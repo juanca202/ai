@@ -42,7 +42,7 @@ La plantilla canónica está en `references/adr-template.md` (léela antes de es
 |------------------------|--------------------------------------------------------------------------------|
 | `Estado`               | Uno de: `Draft` · `Proposed` · `Accepted` · `Deprecated` · `Superseded`       |
 | `Fecha de creación`    | Fecha real de creación — **nunca** se modifica después                         |
-| `Ultima actualización` | Fecha de hoy en **toda** escritura al archivo (creación o edición)             |
+| `Última actualización` | Fecha de hoy en **toda** escritura al archivo (creación o edición)             |
 | `Decisores`            | Nombres o roles de quienes tomaron la decisión                                 |
 | `Etiquetas`                 | Palabras clave relevantes (tecnología, dominio, etc.)                          |
  
@@ -103,7 +103,7 @@ Antes de redactar cualquier ADR nuevo, verificar que no entre en conflicto con A
    - Estado inicial (por defecto: `Draft`)
 4. **Escribir el ADR** usando la plantilla de `references/adr-template.md`
    - `Fecha de creación` = hoy
-   - `Ultima actualización` = hoy
+   - `Última actualización` = hoy
 5. **Actualizar `docs/adr/README.md`**
    - Si no existe, crearlo con encabezado y lista vacía
    - Añadir el nuevo enlace manteniendo el orden ascendente por número:
@@ -120,7 +120,7 @@ Antes de redactar cualquier ADR nuevo, verificar que no entre en conflicto con A
 2. **Leer el contenido actual** completo antes de editar
 3. **Aplicar los cambios** solicitados por el usuario
 4. **Reglas invariantes en toda actualización:**
-   - Actualizar `Ultima actualización` a la fecha de hoy
+   - Actualizar `Última actualización` a la fecha de hoy
    - **Nunca** modificar `Fecha de creación`
 5. **Regla especial para estado `Superseded`:**
    - Es obligatorio agregar en `## Referencias` la referencia al ADR reemplazante:
@@ -139,8 +139,8 @@ Antes de redactar cualquier ADR nuevo, verificar que no entre en conflicto con A
 - [ ] Información requerida completa (problema, decisión, decisores, stack) — nada inventado
 - [ ] Número inferido de la secuencia en `docs/adr/` (nunca pedirlo al usuario)
 - [ ] Slug en minúsculas y kebab-case
-- [ ] `Fecha de creación` y `Ultima actualización` = hoy (creación) / solo `Ultima actualización` = hoy (edición)
-- [ ] Metadatos obligatorios completos: Estado, Fecha de creación, Ultima actualización, Decisores
+- [ ] `Fecha de creación` y `Última actualización` = hoy (creación) / solo `Última actualización` = hoy (edición)
+- [ ] Metadatos obligatorios completos: Estado, Fecha de creación, Última actualización, Decisores
 - [ ] Si `Estado = Superseded`: referencia al ADR reemplazante en `## Referencias`
 - [ ] `docs/adr/README.md` actualizado con el nuevo enlace en orden
 - [ ] El ADR registra la decisión y su justificación — **no desarrolla la implementación** ni instrucciones operativas para la IA

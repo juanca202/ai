@@ -1,8 +1,8 @@
 ---
-
-## name: story-define
-description: Crear o actualizar una Historia de Usuario. Usar cuando se necesite crear, documentar, actualizar o estandarizar historias de usuario.Activar cuando el usuario solicite una nueva historia de usuario, describa una necesidad funcional, pida refinar requisitos, estructurar funcionalidades o alinear historias existentes a las convenciones del proyecto.
+name: story-define
+description: Crear o actualizar una Historia de Usuario. Usar cuando se necesite crear, documentar, actualizar o estandarizar historias de usuario. Activar cuando el usuario solicite una nueva historia de usuario, describa una necesidad funcional, pida refinar requisitos, estructurar funcionalidades o alinear historias existentes a las convenciones del proyecto.
 license: MIT
+---
 
 # Skill: Historia de usuario
 
@@ -10,9 +10,7 @@ Guía para **crear o actualizar** historias de usuario en el repo del producto.
 
 > **Alcance de una US:** El `README.md` es un documento **funcional**. Registra el valor para el usuario, las reglas de negocio, los criterios de aceptación y el estado de avance. El detalle de implementación (DTOs, endpoints, esquemas) va en `docs/product/technical-docs/` o en tareas `TK-XXX`, nunca en la narrativa de la historia. Los documentos técnicos **no son parte de la descripción funcional**; pueden referenciarse únicamente para justificar criterios de INVEST o condiciones del DoR.
 
-La plantilla canónica está en `references/user-story.md` (léela antes de escribir cualquier US).
-
----
+La plantilla canónica está en `references/user-story-template.md` (léela antes de escribir cualquier US).
 
 ## Subagente requerido
 
@@ -89,7 +87,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
   - Usar el `US-XXX` indicado por el usuario o inferir el siguiente libre listando carpetas `US-*` en `docs/product/user-stories/`.
   - Proponer el `nombre-corto` en kebab-case; validar con el usuario si hay ambigüedad.
   - Crear la carpeta `US-XXX-[nombre-corto]/` y `assets/` si habrá archivos vinculados.
-2. **Escribir el `README.md`** usando `references/user-story.md` como molde:
+2. **Escribir el `README.md`** usando `references/user-story-template.md` como molde:
   - **Descripción:** Como/Quiero/Para con modalidad normativa RFC 2119 (ver [Notas — RFC 2119](#rfc-2119)) en el idioma de preferencia.
   - **Reglas de negocio:** cada regla con id secuencial **RN-01**, **RN-02**, … y palabra clave normativa en MAYÚSCULAS (**DEBE**, **NO DEBE**, **DEBERÍA**, etc.). Los ids son únicos en el ámbito de la US; renumerar si se reordenan o eliminan reglas.
   - **Referencias:** enlaces de diseño y archivos en `assets/`; los archivos aportados no deben quedar solo en el chat.
@@ -117,7 +115,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 3. **Aplicar los cambios** solicitados por el usuario. Reglas invariantes:
   - Si el cambio afecta reglas de negocio: mantener los ids RN-XX existentes; renumerar solo si se reordenan o eliminan reglas.
   - Si hay conflicto entre el texto de un `TK-XXX` y el `README.md` de la US: **la US prevalece**. Corregir las tareas, no la historia.
-  - Si el usuario cambia el estado a **Ready**: verificar las cuatro condiciones del checklist antes de guardar.
+  - Si el usuario cambia el estado a **Ready**: verificar todas las condiciones del checklist de Ready antes de guardar.
 4. **Criterios de aceptación:** si se añaden o modifican, aplicar las mismas reglas de formato del flujo de creación (paso 2).
 5. **Confirmar** mostrando las secciones modificadas.
 
@@ -142,7 +140,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 - Unidades de trabajo identificadas
 - Observaciones sin aclaraciones ni pendientes abiertos
 **Formato:**
-- Plantilla `references/user-story.md` leída
+- Plantilla `references/user-story-template.md` leída
 - Reglas de negocio con identificadores RN-01, RN-02, … sin saltos
 - Palabras clave normativas en MAYÚSCULAS en el idioma de preferencia (DEBE, NO DEBE, DEBERÍA…)
 - Archivos del usuario guardados en `assets/` y enlazados con ruta relativa
@@ -176,7 +174,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 - Declarar `Estado: Ready` con Observaciones que aún listen aclaraciones o pendientes sin resolver.
 - Resolver un conflicto entre `TK-XXX` y el `README.md` de la US degradando la US; la US prevalece.
 - Crear tareas `TK-XXX` directamente desde este skill sin invocar `/story-plan`; la creación de tareas siempre se delega a ese skill.
-- Copiar `references/user-story.md` al repo del producto como artefacto en lugar de usarlo como molde.
+- Copiar `references/user-story-template.md` al repo del producto como artefacto en lugar de usarlo como molde.
 
 ---
 

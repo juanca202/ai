@@ -2,7 +2,7 @@
 
 - Estado: Draft | Ready
 - Fecha de creación: YYYY-MM-DD
-- Ultima actualización: YYYY-MM-DD
+- Última actualización: YYYY-MM-DD
 
 ## Descripción
 
