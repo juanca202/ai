@@ -8,7 +8,7 @@ license: MIT
 
 Guía para **crear o actualizar** historias de usuario en el repo del producto.
 
-> **Alcance de una US:** El `README.md` es un documento **funcional**. Registra el valor para el usuario, las reglas de negocio, los criterios de aceptación y el estado de avance. El detalle de implementación (DTOs, endpoints, esquemas) va en `docs/product/technical-docs/` o en tareas `TK-XXX`, nunca en la narrativa de la historia. Los documentos técnicos **no son parte de la descripción funcional**; pueden referenciarse únicamente para justificar criterios de INVEST o condiciones del DoR.
+> **Alcance de una US:** El `README.md` es un documento **funcional**. Registra el valor para el usuario, las reglas de negocio, los criterios de aceptación y el estado de avance. El detalle de implementación (DTOs, endpoints, esquemas) va en `docs/specs/technical-docs/` o en tareas `TK-XXX`, nunca en la narrativa de la historia. Los documentos técnicos **no son parte de la descripción funcional**; pueden referenciarse únicamente para justificar criterios de INVEST o condiciones del DoR.
 
 La plantilla canónica está en `references/user-story-template.md` (léela antes de escribir cualquier US).
 
@@ -23,10 +23,10 @@ La plantilla canónica está en `references/user-story-template.md` (léela ante
 
 | Artefacto             | Ruta                                                                                                                   |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Historia de usuario   | `docs/product/user-stories/US-XXX-[nombre-corto]/README.md`                                                            |
-| Archivos de apoyo     | `docs/product/user-stories/US-XXX-[nombre-corto]/assets/`                                                              |
-| Documentación técnica | `docs/product/technical-docs/` (no parte de la descripción funcional; referenciable solo para justificar INVEST o DoR) |
-| Glosario              | `docs/product/glossary.md` (opcional)                                                                                  |
+| Historia de usuario   | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md`                                                            |
+| Archivos de apoyo     | `docs/specs/user-stories/US-XXX-[nombre-corto]/assets/`                                                              |
+| Documentación técnica | `docs/specs/technical-docs/` (no parte de la descripción funcional; referenciable solo para justificar INVEST o DoR) |
+| Glosario              | `docs/specs/glossary.md` (opcional)                                                                                  |
 
 
 ---
@@ -52,7 +52,7 @@ Antes de crear o editar cualquier US, el agente debe tener clara la siguiente in
 | **Idioma de preferencia**                       | (1) `.agent/MEMORY.md` → `preferred language: <ISO>`; (2) idioma del mensaje del usuario | Preguntar y crear `.agent/MEMORY.md` con `preferred language: <código>`               |
 | **Referencias de diseño** (solo US de UI)       | Figma, prototipos u otros enlaces aportados por el usuario                               | Sin ellas la historia no puede declararse Ready                                       |
 | **Dependencias con otras US o sistemas**        | Indicadas por el usuario o inferibles del contexto                                       | Preguntar; afectan las dimensiones I y E de INVEST                                    |
-| **ID de la US**                                 | Proporcionado por el usuario                                                             | Inferir el siguiente libre revisando carpetas `US-`* en `docs/product/user-stories/`  |
+| **ID de la US**                                 | Proporcionado por el usuario                                                             | Inferir el siguiente libre revisando carpetas `US-`* en `docs/specs/user-stories/`  |
 | **Unidades de trabajo**                         | Proporcionadas por el usuario o inferibles del repo                                      | Sin ellas la historia no puede declararse Ready                                       |
 
 
@@ -66,7 +66,7 @@ Antes de crear archivos, verificar las siguientes condiciones. Si alguna falla, 
 
 **¿Qué verificar?**
 
-- **Duplicado de ID:** si el usuario proporciona `US-XXX`, confirmar que esa carpeta no existe en `docs/product/user-stories/`.
+- **Duplicado de ID:** si el usuario proporciona `US-XXX`, confirmar que esa carpeta no existe en `docs/specs/user-stories/`.
 - **Solapamiento de alcance:** revisar los títulos y descripciones de otras US para detectar si el actor + valor + alcance ya está cubierto por una historia existente.
 - **INVEST parcialmente valorable:** si la información recibida no permite valorar todas las dimensiones, la historia **sí puede crearse** pero con `Estado: Draft` y las lagunas documentadas en Observaciones. Solo es un bloqueante si el actor o el valor de negocio son completamente desconocidos.
 **Si hay conflicto de ID o solapamiento de alcance:**
@@ -74,7 +74,7 @@ Antes de crear archivos, verificar las siguientes condiciones. Si alguna falla, 
 ```
 ⚠️ No es posible crear la historia todavía:
 - <razón concreta>
-- [US-XXX: Título](docs/product/user-stories/US-XXX-nombre/README.md) — <razón del solapamiento, si aplica>
+- [US-XXX: Título](docs/specs/user-stories/US-XXX-nombre/README.md) — <razón del solapamiento, si aplica>
 ```
 
 Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c) proporcionar la información faltante.
@@ -84,7 +84,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 ## Flujo: Crear una historia nueva
 
 1. **Fijar el ID y nombre de carpeta**
-  - Usar el `US-XXX` indicado por el usuario o inferir el siguiente libre listando carpetas `US-*` en `docs/product/user-stories/`.
+  - Usar el `US-XXX` indicado por el usuario o inferir el siguiente libre listando carpetas `US-*` en `docs/specs/user-stories/`.
   - Proponer el `nombre-corto` en kebab-case; validar con el usuario si hay ambigüedad.
   - Crear la carpeta `US-XXX-[nombre-corto]/` y `assets/` si habrá archivos vinculados.
 2. **Escribir el `README.md`** usando `references/user-story-template.md` como molde:
@@ -98,10 +98,10 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
   - **Validación — Definition of Ready (DoR):** tabla con los seis criterios de la plantilla. Para cada uno: `Cumple` / `No cumple` / `Parcial` (el criterio **Referencias de UI** admite además `No aplica`). Ver criterios exactos en el checklist de Ready.
   - **Observaciones:** (1) prerrequisitos o dependencias aún no listas; (2) datos o aclaraciones pendientes del usuario o producto; (3) decisiones pendientes; (4) otras notas. Si no hay nada que reportar en algún ítem, dejarlo vacío.
 3. **Documentación técnica** (solo si el usuario la pide explícitamente)
-  - Crear o actualizar documentos en `docs/product/technical-docs/`.
+  - Crear o actualizar documentos en `docs/specs/technical-docs/`.
   - **No integrarla en la descripción funcional** de la US. Solo puede referenciarse desde las secciones INVEST u Observaciones del DoR para justificar complejidad, dependencias o restricciones técnicas que condicionan algún criterio (p. ej. *«Ver `technical-docs/contrato-api.md` — justifica la estimación de la dimensión E»*).
 4. **Glosario** (si aplica)
-  - Si aparecen términos de dominio nuevos, crear o reutilizar entrada en `docs/product/glossary.md` con definición breve en contexto producto/dominio.
+  - Si aparecen términos de dominio nuevos, crear o reutilizar entrada en `docs/specs/glossary.md` con definición breve en contexto producto/dominio.
 5. **Cierre**
   - Si la US queda en **Ready**, sugerir explícitamente al usuario que ejecute `/story-plan` para crear las tareas `TK-XXX`.
   - Si el usuario pide crearlas en continuidad o en el mismo turno: **invocar `/story-plan` obligatoriamente**; no crear tareas directamente desde este skill. El conocimiento y las reglas de formato de los `TK-XXX` residen en ese skill.

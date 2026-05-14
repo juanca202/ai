@@ -1,6 +1,6 @@
 # Unidades de trabajo
 
-Este archivo es el **catálogo** de unidades usadas en el metadato **Unidad de trabajo** de las tareas (`TK-XXX` bajo `docs/product/user-stories/US-.../`).
+Este archivo es el **catálogo** de unidades usadas en el metadato **Unidad de trabajo** de las tareas (`TK-XXX` bajo `docs/specs/user-stories/US-.../`).
 
 Cada entrada tiene **solo**:
 

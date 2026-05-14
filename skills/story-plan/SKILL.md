@@ -1,6 +1,6 @@
 ---
 name: story-plan
-description: Crea o actualiza tareas técnicas asociadas a una historia de usuario existente. Activar cuando el usuario solicite planificar implementación, descomponer trabajo, definir alcance técnico, estructurar subtareas o documentar especificaciones técnicas sin generar código ni pruebas.
+description: Crea o actualiza tareas técnicas (TK-XXX) asociadas a una historia de usuario existente. Activar cuando el usuario solicite planificar implementación, descomponer trabajo, definir alcance técnico, estructurar subtareas o documentar especificaciones técnicas sin generar código ni pruebas. Activar también — por defecto — cuando el usuario solo entregue una referencia a una historia (p. ej. «US-004», «planifica US-007», «tareas para esta historia») — en ese caso el propósito es proponer stubs agrupados por unidad de trabajo que cubran los criterios de aceptación (CA) y consideren las reglas de negocio (RN-XX) de la US, sin redactar TKs completas.
 license: MIT
 ---
 
@@ -19,16 +19,29 @@ La plantilla canónica está en `references/task-template.md` (léela antes de e
 **Este skill debe ejecutarse obligatoriamente bajo el subagente `docs-specialist`.** No ejecutar directamente sin delegar a ese subagente.
  
 ---
+
+## Modos de invocación
+
+El skill reconoce **dos modos** según lo que entregue el usuario. El modo determina el flujo a aplicar.
+
+| Modo | Disparador | Flujo a aplicar |
+|------|------------|-----------------|
+| **A. Tarea específica** | El usuario describe una tarea concreta (objetivo, unidad, alcance) o pide editar una `TK-XXX` existente. | *Flujo: Crear stub*, *Flujo: Crear TK completa* o *Flujo: Actualizar una TK existente* según corresponda. |
+| **B. Stubs desde US** | El usuario entrega **solo una referencia a una historia** (p. ej. «US-004», «crea las tareas para US-007», «planifica esta historia») sin describir tareas específicas. | *Flujo: Sugerir stubs desde una US* — propósito por defecto: proponer un conjunto de stubs agrupados por unidad de trabajo que cubra los CA y considere las RN de la US. |
+
+En caso de duda entre A y B: preguntar al usuario antes de continuar. No combinar ambos modos en una misma ejecución.
+
+---
  
 ## Ubicación de archivos
  
 | Artefacto | Ruta |
 |-----------|------|
-| Tarea | `docs/product/user-stories/US-XXX-[nombre-corto]/TK-XXX-[kebab-case].md` |
-| Unidades de trabajo | `docs/product/work-units.md` |
+| Tarea | `docs/specs/user-stories/US-XXX-[nombre-corto]/TK-XXX-[kebab-case].md` |
+| Unidades de trabajo | `docs/specs/work-units.md` |
 | ADR | `docs/adr/` |
-| Documentación técnica | `docs/product/technical-docs/` |
-| Glosario | `docs/product/glossary.md` |
+| Documentación técnica | `docs/specs/technical-docs/` |
+| Glosario | `docs/specs/glossary.md` |
  
 ---
  
@@ -47,8 +60,10 @@ Antes de crear o editar cualquier TK, el agente debe tener clara la siguiente in
 | Dato | Cómo obtenerlo | Si no está disponible |
 |------|----------------|-----------------------|
 | **US padre** | Indicada por el usuario | Sin `README.md` de US existente no se puede crear el TK |
-| **Intención** | Del mensaje del usuario | Preguntar: ¿solo anclaje (stub) o TK completa lista para Ready? |
-| **Objetivo del TK** | Del mensaje del usuario | Para stub: basta un objetivo breve. Para TK completa: preguntar hasta tener contexto suficiente |
+| **Modo de invocación** | Inferir del mensaje: ¿tarea específica (A) o solo referencia a US (B)? | Si es ambiguo, preguntar al usuario |
+| **Intención** (solo modo A) | Del mensaje del usuario | Preguntar: ¿solo anclaje (stub) o TK completa lista para Ready? |
+| **Objetivo del TK** (solo modo A) | Del mensaje del usuario | Para stub: basta un objetivo breve. Para TK completa: preguntar hasta tener contexto suficiente |
+| **CAs y RNs de la US** (solo modo B) | Leer del `README.md` de la US padre | Si la US no tiene CAs y RNs explícitos: bloquear modo B y reportar — no crear stubs |
 | **Unidad de trabajo** | Inferir del repo o indicada por el usuario | Stub: puede quedar `Por definir`. TK completa: obligatoria; sin ella el estado no puede ser `Ready` |
 | **Contexto técnico** (solo TK completa) | ADRs existentes, technical-docs, descripción del usuario | Si falta decisión técnica relevante: sugerir ADR al usuario, no crearlo |
 | **Referencia de UI** (solo TK de interfaz) | Figma, wireframe o imagen de alta fidelidad aportados por el usuario | Obligatoria para `Ready`; sin ella el TK de UI no puede salir de `Draft` |
@@ -125,12 +140,40 @@ Una TK completa puede alcanzar `Estado: Ready` si cumple todas las condiciones d
 5. **Confirmar** mostrando las secciones modificadas.
 ---
  
+## Flujo: Sugerir stubs desde una US
+ 
+Aplica cuando el input es **solo una referencia a una historia** (modo B). El propósito es proponer un conjunto coherente de stubs que cubra los CA y considere las RN, sin redactar TKs completas.
+ 
+**Precondiciones de bloqueo** — si alguna falla, **no crear archivos** e informar al usuario indicando la condición incumplida:
+- La carpeta `US-XXX-[nombre-corto]/` existe y su `README.md` tiene `Estado: Ready`.
+- El `README.md` contiene al menos **un criterio de aceptación** (CA) explícito.
+- El `README.md` contiene al menos **una regla de negocio** (RN-XX) explícita.
+ 
+**Pasos:**
+ 
+1. **Leer el `README.md` de la US completo** y todas las `TK-*.md` existentes en su carpeta.
+2. **Verificar las precondiciones de bloqueo.** Si alguna falla, no continuar: reportar al usuario qué falta y sugerir el skill correspondiente (`story-define` para alinear la US, etc.).
+3. **Identificar unidades de trabajo** a partir del alcance de la US, los CA y las RN. Una unidad puede ser un módulo, servicio, paquete, componente UI, etc. **No inventar** unidades no soportadas por la US; lo no claro queda `Por definir` o se pregunta.
+4. **Cubrir los CA y considerar las RN.** Asegurar que cada CA queda cubierto por al menos un stub propuesto. Las RN-XX se consideran como restricciones que condicionan el alcance de los stubs (validaciones, invariantes, autorizaciones); no se replican literalmente en el TK.
+5. **Proponer un stub por cada par (unidad de trabajo, alcance distinguible)**. No es 1 stub por CA: varios CA pueden caer en un mismo stub si comparten unidad y alcance; un CA grande puede dividirse si abarca varias unidades.
+6. **Crear cada stub** siguiendo el *Flujo: Crear stub* (Estado: Draft, descripción breve sin referenciar identificadores CA/RN en el documento, plan vacío). La traza CA/RN → stub vive en el mensaje al usuario, no en el archivo.
+7. **Reportar al usuario** la lista de stubs creados, agrupados por unidad de trabajo, indicando brevemente qué CAs cubre cada uno. Esto permite verificar cobertura sin contaminar los archivos.
+ 
+**Reglas invariantes:**
+- No redactar Plan de implementación, ni Dependencias detalladas, ni Referencias técnicas: son **stubs**, no TKs completas.
+- No incluir identificadores `CA-XX` / `RN-XX` dentro de los archivos `TK-XXX.md`. La consideración es del agente, no del documento.
+- Si la US es ambigua respecto a unidades de trabajo: preguntar al usuario antes de crear stubs; no inferir unidades por cuenta propia.
+- Si dos stubs se solapan: consolidarlos antes de escribir o preguntar al usuario.
+---
+ 
 ## Checklist antes de redactar
  
 **Información:**
 - [ ] `README.md` de la US leído
 - [ ] Todas las `TK-*.md` de la carpeta leídas; solapamientos resueltos
-- [ ] Intención clara: stub vs TK completa
+- [ ] Modo de invocación identificado (A o B)
+- [ ] Modo A: intención clara: stub vs TK completa
+- [ ] Modo B: CAs y RNs identificados en el `README.md`; US en `Estado: Ready`
 - [ ] Idioma de preferencia determinado y `.agent/MEMORY.md` actualizado si fue necesario
 **Validación:**
 - [ ] Carpeta de la US existe con `README.md`
@@ -165,10 +208,16 @@ Una TK completa puede alcanzar `Estado: Ready` si cumple todas las condiciones d
  
 - *Entrada:* «TK-005 para la API Z.»
 - *Comportamiento:* El agente identifica que faltan contratos, endpoints y DTOs para redactar una TK completa. Pregunta al usuario antes de continuar. Si el usuario solo quiere reservar el ID: crea un stub en Draft. No redacta TK completa con supuestos.
-**Ejemplo 4 — Crear todas las tareas de una US**
+**Ejemplo 4 — Stubs desde una US (modo B)**
  
-- *Entrada:* «Crea las tareas necesarias para implementar US-004.»
-- *Salida:* El agente lee el `README.md` de la US, identifica las unidades de trabajo y el alcance, y crea un stub `TK-XXX-[nombre].md` por cada tarea identificada — todas en `Estado: Draft`, con objetivo breve y unidad conocida o `Por definir`. No redacta planes de implementación ni detalle técnico sin contexto explícito del usuario.
+- *Entrada:* «Crea las tareas necesarias para implementar US-004.» (sin describir tareas específicas).
+- *Comportamiento:* El agente activa el *Flujo: Sugerir stubs desde una US*. Verifica que `US-004/README.md` está en `Ready` y contiene CAs y RNs. Lee la US completa, identifica las unidades de trabajo implicadas, y propone un stub por cada (unidad, alcance distinguible) asegurando que todos los CA quedan cubiertos y considerando las RN como restricciones. Crea cada stub en `Estado: Draft` sin referencias a `CA-XX` / `RN-XX` en el archivo. Reporta al usuario la lista agrupada por unidad indicando qué CAs cubre cada stub.
+- *Salida:* Stubs `TK-001-...md` a `TK-NNN-...md` en Draft; `work-units.md` actualizado solo si alguna unidad es nueva y su alcance está claro.
+ 
+**Ejemplo 5 — US no Ready o sin CA/RN**
+ 
+- *Entrada:* «Tareas para US-009.» — pero `US-009/README.md` está en `Draft` o no tiene CAs documentados.
+- *Comportamiento:* El agente bloquea, no crea ningún stub. Reporta al usuario qué falta (estado, CAs, RNs) y sugiere usar `story-define` para alinear la US antes de planificar tareas.
 ---
  
 ## Anti-patterns
@@ -183,6 +232,10 @@ Una TK completa puede alcanzar `Estado: Ready` si cumple todas las condiciones d
 - Usar `glossary.md` como especificación técnica o sustituto de ADR.
 - Rellenar secciones con supuestos o ejemplos genéricos; dejar pendientes reales sin listar en Observaciones.
 - Narrar el trabajo realizado en el mensaje al usuario («leí la US», «creé el TK», «actualicé work-units»); solo reportar resultados y pendientes.
+- **Modo B**: crear stubs desde una US en `Draft`, o sin CAs/RNs explícitos en su `README.md` — debe bloquear y reportar.
+- **Modo B**: incluir identificadores `CA-XX` / `RN-XX` dentro del archivo `TK-XXX.md`; la cobertura se reporta al usuario, no se documenta en el TK.
+- **Modo B**: forzar un mapeo 1 stub = 1 CA; los stubs se agrupan por unidad de trabajo, no por criterio.
+- **Modo B**: redactar Plan de implementación, Dependencias o Referencias detalladas en stubs propuestos desde una US — son stubs, no TKs completas.
 ---
  
 ## Notas

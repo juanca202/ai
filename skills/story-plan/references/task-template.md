@@ -18,7 +18,7 @@
 ## Referencias
 
 - **Arquitectura:** <enlace a ADR en `docs/adr/` cuando la tarea dependa de decisiones ya registradas; no inventar ADRs nuevos>
-- **Documentación técnica:** <enlace a `docs/product/technical-docs/` si aplica — DTOs, ER, flujos, endpoints>
+- **Documentación técnica:** <enlace a `docs/specs/technical-docs/` si aplica — DTOs, ER, flujos, endpoints>
 - **Diseño:** <enlace a Figma, wireframe o imagen de alta fidelidad; obligatorio si la tarea es de UI>
 
 ## Plan de implementación
