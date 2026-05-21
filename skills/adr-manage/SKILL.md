@@ -10,7 +10,7 @@ Guía para **crear o actualizar** Architecture Decision Records.
  
 > **Alcance de un ADR:** Los ADRs se limitan a **registrar la decisión arquitectónica** y su justificación. Pueden incluir **ejemplos**, **diagramas** o **referencias** internas o externas de apoyo (links a documentación, RFCs, PRs, otros ADRs, etc.), pero **no desarrollan la implementación**. La implementación y las instrucciones operativas para la IA son responsabilidad de los skills.
  
-La plantilla canónica está en `references/adr-template.md` (léela antes de escribir cualquier ADR).
+La plantilla canónica está en `assets/adr-template.md` (léela antes de escribir cualquier ADR).
  
 ---
  
@@ -101,7 +101,7 @@ Antes de redactar cualquier ADR nuevo, verificar que no entre en conflicto con A
    - Etiquetas relevantes
    - Contexto, decisión y consecuencias
    - Estado inicial (por defecto: `Draft`)
-4. **Escribir el ADR** usando la plantilla de `references/adr-template.md`
+4. **Escribir el ADR** usando la plantilla de `assets/adr-template.md`
    - `Fecha de creación` = hoy
    - `Última actualización` = hoy
 5. **Actualizar `docs/adr/README.md`**
@@ -135,7 +135,7 @@ Antes de redactar cualquier ADR nuevo, verificar que no entre en conflicto con A
 ## Checklist antes de escribir
  
 - [ ] Subagente `docs-specialist` activo
-- [ ] Plantilla leída desde `references/adr-template.md`
+- [ ] Plantilla leída desde `assets/adr-template.md`
 - [ ] Información requerida completa (problema, decisión, decisores, stack) — nada inventado
 - [ ] Número inferido de la secuencia en `docs/adr/` (nunca pedirlo al usuario)
 - [ ] Slug en minúsculas y kebab-case

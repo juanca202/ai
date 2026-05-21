@@ -21,7 +21,7 @@ Este skill no requiere un subagente fijo. Sin embargo, aplican las siguientes re
 | Condición | Agente / Skill requerido |
 |-----------|--------------------------|
 | La tarea genera o modifica archivos de UI (HTML, CSS, componentes) | Ejecutar bajo el agente **`ui-specialist`** |
-| La referencia de diseño es un enlace o archivo de Figma | Invocar además el skill **`figma-implement-design`** antes y durante la implementación de esa tarea |
+| La referencia de diseño es un enlace o archivo de Figma | Usar el **MCP de Figma** para obtener el contexto del diseño e implementar la tarea, antes y durante la implementación |
  
 Ambas condiciones pueden aplicar a la vez. Si la tarea no involucra UI, implementar directamente sin delegar.
  
@@ -79,7 +79,7 @@ Antes de tocar código, verificar las siguientes condiciones. Si alguna falla, *
 1. Verificar working tree limpio; si no, parar y avisar.
 2. Resolver nombre de rama: `feature/US-XXX-[nombre-corto]` (el segmento tras `feature/` debe coincidir con la carpeta de la US).
 3. `git checkout feature/US-XXX-[nombre-corto]` si la rama existe; si no, `git checkout -b feature/US-XXX-[nombre-corto]` desde la base acordada.
-4. Leer o crear `progress.md` (desde `references/progress-template.md` si no existe; no publicar el archivo de referencia tal cual).
+4. Leer o crear `progress.md` (desde `assets/progress-template.md` si no existe; no publicar el archivo de referencia tal cual).
 ### Paso 2 — Filtrar y presentar cola
  
 1. Leer `README.md` de la US y todos los `TK-*.md` del alcance indicado.
@@ -94,7 +94,7 @@ Antes de tocar código, verificar las siguientes condiciones. Si alguna falla, *
 Por cada tarea aprobada, en orden numérico salvo dependencias obvias en el texto:
  
 1. Implementar según la especificación del TK.
-2. Si la tarea genera o modifica archivos de UI: ejecutar bajo el agente `ui-specialist`. Si además la referencia de diseño es un enlace o archivo de Figma: invocar `figma-implement-design` antes y durante la implementación.
+2. Si la tarea genera o modifica archivos de UI: ejecutar bajo el agente `ui-specialist`. Si además la referencia de diseño es un enlace o archivo de Figma: usar el MCP de Figma para obtener el contexto del diseño e implementar la tarea.
 3. Al terminar la implementación de la tarea, ejecutar lint, typecheck o build del paquete o unidad afectada para validar que el código compila sin errores. Si falla, corregir antes de continuar. **No** ejecutar suites de tests unitarios ni E2E en esta fase.
 4. Actualizar `progress.md`: `Pending` → `In Progress` → `Done`; añadir notas si quedan aspectos parciales.
 5. Preguntar al usuario si desea continuar con la siguiente tarea. **No arrancar la siguiente sin confirmación.**
@@ -137,7 +137,7 @@ Un `TK-XXX` siempre vive bajo la carpeta de una US. Si el usuario indica solo el
 - [ ] TK con `Estado: Ready`
 - [ ] No marcada como `Done` o `Skipped` en `progress.md`
 - [ ] Si la tarea genera o modifica UI: ejecutado bajo `ui-specialist`
-- [ ] Si la referencia de diseño es Figma: `figma-implement-design` invocado
+- [ ] Si la referencia de diseño es Figma: MCP de Figma usado para implementar la tarea
 - [ ] Lint/build ejecutado tras la implementación
 - [ ] `progress.md` actualizado
 - [ ] Confirmación del usuario antes de la siguiente tarea
@@ -173,7 +173,7 @@ Un `TK-XXX` siempre vive bajo la carpeta de una US. Si el usuario indica solo el
 - Ejecutar tests unitarios o E2E durante el ciclo de tareas sin que el usuario haya aceptado la fase final de pruebas.
 - Ignorar `progress.md` o usar identificadores distintos a `TK-XXX` en el progreso.
 - Implementar archivos de UI sin usar el agente `ui-specialist`.
-- Implementar UI con referencia Figma sin invocar `figma-implement-design`.
+- Implementar UI con referencia Figma sin usar el MCP de Figma.
 - Modificar `README.md` de la US, archivos `TK-XXX`, ADRs o `technical-docs/` durante la implementación (`progress.md` excluido); ante cualquier necesidad de cambio en esos artefactos, parar y notificar al usuario.
 - Continuar la implementación cuando se detecta un conflicto en la documentación que pueda afectar el resultado; siempre parar y notificar primero.
 - Usar `glossary.md` como technical-docs o listado de implementación.
@@ -189,5 +189,5 @@ Respetar orden numérico `TK-001`, `TK-002`, … salvo dependencias obvias descr
  
 - **story-plan** especifica el formato y contenido de los TK; este skill los consume.
 - **story-define** define la US y sus criterios; este skill los usa como referencia para la fase de pruebas.
-- **figma-implement-design** es obligatorio para tareas de UI con referencia Figma.
+- **MCP de Figma:** obligatorio para tareas de UI con referencia Figma; usarlo para obtener el contexto del diseño e implementar la tarea.
 

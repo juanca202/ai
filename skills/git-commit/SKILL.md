@@ -41,7 +41,7 @@ Antes de redactar el mensaje, elegir el flujo aplicable según el estado del rep
 | Artefacto | Ruta |
 |-----------|------|
 | Repositorio de trabajo | Directorio actual (`pwd`) |
-| Preferencia de idioma | `docs/MEMORY.md` (raíz del repo) — línea `preferred language: <ISO 639-1>` |
+| Preferencia de idioma | `.agents/MEMORY.md` (raíz del repo) — línea `preferred language: <ISO 639-1>` |
 | Archivos sensibles vetados en staging | `.env*`, `*.pem`, `*.key`, `id_rsa*`, `*.p12`, `*.pfx`, archivos con credenciales o tokens |
 
 ---
@@ -119,7 +119,7 @@ Antes de redactar o ejecutar cualquier commit, el agente debe tener clara esta i
 | **Rama actual** | `git rev-parse --abbrev-ref HEAD` | — |
 | **Tipo, scope, descripción** | Aplicar [Inferencia desde el diff](#inferencia-desde-el-diff) | Proponer y permitir override del usuario; si ninguna regla aplica, preguntar |
 | **Agrupación de archivos** | Inferida del diff por afinidad lógica | Si hay temas mezclados, pasar a [Flujo: Múltiples cambios lógicos mezclados](#flujo-múltiples-cambios-lógicos-mezclados) |
-| **Idioma de preferencia** | (1) idioma del turno actual; (2) `docs/MEMORY.md` → `preferred language: <ISO>` | Preguntar y persistir en `docs/MEMORY.md` con la línea `preferred language: <código>` |
+| **Idioma de preferencia** | (1) idioma del turno actual; (2) `.agents/MEMORY.md` → `preferred language: <ISO>` | Preguntar y persistir en `.agents/MEMORY.md` con la línea `preferred language: <código>` |
 
 > Leer el diff completo antes de redactar el mensaje. No describir cambios que no estén en el diff. No omitir cambios visibles que alteren el sentido del commit.
 
@@ -245,7 +245,7 @@ Esperar respuesta del usuario. **No ejecutar `git commit`** hasta recibir confir
 - [ ] `git status` y `git diff` revisados completos
 - [ ] Tipo, scope y descripción derivados de [Inferencia desde el diff](#inferencia-desde-el-diff), no inventados
 - [ ] Rama actual conocida (`git rev-parse --abbrev-ref HEAD`)
-- [ ] Idioma de preferencia determinado y `docs/MEMORY.md` actualizado si fue necesario
+- [ ] Idioma de preferencia determinado y `.agents/MEMORY.md` actualizado si fue necesario
 - [ ] Intención clara: un commit único vs. separación en varios
 
 **Validación:**
@@ -365,8 +365,8 @@ BREAKING CHANGE: `extends` key behavior changed
 Resolver en este orden, deteniéndose en el primer paso que aplique:
 
 1. Inferir del idioma del turno actual del usuario.
-2. Leer `docs/MEMORY.md` y buscar la línea `preferred language: <código ISO 639-1>` (ej. `es`, `en`).
-3. Si no existe el archivo o no hay esa línea: **preguntar al usuario** qué idioma prefiere y persistir la respuesta creando o actualizando `docs/MEMORY.md` con la línea `preferred language: <código>`.
+2. Leer `.agents/MEMORY.md` y buscar la línea `preferred language: <código ISO 639-1>` (ej. `es`, `en`).
+3. Si no existe el archivo o no hay esa línea: **preguntar al usuario** qué idioma prefiere y persistir la respuesta creando o actualizando `.agents/MEMORY.md` con la línea `preferred language: <código>`.
 
 Solo afecta a la parte en lenguaje natural (descripción, body, footers). **Tipo y `scope`** siguen siendo palabras clave convencionales en inglés salvo acuerdo explícito del equipo.
 

@@ -10,7 +10,7 @@ Guía para **crear o actualizar** tareas `TK-XXX` bajo una historia de usuario e
  
 > **Alcance de un TK:** La tarea es un documento de **especificación técnica**. Describe qué lograr, cómo implementarlo y sus dependencias dentro de la unidad de trabajo. No implementa código, no ejecuta pruebas, no crea ADRs. Lo que no está acordado va en **Observaciones** o se pregunta al usuario — nunca se inventa.
  
-La plantilla canónica está en `references/task-template.md` (léela antes de escribir cualquier TK).
+La plantilla canónica está en `assets/task-template.md` (léela antes de escribir cualquier TK).
  
 ---
  
@@ -114,10 +114,10 @@ Una TK completa puede alcanzar `Estado: Ready` si cumple todas las condiciones d
  
 1. **Inferir el siguiente `TK-XXX`** libre en la carpeta de la US.
 2. **Gestionar `work-units.md`:**
-   - Crear desde `references/work-units-template.md` si el archivo no existe.
+   - Crear desde `assets/work-units-template.md` si el archivo no existe.
    - Si la unidad es nueva: añadir sección `## <nombre-unidad>` con párrafo de alcance. Si el alcance no está claro, preguntar antes de añadirla.
    - No listar TKs, DTOs ni technical-docs dentro de `work-units.md`; solo nombre de unidad y párrafo de alcance.
-3. **Redactar el TK** siguiendo `references/task-template.md`:
+3. **Redactar el TK** siguiendo `assets/task-template.md`:
    - **Metadatos**: `Historia` con enlace `[US-XXX](./README.md)`; `Asignado a` indicado por el usuario, o inferido con `git config user.name`, u omitido si no aplica.
    - **Descripción**: qué lograr — objetivo claro, tono imperativo y verificable; sin «podría», «quizá», «tal vez».
    - **Dependencias**: solo piezas *dentro de la unidad de trabajo* — componentes, servicios, modelos, librerías. No incluir aquí ADRs, technical-docs, contratos ni referencias de diseño; esos van exclusivamente en **Referencias**.
@@ -188,7 +188,7 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - [ ] **Observaciones** sin pendientes abiertos — sección omitida o con *Sin pendientes documentados*
 - [ ] Referencias a ADRs y technical-docs con rutas relativas válidas
 **Formato:**
-- [ ] Plantilla `references/task-template.md` leída
+- [ ] Plantilla `assets/task-template.md` leída
 - [ ] Nombre de archivo en kebab-case, secuencial por historia
 - [ ] Sin código de aplicación en el archivo
 - [ ] Sin párrafos instructivos de plantilla en el TK publicado
