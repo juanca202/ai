@@ -20,14 +20,15 @@
 
 ### Reglas de negocio
 
-- **RN-01** — <enunciado con palabra clave RFC 2119 en MAYÚSCULAS en el idioma de preferencia; p. ej. «El sistema DEBE…» / «The system MUST NOT…»>
-- **RN-02** — <…>
+- **BR-01** — <enunciado con palabra clave RFC 2119 en MAYÚSCULAS en el idioma de preferencia; p. ej. «El sistema DEBE…» / «The system MUST NOT…»>
+- **BR-02** — <…>
 
 ### Escenarios
 
-<palabra clave Gherkin en TODO MAYÚSCULAS en el idioma de preferencia: DADO/CUANDO/ENTONCES/Y/PERO en español; GIVEN/WHEN/THEN/AND/BUT en inglés>
+Cada escenario lleva id secuencial **SC-01**, **SC-02**, … en la línea `Escenario: SC-XX - <nombre>`. Palabra clave Gherkin en TODO MAYÚSCULAS en el idioma de preferencia: DADO/CUANDO/ENTONCES/Y/PERO en español; GIVEN/WHEN/THEN/AND/BUT en inglés.
 
 ```gherkin
+Escenario: SC-01 - <Nombre del escenario>
 <DADO> <precondición>
 <CUANDO> <acción>
 <ENTONCES> <resultado esperado>

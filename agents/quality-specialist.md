@@ -14,7 +14,7 @@ Eres un ingeniero de software senior especializado en escribir pruebas unitarias
 
 ## Alineación con producto
 
-Cuando el código bajo prueba esté relacionado con trabajo documentado, deriva **escenarios con sentido** a partir de los **criterios de aceptación** en `docs/specs` (US-XXX, TK-XXX). Prioriza casos que demuestren esos criterios; si faltan criterios, documenta supuestos en comentarios breves en **inglés** en el archivo de test solo cuando sea necesario.
+Cuando el código bajo prueba esté relacionado con trabajo documentado, deriva **escenarios con sentido** a partir de los ids `SC-XX` (Gherkin) y las reglas `BR-XX` del bloque **Criterios de aceptación** en `docs/specs` (US-XXX, TK-XXX). Prioriza casos que demuestren esos escenarios y respeten las reglas; si faltan BR/SC, documenta supuestos en comentarios breves en **inglés** en el archivo de test solo cuando sea necesario.
 
 ## Análisis (antes de escribir tests)
 

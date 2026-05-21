@@ -50,7 +50,7 @@ Para ejecutar bien el skill, el agente necesita:
 - **Obligatorio:** el **texto del prompt** a auditar, completo y literal.
 - **Opcional:**
   - **`type`** — declara explícitamente el tipo de prompt. Valores permitidos:
-    - `Funcional` — describe comportamiento, criterios de aceptación, reglas de negocio o necesidad del usuario (p. ej. user stories, descripciones de feature, especificaciones de comportamiento). No requiere detalles técnicos como rutas, nombres de clase o archivos. **Las reglas de delimitar alcance y usar nombres exactos se marcan N/A.**
+    - `Funcional` — describe comportamiento, criterios de aceptación (`BR-XX`, `SC-XX`), reglas de negocio o necesidad del usuario (p. ej. user stories, descripciones de feature, especificaciones de comportamiento). No requiere detalles técnicos como rutas, nombres de clase o archivos. **Las reglas de delimitar alcance y usar nombres exactos se marcan N/A.**
     - `Técnico` — solicita implementación, refactor o cambios concretos de código (p. ej. "crea AuthService", "refactoriza /features/auth"). **Las reglas de delimitar alcance y usar nombres exactos aplican plenamente.**
 
     El usuario puede declararlo de varias formas: `type: Funcional`, `type=Funcional`, `tipo=Funcional`, o en lenguaje natural ("es un prompt funcional", "este es técnico"). El agente reconoce ambas formas y normaliza variantes sin acento (`tecnico` → `Técnico`).
@@ -261,7 +261,7 @@ Para cada prompt recibido, el agente debe:
 0. **Determinar el tipo de prompt**:
    - **Si el usuario declaró `type` explícitamente** (p. ej. `type: Funcional`, `type=Tecnico`, `tipo=Funcional`, o en lenguaje natural como "este es un prompt funcional"), usar ese valor. Normalizar variantes sin acento (`tecnico` → `Técnico`, `funcional` → `Funcional`).
    - **Si no se declaró**, inferirlo:
-     - **Funcional** si el prompt: usa lenguaje de comportamiento (`el sistema debe`, `el usuario puede`, `como ... quiero ... para ...`), describe criterios de aceptación, casos de uso o reglas de negocio, y **no** menciona archivos, rutas, clases, funciones ni verbos de codificación.
+     - **Funcional** si el prompt: usa lenguaje de comportamiento (`el sistema debe`, `el usuario puede`, `como ... quiero ... para ...`), describe criterios de aceptación (p. ej. `BR-XX`, `SC-XX`, Gherkin), casos de uso o reglas de negocio, y **no** menciona archivos, rutas, clases, funciones ni verbos de codificación.
      - **Técnico** si el prompt: pide implementar / refactorizar / crear / modificar / corregir código, menciona archivos, rutas, clases, funciones, endpoints, o usa verbos de codificación (`implementa`, `crea`, `refactoriza`, `migra`, `optimiza`, `arregla`).
      - Si es **ambiguo**, asumir **Técnico** (criterio más estricto: aplica más reglas).
    - **Declarar el tipo en el output**. Si fue **inferido** (no declarado), añadir la nota: *"Tipo inferido; declara `type: Funcional` o `type: Técnico` si quieres cambiarlo."*. Si fue **declarado**, no añadir nota.

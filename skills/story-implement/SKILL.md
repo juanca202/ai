@@ -100,7 +100,7 @@ Por cada tarea aprobada, en orden numérico salvo dependencias obvias en el text
 5. Preguntar al usuario si desea continuar con la siguiente tarea. **No arrancar la siguiente sin confirmación.**
 ### Paso 4 — Cierre
  
-1. Cuando no queden tareas pendientes en el alcance acordado (o el usuario detenga la ejecución), ofrecer la fase de pruebas: implementar tests unitarios y/o E2E basados en los criterios del `README.md` y los TK ejecutados.
+1. Cuando no queden tareas pendientes en el alcance acordado (o el usuario detenga la ejecución), ofrecer la fase de pruebas: implementar tests unitarios y/o E2E basados en los escenarios `SC-XX` y las reglas `BR-XX` del bloque **Criterios de aceptación** del `README.md`, además de los TK ejecutados.
 2. Si el usuario rechaza, registrar nota en `progress.md`.
 ---
  
@@ -188,6 +188,6 @@ Respetar orden numérico `TK-001`, `TK-002`, … salvo dependencias obvias descr
 ### Relación con otros skills
  
 - **story-plan** especifica el formato y contenido de los TK; este skill los consume.
-- **story-define** define la US y sus criterios; este skill los usa como referencia para la fase de pruebas.
+- **story-define** define la US y sus criterios de aceptación (`BR-XX`, `SC-XX`); este skill los usa como referencia para la fase de pruebas.
 - **MCP de Figma:** obligatorio para tareas de UI con referencia Figma; usarlo para obtener el contexto del diseño e implementar la tarea.
 

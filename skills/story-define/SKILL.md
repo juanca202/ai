@@ -8,7 +8,7 @@ license: MIT
 
 Guía para **crear o actualizar** historias de usuario en el repo del producto.
 
-> **Alcance de una US:** El `README.md` es un documento **funcional**. Registra el valor para el usuario, las reglas de negocio, los criterios de aceptación y el estado de avance. El detalle de implementación (DTOs, endpoints, esquemas) va en `docs/specs/technical-docs/` o en tareas `TK-XXX`, nunca en la narrativa de la historia. Los documentos técnicos **no son parte de la descripción funcional**; pueden referenciarse únicamente para justificar criterios de INVEST o condiciones del DoR.
+> **Alcance de una US:** El `README.md` es un documento **funcional**. Registra el valor para el usuario, los **criterios de aceptación** (subsecciones *Reglas de negocio* con ids `BR-XX` y *Escenarios* con ids `SC-XX`) y el estado de avance. El detalle de implementación (DTOs, endpoints, esquemas) va en `docs/specs/technical-docs/` o en tareas `TK-XXX`, nunca en la narrativa de la historia. Los documentos técnicos **no son parte de la descripción funcional**; pueden referenciarse únicamente para justificar criterios de INVEST o condiciones del DoR.
 
 La plantilla canónica está en `assets/user-story-template.md` (léela antes de escribir cualquier US).
 
@@ -61,7 +61,7 @@ Antes de crear o editar cualquier US, el agente debe tener clara la siguiente in
 | Dato                                            | Cómo obtenerlo                                                                           | Si no está disponible                                                                 |
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | **Actor y valor de negocio**                    | Del contexto o descripción del usuario                                                   | Preguntar al usuario                                                                  |
-| **Reglas de negocio y criterios de aceptación** | Del contexto o descripción del usuario                                                   | Preguntar; sin ellos INVEST no es valorable y la historia solo puede crearse en Draft |
+| **Criterios de aceptación (BR y SC)**           | Del contexto o descripción del usuario                                                   | Preguntar; sin al menos una `BR-XX` y un `SC-XX` INVEST no es valorable y la historia solo puede crearse en Draft |
 | **Idioma de preferencia**                       | (1) `.agent/MEMORY.md` → `preferred language: <ISO>`; (2) idioma del mensaje del usuario | Preguntar y crear `.agent/MEMORY.md` con `preferred language: <código>`               |
 | **Referencias de diseño** (solo US de UI)       | Figma, prototipos u otros enlaces aportados por el usuario                               | Sin ellas la historia no puede declararse Ready                                       |
 | **Dependencias con otras US o sistemas**        | Indicadas por el usuario o inferibles del contexto                                       | Preguntar; afectan las dimensiones I y E de INVEST                                    |
@@ -103,8 +103,9 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 2. **Escribir el `README.md`** usando `assets/user-story-template.md` como molde:
   - **Descripción:** Como/Quiero/Para con modalidad normativa RFC 2119 (ver [Notas — RFC 2119](#rfc-2119)) en el idioma de preferencia.
   - **Referencias:** enlaces de diseño y archivos en `assets/`; los archivos aportados no deben quedar solo en el chat.
-  - **Reglas de negocio:** cada regla con id secuencial **RN-01**, **RN-02**, … y palabra clave normativa en MAYÚSCULAS (**DEBE**, **NO DEBE**, **DEBERÍA**, etc.). Los ids son únicos en el ámbito de la US; renumerar si se reordenan o eliminan reglas.
-  - **Escenarios:** redactar todos los criterios en formato Gherkin utilizando la palabra clave de cada paso en **TODO MAYÚSCULAS** en el idioma de preferencia (**DADO / CUANDO / ENTONCES / Y / PERO** en español; **GIVEN / WHEN / THEN / AND / BUT** en inglés). Los criterios no deben contradecir ninguna obligación (**DEBE**) ni prohibición (**NO DEBE**) de las reglas de negocio.
+  - **Criterios de aceptación** (sección con dos subsecciones; ids solo `BR-XX` y `SC-XX`):
+    - **Reglas de negocio:** cada regla con id secuencial **BR-01**, **BR-02**, … y palabra clave normativa en MAYÚSCULAS (**DEBE**, **NO DEBE**, **DEBERÍA**, etc.). Los ids son únicos en el ámbito de la US; renumerar si se reordenan o eliminan reglas.
+    - **Escenarios:** cada escenario con id secuencial **SC-01**, **SC-02**, … en la línea `Escenario: SC-XX - <nombre>`. Redactar en formato Gherkin con la palabra clave de cada paso en **TODO MAYÚSCULAS** en el idioma de preferencia (**DADO / CUANDO / ENTONCES / Y / PERO** en español; **GIVEN / WHEN / THEN / AND / BUT** en inglés). Los escenarios no deben contradecir ninguna obligación (**DEBE**) ni prohibición (**NO DEBE**) de las reglas de negocio.
   - **Unidades de trabajo:** al nivel de granularidad del repo (p. ej. `frontend`, `backend`, o `micro-autenticacion`, `micro-catalogo`).
   - **Complejidad sugerida:** story points solo en valores Fibonacci 1, 2, 3, 5, 8, 13 con justificación breve de alcance, riesgo e incertidumbre.
   - **Validación — INVEST:** tabla con las seis dimensiones (I, N, V, E, S, T); valor de cada una: `Cumple` / `No cumple` / `Parcial` con nota. Si alguna dimensión falla, documentarlo sin disimular.
@@ -130,7 +131,8 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 1. **Identificar el archivo** — por ID, nombre-corto o título.
 2. **Leer el `README.md` actual** completo antes de editar.
 3. **Aplicar los cambios** solicitados por el usuario. Reglas invariantes:
-  - Si el cambio afecta reglas de negocio: mantener los ids RN-XX existentes; renumerar solo si se reordenan o eliminan reglas.
+  - Si el cambio afecta reglas de negocio: mantener los ids `BR-XX` existentes; renumerar solo si se reordenan o eliminan reglas.
+  - Si el cambio afecta escenarios: mantener los ids `SC-XX` existentes; renumerar solo si se reordenan o eliminan escenarios.
   - Si hay conflicto entre el texto de un `TK-XXX` y el `README.md` de la US: **la US prevalece**. Corregir las tareas, no la historia.
   - Si el usuario cambia el estado a **Ready**: verificar todas las condiciones del checklist de Ready antes de guardar.
 4. **Criterios de aceptación:** si se añaden o modifican, aplicar las mismas reglas de formato del flujo de creación (paso 2).
@@ -153,13 +155,13 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 - Sin solapamiento de alcance con US existentes
 - Actor y valor de negocio identificados (mínimo para crear); si INVEST no es completamente valorable → `Estado: Draft` con lagunas en Observaciones
 **Condiciones para `Estado: Ready`:**
-- Bloque de criterios de aceptación completo en formato Gherkin, utilizando las palabras clave en MAYÚSCULAS y en el idioma de preferencia del documento
+- Sección **Criterios de aceptación** completa: al menos una `BR-XX` y un `SC-XX`; escenarios en Gherkin con palabras clave en MAYÚSCULAS y en el idioma de preferencia del documento
 - DoR completado según la plantilla
 - Unidades de trabajo identificadas
 - Observaciones sin aclaraciones ni pendientes abiertos
 **Formato:**
 - Plantilla `assets/user-story-template.md` leída
-- Reglas de negocio con identificadores RN-01, RN-02, … sin saltos
+- Reglas de negocio con identificadores `BR-01`, `BR-02`, … sin saltos; escenarios con `SC-01`, `SC-02`, … sin saltos
 - Palabras clave normativas en MAYÚSCULAS en el idioma de preferencia (DEBE, NO DEBE, DEBERÍA…)
 - Archivos del usuario guardados en `assets/` y enlazados con ruta relativa
 - Detalle técnico en `technical-docs/` o `TK-XXX`, no en el `README.md`
@@ -171,7 +173,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 **Ejemplo 1 — Entrada mínima viable**
 
 - *Entrada:* «US nueva: como farmacéutico quiero ver alertas de interacción al añadir un medicamento a la receta, para evitar recetas inseguras. Reglas: mostrar alerta antes de guardar; permitir continuar con justificación.»
-- *Salida:* Carpeta `US-0XX-alertas-interaccion-receta/` con `README.md` completo (Como/Quiero/Para, RN-01 y RN-02 con modalidad RFC 2119, Gherkin con caso feliz y excepción, INVEST y DoR completados, story points con justificación).
+- *Salida:* Carpeta `US-0XX-alertas-interaccion-receta/` con `README.md` completo (Como/Quiero/Para, BR-01 y BR-02 con modalidad RFC 2119, SC-01 y SC-02 en Gherkin con caso feliz y excepción, INVEST y DoR completados, story points con justificación).
 
 **Ejemplo 2 — Falta información**
 
@@ -202,6 +204,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 ## Anti-patterns
 
 - Inventar reglas de negocio o exclusiones que el usuario no dio.
+- Usar el prefijo obsoleto `CA-XX` en lugar de `BR-XX` / `SC-XX`.
 - Poner detalle técnico (clases, endpoints, esquemas) en el `README.md` en lugar de remitirlo a `technical-docs/` o `TK-XXX`.
 - Declarar `Estado: Ready` sin Criterios de aceptación completo o sin referencias de diseño cuando la historia involucra UI.
 - Declarar `Estado: Ready` con Observaciones que aún listen aclaraciones o pendientes sin resolver.
