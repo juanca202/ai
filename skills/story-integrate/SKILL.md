@@ -10,7 +10,7 @@ Guía para **cerrar e integrar** el trabajo de una historia de usuario `US-XXX`:
 
 > **Alcance del submit:** El skill **cierra** localmente lo ya implementado. Verifica condiciones y ejecuta `git merge --no-ff`. No hace push, no borra ramas, no crea MRs/PRs, no resuelve conflictos, no modifica `progress.md`. Lo que no esté en `Done` bloquea el merge — el usuario decide cómo proceder, nunca se fuerza.
 
-Encaja al final del ciclo iniciado por **story-define** → **story-plan** → **story-implement**.
+Encaja al final del ciclo iniciado por **story-define** → **story-plan** → **story-implement**. Ver [Handoffs del ciclo](#handoffs-del-ciclo).
 
 ---
 
@@ -68,7 +68,7 @@ Antes de tocar git, el agente debe tener clara la siguiente información. **No a
 | **Carpeta de la US** | Derivar del nombre de rama descontando el prefijo `feature/` | Si la carpeta no existe: parar e informar; si hay varias coincidentes: preguntar cuál |
 | **Estado de `progress.md`** | Leer el archivo en la carpeta de la US | Si no existe: parar e informar; el merge requiere `progress.md` poblado |
 | **Working tree** | `git status --porcelain` | Si hay salida: parar e informar; no se mergea con cambios pendientes |
-| **Rama base** | (1) `git reflog show <branch>` → línea «Created from»; (2) `git config --get branch.<branch>.merge`; (3) preguntar al usuario | No asumir `main`, `master` ni `develop` por defecto |
+| **Rama base** | (1) `git reflog show <branch>` → línea `Created from`; (2) `git config --get branch.<branch>.merge`; (3) preguntar al usuario | No asumir `main`, `master` ni `develop` por defecto |
 | **Idioma de preferencia** | Ver [Resolución de idioma](#resolución-de-idioma) | Preguntar y persistir en `.agents/MEMORY.md` con `preferred language: <código>` |
 
 > Leer `progress.md` **completo** antes de iniciar cualquier operación git. Las tres condiciones (rama, working tree, estados) se evalúan antes de cambiar de rama o invocar `git merge`.
@@ -106,7 +106,7 @@ Camino feliz cuando todas las verificaciones pasan.
 3. **Localizar la carpeta de la US** descontando el prefijo `feature/` del nombre de rama: `feature/US-XXX-[nombre-corto]` → `docs/specs/user-stories/US-XXX-[nombre-corto]/`. Si la carpeta no existe o hay varias coincidentes, parar.
 4. **Leer `progress.md`** y validar que **todas** las tareas tienen estado `Done`. Si alguna no lo está, parar mostrando la lista completa de tareas no `Done` con su estado actual.
 5. **Resolver la rama base:**
-   - `git reflog show <branch>` → buscar la entrada inicial con «Created from <ref>» o «branch: Created from <ref>».
+   - `git reflog show <branch>` → buscar la entrada inicial con `Created from <ref>` o `branch: Created from <ref>`.
    - Fallback: `git config --get branch.<branch>.merge` y derivar la rama base local correspondiente.
    - Si ninguno concluye o hay ambigüedad: preguntar al usuario sin proponer un default.
 6. **Calcular delta** con `git rev-list --count <base>..HEAD` para reportar cuántos commits se van a integrar.
@@ -186,7 +186,7 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 
 **Ejemplo 3 — Rama base ambigua**
 
-- *Entrada:* Rama `feature/US-077-...`, reflog sin entrada «Created from», sin upstream local; existen `main`, `develop` y `release/2026.q2` como ancestros plausibles.
+- *Entrada:* Rama `feature/US-077-...`, reflog sin entrada `Created from`, sin upstream local; existen `main`, `develop` y `release/2026.q2` como ancestros plausibles.
 - *Comportamiento:* El agente lista los candidatos y pregunta cuál es la rama base correcta. No asume `main` ni `develop`. No mergea hasta tener respuesta.
 
 **Ejemplo 4 — Working tree sucio**
@@ -212,7 +212,7 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 - Modificar `progress.md` para «forzar» que aparezcan en `Done` sin que el trabajo esté completo.
 - Aceptar ramas sin prefijo `feature/` o con prefijos alternativos (`feat/`, `bugfix/`, `hotfix/`) como rama de submit.
 - Asumir `main`, `master` o `develop` como rama base sin confirmarlo por reflog, config o usuario.
-- Resolver conflictos automáticamente o usar `--strategy=ours` / `--strategy=theirs` para «hacerlo pasar».
+- Resolver conflictos automáticamente o usar `--strategy=ours` / `--strategy=theirs` para **hacerlo pasar**.
 - Usar merge fast-forward por defecto cuando el historial de la rama de US se perdería; preservar con `--no-ff` salvo petición explícita del usuario.
 - Hacer push de la rama base o borrar la rama de la US sin que el usuario lo pida explícitamente fuera del skill.
 - Mergear con working tree sucio o desde una rama que no encaja con `feature/US-XXX-[nombre-corto]`.
@@ -224,6 +224,19 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 ---
 
 ## Notas
+
+### Handoffs del ciclo
+
+Posición: **cierre local** — último paso del pipeline de historias (sin push ni PR).
+
+| | |
+|--|--|
+| **Entrada** | Rama `feature/US-XXX-[nombre-corto]`; working tree limpio; commits de la implementación ya hechos (`git-commit`); `progress.md` con **cada** TK listada en `Done`. |
+| **Salida** | Merge `--no-ff` a la rama base local; reporte con hash de merge. Sin push ni borrado de rama. |
+| **Siguiente paso (fuera del skill)** | Push manual, PR/MR (`git-pr`), CI — decisión del usuario. |
+| **Regreso** | TK no `Done` o `progress.md` incompleto → **`story-implement`**. Alcance de US reducido → alinear con **`story-define`** / **`story-plan`** y corregir `progress.md` antes de reintentar. |
+
+**Alcance de `progress.md`:** validar **solo las entradas presentes** en el archivo. Cada una debe estar en `Done`. TK en `Draft` que no estén listadas no bloquean por sí solas; si forman parte del alcance de la entrega, deben añadirse y cerrarse o eliminarse del alcance vía `story-plan` / `story-define`.
 
 ### progress.md
 

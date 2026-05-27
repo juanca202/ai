@@ -130,6 +130,7 @@ Un stub reserva el ID y el vínculo a la US. No requiere contexto técnico compl
    - **Observaciones**: pendientes reales; no rellenar con texto genérico.
 3. Actualizar `work-units.md` **solo si** la unidad del stub no es `Por definir` (ver paso 2 del flujo de TK completa).
 4. **Parar aquí.** No continuar con los pasos de TK completa.
+5. **Handoff:** stub en `Draft` — completar a `Ready` con *Flujo: Crear TK completa* (modo A) antes de **`story-implement`**.
 ---
  
 ## Flujo: Crear TK completa
@@ -150,6 +151,7 @@ Una TK completa puede alcanzar `Estado: Ready` si cumple todas las condiciones d
    - **Observaciones**: solo si hay pendientes reales (prerrequisitos no cumplidos, información pendiente, decisiones por tomar). Si no hay nada pendiente, **omitir la sección**. Si el equipo lo exige, una línea *Sin pendientes documentados*. Con pendientes reales: `Estado: Draft`.
 4. **Actualizar** technical-docs y glossary si aplica (entradas breves; glossary no es sustituto de ADR ni technical-doc).
 5. **Verificar el checklist** antes de asignar `Estado: Ready`.
+6. **Handoff:** si todas las TK del alcance acordado están `Ready`, sugerir **`story-implement`**. Si otras TK siguen en `Draft`, listar cuáles completar antes de implementar.
 ---
  
 ## Flujo: Actualizar una TK existente
@@ -183,6 +185,7 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 6. **Confirmar con el usuario** mediante la herramienta de preguntas estructuradas: `Confirmar stubs` / `Ajustar alcance` / `Cancelar`. Si elige ajustar, revisar la propuesta y repetir pasos 5–6. **No continuar sin confirmación explícita**, salvo que el mensaje inicial ya describiera la descomposición con detalle suficiente para considerarla aprobada.
 7. **Crear cada stub** de la propuesta confirmada siguiendo el *Flujo: Crear stub* (Estado: Draft, descripción breve sin referenciar identificadores `SC-XX` / `BR-XX` en el documento, plan vacío).
 8. **Reportar al usuario** la lista de stubs creados, agrupados por unidad de trabajo, indicando brevemente qué `SC-XX` cubre cada uno.
+9. **Handoff:** si los stubs quedaron en `Draft`, indicar al usuario que debe completar cada TK a `Estado: Ready` con **`story-plan`** (modo A) antes de invocar **`story-implement`**. No sugerir implementación mientras las TK del alcance sigan en Draft.
  
 **Reglas invariantes:**
 - No redactar Plan de implementación, ni Dependencias detalladas, ni Referencias técnicas: son **stubs**, no TKs completas.
@@ -228,20 +231,23 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
  
 - *Entrada:* «Solo quiero reservar TK-003, sin diseño técnico todavía.»
 - *Salida:* `TK-003-[nombre-corto].md` en Draft, unidad `Por definir`, descripción mínima del objetivo, Plan vacío, Observaciones con los pendientes reales. `work-units.md` sin cambios.
+
 **Ejemplo 2 — TK completa**
  
 - *Entrada:* «TK para el diálogo de selección de ítem usando Material; la US tiene criterios; el ADR de UI está en `docs/adr/`.»
 - *Salida:* TK con unidad concreta, Plan con pasos verificables, referencias al ADR con ruta relativa, `work-units.md` actualizado si la unidad es nueva. `Estado: Ready` si Observaciones está limpia; `Draft` si quedan pendientes.
+
 **Ejemplo 3 — Información incompleta**
  
 - *Entrada:* «TK-005 para la API Z.»
 - *Comportamiento:* El agente identifica que faltan contratos, endpoints y DTOs para redactar una TK completa. Pregunta al usuario antes de continuar. Si el usuario solo quiere reservar el ID: crea un stub en Draft. No redacta TK completa con supuestos.
+
 **Ejemplo 4 — Stubs desde una US (modo B)**
  
 - *Entrada:* «Crea las tareas necesarias para implementar US-004.» (sin describir tareas específicas).
 - *Comportamiento — turno 1:* El agente activa el *Flujo: Sugerir stubs desde una US*. Verifica que `US-004/README.md` está en `Ready` y contiene BR y SC en **Criterios de aceptación**. Lee la US completa, identifica unidades de trabajo, y presenta la propuesta agrupada por unidad (paso 5) con `TK-XXX` tentativo, nombre de archivo, objetivo breve y cobertura de SC por stub. Pregunta con opciones `Confirmar stubs` / `Ajustar alcance` / `Cancelar`. **No crea archivos.**
 - *Comportamiento — turno 2:* Tras confirmación, crea cada stub en `Estado: Draft` sin referencias a `SC-XX` / `BR-XX` en el archivo (paso 7) y reporta rutas creadas con cobertura SC (paso 8).
-- *Salida:* Stubs `TK-001-...md` a `TK-NNN-...md` en Draft; `work-units.md` actualizado solo si alguna unidad es nueva y su alcance está claro.
+- *Salida:* Stubs `TK-001-...md` a `TK-NNN-...md` en Draft; `work-units.md` actualizado solo si alguna unidad es nueva y su alcance está claro. Handoff: completar cada TK a `Ready` con `story-plan` antes de `/story-implement`.
  
 **Ejemplo 5 — US no Ready o sin BR/SC**
  
@@ -270,7 +276,19 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 ---
  
 ## Notas
- 
+
+### Handoffs del ciclo
+
+Posición: **planificación** — entre `story-define` e `story-implement`.
+
+| | |
+|--|--|
+| **Entrada** | US con `Estado: Ready` y **Criterios de aceptación** (`BR-XX`, `SC-XX`) en su `README.md`. Si la US está en Draft o faltan BR/SC: **bloquear** y devolver handoff a **`story-define`**. |
+| **Salida mínima (modo B)** | Stubs `TK-XXX-*.md` en `Draft` + cobertura SC reportada al usuario. |
+| **Salida para implementar** | Cada TK del alcance acordado en **`Estado: Ready`** (Plan, Dependencias y Referencias según checklist). Stubs en Draft **no** habilitan `story-implement`. |
+| **Siguiente paso** | **`story-implement`** — solo cuando US Ready **y** las TK a ejecutar están Ready. Sugerir `/story-implement` al cerrar la última TK Ready del alcance. |
+| **Regreso** | Conflicto TK ↔ US → corregir TK aquí; si falta definición funcional → **`story-define`**. |
+
 ### work-units.md
  
 Cada sección `## <nombre-unidad>` contiene solo el nombre de la unidad y una descripción **corta** — lo estrictamente necesario para entender su alcance: qué cubre y, si reduce ambigüedad, qué queda fuera. No es un índice de tareas ni un inventario de artefactos técnicos. Cuando la unidad de un stub es `Por definir`, no es obligatorio crear la sección hasta que se concrete.

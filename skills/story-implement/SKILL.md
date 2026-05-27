@@ -11,6 +11,8 @@ Guía para **ejecutar en código** el trabajo especificado en historias `US-XXX`
 > **Alcance de este skill:** consume especificaciones ya redactadas por **story-plan**. No reescribe ni reestructura tareas — solo las implementa. Correcciones menores acordadas con el usuario son la única excepción. El ritmo es siempre **una tarea por confirmación**.
 >
 > **Solo implementación:** este skill no modifica documentación de producto — ni `README.md` de US, ni `TK-XXX`, ni ADRs, ni technical-docs a excepción de el `progress.md` de la carpeta de la US. Si durante la implementación se detecta un conflicto en la documentación que pueda afectar el resultado (ambigüedad, contradicción entre TKs, regla de negocio incompleta), **parar inmediatamente y notificar al usuario** antes de continuar.
+>
+> **Handoffs:** ver [Handoffs del ciclo](#handoffs-del-ciclo). Entrada mínima: US y TK en `Ready`; salida: `progress.md` en `Done` y working tree limpio → **`story-integrate`**.
 
 ---
 
@@ -69,7 +71,7 @@ Ambas condiciones pueden aplicar a la vez. Si la tarea no involucra UI, implemen
 | **Alcance**             | Del mensaje del usuario: toda la US, una lista de TK, o un TK concreto                                           | Preguntar si hay ambigüedad                                                                                  |
 | **Unidad de trabajo**   | Campo `Unidad de trabajo` de cada TK; complementar con `docs/specs/work-units.md` si el alcance no es claro      | Preguntar al usuario; no asumir                                                                              |
 | **Working tree limpio** | `git status --porcelain`                                                                                         | Si hay cambios pendientes no resueltos: parar y avisar al usuario antes de continuar                         |
-| **Rama de la US**       | `feature/US-XXX-[nombre-corto]`, donde el segmento tras `feature/` coincide con el nombre de la carpeta de la US | Crear con `git checkout -b feature/US-XXX-[nombre-corto]` desde la base acordada                             |
+| **Rama de la US**       | `feature/US-XXX-[nombre-corto]`, donde el segmento tras `feature/` coincide con el nombre de la carpeta de la US | Crear con `git checkout -b feature/US-XXX-[nombre-corto]` desde la rama base acordada o resuelta (mismo criterio que `story-integrate`) |
 | **Usuario asignado**    | Campo `Asignado a` del TK; si no está: `git config user.name`                                                    | Aplicar como filtro salvo instrucción explícita en contrario del usuario                                     |
 
 
@@ -103,7 +105,7 @@ Antes de tocar código, verificar las siguientes condiciones. Si alguna falla, *
 
 1. Verificar working tree limpio; si no, parar y avisar.
 2. Resolver nombre de rama: `feature/US-XXX-[nombre-corto]` (el segmento tras `feature/` debe coincidir con la carpeta de la US).
-3. `git checkout feature/US-XXX-[nombre-corto]` si la rama existe; si no, `git checkout -b feature/US-XXX-[nombre-corto]` desde la base acordada.
+3. `git checkout feature/US-XXX-[nombre-corto]` si la rama existe; si no, `git checkout -b feature/US-XXX-[nombre-corto]` desde la rama base acordada con el usuario o detectada igual que en **`story-integrate`** (reflog `Created from`, config de upstream, o pregunta explícita — no asumir `main`/`develop`).
 4. Leer o crear `progress.md` (desde `assets/progress-template.md` si no existe; no publicar el archivo de referencia tal cual).
 
 ### Paso 2 — Filtrar y presentar cola
@@ -130,6 +132,7 @@ Por cada tarea aprobada, en orden numérico salvo dependencias obvias en el text
 
 1. Cuando no queden tareas pendientes en el alcance acordado (o el usuario detenga la ejecución), ofrecer la fase de pruebas: implementar tests unitarios y/o E2E basados en los escenarios `SC-XX` y las reglas `BR-XX` del bloque **Criterios de aceptación** del `README.md`, además de los TK ejecutados.
 2. Si el usuario rechaza, registrar nota en `progress.md`.
+3. **Handoff:** si todas las entradas de `progress.md` del alcance están en `Done`, working tree limpio y commits hechos (`git-commit`), sugerir **`story-integrate`**. Si quedan TK en `Pending`/`In Progress`, no sugerir integrate — indicar qué falta cerrar.
 
 ---
 
@@ -215,6 +218,17 @@ Un `TK-XXX` siempre vive bajo la carpeta de una US. Si el usuario indica solo el
 
 ## Notas
 
+### Handoffs del ciclo
+
+Posición: **implementación** — entre `story-plan` e `story-integrate`.
+
+| | |
+|--|--|
+| **Entrada** | US `Estado: Ready`; TK del alcance con `Estado: Ready`; rama `feature/US-XXX-[nombre-corto]` (crear desde la misma rama base que usará `story-integrate` al mergear). |
+| **Salida** | Código commiteado; `progress.md` con cada TK del alcance en `Done`; working tree limpio. |
+| **Siguiente paso** | Commits con **`git-commit`** si hay cambios pendientes → **`story-integrate`** cuando `progress.md` esté íntegro en `Done`. |
+| **Regreso** | Ambigüedad o conflicto en US/TK → parar y **`story-define`** / **`story-plan`** según corresponda. TK fuera de alcance → alinear docs y ajustar `progress.md` antes de seguir. |
+
 ### Estados de `progress.md`
 
 Estados válidos por tarea: **`Pending`**, **`In Progress`**, **`Done`**. No usar `Skipped` ni otros valores.
@@ -231,7 +245,9 @@ Respetar orden numérico `TK-001`, `TK-002`, … salvo dependencias obvias descr
 
 ### Relación con otros skills
 
-- **story-plan** especifica el formato y contenido de los TK; este skill los consume.
+- **story-plan** especifica el formato y contenido de los TK; este skill los consume (solo TK `Ready`).
 - **story-define** define la US y sus criterios de aceptación (`BR-XX`, `SC-XX`); este skill los usa como referencia para la fase de pruebas.
+- **story-integrate** cierra la US tras este skill; requiere `progress.md` completo en `Done` y working tree limpio.
+- **git-commit** prepara commits antes del handoff a integrate.
 - **MCP de Figma:** obligatorio para tareas de UI con referencia Figma; usarlo para obtener el contexto del diseño e implementar la tarea.
 

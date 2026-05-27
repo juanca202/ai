@@ -226,6 +226,19 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 
 ## Notas
 
+### Handoffs del ciclo
+
+Posición: **inicio** del pipeline `story-define` → `story-plan` → `story-implement` → `story-integrate`.
+
+| | |
+|--|--|
+| **Entrada** | Necesidad funcional del usuario. No requiere US previa. |
+| **Salida mínima** | Carpeta `US-XXX-[nombre-corto]/README.md` con actor, valor, al menos un `BR-XX` y un `SC-XX`. |
+| **Salida para continuar** | `Estado: Ready` en el `README.md`; INVEST y DoR completos; Observaciones sin pendientes abiertos. |
+| **Siguiente paso** | **`story-plan`** — invocar `/story-plan` (o continuidad explícita del usuario). No crear `TK-XXX` desde este skill. |
+| **Si queda en Draft** | No handoff a plan ni implement. Cerrar lagunas con preguntas estructuradas o mantener Draft documentado. |
+| **Regreso** | Si durante `story-plan` o `story-implement` hay conflicto US ↔ TK, **este skill prevalece**: actualizar TK vía `story-plan`, no degradar la US. |
+
 ### RFC 2119
 
 Tabla de equivalencias para palabras clave normativas (en MAYÚSCULAS en el idioma de preferencia):
