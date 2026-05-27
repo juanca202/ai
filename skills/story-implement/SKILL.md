@@ -1,6 +1,6 @@
 ---
 name: story-implement
-description: Usar al pedir implementar, desarrollar o ejecutar trabajo referenciado por historia de usuario o tarea.
+description: Usar al pedir implementar, desarrollar o ejecutar trabajo referenciado por una historia de usuario o tarea. Solo debe usarse si la historia o tarea se encuentra en estado "ready".
 license: MIT
 ---
 
@@ -61,7 +61,7 @@ Antes de tocar código, verificar las siguientes condiciones. Si alguna falla, *
 **¿Qué verificar?**
 - **Working tree limpio:** `git status --porcelain` sin cambios pendientes no resueltos.
 - **Rama correcta:** estar en la rama `feature/US-XXX-[nombre-corto]` (o crearla). No implementar en `main` ni en ramas de otras historias sin instrucción explícita.
-- **US padre con README.md:** la carpeta de la US existe y tiene `README.md`.
+- **US padre con README.md:** la carpeta de la US existe, tiene `README.md` y esta en estado **Ready**.
 - **TK en estado Ready:** solo encolar tareas cuyo metadato `Estado` sea `Ready`. Las tareas en `Draft` o marcadas como `Skipped` en `progress.md` no son ejecutables por defecto.
 - **Solapamiento de progreso:** leer `progress.md` si existe; respetar tareas ya en `Done`; si hay alguna `In Progress`, revisar notas y estado real antes de continuar.
 **Si hay conflicto:**

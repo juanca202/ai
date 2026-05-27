@@ -67,7 +67,7 @@ Antes de crear o editar cualquier TK, el agente debe tener clara la siguiente in
 | **Unidad de trabajo** | Inferir del repo o indicada por el usuario | Stub: puede quedar `Por definir`. TK completa: obligatoria; sin ella el estado no puede ser `Ready` |
 | **Contexto técnico** (solo TK completa) | ADRs existentes, technical-docs, descripción del usuario | Si falta decisión técnica relevante: sugerir ADR al usuario, no crearlo |
 | **Referencia de UI** (solo TK de interfaz) | Figma, wireframe o imagen de alta fidelidad aportados por el usuario | Obligatoria para `Ready`; sin ella el TK de UI no puede salir de `Draft` |
-| **Idioma de preferencia** | (1) idioma del turno del usuario; (2) `.agent/MEMORY.md` → `preferred language: <ISO>` | Preguntar y crear/actualizar `.agent/MEMORY.md` con `preferred language: <código>` |
+| **Idioma de preferencia** | (1) idioma del turno del usuario; (2) `.agents/MEMORY.md` → `preferred language: <ISO>` | Preguntar y crear/actualizar `.agents/MEMORY.md` con `preferred language: <código>` |
  
 > Leer siempre el `README.md` de la US y **todas** las `TK-*.md` existentes en la carpeta antes de crear o editar cualquier tarea. Detectar solapamientos y resolverlos con el usuario antes de continuar.
  
@@ -174,7 +174,7 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - [ ] Modo de invocación identificado (A o B)
 - [ ] Modo A: intención clara: stub vs TK completa
 - [ ] Modo B: BR-XX y SC-XX identificados en **Criterios de aceptación** del `README.md`; US en `Estado: Ready`
-- [ ] Idioma de preferencia determinado y `.agent/MEMORY.md` actualizado si fue necesario
+- [ ] Idioma de preferencia determinado y `.agents/MEMORY.md` actualizado si fue necesario
 **Validación:**
 - [ ] Carpeta de la US existe con `README.md`
 - [ ] ID `TK-XXX` libre en la carpeta

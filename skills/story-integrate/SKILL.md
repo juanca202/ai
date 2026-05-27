@@ -45,7 +45,7 @@ Antes de tocar git, el agente debe tener clara la siguiente información. **No a
 | **Estado de `progress.md`** | Leer el archivo en la carpeta de la US | Si no existe: parar e informar; el merge requiere `progress.md` poblado |
 | **Working tree** | `git status --porcelain` | Si hay salida: parar e informar; no se mergea con cambios pendientes |
 | **Rama base** | (1) `git reflog show <branch>` → línea «Created from»; (2) `git config --get branch.<branch>.merge`; (3) preguntar al usuario | No asumir `main`, `master` ni `develop` por defecto |
-| **Idioma de preferencia** | (1) idioma del turno del usuario; (2) `.agent/MEMORY.md` → `preferred language: <ISO>` | Preguntar y crear/actualizar `.agent/MEMORY.md` con `preferred language: <código>` |
+| **Idioma de preferencia** | (1) idioma del turno del usuario; (2) `.agents/MEMORY.md` → `preferred language: <ISO>` | Preguntar y crear/actualizar `.agents/MEMORY.md` con `preferred language: <código>` |
 
 > Leer `progress.md` **completo** antes de iniciar cualquier operación git. Las tres condiciones (rama, working tree, estados) se evalúan antes de cambiar de rama o invocar `git merge`.
 
@@ -119,7 +119,7 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 - [ ] Rama actual detectada y validada contra `feature/US-XXX-[nombre-corto]`
 - [ ] Carpeta de la US localizada en `docs/specs/user-stories/US-XXX-[nombre-corto]/`
 - [ ] Rama base resuelta (reflog, config o confirmación del usuario)
-- [ ] Idioma de preferencia determinado y `.agent/MEMORY.md` actualizado si fue necesario
+- [ ] Idioma de preferencia determinado y `.agents/MEMORY.md` actualizado si fue necesario
 
 **Validación:**
 - [ ] `git status --porcelain` sin salida (working tree limpio)

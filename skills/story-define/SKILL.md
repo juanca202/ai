@@ -24,7 +24,7 @@ Cuando este skill indique **preguntar, pedir, confirmar, validar o sugerir** alg
  
 - **Una pregunta por turno** cuando sea posible; máximo tres preguntas en un mismo bloque.
 - **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita categorías; usar entrada libre solo si no hay forma razonable de enumerar opciones (p. ej. el texto del valor de negocio).
-- **No repreguntar** lo que ya está respondido en el contexto, en `.agent/MEMORY.md` o en el `README.md` que se está editando.
+- **No repreguntar** lo que ya está respondido en el contexto, en `.agents/MEMORY.md` o en el `README.md` que se está editando.
 - **Una sola tanda al inicio**: agrupar todas las preguntas necesarias antes de redactar, no ir descubriendo huecos turno a turno.
 - **Fallback**: si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
 Cada sección posterior que diga *preguntar al usuario*, *validar con el usuario* o *sugerir al usuario* asume este mecanismo; no se vuelve a repetir.
@@ -62,7 +62,7 @@ Antes de crear o editar cualquier US, el agente debe tener clara la siguiente in
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | **Actor y valor de negocio**                    | Del contexto o descripción del usuario                                                   | Preguntar al usuario                                                                  |
 | **Criterios de aceptación (BR y SC)**           | Del contexto o descripción del usuario                                                   | Preguntar; sin al menos una `BR-XX` y un `SC-XX` INVEST no es valorable y la historia solo puede crearse en Draft |
-| **Idioma de preferencia**                       | (1) `.agent/MEMORY.md` → `preferred language: <ISO>`; (2) idioma del mensaje del usuario | Preguntar y crear `.agent/MEMORY.md` con `preferred language: <código>`               |
+| **Idioma de preferencia**                       | (1) `.agents/MEMORY.md` → `preferred language: <ISO>`; (2) idioma del mensaje del usuario | Preguntar y crear `.agents/MEMORY.md` con `preferred language: <código>`               |
 | **Referencias de diseño** (solo US de UI)       | Figma, prototipos u otros enlaces aportados por el usuario                               | Sin ellas la historia no puede declararse Ready                                       |
 | **Dependencias con otras US o sistemas**        | Indicadas por el usuario o inferibles del contexto                                       | Preguntar; afectan las dimensiones I y E de INVEST                                    |
 | **ID de la US**                                 | Proporcionado por el usuario                                                             | Inferir el siguiente libre revisando carpetas `US-`* en `docs/specs/user-stories/`  |
@@ -147,7 +147,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 
 - Actor y valor de negocio claros
 - Reglas de negocio con suficiente detalle para valorar INVEST
-- Idioma de preferencia determinado y `.agent/MEMORY.md` actualizado si fue necesario
+- Idioma de preferencia determinado y `.agents/MEMORY.md` actualizado si fue necesario
 - Si es US de UI: referencias de diseño presentes o acordadas
 - Dependencias con otras US o sistemas identificadas
 **Validación:**
