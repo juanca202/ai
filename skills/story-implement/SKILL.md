@@ -1,6 +1,6 @@
 ---
 name: story-implement
-description: Usar al pedir implementar, desarrollar o ejecutar trabajo referenciado por una historia de usuario o tarea. Solo debe usarse si la historia o tarea se encuentra en estado "ready".
+description: Usar al pedir implementar, desarrollar o ejecutar trabajo referenciado por una historia de usuario o tarea. Solo debe usarse si la historia o tarea se encuentra en estado `Ready`.
 license: MIT
 ---
 
@@ -42,6 +42,7 @@ Este skill no requiere un subagente fijo. Sin embargo, aplican las siguientes re
 | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
 | La tarea genera o modifica archivos de UI (HTML, CSS, componentes) | Ejecutar bajo el agente `ui-specialist`                                                                            |
 | La referencia de diseño es un enlace o archivo de Figma            | Usar el **MCP de Figma** para obtener el contexto del diseño e implementar la tarea, antes y durante la implementación |
+| Fase final de pruebas (Paso 4) aceptada por el usuario             | Ejecutar bajo el agente **`quality-specialist`** — no escribir tests directamente desde este skill                    |
 
 
 Ambas condiciones pueden aplicar a la vez. Si la tarea no involucra UI, implementar directamente sin delegar.
@@ -106,7 +107,7 @@ Antes de tocar código, verificar las siguientes condiciones. Si alguna falla, *
 1. Verificar working tree limpio; si no, parar y avisar.
 2. Resolver nombre de rama: `feature/US-XXX-[nombre-corto]` (el segmento tras `feature/` debe coincidir con la carpeta de la US).
 3. `git checkout feature/US-XXX-[nombre-corto]` si la rama existe; si no, `git checkout -b feature/US-XXX-[nombre-corto]` desde la rama base acordada con el usuario o detectada igual que en **`story-integrate`** (reflog `Created from`, config de upstream, o pregunta explícita — no asumir `main`/`develop`).
-4. Leer o crear `progress.md` (desde `assets/progress-template.md` si no existe; no publicar el archivo de referencia tal cual).
+4. Leer o crear `progress.md` (desde `assets/progress-template.md` si no existe; no publicar el archivo de referencia tal cual). Al crearlo, añadir **una entrada por cada TK del alcance acordado** (las `Ready` encoladas y las excluidas que formen parte de la entrega), todas con `Estado: Pending` salvo las ya `Done`.
 
 ### Paso 2 — Filtrar y presentar cola
 
@@ -130,9 +131,10 @@ Por cada tarea aprobada, en orden numérico salvo dependencias obvias en el text
 
 ### Paso 4 — Cierre
 
-1. Cuando no queden tareas pendientes en el alcance acordado (o el usuario detenga la ejecución), ofrecer la fase de pruebas: implementar tests unitarios y/o E2E basados en los escenarios `SC-XX` y las reglas `BR-XX` del bloque **Criterios de aceptación** del `README.md`, además de los TK ejecutados.
-2. Si el usuario rechaza, registrar nota en `progress.md`.
-3. **Handoff:** si todas las entradas de `progress.md` del alcance están en `Done`, working tree limpio y commits hechos (`git-commit`), sugerir **`story-integrate`**. Si quedan TK en `Pending`/`In Progress`, no sugerir integrate — indicar qué falta cerrar.
+1. Cuando no queden tareas pendientes en el alcance acordado (o el usuario detenga la ejecución), ofrecer la fase de pruebas: delegar al agente **`quality-specialist`** para escribir tests unitarios y/o E2E basados en los escenarios `SC-XX` y las reglas `BR-XX` del bloque **Criterios de aceptación** del `README.md`, además de los TK ejecutados.
+2. Si el usuario acepta, invocar **`quality-specialist`** con el contexto de la US, la rama `feature/US-XXX-*` y los TK en `Done`. No escribir tests desde este skill.
+3. Si el usuario rechaza, registrar nota en `progress.md`.
+4. **Handoff:** si todas las entradas de `progress.md` del alcance están en `Done`, working tree limpio y commits hechos (`git-commit`), sugerir en este orden: (1) **`git-pr`** desde la rama `feature/US-XXX-*` si el equipo revisa por PR/MR; (2) **`story-integrate`** para merge local a la rama base. No sugerir `git-pr` después de integrate (la rama activa ya no será la feature). Si quedan TK en `Pending`/`In Progress`, no sugerir integrate — indicar qué falta cerrar.
 
 ---
 
@@ -176,6 +178,9 @@ Un `TK-XXX` siempre vive bajo la carpeta de una US. Si el usuario indica solo el
 - Lint/build ejecutado tras la implementación
 - `progress.md` actualizado
 - Confirmación del usuario antes de la siguiente tarea
+**Cierre (fase de pruebas):**
+- Usuario preguntado sobre fase final de pruebas
+- Si acepta: tests delegados a **`quality-specialist`**, no escritos desde este skill
 
 ---
 
@@ -205,6 +210,7 @@ Un `TK-XXX` siempre vive bajo la carpeta de una US. Si el usuario indica solo el
 - Tratar tareas en Draft como ejecutables por defecto.
 - Arrancar la siguiente TK sin confirmación del usuario.
 - Ejecutar tests unitarios o E2E durante el ciclo de tareas sin que el usuario haya aceptado la fase final de pruebas.
+- Escribir tests en la fase final sin delegar a **`quality-specialist`**.
 - Ignorar `progress.md` o usar identificadores distintos a `TK-XXX` en el progreso.
 - Implementar archivos de UI sin usar el agente `ui-specialist`.
 - Implementar UI con referencia Figma sin usar el MCP de Figma.
@@ -226,7 +232,7 @@ Posición: **implementación** — entre `story-plan` e `story-integrate`.
 |--|--|
 | **Entrada** | US `Estado: Ready`; TK del alcance con `Estado: Ready`; rama `feature/US-XXX-[nombre-corto]` (crear desde la misma rama base que usará `story-integrate` al mergear). |
 | **Salida** | Código commiteado; `progress.md` con cada TK del alcance en `Done`; working tree limpio. |
-| **Siguiente paso** | Commits con **`git-commit`** si hay cambios pendientes → **`story-integrate`** cuando `progress.md` esté íntegro en `Done`. |
+| **Siguiente paso** | Commits con **`git-commit`** si hay cambios pendientes → **`git-pr`** (opcional, desde `feature/US-*`) → **`story-integrate`** cuando `progress.md` esté íntegro en `Done`. |
 | **Regreso** | Ambigüedad o conflicto en US/TK → parar y **`story-define`** / **`story-plan`** según corresponda. TK fuera de alcance → alinear docs y ajustar `progress.md` antes de seguir. |
 
 ### Estados de `progress.md`
@@ -246,7 +252,8 @@ Respetar orden numérico `TK-001`, `TK-002`, … salvo dependencias obvias descr
 ### Relación con otros skills
 
 - **story-plan** especifica el formato y contenido de los TK; este skill los consume (solo TK `Ready`).
-- **story-define** define la US y sus criterios de aceptación (`BR-XX`, `SC-XX`); este skill los usa como referencia para la fase de pruebas.
+- **story-define** define la US y sus criterios de aceptación (`BR-XX`, `SC-XX`); la fase de pruebas los consume vía **`quality-specialist`**.
+- **quality-specialist** escribe tests en el cierre de este skill cuando el usuario acepta la fase final.
 - **story-integrate** cierra la US tras este skill; requiere `progress.md` completo en `Done` y working tree limpio.
 - **git-commit** prepara commits antes del handoff a integrate.
 - **MCP de Figma:** obligatorio para tareas de UI con referencia Figma; usarlo para obtener el contexto del diseño e implementar la tarea.

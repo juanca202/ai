@@ -14,7 +14,7 @@ La plantilla canónica está en `assets/user-story-template.md` (léela antes de
 
 ## Subagente requerido
 
-**Este skill debe ejecutarse obligatoriamente bajo el subagente `docs-specialist`.** No ejecutar directamente sin delegar a ese subagente.
+**Este skill debe ejecutarse bajo el agente/subagente `docs-specialist`** (`agents/docs-specialist.md`; en el proyecto destino instalar como `.cursor/agents/docs-specialist.md`). No ejecutar el flujo normativo de la US sin ese contexto.
 
 ---
 
@@ -22,10 +22,10 @@ La plantilla canónica está en `assets/user-story-template.md` (léela antes de
  
 Cuando este skill indique **preguntar, pedir, confirmar, validar o sugerir** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** que ofrezca el cliente (la que renderiza opciones tappables o un selector de respuesta) en lugar de redactar la pregunta como prosa libre. Reglas:
  
-- **Una pregunta por turno** cuando sea posible; máximo tres preguntas en un mismo bloque.
 - **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita categorías; usar entrada libre solo si no hay forma razonable de enumerar opciones (p. ej. el texto del valor de negocio).
 - **No repreguntar** lo que ya está respondido en el contexto, en `.agents/MEMORY.md` o en el `README.md` que se está editando.
-- **Una sola tanda al inicio**: agrupar todas las preguntas necesarias antes de redactar, no ir descubriendo huecos turno a turno.
+- **Recopilación inicial (antes de redactar):** una sola tanda con hasta **tres preguntas por bloque**; agrupar huecos de información, no ir descubriendo turno a turno.
+- **Confirmaciones de flujo (después de redactar o en cierre Draft):** **una pregunta por turno** cuando sea posible; si hay más de tres lagunas, encadenar tandas como en el paso 5 del flujo de creación.
 - **Fallback**: si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
 Cada sección posterior que diga *preguntar al usuario*, *validar con el usuario* o *sugerir al usuario* asume este mecanismo; no se vuelve a repetir.
 
@@ -233,8 +233,8 @@ Posición: **inicio** del pipeline `story-define` → `story-plan` → `story-im
 | | |
 |--|--|
 | **Entrada** | Necesidad funcional del usuario. No requiere US previa. |
-| **Salida mínima** | Carpeta `US-XXX-[nombre-corto]/README.md` con actor, valor, al menos un `BR-XX` y un `SC-XX`. |
-| **Salida para continuar** | `Estado: Ready` en el `README.md`; INVEST y DoR completos; Observaciones sin pendientes abiertos. |
+| **Salida mínima (creación)** | Carpeta `US-XXX-[nombre-corto]/README.md` con actor y valor de negocio; puede quedar en `Estado: Draft` con lagunas en Observaciones. |
+| **Salida para continuar** | `Estado: Ready` en el `README.md`; INVEST y DoR completos; al menos un `BR-XX` y un `SC-XX`; Observaciones sin pendientes abiertos. |
 | **Siguiente paso** | **`story-plan`** — invocar `/story-plan` (o continuidad explícita del usuario). No crear `TK-XXX` desde este skill. |
 | **Si queda en Draft** | No handoff a plan ni implement. Cerrar lagunas con preguntas estructuradas o mantener Draft documentado. |
 | **Regreso** | Si durante `story-plan` o `story-implement` hay conflicto US ↔ TK, **este skill prevalece**: actualizar TK vía `story-plan`, no degradar la US. |

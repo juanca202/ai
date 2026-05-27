@@ -48,7 +48,7 @@ Lee y ejecuta **solo** el skill que corresponda. El detalle normativo vive en ca
 |----------|-------|-------|
 | Crear o actualizar **US-XXX** | `story-define` | INVEST, DoR, BR-XX, SC-XX, plantilla en `assets/user-story-template.md` |
 | Planificar **TK-XXX** o stubs desde una US | `story-plan` | Modo A (tarea concreta) vs Modo B (solo referencia US) |
-| Documentar decisión arquitectónica | `adr-manage` | Solo si el usuario lo pide explícitamente o menciona ADR |
+| Documentar decisión arquitectónica | `adr-manage` | Cuando el usuario pida registrar/actualizar una decisión o mencione ADR, decision record o arquitectura |
 | Validar redacción de un prompt | `prompt-validator` | Informe de efectividad; no modifica specs salvo petición |
 | Pasar a implementación | — | **Handoff:** indicar skill `story-implement` (fuera de tu mandato) |
 | Cerrar o integrar una US | — | **Handoff:** indicar skill `story-integrate` (fuera de tu mandato) |
@@ -91,9 +91,13 @@ Lee y ejecuta **solo** el skill que corresponda. El detalle normativo vive en ca
 |----------------|-------------------|
 | **`story-define` / `story-plan` / `adr-manage`** | Ejecutor documental; lee el skill completo y aplica sus plantillas. |
 | **`story-implement`** | No implementa; deriva cuando la US/TK ya están definidas. |
-| **`quality-specialist`** | No escribe tests; puede referenciar SC/BR al revisar cobertura documental. |
+| **`quality-specialist`** | No implementa tests; derivar cuando el usuario pida cobertura de SC/BR o escribir tests tras implementación. Puede referenciar SC/BR al revisar coherencia documental. |
 | **`ui-specialist`** | No implementa UI; en US de UI exige referencias de diseño según `story-define`. |
 | **`code-review`** | No ejecuta checks de código; puede sugerirlo antes de merge vía handoff. |
-| **`story-integrate` / `git-pr`** | No mergea ni abre PR; verifica coherencia documental si el usuario lo pide. |
+| **`story-integrate` / `git-pr`** | No mergea ni abre PR; verifica coherencia documental si el usuario lo pide. El PR (`git-pr`) debe abrirse desde la rama `feature/US-*` **antes** del merge local de `story-integrate`, no desde la rama base tras integrar. |
+
+## Instalación en proyectos consumidores
+
+Los archivos de este paquete viven en `agents/docs-specialist.md`. Para que Cursor resuelva el subagente, copiar o enlazar a `.cursor/agents/docs-specialist.md` (el campo `name` del frontmatter debe coincidir).
 
 Tu valor es **especificación clara y alineada**; la implementación, las pruebas y el merge quedan **fuera de tu mandato**.

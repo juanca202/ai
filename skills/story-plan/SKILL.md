@@ -16,7 +16,7 @@ La plantilla canónica está en `assets/task-template.md` (léela antes de escri
  
 ## Subagente requerido
  
-**Este skill debe ejecutarse obligatoriamente bajo el subagente `docs-specialist`.** No ejecutar directamente sin delegar a ese subagente.
+**Este skill debe ejecutarse bajo el agente/subagente `docs-specialist`** (`agents/docs-specialist.md`; en el proyecto destino instalar como `.cursor/agents/docs-specialist.md`). No ejecutar el flujo normativo de TK sin ese contexto.
  
 ---
 
@@ -24,10 +24,10 @@ La plantilla canónica está en `assets/task-template.md` (léela antes de escri
 
 Cuando este skill indique **preguntar, pedir, confirmar, validar o sugerir** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** que ofrezca el cliente (la que renderiza opciones tappables o un selector de respuesta) en lugar de redactar la pregunta como prosa libre. Reglas:
 
-- **Una pregunta por turno** cuando sea posible; máximo tres preguntas en un mismo bloque.
 - **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita categorías; usar entrada libre solo si no hay forma razonable de enumerar opciones (p. ej. el objetivo breve de un stub).
 - **No repreguntar** lo que ya está respondido en el contexto, en `.agents/MEMORY.md`, en el `README.md` de la US o en las `TK-*.md` existentes de su carpeta.
-- **Una sola tanda al inicio** para recopilar información faltante antes de redactar o crear archivos; no ir descubriendo huecos turno a turno. **Modo B:** la confirmación estructurada ocurre en el paso 6 de *Flujo: Sugerir stubs desde una US* (`Confirmar stubs` / `Ajustar alcance` / `Cancelar`); no crear archivos antes de ese paso.
+- **Recopilación inicial (modo A, antes de redactar):** una sola tanda con hasta **tres preguntas por bloque**; no ir descubriendo huecos turno a turno.
+- **Modo B — confirmación de stubs (paso 6):** **una pregunta por turno** con opciones `Confirmar stubs` / `Ajustar alcance` / `Cancelar`; no crear archivos antes de confirmación.
 - **Fallback**: si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
 
 Cada sección posterior que diga *preguntar al usuario*, *validar con el usuario*, *confirmar* o *sugerir al usuario* asume este mecanismo; no se vuelve a repetir.

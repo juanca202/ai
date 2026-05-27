@@ -233,10 +233,11 @@ Posición: **cierre local** — último paso del pipeline de historias (sin push
 |--|--|
 | **Entrada** | Rama `feature/US-XXX-[nombre-corto]`; working tree limpio; commits de la implementación ya hechos (`git-commit`); `progress.md` con **cada** TK listada en `Done`. |
 | **Salida** | Merge `--no-ff` a la rama base local; reporte con hash de merge. Sin push ni borrado de rama. |
-| **Siguiente paso (fuera del skill)** | Push manual, PR/MR (`git-pr`), CI — decisión del usuario. |
+| **Siguiente paso (fuera del skill)** | Push de la rama base y CI — decisión del usuario. |
+| **PR/MR (`git-pr`)** | Abrir **antes** de este skill, estando en `feature/US-XXX-[nombre-corto]` (o con la feature ya publicada en remoto). Tras el merge local, la rama actual es la **base**; `git-pr` bloquea en `main`/`master`/`develop`/`trunk`. |
 | **Regreso** | TK no `Done` o `progress.md` incompleto → **`story-implement`**. Alcance de US reducido → alinear con **`story-define`** / **`story-plan`** y corregir `progress.md` antes de reintentar. |
 
-**Alcance de `progress.md`:** validar **solo las entradas presentes** en el archivo. Cada una debe estar en `Done`. TK en `Draft` que no estén listadas no bloquean por sí solas; si forman parte del alcance de la entrega, deben añadirse y cerrarse o eliminarse del alcance vía `story-plan` / `story-define`.
+**Alcance de `progress.md`:** validar **solo las entradas bajo `### Tareas`** en el archivo. Cada una debe estar en `Done`. El encabezado `## Historia` no tiene estado de merge. TK en `Draft` que no estén listadas no bloquean por sí solas; si forman parte del alcance de la entrega, deben añadirse y cerrarse o eliminarse del alcance vía `story-plan` / `story-define`. **`story-implement`** debe poblar `progress.md` con todas las TK del alcance acordado al iniciar la implementación.
 
 ### progress.md
 

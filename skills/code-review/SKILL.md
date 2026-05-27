@@ -340,6 +340,7 @@ En ningún caso afecta el veredicto: sonar es siempre informativo en este skill.
 ### Relación con otros skills
 
 - **story-implement** ya ejecuta `lint, typecheck o build del paquete o unidad afectada` por cada TK individual. Este skill amplía esa validación a la batería completa antes del merge final de la US.
+- **git-pr** puede invocar este skill de forma bloqueante antes de crear un PR; solo veredictos **❌ No apto** y **⚠️ Incompleto** impiden el PR — **✅ Apto** permite continuar aunque haya warnings informativos.
 - **adr-manage** puede invocarse tras este skill si la revisión de código revela una decisión arquitectónica a documentar (p. ej. desactivar una regla de eslint con justificación, ignorar una clase de warnings de sonar).
 - **prompt-validator** no se relaciona: este skill ejecuta comandos, no audita texto.
 

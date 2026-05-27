@@ -16,8 +16,34 @@ La plantilla canónica está en `assets/adr-template.md` (léela antes de escrib
  
 ## Subagente requerido
  
-**Este skill debe ejecutarse obligatoriamente bajo el subagente `docs-specialist`.** No ejecutar directamente sin delegar a ese subagente.
- 
+**Este skill debe ejecutarse bajo el agente/subagente `docs-specialist`** (`agents/docs-specialist.md`; en el proyecto destino instalar como `.cursor/agents/docs-specialist.md`). No ejecutar el flujo normativo de ADR sin ese contexto.
+
+---
+
+## Cómo preguntar al usuario
+
+Cuando este skill indique **preguntar, pedir, confirmar, validar o sugerir** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** que ofrezca el cliente (la que renderiza opciones tappables o un selector de respuesta) en lugar de redactar la pregunta como prosa libre. Reglas:
+
+- **Una pregunta por turno** cuando sea posible; máximo tres preguntas en un mismo bloque.
+- **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita categorías; usar entrada libre solo si no hay forma razonable de enumerar opciones (p. ej. el título del ADR o los decisores).
+- **No repreguntar** lo que ya está respondido en el contexto, en `.agents/MEMORY.md` o en ADRs existentes en `docs/adr/`.
+- **Una sola tanda al inicio** para recopilar información faltante antes de redactar; no ir descubriendo huecos turno a turno.
+- **Fallback**: si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
+
+Cada sección posterior que diga *preguntar al usuario*, *validar con el usuario* o *sugerir al usuario* asume este mecanismo; no se vuelve a repetir.
+
+---
+
+## Resolución de idioma
+
+Orden canónico compartido con el resto del ciclo de historias. Detenerse en el primer paso que aplique:
+
+1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Si no existe esa línea pero hay claves legacy (`language:`, `idioma:`, `Project language:`), usarlas solo como fallback al leer MEMORY antiguo.
+2. **Idioma del turno del usuario** (mensaje actual).
+3. **Preguntar al usuario** qué idioma prefiere y persistir la respuesta en `.agents/MEMORY.md` con `preferred language: <código>`.
+
+El contenido del ADR (Contexto, Decisión, Consecuencias) usa el idioma resuelto. Las respuestas al usuario siguen la convención del agente `docs-specialist` (español salvo petición en contra).
+
 ---
  
 ## Ubicación de archivos

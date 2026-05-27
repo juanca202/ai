@@ -10,7 +10,7 @@ license: MIT
 
 Crear un Pull Request o Merge Request desde la **rama actual** hacia una **rama destino preguntada al usuario**, sobre **cualquier repositorio git** con remoto configurado, con opción de ejecutar un **code-review previo bloqueante**.
 
-El skill **auto-detecta** la plataforma a partir del remoto `origin` (GitHub, GitLab, Bitbucket, Gitea, Azure Repos…), elige el CLI adecuado, **auto-genera** título y descripción a partir de los commits de la rama (sin pedir confirmación) y **bloquea** la creación del PR si el code-review previo reporta hallazgos.
+El skill **auto-detecta** la plataforma a partir del remoto `origin` (GitHub, GitLab, Bitbucket, Gitea, Azure Repos…), elige el CLI adecuado, **auto-genera** título y descripción a partir de los commits de la rama (sin pedir confirmación) y **bloquea** la creación del PR si el code-review previo devuelve veredicto **❌ No apto** o **⚠️ Incompleto** (según el skill `code-review`).
 
 Usar cuando el usuario pida **crear, abrir, generar, levantar o subir** un PR, MR, pull request o merge request, aunque solo diga "crea el PR" o "súbelo a develop" sin nombrar plataforma.
 
@@ -25,7 +25,7 @@ Usar cuando el usuario pida **crear, abrir, generar, levantar o subir** un PR, M
 - Pre-flight de estado: estar en repo git, rama actual ≠ rama protegida por defecto, working tree limpio, commits propios pendientes respecto a `origin/<destino>`.
 - Pregunta única al usuario para la **rama destino**.
 - Pregunta única al usuario para ejecutar **/code-review** previo (sí/no).
-- Invocación del flujo `/code-review` sobre el diff `origin/<destino>..HEAD` cuando el usuario lo solicita, y **bloqueo total** de la creación del PR si reporta hallazgos.
+- Invocación del flujo `/code-review` sobre el diff `origin/<destino>..HEAD` cuando el usuario lo solicita, y **bloqueo total** de la creación del PR si el veredicto es **❌ No apto** o **⚠️ Incompleto**.
 - `git push -u origin <rama-actual>` si la rama no existe en remoto o tiene commits no publicados.
 - Auto-generación **no interactiva** de título y descripción del PR a partir de los commits y del nombre de la rama.
 - Lectura de `.agents/MEMORY.md` en la raíz del repo (si existe) para detectar **preferencia de idioma** del proyecto y aplicarla al título y descripción.
@@ -36,7 +36,7 @@ Usar cuando el usuario pida **crear, abrir, generar, levantar o subir** un PR, M
 - Modificar código, hacer merges, rebases ni resolver conflictos.
 - Crear, renombrar ni cambiar de rama (la rama origen es **siempre** la actual; cambiar de rama corresponde al usuario).
 - Asignar reviewers, labels, milestones, projects ni configurar reglas del repo.
-- Crear el PR si `/code-review` reportó hallazgos (no hay flujo "crear como draft" ni "ignorar y continuar").
+- Crear el PR si `/code-review` devolvió veredicto **❌ No apto** o **⚠️ Incompleto** (no hay flujo "crear como draft" ni "ignorar y continuar").
 - Editar PRs existentes (este skill solo **crea**).
 - Re-implementar la lógica de `/code-review`: el skill **invoca** el flujo existente, no lo duplica.
 
@@ -71,11 +71,11 @@ Tras éxito:
 Tras bloqueo por code-review:
 
 ```
-✗ PR NO creado: /code-review reportó hallazgos.
+✗ PR NO creado: /code-review devolvió veredicto <❌ No apto | ⚠️ Incompleto>.
 
 <reporte literal de /code-review>
 
-Corrige los hallazgos y vuelve a ejecutar el skill.
+Corrige los bloqueantes y vuelve a ejecutar el skill.
 ```
 
 Tras parada en pre-flight (rama protegida, working tree sucio, plataforma desconocida, etc.): mensaje breve indicando la causa y la acción que debe tomar el usuario, **sin** crear PR ni hacer push.
@@ -97,7 +97,7 @@ Tras parada en pre-flight (rama protegida, working tree sucio, plataforma descon
 - **Working tree limpio antes de crear el PR**: si `git status --porcelain` devuelve cambios, **parar** y avisar; **no** ejecutar `git add` ni `git commit` automáticos.
 - **Push si aplica, sin preguntar**: si la rama actual no existe en `origin` o tiene commits no publicados, ejecutar `git push -u origin <rama-actual>` antes de crear el PR. **Nunca** `--force` ni `--force-with-lease`.
 - **Pregunta única de code-review**: una sola interacción sí/no antes de crear el PR. Si el usuario ya respondió en el mensaje inicial, no volver a preguntar.
-- **Code-review bloqueante**: si el usuario aceptó code-review y `/code-review` reportó **cualquier** hallazgo, **no crear el PR**. Mostrar el reporte y terminar. Es un flujo de un solo intento; el usuario corrige y vuelve a invocar el skill.
+- **Code-review bloqueante**: si el usuario aceptó code-review y `/code-review` devolvió veredicto **❌ No apto** o **⚠️ Incompleto**, **no crear el PR**. Mostrar el reporte y terminar. Un veredicto **✅ Apto** — aunque incluya warnings de eslint, findings informativos de Sonar o acciones sugeridas no bloqueantes — **no** impide crear el PR. Es un flujo de un solo intento; el usuario corrige y vuelve a invocar el skill.
 - **Título y descripción no interactivos**: generar sin pedir confirmación. Excepción: si el usuario los pasó explícitamente en el mismo mensaje, respetarlos.
 - **Idioma de título y descripción**: aplicar [Resolución de idioma del PR](#resolución-de-idioma-del-pr). El override del usuario en el mensaje (título/descripción literales) tiene prioridad sobre la resolución automática.
 - **No reabrir, no editar, no forzar**: si ya existe un PR para `<rama-actual> → <destino>`, devolver su URL y **no** intentar recrearlo.
@@ -133,7 +133,7 @@ Tras parada en pre-flight (rama protegida, working tree sucio, plataforma descon
 5. **Si el usuario aceptó code-review:**
    - Invocar el flujo de `/code-review` sobre el diff `origin/<destino>..HEAD`.
    - Capturar el reporte completo.
-   - Si reporta **cualquier** hallazgo (issue, blocker, warning, comentario de cambio requerido), aplicar el formato de bloqueo definido en `Outputs` y **terminar**. No ejecutar los pasos siguientes.
+   - Parsear el **veredicto** del informe (`✅ Apto`, `❌ No apto`, `⚠️ Incompleto`). Si es **❌ No apto** o **⚠️ Incompleto**, aplicar el formato de bloqueo definido en `Outputs` y **terminar**. Si es **✅ Apto**, continuar aunque el informe liste warnings o acciones informativas. No ejecutar los pasos siguientes solo por warnings de eslint, Sonar informativo o sugerencias en «Próximas acciones».
 
 6. **Push de la rama actual** si aplica:
    - Si `git ls-remote --heads origin <rama-actual>` está vacío, **o**
@@ -168,13 +168,13 @@ Tras parada en pre-flight (rama protegida, working tree sucio, plataforma descon
 
 Usuario: «Crea el PR de esta rama, pásalo por code-review primero.»
 
-Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`, working tree limpio). Auto-detecta GitLab (`origin` apunta a `ns.bayteq.com:3311`). Pregunta destino → usuario responde `develop`. Ejecuta `/code-review` sobre `origin/develop..HEAD` → sin hallazgos. Hace `git push -u origin feature/US-042-auth-refresh-token`. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min` y descripción con commits + diff stat. Ejecuta `glab mr create` y devuelve la URL.
+Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`, working tree limpio). Auto-detecta GitLab (`origin` apunta a `ns.bayteq.com:3311`). Pregunta destino → usuario responde `develop`. Ejecuta `/code-review` sobre `origin/develop..HEAD` → veredicto **✅ Apto**. Hace `git push -u origin feature/US-042-auth-refresh-token`. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min` y descripción con commits + diff stat. Ejecuta `glab mr create` y devuelve la URL.
 
 **Ejemplo 2 — Code-review bloquea:**
 
 Usuario: «Sube el PR a main, con code-review.»
 
-Skill ejecuta `/code-review`, que reporta 2 hallazgos (función sin tests, log con credencial). El skill **no** crea el PR, muestra el reporte literal y termina con «Corrige los hallazgos y vuelve a ejecutar el skill». **No** hace push.
+Skill ejecuta `/code-review`, que devuelve veredicto **❌ No apto** (p. ej. tests fallidos y eslint con errors). El skill **no** crea el PR, muestra el reporte literal y termina con «Corrige los bloqueantes y vuelve a ejecutar el skill». **No** hace push.
 
 **Ejemplo 3 — Sin code-review:**
 
@@ -206,7 +206,7 @@ El repo tiene `.agents/MEMORY.md` con la línea `preferred language: en`. Los co
 - **Asumir la rama destino** (p. ej. `main` por defecto): siempre preguntar.
 - **Preguntar plataforma**: se detecta del remoto.
 - **Pedir confirmación de título o descripción**: el flujo es no interactivo en esa parte.
-- **Crear el PR cuando `/code-review` reportó hallazgos**, aunque parezcan menores: el flujo es bloqueante, no consultivo.
+- **Crear el PR cuando `/code-review` devolvió ❌ No apto o ⚠️ Incompleto**: el bloqueo sigue el veredicto del skill `code-review`, no warnings informativos ni Sonar no bloqueante.
 - **Re-ejecutar `/code-review`** sobre el mismo diff dentro del mismo turno tras un bloqueo: el skill termina, el usuario corrige y reinvoca.
 - **Hacer `git add`, `git commit -am` o cualquier mutación de historia** si hay cambios sin commitear o conflictos. Parar y avisar.
 - **`git push --force` o `--force-with-lease`**. Nunca.
@@ -221,6 +221,8 @@ El repo tiene `.agents/MEMORY.md` con la línea `preferred language: en`. Los co
 ### Sobre `/code-review`
 
 Este skill **no implementa** code-review: invoca el flujo existente del usuario (slash command `/code-review` o el equivalente instalado, p. ej. `glab-code-review`). El alcance del review es el diff `origin/<destino>..HEAD`. Si el slash command no existe en el entorno, **parar** y avisar al usuario; no sustituirlo por un análisis ad-hoc.
+
+**Criterio de bloqueo:** usar el **veredicto final** del informe (`code-review`), no el recuento bruto de líneas en «Próximas acciones». Solo **❌ No apto** y **⚠️ Incompleto** bloquean la creación del PR; **✅ Apto** permite continuar aunque haya warnings o recomendaciones informativas.
 
 ### Detección de plataforma
 
@@ -239,6 +241,10 @@ Convenciones reconocidas para enriquecer el título:
 ### Sobre el push
 
 El skill nunca reescribe historia. Si el push falla por divergencia con remoto, **parar** y avisar; corresponde al usuario decidir cómo resolver (rebase, merge, descartar).
+
+### Orden respecto a `story-integrate`
+
+Invocar este skill **desde la rama `feature/US-XXX-[nombre-corto]`** (origen = rama actual), típicamente **antes** del merge local de **`story-integrate`**. Tras integrate, el checkout suele estar en la rama base (`develop`, `main`, etc.); este skill **bloquea** en ramas protegidas y ya no representa el PR de la feature.
 
 ### Sobre PRs existentes
 
