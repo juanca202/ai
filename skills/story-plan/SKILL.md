@@ -27,7 +27,7 @@ Cuando este skill indique **preguntar, pedir, confirmar, validar o sugerir** alg
 - **Una pregunta por turno** cuando sea posible; máximo tres preguntas en un mismo bloque.
 - **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita categorías; usar entrada libre solo si no hay forma razonable de enumerar opciones (p. ej. el objetivo breve de un stub).
 - **No repreguntar** lo que ya está respondido en el contexto, en `.agents/MEMORY.md`, en el `README.md` de la US o en las `TK-*.md` existentes de su carpeta.
-- **Una sola tanda al inicio** para recopilar información faltante antes de redactar o crear archivos; no ir descubriendo huecos turno a turno. **Excepción — modo B:** tras proponer stubs, pedir confirmación estructurada antes de escribir archivos (p. ej. `Confirmar stubs` / `Ajustar alcance` / `Cancelar`).
+- **Una sola tanda al inicio** para recopilar información faltante antes de redactar o crear archivos; no ir descubriendo huecos turno a turno. **Modo B:** la confirmación estructurada ocurre en el paso 6 de *Flujo: Sugerir stubs desde una US* (`Confirmar stubs` / `Ajustar alcance` / `Cancelar`); no crear archivos antes de ese paso.
 - **Fallback**: si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
 
 Cada sección posterior que diga *preguntar al usuario*, *validar con el usuario*, *confirmar* o *sugerir al usuario* asume este mecanismo; no se vuelve a repetir.
@@ -179,15 +179,17 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 2. **Verificar las precondiciones de bloqueo.** Si alguna falla, no continuar: reportar al usuario qué falta y sugerir el skill correspondiente (`story-define` para alinear la US, etc.).
 3. **Identificar unidades de trabajo** a partir del alcance de la US, los SC y las BR. Una unidad puede ser un módulo, servicio, paquete, componente UI, etc. **No inventar** unidades no soportadas por la US; lo no claro queda `Por definir` o se pregunta.
 4. **Cubrir los SC y considerar las BR.** Asegurar que cada `SC-XX` queda cubierto por al menos un stub propuesto. Las `BR-XX` se consideran como restricciones que condicionan el alcance de los stubs (validaciones, invariantes, autorizaciones); no se replican literalmente en el TK.
-5. **Proponer un stub por cada par (unidad de trabajo, alcance distinguible)**. No es 1 stub por SC: varios SC pueden caer en un mismo stub si comparten unidad y alcance; un SC amplio puede dividirse si abarca varias unidades.
-6. **Crear cada stub** siguiendo el *Flujo: Crear stub* (Estado: Draft, descripción breve sin referenciar identificadores `SC-XX` / `BR-XX` en el documento, plan vacío). La traza SC/BR → stub vive en el mensaje al usuario, no en el archivo.
-7. **Reportar al usuario** la lista de stubs creados, agrupados por unidad de trabajo, indicando brevemente qué `SC-XX` cubre cada uno. Esto permite verificar cobertura sin contaminar los archivos.
+5. **Presentar la propuesta de stubs** al usuario, agrupada por unidad de trabajo. Por cada stub incluir: `TK-XXX` tentativo (siguiente libre en secuencia), nombre de archivo, unidad de trabajo (o `Por definir`), objetivo breve y qué `SC-XX` cubre. No es 1 stub por SC: varios SC pueden caer en un mismo stub si comparten unidad y alcance; un SC amplio puede dividirse si abarca varias unidades. **No crear archivos en este turno** — dejar explícito al final del mensaje.
+6. **Confirmar con el usuario** mediante la herramienta de preguntas estructuradas: `Confirmar stubs` / `Ajustar alcance` / `Cancelar`. Si elige ajustar, revisar la propuesta y repetir pasos 5–6. **No continuar sin confirmación explícita**, salvo que el mensaje inicial ya describiera la descomposición con detalle suficiente para considerarla aprobada.
+7. **Crear cada stub** de la propuesta confirmada siguiendo el *Flujo: Crear stub* (Estado: Draft, descripción breve sin referenciar identificadores `SC-XX` / `BR-XX` en el documento, plan vacío).
+8. **Reportar al usuario** la lista de stubs creados, agrupados por unidad de trabajo, indicando brevemente qué `SC-XX` cubre cada uno.
  
 **Reglas invariantes:**
 - No redactar Plan de implementación, ni Dependencias detalladas, ni Referencias técnicas: son **stubs**, no TKs completas.
 - No incluir identificadores `SC-XX` / `BR-XX` dentro de los archivos `TK-XXX.md`. La consideración es del agente, no del documento.
+- **No crear archivos `TK-*.md` antes de la confirmación del paso 6.** La traza SC/BR → stub vive en la propuesta (paso 5) y en el reporte (paso 8), no dentro de los archivos.
 - Si la US es ambigua respecto a unidades de trabajo: preguntar al usuario antes de crear stubs; no inferir unidades por cuenta propia.
-- Si dos stubs se solapan: consolidarlos antes de escribir o preguntar al usuario.
+- Si dos stubs se solapan: consolidarlos en la propuesta (paso 5) o preguntar al usuario antes de confirmar.
 ---
  
 ## Checklist antes de redactar
@@ -198,6 +200,8 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - [ ] Modo de invocación identificado (A o B)
 - [ ] Modo A: intención clara: stub vs TK completa
 - [ ] Modo B: BR-XX y SC-XX identificados en **Criterios de aceptación** del `README.md`; US en `Estado: Ready`
+- [ ] Modo B: propuesta presentada al usuario (paso 5) sin archivos creados
+- [ ] Modo B: confirmación estructurada recibida (paso 6) antes del primer `TK-*.md`
 - [ ] Idioma de preferencia determinado y `.agents/MEMORY.md` actualizado si fue necesario
 **Validación:**
 - [ ] Carpeta de la US existe con `README.md`
@@ -235,7 +239,8 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 **Ejemplo 4 — Stubs desde una US (modo B)**
  
 - *Entrada:* «Crea las tareas necesarias para implementar US-004.» (sin describir tareas específicas).
-- *Comportamiento:* El agente activa el *Flujo: Sugerir stubs desde una US*. Verifica que `US-004/README.md` está en `Ready` y contiene BR y SC en **Criterios de aceptación**. Lee la US completa, identifica las unidades de trabajo implicadas, y propone un stub por cada (unidad, alcance distinguible) asegurando que todos los SC quedan cubiertos y considerando las BR como restricciones. Crea cada stub en `Estado: Draft` sin referencias a `SC-XX` / `BR-XX` en el archivo. Reporta al usuario la lista agrupada por unidad indicando qué SC cubre cada stub.
+- *Comportamiento — turno 1:* El agente activa el *Flujo: Sugerir stubs desde una US*. Verifica que `US-004/README.md` está en `Ready` y contiene BR y SC en **Criterios de aceptación**. Lee la US completa, identifica unidades de trabajo, y presenta la propuesta agrupada por unidad (paso 5) con `TK-XXX` tentativo, nombre de archivo, objetivo breve y cobertura de SC por stub. Pregunta con opciones `Confirmar stubs` / `Ajustar alcance` / `Cancelar`. **No crea archivos.**
+- *Comportamiento — turno 2:* Tras confirmación, crea cada stub en `Estado: Draft` sin referencias a `SC-XX` / `BR-XX` en el archivo (paso 7) y reporta rutas creadas con cobertura SC (paso 8).
 - *Salida:* Stubs `TK-001-...md` a `TK-NNN-...md` en Draft; `work-units.md` actualizado solo si alguna unidad es nueva y su alcance está claro.
  
 **Ejemplo 5 — US no Ready o sin BR/SC**
@@ -260,6 +265,7 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - **Modo B**: incluir identificadores `SC-XX` / `BR-XX` dentro del archivo `TK-XXX.md`; la cobertura se reporta al usuario, no se documenta en el TK.
 - **Modo B**: forzar un mapeo 1 stub = 1 SC; los stubs se agrupan por unidad de trabajo, no por escenario.
 - **Modo B**: redactar Plan de implementación, Dependencias o Referencias detalladas en stubs propuestos desde una US — son stubs, no TKs completas.
+- **Modo B**: crear stubs sin haber presentado la propuesta (paso 5) y recibido confirmación (paso 6).
 - Lanzar preguntas al usuario como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas; o ir descubriendo huecos turno a turno en lugar de agrupar las preguntas pendientes en una sola tanda al inicio.
 ---
  

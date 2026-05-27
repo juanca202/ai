@@ -86,7 +86,7 @@ Antes de tocar código, verificar las siguientes condiciones. Si alguna falla, *
 - **Working tree limpio:** `git status --porcelain` sin cambios pendientes no resueltos.
 - **Rama correcta:** estar en la rama `feature/US-XXX-[nombre-corto]` (o crearla). No implementar en `main` ni en ramas de otras historias sin instrucción explícita.
 - **US padre con README.md:** la carpeta de la US existe, tiene `README.md` cuyo metadato `Estado` sea `Ready`.
-- **TK en estado Ready:** solo encolar tareas cuyo metadato `Estado` sea `Ready`. Las tareas en `Draft` o marcadas como `Skipped` en `progress.md` no son ejecutables por defecto.
+- **TK en estado Ready:** solo encolar tareas cuyo metadato `Estado` sea `Ready`. Las tareas en `Draft` o ya marcadas como `Done` en `progress.md` no son ejecutables por defecto.
 - **Solapamiento de progreso:** leer `progress.md` si existe; respetar tareas ya en `Done`; si hay alguna `In Progress`, revisar notas y estado real antes de continuar.
 **Si hay conflicto:**
 
@@ -111,8 +111,8 @@ Antes de tocar código, verificar las siguientes condiciones. Si alguna falla, *
 1. Leer `README.md` de la US y todos los `TK-*.md` del alcance indicado.
 2. Consultar `docs/specs/work-units.md` si el alcance de alguna unidad no es claro.
 3. Construir dos listas:
-  - **Implementables:** TK con `Estado: Ready` que pasen los filtros de unidad y usuario asignado, no marcadas como `Done` o `Skipped` en `progress.md`.
-  - **Excluidas:** el resto, con su estado entre paréntesis al final — p. ej. `TK-002 — Ajuste de permisos (Draft)`, `TK-004 — Exportación CSV (Skipped)`.
+  - **Implementables:** TK con `Estado: Ready` que pasen los filtros de unidad y usuario asignado, no marcadas como `Done` en `progress.md`.
+  - **Excluidas:** el resto, con su estado entre paréntesis al final — p. ej. `TK-002 — Ajuste de permisos (Draft)`, `TK-004 — Exportación CSV (Done)`.
 4. Mostrar ambas listas al usuario en orden numérico. **No ejecutar código en este turno.**
 5. Preguntar explícitamente si se desea continuar y **esperar confirmación** antes de implementar.
 
@@ -148,7 +148,7 @@ Un `TK-XXX` siempre vive bajo la carpeta de una US. Si el usuario indica solo el
 - Verificar el número de tarea y la historia indicada antes de continuar.
 ```
 
-1. **No** implementar hasta que la relación TK → US esté confirmada.
+4. **No** implementar hasta que la relación TK → US esté confirmada.
 
 ---
 
@@ -167,7 +167,7 @@ Un `TK-XXX` siempre vive bajo la carpeta de una US. Si el usuario indica solo el
 - Confirmación del usuario recibida antes del primer cambio de código
 **Por cada tarea:**
 - TK con `Estado: Ready`
-- No marcada como `Done` o `Skipped` en `progress.md`
+- No marcada como `Done` en `progress.md`
 - Si la tarea genera o modifica UI: ejecutado bajo `ui-specialist`
 - Si la referencia de diseño es Figma: MCP de Figma usado para implementar la tarea
 - Lint/build ejecutado tras la implementación
@@ -181,7 +181,7 @@ Un `TK-XXX` siempre vive bajo la carpeta de una US. Si el usuario indica solo el
 **Ejemplo 1 — US completa con filtro de unidad**
 
 - *Entrada:* «Implementa lo Ready de la US-042; estoy en el paquete `@acme/web-app`.»
-- *Salida:* Rama limpia y checkout a `feature/US-042-[nombre-corto]`; mensaje con TK Ready del paquete en cola y excluidas con `(Draft)` / `(Skipped)`; tras confirmación, implementa la primera Ready, ejecuta lint/build, actualiza `progress.md`, pregunta por la siguiente. Sin tests hasta el cierre.
+- *Salida:* Rama limpia y checkout a `feature/US-042-[nombre-corto]`; mensaje con TK Ready del paquete en cola y excluidas con `(Draft)` / `(Done)`; tras confirmación, implementa la primera Ready, ejecuta lint/build, actualiza `progress.md`, pregunta por la siguiente. Sin tests hasta el cierre.
 **Ejemplo 2 — TK indicada sin US**
 - *Entrada:* «Implementa TK-003.»
 - *Comportamiento:* El agente pregunta a qué `US-XXX` pertenece. El usuario responde «US-042». El agente valida que `TK-003-[nombre].md` existe dentro de `docs/specs/user-stories/US-042-[nombre-corto]/`. Si existe, continúa con el flujo normal. Si no existe o pertenece a otra US, para con el mensaje de error estructurado indicando el motivo.
@@ -208,11 +208,22 @@ Un `TK-XXX` siempre vive bajo la carpeta de una US. Si el usuario indica solo el
 - Modificar `README.md` de la US, archivos `TK-XXX`, ADRs o `technical-docs/` durante la implementación (`progress.md` excluido); ante cualquier necesidad de cambio en esos artefactos, parar y notificar al usuario.
 - Continuar la implementación cuando se detecta un conflicto en la documentación que pueda afectar el resultado; siempre parar y notificar primero.
 - Usar `glossary.md` como technical-docs o listado de implementación.
+- Escribir `Skipped` u otro estado no definido en `progress.md`; los únicos estados válidos son `Pending`, `In Progress` y `Done`.
 - Lanzar preguntas al usuario como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas; pedir confirmación de cola, siguiente TK o fase de pruebas sin opciones tappables cuando la herramienta está disponible.
 
 ---
 
 ## Notas
+
+### Estados de `progress.md`
+
+Estados válidos por tarea: **`Pending`**, **`In Progress`**, **`Done`**. No usar `Skipped` ni otros valores.
+
+| Situación | Qué hacer |
+|-----------|-----------|
+| Posponer una TK para más adelante | Mantener `Pending` y registrar el motivo en `Notas`. |
+| Sacar una TK del alcance de la US | Parar implementación; alinear US/TK con `story-define` o `story-plan`; eliminar la entrada de `progress.md` o el stub si ya no aplica. |
+| TK completada | `Done`. |
 
 ### Orden de implementación
 
