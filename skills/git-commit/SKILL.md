@@ -23,6 +23,35 @@ Formato canónico del mensaje:
 
 ---
 
+## Cómo preguntar al usuario
+
+Cuando este skill indique **preguntar, pedir, confirmar, validar o sugerir** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** que ofrezca el cliente (la que renderiza opciones tappables o un selector de respuesta) en lugar de redactar la pregunta como prosa libre. Reglas:
+
+- **Una pregunta por turno** cuando sea posible; máximo tres preguntas en un mismo bloque.
+- **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita categorías; usar entrada libre solo si no hay forma razonable de enumerar opciones (p. ej. redactar la descripción del commit).
+- **No repreguntar** lo que ya está respondido en el contexto, en `.agents/MEMORY.md`, en el diff revisado o en la [Propuesta de commit](#propuesta-de-commit) ya mostrada.
+- **Una sola tanda al inicio** para resolver ambigüedades de tipo, scope, agrupación o idioma antes de ejecutar `git commit`; no ir descubriendo huecos turno a turno. **Excepciones de flujo deliberadas** — una pregunta estructurada por turno:
+  - [Propuesta de commit](#propuesta-de-commit): opciones `Confirmar` / `Ajustar tipo` / `Ajustar scope` / `Ajustar descripción` / `Cancelar`; si hay varios commits planeados, confirmar la agrupación propuesta;
+  - commit en rama protegida: `Confirmar commit directo` / `Cancelar`;
+  - archivo sensible detectado: `Retirar del staging` / `Confirmar que es intencional`.
+- **Fallback**: si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
+
+Cada sección posterior que diga *preguntar al usuario*, *validar con el usuario*, *confirmar* o *sugerir al usuario* asume este mecanismo; no se vuelve a repetir.
+
+---
+
+## Resolución de idioma
+
+Orden canónico compartido con el ciclo de historias. Detenerse en el primer paso que aplique:
+
+1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Si no existe esa línea pero hay claves legacy (`language:`, `idioma:`, `Project language:`), usarlas solo como fallback al leer MEMORY antiguo.
+2. **Idioma del turno del usuario** (mensaje actual).
+3. **Preguntar al usuario** qué idioma prefiere y persistir la respuesta en `.agents/MEMORY.md` con `preferred language: <código>`.
+
+Afecta a la parte en lenguaje natural del mensaje de commit (descripción, body, footers). **Tipo y `scope`** permanecen en inglés salvo acuerdo explícito del equipo.
+
+---
+
 ## Selección de flujo
 
 Antes de redactar el mensaje, elegir el flujo aplicable según el estado del repo:
@@ -41,7 +70,7 @@ Antes de redactar el mensaje, elegir el flujo aplicable según el estado del rep
 | Artefacto | Ruta |
 |-----------|------|
 | Repositorio de trabajo | Directorio actual (`pwd`) |
-| Preferencia de idioma | `.agents/MEMORY.md` (raíz del repo) — línea `preferred language: <ISO 639-1>` |
+| Preferencia de idioma | Ver [Resolución de idioma](#resolución-de-idioma) |
 | Archivos sensibles vetados en staging | `.env*`, `*.pem`, `*.key`, `id_rsa*`, `*.p12`, `*.pfx`, archivos con credenciales o tokens |
 
 ---
@@ -53,7 +82,7 @@ Antes de redactar el mensaje, elegir el flujo aplicable según el estado del rep
 - **Descripción:** verbo en imperativo presente, **máximo 72 caracteres**, sin punto final, sin mayúscula inicial.
 - **Cambios breaking:** `!` tras tipo/scope (`feat!:`) o footer `BREAKING CHANGE: <detalle>`.
 - **Referencias a issues:** footer `Closes #123` o `Refs #456` cuando el usuario aporte el número.
-- **Idioma del texto natural** (descripción, body, footers): resuelto por [Idioma del mensaje](#idioma-del-mensaje); tipo y scope permanecen en inglés.
+- **Idioma del texto natural** (descripción, body, footers): resuelto por [Resolución de idioma](#resolución-de-idioma); tipo y scope permanecen en inglés.
 
 ---
 
@@ -119,7 +148,7 @@ Antes de redactar o ejecutar cualquier commit, el agente debe tener clara esta i
 | **Rama actual** | `git rev-parse --abbrev-ref HEAD` | — |
 | **Tipo, scope, descripción** | Aplicar [Inferencia desde el diff](#inferencia-desde-el-diff) | Proponer y permitir override del usuario; si ninguna regla aplica, preguntar |
 | **Agrupación de archivos** | Inferida del diff por afinidad lógica | Si hay temas mezclados, pasar a [Flujo: Múltiples cambios lógicos mezclados](#flujo-múltiples-cambios-lógicos-mezclados) |
-| **Idioma de preferencia** | (1) idioma del turno actual; (2) `.agents/MEMORY.md` → `preferred language: <ISO>` | Preguntar y persistir en `.agents/MEMORY.md` con la línea `preferred language: <código>` |
+| **Idioma de preferencia** | Ver [Resolución de idioma](#resolución-de-idioma) | Preguntar y persistir en `.agents/MEMORY.md` con la línea `preferred language: <código>` |
 
 > Leer el diff completo antes de redactar el mensaje. No describir cambios que no estén en el diff. No omitir cambios visibles que alteren el sentido del commit.
 
@@ -235,7 +264,7 @@ Propuesta:
 Confirma o ajusta tipo/scope/descripción antes de ejecutar.
 ```
 
-Esperar respuesta del usuario. **No ejecutar `git commit`** hasta recibir confirmación explícita (`ok`, `dale`, `procede`, `sí`, equivalente). Si el usuario pide ajustes, aplicarlos y volver a mostrar la propuesta.
+Mostrar la propuesta al usuario y pedir confirmación mediante la **herramienta de preguntas estructuradas** (ver [Cómo preguntar al usuario](#cómo-preguntar-al-usuario)). **No ejecutar `git commit`** hasta recibir confirmación explícita. Si el usuario elige ajustar, aplicar el cambio y volver a mostrar la propuesta.
 
 ---
 
@@ -324,6 +353,7 @@ Esperar respuesta del usuario. **No ejecutar `git commit`** hasta recibir confir
 - Hacer force push a `main` / `master`.
 - Modificar la configuración global de git sin permiso explícito.
 - Ejecutar `git commit` sin mostrar la [Propuesta de commit](#propuesta-de-commit) y esperar confirmación.
+- Lanzar preguntas al usuario como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas; o pedir confirmación del commit sin opciones tappables cuando la herramienta está disponible.
 - Narrar el trabajo realizado al usuario («leí el diff», «hice add», «escribí el mensaje»). Reportar solo el resultado final (SHA + mensaje) y los pendientes.
 
 ---
@@ -362,13 +392,7 @@ BREAKING CHANGE: `extends` key behavior changed
 
 ### Idioma del mensaje
 
-Resolver en este orden, deteniéndose en el primer paso que aplique:
-
-1. Inferir del idioma del turno actual del usuario.
-2. Leer `.agents/MEMORY.md` y buscar la línea `preferred language: <código ISO 639-1>` (ej. `es`, `en`).
-3. Si no existe el archivo o no hay esa línea: **preguntar al usuario** qué idioma prefiere y persistir la respuesta creando o actualizando `.agents/MEMORY.md` con la línea `preferred language: <código>`.
-
-Solo afecta a la parte en lenguaje natural (descripción, body, footers). **Tipo y `scope`** siguen siendo palabras clave convencionales en inglés salvo acuerdo explícito del equipo.
+Aplicar [Resolución de idioma](#resolución-de-idioma). Solo afecta a la parte en lenguaje natural (descripción, body, footers). **Tipo y `scope`** siguen siendo palabras clave convencionales en inglés salvo acuerdo explícito del equipo.
 
 ### Mensaje al usuario
 

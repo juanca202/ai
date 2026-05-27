@@ -14,6 +14,23 @@ Guía para **ejecutar en código** el trabajo especificado en historias `US-XXX`
 
 ---
 
+## Cómo preguntar al usuario
+
+Cuando este skill indique **preguntar, pedir, confirmar, validar o sugerir** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** que ofrezca el cliente (la que renderiza opciones tappables o un selector de respuesta) en lugar de redactar la pregunta como prosa libre. Reglas:
+
+- **Una pregunta por turno** cuando sea posible; máximo tres preguntas en un mismo bloque.
+- **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita categorías; usar entrada libre solo si no hay forma razonable de enumerar opciones (p. ej. identificar la US de un `TK-XXX` sin contexto).
+- **No repreguntar** lo que ya está respondido en el contexto, en `.agents/MEMORY.md`, en el `README.md` de la US, en los `TK-*.md` del alcance o en `progress.md`.
+- **Una sola tanda al inicio** para recopilar información faltante (US padre, alcance, unidad de trabajo ambigua) antes de tocar código; no ir descubriendo huecos turno a turno. **Excepciones de flujo deliberadas** — una pregunta estructurada por turno, con opciones cuando aplique:
+  - confirmación de la cola antes del primer cambio de código;
+  - continuar con la siguiente TK tras completar la anterior;
+  - aceptar o rechazar la fase final de pruebas al cierre.
+- **Fallback**: si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
+
+Cada sección posterior que diga *preguntar al usuario*, *validar con el usuario*, *confirmar* o *sugerir al usuario* asume este mecanismo; no se vuelve a repetir.
+
+---
+
 ## Agentes condicionales
 
 Este skill no requiere un subagente fijo. Sin embargo, aplican las siguientes reglas según el tipo de tarea:
@@ -191,6 +208,7 @@ Un `TK-XXX` siempre vive bajo la carpeta de una US. Si el usuario indica solo el
 - Modificar `README.md` de la US, archivos `TK-XXX`, ADRs o `technical-docs/` durante la implementación (`progress.md` excluido); ante cualquier necesidad de cambio en esos artefactos, parar y notificar al usuario.
 - Continuar la implementación cuando se detecta un conflicto en la documentación que pueda afectar el resultado; siempre parar y notificar primero.
 - Usar `glossary.md` como technical-docs o listado de implementación.
+- Lanzar preguntas al usuario como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas; pedir confirmación de cola, siguiente TK o fase de pruebas sin opciones tappables cuando la herramienta está disponible.
 
 ---
 

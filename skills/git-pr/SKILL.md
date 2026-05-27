@@ -99,7 +99,7 @@ Tras parada en pre-flight (rama protegida, working tree sucio, plataforma descon
 - **Pregunta única de code-review**: una sola interacción sí/no antes de crear el PR. Si el usuario ya respondió en el mensaje inicial, no volver a preguntar.
 - **Code-review bloqueante**: si el usuario aceptó code-review y `/code-review` reportó **cualquier** hallazgo, **no crear el PR**. Mostrar el reporte y terminar. Es un flujo de un solo intento; el usuario corrige y vuelve a invocar el skill.
 - **Título y descripción no interactivos**: generar sin pedir confirmación. Excepción: si el usuario los pasó explícitamente en el mismo mensaje, respetarlos.
-- **Idioma de título y descripción**: si existe `.agents/MEMORY.md` en la raíz del repo y declara una preferencia de idioma (p. ej. `language: es`, `idioma: español`, `preferred language: <ISO>`), **respetarla** para el título y la descripción. Si no existe el archivo o no hay declaración explícita, usar el idioma de los commits. El override del usuario en el mensaje (título/descripción literales) tiene prioridad sobre ambos.
+- **Idioma de título y descripción**: aplicar [Resolución de idioma del PR](#resolución-de-idioma-del-pr). El override del usuario en el mensaje (título/descripción literales) tiene prioridad sobre la resolución automática.
 - **No reabrir, no editar, no forzar**: si ya existe un PR para `<rama-actual> → <destino>`, devolver su URL y **no** intentar recrearlo.
 
 ---
@@ -141,7 +141,7 @@ Tras parada en pre-flight (rama protegida, working tree sucio, plataforma descon
    - ejecutar `git push -u origin <rama-actual>`.
 
 7. **Resolver idioma y auto-generar título y descripción** (sin pedir confirmación):
-   - **Idioma:** leer `.agents/MEMORY.md` desde la raíz del repo (`git rev-parse --show-toplevel`/.agents/MEMORY.md). Si existe y contiene una directiva clara de idioma (claves como `language`, `idioma`, `Project language`, o secciones equivalentes en prosa), usar ese idioma para el título y la descripción. Si no existe el archivo o no hay declaración, usar el idioma predominante de los commits del rango `origin/<destino>..HEAD`. Si el usuario pasó título o descripción explícitos, respetar el suyo y omitir esta resolución para esa parte.
+   - **Idioma:** aplicar [Resolución de idioma del PR](#resolución-de-idioma-del-pr) para el título y la descripción auto-generados. Si el usuario pasó título o descripción explícitos, respetar el suyo y omitir esta resolución para esa parte.
    - **Título:** si la rama tiene un único commit en el rango `origin/<destino>..HEAD`, usar su subject (`git log -1 --pretty=%s`). Si tiene varios, preferir el subject del commit más antiguo del rango. Si la rama sigue patrón `<prefix>/<TICKET>-<descripcion>` (p. ej. `feature/US-042-auth-refresh`) o `US-XXX-...`, anteponer `[<TICKET>]` al título. Si el idioma resuelto no coincide con el del subject elegido, **traducir** el título al idioma objetivo manteniendo el prefijo de ticket intacto.
    - **Descripción:** incluir
      - Lista de commits: `git log origin/<destino>..HEAD --pretty="- %s"` (los subjects se mantienen literales, sin traducir; el resto del cuerpo se redacta en el idioma resuelto).
@@ -196,7 +196,7 @@ La rama ya tiene un PR/MR abierto hacia `develop`. El skill no crea uno nuevo: d
 
 **Ejemplo 7 — Preferencia de idioma desde `.agents/MEMORY.md`:**
 
-El repo tiene `.agents/MEMORY.md` con la línea `language: en`. Los commits están en español (`feat(auth): agrega refresh token`). El skill detecta la preferencia y genera el título traducido al inglés (`[US-042] feat(auth): add refresh token`) y la descripción en inglés, pero conserva los subjects de commits literales en la lista («- feat(auth): agrega refresh token»). Si no existiera `.agents/MEMORY.md`, el título y la descripción quedarían en español.
+El repo tiene `.agents/MEMORY.md` con la línea `preferred language: en`. Los commits están en español (`feat(auth): agrega refresh token`). El skill detecta la preferencia (paso 2 de [Resolución de idioma del PR](#resolución-de-idioma-del-pr)) y genera el título traducido al inglés (`[US-042] feat(auth): add refresh token`) y la descripción en inglés, pero conserva los subjects de commits literales en la lista («- feat(auth): agrega refresh token»). Si no existiera `.agents/MEMORY.md` ni idioma inferible del turno, usaría el idioma predominante de los commits.
 
 ---
 
@@ -244,12 +244,13 @@ El skill nunca reescribe historia. Si el push falla por divergencia con remoto, 
 
 `gh pr create`, `glab mr create`, `az repos pr create` y `tea pr create` suelen detectar PR existentes por sí solos. Si una versión del CLI no lo hace, una verificación previa con el comando `list` correspondiente (`gh pr list --head <rama>`, `glab mr list --source-branch <rama>`, `az repos pr list --source-branch <rama>`, etc.) evita el error y permite devolver la URL existente. Para Bitbucket vía REST, consultar el endpoint `pullrequests` con filtro por rama origen.
 
-### Idioma del PR
+### Resolución de idioma del PR
 
-Orden de precedencia para decidir el idioma del título y la descripción:
+Orden de precedencia para decidir el idioma del **título y la descripción auto-generados** (ver también la regla de override explícito en `Rules`):
 
-1. **Título / descripción explícitos del usuario** en el mensaje inicial → se respetan literalmente.
-2. **`.agents/MEMORY.md` en la raíz del repo** con preferencia declarada (`language`, `idioma`, `Project language`, etc.) → se usa ese idioma.
-3. **Idioma predominante de los commits** del rango `origin/<destino>..HEAD` → fallback por defecto.
+1. **Título / descripción explícitos del usuario** en el mensaje inicial → se respetan literalmente; no aplicar los pasos siguientes a esa parte.
+2. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Si no existe esa línea pero hay claves legacy (`language:`, `idioma:`, `Project language:`), usarlas solo como fallback al leer MEMORY antiguo.
+3. **Idioma del turno del usuario** (mensaje actual).
+4. **Idioma predominante de los commits** del rango `origin/<destino>..HEAD` → fallback cuando los pasos 2–3 no concluyen.
 
 Cuando el idioma resuelto fuerza a traducir el título auto-generado, el prefijo de ticket (`[US-042]`, `[TK-007]`, etc.) se mantiene intacto. Los subjects de commits en la lista de la descripción **no** se traducen: se citan literales para preservar la trazabilidad con la historia git.

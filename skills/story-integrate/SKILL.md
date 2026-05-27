@@ -14,6 +14,30 @@ Encaja al final del ciclo iniciado por **story-define** → **story-plan** → *
 
 ---
 
+## Cómo preguntar al usuario
+
+Cuando este skill indique **preguntar, pedir, confirmar, validar o sugerir** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** que ofrezca el cliente (la que renderiza opciones tappables o un selector de respuesta) en lugar de redactar la pregunta como prosa libre. Reglas:
+
+- **Una pregunta por turno** cuando sea posible; máximo tres preguntas en un mismo bloque.
+- **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita categorías; usar entrada libre solo si no hay forma razonable de enumerar opciones.
+- **No repreguntar** lo que ya está respondido en el contexto, en `.agents/MEMORY.md` o en `progress.md` de la US.
+- **Una sola tanda al inicio** para resolver lagunas antes de cualquier operación git (US asociada a la rama, carpeta ambigua, rama base); no ir descubriendo huecos turno a turno. **Rama base ambigua:** listar los candidatos detectados como opciones tappables (p. ej. `develop`, `main`, `release/2026.q2`); no proponer un default implícito.
+- **Fallback**: si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
+
+Cada sección posterior que diga *preguntar al usuario*, *validar con el usuario*, *confirmar* o *sugerir al usuario* asume este mecanismo; no se vuelve a repetir.
+
+---
+
+## Resolución de idioma
+
+Orden canónico compartido con el resto del ciclo de historias. Detenerse en el primer paso que aplique:
+
+1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Si no existe esa línea pero hay claves legacy (`language:`, `idioma:`, `Project language:`), usarlas solo como fallback al leer MEMORY antiguo.
+2. **Idioma del turno del usuario** (mensaje actual).
+3. **Preguntar al usuario** qué idioma prefiere y persistir la respuesta en `.agents/MEMORY.md` con `preferred language: <código>`.
+
+---
+
 ## Ubicación de archivos
 
 | Artefacto | Ruta |
@@ -45,7 +69,7 @@ Antes de tocar git, el agente debe tener clara la siguiente información. **No a
 | **Estado de `progress.md`** | Leer el archivo en la carpeta de la US | Si no existe: parar e informar; el merge requiere `progress.md` poblado |
 | **Working tree** | `git status --porcelain` | Si hay salida: parar e informar; no se mergea con cambios pendientes |
 | **Rama base** | (1) `git reflog show <branch>` → línea «Created from»; (2) `git config --get branch.<branch>.merge`; (3) preguntar al usuario | No asumir `main`, `master` ni `develop` por defecto |
-| **Idioma de preferencia** | (1) idioma del turno del usuario; (2) `.agents/MEMORY.md` → `preferred language: <ISO>` | Preguntar y crear/actualizar `.agents/MEMORY.md` con `preferred language: <código>` |
+| **Idioma de preferencia** | Ver [Resolución de idioma](#resolución-de-idioma) | Preguntar y persistir en `.agents/MEMORY.md` con `preferred language: <código>` |
 
 > Leer `progress.md` **completo** antes de iniciar cualquier operación git. Las tres condiciones (rama, working tree, estados) se evalúan antes de cambiar de rama o invocar `git merge`.
 
@@ -195,6 +219,7 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 - Cerrar varias US en una sola pasada del skill; este flujo cubre una US por ejecución.
 - Reintentar el merge tras un conflicto sin nueva instrucción del usuario.
 - Narrar el trabajo realizado en el mensaje al usuario («leí progress.md», «detecté la rama»); solo reportar resultados y pendientes.
+- Lanzar preguntas al usuario como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas; preguntar la rama base sin listar candidatos como opciones tappables cuando la herramienta está disponible.
 
 ---
 

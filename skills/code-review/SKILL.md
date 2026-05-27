@@ -345,4 +345,10 @@ En ningún caso afecta el veredicto: sonar es siempre informativo en este skill.
 
 ### Idioma del informe
 
-El informe se devuelve en español por defecto, coherente con el resto de skills del usuario. Si el usuario pide explícitamente el informe en inglés (p. ej. para adjuntar a un PR internacional), traducir los encabezados y veredictos manteniendo los mensajes de error originales de las herramientas en inglés (no traducir lo que devuelve tsc/eslint/etc.).
+Aplicar el orden canónico compartido con el ciclo de historias, deteniéndose en el primer paso que aplique:
+
+1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>`. Claves legacy (`language:`, `idioma:`, `Project language:`) solo como fallback al leer MEMORY antiguo.
+2. **Idioma del turno del usuario** (mensaje actual).
+3. **Preguntar al usuario** qué idioma prefiere y persistir en `.agents/MEMORY.md` con `preferred language: <código>`.
+
+Si el usuario pide explícitamente el informe en un idioma concreto en el mensaje (p. ej. «en inglés para el PR»), ese override prevalece sobre la resolución automática. Traducir encabezados y veredictos al idioma resuelto; mantener los mensajes de error originales de las herramientas sin traducir (tsc/eslint/etc.).

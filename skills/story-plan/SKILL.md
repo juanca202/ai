@@ -20,6 +20,30 @@ La plantilla canónica está en `assets/task-template.md` (léela antes de escri
  
 ---
 
+## Cómo preguntar al usuario
+
+Cuando este skill indique **preguntar, pedir, confirmar, validar o sugerir** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** que ofrezca el cliente (la que renderiza opciones tappables o un selector de respuesta) en lugar de redactar la pregunta como prosa libre. Reglas:
+
+- **Una pregunta por turno** cuando sea posible; máximo tres preguntas en un mismo bloque.
+- **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita categorías; usar entrada libre solo si no hay forma razonable de enumerar opciones (p. ej. el objetivo breve de un stub).
+- **No repreguntar** lo que ya está respondido en el contexto, en `.agents/MEMORY.md`, en el `README.md` de la US o en las `TK-*.md` existentes de su carpeta.
+- **Una sola tanda al inicio** para recopilar información faltante antes de redactar o crear archivos; no ir descubriendo huecos turno a turno. **Excepción — modo B:** tras proponer stubs, pedir confirmación estructurada antes de escribir archivos (p. ej. `Confirmar stubs` / `Ajustar alcance` / `Cancelar`).
+- **Fallback**: si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
+
+Cada sección posterior que diga *preguntar al usuario*, *validar con el usuario*, *confirmar* o *sugerir al usuario* asume este mecanismo; no se vuelve a repetir.
+
+---
+
+## Resolución de idioma
+
+Orden canónico compartido con el resto del ciclo de historias. Detenerse en el primer paso que aplique:
+
+1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Si no existe esa línea pero hay claves legacy (`language:`, `idioma:`, `Project language:`), usarlas solo como fallback al leer MEMORY antiguo.
+2. **Idioma del turno del usuario** (mensaje actual).
+3. **Preguntar al usuario** qué idioma prefiere y persistir la respuesta en `.agents/MEMORY.md` con `preferred language: <código>`.
+
+---
+
 ## Modos de invocación
 
 El skill reconoce **dos modos** según lo que entregue el usuario. El modo determina el flujo a aplicar.
@@ -67,7 +91,7 @@ Antes de crear o editar cualquier TK, el agente debe tener clara la siguiente in
 | **Unidad de trabajo** | Inferir del repo o indicada por el usuario | Stub: puede quedar `Por definir`. TK completa: obligatoria; sin ella el estado no puede ser `Ready` |
 | **Contexto técnico** (solo TK completa) | ADRs existentes, technical-docs, descripción del usuario | Si falta decisión técnica relevante: sugerir ADR al usuario, no crearlo |
 | **Referencia de UI** (solo TK de interfaz) | Figma, wireframe o imagen de alta fidelidad aportados por el usuario | Obligatoria para `Ready`; sin ella el TK de UI no puede salir de `Draft` |
-| **Idioma de preferencia** | (1) idioma del turno del usuario; (2) `.agents/MEMORY.md` → `preferred language: <ISO>` | Preguntar y crear/actualizar `.agents/MEMORY.md` con `preferred language: <código>` |
+| **Idioma de preferencia** | Ver [Resolución de idioma](#resolución-de-idioma) | Preguntar y persistir en `.agents/MEMORY.md` con `preferred language: <código>` |
  
 > Leer siempre el `README.md` de la US y **todas** las `TK-*.md` existentes en la carpeta antes de crear o editar cualquier tarea. Detectar solapamientos y resolverlos con el usuario antes de continuar.
  
@@ -236,6 +260,7 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - **Modo B**: incluir identificadores `SC-XX` / `BR-XX` dentro del archivo `TK-XXX.md`; la cobertura se reporta al usuario, no se documenta en el TK.
 - **Modo B**: forzar un mapeo 1 stub = 1 SC; los stubs se agrupan por unidad de trabajo, no por escenario.
 - **Modo B**: redactar Plan de implementación, Dependencias o Referencias detalladas en stubs propuestos desde una US — son stubs, no TKs completas.
+- Lanzar preguntas al usuario como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas; o ir descubriendo huecos turno a turno en lugar de agrupar las preguntas pendientes en una sola tanda al inicio.
 ---
  
 ## Notas
