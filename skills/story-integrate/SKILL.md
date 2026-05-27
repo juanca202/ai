@@ -1,14 +1,14 @@
 ---
 name: story-integrate
-description: Cerrar e integrar el trabajo de una historia de usuario haciendo merge de la rama feature/US-XXX hacia la rama desde la que se creó, previa verificación de que progress.md tenga todas las tareas en done. Activar cuando el usuario pida cerrar, entregar, mergear, integrar, finalizar o hacer submit del trabajo de una historia, una US o de la rama actual.
+description: Cerrar e integrar el trabajo de una historia de usuario haciendo merge de la rama feature/US-XXX hacia la rama desde la que se creó, previa verificación de que progress.md tenga todas las tareas en Done. Activar cuando el usuario pida cerrar, entregar, mergear, integrar, finalizar o hacer submit del trabajo de una historia, una US o de la rama actual.
 license: MIT
 ---
 
 # Skill: Integración de historia de usuario
 
-Guía para **cerrar e integrar** el trabajo de una historia de usuario `US-XXX`: verificar que la carpeta de la US tenga su `progress.md` con todas las tareas en `done`, y luego hacer **merge** de la rama actual hacia la rama desde la que se creó.
+Guía para **cerrar e integrar** el trabajo de una historia de usuario `US-XXX`: verificar que la carpeta de la US tenga su `progress.md` con todas las tareas en `Done`, y luego hacer **merge** de la rama actual hacia la rama desde la que se creó.
 
-> **Alcance del submit:** El skill **cierra** localmente lo ya implementado. Verifica condiciones y ejecuta `git merge --no-ff`. No hace push, no borra ramas, no crea MRs/PRs, no resuelve conflictos, no modifica `progress.md`. Lo que no esté en `done` bloquea el merge — el usuario decide cómo proceder, nunca se fuerza.
+> **Alcance del submit:** El skill **cierra** localmente lo ya implementado. Verifica condiciones y ejecuta `git merge --no-ff`. No hace push, no borra ramas, no crea MRs/PRs, no resuelve conflictos, no modifica `progress.md`. Lo que no esté en `Done` bloquea el merge — el usuario decide cómo proceder, nunca se fuerza.
 
 Encaja al final del ciclo iniciado por **story-define** → **story-plan** → **story-implement**.
 
@@ -59,7 +59,7 @@ Antes de cambiar de rama o ejecutar el merge, verificar las siguientes condicion
 - **Rama actual con formato válido:** `feature/US-XXX-[nombre-corto]`. Sin el prefijo `feature/` o sin el segmento `US-XXX-...` no se puede derivar la carpeta de la US.
 - **Working tree limpio:** `git status --porcelain` sin salida. Cualquier cambio sin commitear bloquea el merge.
 - **Carpeta de la US existe:** `docs/specs/user-stories/US-XXX-[nombre-corto]/` presente con `progress.md` dentro.
-- **Todas las tareas en `done`:** parsear `progress.md` y confirmar que **cada** entrada tiene estado `done` (case-insensitive, sin espacios extra). Estados como `pending`, `in-progress`, `skipped`, `blocked` o vacío bloquean el merge.
+- **Todas las tareas en `Done`:** parsear `progress.md` y confirmar que **cada** entrada tiene estado `Done` (case-insensitive, sin espacios extra). Estados como `Pending`, `In Progress`, `Skipped` o vacío bloquean el merge.
 - **Rama base resoluble:** identificada por reflog, por config, o confirmada explícitamente por el usuario. Si hay varios candidatos plausibles y ninguno definitivo, preguntar.
 
 **Si hay conflicto:**
@@ -69,7 +69,7 @@ Antes de cambiar de rama o ejecutar el merge, verificar las siguientes condicion
 - [TK-XXX: estado-actual] — <detalle si aplica>
 ```
 
-Ejemplos de razón concreta: `Rama actual no cumple feature/US-XXX-...: rama es 'fix/hotfix-cache'`, `Working tree sucio: 3 archivos modificados`, `progress.md: TK-002 en in-progress, TK-005 en pending`, `Rama base ambigua: candidatos main, develop, release/2026.q2`.
+Ejemplos de razón concreta: `Rama actual no cumple feature/US-XXX-...: rama es 'fix/hotfix-cache'`, `Working tree sucio: 3 archivos modificados`, `progress.md: TK-002 en In Progress, TK-005 en Pending`, `Rama base ambigua: candidatos main, develop, release/2026.q2`.
 
 ---
 
@@ -80,7 +80,7 @@ Camino feliz cuando todas las verificaciones pasan.
 1. **Detectar rama actual** con `git branch --show-current` y validar el patrón `feature/US-XXX-[nombre-corto]`. Si no encaja, parar y preguntar.
 2. **Verificar working tree limpio** con `git status --porcelain`. Si hay salida, parar e informar.
 3. **Localizar la carpeta de la US** descontando el prefijo `feature/` del nombre de rama: `feature/US-XXX-[nombre-corto]` → `docs/specs/user-stories/US-XXX-[nombre-corto]/`. Si la carpeta no existe o hay varias coincidentes, parar.
-4. **Leer `progress.md`** y validar que **todas** las tareas tienen estado `done`. Si alguna no lo está, parar mostrando la lista completa de tareas no-`done` con su estado actual.
+4. **Leer `progress.md`** y validar que **todas** las tareas tienen estado `Done`. Si alguna no lo está, parar mostrando la lista completa de tareas no `Done` con su estado actual.
 5. **Resolver la rama base:**
    - `git reflog show <branch>` → buscar la entrada inicial con «Created from <ref>» o «branch: Created from <ref>».
    - Fallback: `git config --get branch.<branch>.merge` y derivar la rama base local correspondiente.
@@ -124,7 +124,7 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 **Validación:**
 - [ ] `git status --porcelain` sin salida (working tree limpio)
 - [ ] `progress.md` existe en la carpeta de la US
-- [ ] **Todas** las tareas de `progress.md` en estado `done`
+- [ ] **Todas** las tareas de `progress.md` en estado `Done`
 - [ ] Sin commits sin commitear ni stash sin aplicar relevante al alcance
 
 **Ejecución:**
@@ -145,19 +145,19 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 
 **Ejemplo 1 — Camino feliz**
 
-- *Entrada:* Rama `feature/US-042-exportacion-csv`, working tree limpio, `progress.md` con tres tareas todas en `done`, reflog indica `Created from develop`.
+- *Entrada:* Rama `feature/US-042-exportacion-csv`, working tree limpio, `progress.md` con tres tareas todas en `Done`, reflog indica `Created from develop`.
 - *Salida:* `git checkout develop` → `git merge --no-ff feature/US-042-exportacion-csv -m "Merge US-042: exportacion-csv"` → reporte: «Merged 7 commits de `feature/US-042-exportacion-csv` → `develop`. Commit de merge: `a1b2c3d`. HEAD en `develop`, working tree limpio. La rama de US no fue borrada ni se hizo push.»
 
 **Ejemplo 2 — Tarea pendiente**
 
-- *Entrada:* Rama `feature/US-013-ajuste-permisos`, working tree limpio, `progress.md` con TK-001 en `done` y TK-002 en `in-progress`.
+- *Entrada:* Rama `feature/US-013-ajuste-permisos`, working tree limpio, `progress.md` con TK-001 en `Done` y TK-002 en `In Progress`.
 - *Salida:* Sin operaciones git. Mensaje:
   ```
   ⚠️ No es posible mergear todavía:
-  - progress.md tiene tareas no-done:
-    - TK-001: done
-    - TK-002: in-progress
-  - Completa o marca explícitamente cada tarea como done antes de reintentar.
+  - progress.md tiene tareas no Done:
+    - TK-001: Done
+    - TK-002: In Progress
+  - Completa o marca explícitamente cada tarea como Done antes de reintentar.
   ```
 
 **Ejemplo 3 — Rama base ambigua**
@@ -167,7 +167,7 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 
 **Ejemplo 4 — Working tree sucio**
 
-- *Entrada:* Rama `feature/US-051-...`, dos archivos modificados sin commitear, `progress.md` íntegro en `done`.
+- *Entrada:* Rama `feature/US-051-...`, dos archivos modificados sin commitear, `progress.md` íntegro en `Done`.
 - *Salida:* Sin operaciones git. Mensaje listando los archivos pendientes y pidiendo commit, stash o descarte antes de reintentar.
 
 **Ejemplo 5 — Conflicto en el merge**
@@ -177,15 +177,15 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 
 **Ejemplo 6 — Rama sin prefijo `feature/`**
 
-- *Entrada:* Rama `US-099-cleanup-logs` (sin el prefijo `feature/`), `progress.md` íntegro en `done`.
+- *Entrada:* Rama `US-099-cleanup-logs` (sin el prefijo `feature/`), `progress.md` íntegro en `Done`.
 - *Salida:* Sin operaciones git. Mensaje: «La rama actual `US-099-cleanup-logs` no cumple el patrón `feature/US-XXX-[nombre-corto]`. Renombra la rama con `git branch -m feature/US-099-cleanup-logs` antes de reintentar el submit.»
 
 ---
 
 ## Anti-patterns
 
-- Hacer merge sin verificar `progress.md` o ignorando tareas no-`done`.
-- Modificar `progress.md` para «forzar» que aparezcan en `done` sin que el trabajo esté completo.
+- Hacer merge sin verificar `progress.md` o ignorando tareas no `Done`.
+- Modificar `progress.md` para «forzar» que aparezcan en `Done` sin que el trabajo esté completo.
 - Aceptar ramas sin prefijo `feature/` o con prefijos alternativos (`feat/`, `bugfix/`, `hotfix/`) como rama de submit.
 - Asumir `main`, `master` o `develop` como rama base sin confirmarlo por reflog, config o usuario.
 - Resolver conflictos automáticamente o usar `--strategy=ours` / `--strategy=theirs` para «hacerlo pasar».
@@ -202,11 +202,11 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 
 ### progress.md
 
-El skill **lee** `progress.md` para verificar estados, pero no lo modifica. La actualización de estados durante la implementación es responsabilidad de **story-implement**. Si al revisar el archivo aparecen tareas en `in-progress` que sí están terminadas en código, el usuario debe corregir el archivo antes de reintentar el submit — no es papel del submit ajustar progreso.
+El skill **lee** `progress.md` para verificar estados, pero no lo modifica. La actualización de estados durante la implementación es responsabilidad de **story-implement**. Si al revisar el archivo aparecen tareas en `In Progress` que sí están terminadas en código, el usuario debe corregir el archivo antes de reintentar el submit — no es papel del submit ajustar progreso.
 
-### `done` como estado terminal
+### `Done` como estado terminal
 
-Solo `done` (case-insensitive, sin espacios extra) cierra una tarea. `skipped` no se acepta como terminal por defecto: indica una decisión que debe quedar registrada explícitamente y, si el alcance de la US se redujo, esa reducción debería reflejarse en el `README.md` de la US antes de mergear. Si el equipo decide aceptar `skipped` como terminal, ese acuerdo debe documentarse y el skill ajustarse en consecuencia.
+Solo `Done` (case-insensitive, sin espacios extra) cierra una tarea. `skipped` no se acepta como terminal por defecto: indica una decisión que debe quedar registrada explícitamente y, si el alcance de la US se redujo, esa reducción debería reflejarse en el `README.md` de la US antes de mergear. Si el equipo decide aceptar `skipped` como terminal, ese acuerdo debe documentarse y el skill ajustarse en consecuencia.
 
 ### Detección de rama base
 

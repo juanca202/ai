@@ -235,7 +235,6 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - **Modo B**: crear stubs desde una US en `Draft`, o sin `BR-XX` / `SC-XX` explícitos en **Criterios de aceptación** de su `README.md` — debe bloquear y reportar.
 - **Modo B**: incluir identificadores `SC-XX` / `BR-XX` dentro del archivo `TK-XXX.md`; la cobertura se reporta al usuario, no se documenta en el TK.
 - **Modo B**: forzar un mapeo 1 stub = 1 SC; los stubs se agrupan por unidad de trabajo, no por escenario.
-- **Modo B**: usar o exigir el prefijo obsoleto `CA-XX` en lugar de `BR-XX` / `SC-XX`.
 - **Modo B**: redactar Plan de implementación, Dependencias o Referencias detalladas en stubs propuestos desde una US — son stubs, no TKs completas.
 ---
  

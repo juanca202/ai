@@ -204,7 +204,6 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 ## Anti-patterns
 
 - Inventar reglas de negocio o exclusiones que el usuario no dio.
-- Usar el prefijo obsoleto `CA-XX` en lugar de `BR-XX` / `SC-XX`.
 - Poner detalle técnico (clases, endpoints, esquemas) en el `README.md` en lugar de remitirlo a `technical-docs/` o `TK-XXX`.
 - Declarar `Estado: Ready` sin Criterios de aceptación completo o sin referencias de diseño cuando la historia involucra UI.
 - Declarar `Estado: Ready` con Observaciones que aún listen aclaraciones o pendientes sin resolver.

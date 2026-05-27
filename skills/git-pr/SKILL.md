@@ -1,5 +1,5 @@
 ---
-name: create-pr
+name: git-pr
 description: Crear Pull Request (PR) o Merge Request (MR) desde la rama actual hacia una rama destino preguntada al usuario, con opción bloqueante de ejecutar /code-review antes. Funciona sobre cualquier repositorio git con remoto: auto-detecta la plataforma (GitHub, GitLab, Bitbucket, Gitea, Azure Repos, etc.) desde el remoto y usa el CLI disponible. Auto-genera título y descripción a partir de los commits y crea el PR en una sola pasada. Usar siempre que el usuario pida crear, abrir, generar, levantar o subir un PR, MR, pull request o merge request, incluso si solo dice "crea el PR" o "súbelo a develop" sin nombrar la plataforma.
 license: MIT
 ---
@@ -99,7 +99,7 @@ Tras parada en pre-flight (rama protegida, working tree sucio, plataforma descon
 - **Pregunta única de code-review**: una sola interacción sí/no antes de crear el PR. Si el usuario ya respondió en el mensaje inicial, no volver a preguntar.
 - **Code-review bloqueante**: si el usuario aceptó code-review y `/code-review` reportó **cualquier** hallazgo, **no crear el PR**. Mostrar el reporte y terminar. Es un flujo de un solo intento; el usuario corrige y vuelve a invocar el skill.
 - **Título y descripción no interactivos**: generar sin pedir confirmación. Excepción: si el usuario los pasó explícitamente en el mismo mensaje, respetarlos.
-- **Idioma de título y descripción**: si existe `.agents/MEMORY.md` en la raíz del repo y declara una preferencia de idioma (p. ej. `language: es`, `idioma: español`, `Project language: English`), **respetarla** para el título y la descripción. Si no existe el archivo o no hay declaración explícita, usar el idioma de los commits. El override del usuario en el mensaje (título/descripción literales) tiene prioridad sobre ambos.
+- **Idioma de título y descripción**: si existe `.agents/MEMORY.md` en la raíz del repo y declara una preferencia de idioma (p. ej. `language: es`, `idioma: español`, `preferred language: <ISO>`), **respetarla** para el título y la descripción. Si no existe el archivo o no hay declaración explícita, usar el idioma de los commits. El override del usuario en el mensaje (título/descripción literales) tiene prioridad sobre ambos.
 - **No reabrir, no editar, no forzar**: si ya existe un PR para `<rama-actual> → <destino>`, devolver su URL y **no** intentar recrearlo.
 
 ---
@@ -168,7 +168,7 @@ Tras parada en pre-flight (rama protegida, working tree sucio, plataforma descon
 
 Usuario: «Crea el PR de esta rama, pásalo por code-review primero.»
 
-Skill: pre-flight OK (rama `US-042-auth-refresh-token`, working tree limpio). Auto-detecta GitLab (`origin` apunta a `ns.bayteq.com:3311`). Pregunta destino → usuario responde `develop`. Ejecuta `/code-review` sobre `origin/develop..HEAD` → sin hallazgos. Hace `git push -u origin US-042-auth-refresh-token`. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min` y descripción con commits + diff stat. Ejecuta `glab mr create` y devuelve la URL.
+Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`, working tree limpio). Auto-detecta GitLab (`origin` apunta a `ns.bayteq.com:3311`). Pregunta destino → usuario responde `develop`. Ejecuta `/code-review` sobre `origin/develop..HEAD` → sin hallazgos. Hace `git push -u origin feature/US-042-auth-refresh-token`. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min` y descripción con commits + diff stat. Ejecuta `glab mr create` y devuelve la URL.
 
 **Ejemplo 2 — Code-review bloquea:**
 
