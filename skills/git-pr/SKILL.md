@@ -4,61 +4,98 @@ description: Crear Pull Request (PR) o Merge Request (MR) desde la rama actual h
 license: MIT
 ---
 
-# Crear Pull Request (PR / MR)
+# Skill: Crear Pull Request (PR / MR)
 
-## Purpose
+Crear un PR o MR desde la **rama actual** hacia una **rama destino preguntada al usuario**, sobre cualquier repo git con remoto configurado.
 
-Crear un Pull Request o Merge Request desde la **rama actual** hacia una **rama destino preguntada al usuario**, sobre **cualquier repositorio git** con remoto configurado, con opción de ejecutar un **code-review previo bloqueante**.
-
-El skill **auto-detecta** la plataforma a partir del remoto `origin` (GitHub, GitLab, Bitbucket, Gitea, Azure Repos…), elige el CLI adecuado, **auto-genera** título y descripción a partir de los commits de la rama (sin pedir confirmación) y **bloquea** la creación del PR si el code-review previo devuelve veredicto **❌ No apto** o **⚠️ Incompleto** (según el skill `code-review`).
-
-Usar cuando el usuario pida **crear, abrir, generar, levantar o subir** un PR, MR, pull request o merge request, aunque solo diga "crea el PR" o "súbelo a develop" sin nombrar plataforma.
-
----
-
-## Scope
-
-**Incluye:**
-
-- Detección automática de plataforma a partir de `git remote get-url origin`: GitHub, GitLab (SaaS o self-managed), Bitbucket Cloud, Bitbucket Server, Gitea, Azure Repos y otros proveedores con CLI dedicado.
-- Selección del CLI correspondiente según la plataforma detectada (`gh`, `glab`, `tea`, `az repos`, etc.).
-- Pre-flight de estado: estar en repo git, rama actual ≠ rama protegida por defecto, working tree limpio, commits propios pendientes respecto a `origin/<destino>`.
-- Pregunta única al usuario para la **rama destino**.
-- Pregunta única al usuario para ejecutar **/code-review** previo (sí/no).
-- Invocación del flujo `/code-review` sobre el diff `origin/<destino>..HEAD` cuando el usuario lo solicita, y **bloqueo total** de la creación del PR si el veredicto es **❌ No apto** o **⚠️ Incompleto**.
-- `git push -u origin <rama-actual>` si la rama no existe en remoto o tiene commits no publicados.
-- Auto-generación **no interactiva** de título y descripción del PR a partir de los commits y del nombre de la rama.
-- Lectura de `.agents/MEMORY.md` en la raíz del repo (si existe) para detectar **preferencia de idioma** del proyecto y aplicarla al título y descripción.
-- Invocación del CLI correspondiente para crear el PR/MR y devolución de la URL del PR creado.
-
-**No incluye:**
-
-- Modificar código, hacer merges, rebases ni resolver conflictos.
-- Crear, renombrar ni cambiar de rama (la rama origen es **siempre** la actual; cambiar de rama corresponde al usuario).
-- Asignar reviewers, labels, milestones, projects ni configurar reglas del repo.
-- Crear el PR si `/code-review` devolvió veredicto **❌ No apto** o **⚠️ Incompleto** (no hay flujo "crear como draft" ni "ignorar y continuar").
-- Editar PRs existentes (este skill solo **crea**).
-- Re-implementar la lógica de `/code-review`: el skill **invoca** el flujo existente, no lo duplica.
+> **Origen = rama actual**, sin excepción. Si está en `main`, `master`, `develop` o `trunk`: parar y avisar.
+>
+> **Plataforma se auto-detecta** del remoto `origin`. No preguntar.
+>
+> **Code-review opcional pero bloqueante:** si el usuario lo acepta, veredicto `❌ No apto` o `⚠️ Incompleto` impide la creación del PR. No hay flujo "crear como draft" ni "ignorar y continuar".
+>
+> **No incluye:** modificar código, merges, rebases, resolver conflictos, asignar reviewers/labels/milestones, editar PRs existentes.
 
 ---
 
-## Inputs
+## Detección de plataforma
 
-**Obligatorios:**
+Heurística por host de `git remote get-url origin`:
 
-- **Working directory:** repositorio git con `origin` configurado y rama actual con commits propios pendientes hacia la rama destino.
-- **Rama destino:** se pregunta al usuario (ver `Rules`).
+| Host | Plataforma | CLI |
+|------|-----------|-----|
+| `github.com` o GitHub Enterprise | GitHub | `gh` |
+| `gitlab.com` o host GitLab self-managed | GitLab | `glab` |
+| `bitbucket.org` | Bitbucket Cloud | REST + curl (o CLI instalado) |
+| Host con segmento `/scm/` o Bitbucket Server | Bitbucket Server | REST + curl |
+| `dev.azure.com` o `*.visualstudio.com` | Azure Repos | `az repos` |
+| Marcadores de Gitea/Forgejo | Gitea | `tea` |
+| Cualquier otro | — | Probar CLI conocido instalado; si nada encaja, parar y avisar |
 
-**Opcionales:**
-
-- **Decisión de code-review previo** (sí/no): se pregunta al usuario en cada ejecución, salvo que ya lo haya indicado en el mensaje inicial.
-- **Override de título o descripción**: si el usuario los pasa explícitamente en el mismo mensaje, se respetan y se omite la auto-generación de esa parte.
+Verificar que el CLI elegido está instalado (`<cli> --version`); si falta, parar y avisar. Las credenciales son responsabilidad del entorno del usuario (variables de entorno, `~/.netrc`, config previa del CLI).
 
 ---
 
-## Outputs
+## Resolución de idioma
 
-Tras éxito:
+Orden de precedencia para título y descripción auto-generados:
+
+1. Título/descripción explícitos del usuario en el mensaje → respetar literalmente.
+2. `preferred language` en `.agents/MEMORY.md` (claves legacy como `language:` o `idioma:` como fallback).
+3. Idioma del turno del usuario.
+4. Idioma predominante de los commits del rango `origin/<destino>..HEAD`.
+
+Cuando el idioma resuelto obliga a traducir el título, el prefijo de ticket (`[US-042]`, `[TK-007]`) se mantiene intacto. Los subjects de commits en la lista de la descripción **no** se traducen — se citan literales para preservar trazabilidad.
+
+---
+
+## Flujo
+
+### Paso 1 — Pre-flight (obligatorio antes de cualquier acción)
+
+1. `git rev-parse --is-inside-work-tree` — confirmar repo git.
+2. `git rev-parse --abbrev-ref HEAD` — obtener rama actual.
+3. Si la rama actual ∈ {`main`, `master`, `develop`, `trunk`}: **parar** y avisar.
+4. `git status --porcelain` — debe estar vacío; si no, **parar** y avisar. No ejecutar `git add` ni `git commit` automáticos.
+
+### Paso 2 — Detectar plataforma y CLI
+
+Aplicar la tabla de detección. Si ya existe un PR para `<rama-actual> → <destino>`, capturar su URL y devolvérsela al usuario sin crear uno nuevo.
+
+### Paso 3 — Preguntar destino y code-review
+
+- **Rama destino** (pregunta única): validar que existe en `origin` (`git ls-remote --heads origin <destino>`) y que no coincide con la rama actual.
+- **Code-review previo** (sí/no): si el usuario ya lo indicó en el mensaje inicial, omitir la pregunta.
+
+### Paso 4 — Code-review (si fue solicitado)
+
+Invocar el flujo de `code-review` sobre el diff `origin/<destino>..HEAD`. Si el veredicto es `❌ No apto` o `⚠️ Incompleto`: mostrar el reporte y **terminar** — no hacer push ni crear PR. Si es `✅ Apto`: continuar aunque haya warnings o recomendaciones informativas.
+
+### Paso 5 — Push de la rama actual
+
+Si la rama no existe en `origin` o tiene commits no publicados (`git rev-list origin/<rama>..HEAD` no vacío): ejecutar `git push -u origin <rama-actual>`. Nunca `--force` ni `--force-with-lease`. Si el push falla por divergencia: parar y avisar — el usuario decide cómo resolver.
+
+### Paso 6 — Generar título y descripción
+
+Sin pedir confirmación (salvo override explícito del usuario):
+
+- **Título:** un único commit en el rango → su subject (`git log -1 --pretty=%s`). Varios commits → subject del más antiguo. Si la rama sigue patrón `<prefix>/<TICKET>-<desc>` o `US-XXX-...`, anteponer `[<TICKET>]`. Traducir al idioma resuelto manteniendo el prefijo de ticket intacto.
+- **Descripción:** lista de commits (`git log origin/<destino>..HEAD --pretty="- %s"`), resumen de cambios (`git diff --stat origin/<destino>..HEAD`) y referencia a issue/ticket si el nombre de la rama lo contiene (patrón `US-XXX`, `TK-XXX`, `JIRA-XXX`, `#NNN`).
+
+### Paso 7 — Crear PR/MR
+
+| Plataforma | Comando |
+|-----------|---------|
+| GitHub | `gh pr create --base <destino> --head <rama> --title "<título>" --body "<desc>"` |
+| GitLab | `glab mr create --target-branch <destino> --source-branch <rama> --title "<título>" --description "<desc>" --yes` |
+| Bitbucket Cloud | `POST https://api.bitbucket.org/2.0/repositories/<workspace>/<repo>/pullrequests` con payload JSON |
+| Bitbucket Server | `POST /rest/api/1.0/projects/<key>/repos/<slug>/pull-requests` con payload equivalente |
+| Azure Repos | `az repos pr create --source-branch <rama> --target-branch <destino> --title "<título>" --description "<desc>"` |
+| Gitea/Forgejo | `tea pr create --base <destino> --head <rama> --title "<título>" --description "<desc>"` |
+
+Si el CLI indica que ya existe un PR: capturar y devolver la URL existente.
+
+### Paso 8 — Reportar
 
 ```
 ✓ PR creado en <plataforma>
@@ -68,195 +105,52 @@ Tras éxito:
   URL:     <url>
 ```
 
-Tras bloqueo por code-review:
-
+Bloqueo por code-review:
 ```
-✗ PR NO creado: /code-review devolvió veredicto <❌ No apto | ⚠️ Incompleto>.
+✗ PR NO creado: code-review devolvió veredicto <❌ No apto | ⚠️ Incompleto>.
 
-<reporte literal de /code-review>
+<reporte literal de code-review>
 
 Corrige los bloqueantes y vuelve a ejecutar el skill.
 ```
 
-Tras parada en pre-flight (rama protegida, working tree sucio, plataforma desconocida, etc.): mensaje breve indicando la causa y la acción que debe tomar el usuario, **sin** crear PR ni hacer push.
-
 ---
 
-## Rules
+## Ejemplos
 
-- **Origen = rama actual**, sin excepción. No preguntar. Si la rama actual ∈ {`main`, `master`, `develop`, `trunk`}, **parar** y avisar.
-- **Destino = pregunta al usuario** siempre. No asumir `main` ni leerlo de configuración del repo.
-- **Plataforma se auto-detecta** desde `origin`. No preguntar. Heurística por host de la URL del remoto:
-  - `github.com` o subdominios de GitHub Enterprise → GitHub, CLI = `gh`.
-  - `gitlab.com` o host self-managed cuyo path/segmento típico sea de GitLab (p. ej. `ns.bayteq.com`) → GitLab, CLI = `glab`.
-  - `bitbucket.org` → Bitbucket Cloud (sin CLI oficial estable: usar API REST con curl + token, o el CLI que el usuario tenga instalado, p. ej. `bb`).
-  - Host con segmento `/scm/` o que responda como Bitbucket Server → Bitbucket Server (API REST con curl + token).
-  - `dev.azure.com` o `*.visualstudio.com` → Azure Repos, CLI = `az repos`.
-  - Hosts con marcadores típicos de Gitea/Forgejo o configurados explícitamente → Gitea, CLI = `tea`.
-  - **Cualquier otro proveedor**: si existe un CLI conocido en el sistema, intentar con él; si no, **parar** y avisar indicando que no se reconoce la plataforma. Nunca adivinar el endpoint.
-- **Working tree limpio antes de crear el PR**: si `git status --porcelain` devuelve cambios, **parar** y avisar; **no** ejecutar `git add` ni `git commit` automáticos.
-- **Push si aplica, sin preguntar**: si la rama actual no existe en `origin` o tiene commits no publicados, ejecutar `git push -u origin <rama-actual>` antes de crear el PR. **Nunca** `--force` ni `--force-with-lease`.
-- **Pregunta única de code-review**: una sola interacción sí/no antes de crear el PR. Si el usuario ya respondió en el mensaje inicial, no volver a preguntar.
-- **Code-review bloqueante**: si el usuario aceptó code-review y `/code-review` devolvió veredicto **❌ No apto** o **⚠️ Incompleto**, **no crear el PR**. Mostrar el reporte y terminar. Un veredicto **✅ Apto** — aunque incluya warnings de eslint, findings informativos de Sonar o acciones sugeridas no bloqueantes — **no** impide crear el PR. Es un flujo de un solo intento; el usuario corrige y vuelve a invocar el skill.
-- **Título y descripción no interactivos**: generar sin pedir confirmación. Excepción: si el usuario los pasó explícitamente en el mismo mensaje, respetarlos.
-- **Idioma de título y descripción**: aplicar [Resolución de idioma del PR](#resolución-de-idioma-del-pr). El override del usuario en el mensaje (título/descripción literales) tiene prioridad sobre la resolución automática.
-- **No reabrir, no editar, no forzar**: si ya existe un PR para `<rama-actual> → <destino>`, devolver su URL y **no** intentar recrearlo.
-
----
-
-## Steps
-
-1. **Pre-flight obligatorio antes de cualquier acción:**
-   - `git rev-parse --is-inside-work-tree` para confirmar repo git.
-   - `git rev-parse --abbrev-ref HEAD` → rama actual.
-   - Si la rama actual ∈ {`main`, `master`, `develop`, `trunk`}, **parar** y avisar.
-   - `git status --porcelain` debe estar vacío; si no, **parar** y avisar.
-
-2. **Detectar plataforma:**
-   - `git remote get-url origin` → URL del remoto. Extraer el host.
-   - Aplicar la heurística por host descrita en `Rules` para resolver `<plataforma, CLI>`:
-     - `github.com` o GitHub Enterprise → `gh`.
-     - `gitlab.com` o host GitLab self-managed → `glab`.
-     - `bitbucket.org` → Bitbucket Cloud (REST + curl, o CLI instalado).
-     - Host Bitbucket Server (segmento `/scm/`) → Bitbucket Server (REST + curl).
-     - `dev.azure.com` / `*.visualstudio.com` → `az repos`.
-     - Marcadores de Gitea/Forgejo → `tea`.
-     - Cualquier otro: probar CLI conocido en el sistema; si no hay coincidencia, **parar** y avisar.
-   - Verificar que el CLI elegido está instalado (`<cli> --version`); si falta, **parar** y avisar con el nombre del CLI esperado.
-
-3. **Preguntar rama destino** al usuario (pregunta única). Validar:
-   - Existe en `origin` (`git ls-remote --heads origin <destino>` no vacío); si no, **parar** y avisar.
-   - Destino ≠ rama actual; si coincide, **parar** y avisar.
-
-4. **Preguntar code-review previo** al usuario (sí/no). Si el usuario ya lo indicó en el mensaje original (p. ej. "crea el PR a develop y pásalo por code-review primero"), omitir esta pregunta.
-
-5. **Si el usuario aceptó code-review:**
-   - Invocar el flujo de `/code-review` sobre el diff `origin/<destino>..HEAD`.
-   - Capturar el reporte completo.
-   - Parsear el **veredicto** del informe (`✅ Apto`, `❌ No apto`, `⚠️ Incompleto`). Si es **❌ No apto** o **⚠️ Incompleto**, aplicar el formato de bloqueo definido en `Outputs` y **terminar**. Si es **✅ Apto**, continuar aunque el informe liste warnings o acciones informativas. No ejecutar los pasos siguientes solo por warnings de eslint, Sonar informativo o sugerencias en «Próximas acciones».
-
-6. **Push de la rama actual** si aplica:
-   - Si `git ls-remote --heads origin <rama-actual>` está vacío, **o**
-   - si `git rev-list origin/<rama-actual>..HEAD` no está vacío,
-   - ejecutar `git push -u origin <rama-actual>`.
-
-7. **Resolver idioma y auto-generar título y descripción** (sin pedir confirmación):
-   - **Idioma:** aplicar [Resolución de idioma del PR](#resolución-de-idioma-del-pr) para el título y la descripción auto-generados. Si el usuario pasó título o descripción explícitos, respetar el suyo y omitir esta resolución para esa parte.
-   - **Título:** si la rama tiene un único commit en el rango `origin/<destino>..HEAD`, usar su subject (`git log -1 --pretty=%s`). Si tiene varios, preferir el subject del commit más antiguo del rango. Si la rama sigue patrón `<prefix>/<TICKET>-<descripcion>` (p. ej. `feature/US-042-auth-refresh`) o `US-XXX-...`, anteponer `[<TICKET>]` al título. Si el idioma resuelto no coincide con el del subject elegido, **traducir** el título al idioma objetivo manteniendo el prefijo de ticket intacto.
-   - **Descripción:** incluir
-     - Lista de commits: `git log origin/<destino>..HEAD --pretty="- %s"` (los subjects se mantienen literales, sin traducir; el resto del cuerpo se redacta en el idioma resuelto).
-     - Resumen de cambios: `git diff --stat origin/<destino>..HEAD`.
-     - Referencia a issue/ticket si el nombre de la rama lo contiene (patrón `US-XXX`, `TK-XXX`, `JIRA-XXX`, `#NNN`).
-
-8. **Crear el PR/MR** con el CLI resuelto en el paso 2:
-   - **GitHub** (`gh`): `gh pr create --base <destino> --head <rama-actual> --title "<título>" --body "<descripción>"`.
-   - **GitLab** (`glab`): `glab mr create --target-branch <destino> --source-branch <rama-actual> --title "<título>" --description "<descripción>" --yes`.
-   - **Bitbucket Cloud** (REST): `curl -u <user>:<app-password> -X POST https://api.bitbucket.org/2.0/repositories/<workspace>/<repo>/pullrequests` con payload JSON `{title, description, source.branch.name, destination.branch.name}`.
-   - **Bitbucket Server** (REST): `POST` a `/rest/api/1.0/projects/<key>/repos/<slug>/pull-requests` con payload equivalente, usando token o credenciales del usuario.
-   - **Azure Repos** (`az repos`): `az repos pr create --source-branch <rama-actual> --target-branch <destino> --title "<título>" --description "<descripción>"`.
-   - **Gitea / Forgejo** (`tea`): `tea pr create --base <destino> --head <rama-actual> --title "<título>" --description "<descripción>"`.
-   - Si el CLI/API indica que ya existe un PR/MR para la combinación, capturar su URL listando los PR de la rama (`gh pr list --head <rama>`, `glab mr list --source-branch <rama>`, `az repos pr list --source-branch <rama>`, equivalente para Bitbucket/Gitea) y devolverla en lugar de fallar.
-   - Si la plataforma requiere credenciales (token, app password) y no están configuradas, **parar** y avisar; no pedirlas por chat ni almacenarlas.
-
-9. **Reportar** al usuario con el formato definido en `Outputs`.
-
----
-
-## Examples
-
-**Ejemplo 1 — Flujo feliz con code-review:**
-
+**Ejemplo 1 — Con code-review (GitLab self-managed)**
 Usuario: «Crea el PR de esta rama, pásalo por code-review primero.»
+Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`). Detecta GitLab (`ns.bayteq.com:3311`). Pregunta destino → `develop`. Ejecuta `code-review` sobre `origin/develop..HEAD` → `✅ Apto`. Push. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min`. Ejecuta `glab mr create`. Devuelve URL.
 
-Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`, working tree limpio). Auto-detecta GitLab (`origin` apunta a `ns.bayteq.com:3311`). Pregunta destino → usuario responde `develop`. Ejecuta `/code-review` sobre `origin/develop..HEAD` → veredicto **✅ Apto**. Hace `git push -u origin feature/US-042-auth-refresh-token`. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min` y descripción con commits + diff stat. Ejecuta `glab mr create` y devuelve la URL.
+**Ejemplo 2 — Code-review bloquea**
+`code-review` devuelve `❌ No apto` (tests fallidos + eslint errors). El skill no crea el PR, no hace push, muestra el reporte y termina.
 
-**Ejemplo 2 — Code-review bloquea:**
+**Ejemplo 3 — Sin code-review**
+Usuario: «Crea el PR a develop, sin code review.» Omite el paso 4. Push si aplica, auto-genera título y descripción, ejecuta CLI. Devuelve URL.
 
-Usuario: «Sube el PR a main, con code-review.»
+**Ejemplo 4 — Azure Repos**
+`origin` apunta a `https://dev.azure.com/<org>/<proyecto>/_git/<repo>`. Detecta Azure Repos, verifica `az repos`, pregunta destino, push, crea PR con `az repos pr create`.
 
-Skill ejecuta `/code-review`, que devuelve veredicto **❌ No apto** (p. ej. tests fallidos y eslint con errors). El skill **no** crea el PR, muestra el reporte literal y termina con «Corrige los bloqueantes y vuelve a ejecutar el skill». **No** hace push.
+**Ejemplo 5 — Rama protegida**
+Usuario en `main`: «crea un PR a develop.» Parar en pre-flight: «Estás en `main`. Cambia a una rama de feature antes de crear el PR.»
 
-**Ejemplo 3 — Sin code-review:**
+**Ejemplo 6 — PR ya existente**
+La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con nota «Ya existe un PR para esta combinación». No crear uno nuevo.
 
-Usuario: «Crea el PR a develop, sin code review.»
-
-Skill omite el paso 5. Pre-flight OK, push si aplica, auto-genera título desde el primer commit del rango, descripción desde los commits + diff stat, ejecuta el CLI correspondiente y devuelve URL.
-
-**Ejemplo 4 — Plataforma distinta a GitHub/GitLab:**
-
-`origin` apunta a `https://dev.azure.com/<org>/<proyecto>/_git/<repo>`. El skill detecta Azure Repos, verifica que `az repos` está disponible, pregunta destino (`main`), no se pide code-review, hace push si aplica, auto-genera título y descripción, y ejecuta `az repos pr create`. Devuelve la URL del PR.
-
-**Ejemplo 5 — Rama protegida:**
-
-Usuario está en `main` y dice «crea un PR a develop». El skill **para** en el pre-flight: «Estás en `main`. Cambia a una rama de feature antes de crear el PR.»
-
-**Ejemplo 6 — PR ya existente:**
-
-La rama ya tiene un PR/MR abierto hacia `develop`. El skill no crea uno nuevo: devuelve la URL del existente con nota «Ya existe un PR para esta combinación».
-
-**Ejemplo 7 — Preferencia de idioma desde `.agents/MEMORY.md`:**
-
-El repo tiene `.agents/MEMORY.md` con la línea `preferred language: en`. Los commits están en español (`feat(auth): agrega refresh token`). El skill detecta la preferencia (paso 2 de [Resolución de idioma del PR](#resolución-de-idioma-del-pr)) y genera el título traducido al inglés (`[US-042] feat(auth): add refresh token`) y la descripción en inglés, pero conserva los subjects de commits literales en la lista («- feat(auth): agrega refresh token»). Si no existiera `.agents/MEMORY.md` ni idioma inferible del turno, usaría el idioma predominante de los commits.
+**Ejemplo 7 — Idioma desde MEMORY.md**
+`.agents/MEMORY.md` tiene `preferred language: en`. Commits en español (`feat(auth): agrega refresh token`). Título traducido al inglés: `[US-042] feat(auth): add refresh token`. Subjects en la lista de descripción se mantienen literales.
 
 ---
 
 ## Anti-patterns
 
-- **Preguntar la rama origen** o intentar adivinarla: la rama origen es **siempre** la actual.
-- **Asumir la rama destino** (p. ej. `main` por defecto): siempre preguntar.
-- **Preguntar plataforma**: se detecta del remoto.
-- **Pedir confirmación de título o descripción**: el flujo es no interactivo en esa parte.
-- **Crear el PR cuando `/code-review` devolvió ❌ No apto o ⚠️ Incompleto**: el bloqueo sigue el veredicto del skill `code-review`, no warnings informativos ni Sonar no bloqueante.
-- **Re-ejecutar `/code-review`** sobre el mismo diff dentro del mismo turno tras un bloqueo: el skill termina, el usuario corrige y reinvoca.
-- **Hacer `git add`, `git commit -am` o cualquier mutación de historia** si hay cambios sin commitear o conflictos. Parar y avisar.
-- **`git push --force` o `--force-with-lease`**. Nunca.
-- **Asignar reviewers, labels, milestones** por iniciativa propia.
-- **Re-implementar la lógica de `/code-review`** dentro del skill en lugar de invocar el flujo existente.
-- **Crear un segundo PR** cuando ya existe uno para `<rama-actual> → <destino>`.
-
----
-
-## Notes
-
-### Sobre `/code-review`
-
-Este skill **no implementa** code-review: invoca el flujo existente del usuario (slash command `/code-review` o el equivalente instalado, p. ej. `glab-code-review`). El alcance del review es el diff `origin/<destino>..HEAD`. Si el slash command no existe en el entorno, **parar** y avisar al usuario; no sustituirlo por un análisis ad-hoc.
-
-**Criterio de bloqueo:** usar el **veredicto final** del informe (`code-review`), no el recuento bruto de líneas en «Próximas acciones». Solo **❌ No apto** y **⚠️ Incompleto** bloquean la creación del PR; **✅ Apto** permite continuar aunque haya warnings o recomendaciones informativas.
-
-### Detección de plataforma
-
-La heurística por host de `origin` cubre los proveedores comunes: GitHub (público y Enterprise), GitLab (SaaS y self-managed, incluido `ns.bayteq.com`), Bitbucket Cloud y Server, Azure Repos y Gitea/Forgejo. Para hosts no reconocidos, el skill intenta con el CLI conocido que esté instalado en el sistema; si nada encaja, **para** y avisa en lugar de adivinar el endpoint o construir URLs a ciegas.
-
-Para cualquier plataforma, las **credenciales son responsabilidad del entorno del usuario** (configuración previa del CLI, variables de entorno como `GITHUB_TOKEN`, `GITLAB_TOKEN`, `AZURE_DEVOPS_EXT_PAT`, archivos `~/.netrc`, etc.). El skill no las pide ni las almacena.
-
-### Sobre el título auto-generado
-
-Convenciones reconocidas para enriquecer el título:
-
-- `feature/<TICKET>-<descripcion>` o `fix/<TICKET>-<descripcion>` → título prefijado con `[TICKET]`.
-- `US-XXX-<descripcion>` o `TK-XXX-<descripcion>` → título prefijado con `[US-XXX]` / `[TK-XXX]`.
-- Sin patrón reconocible → subject del primer commit del rango.
-
-### Sobre el push
-
-El skill nunca reescribe historia. Si el push falla por divergencia con remoto, **parar** y avisar; corresponde al usuario decidir cómo resolver (rebase, merge, descartar).
-
-### Orden respecto a `story-integrate`
-
-Invocar este skill **desde la rama `feature/US-XXX-[nombre-corto]`** (origen = rama actual), típicamente **antes** del merge local de **`story-integrate`**. Tras integrate, el checkout suele estar en la rama base (`develop`, `main`, etc.); este skill **bloquea** en ramas protegidas y ya no representa el PR de la feature.
-
-### Sobre PRs existentes
-
-`gh pr create`, `glab mr create`, `az repos pr create` y `tea pr create` suelen detectar PR existentes por sí solos. Si una versión del CLI no lo hace, una verificación previa con el comando `list` correspondiente (`gh pr list --head <rama>`, `glab mr list --source-branch <rama>`, `az repos pr list --source-branch <rama>`, etc.) evita el error y permite devolver la URL existente. Para Bitbucket vía REST, consultar el endpoint `pullrequests` con filtro por rama origen.
-
-### Resolución de idioma del PR
-
-Orden de precedencia para decidir el idioma del **título y la descripción auto-generados** (ver también la regla de override explícito en `Rules`):
-
-1. **Título / descripción explícitos del usuario** en el mensaje inicial → se respetan literalmente; no aplicar los pasos siguientes a esa parte.
-2. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Si no existe esa línea pero hay claves legacy (`language:`, `idioma:`, `Project language:`), usarlas solo como fallback al leer MEMORY antiguo.
-3. **Idioma del turno del usuario** (mensaje actual).
-4. **Idioma predominante de los commits** del rango `origin/<destino>..HEAD` → fallback cuando los pasos 2–3 no concluyen.
-
-Cuando el idioma resuelto fuerza a traducir el título auto-generado, el prefijo de ticket (`[US-042]`, `[TK-007]`, etc.) se mantiene intacto. Los subjects de commits en la lista de la descripción **no** se traducen: se citan literales para preservar la trazabilidad con la historia git.
+- Preguntar la rama origen (siempre es la actual) o asumir la destino.
+- Preguntar la plataforma (se detecta del remoto).
+- Pedir confirmación de título o descripción (flujo no interactivo).
+- Crear el PR cuando `code-review` devolvió `❌ No apto` o `⚠️ Incompleto`.
+- Re-ejecutar `code-review` sobre el mismo diff dentro del mismo turno tras un bloqueo.
+- Hacer `git add`, `git commit -am` o cualquier mutación de historia si hay cambios sin commitear.
+- Usar `git push --force` o `--force-with-lease`.
+- Asignar reviewers, labels o milestones por iniciativa propia.
+- Re-implementar la lógica de `code-review` en lugar de invocar el flujo existente.
+- Crear un segundo PR cuando ya existe uno para `<rama-actual> → <destino>`.

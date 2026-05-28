@@ -83,7 +83,8 @@ Antes de cambiar de rama o ejecutar el merge, verificar las siguientes condicion
 - **Rama actual con formato válido:** `feature/US-XXX-[nombre-corto]`. Sin el prefijo `feature/` o sin el segmento `US-XXX-...` no se puede derivar la carpeta de la US.
 - **Working tree limpio:** `git status --porcelain` sin salida. Cualquier cambio sin commitear bloquea el merge.
 - **Carpeta de la US existe:** `docs/specs/user-stories/US-XXX-[nombre-corto]/` presente con `progress.md` dentro.
-- **Todas las tareas en `Done`:** parsear `progress.md` y confirmar que **cada** entrada tiene estado `Done` (case-insensitive, sin espacios extra). Estados como `Pending`, `In Progress` o vacío bloquean el merge. No existe el estado `Skipped`; si aparece en un archivo legacy, tratarlo como bloqueante hasta que el usuario lo corrija.
+- **Todas las tareas en `Done`:** parsear `progress.md` y confirmar que **cada** entrada tiene estado `Done` (case-insensitive, sin espacios extra). Estados como `Pending`, `In Progress` o vacío bloquean el merge.
+- **Code review con veredicto Apto:** ejecutar **`code-review`** (modificador `default`) antes del merge. Solo un veredicto **✅ Apto** permite continuar. **❌ No apto** e **⚠️ Incompleto** bloquean el merge hasta que el usuario corrija los problemas y el review se repita con resultado Apto.
 - **Rama base resoluble:** identificada por reflog, por config, o confirmada explícitamente por el usuario. Si hay varios candidatos plausibles y ninguno definitivo, preguntar.
 
 **Si hay conflicto:**
@@ -105,14 +106,15 @@ Camino feliz cuando todas las verificaciones pasan.
 2. **Verificar working tree limpio** con `git status --porcelain`. Si hay salida, parar e informar.
 3. **Localizar la carpeta de la US** descontando el prefijo `feature/` del nombre de rama: `feature/US-XXX-[nombre-corto]` → `docs/specs/user-stories/US-XXX-[nombre-corto]/`. Si la carpeta no existe o hay varias coincidentes, parar.
 4. **Leer `progress.md`** y validar que **todas** las tareas tienen estado `Done`. Si alguna no lo está, parar mostrando la lista completa de tareas no `Done` con su estado actual.
-5. **Resolver la rama base:**
+5. **Ejecutar `code-review`** (modificador `default`) sobre la rama actual. Si el veredicto es **❌ No apto** o **⚠️ Incompleto**, parar y reportar el informe al usuario — no continuar con el merge hasta obtener veredicto **✅ Apto** en una nueva ejecución.
+6. **Resolver la rama base:**
    - `git reflog show <branch>` → buscar la entrada inicial con `Created from <ref>` o `branch: Created from <ref>`.
    - Fallback: `git config --get branch.<branch>.merge` y derivar la rama base local correspondiente.
    - Si ninguno concluye o hay ambigüedad: preguntar al usuario sin proponer un default.
-6. **Calcular delta** con `git rev-list --count <base>..HEAD` para reportar cuántos commits se van a integrar.
-7. **Cambiar a la rama base** con `git checkout <base>`. Si falla, parar y reportar.
-8. **Ejecutar el merge** con `git merge --no-ff <feature-branch> -m "Merge US-XXX: <nombre-corto>"`. El mensaje de merge usa solo `US-XXX: <nombre-corto>` (sin el prefijo `feature/`). Si surge conflicto, ir al flujo de conflictos.
-9. **Reportar resultado** al usuario: rama origen (con prefijo `feature/`), rama destino, número de commits integrados, hash del commit de merge, estado del HEAD y nota explícita de que **no** se hizo push ni se borró la rama de la US.
+7. **Calcular delta** con `git rev-list --count <base>..HEAD` para reportar cuántos commits se van a integrar.
+8. **Cambiar a la rama base** con `git checkout <base>`. Si falla, parar y reportar.
+9. **Ejecutar el merge** con `git merge --no-ff <feature-branch> -m "Merge US-XXX: <nombre-corto>"`. El mensaje de merge usa solo `US-XXX: <nombre-corto>` (sin el prefijo `feature/`). Si surge conflicto, ir al flujo de conflictos.
+10. **Reportar resultado** al usuario: rama origen (con prefijo `feature/`), rama destino, número de commits integrados, hash del commit de merge, estado del HEAD y nota explícita de que **no** se hizo push ni se borró la rama de la US.
 
 ---
 
@@ -149,6 +151,7 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 - [ ] `git status --porcelain` sin salida (working tree limpio)
 - [ ] `progress.md` existe en la carpeta de la US
 - [ ] **Todas** las tareas de `progress.md` en estado `Done`
+- [ ] **`code-review`** ejecutado con veredicto **✅ Apto**
 - [ ] Sin commits sin commitear ni stash sin aplicar relevante al alcance
 
 **Ejecución:**
@@ -209,6 +212,7 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 ## Anti-patterns
 
 - Hacer merge sin verificar `progress.md` o ignorando tareas no `Done`.
+- Hacer merge sin haber ejecutado `code-review` o con veredicto **❌ No apto** / **⚠️ Incompleto** — el merge solo procede con veredicto **✅ Apto**.
 - Modificar `progress.md` para «forzar» que aparezcan en `Done` sin que el trabajo esté completo.
 - Aceptar ramas sin prefijo `feature/` o con prefijos alternativos (`feat/`, `bugfix/`, `hotfix/`) como rama de submit.
 - Asumir `main`, `master` o `develop` como rama base sin confirmarlo por reflog, config o usuario.
@@ -231,7 +235,7 @@ Posición: **cierre local** — último paso del pipeline de historias (sin push
 
 | | |
 |--|--|
-| **Entrada** | Rama `feature/US-XXX-[nombre-corto]`; working tree limpio; commits de la implementación ya hechos (`git-commit`); `progress.md` con **cada** TK listada en `Done`. |
+| **Entrada** | Rama `feature/US-XXX-[nombre-corto]`; working tree limpio; commits de la implementación ya hechos (`git-commit`); `progress.md` con **cada** TK listada en `Done`; `code-review` con veredicto **✅ Apto**. |
 | **Salida** | Merge `--no-ff` a la rama base local; reporte con hash de merge. Sin push ni borrado de rama. |
 | **Siguiente paso (fuera del skill)** | Push de la rama base y CI — decisión del usuario. |
 | **PR/MR (`git-pr`)** | Abrir **antes** de este skill, estando en `feature/US-XXX-[nombre-corto]` (o con la feature ya publicada en remoto). Tras el merge local, la rama activa es la **base**; `git-pr` bloquea en `main`/`master`/`develop`/`trunk`. |
@@ -245,8 +249,6 @@ El skill **lee** `progress.md` para verificar estados, pero no lo modifica. La a
 ### Estados de `progress.md`
 
 Estados válidos por tarea: **`Pending`**, **`In Progress`**, **`Done`**. Solo **`Done`** (case-insensitive, sin espacios extra) cierra una tarea para merge.
-
-Si una TK no se implementará en esta entrega, no marcarla como `Skipped`: alinear el alcance con `story-define` / `story-plan`, eliminar la entrada de `progress.md` si la TK queda fuera de la US, o completarla hasta `Done` antes de integrar.
 
 ### Detección de rama base
 
