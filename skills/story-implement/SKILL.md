@@ -120,7 +120,7 @@ Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto
 1. Implementar segun la especificacion del TK.
 2. Si la tarea genera o modifica archivos de UI: ejecutar bajo el agente `ui-specialist`. Si ademas la referencia de diseno es Figma: usar el MCP de Figma.
 3. Al terminar, ejecutar lint, typecheck o build del paquete afectado. Si falla, corregir antes de continuar. **No** ejecutar suites de tests en esta fase.
-4. Actualizar `progress.md`: `Pending` => `In Progress` => `Done`; anadir notas si quedan aspectos parciales.
+4. Actualizar `progress.md`: `Pending` => `In Progress` => `Done`; anadir notas si quedan aspectos parciales. Registrar en `Decisiones adicionales` **toda decision tomada durante la sesion de chat** que no este ya documentada en el TK — cambios de enfoque, alternativas descartadas, restricciones descubiertas, acuerdos con el usuario. Si no hubo decisiones nuevas, omitir la seccion.
 5. **Detenerse y preguntar** al usuario (con herramienta de preguntas estructuradas):
    - Mensaje: "TK-XXX completada. Continuo con TK-YYY - [titulo]?"
    - Opciones: [Si, continuar] / [No, detener aqui]
@@ -175,6 +175,7 @@ WARNING No es posible continuar con la implementacion:
 - Si la referencia de diseno es Figma: MCP de Figma usado
 - Lint/build ejecutado tras la implementacion
 - `progress.md` actualizado a `Done`
+- Decisiones tomadas en la sesion registradas en `Decisiones adicionales` del TK en `progress.md`
 - **Confirmacion explicita del usuario recibida antes de pasar a la siguiente TK**
 
 **Cierre (fase de pruebas):**
@@ -218,6 +219,7 @@ WARNING No es posible continuar con la implementacion:
 - Ejecutar suites de tests durante el ciclo de tareas sin que el usuario haya aceptado la fase final.
 - Escribir tests en la fase final sin delegar a **`quality-specialist`**.
 - Ignorar `progress.md` o usar identificadores distintos a `TK-XXX`.
+- Omitir la seccion `Decisiones adicionales` cuando durante la sesion se tomaron decisiones no documentadas en el TK.
 - Implementar archivos de UI sin usar el agente `ui-specialist`.
 - Implementar UI con referencia Figma sin usar el MCP de Figma.
 - Modificar `README.md` de la US, archivos `TK-XXX`, ADRs o `technical-docs/` durante la implementacion.

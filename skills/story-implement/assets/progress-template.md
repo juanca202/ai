@@ -12,6 +12,7 @@
   Implementador: "<inferido de git config user.name>"
   Archivos: []
   Notas: []
+  Decisiones adicionales: []
 
 - TK-XXX <título corto de la tarea>
   Estado: In Progress
@@ -20,3 +21,5 @@
     - <src/ruta/al/archivo.ext>
   Notas:
     - <subpaso o decisión técnica puntual>
+  Decisiones adicionales:
+    - <decisión tomada en sesión de chat no documentada en el TK>
