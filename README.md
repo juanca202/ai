@@ -1,4 +1,4 @@
-# @juanca202/skills
+# @juanca202/ai
 
 ## Usage
 
