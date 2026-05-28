@@ -237,7 +237,8 @@ Posición: **inicio** del pipeline `story-define` → `story-plan` → `story-im
 | **Salida para continuar** | `Estado: Ready` en el `README.md`; INVEST y DoR completos; al menos un `BR-XX` y un `SC-XX`; Observaciones sin pendientes abiertos. |
 | **Siguiente paso** | **`story-plan`** — invocar `/story-plan` (o continuidad explícita del usuario). No crear `TK-XXX` desde este skill. |
 | **Si queda en Draft** | No handoff a plan ni implement. Cerrar lagunas con preguntas estructuradas o mantener Draft documentado. |
-| **Regreso** | Si durante `story-plan` o `story-implement` hay conflicto US ↔ TK, **este skill prevalece**: actualizar TK vía `story-plan`, no degradar la US. |
+| **Regreso desde plan** | Conflicto US ↔ TK detectado en `story-plan` → actualizar la US aquí; `story-plan` corrige el TK. La US prevalece sobre el TK. |
+| **Regreso desde integrate** | Alcance reducido o `progress.md` incompleto detectado en `story-integrate` → ajustar la US aquí y alinear TKs con `story-plan` antes de reintentar el merge. |
 
 ### RFC 2119
 

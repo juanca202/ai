@@ -1,183 +1,182 @@
 ---
 name: story-implement
-description: Usar al pedir implementar, desarrollar o ejecutar trabajo referenciado por una historia de usuario o tarea. Solo debe usarse si la historia o tarea se encuentra en estado `Ready`.
+description: Usar al pedir implementar, desarrollar o ejecutar trabajo referenciado por una historia de usuario o tarea. Solo debe usarse si la historia o tarea se encuentra en estado `Ready`. Activar tambien cuando el usuario mencione "ejecutar tareas", "codificar", "desarrollar la US", "trabajar en el TK" o cualquier variante que implique escribir codigo para una historia o tarea ya especificada.
 license: MIT
 ---
 
 # Skill: Implementar historia de usuario
 
-Guía para **ejecutar en código** el trabajo especificado en historias `US-XXX` y tareas `TK-XXX` bajo `docs/specs/user-stories/`.
+Guia para **ejecutar en codigo** el trabajo especificado en historias `US-XXX` y tareas `TK-XXX` bajo `docs/specs/user-stories/`.
 
-> **Alcance de este skill:** consume especificaciones ya redactadas por **story-plan**. No reescribe ni reestructura tareas — solo las implementa. Correcciones menores acordadas con el usuario son la única excepción. El ritmo es siempre **una tarea por confirmación**.
+> **Alcance:** consume especificaciones ya redactadas por **story-plan**. No reescribe ni reestructura tareas - solo las implementa. Correcciones menores acordadas con el usuario son la unica excepcion.
 >
-> **Solo implementación:** este skill no modifica documentación de producto — ni `README.md` de US, ni `TK-XXX`, ni ADRs, ni technical-docs a excepción de el `progress.md` de la carpeta de la US. Si durante la implementación se detecta un conflicto en la documentación que pueda afectar el resultado (ambigüedad, contradicción entre TKs, regla de negocio incompleta), **parar inmediatamente y notificar al usuario** antes de continuar.
+> **Ritmo obligatorio - una tarea por confirmacion:** implementar una TK, actualizar `progress.md`, ejecutar lint, y **esperar confirmacion explicita del usuario antes de arrancar la siguiente**. Sin excepcion. No existe modo "implementar todo de corrido".
 >
-> **Handoffs:** ver [Handoffs del ciclo](#handoffs-del-ciclo). Entrada mínima: US y TK en `Ready`; salida: `progress.md` en `Done` y working tree limpio → **`story-integrate`**.
+> **Solo implementacion:** no modifica documentacion de producto (`README.md` de US, `TK-XXX`, ADRs, technical-docs) - solo `progress.md`. Si se detecta un conflicto en la documentacion que pueda afectar el resultado, **parar inmediatamente y notificar al usuario** antes de continuar.
+>
+> **Handoffs:** Entrada minima: US y TK en `Ready`; salida: `progress.md` en `Done` y working tree limpio => **`story-integrate`**.
 
 ---
 
-## Cómo preguntar al usuario
+## Como preguntar al usuario
 
-Cuando este skill indique **preguntar, pedir, confirmar, validar o sugerir** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** que ofrezca el cliente (la que renderiza opciones tappables o un selector de respuesta) en lugar de redactar la pregunta como prosa libre. Reglas:
+Cuando este skill indique **preguntar, confirmar o validar** algo, usar la **herramienta de preguntas estructuradas** del cliente (opciones tappables) en lugar de prosa libre. Reglas:
 
-- **Una pregunta por turno** cuando sea posible; máximo tres preguntas en un mismo bloque.
-- **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita categorías; usar entrada libre solo si no hay forma razonable de enumerar opciones (p. ej. identificar la US de un `TK-XXX` sin contexto).
-- **No repreguntar** lo que ya está respondido en el contexto, en `.agents/MEMORY.md`, en el `README.md` de la US, en los `TK-*.md` del alcance o en `progress.md`.
-- **Una sola tanda al inicio** para recopilar información faltante (US padre, alcance, unidad de trabajo ambigua) antes de tocar código; no ir descubriendo huecos turno a turno. **Excepciones de flujo deliberadas** — una pregunta estructurada por turno, con opciones cuando aplique:
-  - confirmación de la cola antes del primer cambio de código;
-  - continuar con la siguiente TK tras completar la anterior;
-  - aceptar o rechazar la fase final de pruebas al cierre.
-- **Fallback**: si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
-
-Cada sección posterior que diga *preguntar al usuario*, *validar con el usuario*, *confirmar* o *sugerir al usuario* asume este mecanismo; no se vuelve a repetir.
+- **Una pregunta por turno**; maximo tres en un mismo bloque.
+- **Opciones cortas y mutuamente excluyentes** (2-4 por pregunta); entrada libre solo si no hay forma de enumerar opciones.
+- **No repreguntar** lo que ya esta en el contexto, `MEMORY.md`, `README.md` de la US, `TK-*.md` o `progress.md`.
+- **Una sola tanda de preguntas al inicio** para recopilar informacion faltante antes de tocar codigo.
+- **Excepciones de flujo deliberadas** - una pregunta estructurada por turno, con opciones cuando aplique:
+  1. Confirmacion de la cola antes del primer cambio de codigo.
+  2. **Confirmacion antes de cada siguiente TK** (obligatoria - ver Paso 3).
+  3. Aceptar o rechazar la fase final de pruebas al cierre.
+- **Fallback:** si el cliente no expone la herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3...).
 
 ---
 
 ## Agentes condicionales
 
-Este skill no requiere un subagente fijo. Sin embargo, aplican las siguientes reglas según el tipo de tarea:
-
-
-| Condición                                                          | Agente / Skill requerido                                                                                               |
-| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| La tarea genera o modifica archivos de UI (HTML, CSS, componentes) | Ejecutar bajo el agente `ui-specialist`                                                                            |
-| La referencia de diseño es un enlace o archivo de Figma            | Usar el **MCP de Figma** para obtener el contexto del diseño e implementar la tarea, antes y durante la implementación |
-| Fase final de pruebas (Paso 4) aceptada por el usuario             | Ejecutar bajo el agente **`quality-specialist`** — no escribir tests directamente desde este skill                    |
-
+| Condicion | Agente / Skill requerido |
+| --------- | ------------------------ |
+| La tarea genera o modifica archivos de UI (HTML, CSS, componentes) | Ejecutar bajo el agente `ui-specialist` |
+| La referencia de diseno es un enlace o archivo de Figma | Usar el **MCP de Figma** para obtener el contexto del diseno antes y durante la implementacion |
+| Fase final de pruebas (Paso 4) aceptada por el usuario | Ejecutar bajo el agente **`quality-specialist`** - no escribir tests desde este skill |
 
 Ambas condiciones pueden aplicar a la vez. Si la tarea no involucra UI, implementar directamente sin delegar.
 
 ---
 
-## Ubicación de archivos
+## Ubicacion de archivos
 
-
-| Artefacto           | Ruta                                                               |
-| ------------------- | ------------------------------------------------------------------ |
-| Historia de usuario | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md`          |
-| Tareas              | `docs/specs/user-stories/US-XXX-[nombre-corto]/TK-XXX-[nombre].md` |
-| Progreso            | `docs/specs/user-stories/US-XXX-[nombre-corto]/progress.md`        |
-| Unidades de trabajo | `docs/specs/work-units.md`                                         |
-| Glosario            | `docs/specs/glossary.md`                                           |
-
+| Artefacto | Ruta |
+| --------- | ---- |
+| Historia de usuario | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md` |
+| Tareas | `docs/specs/user-stories/US-XXX-[nombre-corto]/TK-XXX-[nombre].md` |
+| Progreso | `docs/specs/user-stories/US-XXX-[nombre-corto]/progress.md` |
+| Unidades de trabajo | `docs/specs/work-units.md` |
+| Glosario | `docs/specs/glossary.md` |
 
 ---
 
-## Información requerida antes de implementar
+## Informacion requerida antes de implementar
 
+| Dato | Como obtenerlo | Si no esta disponible |
+| ---- | -------------- | --------------------- |
+| **US padre** | Indicada por el usuario o inferida de la ruta | Preguntar a que `US-XXX` pertenece; no implementar hasta tenerla |
+| **Alcance** | Del mensaje del usuario: toda la US, una lista de TK, o un TK concreto | Preguntar si hay ambiguedad |
+| **Unidad de trabajo** | Campo `Unidad de trabajo` de cada TK; complementar con `work-units.md` si no es claro | Preguntar al usuario; no asumir |
+| **Working tree limpio** | `git status --porcelain` | Si hay cambios pendientes no resueltos: parar y avisar al usuario |
+| **Rama de la US** | `feature/US-XXX-[nombre-corto]` | Crear con `git checkout -b feature/US-XXX-[nombre-corto]` desde la rama base acordada |
+| **Usuario asignado** | Campo `Asignado a` del TK; si no: `git config user.name` | Aplicar como filtro salvo instruccion explicita del usuario |
 
-| Dato                    | Cómo obtenerlo                                                                                                   | Si no está disponible                                                                                        |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **US padre**            | Indicada por el usuario o inferida de la ruta                                                                    | Si solo se indica `TK-XXX` sin US ni ruta: preguntar a qué `US-XXX` pertenece y no implementar hasta tenerla |
-| **Alcance**             | Del mensaje del usuario: toda la US, una lista de TK, o un TK concreto                                           | Preguntar si hay ambigüedad                                                                                  |
-| **Unidad de trabajo**   | Campo `Unidad de trabajo` de cada TK; complementar con `docs/specs/work-units.md` si el alcance no es claro      | Preguntar al usuario; no asumir                                                                              |
-| **Working tree limpio** | `git status --porcelain`                                                                                         | Si hay cambios pendientes no resueltos: parar y avisar al usuario antes de continuar                         |
-| **Rama de la US**       | `feature/US-XXX-[nombre-corto]`, donde el segmento tras `feature/` coincide con el nombre de la carpeta de la US | Crear con `git checkout -b feature/US-XXX-[nombre-corto]` desde la rama base acordada o resuelta (mismo criterio que `story-integrate`) |
-| **Usuario asignado**    | Campo `Asignado a` del TK; si no está: `git config user.name`                                                    | Aplicar como filtro salvo instrucción explícita en contrario del usuario                                     |
-
-
-> Si el usuario indica una lista concreta de TK, un implementador distinto o pide implementar todas las tareas sin filtro, esa instrucción explícita prevalece sobre los filtros automáticos de unidad y usuario.
+> Si el usuario indica una lista concreta de TK, un implementador distinto o pide implementar sin filtro, esa instruccion explicita prevalece sobre los filtros automaticos.
 
 ---
 
-## Validación antes de implementar
+## Validacion antes de implementar
 
-Antes de tocar código, verificar las siguientes condiciones. Si alguna falla, **parar** — informar al usuario y resolver primero.
-
-**¿Qué verificar?**
+Verificar las siguientes condiciones. Si alguna falla, **parar** - informar al usuario y resolver primero.
 
 - **Working tree limpio:** `git status --porcelain` sin cambios pendientes no resueltos.
-- **Rama correcta:** estar en la rama `feature/US-XXX-[nombre-corto]` (o crearla). No implementar en `main` ni en ramas de otras historias sin instrucción explícita.
-- **US padre con README.md:** la carpeta de la US existe, tiene `README.md` cuyo metadato `Estado` sea `Ready`.
-- **TK en estado Ready:** solo encolar tareas cuyo metadato `Estado` sea `Ready`. Las tareas en `Draft` o ya marcadas como `Done` en `progress.md` no son ejecutables por defecto.
+- **Rama correcta:** estar en `feature/US-XXX-[nombre-corto]` (o crearla). No implementar en `main` ni en ramas de otras historias sin instruccion explicita.
+- **US padre con README.md:** la carpeta de la US existe, tiene `README.md` con metadato `Estado: Ready`.
+- **TK en estado Ready:** solo encolar tareas con `Estado: Ready`. Las `Draft` o `Done` en `progress.md` no son ejecutables por defecto.
 - **Solapamiento de progreso:** leer `progress.md` si existe; respetar tareas ya en `Done`; si hay alguna `In Progress`, revisar notas y estado real antes de continuar.
-**Si hay conflicto:**
+
+Si hay conflicto:
 
 ```
-⚠️ No es posible continuar:
-- <razón concreta>
+WARNING No es posible continuar:
+- <razon concreta>
 ```
 
 ---
 
-## Flujo de implementación
+## Flujo de implementacion
 
-### Paso 1 — Preparar repositorio y rama
+### Paso 1 - Preparar repositorio y rama
 
 1. Verificar working tree limpio; si no, parar y avisar.
 2. Resolver nombre de rama: `feature/US-XXX-[nombre-corto]` (el segmento tras `feature/` debe coincidir con la carpeta de la US).
-3. `git checkout feature/US-XXX-[nombre-corto]` si la rama existe; si no, `git checkout -b feature/US-XXX-[nombre-corto]` desde la rama base acordada con el usuario o detectada igual que en **`story-integrate`** (reflog `Created from`, config de upstream, o pregunta explícita — no asumir `main`/`develop`).
-4. Leer o crear `progress.md` (desde `assets/progress-template.md` si no existe; no publicar el archivo de referencia tal cual). Al crearlo, añadir **una entrada por cada TK del alcance acordado** (las `Ready` encoladas y las excluidas que formen parte de la entrega), todas con `Estado: Pending` salvo las ya `Done`.
+3. `git checkout feature/US-XXX-[nombre-corto]` si la rama existe; si no, `git checkout -b feature/US-XXX-[nombre-corto]` desde la rama base acordada con el usuario (no asumir `main`/`develop`).
+4. Leer o crear `progress.md` (desde `assets/progress-template.md` si no existe). Al crearlo, anadir **una entrada por cada TK del alcance acordado** con `Estado: Pending` salvo las ya `Done`.
 
-### Paso 2 — Filtrar y presentar cola
+### Paso 2 - Filtrar y presentar cola
 
 1. Leer `README.md` de la US y todos los `TK-*.md` del alcance indicado.
 2. Consultar `docs/specs/work-units.md` si el alcance de alguna unidad no es claro.
 3. Construir dos listas:
-  - **Implementables:** TK con `Estado: Ready` que pasen los filtros de unidad y usuario asignado, no marcadas como `Done` en `progress.md`.
-  - **Excluidas:** el resto, con su estado entre paréntesis al final — p. ej. `TK-002 — Ajuste de permisos (Draft)`, `TK-004 — Exportación CSV (Done)`.
-4. Mostrar ambas listas al usuario en orden numérico. **No ejecutar código en este turno.**
-5. Preguntar explícitamente si se desea continuar y **esperar confirmación** antes de implementar.
+   - **Implementables:** TK con `Estado: Ready` que pasen los filtros de unidad y usuario asignado, no marcadas como `Done` en `progress.md`.
+   - **Excluidas:** el resto, con su estado entre parentesis - p. ej. `TK-002 - Ajuste de permisos (Draft)`, `TK-004 - Exportacion CSV (Done)`.
+4. Mostrar ambas listas al usuario en orden numerico. **No ejecutar codigo en este turno.**
+5. Preguntar explicitamente si se desea continuar y **esperar confirmacion** antes de implementar.
 
-### Paso 3 — Implementar tarea a tarea
+### Paso 3 - Implementar tarea a tarea
 
-Por cada tarea aprobada, en orden numérico salvo dependencias obvias en el texto:
+> IMPORTANTE **Regla de oro - una TK por turno:** implementar exactamente **una tarea por turno**. Al terminar cada TK, detenerse y **preguntar al usuario si desea continuar con la siguiente**. No avanzar sin confirmacion explicita. Esta regla no tiene excepciones, aunque el usuario haya aprobado la cola completa en el Paso 2.
 
-1. Implementar según la especificación del TK.
-2. Si la tarea genera o modifica archivos de UI: ejecutar bajo el agente `ui-specialist`. Si además la referencia de diseño es un enlace o archivo de Figma: usar el MCP de Figma para obtener el contexto del diseño e implementar la tarea.
-3. Al terminar la implementación de la tarea, ejecutar lint, typecheck o build del paquete o unidad afectada para validar que el código compila sin errores. Si falla, corregir antes de continuar. **No** ejecutar suites de tests unitarios ni E2E en esta fase.
-4. Actualizar `progress.md`: `Pending` → `In Progress` → `Done`; añadir notas si quedan aspectos parciales.
-5. Preguntar al usuario si desea continuar con la siguiente tarea. **No arrancar la siguiente sin confirmación.**
+Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto:
 
-### Paso 4 — Cierre
+1. Implementar segun la especificacion del TK.
+2. Si la tarea genera o modifica archivos de UI: ejecutar bajo el agente `ui-specialist`. Si ademas la referencia de diseno es Figma: usar el MCP de Figma.
+3. Al terminar, ejecutar lint, typecheck o build del paquete afectado. Si falla, corregir antes de continuar. **No** ejecutar suites de tests en esta fase.
+4. Actualizar `progress.md`: `Pending` => `In Progress` => `Done`; anadir notas si quedan aspectos parciales.
+5. **Detenerse y preguntar** al usuario (con herramienta de preguntas estructuradas):
+   - Mensaje: "TK-XXX completada. Continuo con TK-YYY - [titulo]?"
+   - Opciones: [Si, continuar] / [No, detener aqui]
+6. Esperar respuesta. Solo si el usuario confirma: pasar a la siguiente TK. Si detiene, registrar nota en `progress.md` y pasar al Paso 4.
 
-1. Cuando no queden tareas pendientes en el alcance acordado (o el usuario detenga la ejecución), ofrecer la fase de pruebas: delegar al agente **`quality-specialist`** para escribir tests unitarios y/o E2E basados en los escenarios `SC-XX` y las reglas `BR-XX` del bloque **Criterios de aceptación** del `README.md`, además de los TK ejecutados.
-2. Si el usuario acepta, invocar **`quality-specialist`** con el contexto de la US, la rama `feature/US-XXX-*` y los TK en `Done`. No escribir tests desde este skill.
-3. Si el usuario rechaza, registrar nota en `progress.md`.
-4. **Handoff:** si todas las entradas de `progress.md` del alcance están en `Done`, working tree limpio y commits hechos (`git-commit`), sugerir en este orden: (1) **`git-pr`** desde la rama `feature/US-XXX-*` si el equipo revisa por PR/MR; (2) **`story-integrate`** para merge local a la rama base. No sugerir `git-pr` después de integrate (la rama activa ya no será la feature). Si quedan TK en `Pending`/`In Progress`, no sugerir integrate — indicar qué falta cerrar.
+### Paso 4 - Cierre
+
+1. Cuando no queden tareas pendientes (o el usuario detenga la ejecucion), ofrecer la fase de pruebas: delegar a **`quality-specialist`** para escribir tests basados en los `SC-XX` y `BR-XX` del `README.md`.
+2. Si el usuario acepta: invocar **`quality-specialist`** con el contexto de la US, la rama `feature/US-XXX-*` y los TK en `Done`. No escribir tests desde este skill.
+3. Si el usuario rechaza: registrar nota en `progress.md`.
+4. **Handoff:** si todo el alcance esta en `Done`, working tree limpio y commits hechos (`git-commit`), sugerir: (1) **`git-pr`** si el equipo revisa por PR; (2) **`story-integrate`** para merge local. Si quedan TK en `Pending`/`In Progress`, indicar que falta cerrar.
 
 ---
 
-## Flujo: TK indicada sin US explícita
+## Flujo: TK indicada sin US explicita
 
-Un `TK-XXX` siempre vive bajo la carpeta de una US. Si el usuario indica solo el número de tarea sin mencionar la US:
+Un `TK-XXX` siempre vive bajo la carpeta de una US. Si el usuario indica solo el numero de tarea sin mencionar la US:
 
-1. **Preguntar** a qué `US-XXX` pertenece la tarea antes de continuar.
-2. Una vez recibida la US, **validar** que el archivo `TK-XXX-[nombre].md` existe dentro de la carpeta `docs/specs/user-stories/US-XXX-[nombre-corto]/`.
-3. Si la tarea no pertenece a esa US o el archivo no se encuentra: **parar** e informar al usuario con el motivo concreto:
+1. **Preguntar** a que `US-XXX` pertenece antes de continuar.
+2. Una vez recibida la US, **validar** que el archivo `TK-XXX-[nombre].md` existe dentro de `docs/specs/user-stories/US-XXX-[nombre-corto]/`.
+3. Si la tarea no pertenece a esa US o el archivo no se encuentra, **parar** e informar:
 
 ```
-⚠️ No es posible continuar con la implementación:
-- TK-XXX no pertenece a US-XXX o no se encontró en su carpeta.
+WARNING No es posible continuar con la implementacion:
+- TK-XXX no pertenece a US-XXX o no se encontro en su carpeta.
 - Motivo: <archivo no encontrado / TK en carpeta de otra US>
-- Verificar el número de tarea y la historia indicada antes de continuar.
+- Verificar el numero de tarea y la historia indicada antes de continuar.
 ```
 
-4. **No** implementar hasta que la relación TK → US esté confirmada.
+4. **No** implementar hasta que la relacion TK => US este confirmada.
 
 ---
 
 ## Checklist antes de implementar
 
 **Repositorio:**
-
 - Working tree limpio (`git status --porcelain` sin cambios pendientes)
 - Rama `feature/US-XXX-[nombre-corto]` activa o creada
-- `progress.md` leído o creado
+- `progress.md` leido o creado
+
 **Cola:**
-- `README.md` de la US leído
-- Todos los `TK-*.md` del alcance leídos
-- `work-units.md` consultado si algún alcance de unidad no era claro
+- `README.md` de la US leido
+- Todos los `TK-*.md` del alcance leidos
+- `work-units.md` consultado si algun alcance de unidad no era claro
 - Lista de implementables y excluidas presentada al usuario
-- Confirmación del usuario recibida antes del primer cambio de código
+- Confirmacion del usuario recibida antes del primer cambio de codigo
+
 **Por cada tarea:**
 - TK con `Estado: Ready`
 - No marcada como `Done` en `progress.md`
 - Si la tarea genera o modifica UI: ejecutado bajo `ui-specialist`
-- Si la referencia de diseño es Figma: MCP de Figma usado para implementar la tarea
-- Lint/build ejecutado tras la implementación
-- `progress.md` actualizado
-- Confirmación del usuario antes de la siguiente tarea
+- Si la referencia de diseno es Figma: MCP de Figma usado
+- Lint/build ejecutado tras la implementacion
+- `progress.md` actualizado a `Done`
+- **Confirmacion explicita del usuario recibida antes de pasar a la siguiente TK**
+
 **Cierre (fase de pruebas):**
 - Usuario preguntado sobre fase final de pruebas
 - Si acepta: tests delegados a **`quality-specialist`**, no escritos desde este skill
@@ -186,39 +185,46 @@ Un `TK-XXX` siempre vive bajo la carpeta de una US. Si el usuario indica solo el
 
 ## Ejemplos
 
-**Ejemplo 1 — US completa con filtro de unidad**
+**Ejemplo 1 - US completa con filtro de unidad**
+- *Entrada:* "Implementa lo Ready de la US-042; estoy en el paquete `@acme/web-app`."
+- *Salida:* Rama limpia y checkout a `feature/US-042-[nombre-corto]`; mensaje con TK Ready en cola y excluidas; tras confirmacion del usuario, implementa **solo la primera TK Ready**, ejecuta lint/build, actualiza `progress.md`, y **pausa para preguntar si continuar con la siguiente**.
 
-- *Entrada:* «Implementa lo Ready de la US-042; estoy en el paquete `@acme/web-app`.»
-- *Salida:* Rama limpia y checkout a `feature/US-042-[nombre-corto]`; mensaje con TK Ready del paquete en cola y excluidas con `(Draft)` / `(Done)`; tras confirmación, implementa la primera Ready, ejecuta lint/build, actualiza `progress.md`, pregunta por la siguiente. Sin tests hasta el cierre.
-**Ejemplo 2 — TK indicada sin US**
-- *Entrada:* «Implementa TK-003.»
-- *Comportamiento:* El agente pregunta a qué `US-XXX` pertenece. El usuario responde «US-042». El agente valida que `TK-003-[nombre].md` existe dentro de `docs/specs/user-stories/US-042-[nombre-corto]/`. Si existe, continúa con el flujo normal. Si no existe o pertenece a otra US, para con el mensaje de error estructurado indicando el motivo.
-**Ejemplo 3 — TK en Draft**
-- *Entrada:* «Ejecuta TK-005 de la US-042» y TK-005 está en Draft.
-- *Salida:* Lista de excluidas: `TK-005 — … (Draft)`; cola de implementables sin TK-005. No implementa TK-005 hasta que su estado sea Ready.
-**Ejemplo 4 — Confirmación entre tareas**
-- *Entrada:* Hay tres TK Ready aprobadas.
-- *Comportamiento:* El agente implementa TK-001, actualiza `progress.md`, ejecuta lint, pregunta «¿Continúo con TK-002?». No avanza sin respuesta afirmativa.
+**Ejemplo 2 - TK indicada sin US**
+- *Entrada:* "Implementa TK-003."
+- *Comportamiento:* Preguntar a que `US-XXX` pertenece. Validar que el archivo existe. Si existe, continuar con el flujo normal. Si no, parar con mensaje de error.
+
+**Ejemplo 3 - TK en Draft**
+- *Entrada:* "Ejecuta TK-005 de la US-042" y TK-005 esta en Draft.
+- *Salida:* Lista de excluidas: `TK-005 - ... (Draft)`. No implementa TK-005 hasta que este en Ready.
+
+**Ejemplo 4 - Confirmacion entre tareas (caso clave)**
+- *Entrada:* Hay tres TK Ready aprobadas en la cola.
+- *Comportamiento:* Implementa TK-001, actualiza `progress.md`, ejecuta lint. Luego **pausa y pregunta** con opciones tappables: "TK-001 completada. Continuo con TK-002 - [titulo]?" [Si, continuar] / [No, detener aqui]. No avanza sin respuesta afirmativa. Mismo ciclo tras TK-002 antes de TK-003.
+
+**Ejemplo 5 - Usuario pide "implementar todo de corrido"**
+- *Entrada:* "Implementa todas las tareas de una vez sin preguntar."
+- *Comportamiento:* Informar que el skill opera con **una tarea por confirmacion** y que no es posible omitir las pausas entre tareas. Explicar el beneficio: detectar errores temprano y mantener control del alcance. Ofrecer continuar con el flujo estandar.
 
 ---
 
 ## Anti-patterns
 
+- Implementar mas de una TK por turno sin confirmacion intermedia del usuario.
 - Codificar con working tree sucio sin avisar y pausar.
-- Implementar en `main` u otra rama que no sea `feature/US-XXX-[nombre-corto]` de esa US sin instrucción explícita.
-- Omitir el mensaje de cola y confirmación e ir directo al código.
+- Implementar en `main` u otra rama que no sea `feature/US-XXX-[nombre-corto]` sin instruccion explicita.
+- Omitir el mensaje de cola y confirmacion e ir directo al codigo.
 - Tratar tareas en Draft como ejecutables por defecto.
-- Arrancar la siguiente TK sin confirmación del usuario.
-- Ejecutar tests unitarios o E2E durante el ciclo de tareas sin que el usuario haya aceptado la fase final de pruebas.
+- Arrancar la siguiente TK sin confirmacion explicita (aunque el usuario haya aprobado la cola completa en el Paso 2).
+- Ejecutar suites de tests durante el ciclo de tareas sin que el usuario haya aceptado la fase final.
 - Escribir tests en la fase final sin delegar a **`quality-specialist`**.
-- Ignorar `progress.md` o usar identificadores distintos a `TK-XXX` en el progreso.
+- Ignorar `progress.md` o usar identificadores distintos a `TK-XXX`.
 - Implementar archivos de UI sin usar el agente `ui-specialist`.
 - Implementar UI con referencia Figma sin usar el MCP de Figma.
-- Modificar `README.md` de la US, archivos `TK-XXX`, ADRs o `technical-docs/` durante la implementación (`progress.md` excluido); ante cualquier necesidad de cambio en esos artefactos, parar y notificar al usuario.
-- Continuar la implementación cuando se detecta un conflicto en la documentación que pueda afectar el resultado; siempre parar y notificar primero.
-- Usar `glossary.md` como technical-docs o listado de implementación.
-- Escribir `Skipped` u otro estado no definido en `progress.md`; los únicos estados válidos son `Pending`, `In Progress` y `Done`.
-- Lanzar preguntas al usuario como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas; pedir confirmación de cola, siguiente TK o fase de pruebas sin opciones tappables cuando la herramienta está disponible.
+- Modificar `README.md` de la US, archivos `TK-XXX`, ADRs o `technical-docs/` durante la implementacion.
+- Continuar cuando se detecta un conflicto en la documentacion sin notificar al usuario primero.
+- Escribir `Skipped` u otro estado no definido en `progress.md`; estados validos: `Pending`, `In Progress`, `Done`.
+- Lanzar preguntas como prosa libre cuando el cliente expone herramienta de preguntas estructuradas.
+- Aceptar como confirmacion una respuesta ambigua ("ok", "dale") sin opciones explicitas; si hay duda, repreguntar.
 
 ---
 
@@ -226,35 +232,35 @@ Un `TK-XXX` siempre vive bajo la carpeta de una US. Si el usuario indica solo el
 
 ### Handoffs del ciclo
 
-Posición: **implementación** — entre `story-plan` e `story-integrate`.
+Posicion: **implementacion** - entre `story-plan` e `story-integrate`.
 
 | | |
 |--|--|
-| **Entrada** | US `Estado: Ready`; TK del alcance con `Estado: Ready`; rama `feature/US-XXX-[nombre-corto]` (crear desde la misma rama base que usará `story-integrate` al mergear). |
-| **Salida** | Código commiteado; `progress.md` con cada TK del alcance en `Done`; working tree limpio. |
-| **Siguiente paso** | Commits con **`git-commit`** si hay cambios pendientes → **`git-pr`** (opcional, desde `feature/US-*`) → **`story-integrate`** cuando `progress.md` esté íntegro en `Done`. |
-| **Regreso** | Ambigüedad o conflicto en US/TK → parar y **`story-define`** / **`story-plan`** según corresponda. TK fuera de alcance → alinear docs y ajustar `progress.md` antes de seguir. |
+| **Entrada** | US `Estado: Ready`; TK del alcance con `Estado: Ready`; rama `feature/US-XXX-[nombre-corto]` activa o creada desde la rama base acordada con el usuario. |
+| **Salida** | Codigo commiteado; `progress.md` con cada TK del alcance en `Done`; working tree limpio. |
+| **Siguiente paso** | `git-commit` si hay cambios pendientes => `git-pr` (opcional, abrir desde `feature/US-XXX-*` antes de mergear) => **`story-integrate`** cuando `progress.md` este integro en `Done`. |
+| **Regreso desde plan** | TK en Draft o conflicto tecnico => volver a **`story-plan`** para completar o corregir el TK antes de continuar. |
+| **Regreso desde integrate** | TK no `Done` detectada al intentar mergear => completar la implementacion aqui y actualizar `progress.md` antes de reintentar. |
 
 ### Estados de `progress.md`
 
-Estados válidos por tarea: **`Pending`**, **`In Progress`**, **`Done`**. No usar `Skipped` ni otros valores.
+Estados validos por tarea: **`Pending`**, **`In Progress`**, **`Done`**. No usar `Skipped` ni otros valores.
 
-| Situación | Qué hacer |
+| Situacion | Que hacer |
 |-----------|-----------|
-| Posponer una TK para más adelante | Mantener `Pending` y registrar el motivo en `Notas`. |
-| Sacar una TK del alcance de la US | Parar implementación; alinear US/TK con `story-define` o `story-plan`; eliminar la entrada de `progress.md` o el stub si ya no aplica. |
+| Posponer una TK | Mantener `Pending` y registrar el motivo en `Notas`. |
+| Sacar una TK del alcance | Parar; alinear con `story-define` o `story-plan`; eliminar la entrada de `progress.md` si ya no aplica. |
 | TK completada | `Done`. |
 
-### Orden de implementación
+### Orden de implementacion
 
-Respetar orden numérico `TK-001`, `TK-002`, … salvo dependencias obvias descritas en el texto de las tareas. Si hay conflicto de orden, preguntar al usuario antes de implementar.
+Respetar orden numerico `TK-001`, `TK-002`, ... salvo dependencias obvias en el texto de las tareas. Si hay conflicto de orden, preguntar al usuario antes de implementar.
 
-### Relación con otros skills
+### Relacion con otros skills
 
 - **story-plan** especifica el formato y contenido de los TK; este skill los consume (solo TK `Ready`).
-- **story-define** define la US y sus criterios de aceptación (`BR-XX`, `SC-XX`); la fase de pruebas los consume vía **`quality-specialist`**.
-- **quality-specialist** escribe tests en el cierre de este skill cuando el usuario acepta la fase final.
+- **story-define** define la US y sus criterios de aceptacion (`BR-XX`, `SC-XX`).
+- **quality-specialist** escribe tests en el cierre cuando el usuario acepta la fase final.
 - **story-integrate** cierra la US tras este skill; requiere `progress.md` completo en `Done` y working tree limpio.
 - **git-commit** prepara commits antes del handoff a integrate.
-- **MCP de Figma:** obligatorio para tareas de UI con referencia Figma; usarlo para obtener el contexto del diseño e implementar la tarea.
-
+- **MCP de Figma:** obligatorio para tareas de UI con referencia Figma.

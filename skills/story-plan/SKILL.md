@@ -287,7 +287,8 @@ Posición: **planificación** — entre `story-define` e `story-implement`.
 | **Salida mínima (modo B)** | Stubs `TK-XXX-*.md` en `Draft` + cobertura SC reportada al usuario. |
 | **Salida para implementar** | Cada TK del alcance acordado en **`Estado: Ready`** (Plan, Dependencias y Referencias según checklist). Stubs en Draft **no** habilitan `story-implement`. |
 | **Siguiente paso** | **`story-implement`** — solo cuando US Ready **y** las TK a ejecutar están Ready. Sugerir `/story-implement` al cerrar la última TK Ready del alcance. |
-| **Regreso** | Conflicto TK ↔ US → corregir TK aquí; si falta definición funcional → **`story-define`**. |
+| **Regreso desde define** | Cambio funcional en la US → releer `README.md` y actualizar TKs afectadas antes de continuar. |
+| **Regreso desde implement** | TK fuera de alcance o ambigüedad técnica → ajustar el TK aquí; no modificar el `README.md` de la US. Si el conflicto es funcional, escalar a **`story-define`**. |
 
 ### work-units.md
  
