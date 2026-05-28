@@ -10,27 +10,11 @@ Guia para **ejecutar en codigo** el trabajo especificado en historias `US-XXX` y
 
 > **Alcance:** consume especificaciones ya redactadas por **story-plan**. No reescribe ni reestructura tareas - solo las implementa. Correcciones menores acordadas con el usuario son la unica excepcion.
 >
-> **Ritmo obligatorio - una tarea por confirmacion:** implementar una TK, actualizar `progress.md`, ejecutar lint, y **esperar confirmacion explicita del usuario antes de arrancar la siguiente**. Sin excepcion. No existe modo "implementar todo de corrido".
+> **Ritmo obligatorio - una tarea por confirmacion:** implementar una TK, actualizar `progress.md`, ejecutar lint, y **esperar confirmacion explicita del usuario antes de arrancar la siguiente**. Sin excepcion.
 >
 > **Solo implementacion:** no modifica documentacion de producto (`README.md` de US, `TK-XXX`, ADRs, technical-docs) - solo `progress.md`. Si se detecta un conflicto en la documentacion que pueda afectar el resultado, **parar inmediatamente y notificar al usuario** antes de continuar.
 >
 > **Handoffs:** Entrada minima: US y TK en `Ready`; salida: `progress.md` en `Done` y working tree limpio => **`story-integrate`**.
-
----
-
-## Como preguntar al usuario
-
-Cuando este skill indique **preguntar, confirmar o validar** algo, usar la **herramienta de preguntas estructuradas** del cliente (opciones tappables) en lugar de prosa libre. Reglas:
-
-- **Una pregunta por turno**; maximo tres en un mismo bloque.
-- **Opciones cortas y mutuamente excluyentes** (2-4 por pregunta); entrada libre solo si no hay forma de enumerar opciones.
-- **No repreguntar** lo que ya esta en el contexto, `MEMORY.md`, `README.md` de la US, `TK-*.md` o `progress.md`.
-- **Una sola tanda de preguntas al inicio** para recopilar informacion faltante antes de tocar codigo.
-- **Excepciones de flujo deliberadas** - una pregunta estructurada por turno, con opciones cuando aplique:
-  1. Confirmacion de la cola antes del primer cambio de codigo.
-  2. **Confirmacion antes de cada siguiente TK** (obligatoria - ver Paso 3).
-  3. Aceptar o rechazar la fase final de pruebas al cierre.
-- **Fallback:** si el cliente no expone la herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3...).
 
 ---
 
