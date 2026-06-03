@@ -1,13 +1,9 @@
 ---
 name: project-create
-description: >-
-  Crear un proyecto nuevo fusionando una plantilla del equipo según el stack
-  tecnológico (Angular, React, Symfony, etc.). Usar siempre que el usuario pida
-  crear un proyecto nuevo, inicializar desde plantilla, o use `/project-create`.
-  Si el stack no está claro, preguntar antes de cualquier acción.
+description: Crear un proyecto nuevo fusionando una plantilla del equipo según el stack tecnológico (Angular, React, Symfony, etc.). Usar siempre que el usuario pida crear un proyecto nuevo, inicializar desde plantilla, o use `/project-create`. Si el stack no está claro, preguntar antes de cualquier acción.
 ---
 
-# project-create
+# Skill: Crear proyecto desde proyecto base
 
 Fusiona la plantilla del equipo al repo del usuario según el stack elegido.
 **No modifica repositorios remotos de plantilla.**
@@ -24,7 +20,7 @@ Stacks disponibles:
 |------------|-----------|
 | `angular`  | `references/angular.md` |
 
-Si el usuario pide un stack distinto a `angular` → indicar que aún no está disponible; no continuar con merge.
+Si el usuario pide un stack distinto a los stacks disponibles → indicar que aún no está disponible; no continuar con merge.
 
 ### 2 · Leer referencia
 
