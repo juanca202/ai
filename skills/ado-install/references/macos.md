@@ -60,7 +60,7 @@ source ~/.zshrc
 
 Cursor no hereda variables de `~/.zshrc` cuando se abre desde el Dock o Spotlight. El LaunchAgent inyecta cada variable en el entorno de usuario al iniciar sesión.
 
-Crear `~/Library/LaunchAgents/setenv.ado-{alias_lower}.plist` (un archivo por alias):
+Crear `~/Library/LaunchAgents/setenv.{SERVER_KEY}.plist` (un archivo por cuenta):
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -68,7 +68,7 @@ Crear `~/Library/LaunchAgents/setenv.ado-{alias_lower}.plist` (un archivo por al
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>setenv.ado-{alias_lower}</string>
+  <string>setenv.{SERVER_KEY}</string>
   <key>ProgramArguments</key>
   <array>
     <string>/bin/sh</string>
@@ -81,12 +81,12 @@ Crear `~/Library/LaunchAgents/setenv.ado-{alias_lower}.plist` (un archivo por al
 </plist>
 ```
 
-> Ejemplo: alias `FABRIKAM_MARIA` → archivo `setenv.ado-fabrikam-maria.plist`, label `setenv.ado-fabrikam-maria`.
+> Ejemplo: `{SERVER_KEY}` = `ado-bay-jua` → archivo `setenv.ado-bay-jua.plist`, label `setenv.ado-bay-jua`.
 
 Activar sin reiniciar:
 
 ```bash
-launchctl load ~/Library/LaunchAgents/setenv.ado-{alias_lower}.plist
+launchctl load ~/Library/LaunchAgents/setenv.{SERVER_KEY}.plist
 launchctl setenv ADO_PAT_{ALIAS} "$(security find-generic-password -a "$USER" -s "ADO_PAT_{ALIAS}" -w)"
 ```
 
@@ -123,7 +123,7 @@ Si alguna comprobación falla, el agente diagnostica y corrige antes de continua
 
 1. Cerrar con **Cmd+Q** (no solo la ventana).
 2. Reabrir Cursor.
-3. **Settings → MCP** → cada servidor `ado-{org}-{user}` debe aparecer **Connected**.
+3. **Settings → MCP** → cada servidor `{SERVER_KEY}` debe aparecer **Connected** y sin aviso de *naming issues*.
 
 ---
 
@@ -131,8 +131,8 @@ Si alguna comprobación falla, el agente diagnostica y corrige antes de continua
 
 ```bash
 # Descargar y eliminar el LaunchAgent de esa cuenta
-launchctl unload ~/Library/LaunchAgents/setenv.ado-{alias_lower}.plist 2>/dev/null
-rm ~/Library/LaunchAgents/setenv.ado-{alias_lower}.plist
+launchctl unload ~/Library/LaunchAgents/setenv.{SERVER_KEY}.plist 2>/dev/null
+rm ~/Library/LaunchAgents/setenv.{SERVER_KEY}.plist
 
 # Eliminar del Keychain
 security delete-generic-password -a "$USER" -s "ADO_PAT_{ALIAS}"

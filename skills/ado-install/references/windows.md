@@ -75,7 +75,7 @@ Si alguna comprobación falla, el agente diagnostica y corrige antes de continua
 1. Cerrar Cursor por completo (Archivo → Salir o desde bandeja).
 2. Cerrar sesión de Windows y volver a entrar (o reiniciar el equipo) para que Cursor herede las variables de usuario actualizadas.
 3. Reabrir Cursor.
-4. **Settings → MCP** → cada servidor `ado-{org}-{user}` debe aparecer **Connected**.
+4. **Settings → MCP** → cada servidor `{SERVER_KEY}` debe aparecer **Connected** y sin aviso de *naming issues*.
 
 > Si no se quiere cerrar sesión, lanzar Cursor desde una ventana de PowerShell donde se haya seteado `$env:ADO_PAT_{ALIAS}` manualmente (solo válido para esa sesión).
 
