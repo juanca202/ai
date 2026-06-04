@@ -22,6 +22,14 @@ Formato canónico:
 
 ---
 
+## Seguridad
+
+- Este skill **nunca** debe pegar en el chat valores de contraseñas, PAT, API keys, tokens ni líneas de diff que contengan secretos.
+- La detección de secretos sirve para **bloquear** commits; al informar al usuario, usar solo **ruta** y **número de línea** (ver [Detección de secretos](#detección-de-secretos-en-el-diff)).
+- No pedir al usuario que pegue secretos en el chat para “confirmar” el commit.
+
+---
+
 ## Cómo preguntar al usuario
 
 Usar la **herramienta de preguntas estructuradas** del cliente (opciones tappables). Reglas:
@@ -115,13 +123,9 @@ Verbo imperativo presente (`add`, `fix`, `remove`, `validate`, `prevent`). Indic
 
 ## Detección de secretos en el diff
 
-Ejecutar antes de aceptar el staging:
+Antes de aceptar el staging, seguir [references/secret-detection.md](references/secret-detection.md) (comando `grep` y lista de extensiones sensibles).
 
-```bash
-git diff --staged | grep -nEi 'password[[:space:]]*=|api[_-]?key|secret[[:space:]]*=|token[[:space:]]*=|BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY|aws_access_key_id|aws_secret_access_key|-----BEGIN CERTIFICATE-----'
-```
-
-Si hay coincidencias, **o** si el staging incluye `.env*`, `*.pem`, `*.key`, `id_rsa*`, `*.p12`, `*.pfx`: **detener** y reportar al usuario los archivos y líneas detectadas. No commitear hasta que el usuario los retire (`git restore --staged <ruta>`) o confirme explícitamente que es intencional.
+Si hay coincidencias en el comando, **o** si el staging incluye archivos sensibles por nombre (`.env*`, `*.pem`, `*.key`, `id_rsa*`, `*.p12`, `*.pfx`, etc.): **detener** y reportar al usuario **solo** `ruta:línea` con la aclaración `(valor omitido)` — sin citar el contenido de la línea ni el stdout del comando. No commitear hasta que el usuario retire el archivo del staging (`git restore --staged <ruta>`) o confirme explícitamente que es intencional.
 
 ---
 
@@ -214,7 +218,7 @@ Si hay conflicto:
 ```
 ⚠️ No es posible commitear todavía:
 - <razón concreta>
-- <archivo, línea o detalle>
+- <ruta>:<línea> (valor omitido) — sin pegar secretos
 ```
 
 ---
@@ -274,8 +278,8 @@ Si hay conflicto:
 - *Comportamiento:* Aplicar el formateo, `git add src/utils.ts`, commit nuevo con el mismo mensaje. Sin `--amend` ni `--no-verify`.
 
 **Ejemplo 6 — Secreto detectado**
-- *Entrada:* Diff staged incluye `config/.env.local` con `DB_PASSWORD=hunter2`.
-- *Comportamiento:* Detener, reportar archivo y línea. Sugerir `git restore --staged config/.env.local`. No commitear sin confirmación explícita.
+- *Entrada:* Diff staged incluye `config/.env.local` (variable de entorno sensible, línea 12).
+- *Comportamiento:* Detener, reportar `config/.env.local:12 (valor omitido)`. Sugerir `git restore --staged config/.env.local`. No commitear sin confirmación explícita. No mostrar el valor de la variable en el chat.
 
 ---
 
@@ -285,6 +289,7 @@ Si hay conflicto:
 - Mensajes vagos (`update`, `fix stuff`, `changes`, `wip`).
 - Inventar tipo o scope cuando el diff no lo respalda.
 - Incluir archivos sensibles (`.env`, claves) sin detección y confirmación.
+- Mostrar en el chat el valor de un secreto, una línea de diff con credenciales o el output del comando de detección.
 - Saltar la detección de secretos confiando en inspección visual.
 - Saltar hooks con `--no-verify` por comodidad.
 - Usar `--amend` tras fallo de hook en lugar de crear un commit nuevo.

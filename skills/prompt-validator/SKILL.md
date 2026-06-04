@@ -12,6 +12,14 @@ El skill **no** ejecuta el prompt ni produce el código pedido; **solo** audita 
 
 ---
 
+## Seguridad
+
+- En todo el informe (transcripción, "Texto actual", prompt reescrito), **enmascarar** credenciales: API keys, PAT, contraseñas, tokens de sesión, claves privadas y valores tras `=` en variables de entorno → `[REDACTED]`.
+- **Nunca** reproducir en el chat valores secretos que el usuario haya pegado en su prompt, aunque la cita sea para localizar un fragmento.
+- Conservar el resto del texto del prompt tal cual (estructura, rutas, nombres de clase) para que el usuario pueda ubicar las sugerencias.
+
+---
+
 ## Propósito
 
 Auditar un prompt recibido del usuario y devolver:
@@ -47,7 +55,7 @@ Usar cuando el usuario pida revisar, validar, mejorar o auditar un prompt; o cua
 
 Para ejecutar bien el skill, el agente necesita:
 
-- **Obligatorio:** el **texto del prompt** a auditar, completo y literal.
+- **Obligatorio:** el **texto del prompt** a auditar, completo. Si el usuario pega secretos, el agente los trata internamente pero **no** los vuelca en la salida (ver [Seguridad](#seguridad)).
 - **Opcional:**
   - **`type`** — declara explícitamente el tipo de prompt. Valores permitidos:
     - `Funcional` — describe comportamiento, criterios de aceptación (`BR-XX`, `SC-XX`), reglas de negocio o necesidad del usuario (p. ej. user stories, descripciones de feature, especificaciones de comportamiento). No requiere detalles técnicos como rutas, nombres de clase o archivos. **Las reglas de delimitar alcance y usar nombres exactos se marcan N/A.**
@@ -61,7 +69,7 @@ Para ejecutar bien el skill, el agente necesita:
   - Si el usuario quiere **solo las sugerencias** o **también el prompt reescrito** (por defecto: ambos).
   - Si el prompt es **un fragmento** de uno mayor o **independiente** (un fragmento puede legítimamente referirse a contexto ya establecido).
 
-Si el prompt llega como captura, imagen o referencia indirecta (p. ej. "el prompt que te pasé ayer"), **pedir** el texto literal antes de auditar. No inventar el contenido.
+Si el prompt llega como captura, imagen o referencia indirecta (p. ej. "el prompt que te pasé ayer"), **pedir** el texto del prompt antes de auditar. No inventar el contenido.
 
 ---
 
@@ -73,7 +81,7 @@ El skill **siempre** responde con esta estructura:
 ## Análisis del prompt
 
 **Prompt analizado:**
-> [transcripción literal del prompt]
+> [transcripción del prompt; secretos como `[REDACTED]`]
 
 **Tipo detectado:** Funcional | Técnico
 
@@ -86,7 +94,7 @@ El skill **siempre** responde con esta estructura:
 ### Sugerencias de mejora
 
 **1. [Título corto de la mejora]**
-- Texto actual: "<fragmento literal>"
+- Texto actual: "<fragmento citado; secretos como `[REDACTED]`>"
 - Propuesta: "<reemplazo concreto>"
 - Por qué mejora: <explicación en 1 línea>
 - *Regla: [nombre de la regla]*
@@ -267,10 +275,10 @@ Para cada prompt recibido, el agente debe:
    - **Declarar el tipo en el output**. Si fue **inferido** (no declarado), añadir la nota: *"Tipo inferido; declara `type: Funcional` o `type: Técnico` si quieres cambiarlo."*. Si fue **declarado**, no añadir nota.
 1. **Leer el prompt completo** y separarlo en frases u oraciones.
 2. **Aplicar las 11 reglas en orden**, frase por frase. Una misma frase puede activar varias sugerencias (p. ej. `Me gustaría que mejores el código de forma elegante` activa R-1, R-2, R-3 y R-4). Si el tipo es Funcional, **omitir** R-5 y R-10 (marcar N/A).
-3. **Citar literalmente** el fragmento en el campo "Texto actual" de cada sugerencia. No parafrasear el fragmento original; sí parafrasear/reescribir en la propuesta.
+3. **Citar el fragmento** en el campo "Texto actual" de cada sugerencia, con la misma redacción que en el prompt salvo secretos (`[REDACTED]`). No parafrasear el fragmento original; sí parafrasear/reescribir en la propuesta.
 4. **Producir la propuesta más concreta posible**. Si falta contexto (p. ej. para nombrar `AuthService`), proponer un placeholder explícito y pedir confirmación.
 5. **Calcular la efectividad** según la fórmula en [Salidas › Cálculo de efectividad](#cálculo-de-efectividad).
-6. **Generar el prompt reescrito** integrando todas las sugerencias, manteniendo la intención original del usuario. No añadir requisitos nuevos que el prompt no contemplaba.
+6. **Generar el prompt reescrito** integrando todas las sugerencias, manteniendo la intención original del usuario. No añadir requisitos nuevos que el prompt no contemplaba. Aplicar la misma redacción de secretos que en [Seguridad](#seguridad).
 
 ---
 
@@ -283,11 +291,12 @@ Evitar al ejecutar este skill:
 - **Aplicar R-5 o R-10 a un prompt Funcional**: en descripciones de comportamiento o user stories, la ausencia de rutas y nombres de clase es esperada, no una oportunidad de mejora. Marcar **N/A** y excluir del cálculo.
 - **Penalizar el refinamiento opcional en la efectividad**: la regla de exclusividad (`solo`/`únicamente`) es refinamiento, no entra en el porcentaje.
 - **Reescribir la intención** del prompt en la propuesta final (añadir features, cambiar el stack, decidir por el usuario decisiones de arquitectura no implicadas).
-- **Parafrasear el "Texto actual"**: debe citarse literal, entre comillas, para que el usuario lo localice en su prompt.
+- **Parafrasear el "Texto actual"** de forma que el usuario no pueda localizar el fragmento en su prompt (salvo redacción de `[REDACTED]` en credenciales).
+- **Reproducir credenciales** del prompt del usuario en la transcripción, en "Texto actual" o en el prompt reescrito.
 - **Devolver solo la propuesta reescrita** sin las sugerencias (perdería valor pedagógico). Excepción: el usuario lo pide explícitamente.
 - **Omitir la versión reescrita** salvo si el usuario lo pidió.
 - **Omitir la efectividad** o sustituirla por `X/N`: el porcentaje es la métrica principal y debe aparecer siempre.
-- **Auditar un prompt cuyo texto no se ha recibido literal** (no inferir, pedir).
+- **Auditar un prompt cuyo texto no se ha recibido** (no inferir, pedir).
 - **Formular las sugerencias como acusaciones** ("incumples la regla X"): redactarlas como mejoras propuestas ("reemplaza ... por ...; reduce ambigüedad para el agente").
 - **Mostrar códigos de regla (`R-1`, `R-2`, …) al usuario**: en el output usar el nombre/descripción de la regla, no el código. Los códigos son referencia interna de este documento.
 - **Numerar `Reglas cumplidas` o `Reglas no evaluables`**: usar siempre viñetas, una regla por línea; no usar `1.`, `2.`, … ni separación por coma.
@@ -346,6 +355,6 @@ Pedir contexto al usuario **solo** si:
 
 - El prompt referencia archivos, módulos o nombres que el agente no puede ver y la sugerencia depende de ellos (R-10, solo aplica a Técnico).
 - El prompt apela a "buenas prácticas" (R-7) y el stack/dominio cambia radicalmente lo que esas prácticas son (p. ej. React vs Quarkus).
-- El prompt llega indirectamente (captura, "el de ayer") y no se tiene el texto literal.
+- El prompt llega indirectamente (captura, "el de ayer") y no se tiene el texto del prompt.
 
 En el resto de casos, auditar con lo recibido y marcar suposiciones en las sugerencias.
