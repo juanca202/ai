@@ -11,16 +11,20 @@ Cada entrada en `mcp.json` está ligada a un par **organización + correo de usu
 
 ## Flujo del agente
 
-1. **Preguntar la organización** de Azure DevOps (ej. `BayteqDev`). Solo el nombre, sin URL completa.
+1. **Preguntar la organización** de Azure DevOps (ej. `Fabrikam`). Solo el nombre, sin URL completa.
 2. **Preguntar el correo** del usuario ADO asociado a esa organización (ej. `juan@empresa.com`). Se usa para nombrar la variable de entorno y la entrada del servidor de forma única.
 3. **Detectar SO**: macOS → [macos.md](references/macos.md); Windows → [windows.md](references/windows.md).
-4. **Calcular el alias** de la cuenta: `{ORG}_{ALIAS}` donde `ALIAS` es la parte del correo antes del `@`, en mayúsculas y sin caracteres especiales (ej. `BAYTEQDEV_JUAN`). Este alias se usa en el nombre del servidor MCP y en la variable de entorno.
+4. **Calcular el alias** de la cuenta: `{ORG}_{ALIAS}` donde `ALIAS` es la parte del correo antes del `@`, en mayúsculas y sin caracteres especiales (ej. `FABRIKAM_MARIA`). Este alias se usa en el nombre del servidor MCP y en la variable de entorno.
 5. **Indicar al usuario** que cree el PAT en Azure DevOps (con ese usuario) antes de continuar.
 6. **Leer el `.cursor/mcp.json` existente** si ya hay uno, para agregar la nueva entrada sin borrar las configuraciones previas.
 7. **Escribir o actualizar** `.cursor/mcp.json` con la nueva entrada (plantilla abajo).
-8. **Guiar al usuario** paso a paso para guardar el PAT codificado en la variable `ADO_PAT_{ALIAS}` (el agente **no** debe pedir ni almacenar el PAT en el chat).
-9. **Verificar** con los comandos de la sección «Verificación».
-10. Pedir **reinicio completo de Cursor** (Cmd+Q / cerrar app) tras configurar variables.
+8. **Mostrar al usuario únicamente** el Paso 1 de la guía del SO (codificar y guardar: Keychain en macOS, variable de usuario en Windows). El agente **no** debe pedir ni almacenar el PAT en el chat. **Esperar confirmación** de que el usuario completó ese paso.
+9. **Automáticamente**, tras la confirmación, ejecutar los pasos del agente de la guía del SO:
+   - **macOS:** export en `~/.zshrc` + LaunchAgent (Dock/Spotlight).
+   - **Windows:** línea en `$PROFILE` de PowerShell.
+   No mostrar estos pasos al usuario salvo que falle algo y haga falta intervención manual.
+10. **Verificar internamente** con los comandos de «Verificación del agente» en la guía del SO. El agente ejecuta las comprobaciones; **no** mostrarlas al usuario. Solo informar el resultado (éxito o error con diagnóstico).
+11. Pedir **reinicio completo de Cursor** (Cmd+Q / cerrar app) tras configurar variables.
 
 ## Crear PAT (usuario)
 
@@ -54,7 +58,7 @@ El valor base64 resultante es lo que se guarda en `ADO_PAT_{ALIAS}`.
 
 | Correo               | Org        | Alias          | Variable de env        | Clave servidor MCP  |
 | -------------------- | ---------- | -------------- | ---------------------- | ------------------- |
-| juan@bayteq.com      | BayteqDev  | BAYTEQDEV_JUAN | ADO_PAT_BAYTEQDEV_JUAN | ado-bayteqdev-juan  |
+| maria@fabrikam.com   | Fabrikam   | FABRIKAM_MARIA | ADO_PAT_FABRIKAM_MARIA | ado-fabrikam-maria  |
 | carlos@cliente.com   | ClienteOrg | CLIENTEORG_CARLOS | ADO_PAT_CLIENTEORG_CARLOS | ado-clienteorg-carlos |
 
 Reglas del alias:
@@ -84,11 +88,11 @@ Cada cuenta es una entrada independiente. Cuando se agrega una segunda cuenta, *
 ```json
 {
   "mcpServers": {
-    "ado-bayteqdev-juan": {
+    "ado-fabrikam-maria": {
       "command": "npx",
-      "args": ["-y", "@azure-devops/mcp", "BayteqDev", "--authentication", "pat"],
+      "args": ["-y", "@azure-devops/mcp", "Fabrikam", "--authentication", "pat"],
       "env": {
-        "PERSONAL_ACCESS_TOKEN": "${env:ADO_PAT_BAYTEQDEV_JUAN}"
+        "PERSONAL_ACCESS_TOKEN": "${env:ADO_PAT_FABRIKAM_MARIA}"
       }
     },
     "ado-clienteorg-carlos": {
@@ -108,19 +112,9 @@ Cada cuenta es una entrada independiente. Cuando se agrega una segunda cuenta, *
 
 ## Verificación
 
+La verificación previa al reinicio la ejecuta el agente (ver «Verificación del agente» en [macos.md](references/macos.md) o [windows.md](references/windows.md)). **No** mostrar esos comandos al usuario.
+
 Tras reiniciar Cursor, comprobar **Settings → MCP** → servidor `ado-{ORG_LOWER}-{USER_ALIAS_LOWER}` en verde.
-
-**API (macOS/Linux/Git Bash) — reemplazar `{ALIAS}` y `{ORG}`:**
-
-```bash
-VAR="ADO_PAT_{ALIAS}"
-PAT_B64="${!VAR:-$(security find-generic-password -a "$USER" -s "$VAR" -w 2>/dev/null)}"
-curl -s -o /dev/null -w "HTTP %{http_code}\n" \
-  -H "Authorization: Basic $PAT_B64" \
-  "https://dev.azure.com/{ORG}/_apis/projects?api-version=7.1&\$top=1"
-```
-
-Esperado: `HTTP 200`.
 
 **Prueba funcional en chat:** listar proyectos o work items de `{ORG}` usando el servidor `ado-{ORG_LOWER}-{USER_ALIAS_LOWER}`.
 

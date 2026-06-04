@@ -13,34 +13,26 @@ Pasos para que Cursor reciba cada `ADO_PAT_{ALIAS}` de forma persistente tras re
 
 ## Por cada cuenta ADO
 
-Repetir estos pasos una vez por cada par organización+correo. Sustituir `{ALIAS}` por el alias calculado (ej. `BAYTEQDEV_JUAN`).
+Repetir estos pasos una vez por cada par organización+correo. Sustituir `{ALIAS}` por el alias calculado (ej. `FABRIKAM_MARIA`).
 
-### Paso 1 — Codificar el PAT
+### Paso 1 — Codificar y guardar variable de usuario (usuario)
 
-En **PowerShell**, sustituir `PAT_EN_CRUDO`:
+El agente **muestra solo este paso** al usuario y espera confirmación antes de continuar. **No** mostrar comandos de codificación aparte ni pasos de verificación.
 
-```powershell
-[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes(":PAT_EN_CRUDO"))
-```
-
-Copiar la salida base64. **No** guardar el PAT crudo en archivos de texto.
-
-### Paso 2 — Guardar como variable de usuario persistente
+En **PowerShell**, sustituir `PAT_EN_CRUDO` por el token tal como lo copió de Azure DevOps:
 
 ```powershell
 $base64Pat = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes(":PAT_EN_CRUDO"))
 [System.Environment]::SetEnvironmentVariable("ADO_PAT_{ALIAS}", $base64Pat, "User")
 ```
 
-Verificar:
+> El PAT **no** debe pegarse en el chat.
 
-```powershell
-[Environment]::GetEnvironmentVariable("ADO_PAT_{ALIAS}", "User").Length  # debe ser > 0
-```
+---
 
-> Las variables de usuario en Windows persisten en el registro y son heredadas por Cursor al abrirse después de cerrar y reabrir sesión. No se necesita paso adicional para apps gráficas (a diferencia de macOS).
+### Paso 2 — Perfil de PowerShell (agente, automático)
 
-### Paso 3 — Perfil de PowerShell (opcional, para terminales)
+Tras la confirmación del usuario, el agente **ejecuta** este paso sin pedir intervención adicional. Antes de continuar, el agente **verifica** internamente que la variable existe (ver sección «Verificación del agente»).
 
 Para que nuevas ventanas de PowerShell también tengan la variable disponible:
 
@@ -49,11 +41,32 @@ Para que nuevas ventanas de PowerShell también tengan la variable disponible:
 if (!(Test-Path $PROFILE)) { New-Item -Path $PROFILE -ItemType File -Force }
 ```
 
-Añadir a `$PROFILE`:
+Añadir a `$PROFILE` (si la línea no existe ya):
 
 ```powershell
 $env:ADO_PAT_{ALIAS} = [Environment]::GetEnvironmentVariable("ADO_PAT_{ALIAS}", "User")
 ```
+
+> Las variables de usuario en Windows persisten en el registro y son heredadas por Cursor al abrirse después de cerrar y reabrir sesión.
+
+---
+
+## Verificación del agente
+
+El agente ejecuta estas comprobaciones **antes** de pedir reiniciar Cursor. **No** mostrar estos comandos al usuario salvo que falle algo y haga falta diagnosticar.
+
+```powershell
+# Variable de usuario persistente
+[Environment]::GetEnvironmentVariable("ADO_PAT_{ALIAS}", "User").Length  # > 0
+
+# API Azure DevOps
+$pat = [Environment]::GetEnvironmentVariable("ADO_PAT_{ALIAS}", "User")
+$headers = @{ Authorization = "Basic $pat" }
+(Invoke-WebRequest -Uri "https://dev.azure.com/{ORG}/_apis/projects?api-version=7.1&`$top=1" -Headers $headers).StatusCode
+# Esperado: 200
+```
+
+Si alguna comprobación falla, el agente diagnostica y corrige antes de continuar.
 
 ---
 
@@ -65,18 +78,6 @@ $env:ADO_PAT_{ALIAS} = [Environment]::GetEnvironmentVariable("ADO_PAT_{ALIAS}", 
 4. **Settings → MCP** → cada servidor `ado-{org}-{user}` debe aparecer **Connected**.
 
 > Si no se quiere cerrar sesión, lanzar Cursor desde una ventana de PowerShell donde se haya seteado `$env:ADO_PAT_{ALIAS}` manualmente (solo válido para esa sesión).
-
----
-
-## Verificación API
-
-```powershell
-$pat = [Environment]::GetEnvironmentVariable("ADO_PAT_{ALIAS}", "User")
-$headers = @{ Authorization = "Basic $pat" }
-(Invoke-WebRequest -Uri "https://dev.azure.com/{ORG}/_apis/projects?api-version=7.1&`$top=1" -Headers $headers).StatusCode
-```
-
-Esperado: `200`.
 
 ---
 

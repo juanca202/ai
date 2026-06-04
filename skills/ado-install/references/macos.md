@@ -12,17 +12,11 @@ Pasos para que Cursor (abierto desde Dock o Spotlight) reciba cada `ADO_PAT_{ALI
 
 ## Por cada cuenta ADO
 
-Repetir estos pasos una vez por cada par organización+correo. Sustituir `{ALIAS}` por el alias calculado (ej. `BAYTEQDEV_JUAN`).
+Repetir estos pasos una vez por cada par organización+correo. Sustituir `{ALIAS}` por el alias calculado (ej. `FABRIKAM_MARIA`).
 
-### Paso 1 — Codificar el PAT
+### Paso 1 — Codificar y guardar en Keychain (usuario)
 
-```bash
-echo -n ":PAT_EN_CRUDO" | base64
-```
-
-Copiar la salida. **No** guardar el PAT crudo.
-
-### Paso 2 — Guardar en Keychain
+El agente **muestra solo este paso** al usuario y espera confirmación antes de continuar. **No** mostrar comandos de codificación aparte ni pasos de verificación.
 
 **Primera vez:**
 
@@ -39,29 +33,30 @@ security add-generic-password -a "$USER" -s "ADO_PAT_{ALIAS}" \
   -w "$(echo -n ':PAT_EN_CRUDO' | base64)" -U
 ```
 
-Verificar (debe mostrar un número > 0, p. ej. ~117):
+> Sustituir `:PAT_EN_CRUDO` por el token tal como lo copió de Azure DevOps (incluyendo los dos puntos iniciales en el comando). El PAT **no** debe pegarse en el chat.
 
-```bash
-security find-generic-password -a "$USER" -s "ADO_PAT_{ALIAS}" -w 2>/dev/null | wc -c
-```
+---
 
-### Paso 3 — Exportar en `~/.zshrc`
+### Pasos 2 y 3 — Automáticos (agente)
 
-Añadir una línea por cada alias al final de `~/.zshrc`:
+Tras la confirmación del usuario, el agente **ejecuta** estos pasos sin pedir intervención adicional. Antes de continuar, el agente **verifica** internamente que el Keychain responde (ver sección «Verificación del agente»).
+
+#### Paso 2 — Exportar en `~/.zshrc`
+
+Añadir al final de `~/.zshrc` (si la línea no existe ya):
 
 ```bash
 # Azure DevOps PAT para Cursor MCP — {ALIAS}
 export ADO_PAT_{ALIAS}=$(security find-generic-password -a "$USER" -s "ADO_PAT_{ALIAS}" -w 2>/dev/null)
 ```
 
-Aplicar en la terminal actual:
+Aplicar en la sesión actual:
 
 ```bash
 source ~/.zshrc
-echo ${#ADO_PAT_{ALIAS}}   # debe ser > 0
 ```
 
-### Paso 4 — LaunchAgent (necesario para Cursor como app gráfica)
+#### Paso 3 — LaunchAgent (necesario para Cursor como app gráfica)
 
 Cursor no hereda variables de `~/.zshrc` cuando se abre desde el Dock o Spotlight. El LaunchAgent inyecta cada variable en el entorno de usuario al iniciar sesión.
 
@@ -86,7 +81,7 @@ Crear `~/Library/LaunchAgents/setenv.ado-{alias_lower}.plist` (un archivo por al
 </plist>
 ```
 
-> Ejemplo: alias `BAYTEQDEV_JUAN` → archivo `setenv.ado-bayteqdev-juan.plist`, label `setenv.ado-bayteqdev-juan`.
+> Ejemplo: alias `FABRIKAM_MARIA` → archivo `setenv.ado-fabrikam-maria.plist`, label `setenv.ado-fabrikam-maria`.
 
 Activar sin reiniciar:
 
@@ -95,11 +90,32 @@ launchctl load ~/Library/LaunchAgents/setenv.ado-{alias_lower}.plist
 launchctl setenv ADO_PAT_{ALIAS} "$(security find-generic-password -a "$USER" -s "ADO_PAT_{ALIAS}" -w)"
 ```
 
-Verificar:
+---
+
+## Verificación del agente
+
+El agente ejecuta estas comprobaciones **antes** de pedir reiniciar Cursor. **No** mostrar estos comandos al usuario salvo que falle algo y haga falta diagnosticar.
 
 ```bash
-launchctl getenv ADO_PAT_{ALIAS} | wc -c   # debe ser > 0
+# Keychain accesible
+security find-generic-password -a "$USER" -s "ADO_PAT_{ALIAS}" -w 2>/dev/null | wc -c   # > 0
+
+# Variable en shell
+echo ${#ADO_PAT_{ALIAS}}   # > 0
+
+# LaunchAgent activo
+launchctl getenv ADO_PAT_{ALIAS} | wc -c   # > 0
+
+# API Azure DevOps
+VAR="ADO_PAT_{ALIAS}"
+PAT_B64="${!VAR:-$(security find-generic-password -a "$USER" -s "$VAR" -w 2>/dev/null)}"
+curl -s -o /dev/null -w "HTTP %{http_code}\n" \
+  -H "Authorization: Basic $PAT_B64" \
+  "https://dev.azure.com/{ORG}/_apis/projects?api-version=7.1&\$top=1"
+# Esperado: HTTP 200
 ```
+
+Si alguna comprobación falla, el agente diagnostica y corrige antes de continuar.
 
 ---
 
