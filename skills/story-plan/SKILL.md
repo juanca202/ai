@@ -44,6 +44,63 @@ Orden canónico compartido con el resto del ciclo de historias. Detenerse en el 
 
 ---
 
+## Integración con Azure DevOps
+
+Antes de crear cualquier TK (stub o completa), verificar si el repositorio usa Azure DevOps como fuente de trabajo:
+
+### Paso 1 — Detectar si el repo está vinculado a ADO
+
+Leer `.agents/MEMORY.md` (raíz del repo) y buscar cualquiera de estas señales:
+
+- Línea `azure_devops_org:` o `ado_org:` con un valor no vacío.
+- Línea `azure_devops_project:` o `ado_project:` con un valor no vacío.
+- Línea `work_item_tracking: azure_devops` (o valor equivalente).
+
+Si **ninguna** señal está presente → el repo **no** usa ADO. Continuar con el flujo normal (ID secuencial local).
+
+Si **alguna** señal está presente → el repo **sí** usa ADO. Pasar al paso 2.
+
+### Paso 2 — Verificar disponibilidad del MCP de ADO
+
+Comprobar si existe una herramienta MCP de Azure DevOps disponible en el cliente actual (p. ej. `mcp_azure-devops_*` o similar).
+
+- **MCP disponible** → Pasar al paso 3 (crear en ADO primero).
+- **MCP no disponible** → Notificar al usuario:
+  ```
+  ⚠️ El repo está vinculado a Azure DevOps pero el MCP no está conectado.
+  La tarea se creará solo en local con ID secuencial.
+  Para habilitar la sincronización, conecta el MCP de ADO desde el menú de herramientas.
+  ```
+  Continuar con el flujo normal (ID secuencial local).
+
+### Paso 3 — Crear primero en Azure DevOps (cuando MCP disponible)
+
+Antes de generar el archivo local, usar el MCP para crear el work item en ADO:
+
+1. **Título**: usar el nombre descriptivo del TK (mismo que iría en el nombre de archivo).
+2. **Tipo de work item**: `Task` (o el tipo equivalente configurado en el proyecto ADO).
+3. **Descripción**: el objetivo breve del TK.
+4. **Iteración / Area Path**: leer de `.agents/MEMORY.md` si está definido (`ado_area_path:`, `ado_iteration:`); si no, omitir (ADO usará los defaults del proyecto).
+5. **Historia padre**: si el proyecto ADO tiene US vinculadas, intentar vincular al work item padre correspondiente a la US. Si no hay forma de resolverlo, omitir la vinculación sin bloquear.
+
+Tras la llamada al MCP, **extraer el `id` numérico** del work item creado (campo `id` en la respuesta).
+
+### Paso 4 — Usar el ID de ADO como número de tarea local
+
+En lugar del número secuencial `TK-XXX` calculado de los archivos existentes, usar el **ID del work item ADO** como el número del TK:
+
+- Formato: `TK-<ado_id>-[nombre-descriptivo].md`  
+  Ejemplo: si ADO devuelve `id: 1847`, el archivo será `TK-1847-modelo-dominio.md`.
+- Registrar en los metadatos del archivo el vínculo al work item:
+  ```
+  ADO Work Item: [#<ado_id>](<url-al-work-item>)
+  ```
+  Usar la URL que devuelva el MCP, o construirla como `https://dev.azure.com/<org>/<project>/_workitems/edit/<ado_id>`.
+
+> **Nota de solapamiento:** al usar IDs de ADO, el check "ID disponible" se realiza igualmente — verificar que no exista ya `TK-<ado_id>-*.md` en la carpeta de la US antes de crear el archivo.
+
+---
+
 ## Modos de invocación
 
 El skill reconoce **dos modos** según lo que entregue el usuario. El modo determina el flujo a aplicar.
@@ -71,10 +128,12 @@ En caso de duda entre A y B: preguntar al usuario antes de continuar. No combina
  
 ## Convenciones del nombre de archivo
  
-- Formato: `TK-XXX-[nombre-descriptivo].md` con `TK-XXX` en mayúsculas.
-- `XXX`: número secuencial **por historia** (no global); tres dígitos con cero a la izquierda.
+- Formato: `TK-<número>-[nombre-descriptivo].md` con `TK-<número>` en mayúsculas.
+- **Sin ADO**: `<número>` es un secuencial **por historia** (no global); tres dígitos con cero a la izquierda → `TK-001`, `TK-002`, …
+- **Con ADO (MCP disponible)**: `<número>` es el **ID numérico del work item** creado en Azure DevOps → `TK-1847`, `TK-2031`, …  No se aplica padding de ceros.
 - Nombre descriptivo: minúsculas, kebab-case, corto y descriptivo.
-- Ejemplos: `TK-001-modelo-dominio-receta.md`, `TK-002-endpoint-crear-receta.md`.
+- Ejemplos sin ADO: `TK-001-modelo-dominio-receta.md`, `TK-002-endpoint-crear-receta.md`.
+- Ejemplos con ADO: `TK-1847-modelo-dominio-receta.md`, `TK-2031-endpoint-crear-receta.md`.
 ---
  
 ## Información requerida antes de redactar
@@ -119,12 +178,15 @@ Antes de crear archivos, verificar las siguientes condiciones. Si alguna falla, 
  
 Un stub reserva el ID y el vínculo a la US. No requiere contexto técnico completo.
  
-1. Inferir el siguiente `TK-XXX` libre listando archivos `TK-*.md` en la carpeta de la US.
-2. Crear `TK-XXX-[nombre-descriptivo].md` con:
+1. **Resolver el ID de la tarea** siguiendo la [Integración con Azure DevOps](#integración-con-azure-devops):
+   - Si el repo **usa ADO y el MCP está disponible**: crear el work item en ADO (Paso 3) y usar el `id` devuelto como número del archivo. Guardar la URL del work item para los metadatos.
+   - En cualquier otro caso: inferir el siguiente número secuencial libre listando archivos `TK-*.md` en la carpeta de la US.
+2. Crear `TK-<número>-[nombre-descriptivo].md` con:
    - `Estado: Draft`
    - `Historia`: enlace a la US `[US-XXX](./README.md)`.
    - `Unidad de trabajo`: la conocida o `Por definir`.
    - `Asignado a`: indicado por el usuario; si no, inferir con `git config user.name`; omitir la línea si no aplica.
+   - `ADO Work Item`: `[#<ado_id>](<url>)` — solo si se creó en ADO; omitir la línea si no aplica.
    - **Descripción**: objetivo breve acordado — el *qué*, sin el cómo.
    - **Plan de implementación**: vacío o ausente si no hay pasos definidos.
    - **Observaciones**: pendientes reales; no rellenar con texto genérico.
@@ -137,13 +199,15 @@ Un stub reserva el ID y el vínculo a la US. No requiere contexto técnico compl
  
 Una TK completa puede alcanzar `Estado: Ready` si cumple todas las condiciones del checklist.
  
-1. **Inferir el siguiente `TK-XXX`** libre en la carpeta de la US.
+1. **Resolver el ID de la tarea** siguiendo la [Integración con Azure DevOps](#integración-con-azure-devops):
+   - Si el repo **usa ADO y el MCP está disponible**: crear el work item en ADO (Paso 3) y usar el `id` devuelto como número del archivo. Guardar la URL del work item para los metadatos.
+   - En cualquier otro caso: inferir el siguiente número secuencial libre en la carpeta de la US.
 2. **Gestionar `work-units.md`:**
    - Crear desde `assets/work-units-template.md` si el archivo no existe.
    - Si la unidad es nueva: añadir sección `## <nombre-unidad>` con párrafo de alcance. Si el alcance no está claro, preguntar antes de añadirla.
    - No listar TKs, DTOs ni technical-docs dentro de `work-units.md`; solo nombre de unidad y párrafo de alcance.
 3. **Redactar el TK** siguiendo `assets/task-template.md`:
-   - **Metadatos**: `Historia` con enlace `[US-XXX](./README.md)`; `Asignado a` indicado por el usuario, o inferido con `git config user.name`, u omitido si no aplica.
+   - **Metadatos**: `Historia` con enlace `[US-XXX](./README.md)`; `Asignado a` indicado por el usuario, o inferido con `git config user.name`, u omitido si no aplica; `ADO Work Item: [#<ado_id>](<url>)` solo si se creó en ADO.
    - **Descripción**: qué lograr — objetivo claro, tono imperativo y verificable; sin «podría», «quizá», «tal vez».
    - **Dependencias**: solo piezas *dentro de la unidad de trabajo* — componentes, servicios, modelos, librerías. No incluir aquí ADRs, technical-docs, contratos ni referencias de diseño; esos van exclusivamente en **Referencias**.
    - **Referencias**: ADRs existentes, technical-docs, diseño. No crear ADRs; si falta una decisión, sugerirlo al usuario en Observaciones.
@@ -206,6 +270,8 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - [ ] Modo B: propuesta presentada al usuario (paso 5) sin archivos creados
 - [ ] Modo B: confirmación estructurada recibida (paso 6) antes del primer `TK-*.md`
 - [ ] Idioma de preferencia determinado y `.agents/MEMORY.md` actualizado si fue necesario
+- [ ] **ADO**: `.agents/MEMORY.md` revisado para señales de vinculación ADO
+- [ ] **ADO**: si ADO detectado, MCP comprobado; si disponible, work item creado y `ado_id` extraído antes de crear el archivo local
 **Validación:**
 - [ ] Carpeta de la US existe con `README.md`
 - [ ] ID `TK-XXX` libre en la carpeta
@@ -253,9 +319,12 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
  
 - *Entrada:* «Tareas para US-009.» — pero `US-009/README.md` está en `Draft` o no tiene SC documentados en **Criterios de aceptación**.
 - *Comportamiento:* El agente bloquea, no crea ningún stub. Reporta al usuario qué falta (estado, BR, SC) y sugiere usar `story-define` para alinear la US antes de planificar tareas.
+**Ejemplo 6 — Repo vinculado a Azure DevOps con MCP disponible**
+
+- *Contexto:* `.agents/MEMORY.md` contiene `azure_devops_project: MyProject`. MCP de ADO disponible en el cliente.
+- *Entrada:* «TK para el endpoint de autenticación en US-003.»
+- *Comportamiento:* El agente detecta ADO, verifica MCP disponible, crea work item en ADO (`Task`, título "Endpoint de autenticación", US-003 como padre si hay vinculación), extrae `id: 2031`. Genera el archivo local `TK-2031-endpoint-autenticacion.md` con metadato `ADO Work Item: [#2031](https://dev.azure.com/…)`. Flujo de TK completa o stub según la intención del usuario.
 ---
- 
-## Anti-patterns
  
 - Implementar features, migraciones o tests mientras se redacta el TK.
 - Crear ADRs sin pedido explícito del usuario; solo referenciar existentes o sugerir su creación.
@@ -267,6 +336,8 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - Usar `glossary.md` como especificación técnica o sustituto de ADR.
 - Rellenar secciones con supuestos o ejemplos genéricos; dejar pendientes reales sin listar en Observaciones.
 - Narrar el trabajo realizado en el mensaje al usuario («leí la US», «creé el TK», «actualicé work-units»); solo reportar resultados y pendientes.
+- **ADO**: crear el archivo local con ID secuencial cuando el repo está vinculado a ADO y el MCP está disponible — siempre crear en ADO primero y usar su `id`.
+- **ADO**: omitir la línea `ADO Work Item:` en los metadatos cuando el TK fue creado vía MCP.
 - **Modo B**: crear stubs desde una US en `Draft`, o sin `BR-XX` / `SC-XX` explícitos en **Criterios de aceptación** de su `README.md` — debe bloquear y reportar.
 - **Modo B**: incluir identificadores `SC-XX` / `BR-XX` dentro del archivo `TK-XXX.md`; la cobertura se reporta al usuario, no se documenta en el TK.
 - **Modo B**: forzar un mapeo 1 stub = 1 SC; los stubs se agrupan por unidad de trabajo, no por escenario.

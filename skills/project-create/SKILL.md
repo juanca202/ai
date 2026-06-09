@@ -19,6 +19,7 @@ Stacks disponibles:
 | `stack_id` | Referencia |
 |------------|-----------|
 | `angular`  | `references/angular.md` |
+| `nextjs`  | `references/nextjs.md` |
 
 Si el usuario pide un stack distinto a los stacks disponibles → indicar que aún no está disponible; no continuar con merge.
 
