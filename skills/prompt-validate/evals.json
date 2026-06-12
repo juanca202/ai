@@ -1,5 +1,5 @@
 {
-  "skill_name": "prompt-validator",
+  "skill_name": "prompt-validate",
   "evals": [
     {
       "id": 1,
