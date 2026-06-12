@@ -1,5 +1,5 @@
 ---
-name: prompt-validator
+name: prompt-validate
 description: Validar prompts dirigidos a agentes de IA (Claude Code, Cursor, Copilot, etc.) contra reglas de redacción efectiva. Calcular un porcentaje de efectividad del prompt y devolver sugerencias de mejora concretas, más una propuesta de prompt reescrito. Cubre verbos no imperativos, lenguaje conversacional, acciones vagas, términos subjetivos, alcance difuso, prohibiciones implícitas, intenciones múltiples y nombres genéricos. Las reglas de detalle técnico (alcance, nombres exactos) se aplican solo a prompts de implementación; en prompts funcionales (user stories, descripciones de comportamiento) se marcan N/A. Usar siempre que el usuario pida validar, revisar, auditar, mejorar, corregir o "pulir" un prompt antes de enviarlo a un agente, o cuando pegue un prompt y pida feedback sobre cómo está redactado.
 license: MIT
 ---
