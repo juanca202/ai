@@ -1,0 +1,143 @@
+# Tipo de implementacion: Work item de mantenimiento
+
+Flujo para **ejecutar en codigo** un work item de mantenimiento `WI-XXX` bajo `docs/specs/work-items/`: bugs, refactor, deuda tecnica, actualizacion de dependencias, tareas operativas o de infraestructura. Esta referencia se carga desde `SKILL.md` cuando la seleccion de tipo resuelve a este caso. Asume ya resueltos el subagente, el mecanismo de preguntas, el idioma, la validacion de repositorio y el ritmo de confirmacion (ver `SKILL.md`).
+
+> **Naturaleza del WI:** documento **unico y combinado** - el requerimiento, los criterios de aceptacion y el plan de implementacion conviven en un solo `WI-XXX.md` que mapea 1:1 con un work item de ADO. **No se descompone en sub-tareas** (modelo plano). Un esfuerzo grande son varios `WI-` hermanos, nunca un WI con hijos.
+>
+> **Unidad de confirmacion:** **el `WI-XXX` completo.** Se implementa el plan del WI como una unidad; al terminarlo se actualiza `progress.md` y se pide confirmacion antes de pasar al siguiente WI (si el alcance incluye varios).
+
+---
+
+## Ubicacion de archivos
+
+| Artefacto | Ruta |
+| --------- | ---- |
+| Work item | `docs/specs/work-items/WI-XXX-[kebab-case].md` |
+| Progreso | `docs/specs/work-items/progress.md` |
+| Unidades de trabajo | `docs/specs/work-units.md` |
+| ADR | `docs/adr/` |
+| Documentacion tecnica | `docs/specs/technical-docs/` |
+| Glosario | `docs/specs/glossary.md` |
+
+**Rama de trabajo:** `feature/WI-XXX-[kebab-case]` por defecto. Si el equipo usa prefijos por tipo, el prefijo puede seguir el `Tipo` del WI (`bug` => `fix/`, refactor/deuda/dependencias/operativa => `chore/` o `refactor/`). No asumir la rama base; acordarla con el usuario.
+
+> Con ADO, el numero del WI es el ID del work item (`WI-1847`); sin ADO es un secuencial local (`WI-001`). Respetar el numero tal cual aparece en el archivo.
+
+---
+
+## Informacion requerida antes de implementar
+
+| Dato | Como obtenerlo | Si no esta disponible |
+| ---- | -------------- | --------------------- |
+| **WI a implementar** | Indicado por el usuario (numero o nombre) | Preguntar cual; no asumir |
+| **Alcance** | Un WI concreto o una lista de `WI-` hermanos | Preguntar si hay ambiguedad |
+| **Tipo** | Campo `Tipo` del WI (bug / refactor / deuda-tecnica / dependencias / operativa) | Leer del archivo; condiciona la rama y el cierre |
+| **Unidad de trabajo** | Campo `Unidad de trabajo` del WI; complementar con `work-units.md` | Preguntar; no asumir |
+| **Rama** | Derivada del WI segun convencion del equipo | Crear desde la rama base acordada |
+
+---
+
+## Validacion especifica
+
+Ademas de la validacion de repositorio transversal (`SKILL.md`):
+
+- **WI existente y en `Ready`:** el archivo `WI-XXX-*.md` existe en `docs/specs/work-items/` y tiene `Estado: Ready`. Un `WI` en `Draft` (stub o incompleto) **no** es ejecutable - devolver a `work-plan` para completarlo.
+- **Criterios de aceptacion presentes:** el WI tiene **Criterios de aceptacion** verificables. Si faltan, parar: el WI no estaba realmente `Ready`.
+- **Referencia de UI (si toca UI):** si el WI modifica UI, debe tener referencia de diseno en **Referencias** (Figma/wireframe). Sin ella, parar y avisar.
+
+---
+
+## Flujo de implementacion
+
+### Paso 1 - Preparar repositorio y rama
+
+1. Verificar working tree limpio; si no, parar y avisar.
+2. Resolver y hacer checkout de la rama del WI (crear desde la rama base acordada si no existe).
+3. Leer o crear `progress.md` en `docs/specs/work-items/` (desde `assets/progress-template.md`). Anadir **una entrada por cada WI del alcance** con `Estado: Pending` salvo los ya `Done`.
+
+### Paso 2 - Presentar alcance
+
+1. Leer **completo** cada `WI-*.md` del alcance: Requerimiento, Criterios de aceptacion, Dependencias, Referencias y Plan de implementacion.
+2. Consultar `work-units.md` si el alcance de la unidad no es claro.
+3. Construir dos listas:
+   - **Implementables:** WI `Ready` con criterios de aceptacion, no marcados como `Done`.
+   - **Excluidos:** el resto, con su estado entre parentesis - p. ej. `WI-007 - Limpieza de reportes (Draft)`.
+4. Mostrar ambas listas. **No ejecutar codigo en este turno.**
+5. Preguntar si continuar y **esperar confirmacion**.
+
+### Paso 3 - Implementar WI a WI
+
+> IMPORTANTE **Una unidad = un WI completo.** Se implementa todo el plan del WI; al terminarlo, detenerse y preguntar antes del siguiente WI del alcance (si hay varios). No avanzar sin confirmacion.
+
+Por cada WI aprobado:
+
+1. Implementar **el `Plan de implementacion` completo del WI**. Como es un documento plano, el plan se ejecuta como una unidad coherente, no como TK independientes.
+2. Si genera o modifica UI: ejecutar bajo `ui-specialist`. Si la referencia de diseno es Figma: usar el MCP de Figma.
+3. Al terminar, ejecutar lint/typecheck/build del paquete afectado. Si falla, corregir antes de continuar. **No** ejecutar suites de tests en esta fase.
+4. **Verificar los criterios de aceptacion** del WI de forma manual/funcional; si alguno no se cumple, completar antes de marcar `Done`.
+5. Actualizar `progress.md`: `Pending` => `In Progress` => `Done`; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
+6. **Detenerse y preguntar** (herramienta estructurada): "WI-XXX completado. Continuo con WI-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui]. Si el alcance es un unico WI, igualmente confirmar antes de pasar al cierre.
+7. Solo si confirma: siguiente WI. Si detiene, registrar nota y pasar al Paso 4.
+
+### Paso 4 - Cierre
+
+1. Ofrecer la fase de pruebas: delegar a **`quality-specialist`** para escribir tests basados en los **Criterios de aceptacion** del WI (no hay `SC-XX`/`BR-XX`: el WI es autocontenido).
+2. Si acepta: invocar `quality-specialist` con el contexto del WI, la rama y el WI en `Done`. No escribir tests desde este skill.
+3. Si rechaza: registrar nota en `progress.md`.
+4. **Handoff:** si el alcance esta en `Done`, working tree limpio y commits hechos, sugerir `pr-create` o `work-integrate`. Si quedan WI pendientes, indicar que falta cerrar.
+
+---
+
+## Checklist
+
+**Repositorio:** working tree limpio; rama del WI activa o creada; `progress.md` leido o creado.
+
+**Alcance:** cada `WI-*.md` leido completo; `work-units.md` consultado si hizo falta; listas presentadas; confirmacion recibida antes del primer cambio de codigo.
+
+**Por cada WI:** `Ready` con criterios de aceptacion; no `Done`; UI bajo `ui-specialist`; Figma via MCP; plan completo implementado; criterios de aceptacion verificados; lint/build ejecutado; `progress.md` a `Done`; decisiones de sesion registradas; **confirmacion explicita antes del siguiente WI**.
+
+**Cierre:** usuario preguntado por la fase de pruebas; si acepta, tests delegados a `quality-specialist` sobre los **Criterios de aceptacion**.
+
+---
+
+## Ejemplos
+
+**Ejemplo 1 - WI unico completo**
+- *Entrada:* "Implementa el WI-002, actualizar Spring Boot a 3.3."
+- *Salida:* checkout a la rama del WI; lee el WI completo; presenta el alcance; tras confirmacion implementa **todo el plan del WI** como una unidad; ejecuta build; verifica criterios de aceptacion; actualiza `progress.md` a `Done`; pausa y confirma antes del cierre; ofrece tests via `quality-specialist`.
+
+**Ejemplo 2 - Varios WI hermanos**
+- *Entrada:* "Implementa WI-003, WI-004 y WI-005 (structured logging en API, workers y batch)."
+- *Comportamiento:* cola con los tres `Ready`; implementa WI-003 completo, lint/build, `progress.md` a `Done`, **pausa y pregunta** si continuar con WI-004. Mismo ciclo por cada WI.
+
+**Ejemplo 3 - WI en Draft**
+- *Entrada:* "Ejecuta WI-007" y esta en Draft (stub sin criterios).
+- *Salida:* `WI-007 (Draft)` en excluidos; no se implementa; devolver a `work-plan` para completarlo a `Ready`.
+
+**Ejemplo 4 - WI de UI sin referencia de diseno**
+- *Entrada:* "Implementa WI-009" (toca UI) pero el WI no tiene referencia de diseno en Referencias.
+- *Comportamiento:* parar y avisar: el WI no estaba listo para implementar; falta la referencia de diseno.
+
+---
+
+## Anti-patterns (especificos del tipo)
+
+- Descomponer un WI en sub-tareas o tratarlo como si tuviera `TK-XXX`; el WI es un documento plano.
+- Implementar parte del plan del WI y pasar al siguiente sin completarlo ni verificar criterios.
+- Marcar `Done` sin verificar los **Criterios de aceptacion**.
+- Buscar `SC-XX`/`BR-XX` para los tests: el WI no proviene de una US; los tests se basan en sus criterios de aceptacion.
+- Implementar un WI en `Draft` (stub) como si estuviera listo.
+- Implementar UI sin `ui-specialist`, o UI con referencia Figma sin el MCP de Figma.
+
+---
+
+## Handoffs del ciclo
+
+Posicion: **implementacion** - un WI es autocontenido (no proviene de `work-define`).
+
+| | |
+|--|--|
+| **Entrada** | `WI-XXX` en `Estado: Ready` (Requerimiento, Criterios de aceptacion, Dependencias, Referencias y Plan). Stubs en `Draft` **no** habilitan la implementacion. |
+| **Salida** | Codigo commiteado; `progress.md` con el WI en `Done`; working tree limpio. |
+| **Siguiente paso** | `git-commit` => `pr-create` (opcional) => `work-integrate`. |
+| **Regreso desde plan** | Ambiguedad tecnica, criterios faltantes o alcance incorrecto => volver a `work-plan` para ajustar el WI. |

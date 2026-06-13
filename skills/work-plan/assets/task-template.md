@@ -4,6 +4,7 @@
 - Historia: <enlace obligatorio a la historia de usuario; p. ej. [US-XXX: Título](./README.md)>
 - Unidad de trabajo: <obligatorio: paquete / módulo / servicio / etc.; inferido del proyecto o indicado por el usuario>
 - Asignado a: <opcional: priorizar lo indicado por el usuario; si no, inferir con `git config user.name`; omitir línea si no aplica>
+- ADO Work Item: <[#<ado_id>](<url>) solo si se creó en ADO; omitir línea si no aplica>
 
 ## Descripción
 
