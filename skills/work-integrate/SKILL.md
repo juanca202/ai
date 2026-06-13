@@ -1,5 +1,5 @@
 ---
-name: story-integrate
+name: work-integrate
 description: Cerrar e integrar el trabajo de una historia de usuario haciendo merge de la rama feature/US-XXX hacia la rama desde la que se creó, previa verificación de que progress.md tenga todas las tareas en Done. Activar cuando el usuario pida cerrar, entregar, mergear, integrar, finalizar o hacer submit del trabajo de una historia, una US o de la rama actual.
 license: MIT
 ---
@@ -10,7 +10,7 @@ Guía para **cerrar e integrar** el trabajo de una historia de usuario `US-XXX`:
 
 > **Alcance del submit:** El skill **cierra** localmente lo ya implementado. Verifica condiciones y ejecuta `git merge --no-ff`. No hace push, no borra ramas, no crea MRs/PRs, no resuelve conflictos, no modifica `progress.md`. Lo que no esté en `Done` bloquea el merge — el usuario decide cómo proceder, nunca se fuerza.
 
-Encaja al final del ciclo iniciado por **story-define** → **story-plan** → **story-implement**. Ver [Handoffs del ciclo](#handoffs-del-ciclo).
+Encaja al final del ciclo iniciado por **work-define** → **work-plan** → **work-implement**. Ver [Handoffs del ciclo](#handoffs-del-ciclo).
 
 ---
 
@@ -238,13 +238,13 @@ Posición: **cierre local** — último paso del pipeline de historias (sin push
 | **Entrada** | Rama `feature/US-XXX-[nombre-corto]`; working tree limpio; commits de la implementación ya hechos (`git-commit`); `progress.md` con **cada** TK listada en `Done`; `code-review` con veredicto **✅ Apto**. |
 | **Salida** | Merge `--no-ff` a la rama base local; reporte con hash de merge. Sin push ni borrado de rama. |
 | **Siguiente paso (fuera del skill)** | Push de la rama base y CI — decisión del usuario. |
-| **PR/MR (`git-pr`)** | Abrir **antes** de este skill, estando en `feature/US-XXX-[nombre-corto]` (o con la feature ya publicada en remoto). Tras el merge local, la rama activa es la **base**; `git-pr` bloquea en `main`/`master`/`develop`/`trunk`. |
-| **Regreso a implement** | TK no `Done` o `progress.md` incompleto → completar en **`story-implement`** y actualizar `progress.md` antes de reintentar. |
-| **Regreso a define / plan** | Alcance de US reducido o TK fuera de entrega → alinear con **`story-define`** / **`story-plan`**, corregir `progress.md` y reintentar. |
+| **PR/MR (`pr-create`)** | Abrir **antes** de este skill, estando en `feature/US-XXX-[nombre-corto]` (o con la feature ya publicada en remoto). Tras el merge local, la rama activa es la **base**; `pr-create` bloquea en `main`/`master`/`develop`/`trunk`. |
+| **Regreso a implement** | TK no `Done` o `progress.md` incompleto → completar en **`work-implement`** y actualizar `progress.md` antes de reintentar. |
+| **Regreso a define / plan** | Alcance de US reducido o TK fuera de entrega → alinear con **`work-define`** / **`work-plan`**, corregir `progress.md` y reintentar. |
 
 ### progress.md
 
-El skill **lee** `progress.md` para verificar estados, pero no lo modifica. La actualización de estados durante la implementación es responsabilidad de **story-implement**. Si al revisar el archivo aparecen tareas en `In Progress` que sí están terminadas en código, el usuario debe corregir el archivo antes de reintentar el submit — no es papel del submit ajustar progreso.
+El skill **lee** `progress.md` para verificar estados, pero no lo modifica. La actualización de estados durante la implementación es responsabilidad de **work-implement**. Si al revisar el archivo aparecen tareas en `In Progress` que sí están terminadas en código, el usuario debe corregir el archivo antes de reintentar el submit — no es papel del submit ajustar progreso.
 
 ### Estados de `progress.md`
 

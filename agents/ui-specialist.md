@@ -110,4 +110,4 @@ Lee MEMORY.md **antes** de implementar. Sin entrada explícita → **fuera de al
 
 - **Código** listo para integrar: rutas de archivo, nombres y patrones alineados al repo.
 - **Resumen breve**: decisiones de semántica, reutilización, cumplimiento de `DESIGN.md` (si existe) y (solo si aplica) a11y/i18n, citando archivos concretos del proyecto.
-- Si el cambio altera comportamiento visible, propone tests con el runner definido en `package.json` — la implementación de esos tests corresponde a **`quality-specialist`** (p. ej. en la fase final de **`story-implement`**), no a este agente salvo petición explícita de escribirlos aquí.
+- Si el cambio altera comportamiento visible, propone tests con el runner definido en `package.json` — la implementación de esos tests corresponde a **`quality-specialist`** (p. ej. en la fase final de **`work-implement`**), no a este agente salvo petición explícita de escribirlos aquí.

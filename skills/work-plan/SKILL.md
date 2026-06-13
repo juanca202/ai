@@ -1,5 +1,5 @@
 ---
-name: story-plan
+name: work-plan
 description: Crea o actualiza tareas técnicas (TK-XXX) asociadas a una historia de usuario existente. Activar cuando el usuario solicite planificar implementación, descomponer trabajo, definir alcance técnico, estructurar subtareas o documentar especificaciones técnicas sin generar código ni pruebas. Activar también — por defecto — cuando el usuario solo entregue una referencia a una historia (p. ej. «US-004», «planifica US-007», «tareas para esta historia») — en ese caso el propósito es proponer stubs agrupados por unidad de trabajo que cubran los escenarios (SC-XX) y consideren las reglas de negocio (BR-XX) de la US, sin redactar TKs completas.
 license: MIT
 ---
@@ -192,7 +192,7 @@ Un stub reserva el ID y el vínculo a la US. No requiere contexto técnico compl
    - **Observaciones**: pendientes reales; no rellenar con texto genérico.
 3. Actualizar `work-units.md` **solo si** la unidad del stub no es `Por definir` (ver paso 2 del flujo de TK completa).
 4. **Parar aquí.** No continuar con los pasos de TK completa.
-5. **Handoff:** stub en `Draft` — completar a `Ready` con *Flujo: Crear TK completa* (modo A) antes de **`story-implement`**.
+5. **Handoff:** stub en `Draft` — completar a `Ready` con *Flujo: Crear TK completa* (modo A) antes de **`work-implement`**.
 ---
  
 ## Flujo: Crear TK completa
@@ -215,7 +215,7 @@ Una TK completa puede alcanzar `Estado: Ready` si cumple todas las condiciones d
    - **Observaciones**: solo si hay pendientes reales (prerrequisitos no cumplidos, información pendiente, decisiones por tomar). Si no hay nada pendiente, **omitir la sección**. Si el equipo lo exige, una línea *Sin pendientes documentados*. Con pendientes reales: `Estado: Draft`.
 4. **Actualizar** technical-docs y glossary si aplica (entradas breves; glossary no es sustituto de ADR ni technical-doc).
 5. **Verificar el checklist** antes de asignar `Estado: Ready`.
-6. **Handoff:** si todas las TK del alcance acordado están `Ready`, sugerir **`story-implement`**. Si otras TK siguen en `Draft`, listar cuáles completar antes de implementar.
+6. **Handoff:** si todas las TK del alcance acordado están `Ready`, sugerir **`work-implement`**. Si otras TK siguen en `Draft`, listar cuáles completar antes de implementar.
 ---
  
 ## Flujo: Actualizar una TK existente
@@ -242,14 +242,14 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 **Pasos:**
  
 1. **Leer el `README.md` de la US completo** y todas las `TK-*.md` existentes en su carpeta.
-2. **Verificar las precondiciones de bloqueo.** Si alguna falla, no continuar: reportar al usuario qué falta y sugerir el skill correspondiente (`story-define` para alinear la US, etc.).
+2. **Verificar las precondiciones de bloqueo.** Si alguna falla, no continuar: reportar al usuario qué falta y sugerir el skill correspondiente (`work-define` para alinear la US, etc.).
 3. **Identificar unidades de trabajo** a partir del alcance de la US, los SC y las BR. Una unidad puede ser un módulo, servicio, paquete, componente UI, etc. **No inventar** unidades no soportadas por la US; lo no claro queda `Por definir` o se pregunta.
 4. **Cubrir los SC y considerar las BR.** Asegurar que cada `SC-XX` queda cubierto por al menos un stub propuesto. Las `BR-XX` se consideran como restricciones que condicionan el alcance de los stubs (validaciones, invariantes, autorizaciones); no se replican literalmente en el TK.
 5. **Presentar la propuesta de stubs** al usuario, agrupada por unidad de trabajo. Por cada stub incluir: `TK-XXX` tentativo (siguiente libre en secuencia), nombre de archivo, unidad de trabajo (o `Por definir`), objetivo breve y qué `SC-XX` cubre. No es 1 stub por SC: varios SC pueden caer en un mismo stub si comparten unidad y alcance; un SC amplio puede dividirse si abarca varias unidades. **No crear archivos en este turno** — dejar explícito al final del mensaje.
 6. **Confirmar con el usuario** mediante la herramienta de preguntas estructuradas: `Confirmar stubs` / `Ajustar alcance` / `Cancelar`. Si elige ajustar, revisar la propuesta y repetir pasos 5–6. **No continuar sin confirmación explícita**, salvo que el mensaje inicial ya describiera la descomposición con detalle suficiente para considerarla aprobada.
 7. **Crear cada stub** de la propuesta confirmada siguiendo el *Flujo: Crear stub* (Estado: Draft, descripción breve sin referenciar identificadores `SC-XX` / `BR-XX` en el documento, plan vacío).
 8. **Reportar al usuario** la lista de stubs creados, agrupados por unidad de trabajo, indicando brevemente qué `SC-XX` cubre cada uno.
-9. **Handoff:** si los stubs quedaron en `Draft`, indicar al usuario que debe completar cada TK a `Estado: Ready` con **`story-plan`** (modo A) antes de invocar **`story-implement`**. No sugerir implementación mientras las TK del alcance sigan en Draft.
+9. **Handoff:** si los stubs quedaron en `Draft`, indicar al usuario que debe completar cada TK a `Estado: Ready` con **`work-plan`** (modo A) antes de invocar **`work-implement`**. No sugerir implementación mientras las TK del alcance sigan en Draft.
  
 **Reglas invariantes:**
 - No redactar Plan de implementación, ni Dependencias detalladas, ni Referencias técnicas: son **stubs**, no TKs completas.
@@ -313,12 +313,12 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - *Entrada:* «Crea las tareas necesarias para implementar US-004.» (sin describir tareas específicas).
 - *Comportamiento — turno 1:* El agente activa el *Flujo: Sugerir stubs desde una US*. Verifica que `US-004/README.md` está en `Ready` y contiene BR y SC en **Criterios de aceptación**. Lee la US completa, identifica unidades de trabajo, y presenta la propuesta agrupada por unidad (paso 5) con `TK-XXX` tentativo, nombre de archivo, objetivo breve y cobertura de SC por stub. Pregunta con opciones `Confirmar stubs` / `Ajustar alcance` / `Cancelar`. **No crea archivos.**
 - *Comportamiento — turno 2:* Tras confirmación, crea cada stub en `Estado: Draft` sin referencias a `SC-XX` / `BR-XX` en el archivo (paso 7) y reporta rutas creadas con cobertura SC (paso 8).
-- *Salida:* Stubs `TK-001-...md` a `TK-NNN-...md` en Draft; `work-units.md` actualizado solo si alguna unidad es nueva y su alcance está claro. Handoff: completar cada TK a `Ready` con `story-plan` antes de `/story-implement`.
+- *Salida:* Stubs `TK-001-...md` a `TK-NNN-...md` en Draft; `work-units.md` actualizado solo si alguna unidad es nueva y su alcance está claro. Handoff: completar cada TK a `Ready` con `work-plan` antes de `/work-implement`.
  
 **Ejemplo 5 — US no Ready o sin BR/SC**
  
 - *Entrada:* «Tareas para US-009.» — pero `US-009/README.md` está en `Draft` o no tiene SC documentados en **Criterios de aceptación**.
-- *Comportamiento:* El agente bloquea, no crea ningún stub. Reporta al usuario qué falta (estado, BR, SC) y sugiere usar `story-define` para alinear la US antes de planificar tareas.
+- *Comportamiento:* El agente bloquea, no crea ningún stub. Reporta al usuario qué falta (estado, BR, SC) y sugiere usar `work-define` para alinear la US antes de planificar tareas.
 **Ejemplo 6 — Repo vinculado a Azure DevOps con MCP disponible**
 
 - *Contexto:* `.agents/MEMORY.md` contiene `azure_devops_project: MyProject`. MCP de ADO disponible en el cliente.
@@ -350,16 +350,16 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 
 ### Handoffs del ciclo
 
-Posición: **planificación** — entre `story-define` e `story-implement`.
+Posición: **planificación** — entre `work-define` e `work-implement`.
 
 | | |
 |--|--|
-| **Entrada** | US con `Estado: Ready` y **Criterios de aceptación** (`BR-XX`, `SC-XX`) en su `README.md`. Si la US está en Draft o faltan BR/SC: **bloquear** y devolver handoff a **`story-define`**. |
+| **Entrada** | US con `Estado: Ready` y **Criterios de aceptación** (`BR-XX`, `SC-XX`) en su `README.md`. Si la US está en Draft o faltan BR/SC: **bloquear** y devolver handoff a **`work-define`**. |
 | **Salida mínima (modo B)** | Stubs `TK-XXX-*.md` en `Draft` + cobertura SC reportada al usuario. |
-| **Salida para implementar** | Cada TK del alcance acordado en **`Estado: Ready`** (Plan, Dependencias y Referencias según checklist). Stubs en Draft **no** habilitan `story-implement`. |
-| **Siguiente paso** | **`story-implement`** — solo cuando US Ready **y** las TK a ejecutar están Ready. Sugerir `/story-implement` al cerrar la última TK Ready del alcance. |
+| **Salida para implementar** | Cada TK del alcance acordado en **`Estado: Ready`** (Plan, Dependencias y Referencias según checklist). Stubs en Draft **no** habilitan `work-implement`. |
+| **Siguiente paso** | **`work-implement`** — solo cuando US Ready **y** las TK a ejecutar están Ready. Sugerir `/work-implement` al cerrar la última TK Ready del alcance. |
 | **Regreso desde define** | Cambio funcional en la US → releer `README.md` y actualizar TKs afectadas antes de continuar. |
-| **Regreso desde implement** | TK fuera de alcance o ambigüedad técnica → ajustar el TK aquí; no modificar el `README.md` de la US. Si el conflicto es funcional, escalar a **`story-define`**. |
+| **Regreso desde implement** | TK fuera de alcance o ambigüedad técnica → ajustar el TK aquí; no modificar el `README.md` de la US. Si el conflicto es funcional, escalar a **`work-define`**. |
 
 ### work-units.md
  

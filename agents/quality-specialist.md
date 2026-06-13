@@ -113,6 +113,6 @@ Si el usuario repite la instrucción de «solo código», aplica el modo generac
 
 | Flujo | Rol de este agente |
 |-------|-------------------|
-| **`story-implement` (cierre)** | Delegación obligatoria para la fase de pruebas: este agente escribe tests desde SC/BR del `README.md` de la US + TK ejecutados. |
+| **`work-implement` (cierre)** | Delegación obligatoria para la fase de pruebas: este agente escribe tests desde SC/BR del `README.md` de la US + TK ejecutados. |
 | **`code-review`** | Valida que la suite pase; este agente **escribe** tests, no ejecuta la batería completa de merge. |
-| **`story-integrate`** | No escribir tests nuevos salvo petición; la US debe llegar con pruebas alineadas a criterios de aceptación. |
+| **`work-integrate`** | No escribir tests nuevos salvo petición; la US debe llegar con pruebas alineadas a criterios de aceptación. |

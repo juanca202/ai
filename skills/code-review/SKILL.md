@@ -166,9 +166,9 @@ Devolver el informe completo. **No** continuar con `git commit`, push ni merge a
 
 ### Relación con otros skills
 
-- **story-implement** ya ejecuta lint/typecheck/build por cada TK individual. Este skill amplía esa validación a la batería completa antes del merge.
-- **story-integrate** requiere veredicto **✅ Apto** como precondición del merge.
-- **git-pr** puede invocar este skill de forma bloqueante antes de crear un PR.
+- **work-implement** ya ejecuta lint/typecheck/build por cada TK individual. Este skill amplía esa validación a la batería completa antes del merge.
+- **work-integrate** requiere veredicto **✅ Apto** como precondición del merge.
+- **pr-create** puede invocar este skill de forma bloqueante antes de crear un PR.
 
 ### Idioma del informe
 

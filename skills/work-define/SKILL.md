@@ -1,5 +1,5 @@
 ---
-name: story-define
+name: work-define
 description: Crear o actualizar una Historia de Usuario. Usar cuando se necesite crear, documentar, actualizar o estandarizar historias de usuario. Activar cuando el usuario solicite una nueva historia de usuario, describa una necesidad funcional, pida refinar requisitos, estructurar funcionalidades o alinear historias existentes a las convenciones del proyecto.
 license: MIT
 ---
@@ -131,8 +131,8 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
     - Una pregunta por laguna, con opciones cuando la respuesta admita categorías (idioma, formato, prioridad, dependencias enumerables, story points Fibonacci); entrada libre solo para campos narrativos (refinamiento del valor, reglas nuevas, criterios verificables).
     - Respetar el máximo de tres preguntas por bloque; si hay más lagunas, encadenar tandas hasta agotarlas o hasta que el usuario indique que prefiere mantener el resto como Draft.
     - Tras recibir respuestas, actualizar las secciones afectadas del `README.md`, revalidar los checklists de INVEST y DoR, y promover a `Estado: Ready` solo si quedan completos. Si alguna laguna sigue abierta, mantener `Draft` y reflejar el residual en Observaciones.
-  - Si la US queda en **Ready**, sugerir explícitamente al usuario que ejecute `/story-plan` para crear las tareas `TK-XXX`.
-  - Si el usuario pide crearlas en continuidad o en el mismo turno: **invocar `/story-plan` obligatoriamente**; no crear tareas directamente desde este skill. El conocimiento y las reglas de formato de los `TK-XXX` residen en ese skill.
+  - Si la US queda en **Ready**, sugerir explícitamente al usuario que ejecute `/work-plan` para crear las tareas `TK-XXX`.
+  - Si el usuario pide crearlas en continuidad o en el mismo turno: **invocar `/work-plan` obligatoriamente**; no crear tareas directamente desde este skill. El conocimiento y las reglas de formato de los `TK-XXX` residen en ese skill.
 
 ---
 
@@ -198,7 +198,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 **Ejemplo 4 — Ready y tareas**
 
 - *Entrada:* Historia cerrada en Ready; el usuario dice: «crea las tareas para implementarla».
-- *Salida:* El agente no crea tareas directamente; invoca `/story-plan` pasando el contexto de la US. Toda la lógica de creación de `TK-XXX` (stubs, plantilla, work-units) es responsabilidad de ese skill.
+- *Salida:* El agente no crea tareas directamente; invoca `/work-plan` pasando el contexto de la US. Toda la lógica de creación de `TK-XXX` (stubs, plantilla, work-units) es responsabilidad de ese skill.
 
 **Ejemplo 5 — Draft con cierre asistido**
 
@@ -218,7 +218,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 - Declarar `Estado: Ready` sin Criterios de aceptación completo o sin referencias de diseño cuando la historia involucra UI.
 - Declarar `Estado: Ready` con Observaciones que aún listen aclaraciones o pendientes sin resolver.
 - Resolver un conflicto entre `TK-XXX` y el `README.md` de la US degradando la US; la US prevalece.
-- Crear tareas `TK-XXX` directamente desde este skill sin invocar `/story-plan`; la creación de tareas siempre se delega a ese skill.
+- Crear tareas `TK-XXX` directamente desde este skill sin invocar `/work-plan`; la creación de tareas siempre se delega a ese skill.
 - Copiar `assets/user-story-template.md` al repo del producto como artefacto en lugar de usarlo como molde.
 - Lanzar preguntas al usuario como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas; o ir descubriendo huecos turno a turno en lugar de agrupar todas las preguntas pendientes en una sola tanda al inicio.
 
@@ -228,17 +228,17 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 
 ### Handoffs del ciclo
 
-Posición: **inicio** del pipeline `story-define` → `story-plan` → `story-implement` → `story-integrate`.
+Posición: **inicio** del pipeline `work-define` → `work-plan` → `work-implement` → `work-integrate`.
 
 | | |
 |--|--|
 | **Entrada** | Necesidad funcional del usuario. No requiere US previa. |
 | **Salida mínima (creación)** | Carpeta `US-XXX-[nombre-corto]/README.md` con actor y valor de negocio; puede quedar en `Estado: Draft` con lagunas en Observaciones. |
 | **Salida para continuar** | `Estado: Ready` en el `README.md`; INVEST y DoR completos; al menos un `BR-XX` y un `SC-XX`; Observaciones sin pendientes abiertos. |
-| **Siguiente paso** | **`story-plan`** — invocar `/story-plan` (o continuidad explícita del usuario). No crear `TK-XXX` desde este skill. |
+| **Siguiente paso** | **`work-plan`** — invocar `/work-plan` (o continuidad explícita del usuario). No crear `TK-XXX` desde este skill. |
 | **Si queda en Draft** | No handoff a plan ni implement. Cerrar lagunas con preguntas estructuradas o mantener Draft documentado. |
-| **Regreso desde plan** | Conflicto US ↔ TK detectado en `story-plan` → actualizar la US aquí; `story-plan` corrige el TK. La US prevalece sobre el TK. |
-| **Regreso desde integrate** | Alcance reducido o `progress.md` incompleto detectado en `story-integrate` → ajustar la US aquí y alinear TKs con `story-plan` antes de reintentar el merge. |
+| **Regreso desde plan** | Conflicto US ↔ TK detectado en `work-plan` → actualizar la US aquí; `work-plan` corrige el TK. La US prevalece sobre el TK. |
+| **Regreso desde integrate** | Alcance reducido o `progress.md` incompleto detectado en `work-integrate` → ajustar la US aquí y alinear TKs con `work-plan` antes de reintentar el merge. |
 
 ### RFC 2119
 

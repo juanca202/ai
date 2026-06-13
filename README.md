@@ -53,8 +53,8 @@ npx skills add https://github.com/juanca202/ai -g -y --copy -a cursor -s '*'
 
 ```bash
 mkdir -p ~/.agents/skills
-for d in ado-install adr-discover adr-manage code-review git-commit git-pr \
-  project-create prompt-validator story-define story-implement story-integrate story-plan; do
+for d in ado-install adr-discover adr-manage code-review git-commit pr-create \
+  project-create prompt-validator work-define work-implement work-integrate work-plan; do
   cp -R skills/"$d" ~/.agents/skills/
 done
 ```
@@ -66,7 +66,7 @@ done
 | `ado-install` | MCP de Azure DevOps en Cursor |
 | `adr-discover` / `adr-manage` | ADRs |
 | `code-review` | Checks TS/Node antes de merge |
-| `git-commit` / `git-pr` | Commits y pull requests |
+| `git-commit` / `pr-create` | Commits y pull requests |
 | `project-create` | Proyectos desde plantillas |
 | `prompt-validator` | Revisión de prompts |
-| `story-define` / `story-plan` / `story-implement` / `story-integrate` | Flujo de historias de usuario |
+| `work-define` / `work-plan` / `work-implement` / `work-integrate` | Flujo de historias de usuario |

@@ -1,5 +1,5 @@
 ---
-name: story-implement
+name: work-implement
 description: Usar al pedir implementar, desarrollar o ejecutar trabajo referenciado por una historia de usuario o tarea. Solo debe usarse si la historia o tarea se encuentra en estado `Ready`. Activar tambien cuando el usuario mencione "ejecutar tareas", "codificar", "desarrollar la US", "trabajar en el TK" o cualquier variante que implique escribir codigo para una historia o tarea ya especificada.
 license: MIT
 ---
@@ -8,13 +8,13 @@ license: MIT
 
 Guia para **ejecutar en codigo** el trabajo especificado en historias `US-XXX` y tareas `TK-XXX` bajo `docs/specs/user-stories/`.
 
-> **Alcance:** consume especificaciones ya redactadas por **story-plan**. No reescribe ni reestructura tareas - solo las implementa. Correcciones menores acordadas con el usuario son la unica excepcion.
+> **Alcance:** consume especificaciones ya redactadas por **work-plan**. No reescribe ni reestructura tareas - solo las implementa. Correcciones menores acordadas con el usuario son la unica excepcion.
 >
 > **Ritmo obligatorio - una tarea por confirmacion:** implementar una TK, actualizar `progress.md`, ejecutar lint, y **esperar confirmacion explicita del usuario antes de arrancar la siguiente**. Sin excepcion.
 >
 > **Solo implementacion:** no modifica documentacion de producto (`README.md` de US, `TK-XXX`, ADRs, technical-docs) - solo `progress.md`. Si se detecta un conflicto en la documentacion que pueda afectar el resultado, **parar inmediatamente y notificar al usuario** antes de continuar.
 >
-> **Handoffs:** Entrada minima: US y TK en `Ready`; salida: `progress.md` en `Done` y working tree limpio => **`story-integrate`**.
+> **Handoffs:** Entrada minima: US y TK en `Ready`; salida: `progress.md` en `Done` y working tree limpio => **`work-integrate`**.
 
 ---
 
@@ -115,7 +115,7 @@ Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto
 1. Cuando no queden tareas pendientes (o el usuario detenga la ejecucion), ofrecer la fase de pruebas: delegar a **`quality-specialist`** para escribir tests basados en los `SC-XX` y `BR-XX` del `README.md`.
 2. Si el usuario acepta: invocar **`quality-specialist`** con el contexto de la US, la rama `feature/US-XXX-*` y los TK en `Done`. No escribir tests desde este skill.
 3. Si el usuario rechaza: registrar nota en `progress.md`.
-4. **Handoff:** si todo el alcance esta en `Done`, working tree limpio y commits hechos (`git-commit`), sugerir: (1) **`git-pr`** si el equipo revisa por PR; (2) **`story-integrate`** para merge local. Si quedan TK en `Pending`/`In Progress`, indicar que falta cerrar.
+4. **Handoff:** si todo el alcance esta en `Done`, working tree limpio y commits hechos (`git-commit`), sugerir: (1) **`pr-create`** si el equipo revisa por PR; (2) **`work-integrate`** para merge local. Si quedan TK en `Pending`/`In Progress`, indicar que falta cerrar.
 
 ---
 
@@ -218,14 +218,14 @@ WARNING No es posible continuar con la implementacion:
 
 ### Handoffs del ciclo
 
-Posicion: **implementacion** - entre `story-plan` e `story-integrate`.
+Posicion: **implementacion** - entre `work-plan` e `work-integrate`.
 
 | | |
 |--|--|
 | **Entrada** | US `Estado: Ready`; TK del alcance con `Estado: Ready`; rama `feature/US-XXX-[nombre-corto]` activa o creada desde la rama base acordada con el usuario. |
 | **Salida** | Codigo commiteado; `progress.md` con cada TK del alcance en `Done`; working tree limpio. |
-| **Siguiente paso** | `git-commit` si hay cambios pendientes => `git-pr` (opcional, abrir desde `feature/US-XXX-*` antes de mergear) => **`story-integrate`** cuando `progress.md` este integro en `Done`. |
-| **Regreso desde plan** | TK en Draft o conflicto tecnico => volver a **`story-plan`** para completar o corregir el TK antes de continuar. |
+| **Siguiente paso** | `git-commit` si hay cambios pendientes => `pr-create` (opcional, abrir desde `feature/US-XXX-*` antes de mergear) => **`work-integrate`** cuando `progress.md` este integro en `Done`. |
+| **Regreso desde plan** | TK en Draft o conflicto tecnico => volver a **`work-plan`** para completar o corregir el TK antes de continuar. |
 | **Regreso desde integrate** | TK no `Done` detectada al intentar mergear => completar la implementacion aqui y actualizar `progress.md` antes de reintentar. |
 
 ### Estados de `progress.md`
@@ -235,7 +235,7 @@ Estados validos por tarea: **`Pending`**, **`In Progress`**, **`Done`**. No usar
 | Situacion | Que hacer |
 |-----------|-----------|
 | Posponer una TK | Mantener `Pending` y registrar el motivo en `Notas`. |
-| Sacar una TK del alcance | Parar; alinear con `story-define` o `story-plan`; eliminar la entrada de `progress.md` si ya no aplica. |
+| Sacar una TK del alcance | Parar; alinear con `work-define` o `work-plan`; eliminar la entrada de `progress.md` si ya no aplica. |
 | TK completada | `Done`. |
 
 ### Orden de implementacion
@@ -244,9 +244,9 @@ Respetar orden numerico `TK-001`, `TK-002`, ... salvo dependencias obvias en el 
 
 ### Relacion con otros skills
 
-- **story-plan** especifica el formato y contenido de los TK; este skill los consume (solo TK `Ready`).
-- **story-define** define la US y sus criterios de aceptacion (`BR-XX`, `SC-XX`).
+- **work-plan** especifica el formato y contenido de los TK; este skill los consume (solo TK `Ready`).
+- **work-define** define la US y sus criterios de aceptacion (`BR-XX`, `SC-XX`).
 - **quality-specialist** escribe tests en el cierre cuando el usuario acepta la fase final.
-- **story-integrate** cierra la US tras este skill; requiere `progress.md` completo en `Done` y working tree limpio.
+- **work-integrate** cierra la US tras este skill; requiere `progress.md` completo en `Done` y working tree limpio.
 - **git-commit** prepara commits antes del handoff a integrate.
 - **MCP de Figma:** obligatorio para tareas de UI con referencia Figma.

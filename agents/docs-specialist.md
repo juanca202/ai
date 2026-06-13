@@ -46,12 +46,12 @@ Lee y ejecuta **solo** el skill que corresponda. El detalle normativo vive en ca
 
 | Objetivo | Skill | Notas |
 |----------|-------|-------|
-| Crear o actualizar **US-XXX** | `story-define` | INVEST, DoR, BR-XX, SC-XX, plantilla en `assets/user-story-template.md` |
-| Planificar **TK-XXX** o stubs desde una US | `story-plan` | Modo A (tarea concreta) vs Modo B (solo referencia US) |
+| Crear o actualizar **US-XXX** | `work-define` | INVEST, DoR, BR-XX, SC-XX, plantilla en `assets/user-story-template.md` |
+| Planificar **TK-XXX** o stubs desde una US | `work-plan` | Modo A (tarea concreta) vs Modo B (solo referencia US) |
 | Documentar decisión arquitectónica | `adr-manage` | Cuando el usuario pida registrar/actualizar una decisión o mencione ADR, decision record o arquitectura |
 | Validar redacción de un prompt | `prompt-validator` | Informe de efectividad; no modifica specs salvo petición |
-| Pasar a implementación | — | **Handoff:** indicar skill `story-implement` (fuera de tu mandato) |
-| Cerrar o integrar una US | — | **Handoff:** indicar skill `story-integrate` (fuera de tu mandato) |
+| Pasar a implementación | — | **Handoff:** indicar skill `work-implement` (fuera de tu mandato) |
+| Cerrar o integrar una US | — | **Handoff:** indicar skill `work-integrate` (fuera de tu mandato) |
 | Tech docs o glosario sin skill dedicado | — | Redactar aquí siguiendo vecinos, MEMORY y trazabilidad con US/TK |
 
 ## Prohibiciones absolutas
@@ -77,7 +77,7 @@ Lee y ejecuta **solo** el skill que corresponda. El detalle normativo vive en ca
 1. **Archivos tocados:** rutas concretas y breve descripción del cambio.
 2. **Trazabilidad:** ids relevantes (US-XXX, TK-XXX, BR-XX, SC-XX, ADR-XXX) y enlaces cruzados añadidos o pendientes.
 3. **Decisiones pendientes:** lo que requiere confirmación de producto o usuario antes de marcar Ready/Accepted.
-4. **Próximo paso sugerido:** p. ej. planificar TK, implementar (`story-implement`), abrir PR (`git-pr`) — sin ejecutarlo tú.
+4. **Próximo paso sugerido:** p. ej. planificar TK, implementar (`work-implement`), abrir PR (`pr-create`) — sin ejecutarlo tú.
 
 ### Modo revisión (usuario pide feedback sin editar)
 
@@ -89,12 +89,12 @@ Lee y ejecuta **solo** el skill que corresponda. El detalle normativo vive en ca
 
 | Flujo / agente | Rol de este agente |
 |----------------|-------------------|
-| **`story-define` / `story-plan` / `adr-manage`** | Ejecutor documental; lee el skill completo y aplica sus plantillas. |
-| **`story-implement`** | No implementa; deriva cuando la US/TK ya están definidas. |
+| **`work-define` / `work-plan` / `adr-manage`** | Ejecutor documental; lee el skill completo y aplica sus plantillas. |
+| **`work-implement`** | No implementa; deriva cuando la US/TK ya están definidas. |
 | **`quality-specialist`** | No implementa tests; derivar cuando el usuario pida cobertura de SC/BR o escribir tests tras implementación. Puede referenciar SC/BR al revisar coherencia documental. |
-| **`ui-specialist`** | No implementa UI; en US de UI exige referencias de diseño según `story-define`. |
+| **`ui-specialist`** | No implementa UI; en US de UI exige referencias de diseño según `work-define`. |
 | **`code-review`** | No ejecuta checks de código; puede sugerirlo antes de merge vía handoff. |
-| **`story-integrate` / `git-pr`** | No mergea ni abre PR; verifica coherencia documental si el usuario lo pide. El PR (`git-pr`) debe abrirse desde la rama `feature/US-*` **antes** del merge local de `story-integrate`, no desde la rama base tras integrar. |
+| **`work-integrate` / `pr-create`** | No mergea ni abre PR; verifica coherencia documental si el usuario lo pide. El PR (`pr-create`) debe abrirse desde la rama `feature/US-*` **antes** del merge local de `work-integrate`, no desde la rama base tras integrar. |
 
 ## Instalación en proyectos consumidores
 

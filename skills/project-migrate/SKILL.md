@@ -1,9 +1,9 @@
 ---
 name: project-migrate
-description: 'Use this skill whenever the user wants to plan or document a technology migration from a source project to a destination project. Triggers include any mention of "migrar", "migración", "migrate", "migration", moving code/modules/features/dependencies between two projects, or comparing/mapping tech stacks across two codebases. The skill works in two steps: first it infers the technology stack of BOTH projects and generates a discovery.md (stack equivalences); then it generates a plan.md (current state, change proposal, validation tests with parity and Golden Master testing, and a phased implementation plan). Both files go under `docs/migrate/MG-XXX-<slug>/` inside the destination project. Use it even when the user only describes what to migrate without explicitly saying "create a migration doc".'
+description: Usar cuando el usuario quiera planificar o documentar una migración tecnológica de un proyecto origen a uno destino. Activar ante menciones de "migrar", "migración", "migrate", "migration", mover código/módulos/features/dependencias entre dos proyectos, o comparar/mapear stacks entre codebases. El skill trabaja en dos pasos: primero infiere el stack tecnológico de AMBOS proyectos y genera un discovery.md (equivalencias de stack); luego genera un plan.md (estado actual, propuesta de cambio, pruebas de validación con paridad y Golden Master Testing, y plan de implementación por fases). Ambos archivos van en `docs/migrate/MG-XXX-<slug>/` dentro del proyecto destino. Si el destino está fragmentado en varios proyectos (p. ej. un monolito dividido en servicios), cada proyecto destino recibe su propia carpeta de migración con discovery.md y plan.md acotados a ese proyecto. Usar también cuando el usuario solo describa qué migrar sin pedir explícitamente "crear un doc de migración".
 ---
 
-# Migrate
+# Skill: Migración entre proyectos
 
 Documenta una migración entre dos proyectos en **dos pasos**:
 
@@ -20,12 +20,35 @@ migración en el proyecto destino.
 
 1. **Qué se va a migrar** (un módulo, una feature, dependencias, el proyecto
    completo, etc.).
-2. **Proyecto origen** y **proyecto destino**: idealmente las rutas a ambos
-   repos/carpetas. Si solo te dan descripciones, trabaja con esa información,
-   pero deja constancia de los supuestos.
+2. **Proyecto origen** y **proyecto(s) destino**: idealmente las rutas a los
+   repos/carpetas. El destino puede ser **uno o varios proyectos** (p. ej. un
+   monolito que se fragmenta en varios servicios). Si solo te dan descripciones,
+   trabaja con esa información, pero deja constancia de los supuestos.
 
 Si falta alguno de estos datos, pídelo de forma breve antes de continuar. No
 inventes rutas ni stacks.
+
+## Destino único vs. destino fragmentado
+
+- **Destino único**: ejecuta el flujo una sola vez y genera un `discovery.md` y
+  un `plan.md` en ese proyecto destino.
+- **Destino fragmentado** (el origen se reparte entre **varios** proyectos
+  destino): **cada proyecto destino debe tener su propia carpeta de migración**
+  con su `discovery.md` y `plan.md` **específicos de ese proyecto**. Es decir,
+  repite el flujo completo por cada destino, pero acotando el contenido a la
+  parte del origen que aterriza en ese proyecto:
+  - El discovery de cada proyecto solo incluye los elementos del stack relevantes
+    para la porción que recibe ese proyecto (y su estado `Draft`/`Ready` se
+    evalúa solo sobre esos elementos).
+  - El plan de cada proyecto solo muestra, en sus árboles, los archivos del
+    origen que se migran a ese proyecto y los archivos resultantes en él.
+  - Usa el **mismo `MG-XXX-<slug>`** en todos los proyectos para que la migración
+    sea trazable como una sola unidad. Para evitar colisiones, calcula `XXX` como
+    el siguiente secuencial libre considerando el **número más alto entre todos**
+    los `docs/migrate/` de los proyectos destino involucrados.
+
+En las secciones siguientes, "el destino" se refiere a **cada** proyecto destino
+cuando el destino está fragmentado.
 
 ## Paso 1 — Discovery (`discovery.md`)
 
@@ -51,11 +74,12 @@ el árbol de dependencias. Anota la versión exacta cuando exista (p. ej.
 
 ### 2. Calcular el ID secuencial `MG-XXX`
 
-Mira la carpeta `<destino>/docs/migrate/`:
-
-- Si existe, busca carpetas con el patrón `MG-XXX-*`, toma el número más alto y
-  súmale 1.
-- Si no existe ninguna, empieza en `001`.
+- **Destino único**: mira `<destino>/docs/migrate/`, busca carpetas con el patrón
+  `MG-XXX-*`, toma el número más alto y súmale 1. Si no existe ninguna, empieza
+  en `001`.
+- **Destino fragmentado**: calcula el siguiente secuencial libre considerando el
+  número **más alto entre todos** los `docs/migrate/` de los proyectos destino
+  involucrados, y usa ese mismo `MG-XXX` en cada uno.
 - Formatea siempre con **3 dígitos y ceros a la izquierda**: `001`, `002`, `017`…
 
 ### 3. Crear la carpeta de la migración
@@ -144,3 +168,7 @@ La ruta final del documento es:
 Al terminar, indica al usuario la carpeta de la migración, el ID asignado y los
 archivos generados (`discovery.md` y `plan.md`). Para el discovery, menciona el
 estado resultante (`Draft` o `Ready`) y por qué quedó así en una línea.
+
+Si el destino está **fragmentado**, lista la carpeta `MG-XXX-<slug>/` creada en
+**cada** proyecto destino con sus respectivos `discovery.md` y `plan.md`, e
+indica el estado del discovery de cada uno.
