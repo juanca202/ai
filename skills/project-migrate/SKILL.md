@@ -4,10 +4,11 @@ description: >-
   Planifica y documenta migraciones tecnológicas entre un proyecto origen y uno destino.
   Úsalo cuando el usuario quiera migrar o mover código, módulos, features o dependencias
   entre dos proyectos, o mapear/comparar sus stacks (disparadores: migrar, migración,
-  migrate, migration). Produce tres documentos secuenciales en docs/specs/migrate/MG-XXX-{slug}/
+  migrate, migration). Produce tres documentos secuenciales en docs/specs/migrations/MG-XXX-{slug}/
   del proyecto destino — discovery.md, validation.md y plan.md. Si el destino se divide en
   varios proyectos, cada uno recibe su propia carpeta. Aplica aunque el usuario no pida
-  explícitamente crear documentos de migración.
+  explícitamente crear documentos de migración. Al terminar el plan, ofrece continuar
+  con la implementación y, si el usuario acepta, hace handoff al skill work-implement.
 ---
 
 # Migración entre proyectos
@@ -30,12 +31,16 @@ migración en el proyecto destino.
 El flujo es **secuencial y con compuertas**: no avances al siguiente paso
 mientras el documento del paso anterior no esté en `Ready`.
 
+Al terminar el plan, este skill **ofrece continuar con la implementación**: si el
+usuario acepta y el `plan.md` está en `Ready`, hace *handoff* al skill
+`work-implement` (ver "Continuar con la implementación" al final).
+
 ## Estructura de la carpeta de migración
 
-Cada migración vive en `<destino>/docs/specs/migrate/MG-XXX-{slug}/`:
+Cada migración vive en `<destino>/docs/specs/migrations/MG-XXX-{slug}/`:
 
 ```text
-docs/specs/migrate/
+docs/specs/migrations/
 └── MG-XXX-{slug}/
     ├── discovery.md    # Paso 1
     ├── validation.md   # Paso 2
@@ -74,7 +79,7 @@ inventes rutas ni stacks.
   - Usa el **mismo `MG-XXX-{slug}`** en todos los proyectos para que la migración
     sea trazable como una sola unidad. Para evitar colisiones, calcula `XXX` como
     el siguiente secuencial libre considerando el **número más alto entre todos**
-    los `docs/specs/migrate/` de los proyectos destino involucrados.
+    los `docs/specs/migrations/` de los proyectos destino involucrados.
 
 En las secciones siguientes, "el destino" se refiere a **cada** proyecto destino
 cuando el destino está fragmentado.
@@ -103,17 +108,17 @@ el árbol de dependencias. Anota la versión exacta cuando exista (p. ej.
 
 ### 2. Calcular el ID secuencial `MG-XXX`
 
-- **Destino único**: mira `<destino>/docs/specs/migrate/`, busca carpetas con el patrón
+- **Destino único**: mira `<destino>/docs/specs/migrations/`, busca carpetas con el patrón
   `MG-XXX-*`, toma el número más alto y súmale 1. Si no existe ninguna, empieza
   en `001`.
 - **Destino fragmentado**: calcula el siguiente secuencial libre considerando el
-  número **más alto entre todos** los `docs/specs/migrate/` de los proyectos destino
+  número **más alto entre todos** los `docs/specs/migrations/` de los proyectos destino
   involucrados, y usa ese mismo `MG-XXX` en cada uno.
 - Formatea siempre con **3 dígitos y ceros a la izquierda**: `001`, `002`, `017`…
 
 ### 3. Crear la carpeta de la migración
 
-Crea `<destino>/docs/specs/migrate/MG-XXX-{slug}/`, donde `{slug}` es una descripción
+Crea `<destino>/docs/specs/migrations/MG-XXX-{slug}/`, donde `{slug}` es una descripción
 corta de la migración en *kebab-case* (minúsculas, palabras separadas por
 guiones, sin acentos ni caracteres especiales). Ejemplos:
 
@@ -220,7 +225,7 @@ Copia la plantilla `assets/discovery-template.md` dentro de la carpeta creada,
   pendientes, el discovery debe quedar en `Draft`.
 
 La ruta final del documento es:
-`<destino>/docs/specs/migrate/MG-XXX-{slug}/discovery.md`
+`<destino>/docs/specs/migrations/MG-XXX-{slug}/discovery.md`
 
 ## Paso 2 — Preparación de validación (`validation.md`)
 
@@ -286,7 +291,7 @@ Fuente de datos, Recursos, Estado), un bloque de detalle por cada caso y la list
 de recursos almacenados en `validation/`.
 
 La ruta final del documento es:
-`<destino>/docs/specs/migrate/MG-XXX-{slug}/validation.md`
+`<destino>/docs/specs/migrations/MG-XXX-{slug}/validation.md`
 
 ## Paso 3 — Plan de migración (`plan.md`)
 
@@ -344,7 +349,7 @@ incluye un **Parallel Run + Reconciliation** para validar el destino contra el
 origen en vivo antes del *cutover*.
 
 La ruta final del documento es:
-`<destino>/docs/specs/migrate/MG-XXX-{slug}/plan.md`
+`<destino>/docs/specs/migrations/MG-XXX-{slug}/plan.md`
 
 ## Resultado
 
@@ -357,3 +362,69 @@ quedó en `Draft`, recuerda que el plan no se genera hasta resolver sus pendient
 Si el destino está **fragmentado**, lista la carpeta `MG-XXX-{slug}/` creada en
 **cada** proyecto destino con sus respectivos `discovery.md`, `validation.md` y
 `plan.md`, e indica el estado del discovery de cada uno.
+
+## Continuar con la implementación (opcional)
+
+Una vez generado y reportado el plan, **ofrece continuar con la implementación**
+de la migración. Este paso es un *handoff* al skill `work-implement`; no escribas
+código desde este skill.
+
+**Condición previa.** Solo ofrece continuar si `plan.md` está en **`Ready`**
+(en destino fragmentado, solo respecto de los proyectos cuyo `plan.md` quedó en
+`Ready`). Si el plan está en `Draft`, no ofrezcas la implementación: indica que
+primero deben resolverse los pendientes del plan, porque `work-implement` solo
+implementa trabajo en `Ready`.
+
+**Cómo preguntar.** Usa la herramienta de preguntas estructuradas
+(`ask_user_input_v0`) con opciones cortas y mutuamente excluyentes, p. ej.:
+
+- *¿Deseas continuar con la implementación de esta migración ahora?* →
+  `Sí, implementar` / `No, solo el plan`.
+
+**Si la respuesta es afirmativa.** La implementación corre a cargo del skill
+**`work-implement`**, que detecta el tipo de trabajo por el artefacto
+referenciado: como aquí se trata de una migración `MG-XXX`, leerá su flujo en
+`references/migrations.md` y ejecutará **por fases**, con validación por Golden
+Master Testing y una unidad por confirmación. El cómo arrancarlo depende de si el
+destino es único o fragmentado.
+
+#### Destino único
+
+Hay un solo `plan.md`. Carga y sigue `work-implement` pasándole como referencia la
+migración recién creada (el `MG-XXX-{slug}` y la ruta de su `plan.md`).
+
+#### Destino fragmentado
+
+Hay un `plan.md` por proyecto destino (considera solo los que estén en `Ready`).
+**Todos** los proyectos destino se van a implementar; lo que se decide es **cómo
+ejecutar sus planes**. Pregunta con la herramienta de preguntas estructuradas
+(`ask_user_input_v0`):
+
+- *¿Cómo quieres ejecutar los planes de los proyectos destino?* →
+  `Secuencial por prioridad` / `En paralelo con tareas`.
+
+**Si elige secuencial por prioridad.** Ordena los proyectos destino por prioridad
+—según lo indique el plan o el propio usuario— e implementa **cada uno** con
+`work-implement`, **uno tras otro en ese orden**: no inicies el siguiente hasta
+terminar el anterior. Se ejecutan todos; lo que cambia es el orden, sin
+paralelismo entre planes.
+
+**Si elige en paralelo con tareas.** Usa **la herramienta de tareas** para
+orquestar la ejecución: crea **una tarea por cada `plan.md` en `Ready`** (una por
+proyecto destino) y delega cada tarea a `work-implement`. Antes de lanzarlas,
+determina si **hay dependencias entre los planes** (p. ej. un proyecto que debe
+migrarse antes porque otro lo consume); si el discovery/plan no lo deja claro,
+pregúntaselo al usuario.
+
+- **Sin dependencias entre los planes:** las tareas pueden ejecutarse **en
+  paralelo**.
+- **Con dependencias:** secuencia las tareas respetando el orden de dependencia;
+  las independientes entre sí pueden seguir ejecutándose en paralelo.
+
+En cualquier caso, cada proyecto destino es una ejecución de `work-implement`
+independiente, por fases y con una unidad por confirmación: el paralelismo es
+**entre planes** de distintos proyectos, nunca dentro de un mismo plan ni
+mezclando proyectos en una misma unidad de confirmación.
+
+**Si la respuesta es negativa.** Cierra aquí: el plan queda listo para
+implementarse más adelante con `work-implement` cuando el usuario lo decida.
