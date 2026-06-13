@@ -1,6 +1,13 @@
 ---
 name: project-migrate
-description: Planifica y documenta migraciones tecnológicas entre un proyecto origen y uno destino. Úsalo cuando el usuario quiera migrar o mover código, módulos, features o dependencias entre dos proyectos, o mapear/comparar sus stacks (disparadores: "migrar", "migración", "migrate", "migration"). Produce tres documentos secuenciales en `docs/specs/migrate/MG-XXX-{slug}/` del proyecto destino: discovery.md (mapeo tecnológico y oportunidades de validación), validation.md (casos de Golden Master Testing) y plan.md (plan de implementación por fases). Si el destino se divide en varios proyectos, cada uno recibe su propia carpeta. Aplica aunque el usuario no pida explícitamente crear documentos de migración.
+description: >-
+  Planifica y documenta migraciones tecnológicas entre un proyecto origen y uno destino.
+  Úsalo cuando el usuario quiera migrar o mover código, módulos, features o dependencias
+  entre dos proyectos, o mapear/comparar sus stacks (disparadores: migrar, migración,
+  migrate, migration). Produce tres documentos secuenciales en docs/specs/migrate/MG-XXX-{slug}/
+  del proyecto destino — discovery.md, validation.md y plan.md. Si el destino se divide en
+  varios proyectos, cada uno recibe su propia carpeta. Aplica aunque el usuario no pida
+  explícitamente crear documentos de migración.
 ---
 
 # Migración entre proyectos
