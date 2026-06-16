@@ -16,12 +16,6 @@ Guia general para **ejecutar en codigo** trabajo ya especificado, de **distintos
 
 ---
 
-## Subagente requerido
-
-Igual que el resto del ciclo de trabajo, **este skill debe ejecutarse bajo el subagente correspondiente del proyecto** cuando exista. No ejecutar ningun flujo normativo sin ese contexto.
-
----
-
 ## Como preguntar al usuario
 
 Cuando este skill (o cualquiera de sus referencias) indique **preguntar, pedir, confirmar o validar** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** del cliente (la que renderiza opciones tappables o un selector) en lugar de redactar la pregunta como prosa libre. Reglas:
@@ -99,6 +93,17 @@ Cada tipo mantiene un `progress.md` como **unica bitacora** que este skill puede
 
 ---
 
+## Documentacion de codigo segun ADR (transversal)
+
+Antes de escribir codigo, verificar si el proyecto tiene **algun ADR que defina como documentar el codigo** (estilo de docstrings, comentarios, JSDoc/TSDoc, convenciones de encabezado de archivo, anotaciones, etc.). Los ADR suelen vivir bajo `docs/adr/` o donde el proyecto los registre.
+
+- Si existe un ADR **vigente** sobre documentacion de codigo, **aplicarlo dentro de la misma unidad que se implementa** (la TK, el WI o la fase). La documentacion que el ADR exige es **parte del entregable de esa unidad**, no un paso posterior.
+- **No diferir** esa documentacion "para otro momento", un commit aparte o una tarea futura. Una unidad cuyo codigo no cumple la documentacion que su ADR exige **no esta `Done`**.
+- Esto **no contradice** la regla de no modificar la especificacion de producto: seguir un ADR significa **obedecerlo al escribir el codigo**, no editar el ADR. El ADR se respeta, no se cambia.
+- Si hay varios ADR aplicables, o uno ambiguo respecto al alcance actual, **preguntar al usuario** antes de continuar en lugar de asumir.
+
+---
+
 ## Subagentes y MCP condicionales (transversal)
 
 | Condicion | Agente / MCP requerido |
@@ -136,6 +141,7 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 - Implementar en `main` u otra rama que no sea la del artefacto sin instruccion explicita.
 - Tratar como ejecutable un artefacto que no esta en `Ready`.
 - Modificar la especificacion de producto (US/TK/WI/discovery/validation/plan, ADRs, technical-docs) durante la implementacion.
+- Diferir "para otro momento" la documentacion de codigo que un ADR vigente exige, o cerrar una unidad como `Done` sin esa documentacion.
 - Continuar cuando se detecta un conflicto en la documentacion sin notificar al usuario primero.
 - Escribir tests sin delegar a `quality-specialist`.
 - Escribir un estado no definido en `progress.md`; estados validos: `Pending`, `In Progress`, `Done`.

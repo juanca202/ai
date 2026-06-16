@@ -91,6 +91,7 @@ Tras merge **sin conflictos pendientes**, aplicar **`projectName`** y **`project
 
 | Archivo | Acción |
 | ------- | ------ |
+| `src/app/layout.tsx` | `metadata.title` → **`projectName`**. |
 | `src/index.html` | `<title>` → **`projectName`**. |
 | `package.json` | `"name"` → **`projectId`**. |
 | `package-lock.json` | Alinear `name` raíz y `packages[""].name` con **`projectId`**. |
