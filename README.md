@@ -4,69 +4,37 @@ Skills y agentes del equipo para Cursor y otros asistentes de código.
 
 ## Instalación
 
-### En un proyecto (recomendado para equipos)
-
-Desde la raíz del repositorio:
-
 ```bash
-npx skills add https://github.com/juanca202/ai -y --copy
+npx skills add https://github.com/juanca202/ai
 ```
 
-Los skills quedan en `.agents/skills/` y se pueden versionar con el proyecto.
-
-### Global (todos los proyectos)
-
-```bash
-npx skills add https://github.com/juanca202/ai -g -y --copy -a cursor -s '*'
-```
-
-| Flag | Motivo |
-|------|--------|
-| `-g` | Instala en el directorio del usuario (`~/.agents/skills/` y, para Cursor, `~/.cursor/skills/`) |
-| `-y` | Sin prompts interactivos |
-| `--copy` | Copia archivos (más fiable que symlinks en macOS/Windows) |
-| `-a cursor` | Solo Cursor; evita agentes que no soportan instalación global |
-| `-s '*'` | Todos los skills del paquete |
-
-**No uses** `--all` ni `--agent '*'` con `-g`: el CLI intenta instalar también en **PromptScript**, que no admite skills globales y muestra errores del tipo:
-
-```text
-PromptScript does not support global skill installation
-```
-
-Ese mensaje no significa que la instalación falló por completo. Si ves rutas `~/.agents/skills/<nombre>/`, Cursor ya tiene los skills. Comprueba con:
-
-```bash
-ls ~/.agents/skills
-npx skills ls -g
-```
-
-### Si apareció "Failed to install 12"
-
-Suele ser **12 skills × agente PromptScript**. Los demás agentes (incluido el directorio universal `~/.agents/skills/`) suelen haberse instalado bien. Para reinstalar sin ese ruido:
-
-```bash
-npx skills add https://github.com/juanca202/ai -g -y --copy -a cursor -s '*'
-```
-
-### Instalación manual (alternativa)
-
-```bash
-mkdir -p ~/.agents/skills
-for d in ado-install adr-discover adr-manage code-review git-commit pr-create \
-  project-create prompt-validator work-define work-implement work-integrate work-plan; do
-  cp -R skills/"$d" ~/.agents/skills/
-done
-```
+El asistente te guiará paso a paso: dónde instalar (proyecto o global), qué agente usar y qué skills incluir.
 
 ## Skills incluidos
 
 | Skill | Uso |
 |-------|-----|
-| `ado-install` | MCP de Azure DevOps en Cursor |
-| `adr-discover` / `adr-manage` | ADRs |
-| `code-review` | Checks TS/Node antes de merge |
-| `git-commit` / `pr-create` | Commits y pull requests |
-| `project-create` | Proyectos desde plantillas |
-| `prompt-validator` | Revisión de prompts |
-| `work-define` / `work-plan` / `work-implement` / `work-integrate` | Flujo de historias de usuario |
+| `ado-install` | Configurar el MCP de Azure DevOps en Cursor (PAT, multi-cuenta, verificación) |
+| `adr-discover` | Auditar un repositorio y proponer ADRs candidatos a partir de decisiones implícitas |
+| `adr-manage` | Crear o actualizar Architecture Decision Records en `docs/adr/` |
+| `code-review` | Batería de verificaciones automatizadas pre-merge según el stack detectado |
+| `git-commit` | Preparar commits con mensajes Conventional Commits inferidos del diff |
+| `pr-create` | Crear PR o MR desde la rama actual (GitHub, GitLab, Azure Repos, etc.) |
+| `project-create` | Crear proyectos nuevos fusionando plantillas del equipo por stack |
+| `project-migrate` | Planificar y documentar migraciones tecnológicas entre proyectos (MG-XXX) |
+| `prompt-validate` | Validar y mejorar prompts para agentes de IA (efectividad y reescritura) |
+| `trace-validate` | Reporte de trazabilidad: criterios de aceptación (BR/SC) ↔ casos y artefactos de prueba |
+| `work-define` | Crear o actualizar historias de usuario (US-XXX) |
+| `work-plan` | Planificar tareas técnicas (TK-XXX) o work items de mantenimiento (WI-XXX) |
+| `work-implement` | Implementar TK, WI o migraciones (MG-XXX) a partir de specs en estado Ready |
+| `work-integrate` | Cerrar e integrar el trabajo de una US (merge de `feature/US-XXX-*`) |
+
+## Agentes incluidos
+
+Los agentes viven en `agents/` y se pueden referenciar desde reglas de Cursor o invocar con la herramienta Task.
+
+| Agente | Uso |
+|--------|-----|
+| `docs-specialist` | Especificación Markdown: US, TK, ADR, technical-docs, glosario y trazabilidad en `docs/specs` |
+| `quality-specialist` | Autor senior de pruebas automatizadas; deriva casos de criterios de aceptación (SC/BR) |
+| `ui-specialist` | UI agnóstica de framework; descubre stack, aplica `DESIGN.md` y convenciones del repo |
