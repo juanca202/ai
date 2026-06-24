@@ -25,20 +25,14 @@ Genera un **reporte de trazabilidad** que cruza los **criterios de aceptacion** 
 Cuando este skill indique **preguntar, pedir, confirmar o validar** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** del cliente (opciones tappables o selector) en lugar de prosa libre. Reglas:
 
 - **Opciones cortas y mutuamente excluyentes** (2-4 por pregunta) cuando la respuesta admita categorias.
-- **No repreguntar** lo que ya este respondido en el contexto, en `.agents/MEMORY.md`, o en los documentos del repo.
+- **No repreguntar** lo que ya este respondido en el contexto de la sesion o en los documentos del repo.
 - **Fallback:** si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3...).
 
 ---
 
 ## Resolucion de idioma
 
-Orden canonico compartido con el resto del ciclo de trabajo. Detenerse en el primer paso que aplique:
-
-1. **`.agents/MEMORY.md`** (raiz del repo) -> linea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Si no existe pero hay claves legacy (`language:`, `idioma:`, `Project language:`), usarlas solo como fallback.
-2. **Idioma del turno del usuario** (mensaje actual).
-3. **Preguntar al usuario** y persistir la respuesta en `.agents/MEMORY.md` con `preferred language: <codigo>`.
-
-El reporte se redacta en el idioma resuelto.
+Si en el contexto de la sesion de chat existe un **idioma de preferencia del usuario**, redactar el reporte en ese idioma. Si no consta, usar el **idioma de la conversacion**. La salida y los mensajes de error de las herramientas de prueba no se traducen.
 
 ---
 
@@ -174,7 +168,7 @@ Solo el veredicto, el resumen de cobertura y lo que el usuario debe saber o deci
 
 ## Checklist
 
-- [ ] Idioma resuelto (y `.agents/MEMORY.md` actualizado si hizo falta)
+- [ ] Idioma resuelto (preferencia del usuario en la sesion, o idioma de la conversacion)
 - [ ] `README.md` de la US leido; `BR-XX` y `SC-XX` extraidos de **Criterios de aceptacion**
 - [ ] Casos de prueba y artefactos (unit / integracion / e2e) inventariados con su ruta y criterio
 - [ ] Cada `BR-XX`/`SC-XX` con estado (Cubierto / Parcial / No cubierto) y observaciones cuando aplica

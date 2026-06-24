@@ -21,7 +21,7 @@ Guia general para **ejecutar en codigo** trabajo ya especificado, de **distintos
 Cuando este skill (o cualquiera de sus referencias) indique **preguntar, pedir, confirmar o validar** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** del cliente (la que renderiza opciones tappables o un selector) en lugar de redactar la pregunta como prosa libre. Reglas:
 
 - **Opciones cortas y mutuamente excluyentes** (2-4 por pregunta) cuando la respuesta admita categorias.
-- **No repreguntar** lo que ya esta respondido en el contexto, en `.agents/MEMORY.md`, o en los documentos del repo.
+- **No repreguntar** lo que ya esta respondido en el contexto de la sesion o en los documentos del repo.
 - **Confirmaciones entre unidades:** una pregunta por turno con opciones claras (p. ej. `Si, continuar` / `No, detener aqui`). No avanzar antes de la respuesta.
 - **Fallback:** si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3...).
 
@@ -31,11 +31,7 @@ Cada vez que una referencia diga *preguntar al usuario*, *validar con el usuario
 
 ## Resolucion de idioma
 
-Orden canonico compartido con el resto del ciclo de trabajo. Detenerse en el primer paso que aplique:
-
-1. **`.agents/MEMORY.md`** (raiz del repo) -> linea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Si no existe esa linea pero hay claves legacy (`language:`, `idioma:`, `Project language:`), usarlas solo como fallback.
-2. **Idioma del turno del usuario** (mensaje actual).
-3. **Preguntar al usuario** que idioma prefiere y persistir la respuesta en `.agents/MEMORY.md` con `preferred language: <codigo>`.
+Si en el contexto de la sesion de chat existe un **idioma de preferencia del usuario**, redactar en ese idioma los mensajes al usuario y las notas de `progress.md`. Si no consta, usar el **idioma de la conversacion**. La salida y los mensajes de error de las herramientas (lint, build, tests) no se traducen; el codigo, los identificadores y los nombres de artefacto tampoco.
 
 ---
 

@@ -113,9 +113,10 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 2. **Escribir el `README.md`** usando `assets/user-story-template.md` como molde:
   - **Descripción:** Como/Quiero/Para con modalidad normativa RFC 2119 (ver [Notas — RFC 2119](#rfc-2119)) en el idioma de preferencia.
   - **Referencias:** enlaces de diseño y archivos en `assets/`; los archivos aportados no deben quedar solo en el chat.
-  - **Criterios de aceptación** (sección con dos subsecciones; ids solo `BR-XX` y `SC-XX`):
+  - **Criterios de aceptación** (subsecciones con ids `BR-XX`, `NFR-XX` —opcional— y `SC-XX`):
     - **Reglas de negocio:** cada regla con id secuencial **BR-01**, **BR-02**, … y palabra clave normativa en MAYÚSCULAS (**DEBE**, **NO DEBE**, **DEBERÍA**, etc.). Los ids son únicos en el ámbito de la US; renumerar si se reordenan o eliminan reglas.
-    - **Escenarios:** cada escenario con id secuencial **SC-01**, **SC-02**, … en la línea `Escenario: SC-XX - <nombre>`. Redactar en formato Gherkin con la palabra clave de cada paso en **TODO MAYÚSCULAS** en el idioma de preferencia (**DADO / CUANDO / ENTONCES / Y / PERO** en español; **GIVEN / WHEN / THEN / AND / BUT** en inglés). Los escenarios no deben contradecir ninguna obligación (**DEBE**) ni prohibición (**NO DEBE**) de las reglas de negocio.
+    - **Requisitos no funcionales** (solo si aplica): cada NFR con id secuencial **NFR-01**, **NFR-02**, …; prefijar con la **característica ISO/IEC 25010** entre corchetes en el idioma de preferencia (ver [Notas — ISO 25010](#iso-25010)); enunciado con modalidad RFC 2119 en MAYÚSCULAS. Omitir la subsección entera si no hay NFRs.
+    - **Escenarios:** cada escenario con id secuencial **SC-01**, **SC-02**, … en la línea `Escenario: SC-XX - <nombre>`. Redactar en formato Gherkin con la palabra clave de cada paso en **TODO MAYÚSCULAS** en el idioma de preferencia (**DADO / CUANDO / ENTONCES / Y / PERO** en español; **GIVEN / WHEN / THEN / AND / BUT** en inglés). Los escenarios no deben contradecir ninguna obligación (**DEBE**) ni prohibición (**NO DEBE**) de las reglas de negocio ni de los NFR.
   - **Unidades de trabajo:** al nivel de granularidad del repo (p. ej. `frontend`, `backend`, o `micro-autenticacion`, `micro-catalogo`).
   - **Complejidad sugerida:** story points solo en valores Fibonacci 1, 2, 3, 5, 8, 13 con justificación breve de alcance, riesgo e incertidumbre.
   - **Validación — INVEST:** tabla con las seis dimensiones (I, N, V, E, S, T); valor de cada una: `Cumple` / `No cumple` / `Parcial` con nota. Si alguna dimensión falla, documentarlo sin disimular.
@@ -142,6 +143,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 2. **Leer el `README.md` actual** completo antes de editar.
 3. **Aplicar los cambios** solicitados por el usuario. Reglas invariantes:
   - Si el cambio afecta reglas de negocio: mantener los ids `BR-XX` existentes; renumerar solo si se reordenan o eliminan reglas.
+  - Si el cambio afecta NFRs: mantener los ids `NFR-XX` existentes; conservar o corregir la característica ISO 25010 entre corchetes; renumerar solo si se reordenan o eliminan NFRs.
   - Si el cambio afecta escenarios: mantener los ids `SC-XX` existentes; renumerar solo si se reordenan o eliminan escenarios.
   - Si hay conflicto entre el texto de un `TK-XXX` y el `README.md` de la US: **la US prevalece**. Corregir las tareas, no la historia.
   - Si el usuario cambia el estado a **Ready**: verificar todas las condiciones del checklist de Ready antes de guardar.
@@ -171,7 +173,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 - Observaciones sin aclaraciones ni pendientes abiertos
 **Formato:**
 - Plantilla `assets/user-story-template.md` leída
-- Reglas de negocio con identificadores `BR-01`, `BR-02`, … sin saltos; escenarios con `SC-01`, `SC-02`, … sin saltos
+- Reglas de negocio con identificadores `BR-01`, `BR-02`, … sin saltos; NFRs con `NFR-01`, `NFR-02`, … y característica ISO 25010 entre corchetes (si aplica); escenarios con `SC-01`, `SC-02`, … sin saltos
 - Palabras clave normativas en MAYÚSCULAS en el idioma de preferencia (DEBE, NO DEBE, DEBERÍA…)
 - Archivos del usuario guardados en `assets/` y enlazados con ruta relativa
 - Detalle técnico en `technical-docs/` o `TK-XXX`, no en el `README.md`
@@ -255,3 +257,20 @@ Tabla de equivalencias para palabras clave normativas (en MAYÚSCULAS en el idio
 
 
 Elegir una forma por nivel y mantenerla consistente en toda la US. Si el usuario pide no usar RFC 2119, documentarlo en Observaciones; el formato Gherkin en MAYÚSCULAS se mantiene salvo petición explícita en contra.
+
+### ISO 25010
+
+Cada **NFR-XX** debe clasificarse en una característica de calidad de **ISO/IEC 25010** (modelo de calidad de producto software). Usar el nombre en el idioma de preferencia del documento, entre corchetes al inicio del enunciado:
+
+| Característica (`es`) | Característica (`en`) | Ejemplos de NFR |
+| --------------------- | --------------------- | --------------- |
+| Idoneidad funcional | Functional suitability | Completitud de funciones, corrección, pertinencia |
+| Eficiencia de rendimiento | Performance efficiency | Tiempos de respuesta, throughput, uso de recursos |
+| Compatibilidad | Compatibility | Coexistencia, interoperabilidad |
+| Usabilidad | Usability | Accesibilidad, aprendizaje, operabilidad |
+| Fiabilidad | Reliability | Disponibilidad, tolerancia a fallos, recuperabilidad |
+| Seguridad | Security | Confidencialidad, integridad, autenticación |
+| Mantenibilidad | Maintainability | Modularidad, testabilidad, modificabilidad |
+| Portabilidad | Portability | Adaptabilidad, instalabilidad |
+
+Elegir la característica de **primer nivel** que mejor encaje; no mezclar varias en un mismo NFR. Si un requisito abarca más de una, dividirlo en NFRs distintos.

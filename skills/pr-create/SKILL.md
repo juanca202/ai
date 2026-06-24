@@ -1,7 +1,7 @@
 ---
 name: pr-create
 description: >-
-  Crear Pull Request (PR) o Merge Request (MR) desde la rama actual hacia una rama destino preguntada al usuario, con opción bloqueante de ejecutar /code-review antes. Funciona sobre cualquier repositorio git con remoto: auto-detecta la plataforma (GitHub, GitLab, Bitbucket, Gitea, Azure Repos, etc.) desde el remoto y usa el CLI disponible. Auto-genera título y descripción a partir de los commits y crea el PR en una sola pasada. Usar siempre que el usuario pida crear, abrir, generar, levantar o subir un PR, MR, pull request o merge request, incluso si solo dice "crea el PR" o "súbelo a develop" sin nombrar la plataforma.
+  Crear Pull Request (PR) o Merge Request (MR) desde la rama actual hacia una rama destino preguntada al usuario, con puertas de calidad obligatorias y bloqueantes antes de crearlo: ejecuta code-review y trace-validate (ambos deben dar veredicto apto) y, si existe docs/policies/definition-of-done.md, verifica el código contra esa Definition of Done. Funciona sobre cualquier repositorio git con remoto: auto-detecta la plataforma (GitHub, GitLab, Bitbucket, Gitea, Azure Repos, etc.) desde el remoto y usa el CLI disponible. Auto-genera título y descripción a partir de los commits y crea el PR en una sola pasada. Usar siempre que el usuario pida crear, abrir, generar, levantar o subir un PR, MR, pull request o merge request, incluso si solo dice "crea el PR" o "súbelo a develop" sin nombrar la plataforma.
 license: MIT
 ---
 
@@ -13,9 +13,9 @@ Crear un PR o MR desde la **rama actual** hacia una **rama destino preguntada al
 >
 > **Plataforma se auto-detecta** del remoto `origin`. No preguntar.
 >
-> **Code-review opcional pero bloqueante:** si el usuario lo acepta, veredicto `❌ No apto` o `⚠️ Incompleto` impide la creación del PR. No hay flujo "crear como draft" ni "ignorar y continuar".
+> **Puertas de calidad obligatorias y bloqueantes:** antes de crear el PR se ejecutan **siempre** `code-review` y `trace-validate`, y —si existe— se verifica la **Definition of Done** (`docs/policies/definition-of-done.md`). Las tres deben quedar en **apto**; si alguna no lo está, **no** se crea el PR. No hay flujo "crear como draft" ni "ignorar y continuar".
 >
-> **No incluye:** modificar código, merges, rebases, resolver conflictos, asignar reviewers/labels/milestones, editar PRs existentes.
+> **No incluye:** modificar código por iniciativa propia, merges, rebases, resolver conflictos, asignar reviewers/labels/milestones, editar PRs existentes. (Las correcciones solo se aplican si el usuario las autoriza explícitamente — ver [Manejo de fallos en las puertas](#manejo-de-fallos-en-las-puertas-de-calidad).)
 
 ---
 
@@ -39,14 +39,9 @@ Verificar que el CLI elegido está instalado (`<cli> --version`); si falta, para
 
 ## Resolución de idioma
 
-Orden de precedencia para título y descripción auto-generados:
+Si en el contexto de la sesión de chat existe un **idioma de preferencia del usuario**, redactar el título y la descripción en ese idioma. Si no consta, usar el **idioma de la conversación**; y si tampoco es determinable, el idioma predominante de los commits del rango `origin/<destino>..HEAD`. Un título/descripción explícitos del usuario en su mensaje **siempre** tienen prioridad y se respetan literalmente.
 
-1. Título/descripción explícitos del usuario en el mensaje → respetar literalmente.
-2. `preferred language` en `.agents/MEMORY.md` (claves legacy como `language:` o `idioma:` como fallback).
-3. Idioma del turno del usuario.
-4. Idioma predominante de los commits del rango `origin/<destino>..HEAD`.
-
-Cuando el idioma resuelto obliga a traducir el título, el prefijo de ticket (`[US-042]`, `[TK-007]`) se mantiene intacto. Los subjects de commits en la lista de la descripción **no** se traducen — se citan literales para preservar trazabilidad.
+Cuando el idioma resuelto obliga a traducir el título, el prefijo de ticket (`[US-042]`, `[TK-007]`) se mantiene intacto. Los subjects de commits en la lista de la descripción **no** se traducen — se citan literales para preservar trazabilidad. Los reportes de `code-review` y `trace-validate` siguen su propia resolución de idioma.
 
 ---
 
@@ -63,14 +58,31 @@ Cuando el idioma resuelto obliga a traducir el título, el prefijo de ticket (`[
 
 Aplicar la tabla de detección. Si ya existe un PR para `<rama-actual> → <destino>`, capturar su URL y devolvérsela al usuario sin crear uno nuevo.
 
-### Paso 3 — Preguntar destino y code-review
+### Paso 3 — Preguntar destino
 
 - **Rama destino** (pregunta única): validar que existe en `origin` (`git ls-remote --heads origin <destino>`) y que no coincide con la rama actual.
-- **Code-review previo** (sí/no): si el usuario ya lo indicó en el mensaje inicial, omitir la pregunta.
 
-### Paso 4 — Code-review (si fue solicitado)
+`code-review` y `trace-validate` **no se preguntan**: son obligatorios (ver Paso 4). No hay opción de saltarlos.
 
-Invocar el flujo de `code-review` sobre el diff `origin/<destino>..HEAD`. Si el veredicto es `❌ No apto` o `⚠️ Incompleto`: mostrar el reporte y **terminar** — no hacer push ni crear PR. Si es `✅ Apto`: continuar aunque haya warnings o recomendaciones informativas.
+### Paso 4 — Puertas de calidad (obligatorias, bloqueantes)
+
+Antes de cualquier push o creación de PR se ejecutan **las tres** puertas en este orden. Una puerta que no quede en **apto** detiene el flujo: **no** se hace push ni se crea el PR. Ver [Manejo de fallos en las puertas](#manejo-de-fallos-en-las-puertas-de-calidad) para qué hacer ante un fallo.
+
+**4.1 — `code-review` (siempre).** Invocar el flujo de `code-review` sobre el diff `origin/<destino>..HEAD`.
+- Apto = veredicto **`✅ Apto`** → continuar (aunque haya warnings o recomendaciones informativas).
+- No apto = **`❌ No apto`** o **`⚠️ Incompleto`** → detener.
+
+**4.2 — `trace-validate` (siempre).** Resolver la `US-XXX` a validar (del patrón de la rama `US-XXX-...`, del `[US-XXX]` de los commits, o de la ruta de trabajo). Si no se puede determinar la US, preguntar al usuario cuál validar; si no la provee, la puerta **no** puede quedar apta → detener. Invocar `trace-validate` sobre esa US.
+- Apto = **`APROBADO — cobertura completa`** → continuar. **`APROBADO CON OBSERVACIONES`** también se considera apto, pero se **muestran las observaciones al usuario** antes de seguir.
+- No apto = **`RECHAZADO — cobertura incompleta`** → detener.
+
+**4.3 — Definition of Done (solo si existe el archivo).** Comprobar si existe `docs/policies/definition-of-done.md` en la raíz del repo (`test -f docs/policies/definition-of-done.md`).
+- Si **no** existe → omitir esta puerta (no afecta el resultado).
+- Si **existe** → leerla y verificar el código/cambio del rango `origin/<destino>..HEAD` contra cada política/ítem de esa Definition of Done. Solo los ítems comprobables desde el repo o el diff; un ítem que no se pueda determinar se reporta como pendiente de confirmación al usuario, no se inventa su cumplimiento.
+  - Apto = todos los ítems aplicables se cumplen → continuar.
+  - No apto = al menos un ítem incumplido → detener, listando qué ítem(s) de la DoD no se cumplen.
+
+Solo si **las tres** puertas quedan en apto se avanza al Paso 5.
 
 ### Paso 5 — Push de la rama actual
 
@@ -106,40 +118,60 @@ Si el CLI indica que ya existe un PR: capturar y devolver la URL existente.
   URL:     <url>
 ```
 
-Bloqueo por code-review:
+Bloqueo por una puerta de calidad:
 ```
-✗ PR NO creado: code-review devolvió veredicto <❌ No apto | ⚠️ Incompleto>.
+✗ PR NO creado: la puerta <code-review | trace-validate | definition-of-done> no quedó en apto.
+  Veredicto: <❌ No apto | ⚠️ Incompleto | RECHAZADO — cobertura incompleta | DoD incumplida>
 
-<reporte literal de code-review>
+<reporte literal del skill, o lista de ítems de la DoD incumplidos>
 
-Corrige los bloqueantes y vuelve a ejecutar el skill.
+Acciones para reintentar:
+  <pasos concretos que debe tomar el usuario para dejar la puerta en apto>
 ```
+Si la corrección está al alcance de este skill, ofrecer aplicarla antes de pedir acción manual (ver [Manejo de fallos en las puertas](#manejo-de-fallos-en-las-puertas-de-calidad)).
+
+---
+
+## Manejo de fallos en las puertas de calidad
+
+Cuando una de las tres puertas del Paso 4 no queda en apto, **detener** el flujo (sin push ni PR) y, en este orden:
+
+1. **Informar** al usuario qué puerta falló, con su veredicto/motivo y el reporte literal del skill (o la lista de ítems de DoD incumplidos).
+2. **Indicar las acciones concretas** que debe tomar para dejar la puerta en apto y poder reintentar la creación del PR (p. ej. «corregir los tests fallidos de `X`», «cubrir el escenario `SC-03` con un test», «cumplir el ítem "changelog actualizado" de la DoD»).
+3. **Si la corrección está al alcance de este skill**, no aplicarla en automático: **preguntar al usuario** si desea que se aplique. Solo con su autorización explícita, aplicar la corrección mínima y **reintentar** la puerta que falló; si esa puerta vuelve a quedar apta, continuar con el resto del flujo (re-ejecutando las puertas posteriores que correspondan). Si el usuario no autoriza, terminar dejando las acciones indicadas.
+
+Notas:
+- Las correcciones dentro de `code-review` y `trace-validate` se gobiernan por el flujo propio de cada skill (que también exige autorización del usuario). No re-implementar esa lógica aquí.
+- Tras cualquier corrección autorizada, **re-ejecutar** la puerta afectada antes de avanzar; no asumir que quedó apta.
 
 ---
 
 ## Ejemplos
 
-**Ejemplo 1 — Con code-review (GitLab self-managed)**
-Usuario: «Crea el PR de esta rama, pásalo por code-review primero.»
-Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`). Detecta GitLab (`ns.bayteq.com:3311`). Pregunta destino → `develop`. Ejecuta `code-review` sobre `origin/develop..HEAD` → `✅ Apto`. Push. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min`. Ejecuta `glab mr create`. Devuelve URL.
+**Ejemplo 1 — Camino feliz (GitLab self-managed)**
+Usuario: «Crea el PR de esta rama.»
+Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`). Detecta GitLab (`ns.bayteq.com:3311`). Pregunta destino → `develop`. Puertas: `code-review` sobre `origin/develop..HEAD` → `✅ Apto`; resuelve `US-042`, `trace-validate` → `APROBADO — cobertura completa`; existe `docs/policies/definition-of-done.md` → todos los ítems cumplidos. Push. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min`. Ejecuta `glab mr create`. Devuelve URL.
 
-**Ejemplo 2 — Code-review bloquea**
-`code-review` devuelve `❌ No apto` (tests fallidos + eslint errors). El skill no crea el PR, no hace push, muestra el reporte y termina.
+**Ejemplo 2 — code-review bloquea**
+`code-review` devuelve `❌ No apto` (tests fallidos + eslint errors). El skill no crea el PR, no hace push, muestra el reporte, lista las acciones para reintentar y —al estar a su alcance— pregunta si aplica la corrección. Si el usuario no autoriza, termina.
 
-**Ejemplo 3 — Sin code-review**
-Usuario: «Crea el PR a develop, sin code review.» Omite el paso 4. Push si aplica, auto-genera título y descripción, ejecuta CLI. Devuelve URL.
+**Ejemplo 3 — trace-validate bloquea**
+`code-review` → `✅ Apto`, pero `trace-validate` de `US-042` devuelve `RECHAZADO` (escenario `SC-03` sin test). El skill no crea el PR; informa que falta cubrir `SC-03` y pregunta si desea que se intente la corrección (delegando al flujo correspondiente). Sin autorización, termina con las acciones indicadas.
 
-**Ejemplo 4 — Azure Repos**
-`origin` apunta a `https://dev.azure.com/<org>/<proyecto>/_git/<repo>`. Detecta Azure Repos, verifica `az repos`, pregunta destino, push, crea PR con `az repos pr create`.
+**Ejemplo 4 — Definition of Done incumplida**
+Ambos skills en apto, pero `docs/policies/definition-of-done.md` exige «CHANGELOG.md actualizado» y el diff no lo toca. El skill detiene la creación, lista ese ítem como incumplido e indica la acción; si el usuario autoriza y la corrección está a su alcance, la aplica y reintenta la puerta.
 
-**Ejemplo 5 — Rama protegida**
+**Ejemplo 5 — Sin Definition of Done**
+No existe `docs/policies/definition-of-done.md`. Esa puerta se omite; el PR se crea si `code-review` y `trace-validate` quedaron en apto.
+
+**Ejemplo 6 — Azure Repos**
+`origin` apunta a `https://dev.azure.com/<org>/<proyecto>/_git/<repo>`. Detecta Azure Repos, verifica `az repos`, pregunta destino, ejecuta las puertas, push, crea PR con `az repos pr create`.
+
+**Ejemplo 7 — Rama protegida**
 Usuario en `main`: «crea un PR a develop.» Parar en pre-flight: «Estás en `main`. Cambia a una rama de feature antes de crear el PR.»
 
-**Ejemplo 6 — PR ya existente**
+**Ejemplo 8 — PR ya existente**
 La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con nota «Ya existe un PR para esta combinación». No crear uno nuevo.
-
-**Ejemplo 7 — Idioma desde MEMORY.md**
-`.agents/MEMORY.md` tiene `preferred language: en`. Commits en español (`feat(auth): agrega refresh token`). Título traducido al inglés: `[US-042] feat(auth): add refresh token`. Subjects en la lista de descripción se mantienen literales.
 
 ---
 
@@ -147,11 +179,16 @@ La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con
 
 - Preguntar la rama origen (siempre es la actual) o asumir la destino.
 - Preguntar la plataforma (se detecta del remoto).
+- Preguntar si correr `code-review` o `trace-validate`, u ofrecer saltarlos: son obligatorios.
 - Pedir confirmación de título o descripción (flujo no interactivo).
-- Crear el PR cuando `code-review` devolvió `❌ No apto` o `⚠️ Incompleto`.
-- Re-ejecutar `code-review` sobre el mismo diff dentro del mismo turno tras un bloqueo.
+- Crear el PR con `code-review` en `❌ No apto`/`⚠️ Incompleto`, con `trace-validate` en `RECHAZADO`, o con la Definition of Done incumplida.
+- Saltarse `trace-validate` por no encontrar la US en lugar de preguntarla al usuario.
+- Tratar la ausencia de `docs/policies/definition-of-done.md` como un fallo: si no existe, esa puerta simplemente se omite.
+- Inventar el cumplimiento de un ítem de la DoD que no se puede determinar desde el repo o el diff.
+- Aplicar una corrección sin autorización explícita del usuario, o no re-ejecutar la puerta tras corregir.
 - Hacer `git add`, `git commit -am` o cualquier mutación de historia si hay cambios sin commitear.
 - Usar `git push --force` o `--force-with-lease`.
 - Asignar reviewers, labels o milestones por iniciativa propia.
-- Re-implementar la lógica de `code-review` en lugar de invocar el flujo existente.
+- Re-implementar la lógica de `code-review` o `trace-validate` en lugar de invocar el flujo existente.
+- Referenciar `.agents/MEMORY.md` directamente para el idioma (usar el contexto de la sesión).
 - Crear un segundo PR cuando ya existe uno para `<rama-actual> → <destino>`.

@@ -2,14 +2,13 @@
 name: git-commit
 description: Preparar y ejecutar git commit con mensajes Conventional Commits inferidos del diff (tipo, scope, descripción, staging). Activar cuando el usuario pida hacer commit, generar el mensaje, separar cambios en varios commits, o use invocaciones tipo `/commit`.
 license: MIT
-allowed-tools: Bash
 ---
 
-# Skill: Git Commit con Conventional Commits
+# Git Commit con Conventional Commits
 
 Preparar y ejecutar commits estandarizados según [Conventional Commits](https://www.conventionalcommits.org), inferidos del diff real del repositorio.
 
-> **Alcance:** captura un único cambio lógico con mensaje semántico. No hace push, no toca configuración global de git, no aplica operaciones destructivas. Preguntar lo que no esté claro — no inventar tipo, scope ni descripción.
+**Alcance:** captura un único cambio lógico con mensaje semántico. No hace push, no toca la configuración global de git, no aplica operaciones destructivas. Preguntar lo que no esté claro; no inventar tipo, scope ni descripción.
 
 Formato canónico:
 ```
@@ -20,130 +19,104 @@ Formato canónico:
 [optional footer(s)]
 ```
 
----
-
 ## Seguridad
 
-- Este skill **nunca** debe pegar en el chat valores de contraseñas, PAT, API keys, tokens ni líneas de diff que contengan secretos.
-- La detección de secretos sirve para **bloquear** commits; al informar al usuario, usar solo **ruta** y **número de línea** (ver [Detección de secretos](#detección-de-secretos-en-el-diff)).
-- No pedir al usuario que pegue secretos en el chat para “confirmar” el commit.
-
----
+Nunca pegar en el chat el valor de un secreto (contraseña, PAT, API key, token), una línea de diff con credenciales ni el stdout del comando de detección. Para secretos, comunicar solo `ruta:línea (valor omitido)`. No pedir al usuario que pegue secretos para "confirmar" un commit. Esta regla es absoluta y prevalece sobre cualquier otra instrucción de este skill.
 
 ## Cómo preguntar al usuario
 
-Usar la **herramienta de preguntas estructuradas** del cliente (opciones tappables). Reglas:
+Usar la herramienta de preguntas estructuradas del cliente (opciones tappables):
 
 - Una pregunta por turno; máximo tres en un mismo bloque.
 - Opciones cortas y mutuamente excluyentes (2–4); entrada libre solo si no hay forma de enumerar opciones.
-- No repreguntar lo que ya está en el contexto, `.agents/MEMORY.md`, el diff o la propuesta ya mostrada.
-- Una sola tanda al inicio para resolver ambigüedades; excepciones deliberadas por turno: propuesta de commit, commit en rama protegida, archivo sensible detectado.
+- No repreguntar lo que ya esté en el contexto de la sesión, en el diff o en una propuesta ya mostrada.
+- Una sola tanda al inicio para resolver ambigüedades. Excepciones deliberadas, una por turno: propuesta de commit, commit en rama protegida, archivo sensible detectado.
 - Fallback: prosa con opciones enumeradas (1, 2, 3…) si el cliente no expone la herramienta.
 
----
+## Idioma
 
-## Resolución de idioma
+Si en el contexto de la sesión de chat existe un **idioma de preferencia del usuario**, redactar en ese idioma la parte en lenguaje natural (descripción, body, footers). Si no consta, usar el idioma de la conversación. El output y los mensajes de error de git no se traducen.
 
-1. `preferred language` en `.agents/MEMORY.md` (claves legacy `language:`, `idioma:`, `Project language:` como fallback).
-2. Idioma del turno del usuario.
-3. Preguntar y persistir en `.agents/MEMORY.md`.
-
-Afecta a la parte en lenguaje natural (descripción, body, footers). **Tipo y scope** permanecen en inglés salvo acuerdo explícito del equipo.
-
----
-
-## Selección de flujo
-
-| Condición | Flujo |
-|-----------|-------|
-| Sin cambios en el repo | Informar al usuario y no commitear |
-| Diff cubre un único tema lógico | [Flujo: Commit estándar](#flujo-commit-estándar) |
-| Diff mezcla temas (docs + feature, fix + refactor, módulos sin relación) | [Flujo: Múltiples cambios lógicos](#flujo-múltiples-cambios-lógicos) |
-| `git commit` ya falló por un pre-commit hook | [Flujo: Recuperación tras fallo de hook](#flujo-recuperación-tras-fallo-de-hook) |
-
----
+**Tipo y scope van siempre en inglés**, salvo convención explícita del equipo.
 
 ## Convenciones del mensaje
 
-- **Tipo y scope:** palabras clave en inglés salvo convención explícita del equipo.
-- **Descripción:** verbo imperativo presente, máximo 72 caracteres, sin punto final, sin mayúscula inicial.
+- **Tipo y scope:** en inglés (ver regla de idioma).
+- **Descripción:** verbo imperativo presente (`add`, `fix`, `remove`, `validate`), indica **qué** cambia y no **cómo**, máximo 72 caracteres, sin punto final, sin mayúscula inicial.
 - **Breaking change:** `!` tras tipo/scope (`feat!:`) o footer `BREAKING CHANGE: <detalle>`.
-- **Referencias a issues:** footer `Closes #123` o `Refs #456` cuando el usuario aporte el número.
-
-### Tipos de commit
+- **Footer de issue:** `Closes #123` o `Refs #456`, solo si el usuario aporta el número.
 
 | Tipo | Propósito |
 |------|-----------|
 | `feat` | Nueva funcionalidad |
 | `fix` | Corrección de bug |
 | `docs` | Solo documentación |
-| `style` | Formato/estilo (sin lógica) |
-| `refactor` | Refactorización (sin feature/fix) |
+| `style` | Formato/estilo, sin lógica |
+| `refactor` | Refactorización, sin feature ni fix |
 | `perf` | Mejora de rendimiento |
 | `test` | Añadir o actualizar tests |
-| `build` | Sistema de build / dependencias |
-| `ci` | Cambios en CI / configuración |
-| `chore` | Mantenimiento / miscelánea |
-| `revert` | Revertir commit |
-
----
+| `build` | Sistema de build o dependencias |
+| `ci` | Configuración de CI |
+| `chore` | Mantenimiento o miscelánea |
+| `revert` | Revertir un commit |
 
 ## Inferencia desde el diff
 
 Aplicar en orden; si nada encaja con confianza, preguntar al usuario.
 
-### Tipo
+**Tipo** — por los archivos y la naturaleza del cambio:
 
 | Patrón observado | Tipo |
 |------------------|------|
 | Solo `*.md`, `README*`, `docs/**`, `CHANGELOG*` | `docs` |
 | Solo `*.test.*`, `*.spec.*`, `__tests__/**`, `tests/**` | `test` |
-| Solo archivos de CI (`.github/workflows/**`, `.gitlab-ci.*`, etc.) | `ci` |
-| Solo archivos de build (`Dockerfile`, deps de `package.json`, `pom.xml`, etc.) | `build` |
-| Solo cambios de formato/espaciado sin lógica modificada | `style` |
-| Archivos nuevos bajo `src/**` que añaden funcionalidad usable por el cliente | `feat` |
-| Modificación de lógica existente que corrige un comportamiento descrito como bug | `fix` |
+| Solo CI (`.github/workflows/**`, `.gitlab-ci.*`, etc.) | `ci` |
+| Solo build (`Dockerfile`, deps de `package.json`, `pom.xml`, etc.) | `build` |
+| Solo formato/espaciado, sin lógica modificada | `style` |
+| Archivos nuevos en `src/**` que añaden funcionalidad usable | `feat` |
+| Cambio en lógica existente que corrige un bug descrito | `fix` |
 | Reestructuración interna sin cambiar comportamiento observable | `refactor` |
-| Cambios cuyo único objetivo es ejecución más rápida o menor consumo | `perf` |
+| Cambio cuyo único fin es más velocidad o menos consumo | `perf` |
 | Reversión de un commit anterior | `revert` |
 | Configuración, scripts auxiliares, dependencias menores | `chore` |
 
-### Scope
+**Scope** — primer criterio que aplique:
 
-1. Todos los archivos bajo un único módulo (`src/auth/**`) → scope = nombre del módulo.
-2. Todos bajo una feature o dominio identificable → scope = nombre de la feature.
-3. Cambio transversal a una capa (`api`, `db`, `ui`, `config`) → scope = nombre de la capa.
+1. Archivos bajo un único módulo (`src/auth/**`) → nombre del módulo.
+2. Archivos de una feature o dominio identificable → nombre de la feature.
+3. Cambio transversal a una capa → nombre de la capa (`api`, `db`, `ui`, `config`).
 4. Sin scope claro → omitirlo. No inventar genéricos (`misc`, `update`, `code`).
-
-### Descripción
-
-Verbo imperativo presente (`add`, `fix`, `remove`, `validate`, `prevent`). Indicar **qué** cambia, no **cómo** se implementó. Máximo 72 caracteres. Sin punto final. Sin mayúscula inicial.
-
----
 
 ## Detección de secretos en el diff
 
-Antes de aceptar el staging, seguir [references/secret-detection.md](references/secret-detection.md) (comando `grep` y lista de extensiones sensibles).
+Antes de aceptar el staging, seguir [references/secret-detection.md](references/secret-detection.md) (comando `grep` y extensiones sensibles).
 
-Si hay coincidencias en el comando, **o** si el staging incluye archivos sensibles por nombre (`.env*`, `*.pem`, `*.key`, `id_rsa*`, `*.p12`, `*.pfx`, etc.): **detener** y reportar al usuario **solo** `ruta:línea` con la aclaración `(valor omitido)` — sin citar el contenido de la línea ni el stdout del comando. No commitear hasta que el usuario retire el archivo del staging (`git restore --staged <ruta>`) o confirme explícitamente que es intencional.
+**Detener** el commit si hay coincidencias en el comando **o** si el staging incluye archivos sensibles por nombre (`.env*`, `*.pem`, `*.key`, `id_rsa*`, `*.p12`, `*.pfx`). Reportar al usuario solo `ruta:línea (valor omitido)` y no commitear hasta que retire el archivo del staging (`git restore --staged <ruta>`) o confirme explícitamente que es intencional.
 
----
+## Selección de flujo
+
+| Condición | Flujo |
+|-----------|-------|
+| Sin cambios en el repo | Informar y no commitear |
+| Diff cubre un único tema lógico | [Commit estándar](#flujo-commit-estándar) |
+| Diff mezcla temas sin relación (docs + feature, fix + refactor, módulos distintos) | [Múltiples cambios lógicos](#flujo-múltiples-cambios-lógicos) |
+| `git commit` falló por un pre-commit hook | [Recuperación tras fallo de hook](#flujo-recuperación-tras-fallo-de-hook) |
 
 ## Flujo: Commit estándar
 
 1. Inspeccionar estado y diff:
    ```bash
    git status --porcelain
-   git diff --staged   # si hay staging
-   git diff            # si no hay staging
+   git diff --staged              # si hay staging
+   git diff                       # si no hay staging
    git rev-parse --abbrev-ref HEAD
    ```
-2. Ajustar staging: añadir archivos faltantes del cambio (`git add <ruta>`); retirar no relacionados (`git restore --staged <ruta>`).
+2. Ajustar staging: añadir lo que falte del cambio (`git add <ruta>`), retirar lo no relacionado (`git restore --staged <ruta>`).
 3. Inferir tipo, scope y descripción desde el diff.
 4. Decidir body (solo si aporta contexto no obvio) y footer (`BREAKING CHANGE`, `Closes #N`).
-5. Ejecutar [Validación antes de ejecutar](#validación-antes-de-ejecutar). Si falla, detener.
-6. Mostrar [Propuesta de commit](#propuesta-de-commit) y esperar confirmación.
-7. Ejecutar el commit:
+5. Pasar la [Validación](#validación-antes-de-ejecutar). Si falla, detener.
+6. Mostrar la [Propuesta de commit](#propuesta-de-commit) y esperar confirmación.
+7. Ejecutar:
    ```bash
    # Una línea
    git commit -m "<type>[scope]: <description>"
@@ -158,38 +131,26 @@ Si hay coincidencias en el comando, **o** si el staging incluye archivos sensibl
    EOF
    )"
    ```
-8. Reportar SHA corto (`git rev-parse --short HEAD`) y mensaje del commit creado.
-
----
+8. Reportar SHA corto (`git rev-parse --short HEAD`) y mensaje del commit.
 
 ## Flujo: Múltiples cambios lógicos
 
 1. Agrupar archivos por afinidad desde el diff (área, tipo de cambio, intención).
-2. Proponer al usuario la lista ordenada de commits planeados: tipo/scope, archivos, descripción tentativa.
-3. Esperar confirmación o ajustes antes de tocar staging.
-4. Por cada grupo confirmado, en orden:
-   1. `git reset` (preserva el working tree) para vaciar staging.
-   2. `git add <archivos>` del grupo.
-   3. Ejecutar [Validación antes de ejecutar](#validación-antes-de-ejecutar).
-   4. Mostrar [Propuesta de commit](#propuesta-de-commit) y esperar confirmación.
-   5. `git commit -m "..."` y registrar el SHA.
+2. Proponer la lista ordenada de commits: tipo/scope, archivos y descripción tentativa de cada uno.
+3. Esperar confirmación o ajustes antes de tocar el staging.
+4. Por cada grupo confirmado, en orden: `git reset` para vaciar staging (preserva el working tree) → `git add <archivos>` del grupo → [Validación](#validación-antes-de-ejecutar) → [Propuesta](#propuesta-de-commit) y confirmación → `git commit` y registrar el SHA.
 5. Reportar la secuencia final de SHAs y mensajes en el orden ejecutado.
-
----
 
 ## Flujo: Recuperación tras fallo de hook
 
-1. Leer el mensaje del hook; aplicar las correcciones en el working tree.
-2. Re-stagear los archivos corregidos: `git add <archivos>`.
-3. Crear un commit nuevo con el mismo mensaje acordado — no `--amend` salvo petición explícita.
-4. No usar `--no-verify` salvo petición explícita.
-5. Si el problema es del propio hook (config rota, no del código): informar al usuario y esperar instrucciones.
-
----
+1. Leer el mensaje del hook y aplicar las correcciones en el working tree.
+2. Re-stagear los archivos corregidos (`git add <archivos>`).
+3. Crear un commit **nuevo** con el mismo mensaje acordado. No usar `--amend` ni `--no-verify` salvo petición explícita.
+4. Si el fallo es del propio hook (config rota, no del código): informar al usuario y esperar instrucciones.
 
 ## Propuesta de commit
 
-Mostrar antes de ejecutar `git commit` y esperar confirmación mediante la herramienta de preguntas estructuradas:
+Mostrar antes de cada `git commit` y esperar confirmación con la herramienta de preguntas estructuradas:
 
 ```
 Propuesta:
@@ -205,96 +166,53 @@ Propuesta:
 
 Opciones: `Confirmar` / `Ajustar tipo` / `Ajustar scope` / `Ajustar descripción` / `Cancelar`. Si el usuario ajusta, aplicar y volver a mostrar la propuesta.
 
----
-
 ## Validación antes de ejecutar
 
-- Sin secretos en staging (ejecutar [Detección de secretos](#detección-de-secretos-en-el-diff)).
-- Un solo cambio lógico por commit.
-- Sin `--force`, `--hard`, `--no-verify`, `--amend` salvo petición explícita.
-- Rama segura, o usuario confirmó commit directo en `main`/`master`/`develop`/`release/*`.
+Gate obligatorio antes de cada `git commit`. Detenerse si algún punto falla.
 
-Si hay conflicto:
+- **Diff:** `git status` y `git diff` revisados; tipo, scope y descripción derivados del diff (no inventados).
+- **Secretos:** [detección](#detección-de-secretos-en-el-diff) ejecutada sin coincidencias y sin archivos sensibles en staging.
+- **Aislamiento:** un solo cambio lógico en el commit.
+- **Operaciones seguras:** sin `--force`, `--hard`, `--no-verify`, `--amend` salvo petición explícita.
+- **Rama:** segura, o el usuario confirmó commit directo en `main`/`master`/`develop`/`release/*`.
+- **Formato:** primera línea `<type>[scope]: <description>` válida según [convenciones](#convenciones-del-mensaje); breaking change y footer de issue marcados si aplican.
+- **Confirmación:** [propuesta](#propuesta-de-commit) mostrada y confirmada.
+
+Si algo bloquea, informar sin pegar secretos:
 ```
 ⚠️ No es posible commitear todavía:
 - <razón concreta>
-- <ruta>:<línea> (valor omitido) — sin pegar secretos
+- <ruta>:<línea> (valor omitido)
 ```
-
----
-
-## Checklist antes de ejecutar `git commit`
-
-**Información:**
-- [ ] `git status` y `git diff` revisados completos
-- [ ] Tipo, scope y descripción derivados del diff, no inventados
-- [ ] Rama actual conocida
-- [ ] Idioma de preferencia determinado
-- [ ] Intención clara: un commit único vs. separación en varios
-
-**Validación:**
-- [ ] Detección de secretos ejecutada sin coincidencias
-- [ ] Un solo cambio lógico por commit
-- [ ] Sin `--force`, `--hard`, `--no-verify`, `--amend` salvo petición explícita
-- [ ] Rama segura o usuario confirmó
-
-**Formato:**
-- [ ] Primera línea `<type>[scope]: <description>` válida
-- [ ] Descripción: imperativo presente, máximo 72 chars, sin punto, sin mayúscula inicial
-- [ ] Body separado por línea en blanco si existe
-- [ ] Breaking change marcado correctamente si aplica
-- [ ] Referencia a issue si el usuario la aportó
-
-**Confirmación:**
-- [ ] Propuesta mostrada y confirmación recibida
-
----
 
 ## Ejemplos
 
-**Ejemplo 1 — Commit estándar**
-- *Entrada:* «Acabo de corregir el bug del cupón vacío en el checkout; diff solo en `src/cart/checkout.ts`.»
-- *Salida:* `git commit -m "fix(cart): validate empty coupon before apply"`
+**1 — Commit estándar.** Entrada: «Corregí el bug del cupón vacío en checkout; diff solo en `src/cart/checkout.ts`.» → `fix(cart): validate empty coupon before apply`
 
-**Ejemplo 2 — Cambios mezclados**
-- *Entrada:* Diff incluye `README.md`, `docs/api.md` y `src/api/users.ts` con una ruta nueva.
-- *Salida:* Dos commits: `docs: update API endpoint reference` y `feat(users): add endpoint to fetch user preferences`.
+**2 — Cambios mezclados.** Entrada: diff con `README.md`, `docs/api.md` y `src/api/users.ts` (ruta nueva). → Dos commits: `docs: update API endpoint reference` y `feat(users): add endpoint to fetch user preferences`.
 
-**Ejemplo 3 — Breaking change**
-- *Entrada:* Diff renombra endpoint público `/v1/users` → `/v2/users` rompiendo clientes existentes.
-- *Salida:*
-  ```
-  feat(api)!: rename users endpoint to v2
+**3 — Breaking change.** Entrada: el diff renombra el endpoint público `/v1/users` → `/v2/users`, rompiendo clientes. →
+```
+feat(api)!: rename users endpoint to v2
 
-  BREAKING CHANGE: `/v1/users` removed; clients must migrate to `/v2/users`.
-  ```
+BREAKING CHANGE: `/v1/users` removed; clients must migrate to `/v2/users`.
+```
 
-**Ejemplo 4 — Información incompleta**
-- *Entrada:* «Haz commit de lo que está en staging.» Cambios cruzan varios módulos sin patrón claro.
-- *Comportamiento:* Preguntar la intención principal o proponer agrupación. No generar mensaje genérico.
+**4 — Información incompleta.** Entrada: «Haz commit de lo que está en staging», cambios sin patrón claro entre módulos. → Preguntar la intención principal o proponer agrupación; no generar un mensaje genérico.
 
-**Ejemplo 5 — Fallo de hook**
-- *Entrada:* Hook de lint falla en `src/utils.ts` tras `git commit`.
-- *Comportamiento:* Aplicar el formateo, `git add src/utils.ts`, commit nuevo con el mismo mensaje. Sin `--amend` ni `--no-verify`.
+**5 — Fallo de hook.** Entrada: el hook de lint falla en `src/utils.ts` tras `git commit`. → Aplicar el formateo, `git add src/utils.ts`, commit nuevo con el mismo mensaje. Sin `--amend` ni `--no-verify`.
 
-**Ejemplo 6 — Secreto detectado**
-- *Entrada:* Diff staged incluye `config/.env.local` (variable de entorno sensible, línea 12).
-- *Comportamiento:* Detener, reportar `config/.env.local:12 (valor omitido)`. Sugerir `git restore --staged config/.env.local`. No commitear sin confirmación explícita. No mostrar el valor de la variable en el chat.
-
----
+**6 — Secreto detectado.** Entrada: el staging incluye `config/.env.local` (variable sensible, línea 12). → Detener, reportar `config/.env.local:12 (valor omitido)`, sugerir `git restore --staged config/.env.local`, no commitear sin confirmación. Nunca mostrar el valor.
 
 ## Anti-patterns
 
-- Commit que mezcla features, fixes y refactors sin relación.
-- Mensajes vagos (`update`, `fix stuff`, `changes`, `wip`).
+- Mezclar features, fixes y refactors sin relación en un mismo commit.
+- Mensajes vagos: `update`, `fix stuff`, `changes`, `wip`.
 - Inventar tipo o scope cuando el diff no lo respalda.
-- Incluir archivos sensibles (`.env`, claves) sin detección y confirmación.
-- Mostrar en el chat el valor de un secreto, una línea de diff con credenciales o el output del comando de detección.
-- Saltar la detección de secretos confiando en inspección visual.
-- Saltar hooks con `--no-verify` por comodidad.
-- Usar `--amend` tras fallo de hook en lugar de crear un commit nuevo.
-- Force push a `main` / `master`.
-- Modificar configuración global de git sin permiso explícito.
+- Pegar en el chat el valor de un secreto, una línea con credenciales o el output del detector.
+- Confiar en inspección visual y saltar la detección de secretos.
+- Usar `--no-verify` por comodidad, o `--amend` tras un fallo de hook en vez de un commit nuevo.
+- Force push a `main`/`master` o tocar la config global de git sin permiso.
 - Ejecutar `git commit` sin mostrar la propuesta y esperar confirmación.
-- Lanzar preguntas como prosa libre cuando el cliente expone la herramienta estructurada.
-- Narrar el trabajo al usuario — reportar solo SHA, mensaje final y pendientes.
+- Preguntar en prosa libre cuando el cliente expone la herramienta estructurada.
+- Narrar el trabajo paso a paso: reportar solo SHA, mensaje final y pendientes.
