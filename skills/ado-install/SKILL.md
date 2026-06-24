@@ -14,12 +14,13 @@ Cada entrada en `mcp.json` está ligada a un par **organización + correo de usu
 1. **Preguntar la organización** de Azure DevOps (ej. `Fabrikam`). Solo el nombre, sin URL completa.
 2. **Preguntar el correo** del usuario ADO asociado a esa organización (ej. `juan@empresa.com`). Se usa para nombrar la variable de entorno y la entrada del servidor de forma única.
 3. **Detectar SO**: macOS → [macos.md](references/macos.md); Windows → [windows.md](references/windows.md).
+   - **Precondición Node/npx:** como `mcp.json` usa `command: "npx"`, verificar que `node` y `npx` estén disponibles (`node -v`, `npx -v`; idealmente Node **20+**). Si faltan, avisar al usuario que debe instalarlos antes de continuar, ya que el servidor MCP fallaría al reiniciar Cursor.
 4. **Calcular identificadores** de la cuenta:
    - **Alias env** `{ALIAS}`: `{ORG}_{PARTE_CORREO}` en mayúsculas (ej. `BAYTEQDEV_JUANCA`). Se usa en `ADO_PAT_{ALIAS}` y Keychain.
    - **Clave servidor MCP** `{SERVER_KEY}`: nombre **corto** para `mcp.json` (ver sección «Límite de 60 caracteres en Cursor»). **No** usar el alias completo como clave del servidor.
 5. **Indicar al usuario** que cree el PAT en Azure DevOps (con ese usuario) antes de continuar.
-6. **Leer el `.cursor/mcp.json` existente** si ya hay uno, para agregar la nueva entrada sin borrar las configuraciones previas.
-7. **Escribir o actualizar** `.cursor/mcp.json` con la nueva entrada (plantilla abajo). Validar que `{SERVER_KEY}` tenga ≤ 19 caracteres antes de guardar.
+6. **Leer el `.cursor/mcp.json` existente** si ya hay uno, para agregar la nueva entrada sin borrar las configuraciones previas. **Si el archivo existe pero NO es JSON válido** (corrupto o editado a mano), **no sobrescribir a ciegas**: informar al usuario, respaldarlo (ej. `mcp.json.bak`) y pedir confirmación antes de regenerarlo.
+7. **Escribir o actualizar** `.cursor/mcp.json` con la nueva entrada (plantilla abajo). Validar que `{SERVER_KEY}` tenga ≤ 17 caracteres antes de guardar.
 8. **Mostrar al usuario únicamente** el Paso 1 de la guía del SO (codificar y guardar: Keychain en macOS, variable de usuario en Windows). El agente **no** debe pedir ni almacenar el PAT en el chat. **Esperar confirmación** de que el usuario completó ese paso.
 9. **Automáticamente**, tras la confirmación, ejecutar los pasos del agente de la guía del SO:
    - **macOS:** export en `~/.zshrc` + LaunchAgent (Dock/Spotlight).
@@ -58,7 +59,7 @@ El valor base64 resultante es lo que se guarda en `ADO_PAT_{ALIAS}`.
 
 ## Nomenclatura
 
-Cursor impone un límite de **60 caracteres** en `{SERVER_KEY}:{tool_name}`. Si se supera, filtra herramientas y muestra *«Some tools have naming issues and may be filtered out»*. La herramienta más larga de `@azure-devops/mcp` mide **40 caracteres** (`pipelines_get_build_definition_revisions`, `repo_list_pull_requests_by_repo_or_project`), así que `{SERVER_KEY}` debe tener **≤ 19 caracteres**.
+Cursor impone un límite de **60 caracteres** en `{SERVER_KEY}:{tool_name}` (incluido el separador `:`). Si se supera, filtra herramientas y muestra *«Some tools have naming issues and may be filtered out»*. La herramienta más larga de `@azure-devops/mcp` mide **42 caracteres** (`repo_list_pull_requests_by_repo_or_project`), así que `{SERVER_KEY}` debe tener **≤ 17 caracteres** (`60 − 1 separador − 42 = 17`).
 
 ### Alias de entorno (`{ALIAS}`)
 
@@ -78,7 +79,7 @@ Reglas del alias env:
 
 Usada **solo** como clave en `mcp.json`. Debe ser corta y única.
 
-| Correo                         | Org        | SERVER_KEY (≤ 19) |
+| Correo                         | Org        | SERVER_KEY (≤ 17) |
 | ------------------------------ | ---------- | ----------------- |
 | maria@fabrikam.com             | Fabrikam   | `ado-fab-mar`     |
 | carlos@cliente.com             | ClienteOrg | `ado-cli-car`     |
@@ -90,8 +91,9 @@ Algoritmo para calcular `{SERVER_KEY}`:
 2. `{org}` = organización en minúsculas, solo alfanuméricos, truncada para que quepa.
 3. `-` separador.
 4. `{user}` = parte local del correo en minúsculas, solo alfanuméricos, truncada para que quepa.
-5. **Validar:** `len(SERVER_KEY) ≤ 19`. Si no cabe, acortar `{user}` primero, luego `{org}`.
-6. **Colisión:** si la clave ya existe en `mcp.json` para otra cuenta, añadir sufijo numérico (`ado-bay-jua2`) recortando `{user}` si hace falta.
+5. **Validar:** `len(SERVER_KEY) ≤ 17`. Si no cabe, acortar `{user}` primero, luego `{org}`.
+6. **Colisión (otra cuenta):** si la clave ya existe en `mcp.json` para **otra** cuenta (org o correo distintos), añadir sufijo numérico (`ado-bay-jua2`) recortando `{user}` si hace falta.
+7. **Re-ejecución (misma cuenta):** si la entrada corresponde a la **misma** cuenta (org **y** correo idénticos), **actualizar/sobrescribir** la entrada existente en lugar de crear una nueva — **no duplicar** la entrada. Tratar el token como **rotación**: regenerar su valor en Keychain (macOS) o variable de usuario (Windows) reutilizando el mismo `{SERVER_KEY}` y `ADO_PAT_{ALIAS}`.
 
 > **Migración:** si ya existe una clave larga (ej. `ado-bayteq-juanca-altamirano`), renombrar la entrada en `mcp.json` a la clave corta. La variable `ADO_PAT_{ALIAS}` no cambia.
 
@@ -136,7 +138,7 @@ Cada cuenta es una entrada independiente. Cuando se agrega una segunda cuenta, *
 }
 ```
 
-- `{SERVER_KEY}` ≤ 19 caracteres; `{ALIAS}` puede ser largo (solo env/Keychain).
+- `{SERVER_KEY}` ≤ 17 caracteres; `{ALIAS}` puede ser largo (solo env/Keychain).
 
 - No commitear secretos inline; usar siempre `${env:ADO_PAT_{ALIAS}}`.
 - No ejecutar remoto y local a la vez.

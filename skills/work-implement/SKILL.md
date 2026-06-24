@@ -31,7 +31,13 @@ Cada vez que una referencia diga *preguntar al usuario*, *validar con el usuario
 
 ## Resolucion de idioma
 
-Si en el contexto de la sesion de chat existe un **idioma de preferencia del usuario**, redactar en ese idioma los mensajes al usuario y las notas de `progress.md`. Si no consta, usar el **idioma de la conversacion**. La salida y los mensajes de error de las herramientas (lint, build, tests) no se traducen; el codigo, los identificadores y los nombres de artefacto tampoco.
+Orden canonico compartido con el resto del ciclo de trabajo. Detenerse en el primer paso que aplique:
+
+1. **`.agents/MEMORY.md`** (raiz del repo) -> linea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Si no existe esa linea pero hay claves legacy (`language:`, `idioma:`, `Project language:`), usarlas solo como fallback.
+2. **Idioma del turno del usuario** (mensaje actual).
+3. **Preguntar al usuario** que idioma prefiere y persistir la respuesta en `.agents/MEMORY.md` con `preferred language: <codigo>`.
+
+El idioma resuelto aplica a los mensajes al usuario y a las notas de `progress.md`. La salida y los mensajes de error de las herramientas (lint, build, tests) no se traducen; el codigo, los identificadores y los nombres de artefacto tampoco.
 
 ---
 
@@ -104,11 +110,11 @@ Antes de escribir codigo, verificar si el proyecto tiene **algun ADR que defina 
 
 | Condicion | Agente / MCP requerido |
 | --------- | ---------------------- |
-| La unidad genera o modifica archivos de UI (HTML, CSS, componentes) | Ejecutar bajo el agente `ui-specialist` |
+| La unidad genera o modifica archivos de UI (HTML, CSS, componentes) | Ejecutar bajo el agente `ui-specialist` **si el proyecto lo define** |
 | La referencia de diseno es un enlace o archivo de Figma | Usar el **MCP de Figma** para obtener el contexto del diseno antes y durante la implementacion |
-| Fase final de pruebas aceptada por el usuario | Ejecutar bajo el agente **`quality-specialist`** - no escribir tests desde este skill. La **base de los tests depende del tipo** (ver referencia) |
+| Fase final de pruebas aceptada por el usuario | Ejecutar bajo el agente **`quality-specialist`** **si el proyecto lo define** - no escribir tests desde este skill. La **base de los tests depende del tipo** (ver referencia) |
 
-Si la unidad no involucra UI, implementar directamente sin delegar.
+Los subagentes (`ui-specialist`, `quality-specialist`) solo se usan **si el proyecto los define**; si no existen, ejecutar el paso directamente sin delegar. Si la unidad no involucra UI, implementar directamente sin delegar.
 
 ---
 
@@ -122,7 +128,7 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 
 | Archivo | Cuando leerlo |
 |---------|---------------|
-| `references/user-story-tasks.md` | Tipo = tarea de historia de usuario (`US-XXX` / `TK-XXX`). Ubicaciones, filtros, cola, ciclo TK-a-TK, flujo "TK sin US", cierre con `quality-specialist` sobre `SC-XX`/`BR-XX`, ejemplos y anti-patrones. |
+| `references/user-story-tasks.md` | Tipo = tarea de historia de usuario (`US-XXX` / `TK-XXX`). Ubicaciones, filtros, cola, ciclo TK-a-TK, flujo "TK sin US", cierre con `quality-specialist` sobre `AC-XXX`, ejemplos y anti-patrones. |
 | `references/work-items.md` | Tipo = work item de mantenimiento (`WI-XXX`). Documento unico combinado, validacion por criterios de aceptacion, ciclo por WI completo, cierre, ejemplos y anti-patrones. |
 | `references/migrations.md` | Tipo = migracion (`MG-XXX`). Pre-requisito `plan.md` en `Ready`, ejecucion por fases, validacion por Golden Master Testing, destino fragmentado, ejemplos y anti-patrones. |
 | `assets/progress-template.md` | Plantilla de `progress.md`. Adaptar encabezado y unidades al tipo. |

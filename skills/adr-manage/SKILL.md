@@ -62,7 +62,7 @@ Antes de redactar un ADR nuevo:
 
 ## Flujo: Crear ADR nuevo
 
-1. **Número secuencial** — listar `docs/adr/ADR-*.md`, tomar el más alto + 1; si no hay ninguno, empezar en `001`. Nunca pedir el número al usuario.
+1. **Número secuencial** — listar `docs/adr/ADR-*.md`, tomar el más alto + 1; si no hay ninguno, empezar en `001`. Nunca pedir el número al usuario. Si se crean varios ADR en una misma tanda (p. ej. invocado por `adr-discover` para varios candidatos), recalcular el número releyendo los archivos ya escritos antes de cada nuevo ADR, para evitar colisiones de numeración.
 2. **Nombre de archivo** — `ADR-XXX-<slug>.md` (minúsculas, kebab-case, corto)
 3. **Recopilar información faltante** (ver tabla anterior)
 4. **Escribir el ADR** desde `assets/adr-template.md`:
@@ -83,9 +83,10 @@ Antes de redactar un ADR nuevo:
 3. Aplicar los cambios; actualizar `Última actualización` a hoy; **nunca** tocar `Fecha de creación`
 4. Si el nuevo estado es `Superseded`: agregar en `## Referencias`:
    ```
-   - Superseded by: [ADR-XXX: Título](docs/adr/ADR-XXX-slug.md)
+   - Superseded by: [ADR-XXX: Título](ADR-XXX-slug.md)
    ```
    Si el usuario no indicó el ADR reemplazante, preguntar antes de guardar.
+   Si el nuevo estado es `Deprecated`: marcar `Estado: Deprecated`, actualizar `Última actualización` a hoy y registrar en `## Referencias` el motivo de la obsolescencia; si otro ADR lo reemplaza, enlazarlo con ruta relativa `[ADR-XXX: Título](ADR-XXX-slug.md)`.
 5. Actualizar `docs/adr/README.md` si el título cambió
 6. **Confirmar** mostrando los campos modificados
 

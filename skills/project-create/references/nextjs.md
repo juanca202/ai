@@ -92,10 +92,10 @@ Tras merge **sin conflictos pendientes**, aplicar **`projectName`** y **`project
 | Archivo | Acción |
 | ------- | ------ |
 | `src/app/layout.tsx` | `metadata.title` → **`projectName`**. |
-| `src/index.html` | `<title>` → **`projectName`**. |
+| `src/index.html` | Si existe: `<title>` → **`projectName`**. |
 | `package.json` | `"name"` → **`projectId`**. |
 | `package-lock.json` | Alinear `name` raíz y `packages[""].name` con **`projectId`**. |
-| `.cursor/hooks/telemetry/scripts/send.js` | Reemplazar **`react-base-project`** por **`projectId`**. |
+| `.cursor/hooks/telemetry/scripts/send.js` | Si existe y contiene **`react-base-project`**: reemplazarlo por **`projectId`**. |
 
 ---
 

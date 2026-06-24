@@ -1,16 +1,21 @@
+<!--
+Convención de placeholders: sustituir manualmente cada {{texto}}; no es un motor de plantillas.
+Eliminar este bloque y sustituir todos los {{…}} al publicar el documento final.
+-->
+
 # Preparación de Validación
 
-- Estado: Draft | Ready
-- Fecha: YYYY-MM-DD
+- Estado: {{Draft | Ready}}
+- Fecha: {{YYYY-MM-DD}}
 - Discovery: [discovery.md](./discovery.md)
-- Proyecto origen: <nombre / stack principal del origen>
-- Proyecto destino: <nombre / stack principal del destino>
+- Proyecto origen: {{nombre / stack principal del origen}}
+- Proyecto destino: {{nombre / stack principal del destino}}
 
 ## Descripción
 
-<Objetivo: a partir de las oportunidades de Golden Master Testing del discovery,
+{{Objetivo: a partir de las oportunidades de Golden Master Testing del discovery,
 preparar los casos de validación y reunir sus insumos (entradas y salidas de
-referencia). Estos casos servirán para implementar las pruebas durante el plan.>
+referencia). Estos casos servirán para implementar las pruebas durante el plan.}}
 
 ## Casos de validación
 
@@ -21,7 +26,7 @@ referencia). Estos casos servirán para implementar las pruebas durante el plan.
 | GM-003 | CustomerImport | Comparación DB State | Datos históricos | ./validation/gm-003/  | Pendiente |
 
 Detalle por cada caso (formato simple recomendado; para APIs o UI usa las
-variantes de `reference/golden-master-testing.md`):
+variantes de `references/golden-master-testing.md`):
 
 ```yaml
 id: GM-001
@@ -69,4 +74,4 @@ Pendientes para completar la preparación de validación: casos en `Pendiente`
 MCP de Chrome desde la URL del ambiente de pruebas registrada en el discovery).
 **Mientras exista algún caso pendiente, este documento permanece en `Draft`.**
 
-- [ ] <pendiente a resolver>
+- [ ] {{pendiente a resolver}}

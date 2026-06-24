@@ -66,6 +66,8 @@ $headers = @{ Authorization = "Basic $pat" }
 # Esperado: 200
 ```
 
+> **Cuidado: HTTP 200 no garantiza éxito.** Azure DevOps puede responder `200` con una **página de inicio de sesión** (HTML) si el PAT es inválido o expiró. Verificar que la respuesta sea **JSON real** (que su contenido contenga `"value"` o `"count"`), no solo el código 200. Mapear `401`/`203` como **PAT inválido** y `404` como **organización inexistente / incorrecta**.
+
 Si alguna comprobación falla, el agente diagnostica y corrige antes de continuar.
 
 ---

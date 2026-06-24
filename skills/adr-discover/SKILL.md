@@ -16,7 +16,7 @@ El output es una **lista priorizada de ADRs candidatos**. El usuario decide cuá
 Antes de inspeccionar, determinar el alcance:
 
 1. **Leer `.agents/MEMORY.md`** (si existe) para entender el stack y contexto ya conocido.
-2. **Leer `docs/adr/`** para listar los ADRs ya existentes — nunca proponer un candidato que duplique uno existente (`Accepted`, `Proposed` o `Draft`).
+2. **Leer `docs/adr/`** para listar los ADRs ya existentes — nunca proponer un candidato que duplique uno existente (`Accepted`, `Proposed`, `Draft`, `Deprecated` o `Superseded`).
 3. Si el usuario no indicó ruta, asumir raíz del repositorio actual.
 
 ---
@@ -70,7 +70,7 @@ grep -r "inject\|Injectable\|@Autowired\|provide\|container" src -l 2>/dev/null 
 ```bash
 ls docs/adr/*.md 2>/dev/null || echo "No hay ADRs"
 ```
-Para cada ADR existente, leer solo el título y la sección `## Decisión` (no cargar el documento completo si hay muchos).
+Para cada ADR existente, leer solo el título y la sección `## Decision` (no cargar el documento completo si hay muchos).
 
 ---
 
@@ -158,6 +158,7 @@ Por cada candidato aprobado por el usuario:
    - La evidencia encontrada (como contexto para la sección `## Contexto`)
    - La decisión inferida
    - Las alternativas implícitas detectadas (si las hay)
+   - Los **Decisores** y el **idioma**, acordados una sola vez para todo el lote, de modo que `adr-manage` no vuelva a preguntar lo mismo por cada ADR
 
 2. Dejar que `adr-manage` ejecute su flujo completo (incluyendo preguntar decisores, estado, etc.).
 

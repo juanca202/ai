@@ -1,6 +1,6 @@
 ---
 name: project-create
-description: Crear un proyecto nuevo fusionando una plantilla del equipo según el stack tecnológico (Angular, React, Symfony, etc.). Usar siempre que el usuario pida crear un proyecto nuevo, inicializar desde plantilla, o use `/project-create`. Si el stack no está claro, preguntar antes de cualquier acción.
+description: Crear un proyecto nuevo fusionando una plantilla del equipo según el stack tecnológico (Angular, Next.js). Se pueden agregar más stacks creando su archivo en `references/<stack_id>.md`. Usar siempre que el usuario pida crear un proyecto nuevo, inicializar desde plantilla, o use `/project-create`. Si el stack no está claro, preguntar antes de cualquier acción.
 ---
 
 # Skill: Crear proyecto desde proyecto base
@@ -20,6 +20,8 @@ Stacks disponibles:
 |------------|-----------|
 | `angular`  | `references/angular.md` |
 | `nextjs`  | `references/nextjs.md` |
+
+Para agregar más stacks, crear su archivo en `references/<stack_id>.md` y añadirlo a esta tabla.
 
 Si el usuario pide un stack distinto a los stacks disponibles → indicar que aún no está disponible; no continuar con merge.
 

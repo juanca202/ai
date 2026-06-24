@@ -1,19 +1,24 @@
+<!--
+Convención de placeholders: sustituir manualmente cada {{texto}}; no es un motor de plantillas.
+Eliminar este bloque y sustituir todos los {{…}} al publicar el documento final.
+-->
+
 # Descubrimiento de Migración
 
-- Estado: Draft | Ready
-- Fecha: YYYY-MM-DD
-- Proyecto origen: <nombre / stack principal del origen>
-- Proyecto destino: <nombre / stack principal del destino>
+Estado: {{Draft | Ready}}
+Fecha: {{YYYY-MM-DD}}
+Proyecto origen: {{nombre / stack principal del origen}}
+Proyecto destino: {{nombre / stack principal del destino}}
 
 ## Descripción
 
-<Descripción corta del objetivo de la migración: qué se migra y para qué.>
+{{Descripción corta del objetivo de la migración: qué se migra y para qué.}}
 
 ## Entorno del origen
 
-- Ambiente accesible vía web: Sí | No
-- URL del ambiente de pruebas: <URL o N/A>
-- Notas de acceso: <restricciones o requisitos de acceso, si aplica>
+- Ambiente accesible vía web: {{Sí | No}}
+- URL del ambiente de pruebas: {{URL o N/A}}
+- Notas de acceso: {{restricciones o requisitos de acceso, si aplica}}
 
 ## Mapeo Tecnológico
 
@@ -23,11 +28,11 @@ Si no existe equivalente, se deja una nota explícita en la columna de destino.
 
 | Elemento tecnológico | Origen (con versión)    | Destino (equivalente o nota)    | Equivalencia |
 | -------------------- | ----------------------- | ------------------------------- | ------------ |
-| <p. ej. Framework>   | <p. ej. Express 4.18>   | <p. ej. Fastify 4.x>            | Adaptación   |
-| <p. ej. ORM>         | <p. ej. Sequelize 6.32> | <p. ej. Prisma 5.x>             | Adaptación   |
-| <p. ej. Utilidad>    | <p. ej. Moment 2.29>    | <p. ej. date-fns 3.x>           | Directa      |
-| <p. ej. Validación>  | <p. ej. Joi 17.9>       | ⚠️ Sin equivalente identificado | Rediseño     |
-| <p. ej. Polyfill>    | <p. ej. core-js 3.x>    | No necesario en destino         | Eliminar     |
+| {{p. ej. Framework}}   | {{p. ej. Express 4.18}}   | {{p. ej. Fastify 4.x}}            | Adaptación   |
+| {{p. ej. ORM}}         | {{p. ej. Sequelize 6.32}} | {{p. ej. Prisma 5.x}}             | Adaptación   |
+| {{p. ej. Utilidad}}    | {{p. ej. Moment 2.29}}    | {{p. ej. date-fns 3.x}}           | Directa      |
+| {{p. ej. Validación}}  | {{p. ej. Joi 17.9}}       | ⚠️ Sin equivalente identificado | Rediseño     |
+| {{p. ej. Polyfill}}    | {{p. ej. core-js 3.x}}    | No necesario en destino         | Eliminar     |
 
 ## Estrategia de Verificación Existente
 
@@ -73,4 +78,4 @@ abiertas, equivalencias por definir, datos faltantes, validaciones por confirmar
 supuestos a verificar). **Mientras existan pendientes en esta lista, el discovery
 permanece en `Draft`.**
 
-- [ ] <pendiente a resolver>
+- [ ] {{pendiente a resolver}}

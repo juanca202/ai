@@ -72,15 +72,17 @@ Antes de cualquier push o creación de PR se ejecutan **las tres** puertas en es
 - Apto = veredicto **`✅ Apto`** → continuar (aunque haya warnings o recomendaciones informativas).
 - No apto = **`❌ No apto`** o **`⚠️ Incompleto`** → detener.
 
-**4.2 — `trace-validate` (siempre).** Resolver la `US-XXX` a validar (del patrón de la rama `US-XXX-...`, del `[US-XXX]` de los commits, o de la ruta de trabajo). Si no se puede determinar la US, preguntar al usuario cuál validar; si no la provee, la puerta **no** puede quedar apta → detener. Invocar `trace-validate` sobre esa US.
-- Apto = **`APROBADO — cobertura completa`** → continuar. **`APROBADO CON OBSERVACIONES`** también se considera apto, pero se **muestran las observaciones al usuario** antes de seguir.
-- No apto = **`RECHAZADO — cobertura incompleta`** → detener.
+**4.2 — `trace-validate` (siempre).** Resolver el **trabajo** a validar (`US-XXX`, `WI-XXX` o `MG-XXX`) del patrón de la rama, del prefijo de los commits, o de la ruta de trabajo. `trace-validate` traza los **criterios de aceptacion del tipo**: `AC-XXX` (US), los Criterios de aceptación del WI (`AC-N`), o los casos Golden Master `GM-XXX` (MG). Si no se puede determinar el trabajo, preguntar al usuario cuál validar; si no lo provee, la puerta **no** puede quedar apta → detener. Invocar `trace-validate` sobre ese trabajo.
+- Apto = **`✅ Aprobado`** → continuar. **`⚠️ Aprobado con observaciones`** también se considera apto, pero se **muestran las observaciones al usuario** antes de seguir.
+- No apto = **`❌ Rechazado`** → detener.
 
 **4.3 — Definition of Done (solo si existe el archivo).** Comprobar si existe `docs/policies/definition-of-done.md` en la raíz del repo (`test -f docs/policies/definition-of-done.md`).
 - Si **no** existe → omitir esta puerta (no afecta el resultado).
-- Si **existe** → leerla y verificar el código/cambio del rango `origin/<destino>..HEAD` contra cada política/ítem de esa Definition of Done. Solo los ítems comprobables desde el repo o el diff; un ítem que no se pueda determinar se reporta como pendiente de confirmación al usuario, no se inventa su cumplimiento.
-  - Apto = todos los ítems aplicables se cumplen → continuar.
-  - No apto = al menos un ítem incumplido → detener, listando qué ítem(s) de la DoD no se cumplen.
+- Si **existe** → leerla y verificar el código/cambio del rango `origin/<destino>..HEAD` contra cada política/ítem de esa Definition of Done. **Formato esperado de `docs/policies/definition-of-done.md`:** un documento de política con ítems/checklist verificables (cada ítem una condición concreta de cierre). El skill solo evalúa automáticamente los ítems comprobables desde el repo o el diff; para el resto, pregunta.
+  - **Ítems comprobables desde el repo/diff** → evaluarlos directamente: cumplido / incumplido.
+  - **Ítems no comprobables automáticamente** → **presentarlos al usuario y preguntarle** si se cumplen (no inventar su cumplimiento). Si el usuario **confirma** que se cumplen → cuentan como cumplidos. Si **no los confirma** o los marca incumplidos → cuentan como incumplidos.
+  - Apto = todos los ítems aplicables se cumplen (los comprobables verificados + los no comprobables confirmados por el usuario) → continuar.
+  - No apto = al menos un ítem incumplido, o algún ítem no comprobable que el usuario no confirma → la puerta **no** queda apta → detener, listando qué ítem(s) de la DoD no se cumplen o quedan sin confirmar.
 
 Solo si **las tres** puertas quedan en apto se avanza al Paso 5.
 
@@ -121,7 +123,7 @@ Si el CLI indica que ya existe un PR: capturar y devolver la URL existente.
 Bloqueo por una puerta de calidad:
 ```
 ✗ PR NO creado: la puerta <code-review | trace-validate | definition-of-done> no quedó en apto.
-  Veredicto: <❌ No apto | ⚠️ Incompleto | RECHAZADO — cobertura incompleta | DoD incumplida>
+  Veredicto: <❌ No apto | ⚠️ Incompleto | ❌ Rechazado | DoD incumplida>
 
 <reporte literal del skill, o lista de ítems de la DoD incumplidos>
 
@@ -150,7 +152,7 @@ Notas:
 
 **Ejemplo 1 — Camino feliz (GitLab self-managed)**
 Usuario: «Crea el PR de esta rama.»
-Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`). Detecta GitLab (`ns.bayteq.com:3311`). Pregunta destino → `develop`. Puertas: `code-review` sobre `origin/develop..HEAD` → `✅ Apto`; resuelve `US-042`, `trace-validate` → `APROBADO — cobertura completa`; existe `docs/policies/definition-of-done.md` → todos los ítems cumplidos. Push. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min`. Ejecuta `glab mr create`. Devuelve URL.
+Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`). Detecta GitLab (`ns.bayteq.com:3311`). Pregunta destino → `develop`. Puertas: `code-review` sobre `origin/develop..HEAD` → `✅ Apto`; resuelve `US-042`, `trace-validate` → `✅ Aprobado`; existe `docs/policies/definition-of-done.md` → todos los ítems cumplidos. Push. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min`. Ejecuta `glab mr create`. Devuelve URL.
 
 **Ejemplo 2 — code-review bloquea**
 `code-review` devuelve `❌ No apto` (tests fallidos + eslint errors). El skill no crea el PR, no hace push, muestra el reporte, lista las acciones para reintentar y —al estar a su alcance— pregunta si aplica la corrección. Si el usuario no autoriza, termina.
@@ -182,7 +184,7 @@ La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con
 - Preguntar si correr `code-review` o `trace-validate`, u ofrecer saltarlos: son obligatorios.
 - Pedir confirmación de título o descripción (flujo no interactivo).
 - Crear el PR con `code-review` en `❌ No apto`/`⚠️ Incompleto`, con `trace-validate` en `RECHAZADO`, o con la Definition of Done incumplida.
-- Saltarse `trace-validate` por no encontrar la US en lugar de preguntarla al usuario.
+- Saltarse `trace-validate` por no encontrar el trabajo (US/WI/MG) en lugar de preguntarlo al usuario.
 - Tratar la ausencia de `docs/policies/definition-of-done.md` como un fallo: si no existe, esa puerta simplemente se omite.
 - Inventar el cumplimiento de un ítem de la DoD que no se puede determinar desde el repo o el diff.
 - Aplicar una corrección sin autorización explícita del usuario, o no re-ejecutar la puerta tras corregir.

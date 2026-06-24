@@ -20,7 +20,7 @@ Esta referencia detalla **cómo** ejecutar las tres dimensiones de la [revisión
 
 Pasos:
 
-1. **Reconstruir la intención** desde las fuentes disponibles, en este orden: criterios de aceptación de la US (`SC-XX`) y reglas de negocio (`BR-XX`) en el `README.md`; descripción del TK; nombre de la rama; mensajes de commit del rango; descripción del PR si existe.
+1. **Reconstruir la intención** desde las fuentes disponibles, en este orden: criterios de aceptación de la US (`AC-XXX`) en el `README.md`; descripción del TK; nombre de la rama; mensajes de commit del rango; descripción del PR si existe.
 2. **Mapear diff ↔ intención:** para cada parte relevante del cambio, ¿a qué objetivo responde? Para cada objetivo declarado, ¿está cubierto en el diff?
 3. **Buscar desajustes (mismatch):**
    - El código resuelve un problema **distinto** o **más amplio** del pedido (scope creep silencioso).
@@ -29,7 +29,7 @@ Pasos:
    - Lógica que **contradice su nombre/intención** (una función `validateX` que además persiste, un `getY` con efectos).
    - Casos borde implícitos en la intención que el código ignora (nulos, vacíos, concurrencia, errores).
 
-Señales de buen estado: el diff cubre exactamente los `SC-XX`/`BR-XX`, sin lógica de más, y los casos borde del dominio están contemplados.
+Señales de buen estado: el diff cubre exactamente los `AC-XXX`, sin lógica de más, y los casos borde del dominio están contemplados.
 
 ---
 

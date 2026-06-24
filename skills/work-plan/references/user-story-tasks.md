@@ -69,7 +69,7 @@ Antes de crear o editar cualquier TK, tener clara esta información. **No invent
 | **Modo de invocación** | Inferir del mensaje: ¿tarea específica (A) o solo referencia a US (B)? | Si es ambiguo, preguntar al usuario |
 | **Intención** (solo modo A) | Del mensaje del usuario | Preguntar: ¿solo anclaje (stub) o TK completa lista para Ready? |
 | **Objetivo del TK** (solo modo A) | Del mensaje del usuario | Para stub: basta un objetivo breve. Para TK completa: preguntar hasta tener contexto suficiente |
-| **BR y SC de la US** (solo modo B) | Leer la sección **Criterios de aceptación** del `README.md` de la US padre (subsecciones *Reglas de negocio* y *Escenarios*) | Si faltan BR-XX o SC-XX explícitos: bloquear modo B y reportar — no crear stubs |
+| **AC-XXX de la US** (solo modo B) | Leer la sección **Criterios de aceptación** del `README.md` de la US padre (lista plana `AC-XXX`) | Si no hay `AC-XXX` explícitos: bloquear modo B y reportar — no crear stubs |
 | **Unidad de trabajo** | Inferir del repo o indicada por el usuario | Stub: puede quedar `Por definir`. TK completa: obligatoria; sin ella el estado no puede ser `Ready` |
 | **Contexto técnico** (solo TK completa) | ADRs existentes, technical-docs, descripción del usuario | Si falta decisión técnica relevante: sugerir ADR al usuario, no crearlo |
 | **Referencia de UI** (solo TK de interfaz) | Figma, wireframe o imagen de alta fidelidad aportados por el usuario | Obligatoria para `Ready`; sin ella el TK de UI no puede salir de `Draft` |
@@ -159,25 +159,24 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 
 **Precondiciones de bloqueo** — si alguna falla, **no crear archivos** e informar al usuario indicando la condición incumplida:
 - La carpeta `US-XXX-[nombre-corto]/` existe y su `README.md` tiene `Estado: Ready`.
-- El `README.md` contiene la sección **Criterios de aceptación** con al menos **una regla de negocio** (`BR-XX`) en la subsección *Reglas de negocio*.
-- El mismo bloque contiene al menos **un escenario** (`SC-XX`) en la subsección *Escenarios*.
+- El `README.md` contiene la sección **Criterios de aceptación** con al menos un `AC-XXX`.
 
 **Pasos:**
 
 1. **Leer el `README.md` de la US completo** y todas las `TK-*.md` existentes en su carpeta.
 2. **Verificar las precondiciones de bloqueo.** Si alguna falla, no continuar: reportar qué falta y sugerir el skill correspondiente (`work-define` para alinear la US, etc.).
 3. **Identificar unidades de trabajo** a partir del alcance de la US, los SC y las BR. Una unidad puede ser un módulo, servicio, paquete, componente UI, etc. **No inventar** unidades no soportadas por la US; lo no claro queda `Por definir` o se pregunta.
-4. **Cubrir los SC y considerar las BR.** Cada `SC-XX` debe quedar cubierto por al menos un stub. Las `BR-XX` se consideran como restricciones que condicionan el alcance (validaciones, invariantes, autorizaciones); no se replican literalmente en el TK.
-5. **Presentar la propuesta de stubs** agrupada por unidad de trabajo. Por cada stub: `TK-XXX` tentativo (siguiente libre), nombre de archivo, unidad (o `Por definir`), objetivo breve y qué `SC-XX` cubre. No es 1 stub por SC: varios SC pueden caer en un mismo stub si comparten unidad y alcance; un SC amplio puede dividirse si abarca varias unidades. **No crear archivos en este turno** — dejarlo explícito al final del mensaje.
+4. **Cubrir los AC-XXX.** Cada `AC-XXX` debe quedar cubierto por al menos un stub; agrupar los que comparten unidad y alcance.
+5. **Presentar la propuesta de stubs** agrupada por unidad de trabajo. Por cada stub: `TK-XXX` tentativo (siguiente libre), nombre de archivo, unidad (o `Por definir`), objetivo breve y qué `AC-XXX` cubre. No es 1 stub por SC: varios SC pueden caer en un mismo stub si comparten unidad y alcance; un SC amplio puede dividirse si abarca varias unidades. **No crear archivos en este turno** — dejarlo explícito al final del mensaje.
 6. **Confirmar con el usuario** mediante la herramienta de preguntas estructuradas: `Confirmar stubs` / `Ajustar alcance` / `Cancelar`. Si elige ajustar, revisar y repetir pasos 5–6. **No continuar sin confirmación explícita**, salvo que el mensaje inicial ya describiera la descomposición con detalle suficiente para considerarla aprobada.
-7. **Crear cada stub** confirmado siguiendo el *Flujo: Crear stub* (Estado: Draft, descripción breve sin referenciar `SC-XX` / `BR-XX` en el documento, plan vacío).
-8. **Reportar al usuario** la lista de stubs creados, agrupados por unidad, indicando qué `SC-XX` cubre cada uno.
+7. **Crear cada stub** confirmado siguiendo el *Flujo: Crear stub* (Estado: Draft, descripción breve sin referenciar `AC-XXX` en el documento, plan vacío).
+8. **Reportar al usuario** la lista de stubs creados, agrupados por unidad, indicando qué `AC-XXX` cubre cada uno.
 9. **Handoff:** si los stubs quedaron en `Draft`, indicar que debe completar cada TK a `Estado: Ready` con **`work-plan`** (modo A) antes de **`work-implement`**. No sugerir implementación mientras las TK del alcance sigan en Draft.
 
 **Reglas invariantes:**
 - No redactar Plan de implementación, ni Dependencias detalladas, ni Referencias técnicas: son **stubs**.
-- No incluir identificadores `SC-XX` / `BR-XX` dentro de los archivos `TK-XXX.md`. La consideración es del agente, no del documento.
-- **No crear archivos `TK-*.md` antes de la confirmación del paso 6.** La traza SC/BR → stub vive en la propuesta (paso 5) y en el reporte (paso 8).
+- No incluir identificadores `AC-XXX` dentro de los archivos `TK-XXX.md`. La consideración es del agente, no del documento.
+- **No crear archivos `TK-*.md` antes de la confirmación del paso 6.** La traza AC-XXX → stub vive en la propuesta (paso 5) y en el reporte (paso 8).
 - Si la US es ambigua respecto a unidades: preguntar antes de crear stubs; no inferir unidades por cuenta propia.
 - Si dos stubs se solapan: consolidarlos en la propuesta (paso 5) o preguntar antes de confirmar.
 
@@ -190,7 +189,7 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - [ ] Todas las `TK-*.md` de la carpeta leídas; solapamientos resueltos
 - [ ] Modo de invocación identificado (A o B)
 - [ ] Modo A: intención clara: stub vs TK completa
-- [ ] Modo B: BR-XX y SC-XX identificados en **Criterios de aceptación** del `README.md`; US en `Estado: Ready`
+- [ ] Modo B: AC-XXX identificados en **Criterios de aceptación** del `README.md`; US en `Estado: Ready`
 - [ ] Modo B: propuesta presentada al usuario (paso 5) sin archivos creados
 - [ ] Modo B: confirmación estructurada recibida (paso 6) antes del primer `TK-*.md`
 - [ ] Idioma de preferencia determinado y `.agents/MEMORY.md` actualizado si fue necesario
@@ -234,13 +233,13 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 
 **Ejemplo 4 — Stubs desde una US (modo B)**
 - *Entrada:* «Crea las tareas necesarias para implementar US-004.» (sin describir tareas específicas).
-- *Comportamiento — turno 1:* Activa el *Flujo: Sugerir stubs desde una US*. Verifica que `US-004/README.md` está en `Ready` y contiene BR y SC. Lee la US completa, identifica unidades de trabajo, y presenta la propuesta agrupada por unidad (paso 5) con `TK-XXX` tentativo, nombre de archivo, objetivo breve y cobertura de SC por stub. Pregunta con opciones `Confirmar stubs` / `Ajustar alcance` / `Cancelar`. **No crea archivos.**
-- *Comportamiento — turno 2:* Tras confirmación, crea cada stub en `Estado: Draft` sin referencias a `SC-XX` / `BR-XX` en el archivo (paso 7) y reporta rutas creadas con cobertura SC (paso 8).
+- *Comportamiento — turno 1:* Activa el *Flujo: Sugerir stubs desde una US*. Verifica que `US-004/README.md` está en `Ready` y contiene `AC-XXX`. Lee la US completa, identifica unidades de trabajo, y presenta la propuesta agrupada por unidad (paso 5) con `TK-XXX` tentativo, nombre de archivo, objetivo breve y cobertura de `AC-XXX` por stub. Pregunta con opciones `Confirmar stubs` / `Ajustar alcance` / `Cancelar`. **No crea archivos.**
+- *Comportamiento — turno 2:* Tras confirmación, crea cada stub en `Estado: Draft` sin referencias a `AC-XXX` en el archivo (paso 7) y reporta rutas creadas con cobertura AC (paso 8).
 - *Salida:* Stubs `TK-001-...md` a `TK-NNN-...md` en Draft; `work-units.md` actualizado solo si alguna unidad es nueva y su alcance está claro.
 
-**Ejemplo 5 — US no Ready o sin BR/SC**
-- *Entrada:* «Tareas para US-009.» — pero `US-009/README.md` está en `Draft` o no tiene SC documentados.
-- *Comportamiento:* Bloquea, no crea ningún stub. Reporta qué falta (estado, BR, SC) y sugiere usar `work-define` para alinear la US antes de planificar.
+**Ejemplo 5 — US no Ready o sin AC-XXX**
+- *Entrada:* «Tareas para US-009.» — pero `US-009/README.md` está en `Draft` o no tiene `AC-XXX` documentados.
+- *Comportamiento:* Bloquea, no crea ningún stub. Reporta qué falta (estado, criterios) y sugiere usar `work-define` para alinear la US antes de planificar.
 
 **Ejemplo 6 — Repo vinculado a Azure DevOps** — ver `references/azure-devops.md`.
 
@@ -258,8 +257,8 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - Usar `glossary.md` como especificación técnica o sustituto de ADR.
 - Rellenar secciones con supuestos o ejemplos genéricos; dejar pendientes reales sin listar en Observaciones.
 - Narrar el trabajo realizado en el mensaje al usuario; solo reportar resultados y pendientes.
-- **Modo B**: crear stubs desde una US en `Draft`, o sin `BR-XX` / `SC-XX` explícitos en **Criterios de aceptación** — debe bloquear y reportar.
-- **Modo B**: incluir identificadores `SC-XX` / `BR-XX` dentro del archivo `TK-XXX.md`; la cobertura se reporta al usuario, no se documenta.
+- **Modo B**: crear stubs desde una US en `Draft`, o sin `AC-XXX` explícitos en **Criterios de aceptación** — debe bloquear y reportar.
+- **Modo B**: incluir identificadores `AC-XXX` dentro del archivo `TK-XXX.md`; la cobertura se reporta al usuario, no se documenta.
 - **Modo B**: forzar un mapeo 1 stub = 1 SC; los stubs se agrupan por unidad de trabajo.
 - **Modo B**: redactar Plan, Dependencias o Referencias detalladas en stubs propuestos desde una US.
 - **Modo B**: crear stubs sin haber presentado la propuesta (paso 5) y recibido confirmación (paso 6).
@@ -275,8 +274,8 @@ Posición: **planificación** — entre `work-define` e `work-implement`.
 
 | | |
 |--|--|
-| **Entrada** | US con `Estado: Ready` y **Criterios de aceptación** (`BR-XX`, `SC-XX`) en su `README.md`. Si la US está en Draft o faltan BR/SC: **bloquear** y devolver handoff a **`work-define`**. |
-| **Salida mínima (modo B)** | Stubs `TK-XXX-*.md` en `Draft` + cobertura SC reportada al usuario. |
+| **Entrada** | US con `Estado: Ready` y **Criterios de aceptación** (`AC-XXX`) en su `README.md`. Si la US está en Draft o no tiene `AC-XXX`: **bloquear** y devolver handoff a **`work-define`**. |
+| **Salida mínima (modo B)** | Stubs `TK-XXX-*.md` en `Draft` + cobertura `AC-XXX` reportada al usuario. |
 | **Salida para implementar** | Cada TK del alcance acordado en **`Estado: Ready`**. Stubs en Draft **no** habilitan `work-implement`. |
 | **Siguiente paso** | **`work-implement`** — solo cuando US Ready **y** las TK a ejecutar están Ready. |
 | **Regreso desde define** | Cambio funcional en la US → releer `README.md` y actualizar TKs afectadas antes de continuar. |

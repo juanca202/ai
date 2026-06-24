@@ -5,7 +5,7 @@
       "id": 1,
       "name": "Technical prompt with multiple rule violations",
       "prompt": "Valida este prompt técnico:\n\n\"Me gustaría que refactorizaras el código de autenticación y lo dejes más limpio y elegante. Sería bueno también mejorar el routing y la gestión de errores siguiendo buenas prácticas. Podrías hacerlo más robusto y profesional.\"",
-      "expected_output": "Analysis detecting multiple violations: R-1/R-2 (non-imperative and conversational language 'me gustaría', 'sería bueno', 'podrías'), R-3 (vague 'mejorar' without concrete object), R-4 (subjective terms 'limpio', 'elegante', 'robusto', 'profesional'), R-5 (no scope or path defined), R-7 (implicit 'buenas prácticas'), R-8 (multiple intentions mixed). Effectiveness 20% or below. Includes a rewritten prompt using imperative verbs, concrete replacements for subjective terms, and split intentions.",
+      "expected_output": "Analysis detecting multiple violations: R-1/R-2 (non-imperative and conversational language 'me gustaría', 'sería bueno', 'podrías'), R-3 (vague 'mejorar' without concrete object), R-4 (subjective terms 'limpio', 'elegante', 'robusto', 'profesional'), R-5 (no scope or path defined), R-7 (implicit 'buenas prácticas'), R-8 (multiple intentions mixed). Effectiveness 25% or below. Includes a rewritten prompt using imperative verbs, concrete replacements for subjective terms, and split intentions.",
       "files": [],
       "assertions": [
         {

@@ -1,34 +1,39 @@
-# ADR-XXX: <titulo>
+<!--
+Convención de placeholders: sustituir manualmente cada {{texto}}; no es un motor de plantillas.
+Eliminar este bloque y sustituir todos los {{…}} al publicar el documento final.
+-->
+
+# ADR-XXX: {{titulo}}
  
-- Estado: Draft | Proposed | Accepted | Deprecated | Superseded
-- Fecha de creación: YYYY-MM-DD
-- Última actualización: YYYY-MM-DD
-- Decisores: <nombres/roles>
-- Etiquetas: <nextjs, app-router, rsc, performance, security, etc.>
+- Estado: {{Draft | Proposed | Accepted | Deprecated | Superseded}}
+- Fecha de creación: {{YYYY-MM-DD}}
+- Última actualización: {{YYYY-MM-DD}}
+- Decisores: {{nombres/roles}}
+- Etiquetas: {{nextjs, app-router, rsc, performance, security, etc.}}
 
 ## Contexto 
 
-<problema, restricciones, drivers técnicos o de negocio>
+{{problema, restricciones, drivers técnicos o de negocio}}
  
 ## Decision
 
- <decision concreta y alcance>
+ {{decision concreta y alcance}}
 
 ## Alternativas consideradas (opcional)
 
- - Opcion A: <pros/contras>
- - Opcion B: <pros/contras>
+ - Opcion A: {{pros/contras}}
+ - Opcion B: {{pros/contras}}
 
 ## Consecuencias
  
 ### Positivas
 
- - <impacto esperado>
+ - {{impacto esperado}}
 
 ### Negativas / trade-offs
 
- - <costos o riesgos asumidos>
+ - {{costos o riesgos asumidos}}
 
 ## Referencias
 
-- <links internos/externos>
+- {{links internos/externos}}

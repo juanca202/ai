@@ -121,6 +121,12 @@ Elige el formato según el tipo de componente. Los recursos referenciados
 (entradas, salidas de referencia, capturas) se guardan en la carpeta
 `validation/` de la migración.
 
+> **IDs de caso.** Cada caso tiene **un** identificador canónico `GM-XXX`. Las
+> variantes `GM-API-XXX` / `GM-UI-XXX` que aparecen abajo son solo **etiquetas de
+> categoría** opcionales del bloque de detalle; en la **tabla resumen** de
+> `validation.md` usa siempre el `GM-XXX` canónico para no romper la trazabilidad
+> con el plan.
+
 #### Opción 1 — Formato simple (recomendado)
 
 ```yaml
