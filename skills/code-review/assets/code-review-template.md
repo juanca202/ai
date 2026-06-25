@@ -60,7 +60,7 @@ Símbolos de severidad: `🔴` Crítico · `🟠` Mayor · `🟡` Menor · `💡
 
 - {{🔴 | 🟠 | 🟡 | 💡}} {{hallazgo}} — **Por qué:** {{…}} **Impacto:** {{…}} **Sugerencia concreta:** {{…}}
 
-### Feedback senior adicional
+### Feedback adicional
 
 {{Comentarios contextuales: lo que está bien hecho y nitpicks `🟡`/`💡`. No abrumar; priorizar por impacto.}}
 

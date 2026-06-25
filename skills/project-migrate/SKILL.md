@@ -40,6 +40,14 @@ El **procedimiento detallado** de los tres pasos, el detalle del destino
 fragmentado y el *handoff* viven en [references/flow.md](./references/flow.md).
 Aquí queda el resumen y los punteros.
 
+## Resolución de idioma
+
+El idioma de los documentos generados (`discovery.md`, `validation.md`, `plan.md`) y de los mensajes al usuario se decide en este orden; detenerse en el primer paso que aplique:
+
+1. Si en el contexto de la sesión existe una preferencia de idioma del usuario, usarla.
+2. Si no, usar el idioma del mensaje del usuario y **preguntar al usuario si desea persistir su preferencia de idioma en la memoria**.
+3. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta, **preguntar si desea persistir su preferencia de idioma en la memoria**; no decidir el idioma por cuenta propia.
+
 ## Estructura de la carpeta de migración
 
 Cada migración vive en `<destino>/docs/specs/migrations/MG-XXX-{slug}/`:

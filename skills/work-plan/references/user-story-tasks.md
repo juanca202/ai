@@ -192,7 +192,7 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - [ ] Modo B: AC-XXX identificados en **Criterios de aceptación** del `README.md`; US en `Estado: Ready`
 - [ ] Modo B: propuesta presentada al usuario (paso 5) sin archivos creados
 - [ ] Modo B: confirmación estructurada recibida (paso 6) antes del primer `TK-*.md`
-- [ ] Idioma de preferencia determinado y `.agents/MEMORY.md` actualizado si fue necesario
+- [ ] Idioma de preferencia determinado (preferencia en contexto, idioma del mensaje, o preguntado al usuario)
 - [ ] **ADO**: vinculación verificada (ver `SKILL.md`); si está vinculado, seguido `references/azure-devops.md` y `ado_id` extraído antes de crear el archivo local
 
 **Validación:**

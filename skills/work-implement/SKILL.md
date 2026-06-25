@@ -31,11 +31,11 @@ Cada vez que una referencia diga *preguntar al usuario*, *validar con el usuario
 
 ## Resolucion de idioma
 
-Orden canonico compartido con el resto del ciclo de trabajo. Detenerse en el primer paso que aplique:
+El idioma de los mensajes al usuario y de las notas de `progress.md` se decide en este orden; detenerse en el primer paso que aplique:
 
-1. **`.agents/MEMORY.md`** (raiz del repo) -> linea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Si no existe esa linea pero hay claves legacy (`language:`, `idioma:`, `Project language:`), usarlas solo como fallback.
-2. **Idioma del turno del usuario** (mensaje actual).
-3. **Preguntar al usuario** que idioma prefiere y persistir la respuesta en `.agents/MEMORY.md` con `preferred language: <codigo>`.
+1. Si en el contexto de la sesion existe una preferencia de idioma del usuario, usarla.
+2. Si no, usar el idioma del mensaje del usuario y **preguntar al usuario si desea persistir su preferencia de idioma en la memoria**.
+3. Si no se puede inferir, **preguntar al usuario** que idioma prefiere y, tras su respuesta, **preguntar si desea persistir su preferencia de idioma en la memoria**; no decidir el idioma por cuenta propia.
 
 El idioma resuelto aplica a los mensajes al usuario y a las notas de `progress.md`. La salida y los mensajes de error de las herramientas (lint, build, tests) no se traducen; el codigo, los identificadores y los nombres de artefacto tampoco.
 

@@ -76,7 +76,7 @@ Por cada fase aprobada, en el orden del plan:
 3. Ejecutar lint/typecheck/build del paquete afectado. Si falla, corregir antes de continuar.
 4. **Validar con Golden Master:** ejecutar los casos de `validation.md` que aplican a la fase y **contrastar la salida del destino contra el golden master** de referencia (segun la estrategia de comparacion de cada caso). Si hay diferencias no justificadas, corregir antes de marcar la fase `Done`. Si una diferencia corresponde a un bug del origen marcado como excepcion en `validation.md`, no "congelarlo": dejar nota.
 5. Si aplica **Parallel Run + Reconciliation**, ejecutar el destino contra el origen en vivo y reconciliar antes de cerrar la fase de *coexistencia*.
-6. Actualizar `progress.md`: `Pending` => `In Progress` => `Done`; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
+6. Actualizar `progress.md`: `Pending` => `In Progress` => `Done`; marcar el check de cada tarea de la fase del plan que se haya completado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
 7. **Detenerse y preguntar** (herramienta estructurada): "Fase N completada y validada. Continuo con la Fase N+1 - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui].
 8. Solo si confirma: siguiente fase. Si detiene, registrar nota y pasar al Paso 4.
 

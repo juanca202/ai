@@ -71,7 +71,7 @@ Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto
 1. Implementar segun la especificacion del TK.
 2. Si genera o modifica UI: ejecutar bajo `ui-specialist`. Si la referencia de diseno es Figma: usar el MCP de Figma.
 3. Al terminar, ejecutar lint/typecheck/build del paquete afectado. Si falla, corregir antes de continuar. **No** ejecutar suites de tests en esta fase.
-4. Actualizar `progress.md`: `Pending` => `In Progress` => `Done`; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
+4. Actualizar `progress.md`: `Pending` => `In Progress` => `Done`; marcar el check de cada subtarea del plan de la TK que se haya completado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
 5. **Detenerse y preguntar** (herramienta estructurada): "TK-XXX completada. Continuo con TK-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui].
 6. Solo si el usuario confirma: pasar a la siguiente TK. Si detiene, registrar nota y pasar al Paso 4.
 

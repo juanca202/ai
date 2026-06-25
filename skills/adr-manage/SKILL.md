@@ -22,13 +22,13 @@ La plantilla canónica está en `assets/adr-template.md`. Leerla antes de redact
 
 ---
 
-## Idioma del contenido
+## Resolución de idioma
 
-Resolver en este orden (detenerse en el primer match):
+El idioma del ADR y de los mensajes al usuario se decide en este orden; detenerse en el primer paso que aplique:
 
-1. `preferred language: <ISO>` en `.agents/MEMORY.md`
-2. Idioma del mensaje actual del usuario
-3. Preguntar al usuario y persistir en `.agents/MEMORY.md`
+1. Si en el contexto de la sesión existe una preferencia de idioma del usuario, usarla.
+2. Si no, usar el idioma del mensaje del usuario y **preguntar al usuario si desea persistir su preferencia de idioma en la memoria**.
+3. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta, **preguntar si desea persistir su preferencia de idioma en la memoria**; no decidir el idioma por cuenta propia.
 
 ---
 

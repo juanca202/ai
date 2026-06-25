@@ -32,11 +32,11 @@ Carga el archivo correspondiente cuando vayas a ejecutar la tarea; el detalle í
 
 ## Resolución de idioma
 
-Orden canónico para el idioma de la US, criterios de aceptación, INVEST, DoR y texto natural del skill. Detenerse en el primer paso que aplique:
+El idioma de la US (criterios de aceptación, INVEST, DoR y texto natural) se decide en este orden; detenerse en el primer paso que aplique:
 
-1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Si no existe esa línea pero hay claves legacy (`language:`, `idioma:`, `Project language:`), usarlas solo como fallback al leer MEMORY antiguo.
-2. **Idioma del turno del usuario** (mensaje actual).
-3. **Preguntar al usuario** qué idioma prefiere y persistir la respuesta en `.agents/MEMORY.md` con `preferred language: <código>`.
+1. Si en el contexto de la sesión existe una preferencia de idioma del usuario, usarla.
+2. Si no, usar el idioma del mensaje del usuario y **preguntar al usuario si desea persistir su preferencia de idioma en la memoria**.
+3. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta, **preguntar si desea persistir su preferencia de idioma en la memoria**; no decidir el idioma por cuenta propia.
 
 ---
 
@@ -69,7 +69,7 @@ Antes de crear o editar cualquier US, el agente debe tener clara la siguiente in
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | **Actor y valor de negocio**                    | Del contexto o descripción del usuario                                                   | Preguntar al usuario                                                                  |
 | **Criterios de aceptación (AC-XXX)**            | Del contexto o descripción del usuario                                                   | Preguntar; sin al menos un `AC-XXX` INVEST no es valorable y la historia solo puede crearse en Draft |
-| **Idioma de preferencia**                       | Ver [Resolución de idioma](#resolución-de-idioma) | Preguntar y persistir en `.agents/MEMORY.md` con `preferred language: <código>`        |
+| **Idioma de preferencia**                       | Ver [Resolución de idioma](#resolución-de-idioma) | Preguntar al usuario; no decidir el idioma por cuenta propia                          |
 | **Referencias de diseño** (solo US de UI)       | Figma, prototipos u otros enlaces aportados por el usuario                               | Sin ellas la historia no puede declararse Ready                                       |
 | **Dependencias con otras US o sistemas**        | Indicadas por el usuario o inferibles del contexto                                       | Preguntar; afectan las dimensiones I y E de INVEST                                    |
 | **ID de la US**                                 | Proporcionado por el usuario                                                             | Inferir el siguiente libre revisando carpetas `US-`* en `docs/specs/user-stories/`  |

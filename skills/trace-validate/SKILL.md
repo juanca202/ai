@@ -48,7 +48,13 @@ Cuando este skill indique **preguntar, pedir, confirmar o validar** algo al usua
 
 ## Resolucion de idioma
 
-Si en el contexto de la sesion de chat existe un **idioma de preferencia del usuario**, redactar el reporte en ese idioma. Si no consta, usar el **idioma de la conversacion**. La salida y los mensajes de error de las herramientas de prueba no se traducen.
+El idioma del reporte se decide en este orden; detenerse en el primer paso que aplique:
+
+1. Si en el contexto de la sesion existe una preferencia de idioma del usuario, usarla.
+2. Si no, usar el idioma del mensaje del usuario y **preguntar al usuario si desea persistir su preferencia de idioma en la memoria**.
+3. Si no se puede inferir, **preguntar al usuario** que idioma prefiere y, tras su respuesta, **preguntar si desea persistir su preferencia de idioma en la memoria**; no decidir el idioma por cuenta propia.
+
+La salida y los mensajes de error de las herramientas de prueba no se traducen.
 
 ---
 

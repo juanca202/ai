@@ -64,17 +64,17 @@ Categorías no funcionales (ISO/IEC 25010): Idoneidad funcional · Eficiencia de
 
 ### Archivos afectados
 
-<!-- Árbol con las rutas de los archivos que se crearán, modificarán o eliminarán. Usar símbolos: + creado · ~ modificado · - eliminado. -->
+<!-- Árbol con las rutas de los archivos que se crearán, modificarán o eliminarán. Usar símbolos: + creado · ~ modificado · - eliminado. Frente a cada archivo, una descripción muy corta y acotada de qué se hace en él. -->
 
 ```text
 {{unidad-de-trabajo}}/
 └── src/
-    ├── + {{ruta/archivo-nuevo.ext}}
-    ├── ~ {{ruta/archivo-modificado.ext}}
-    └── - {{ruta/archivo-eliminado.ext}}
+    ├── + {{ruta/archivo-nuevo.ext}}        # {{qué se crea aquí: muy corto}}
+    ├── ~ {{ruta/archivo-modificado.ext}}   # {{qué se cambia aquí: muy corto}}
+    └── - {{ruta/archivo-eliminado.ext}}    # {{por qué se elimina: muy corto}}
 ```
 
-### Tareas detalladas
+### Subtareas
 
 <!-- Pasos concretos acordados o derivados de fuentes citadas en Referencias. Si no se conocen aún, omitir esta subsección e indicar en Observaciones qué falta. -->
 

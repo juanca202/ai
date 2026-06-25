@@ -181,6 +181,12 @@ Usar este skill **solo cuando se le invoca explícitamente** (ni de forma proact
 
 Es un proceso **posterior a la implementación**: no forma parte de `work-implement` ni del desarrollo de tareas. Sin invocación explícita, no corresponde usarlo.
 
-### Idioma del informe
+### Resolución de idioma
 
-Si en el contexto de la sesión de chat existe un **idioma de preferencia del usuario**, redactar el informe en ese idioma. Si no consta, usar el idioma de la conversación. Los mensajes de error de las herramientas no se traducen.
+El idioma del informe se decide en este orden; detenerse en el primer paso que aplique:
+
+1. Si en el contexto de la sesión existe una preferencia de idioma del usuario, usarla.
+2. Si no, usar el idioma del mensaje del usuario y **preguntar al usuario si desea persistir su preferencia de idioma en la memoria**.
+3. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta, **preguntar si desea persistir su preferencia de idioma en la memoria**; no decidir el idioma por cuenta propia.
+
+Los mensajes de error de las herramientas no se traducen.

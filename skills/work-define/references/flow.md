@@ -93,7 +93,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 
 - Actor y valor de negocio claros
 - Reglas de negocio con suficiente detalle para valorar INVEST
-- Idioma de preferencia determinado y `.agents/MEMORY.md` actualizado si fue necesario
+- Idioma de preferencia determinado (preferencia en contexto, idioma del mensaje, o preguntado al usuario)
 - Si es US de UI: referencias de diseño presentes o acordadas
 - Dependencias con otras US o sistemas identificadas
 

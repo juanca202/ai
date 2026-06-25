@@ -75,7 +75,7 @@ Por cada WI aprobado:
 2. Si genera o modifica UI: ejecutar bajo `ui-specialist`. Si la referencia de diseno es Figma: usar el MCP de Figma.
 3. Al terminar, ejecutar lint/typecheck/build del paquete afectado. Si falla, corregir antes de continuar. **No** ejecutar suites de tests en esta fase.
 4. **Verificar los criterios de aceptacion** del WI de forma manual/funcional; si alguno no se cumple, completar antes de marcar `Done`.
-5. Actualizar `progress.md`: `Pending` => `In Progress` => `Done`; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
+5. Actualizar `progress.md`: `Pending` => `In Progress` => `Done`; marcar el check de cada tarea del plan del WI que se haya completado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
 6. **Detenerse y preguntar** (herramienta estructurada): "WI-XXX completado. Continuo con WI-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui]. Si el alcance es un unico WI, igualmente confirmar antes de pasar al cierre.
 7. Solo si confirma: siguiente WI. Si detiene, registrar nota y pasar al Paso 4.
 

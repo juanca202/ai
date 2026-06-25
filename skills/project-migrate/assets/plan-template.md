@@ -31,15 +31,16 @@ Descripción de cómo está hoy lo que se va a migrar. Incluye el árbol con las
 
 Descripción del estado objetivo tras la migración. Incluye el árbol con las
 **rutas de los archivos resultantes** en el proyecto destino (nuevos o
-modificados).
+modificados). Frente a cada archivo, una descripción muy corta y acotada de qué
+se hace en él.
 
 ```text
 {{proyecto-destino}}/
 └── src/
-    ├── {{archivo-resultante-1}}
-    ├── {{archivo-resultante-2}}
+    ├── {{archivo-resultante-1}}        # {{qué se hace aquí: muy corto}}
+    ├── {{archivo-resultante-2}}        # {{qué se hace aquí: muy corto}}
     └── {{carpeta}}/
-        └── {{archivo-resultante-3}}
+        └── {{archivo-resultante-3}}    # {{qué se hace aquí: muy corto}}
 ```
 
 {{Notas sobre el mapeo origen → destino, cambios de estructura, renombrados o
