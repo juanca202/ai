@@ -67,6 +67,7 @@ Verificar estas condiciones antes de implementar, sea cual sea el tipo. Si algun
 
 - **Working tree limpio:** `git status --porcelain` sin cambios pendientes no resueltos.
 - **Rama correcta:** estar en (o crear) la rama de trabajo del artefacto. No implementar en `main` ni en ramas de otro trabajo sin instruccion explicita. El nombre de rama lo define cada referencia segun el tipo.
+- **Solo trabajo de la rama actual:** solo se implementan unidades (TK / WI / Fase) que pertenezcan a la historia, work item o migracion asociada a la rama de implementacion actual. No implementar tareas de otro artefacto o de otra rama: si la unidad pedida no corresponde a la rama actual, **parar** y cambiar a su rama correspondiente (o pedir al usuario que lo haga) antes de continuar; nunca mezclar trabajo de distintos artefactos en una misma rama.
 - **Artefacto en `Ready`:** el artefacto a implementar existe y esta en `Estado: Ready` (lo verifica cada referencia con su regla propia).
 - **Solapamiento de progreso:** leer `progress.md` si existe; respetar unidades ya en `Done`; si hay alguna `In Progress`, revisar notas y estado real antes de continuar.
 
