@@ -73,19 +73,20 @@ Por cada fase aprobada, en el orden del plan:
 
 1. Implementar las **tareas accionables de la fase** segun el `plan.md`, respetando la estrategia incremental (Transform / Coexist / Eliminate, o la que indique el plan).
 2. Si la fase genera o modifica UI: ejecutar bajo `ui-specialist`. Si la referencia de diseno es Figma: usar el MCP de Figma.
-3. Ejecutar lint/typecheck/build del paquete afectado. Si falla, corregir antes de continuar.
+3. Ejecutar lint/typecheck/build y la suite de tests del paquete afectado. Si algo falla, corregir antes de continuar.
 4. **Validar con Golden Master:** ejecutar los casos de `validation.md` que aplican a la fase y **contrastar la salida del destino contra el golden master** de referencia (segun la estrategia de comparacion de cada caso). Si hay diferencias no justificadas, corregir antes de marcar la fase `Done`. Si una diferencia corresponde a un bug del origen marcado como excepcion en `validation.md`, no "congelarlo": dejar nota.
 5. Si aplica **Parallel Run + Reconciliation**, ejecutar el destino contra el origen en vivo y reconciliar antes de cerrar la fase de *coexistencia*.
-6. Actualizar `progress.md`: `Pending` => `In Progress` => `Done`; marcar el check de cada tarea de la fase del plan que se haya completado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
+6. Actualizar el artefacto y el progreso:
+   - **Al iniciar la fase:** cambiar su estado en `progress.md` a `In Progress`.
+   - **Por cada tarea de la fase completada:** marcar `[ ]` => `[x]` en la seccion correspondiente del `plan.md`.
+   - **Al cerrar la fase:** cambiar su estado en `progress.md` a `Done`; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
 7. **Detenerse y preguntar** (herramienta estructurada): "Fase N completada y validada. Continuo con la Fase N+1 - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui].
 8. Solo si confirma: siguiente fase. Si detiene, registrar nota y pasar al Paso 4.
 
 ### Paso 4 - Cierre
 
-1. Cuando todas las fases esten `Done` (o el usuario detenga), ofrecer la **suite completa de Golden Master** y, si aplica, el **Parallel Run + Reconciliation** final antes del *cutover*. La implementacion/ejecucion del arnes de golden master se puede delegar a **`quality-specialist`** (la definicion de los casos ya vive en `validation.md`; no se inventan tests nuevos).
-2. Si acepta: invocar `quality-specialist` con el contexto de la migracion, la rama y `validation.md`. 
-3. Si rechaza: registrar nota en `progress.md`.
-4. **Handoff:** si todas las fases del destino estan `Done`, golden master en verde, working tree limpio y commits hechos, sugerir `pr-create` o `work-integrate`. Si el destino esta fragmentado, repetir el flujo para el siguiente proyecto destino. Si quedan fases pendientes, indicar que falta cerrar.
+1. Cuando todas las fases esten `Done` (o el usuario detenga), ejecutar la **suite completa de Golden Master** y, si aplica, el **Parallel Run + Reconciliation** final antes del *cutover*. La definicion de los casos ya vive en `validation.md`; no inventar casos nuevos.
+2. **Handoff:** si todas las fases del destino estan `Done`, golden master en verde, working tree limpio y commits hechos, sugerir `pr-create` o `work-integrate`. Si el destino esta fragmentado, repetir el flujo para el siguiente proyecto destino. Si quedan fases pendientes, indicar que falta cerrar.
 
 ---
 
@@ -97,7 +98,7 @@ Por cada fase aprobada, en el orden del plan:
 
 **Por cada fase:** tareas implementadas segun el plan; estrategia incremental respetada; UI bajo `ui-specialist`; Figma via MCP; lint/build ejecutado; **golden master validado** (destino vs referencia); Parallel Run/Reconciliation si aplica; `progress.md` a `Done`; decisiones de sesion registradas; **confirmacion explicita antes de la siguiente fase**.
 
-**Cierre:** suite completa de golden master ofrecida; ejecucion/arnes delegado a `quality-specialist` si el usuario acepta; cutover solo tras validacion en verde.
+**Cierre:** suite completa de golden master ejecutada; cutover solo tras validacion en verde.
 
 ---
 

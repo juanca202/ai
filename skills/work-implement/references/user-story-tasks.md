@@ -40,6 +40,12 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 
 - **US padre con README.md:** la carpeta de la US existe y tiene `README.md` con metadato `Estado: Ready`.
 - **TK en estado Ready:** solo encolar tareas con `Estado: Ready`. Las `Draft` o `Done` en `progress.md` no son ejecutables por defecto.
+- **Test cases presentes:** verificar si existe la carpeta `docs/specs/user-stories/US-XXX-[nombre-corto]/test-cases/` con al menos un archivo `TC-XXX-*.md`. Si no existe o esta vacia, **preguntar al usuario** (herramienta estructurada) antes de continuar:
+
+  > "La US no tiene test cases definidos. Se recomienda definirlos con `test-define` antes de implementar. ¿Deseas continuar de todas formas?"
+  > Opciones: [Si, continuar sin test cases] / [No, detener aqui]
+
+  Si el usuario confirma, continuar normalmente. Si detiene, sugerir ejecutar `test-define` primero.
 
 ---
 
@@ -68,19 +74,23 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 
 Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto:
 
-1. Implementar segun la especificacion del TK.
+1. Aplicar el ciclo **TDD (Red → Green → Refactor)** por cada unidad de comportamiento de la TK:
+   - **Red:** escribir el test que describe el comportamiento esperado (basarse en los `TC-XXX` disponibles o en los `AC-XXX` del `README.md`). El test debe fallar antes de escribir codigo de produccion.
+   - **Green:** escribir el minimo codigo de produccion para que el test pase.
+   - **Refactor:** limpiar codigo de produccion y test sin romper los tests. Aplicar principios de Clean Architecture (ver `SKILL.md`).
 2. Si genera o modifica UI: ejecutar bajo `ui-specialist`. Si la referencia de diseno es Figma: usar el MCP de Figma.
-3. Al terminar, ejecutar lint/typecheck/build del paquete afectado. Si falla, corregir antes de continuar. **No** ejecutar suites de tests en esta fase.
-4. Actualizar `progress.md`: `Pending` => `In Progress` => `Done`; marcar el check de cada subtarea del plan de la TK que se haya completado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
+3. Al terminar todos los comportamientos de la TK, ejecutar lint/typecheck/build del paquete afectado y la suite de tests. Si algo falla, corregir antes de continuar.
+4. Actualizar el artefacto y el progreso:
+   - **Al iniciar la TK:** cambiar su estado en `progress.md` a `In Progress`.
+   - **Por cada subtarea completada:** marcar `[ ]` => `[x]` en la seccion de subtareas del `TK-XXX.md` correspondiente.
+   - **Al cerrar la TK:** cambiar su estado en `progress.md` a `Done`; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
 5. **Detenerse y preguntar** (herramienta estructurada): "TK-XXX completada. Continuo con TK-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui].
 6. Solo si el usuario confirma: pasar a la siguiente TK. Si detiene, registrar nota y pasar al Paso 4.
 
 ### Paso 4 - Cierre
 
-1. Cuando no queden tareas pendientes (o el usuario detenga), ofrecer la fase de pruebas: delegar a **`quality-specialist`** para escribir tests basados en los **`AC-XXX`** del `README.md`.
-2. Si acepta: invocar `quality-specialist` con el contexto de la US, la rama `feature/US-XXX-*` y los TK en `Done`. No escribir tests desde este skill.
-3. Si rechaza: registrar nota en `progress.md`.
-4. **Handoff:** si todo el alcance esta en `Done`, working tree limpio y commits hechos, sugerir `pr-create` (si revisan por PR) o `work-integrate` (merge local). Si quedan TK pendientes, indicar que falta cerrar.
+1. Cuando no queden tareas pendientes (o el usuario detenga), verificar que la suite de tests pase limpia y el working tree este limpio con commits hechos.
+2. **Handoff:** si todo el alcance esta en `Done`, sugerir `pr-create` (si revisan por PR) o `work-integrate` (merge local). Si quedan TK pendientes, indicar que falta cerrar.
 
 ---
 
@@ -108,9 +118,9 @@ WARNING No es posible continuar con la implementacion:
 
 **Cola:** `README.md` y todos los `TK-*.md` del alcance leidos; `work-units.md` consultado si hizo falta; listas presentadas; confirmacion recibida antes del primer cambio de codigo.
 
-**Por cada tarea:** TK `Ready`; no `Done` en `progress.md`; UI bajo `ui-specialist`; Figma via MCP; lint/build ejecutado; `progress.md` a `Done`; decisiones de sesion registradas; **confirmacion explicita antes de la siguiente TK**.
+**Por cada tarea:** TK `Ready`; no `Done` en `progress.md`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; UI bajo `ui-specialist`; Figma via MCP; lint/typecheck/build/tests ejecutados y en verde; `progress.md` a `Done`; decisiones de sesion registradas; **confirmacion explicita antes de la siguiente TK**.
 
-**Cierre:** usuario preguntado por la fase de pruebas; si acepta, tests delegados a `quality-specialist` sobre `AC-XXX`.
+**Cierre:** suite de tests en verde; working tree limpio; handoff a `pr-create` o `work-integrate`.
 
 ---
 
@@ -139,7 +149,7 @@ WARNING No es posible continuar con la implementacion:
 - Arrancar la siguiente TK sin confirmacion explicita (aunque la cola este aprobada).
 - Omitir el mensaje de cola e ir directo al codigo.
 - Tratar tareas en Draft como ejecutables.
-- Ejecutar suites de tests durante el ciclo sin que el usuario acepte la fase final.
+- Escribir codigo de produccion antes del test (romper el ciclo Red→Green→Refactor).
 - Ignorar `progress.md` o usar identificadores distintos a `TK-XXX`.
 - Implementar UI sin `ui-specialist`, o UI con referencia Figma sin el MCP de Figma.
 

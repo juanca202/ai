@@ -44,6 +44,12 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 - **WI existente y en `Ready`:** el archivo `WI-XXX-*.md` existe en `docs/specs/work-items/` y tiene `Estado: Ready`. Un `WI` en `Draft` (stub o incompleto) **no** es ejecutable - devolver a `work-plan` para completarlo.
 - **Criterios de aceptacion presentes:** el WI tiene **Criterios de aceptacion** verificables. Si faltan, parar: el WI no estaba realmente `Ready`.
 - **Referencia de UI (si toca UI):** si el WI modifica UI, debe tener referencia de diseno en **Referencias** (Figma/wireframe). Sin ella, parar y avisar.
+- **Test cases presentes:** verificar si existe la carpeta `docs/specs/work-items/WI-XXX-[kebab-case]/test-cases/` con al menos un archivo `TC-XXX-*.md`. Si no existe o esta vacia, **preguntar al usuario** (herramienta estructurada) antes de continuar:
+
+  > "El WI no tiene test cases definidos. Se recomienda definirlos con `test-define` antes de implementar. ¿Deseas continuar de todas formas?"
+  > Opciones: [Si, continuar sin test cases] / [No, detener aqui]
+
+  Si el usuario confirma, continuar normalmente. Si detiene, sugerir ejecutar `test-define` primero.
 
 ---
 
@@ -71,20 +77,24 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 
 Por cada WI aprobado:
 
-1. Implementar **el `Plan de implementacion` completo del WI**. Como es un documento plano, el plan se ejecuta como una unidad coherente, no como TK independientes.
+1. Aplicar el ciclo **TDD (Red → Green → Refactor)** por cada comportamiento del plan del WI:
+   - **Red:** escribir el test que describe el comportamiento esperado (basarse en los `TC-XXX` disponibles o en los Criterios de aceptacion del WI). El test debe fallar antes de escribir codigo de produccion.
+   - **Green:** escribir el minimo codigo de produccion para que el test pase.
+   - **Refactor:** limpiar codigo de produccion y test sin romper los tests. Aplicar principios de Clean Architecture (ver `SKILL.md`).
 2. Si genera o modifica UI: ejecutar bajo `ui-specialist`. Si la referencia de diseno es Figma: usar el MCP de Figma.
-3. Al terminar, ejecutar lint/typecheck/build del paquete afectado. Si falla, corregir antes de continuar. **No** ejecutar suites de tests en esta fase.
-4. **Verificar los criterios de aceptacion** del WI de forma manual/funcional; si alguno no se cumple, completar antes de marcar `Done`.
-5. Actualizar `progress.md`: `Pending` => `In Progress` => `Done`; marcar el check de cada tarea del plan del WI que se haya completado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
+3. Al terminar todos los comportamientos del WI, ejecutar lint/typecheck/build y la suite de tests del paquete afectado. Si algo falla, corregir antes de continuar.
+4. **Verificar los criterios de aceptacion** del WI contra los tests; si algun criterio no tiene cobertura, completar el ciclo TDD para ese criterio antes de marcar `Done`.
+5. Actualizar el artefacto y el progreso:
+   - **Al iniciar el WI:** cambiar su estado en `progress.md` a `In Progress`.
+   - **Por cada tarea del plan completada:** marcar `[ ]` => `[x]` en la seccion del plan de implementacion del `WI-XXX.md` correspondiente.
+   - **Al cerrar el WI:** cambiar su estado en `progress.md` a `Done`; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
 6. **Detenerse y preguntar** (herramienta estructurada): "WI-XXX completado. Continuo con WI-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui]. Si el alcance es un unico WI, igualmente confirmar antes de pasar al cierre.
 7. Solo si confirma: siguiente WI. Si detiene, registrar nota y pasar al Paso 4.
 
 ### Paso 4 - Cierre
 
-1. Ofrecer la fase de pruebas: delegar a **`quality-specialist`** para escribir tests basados en los **Criterios de aceptacion** del WI (el WI es autocontenido; no proviene de una US).
-2. Si acepta: invocar `quality-specialist` con el contexto del WI, la rama y el WI en `Done`. No escribir tests desde este skill.
-3. Si rechaza: registrar nota en `progress.md`.
-4. **Handoff:** si el alcance esta en `Done`, working tree limpio y commits hechos, sugerir `pr-create` o `work-integrate`. Si quedan WI pendientes, indicar que falta cerrar.
+1. Verificar que la suite de tests pase limpia y el working tree este limpio con commits hechos.
+2. **Handoff:** si el alcance esta en `Done`, sugerir `pr-create` o `work-integrate`. Si quedan WI pendientes, indicar que falta cerrar.
 
 ---
 
@@ -94,9 +104,9 @@ Por cada WI aprobado:
 
 **Alcance:** cada `WI-*.md` leido completo; `work-units.md` consultado si hizo falta; listas presentadas; confirmacion recibida antes del primer cambio de codigo.
 
-**Por cada WI:** `Ready` con criterios de aceptacion; no `Done`; UI bajo `ui-specialist`; Figma via MCP; plan completo implementado; criterios de aceptacion verificados; lint/build ejecutado; `progress.md` a `Done`; decisiones de sesion registradas; **confirmacion explicita antes del siguiente WI**.
+**Por cada WI:** `Ready` con criterios de aceptacion; no `Done`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; UI bajo `ui-specialist`; Figma via MCP; plan completo implementado; criterios de aceptacion cubiertos por tests; lint/typecheck/build/tests en verde; `progress.md` a `Done`; decisiones de sesion registradas; **confirmacion explicita antes del siguiente WI**.
 
-**Cierre:** usuario preguntado por la fase de pruebas; si acepta, tests delegados a `quality-specialist` sobre los **Criterios de aceptacion**.
+**Cierre:** suite de tests en verde; working tree limpio; handoff a `pr-create` o `work-integrate`.
 
 ---
 
@@ -104,7 +114,7 @@ Por cada WI aprobado:
 
 **Ejemplo 1 - WI unico completo**
 - *Entrada:* "Implementa el WI-002, actualizar Spring Boot a 3.3."
-- *Salida:* checkout a la rama del WI; lee el WI completo; presenta el alcance; tras confirmacion implementa **todo el plan del WI** como una unidad; ejecuta build; verifica criterios de aceptacion; actualiza `progress.md` a `Done`; pausa y confirma antes del cierre; ofrece tests via `quality-specialist`.
+- *Salida:* checkout a la rama del WI; lee el WI completo; presenta el alcance; tras confirmacion aplica ciclo TDD por cada comportamiento del plan; lint/typecheck/build/tests en verde; criterios de aceptacion cubiertos por tests; actualiza `progress.md` a `Done`; handoff a `pr-create` o `work-integrate`.
 
 **Ejemplo 2 - Varios WI hermanos**
 - *Entrada:* "Implementa WI-003, WI-004 y WI-005 (structured logging en API, workers y batch)."
@@ -124,9 +134,10 @@ Por cada WI aprobado:
 
 - Descomponer un WI en sub-tareas o tratarlo como si tuviera `TK-XXX`; el WI es un documento plano.
 - Implementar parte del plan del WI y pasar al siguiente sin completarlo ni verificar criterios.
-- Marcar `Done` sin verificar los **Criterios de aceptacion**.
+- Marcar `Done` sin que los tests de los criterios de aceptacion existan y pasen en verde.
 - Buscar criterios de US (`AC-XXX`) para los tests del WI: el WI no proviene de una US; los tests se basan en sus propios criterios de aceptacion.
 - Implementar un WI en `Draft` (stub) como si estuviera listo.
+- Escribir codigo de produccion antes del test (romper el ciclo Red→Green→Refactor).
 - Implementar UI sin `ui-specialist`, o UI con referencia Figma sin el MCP de Figma.
 
 ---

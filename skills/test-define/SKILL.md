@@ -1,0 +1,151 @@
+---
+name: test-define
+description: 'Crear casos de prueba (TC-XXX) a partir de los criterios de aceptación de una historia de usuario (US-XXX) o un work item (WI-XXX), siguiendo el estándar IEEE 29119-4. Activar cuando el usuario pida "definir test cases", "crear casos de prueba", "generar TCs", "pruebas para la US/WI", "documentar pruebas", "casos de prueba para los criterios de aceptación", o cualquier variante que implique producir documentación de prueba a partir de requisitos ya especificados. También activar cuando el usuario mencione "test-define" o "/test-define".'
+---
+
+# Skill: Definir casos de prueba
+
+Genera **casos de prueba documentados** (`TC-XXX`) a partir de los criterios de aceptación de un artefacto ya especificado (`US-XXX` o `WI-XXX`), siguiendo la estructura IEEE 29119-4. Por cada criterio produce tres perspectivas: **happy path**, **error** y **límite**.
+
+> **Solo documentación de prueba:** este skill produce archivos `TC-XXX-{slug}.md`. No implementa código de prueba ni ejecuta tests — eso corresponde a `quality-specialist`. No modifica el artefacto origen (US/WI) ni ningún otro archivo existente.
+
+---
+
+## Cómo preguntar al usuario
+
+Toda pregunta al usuario va por la **herramienta de preguntas estructuradas** (opciones tappables), no como prosa libre. Reglas:
+
+- Opciones cortas y mutuamente excluyentes (2-4 por pregunta).
+- No repreguntar lo que ya conste en el artefacto o en la conversación.
+- Si el cliente no expone la herramienta, formular en prosa con opciones enumeradas.
+
+---
+
+## Resolución de idioma
+
+Redactar los TCs y los mensajes al usuario en el idioma del artefacto origen. Si hay conflicto o ambigüedad, preguntar al usuario antes de generar.
+
+---
+
+## Selección del artefacto
+
+El usuario indica un `US-XXX` o un `WI-XXX`. Si el identificador es ambiguo (sin prefijo, o no está claro el tipo), **preguntar** antes de continuar.
+
+| Tipo | Ubicación del artefacto | Ubicación de los TCs |
+|------|------------------------|----------------------|
+| Historia de usuario | `docs/specs/user-stories/US-XXX-{nombre}/README.md` | `docs/specs/user-stories/US-XXX-{nombre}/test-cases/` |
+| Work item | `docs/specs/work-items/WI-XXX-{kebab-case}.md` | `docs/specs/work-items/WI-XXX-{kebab-case}/test-cases/` |
+
+> Para WI, la carpeta `WI-XXX-{kebab-case}/test-cases/` se crea si no existe; el archivo `.md` del WI permanece donde está.
+
+---
+
+## Paso 1 — Leer y extraer criterios
+
+1. Leer el artefacto completo.
+   - **US:** `README.md` de la historia. Los criterios son los bloques `AC-XXX` en la sección Criterios de aceptación.
+   - **WI:** el `WI-XXX-{kebab-case}.md`. Los criterios son los ítems de la sección **Criterios de aceptación**.
+2. Verificar el estado del artefacto:
+   - `Estado: Ready` → continuar.
+   - `Estado: Draft` → parar: el artefacto no está listo para producir TCs.
+   - `Estado: Obsolete` → parar: el artefacto fue descartado; no generar TCs sobre él.
+   - Cualquier otro estado → parar e informar: "El artefacto tiene estado [X], que no es soportado. Solo se procesan artefactos en estado `Ready`."
+3. Si no hay criterios de aceptación definidos (sección ausente o vacía), **parar** e indicar que el artefacto necesita criterios antes de poder generar TCs.
+4. Verificar que **cada criterio tenga un código de identificación** (`AC-XXX` en US; cualquier identificador único en WI, p. ej. `AC-01`, `CA-1`, etc.). Si uno o más criterios carecen de código, **parar** e informar al usuario:
+
+   ```
+   ERROR Trazabilidad incompleta:
+   Los siguientes criterios no tienen código identificador: [lista].
+   Cada criterio de aceptación debe tener un código único antes de generar TCs.
+   Agrégalos en el artefacto y reinicia el proceso.
+   ```
+
+   No continuar hasta que todos los criterios tengan código. No asignar códigos automáticamente.
+5. Listar los criterios encontrados (con su identificador y título) y pedir confirmación al usuario antes de continuar.
+
+---
+
+## Paso 2 — Entrevista de clarificación
+
+Antes de generar ningún TC, resolver las dudas que puedan afectar la calidad de los casos. Las preguntas a continuación son el conjunto estándar; **omitir las que ya estén respondidas en el artefacto o en la conversación** para no interrogar innecesariamente al usuario.
+
+Preguntar usando la herramienta de preguntas estructuradas sobre:
+
+1. **Alcance**: ¿TCs para todos los criterios o para un subconjunto? (opciones: Todos / Seleccionar criterios).
+2. **Entorno de referencia**: ¿desarrollo, staging o producción? Afecta URLs, datos de prueba y configuraciones.
+3. **Roles de usuario involucrados**: si el artefacto no los especifica, listar los inferidos y confirmar.
+4. **Datos de prueba**: ¿hay juegos de datos ya definidos o se proponen dentro del TC? (opciones: Ya existen / Proponer en el TC).
+5. **Escenarios de error críticos**: ¿el negocio prioriza algún error específico que el artefacto no detalla?
+
+No avanzar al Paso 3 hasta recibir respuesta a las preguntas que apliquen.
+
+---
+
+## Paso 3 — Generar casos de prueba
+
+Por cada criterio en el alcance, analizar cuántos TCs son necesarios según la información del artefacto, las respuestas del usuario en la entrevista y la complejidad del escenario. No hay un número fijo: un criterio simple puede requerir un solo TC; uno complejo puede necesitar varios. Las tres perspectivas sirven como guía de cobertura mínima, no como límite:
+
+| Perspectiva | Qué cubre | Ejemplo de slug |
+|-------------|-----------|-----------------|
+| **Happy path** | Flujo exitoso con datos válidos; el criterio se cumple completamente. | `login-credenciales-validas-happy` |
+| **Error** | Entrada inválida, permiso denegado, servicio caído, o cualquier desvío que el sistema debe manejar con un error controlado. | `login-password-incorrecto-error` |
+| **Límite** | Valores en el borde del dominio: máximo/mínimo permitido, longitud exacta, fecha límite, concurrencia, campo vacío. | `nombre-255-caracteres-limite` |
+
+Si dentro de una perspectiva hay múltiples escenarios distintos que vale la pena distinguir (p. ej., dos tipos de error con comportamientos diferentes), crear un TC por escenario en lugar de agruparlos. Si una perspectiva no aplica al criterio, omitirla sin necesidad de justificar salvo que sea evidente que debería existir y se descarta por alguna razón concreta.
+
+### Numeración y nombres de archivo
+
+- El secuencial `XXX` (tres dígitos: 001, 002, …) es por artefacto padre, siguiendo el orden criterio-a-criterio (happy → error → límite).
+- Si la carpeta `test-cases/` ya existe con TCs previos, leer los archivos presentes, determinar el número más alto y continuar desde el siguiente. No regenerar TCs ya existentes salvo instrucción explícita del usuario.
+- Nombre de archivo: `TC-XXX-{slug}.md`, donde el slug sigue el patrón `{criterio-resumido}-{perspectiva}` (ver columna Ejemplo arriba). Un TC por archivo.
+
+### Estructura de cada TC
+
+Usar `assets/test-case-template.md` para todos los campos. Reglas de llenado:
+
+- **Criterio de aceptación:** referenciar el identificador exacto (`AC-XXX` en US; identificador local asignado en Paso 1 para WI). Este campo no puede estar vacío ni ser genérico — es el vínculo de trazabilidad.
+- **Prioridad:** derivar del impacto del criterio en el negocio: Alta si el criterio es bloqueante o afecta seguridad/datos; Media si es funcional importante; Baja si es edge case o cosmético. Si no hay suficiente contexto, preguntar al usuario.
+- **Creado por:** usar `git config user.name` del repositorio. Si no está disponible, dejar el campo vacío.
+- **Precondiciones:** ser específico — incluir estado del sistema, datos existentes y permisos requeridos.
+- **Datos de prueba:** usar los confirmados en el Paso 2; si se proponen, marcarlos con `[propuesto]`.
+- **Pasos:** acciones atómicas y observables; cada fila incluye actor + acción + resultado esperado del paso.
+- **Resultado esperado final:** estado observable del sistema (UI, código HTTP, mensaje, evento publicado), no estado interno.
+
+---
+
+## Paso 4 — Guardar y reportar
+
+1. Crear la carpeta `test-cases/` si no existe.
+2. Escribir cada `TC-XXX-{slug}.md` en la ruta correcta según la tabla de Selección del artefacto. Guardar cada TC con `Estado: Ready` salvo que el usuario indique lo contrario.
+3. Mostrar al usuario un resumen:
+   - Criterios procesados.
+   - TCs generados: ID · título · perspectiva.
+   - TCs omitidos con justificación.
+4. Preguntar si el usuario acepta el resultado:
+   - **Acepta** → cerrar; el skill termina.
+   - **Ajuste puntual** (campo incorrecto, dato de prueba erróneo) → aplicar la corrección y volver a este paso para confirmar.
+   - **Cambio estructural** (nuevos criterios, redefinición del alcance) → reiniciar desde el Paso 1.
+
+---
+
+## Trazabilidad
+
+Cada TC referencia exactamente un criterio de aceptación en el campo **Criterio de aceptación** del encabezado. Un TC sin ese campo completo es inválido.
+
+La trazabilidad inversa (de un criterio a sus TCs) se obtiene buscando el identificador del criterio (`AC-XXX`) en los archivos de la carpeta `test-cases/` del artefacto.
+
+---
+
+## Anti-patterns
+
+- Generar TCs sin haber completado la entrevista del Paso 2 (incluso si parece obvio).
+- Crear un TC que cubra más de un criterio de aceptación.
+- Omitir una perspectiva sin dejar nota justificada en el TC.
+- Dejar el campo **Criterio de aceptación** vacío o con un valor genérico ("criterio 1").
+- Reutilizar un número de secuencia ya existente en `test-cases/`.
+- Regenerar TCs existentes sin instrucción explícita del usuario.
+- Modificar el artefacto origen (README de US o WI-XXX.md) en cualquier momento.
+- Escribir código de prueba (Jest, Cypress, etc.); ese trabajo corresponde a `quality-specialist`.
+- Continuar si el artefacto no está en `Estado: Ready` o no tiene criterios de aceptación.
+- Asignar códigos de criterio automáticamente; si faltan, parar y pedirle al usuario que los agregue en el artefacto.
+- Lanzar preguntas como prosa libre cuando el cliente expone herramienta de preguntas estructuradas.

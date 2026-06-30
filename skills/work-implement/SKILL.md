@@ -10,7 +10,7 @@ Guia general para **ejecutar en codigo** trabajo ya especificado, de **distintos
 
 > **Alcance (cualquier tipo):** consume especificaciones ya redactadas por los skills de planificacion (`work-plan`, `project-migrate`). **No reescribe ni reestructura** la especificacion - solo la implementa. Correcciones menores acordadas con el usuario son la unica excepcion.
 >
-> **Solo implementacion:** no modifica documentacion de producto (README de US, `TK-XXX`, `WI-XXX`, `discovery.md`, `validation.md`, `plan.md`, ADRs, technical-docs) - solo el `progress.md`. Si se detecta un conflicto en la documentacion que pueda afectar el resultado, **parar inmediatamente y notificar al usuario** antes de continuar.
+> **Solo implementacion:** no modifica documentacion de producto (README de US, `TK-XXX`, `WI-XXX`, `discovery.md`, `validation.md`, `plan.md`, ADRs, technical-docs) - solo el `progress.md`. **Excepcion de checkboxes:** marcar `[ ]` como `[x]` en las subtareas del artefacto en ejecucion **a medida que se completan** es la unica modificacion permitida en archivos de especificacion; no se toca ninguna otra seccion del artefacto. El archivo a editar depende del tipo: `TK-XXX.md` para tareas de historia de usuario, `WI-XXX.md` para work items, `plan.md` para fases de migracion. Si se detecta un conflicto en la documentacion que pueda afectar el resultado, **parar inmediatamente y notificar al usuario** antes de continuar.
 >
 > **Ritmo obligatorio - una unidad por confirmacion:** implementar una unidad, actualizar `progress.md`, ejecutar lint/build, y **esperar confirmacion explicita del usuario antes de arrancar la siguiente**. Sin excepcion. La **unidad** depende del tipo (ver tabla de seleccion).
 
@@ -107,15 +107,41 @@ Antes de escribir codigo, verificar si el proyecto tiene **algun ADR que defina 
 
 ---
 
+## Principios de desarrollo (transversal)
+
+Toda implementacion, sea cual sea el tipo de artefacto, sigue estos dos principios. No son opcionales.
+
+### TDD — Test-Driven Development
+
+El ciclo obligatorio por cada unidad de comportamiento es **Red → Green → Refactor**:
+
+1. **Red:** escribir el test que falla antes de escribir el codigo de produccion. El test debe describir el comportamiento esperado segun los criterios de aceptacion o los TC-XXX disponibles.
+2. **Green:** escribir el minimo codigo necesario para que el test pase.
+3. **Refactor:** limpiar el codigo (produccion y test) sin romper los tests.
+
+Los tests son parte del entregable de la unidad, no una fase posterior. Una unidad no esta `Done` si sus tests no existen o no pasan.
+
+### Clean Architecture
+
+Organizar el codigo respetando la separacion de responsabilidades:
+
+- **Capas con dependencias hacia adentro:** Entities → Use Cases → Interface Adapters → Frameworks/Drivers. Las capas internas no conocen las externas.
+- **Regla de dependencia:** el codigo fuente solo puede apuntar hacia adentro; nunca una capa interna importa de una externa.
+- **Use cases primero:** la logica de negocio vive en casos de uso, no en controladores, servicios de infraestructura ni frameworks.
+- **Inversión de dependencias:** las abstracciones (interfaces/puertos) se definen en la capa de dominio; las implementaciones concretas (repositorios, clientes HTTP, etc.) viven en la capa de infraestructura.
+
+Si el proyecto ya tiene una estructura establecida que se aparta de Clean Architecture, respetar la convencion existente y registrar la decision en `Decisiones adicionales` del `progress.md`.
+
+---
+
 ## Subagentes y MCP condicionales (transversal)
 
 | Condicion | Agente / MCP requerido |
 | --------- | ---------------------- |
 | La unidad genera o modifica archivos de UI (HTML, CSS, componentes) | Ejecutar bajo el agente `ui-specialist` **si el proyecto lo define** |
 | La referencia de diseno es un enlace o archivo de Figma | Usar el **MCP de Figma** para obtener el contexto del diseno antes y durante la implementacion |
-| Fase final de pruebas aceptada por el usuario | Ejecutar bajo el agente **`quality-specialist`** **si el proyecto lo define** - no escribir tests desde este skill. La **base de los tests depende del tipo** (ver referencia) |
 
-Los subagentes (`ui-specialist`, `quality-specialist`) solo se usan **si el proyecto los define**; si no existen, ejecutar el paso directamente sin delegar. Si la unidad no involucra UI, implementar directamente sin delegar.
+El subagente `ui-specialist` solo se usa **si el proyecto lo define**; si no existe, ejecutar el paso directamente. Si la unidad no involucra UI, implementar directamente sin delegar.
 
 ---
 
@@ -129,7 +155,7 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 
 | Archivo | Cuando leerlo |
 |---------|---------------|
-| `references/user-story-tasks.md` | Tipo = tarea de historia de usuario (`US-XXX` / `TK-XXX`). Ubicaciones, filtros, cola, ciclo TK-a-TK, flujo "TK sin US", cierre con `quality-specialist` sobre `AC-XXX`, ejemplos y anti-patrones. |
+| `references/user-story-tasks.md` | Tipo = tarea de historia de usuario (`US-XXX` / `TK-XXX`). Ubicaciones, filtros, cola, ciclo TK-a-TK (con TDD), flujo "TK sin US", cierre, ejemplos y anti-patrones. |
 | `references/work-items.md` | Tipo = work item de mantenimiento (`WI-XXX`). Documento unico combinado, validacion por criterios de aceptacion, ciclo por WI completo, cierre, ejemplos y anti-patrones. |
 | `references/migrations.md` | Tipo = migracion (`MG-XXX`). Pre-requisito `plan.md` en `Ready`, ejecucion por fases, validacion por Golden Master Testing, destino fragmentado, ejemplos y anti-patrones. |
 | `assets/progress-template.md` | Plantilla de `progress.md`. Adaptar encabezado y unidades al tipo. |
@@ -143,10 +169,10 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 - Codificar con working tree sucio sin avisar y pausar.
 - Implementar en `main` u otra rama que no sea la del artefacto sin instruccion explicita.
 - Tratar como ejecutable un artefacto que no esta en `Ready`.
-- Modificar la especificacion de producto (US/TK/WI/discovery/validation/plan, ADRs, technical-docs) durante la implementacion.
+- Modificar la especificacion de producto (US/TK/WI/discovery/validation/plan, ADRs, technical-docs) durante la implementacion, salvo marcar checkboxes de subtareas completadas en el artefacto activo.
 - Diferir "para otro momento" la documentacion de codigo que un ADR vigente exige, o cerrar una unidad como `Done` sin esa documentacion.
 - Continuar cuando se detecta un conflicto en la documentacion sin notificar al usuario primero.
-- Escribir tests sin delegar a `quality-specialist`.
+- Diferir la escritura de tests para despues de la implementacion; el ciclo TDD es Red → Green → Refactor dentro de cada unidad.
 - Escribir un estado no definido en `progress.md`; estados validos: `Pending`, `In Progress`, `Done`.
 - Lanzar preguntas como prosa libre cuando el cliente expone herramienta de preguntas estructuradas.
 - Aceptar como confirmacion una respuesta ambigua sin opciones explicitas; si hay duda, repreguntar.
