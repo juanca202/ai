@@ -39,7 +39,8 @@ No existe aquí el modo «stubs desde una historia»: no hay US que descomponer.
 
 | Artefacto | Ruta |
 |-----------|------|
-| Work item | `docs/specs/work-items/WI-XXX-[kebab-case].md` |
+| Work item | `docs/specs/work-items/WI-XXX-[kebab-case]/README.md` |
+| Progreso | `docs/specs/work-items/WI-XXX-[kebab-case]/progress.md` |
 | Unidades de trabajo | `docs/specs/work-units.md` (compartido con el resto del repo) |
 | ADR | `docs/adr/` |
 | Documentación técnica | `docs/specs/technical-docs/` |
@@ -49,11 +50,11 @@ No existe aquí el modo «stubs desde una historia»: no hay US que descomponer.
 
 ## Convenciones del nombre de archivo
 
-- Formato: `WI-<número>-[nombre-descriptivo].md` con `WI-<número>` en mayúsculas.
+- Formato de carpeta: `WI-<número>-[nombre-descriptivo]/` con `WI-<número>` en mayúsculas. Dentro, siempre un `README.md` como documento principal del WI.
 - **Sin ADO**: `<número>` es un secuencial **global dentro de `docs/specs/work-items/`** (no hay historia padre que reinicie la cuenta); tres dígitos con cero a la izquierda → `WI-001`, `WI-002`, …
 - **Con ADO (MCP disponible)**: `<número>` es el **ID numérico del work item** creado en Azure DevOps → `WI-1847`, `WI-2031`, … Sin padding de ceros. Ver `references/azure-devops.md`.
 - Nombre descriptivo: minúsculas, kebab-case, corto y descriptivo.
-- Ejemplos sin ADO: `WI-001-fix-timeout-login.md`, `WI-002-upgrade-spring-boot.md`.
+- Ejemplos sin ADO: `WI-001-fix-timeout-login/README.md`, `WI-002-upgrade-spring-boot/README.md`.
 
 ---
 
@@ -82,7 +83,7 @@ Antes de crear o editar cualquier WI, tener clara esta información. **No invent
 Antes de crear archivos, verificar estas condiciones. Si alguna falla, **no crear** — informar al usuario y resolver primero.
 
 **¿Qué verificar?**
-- **ID disponible:** el número `WI-XXX` propuesto no existe ya en `docs/specs/work-items/`. (Aplica también con IDs de ADO: verificar que no exista `WI-<ado_id>-*.md`.)
+- **ID disponible:** el número `WI-XXX` propuesto no existe ya como carpeta en `docs/specs/work-items/`. (Aplica también con IDs de ADO: verificar que no exista `WI-<ado_id>-*/`.)
 - **Solapamiento de alcance:** leer los `WI-*.md` existentes y comparar su requerimiento con el del nuevo. Si alguno ya cubre el mismo alcance: informar el conflicto y preguntar si prefiere actualizar el existente o ajustar el alcance del nuevo.
 - **Unidad definida (solo WI completo):** si la unidad sigue siendo `Por definir` tras preguntar, publicar como stub en Draft, no como WI completo.
 
@@ -99,8 +100,8 @@ Antes de crear archivos, verificar estas condiciones. Si alguna falla, **no crea
 
 Un stub reserva el ID. No requiere requerimiento detallado ni contexto técnico completo.
 
-1. **Resolver el ID:** si el repo usa ADO con MCP disponible, seguir `references/azure-devops.md` (crear el work item primero y usar su `id`). En cualquier otro caso, inferir el siguiente secuencial libre listando archivos `WI-*.md` en `docs/specs/work-items/`.
-2. Crear `WI-<número>-[nombre-descriptivo].md` con:
+1. **Resolver el ID:** si el repo usa ADO con MCP disponible, seguir `references/azure-devops.md` (crear el work item primero y usar su `id`). En cualquier otro caso, inferir el siguiente secuencial libre listando carpetas `WI-*/` en `docs/specs/work-items/`.
+2. Crear la carpeta `WI-<número>-[nombre-descriptivo]/` y dentro el archivo `README.md` con:
    - `Estado: Draft`
    - `Tipo`: el conocido o el más probable (confirmar si hay duda).
    - `Unidad de trabajo`: la conocida o `Por definir`.
@@ -119,7 +120,7 @@ Un stub reserva el ID. No requiere requerimiento detallado ni contexto técnico 
 
 Un WI completo puede alcanzar `Estado: Ready` si cumple todas las condiciones del checklist.
 
-1. **Resolver el ID:** si el repo usa ADO con MCP disponible, seguir `references/azure-devops.md`. En cualquier otro caso, inferir el siguiente secuencial libre en `docs/specs/work-items/`.
+1. **Resolver el ID:** si el repo usa ADO con MCP disponible, seguir `references/azure-devops.md`. En cualquier otro caso, inferir el siguiente secuencial libre listando carpetas `WI-*/` en `docs/specs/work-items/`. Crear la carpeta `WI-<número>-[nombre-descriptivo]/` antes de escribir el `README.md`.
 2. **Gestionar `work-units.md`:**
    - Crear desde `assets/work-units-template.md` si el archivo no existe.
    - Si la unidad es nueva: añadir sección `## <nombre-unidad>` con párrafo de alcance. Si el alcance no está claro, preguntar antes de añadirla.
@@ -207,11 +208,11 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 
 **Ejemplo 1 — Stub**
 - *Entrada:* «Reserva un WI para el timeout intermitente del login, todavía no sé la causa.»
-- *Salida:* `WI-001-timeout-login.md` en Draft, `Tipo: bug`, unidad `Por definir`, Requerimiento breve, Criterios y Plan vacíos, Observaciones con los pendientes reales. `work-units.md` sin cambios.
+- *Salida:* carpeta `WI-001-timeout-login/` con `README.md` en Draft, `Tipo: bug`, unidad `Por definir`, Requerimiento breve, Criterios y Plan vacíos, Observaciones con los pendientes reales. `work-units.md` sin cambios.
 
 **Ejemplo 2 — WI completo**
 - *Entrada:* «Actualiza Spring Boot a 3.3; el ADR de versiones está en `docs/adr/`; la suite debe quedar verde y sin warnings de deprecación.»
-- *Salida:* `WI-002-upgrade-spring-boot.md` con `Tipo: dependencias`, Requerimiento, Criterios de aceptación verificables, unidad concreta, Plan con pasos, referencia al ADR con ruta relativa. `Estado: Ready` si Observaciones está limpia.
+- *Salida:* carpeta `WI-002-upgrade-spring-boot/` con `README.md`, `Tipo: dependencias`, Requerimiento, Criterios de aceptación verificables, unidad concreta, Plan con pasos, referencia al ADR con ruta relativa. `Estado: Ready` si Observaciones está limpia.
 
 **Ejemplo 3 — Información incompleta**
 - *Entrada:* «WI para limpiar el módulo de reportes.»
@@ -229,7 +230,7 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 ## Anti-patrones
 
 - Implementar el arreglo, la migración o los tests mientras se redacta el WI.
-- Separar el requerimiento y la especificación técnica en dos archivos: el WI es **un único documento combinado**.
+- Crear el WI como un archivo suelto `WI-XXX-[slug].md` en lugar de una carpeta `WI-XXX-[slug]/README.md`.
 - Crear un `WI` con sub-tareas hijas; un esfuerzo grande se parte en varios `WI-` hermanos.
 - Crear ADRs sin pedido explícito del usuario; solo referenciar existentes o sugerir su creación.
 - Publicar `Estado: Ready` sin criterios de aceptación verificables.

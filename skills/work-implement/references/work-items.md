@@ -2,7 +2,7 @@
 
 Flujo para **ejecutar en codigo** un work item de mantenimiento `WI-XXX` bajo `docs/specs/work-items/`: bugs, refactor, deuda tecnica, actualizacion de dependencias, tareas operativas o de infraestructura. Esta referencia se carga desde `SKILL.md` cuando la seleccion de tipo resuelve a este caso. Asume ya resueltos el mecanismo de preguntas, el idioma, la validacion de repositorio y el ritmo de confirmacion (ver `SKILL.md`).
 
-> **Naturaleza del WI:** documento **unico y combinado** - el requerimiento, los criterios de aceptacion y el plan de implementacion conviven en un solo `WI-XXX.md` que mapea 1:1 con un work item de ADO. **No se descompone en sub-tareas** (modelo plano). Un esfuerzo grande son varios `WI-` hermanos, nunca un WI con hijos.
+> **Naturaleza del WI:** documento **unico y combinado** - el requerimiento, los criterios de aceptacion y el plan de implementacion conviven en `WI-XXX-[kebab-case]/README.md`, que mapea 1:1 con un work item de ADO. **No se descompone en sub-tareas** (modelo plano). Un esfuerzo grande son varios `WI-` hermanos, nunca un WI con hijos.
 >
 > **Unidad de confirmacion:** **el `WI-XXX` completo.** Se implementa el plan del WI como una unidad; al terminarlo se actualiza `progress.md` y se pide confirmacion antes de pasar al siguiente WI (si el alcance incluye varios).
 
@@ -12,8 +12,8 @@ Flujo para **ejecutar en codigo** un work item de mantenimiento `WI-XXX` bajo `d
 
 | Artefacto | Ruta |
 | --------- | ---- |
-| Work item | `docs/specs/work-items/WI-XXX-[kebab-case].md` |
-| Progreso | `docs/specs/work-items/progress.md` |
+| Work item | `docs/specs/work-items/WI-XXX-[kebab-case]/README.md` |
+| Progreso | `docs/specs/work-items/WI-XXX-[kebab-case]/progress.md` |
 | Unidades de trabajo | `docs/specs/work-units.md` |
 | ADR | `docs/adr/` |
 | Documentacion tecnica | `docs/specs/technical-docs/` |
@@ -41,10 +41,10 @@ Flujo para **ejecutar en codigo** un work item de mantenimiento `WI-XXX` bajo `d
 
 Ademas de la validacion de repositorio transversal (`SKILL.md`):
 
-- **WI existente y en `Ready`:** el archivo `WI-XXX-*.md` existe en `docs/specs/work-items/` y tiene `Estado: Ready`. Un `WI` en `Draft` (stub o incompleto) **no** es ejecutable - devolver a `work-plan` para completarlo.
+- **WI existente y en `Ready`:** la carpeta `WI-XXX-[kebab-case]/` existe en `docs/specs/work-items/` y su `README.md` tiene `Estado: Ready`. Un `WI` en `Draft` (stub o incompleto) **no** es ejecutable - devolver a `work-plan` para completarlo.
 - **Criterios de aceptacion presentes:** el WI tiene **Criterios de aceptacion** verificables. Si faltan, parar: el WI no estaba realmente `Ready`.
 - **Referencia de UI (si toca UI):** si el WI modifica UI, debe tener referencia de diseno en **Referencias** (Figma/wireframe). Sin ella, parar y avisar.
-- **Test cases presentes:** verificar si existe la carpeta `docs/specs/work-items/WI-XXX-[kebab-case]/test-cases/` con al menos un archivo `TC-XXX-*.md`. Si no existe o esta vacia, **preguntar al usuario** (herramienta estructurada) antes de continuar:
+- **Test cases presentes:** verificar si existe la carpeta `docs/specs/work-items/WI-XXX-[kebab-case]/test-cases/` (dentro de la carpeta del WI) con al menos un archivo `TC-XXX-*.md`. Si no existe o esta vacia, **preguntar al usuario** (herramienta estructurada) antes de continuar:
 
   > "El WI no tiene test cases definidos. Se recomienda definirlos con `test-define` antes de implementar. ¿Deseas continuar de todas formas?"
   > Opciones: [Si, continuar sin test cases] / [No, detener aqui]
@@ -59,7 +59,7 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 
 1. Verificar working tree limpio; si no, parar y avisar.
 2. Resolver y hacer checkout de la rama del WI (crear desde la rama base acordada si no existe).
-3. Leer o crear `progress.md` en `docs/specs/work-items/` (desde `assets/progress-template.md`). Anadir **una entrada por cada WI del alcance** con `Estado: Pending` salvo los ya `Done`.
+3. Leer o crear `progress.md` dentro de la carpeta del WI (`docs/specs/work-items/WI-XXX-[kebab-case]/progress.md`) desde `assets/progress-template.md`. El `progress.md` es específico de este WI — contiene únicamente las entradas del plan de implementación del `README.md`.
 
 ### Paso 2 - Presentar alcance
 
