@@ -7,7 +7,7 @@ description: 'Crear casos de prueba (TC-XXX) a partir de los criterios de acepta
 
 Genera **casos de prueba documentados** (`TC-XXX`) a partir de los criterios de aceptación de un artefacto ya especificado (`US-XXX` o `WI-XXX`), siguiendo la estructura IEEE 29119-4. Por cada criterio produce tres perspectivas: **happy path**, **error** y **límite**.
 
-> **Solo documentación de prueba:** este skill produce archivos `TC-XXX-{slug}.md`. No implementa código de prueba ni ejecuta tests — eso corresponde a `quality-specialist`. No modifica el artefacto origen (US/WI) ni ningún otro archivo existente.
+> **Solo documentación de prueba:** este skill produce archivos `TC-XXX-{slug}.md`. No implementa código de prueba ni ejecuta tests — eso corresponde a `quality-specialist`. La única modificación permitida sobre el artefacto origen (US/WI) es agregar, bajo cada criterio de aceptación, la lista de casos de prueba que lo cubren (ver Paso 5); no altera ningún otro contenido del artefacto ni otros archivos existentes.
 
 ---
 
@@ -128,11 +128,34 @@ Usar `assets/test-case-template.md` para todos los campos. Reglas de llenado:
 
 ---
 
+## Paso 5 — Actualizar el artefacto origen con la trazabilidad
+
+Una vez guardados y aceptados los TCs, editar el artefacto origen (README de la US o el `WI-XXX-{kebab-case}.md`) para dejar registrada la trazabilidad directa: bajo cada criterio de aceptación, agregar la lista de los casos de prueba que lo cubren.
+
+Reglas:
+
+- La **única** modificación permitida sobre el artefacto es agregar esta línea de trazabilidad. No reescribir, reordenar ni alterar el texto de los criterios ni ninguna otra sección.
+- Para cada criterio, inmediatamente debajo de su enunciado, agregar una línea `Casos de prueba:` con los TCs que lo referencian, enlazados por ruta relativa a la carpeta `test-cases/`. Separar múltiples TCs con ` · `.
+- El texto del enlace es el ID del TC (`TC-XXX`); el destino es el archivo `TC-XXX-{slug}.md` correspondiente.
+- Si un criterio no tiene TCs (perspectiva omitida por completo), no agregar la línea o dejarla como `Casos de prueba: —` según convenga a la legibilidad.
+- Si el criterio ya tenía una línea `Casos de prueba:` de una corrida anterior, reemplazarla por la lista completa y actualizada (no duplicar).
+
+Formato (ejemplo):
+
+```
+AC-008 (Observabilidad): El logging estructurado con Pino está activo y registra al menos el inicio del servidor y los errores de autenticación.
+Casos de prueba: [TC-019](./test-cases/TC-019-log-arranque-servidor-happy.md) · [TC-020](./test-cases/TC-020-log-error-autenticacion-error.md)
+```
+
+Tras editar, informar al usuario qué criterios quedaron enlazados con qué TCs.
+
+---
+
 ## Trazabilidad
 
 Cada TC referencia exactamente un criterio de aceptación en el campo **Criterio de aceptación** del encabezado. Un TC sin ese campo completo es inválido.
 
-La trazabilidad inversa (de un criterio a sus TCs) se obtiene buscando el identificador del criterio (`AC-XXX`) en los archivos de la carpeta `test-cases/` del artefacto.
+La trazabilidad inversa (de un criterio a sus TCs) se obtiene buscando el identificador del criterio (`AC-XXX`) en los archivos de la carpeta `test-cases/` del artefacto. La trazabilidad directa (de un criterio a sus TCs) queda registrada en el propio artefacto origen mediante la línea `Casos de prueba:` que se agrega en el Paso 5.
 
 ---
 
@@ -144,7 +167,7 @@ La trazabilidad inversa (de un criterio a sus TCs) se obtiene buscando el identi
 - Dejar el campo **Criterio de aceptación** vacío o con un valor genérico ("criterio 1").
 - Reutilizar un número de secuencia ya existente en `test-cases/`.
 - Regenerar TCs existentes sin instrucción explícita del usuario.
-- Modificar el artefacto origen (README de US o WI-XXX.md) en cualquier momento.
+- Modificar el artefacto origen (README de US o WI-XXX.md) más allá de agregar la línea `Casos de prueba:` bajo cada criterio en el Paso 5; cualquier otro cambio al texto de los criterios o a otras secciones está prohibido.
 - Escribir código de prueba (Jest, Cypress, etc.); ese trabajo corresponde a `quality-specialist`.
 - Continuar si el artefacto no está en `Estado: Ready` o no tiene criterios de aceptación.
 - Asignar códigos de criterio automáticamente; si faltan, parar y pedirle al usuario que los agregue en el artefacto.
