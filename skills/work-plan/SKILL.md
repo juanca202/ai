@@ -1,6 +1,6 @@
 ---
 name: work-plan
-description: "Planifica trabajo de distintos tipos sin generar código ni pruebas. Dos tipos de plan: (1) tareas técnicas (TK-XXX) bajo una historia de usuario existente; (2) work items de mantenimiento (WI-XXX) sin historia asociada — bugs, refactor, deuda técnica, actualización de dependencias, tareas operativas. Activar siempre que el usuario pida planificar implementación, descomponer trabajo, definir alcance técnico, documentar especificaciones técnicas o planificar mantenimiento / deuda técnica / refactor, aunque no nombre «tarea», «TK» o «WI». Activar también — por defecto — cuando solo entregue una referencia a una historia (p. ej. «US-004», «planifica US-007», «tareas para esta historia»): proponer stubs agrupados por unidad de trabajo que cubran los criterios de aceptacion (AC-XXX). Selecciona el tipo según haya o no historia asociada y carga su definición desde references/."
+description: "Planifica trabajo de distintos tipos sin generar código ni pruebas. Dos tipos de plan: (1) tareas técnicas (TK-XXX) bajo una historia de usuario existente; (2) work items de mantenimiento (WI-XXX) sin historia asociada — bugs, refactor, deuda técnica, actualización de dependencias, tareas operativas. Activar siempre que el usuario pida planificar implementación, descomponer trabajo, definir alcance técnico, documentar especificaciones técnicas o planificar mantenimiento / deuda técnica / refactor, aunque no nombre «tarea», «TK» o «WI». Activar también — por defecto — cuando solo entregue una referencia a una historia (p. ej. «US-004», «planifica US-007», «tareas para esta historia»): proponer stubs agrupados por repositorio que cubran los criterios de aceptacion (AC-XXX). Selecciona el tipo según haya o no historia asociada y carga su definición desde references/."
 license: MIT
 ---
 
@@ -14,7 +14,7 @@ Guía general para **planificar trabajo** produciendo documentos de especificaci
 
 ## Subagente
 
-**Si el proyecto define el subagente `docs-specialist`, ejecutar este skill bajo ese subagente**, sea cual sea el tipo de plan. Si no existe en el proyecto, ejecutar el flujo normalmente.
+**Si el proyecto define el subagente `docs-specialist`, ejecutar este skill bajo ese subagente**, sea cual sea el tipo de plan. Si no existe, ejecutar el flujo normalmente.
 
 ---
 
@@ -25,7 +25,7 @@ Cuando este skill (o cualquiera de sus referencias) indique **preguntar, pedir, 
 - **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita categorías; usar entrada libre solo si no hay forma razonable de enumerar opciones (p. ej. el objetivo breve de un stub).
 - **No repreguntar** lo que ya está respondido en el contexto, en `.agents/MEMORY.md`, o en los documentos existentes del repo.
 - **Recopilación inicial:** agrupar las preguntas pendientes en una sola tanda (hasta tres por bloque); no ir descubriendo huecos turno a turno.
-- **Confirmaciones de creación:** una pregunta por turno con opciones claras (p. ej. `Confirmar` / `Ajustar` / `Cancelar`); no crear archivos antes de la confirmación.
+- **Confirmaciones de creación:** una pregunta por turno con opciones claras (p. ej. Opciones: [Confirmar] / [Ajustar] / [Cancelar]); no crear archivos antes de la confirmación.
 - **Fallback:** si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
 
 Cada vez que una referencia diga *preguntar al usuario*, *validar con el usuario*, *confirmar* o *sugerir al usuario* asume este mecanismo; no se repite allí.
@@ -73,7 +73,7 @@ La sincronización con Azure DevOps (ADO) es transversal a los tipos de plan que
 
 ## Mensaje al usuario
 
-Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamiento interno, cadenas de pensamiento ni narración del trabajo en curso («leí la US», «creé el archivo», «actualicé work-units»). Si hay pendientes o aclaraciones, listarlos en viñetas agrupadas por artefacto.
+Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamiento interno, cadenas de pensamiento ni narración del trabajo en curso («leí la US», «creé el archivo»). Si hay pendientes o aclaraciones, listarlos en viñetas agrupadas por artefacto.
 
 ---
 
@@ -86,4 +86,3 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 | `references/azure-devops.md` | Solo si se detecta vinculación a ADO (ver sección anterior). |
 | `assets/task-template.md` | Plantilla canónica de una tarea de historia de usuario (`TK-XXX`). Leer antes de redactar el documento. |
 | `assets/work-item-template.md` | Plantilla canónica de un work item de mantenimiento (`WI-XXX`). Leer antes de redactar el documento. |
-| `assets/work-units-template.md` | Plantilla de `work-units.md`. |

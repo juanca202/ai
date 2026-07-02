@@ -86,7 +86,16 @@ Por cada fase aprobada, en el orden del plan:
 ### Paso 4 - Cierre
 
 1. Cuando todas las fases esten `Done` (o el usuario detenga), ejecutar la **suite completa de Golden Master** y, si aplica, el **Parallel Run + Reconciliation** final antes del *cutover*. La definicion de los casos ya vive en `validation.md`; no inventar casos nuevos.
-2. **Handoff:** si todas las fases del destino estan `Done`, golden master en verde, working tree limpio y commits hechos, sugerir `pr-create` o `work-integrate`. Si el destino esta fragmentado, repetir el flujo para el siguiente proyecto destino. Si quedan fases pendientes, indicar que falta cerrar.
+2. **Handoff:** si todas las fases del destino estan `Done`, golden master en verde, working tree limpio y commits hechos, **preguntar al usuario** (herramienta estructurada) como continuar:
+
+   > "Implementacion completada. ¿Que quieres hacer ahora?"
+   > Opciones: [Integrar el trabajo] / [Crear un PR] / [Terminar aqui]
+
+   - **Integrar el trabajo** => hacer handoff a `work-integrate`.
+   - **Crear un PR** => hacer handoff a `pr-create`.
+   - **Terminar aqui** => cerrar sin handoff; el trabajo queda commiteado en la rama.
+
+   Si el destino esta fragmentado, repetir el flujo para el siguiente proyecto destino. Si quedan fases pendientes, indicar que falta cerrar antes de ofrecer estas opciones.
 
 ---
 

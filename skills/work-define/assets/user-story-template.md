@@ -73,12 +73,12 @@ Escenario: SC-01 - {{Nombre del escenario}}
 - **Story points:** {{1 | 2 | 3 | 5 | 8 | 13}}
 - **Justificación:** {{justificación breve basada en alcance, riesgo e incertidumbre}}
 
-## Unidades de trabajo
+## Repositorios
 
-<!-- Referencia/puntero. El registro canónico de unidades de trabajo es docs/specs/work-units.md (gestionado por work-plan); aquí solo se nombran, no se duplica su alcance. -->
+<!-- Nombre(s) del/los repositorio(s) git al/los que afecta la historia. Es la referencia de dónde se materializará el trabajo; work-plan la usa para agrupar las tareas por repositorio. -->
 
-- {{unidad o área 1; puede ser general — frontend, backend — o específica — micro-autenticacion, client-web}}
-- {{unidad o área 2}}
+- {{repositorio 1; p. ej. frontend-web, api-catalogo, micro-autenticacion}}
+- {{repositorio 2}}
 
 ## Validación
 
@@ -99,7 +99,7 @@ Escenario: SC-01 - {{Nombre del escenario}}
 | ---------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
 | Dependencias listas                | {{Cumple / No cumple / Parcial}}             | {{explicación}}                                                                |
 | Inputs/outputs claros              | {{Cumple / No cumple / Parcial}}             | {{explicación}}                                                                |
-| Unidades de trabajo definidas      | {{Cumple / No cumple / Parcial}}             | {{explicación}}                                                                |
+| Repositorios definidos             | {{Cumple / No cumple / Parcial}}             | {{explicación}}                                                                |
 | Sin decisiones técnicas pendientes | {{Cumple / No cumple / Parcial}}             | {{explicación}}                                                                |
 | Referencias de UI                  | {{Cumple / No cumple / Parcial / No aplica}} | {{explicación}}                                                                |
 | Sin aclaraciones pendientes        | {{Cumple / No cumple / Parcial}}             | {{vacío o «Ninguna» en Observaciones; nada pendiente con usuario/producto}}    |

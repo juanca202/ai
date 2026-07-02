@@ -164,7 +164,7 @@ Propuesta:
   footer:      <texto o "(ninguno)">
 ```
 
-Opciones: `Confirmar` / `Ajustar tipo` / `Ajustar scope` / `Ajustar descripción` / `Cancelar`. Si el usuario ajusta, aplicar y volver a mostrar la propuesta.
+Opciones: [Confirmar] / [Ajustar tipo] / [Ajustar alcance] / [Ajustar descripción] / [Cancelar]. Si el usuario ajusta, aplicar y volver a mostrar la propuesta.
 
 ## Validación antes de ejecutar
 

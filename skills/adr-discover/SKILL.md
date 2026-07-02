@@ -143,9 +143,12 @@ Mostrar la lista al usuario en este formato:
 Total: X candidatos encontrados. ¿Cuáles quieres documentar como ADR?
 ```
 
-Tras mostrar la lista, preguntar:
+Tras mostrar la lista, preguntar con la **herramienta de preguntas estructuradas**:
 
-> "¿Cuáles candidatos quieres crear como ADR? Puedes indicarlos por código (C-01, C-03…), por rango (C-01 a C-04), o decir 'todos los de alta prioridad'."
+> "¿Cuáles quieres documentar como ADR?"
+> Opciones: [Todos] / [Solo los de alta prioridad] / [Elegir algunos]
+>
+> - Si elige **Elegir algunos**: pedir que indique los códigos (p. ej. `C-01, C-03`) o un rango (`C-01 a C-04`).
 
 ---
 

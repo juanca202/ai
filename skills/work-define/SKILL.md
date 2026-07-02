@@ -73,7 +73,7 @@ Antes de crear o editar cualquier US, el agente debe tener clara la siguiente in
 | **Referencias de diseño** (solo US de UI)       | Figma, prototipos u otros enlaces aportados por el usuario                               | Sin ellas la historia no puede declararse Ready                                       |
 | **Dependencias con otras US o sistemas**        | Indicadas por el usuario o inferibles del contexto                                       | Preguntar; afectan las dimensiones I y E de INVEST                                    |
 | **ID de la US**                                 | Proporcionado por el usuario                                                             | Inferir el siguiente libre revisando carpetas `US-`* en `docs/specs/user-stories/`  |
-| **Unidades de trabajo**                         | Proporcionadas por el usuario o inferibles del repo                                      | Sin ellas la historia no puede declararse Ready                                       |
+| **Repositorios afectados**                      | Proporcionados por el usuario o inferibles del repo                                      | Sin ellos la historia no puede declararse Ready                                       |
 
 
 > El único dato estrictamente obligatorio para crear la historia es tener identificado el actor y el valor de negocio. Si INVEST no es completamente valorable con la información disponible, la historia se crea con `Estado: Draft` y las lagunas documentadas en Observaciones. El estado **Ready** requiere todos los datos sin excepción.
@@ -84,9 +84,9 @@ Antes de crear o editar cualquier US, el agente debe tener clara la siguiente in
 
 El procedimiento completo —cómo preguntar al usuario, validación antes de crear, los pasos de **Crear** y **Actualizar**, el checklist y los ejemplos/anti-patrones— está en [`references/flow.md`](references/flow.md). Síntesis:
 
-- **Crear:** fijar ID y carpeta `US-XXX-[nombre-corto]/` → redactar el `README.md` con la plantilla (Descripción RFC 2119, Referencias, Criterios `AC-XXX` con categoría y enunciado RFC 2119, Unidades de trabajo, Complejidad Fibonacci, INVEST, DoR, Observaciones) → documentación técnica solo si se pide → glosario si aplica → cierre.
+- **Crear:** fijar ID y carpeta `US-XXX-[nombre-corto]/` → redactar el `README.md` con la plantilla (Descripción RFC 2119, Referencias, Criterios `AC-XXX` con categoría y enunciado RFC 2119, Repositorios, Complejidad Fibonacci, INVEST, DoR, Observaciones) → documentación técnica solo si se pide → glosario si aplica → cierre.
 - **Actualizar:** identificar y leer el `README.md` → aplicar cambios conservando ids `AC-XXX` (renumerar solo si se reordenan/eliminan) → revalidar → confirmar. Ante conflicto `TK-XXX` ↔ US, **la US prevalece**.
-- **Cierre:** si queda **Draft**, cerrar lagunas con preguntas estructuradas (una por laguna, máx. tres por bloque); si queda **Ready**, sugerir o invocar `/work-plan` para las `TK-XXX` (nunca crearlas desde este skill).
+- **Cierre:** si queda **Draft**, cerrar lagunas con preguntas estructuradas (una por laguna, máx. tres por bloque); si queda **Ready**, sugerir como próximos pasos definir los casos de prueba (si el usuario acepta, invocar `/test-define`) y crear las `TK-XXX` con `/work-plan` (nunca crear TCs ni tareas directamente desde este skill).
 
 Las modalidades **RFC 2119**, las **categorías de AC-XXX** (funcionales e ISO 25010) y las rúbricas **INVEST** y **DoR** detalladas están en [`references/quality-criteria.md`](references/quality-criteria.md).
 
@@ -97,9 +97,9 @@ Las modalidades **RFC 2119**, las **categorías de AC-XXX** (funcionales e ISO 2
 Promover a **Ready** solo si se cumplen todos; el detalle de cada criterio está en [`references/quality-criteria.md`](references/quality-criteria.md#definition-of-ready-dor).
 
 - Sección **Criterios de aceptación** completa: al menos un `AC-XXX` con categoría entre paréntesis y enunciado RFC 2119 en MAYÚSCULAS.
-- **DoR** completado según la plantilla (Dependencias listas, Inputs/outputs claros, Unidades de trabajo definidas, sin decisiones técnicas pendientes, Referencias de UI cuando aplique, sin aclaraciones pendientes).
+- **DoR** completado según la plantilla (Dependencias listas, Inputs/outputs claros, Repositorios definidos, sin decisiones técnicas pendientes, Referencias de UI cuando aplique, sin aclaraciones pendientes).
 - **INVEST** sin dimensiones en `No cumple`.
-- **Unidades de trabajo** identificadas.
+- **Repositorios afectados** identificados.
 - **Observaciones** sin aclaraciones ni pendientes abiertos.
 
 Si falta cualquiera, mantener `Estado: Draft` con las lagunas documentadas en Observaciones.

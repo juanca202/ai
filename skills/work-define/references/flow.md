@@ -53,7 +53,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
     - Cada criterio usa id secuencial **AC-001**, **AC-002**, … único en el ámbito de la US; renumerar si se reordenan o eliminan criterios.
     - La categoría va entre paréntesis inmediatamente después del id (ver [Categorías de criterios de aceptación](quality-criteria.md#categorías-de-criterios-de-aceptación)): categorías funcionales (Reglas de negocio, Casos de uso, Flujos de proceso, Procesamiento de datos, Integraciones, Interacción de usuario, Salidas del sistema) o una característica ISO/IEC 25010 para criterios no funcionales.
     - El enunciado usa palabra clave normativa RFC 2119 en MAYÚSCULAS en el idioma de preferencia (**DEBE**, **NO DEBE**, **DEBERÍA**, etc.). Ver [RFC 2119](quality-criteria.md#rfc-2119).
-  - **Unidades de trabajo:** al nivel de granularidad del repo (p. ej. `frontend`, `backend`, o `micro-autenticacion`, `micro-catalogo`). El registro **canónico** de unidades de trabajo vive en `docs/specs/work-units.md` (gestionado por `work-plan`); esta sección de la US es solo una **referencia/puntero**, no un duplicado: no detallar aquí el alcance de cada unidad.
+  - **Repositorios:** nombre(s) del/los repositorio(s) git al/los que afecta la historia (p. ej. `frontend-web`, `api-catalogo`, o `micro-autenticacion`, `micro-catalogo`). Es la referencia de dónde se materializará el trabajo; `work-plan` la usa para agrupar las tareas por repositorio. Aquí solo se nombran; no se detalla el alcance de cada uno.
   - **Complejidad sugerida:** story points solo en valores Fibonacci 1, 2, 3, 5, 8, 13 con justificación breve de alcance, riesgo e incertidumbre.
   - **Validación — INVEST:** tabla con las seis dimensiones (I, N, V, E, S, T); valor de cada una: `Cumple` / `No cumple` / `Parcial` con nota. Si alguna dimensión falla, documentarlo sin disimular (ver [INVEST](quality-criteria.md#invest)).
   - **Validación — Definition of Ready (DoR):** tabla con los seis criterios de la plantilla. Para cada uno: `Cumple` / `No cumple` / `Parcial` (el criterio **Referencias de UI** admite además `No aplica`). Ver criterios exactos en [Definition of Ready (DoR)](quality-criteria.md#definition-of-ready-dor).
@@ -68,8 +68,9 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
     - Una pregunta por laguna, con opciones cuando la respuesta admita categorías (idioma, formato, prioridad, dependencias enumerables, story points Fibonacci); entrada libre solo para campos narrativos (refinamiento del valor, reglas nuevas, criterios verificables).
     - Respetar el máximo de tres preguntas por bloque; si hay más lagunas, encadenar tandas hasta agotarlas o hasta que el usuario indique que prefiere mantener el resto como Draft.
     - Tras recibir respuestas, actualizar las secciones afectadas del `README.md`, revalidar los checklists de INVEST y DoR, y promover a `Estado: Ready` solo si quedan completos. Si alguna laguna sigue abierta, mantener `Draft` y reflejar el residual en Observaciones.
-  - Si la US queda en **Ready**, sugerir explícitamente al usuario que ejecute `/work-plan` para crear las tareas `TK-XXX`.
-  - Si el usuario pide crearlas en continuidad o en el mismo turno: **invocar `/work-plan` obligatoriamente**; no crear tareas directamente desde este skill. El conocimiento y las reglas de formato de los `TK-XXX` residen en ese skill.
+  - Si la US queda en **Ready**, sugerir explícitamente al usuario dos próximos pasos posibles: **[Definir casos de prueba]** o **[Planificar tareas]**.
+    - Si el usuario acepta definir los casos de prueba: **invocar `/test-define`** pasando el contexto de la US; no crear los `TC-XXX` directamente desde este skill. Su formato y reglas residen en ese skill.
+    - Si el usuario pide crear las tareas en continuidad o en el mismo turno: **invocar `/work-plan` obligatoriamente**; no crear tareas directamente desde este skill. El conocimiento y las reglas de formato de los `TK-XXX` residen en ese skill.
 
 ---
 
@@ -107,7 +108,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 
 - Sección **Criterios de aceptación** completa: al menos un `AC-XXX` con categoría entre paréntesis y enunciado RFC 2119 en MAYÚSCULAS
 - DoR completado según la plantilla
-- Unidades de trabajo identificadas
+- Repositorios afectados identificados
 - Observaciones sin aclaraciones ni pendientes abiertos
 
 **Formato:**
@@ -140,15 +141,15 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 **Ejemplo 4 — Ready y tareas**
 
 - *Entrada:* Historia cerrada en Ready; el usuario dice: «crea las tareas para implementarla».
-- *Salida:* El agente no crea tareas directamente; invoca `/work-plan` pasando el contexto de la US. Toda la lógica de creación de `TK-XXX` (stubs, plantilla, work-units) es responsabilidad de ese skill.
+- *Salida:* El agente no crea tareas directamente; invoca `/work-plan` pasando el contexto de la US. Toda la lógica de creación de `TK-XXX` (stubs, plantilla, agrupación por repositorio) es responsabilidad de ese skill.
 
 **Ejemplo 5 — Draft con cierre asistido**
 
 - *Entrada:* «US nueva: como analista quiero descargar el reporte mensual de ventas en CSV para procesarlo localmente.» Hay actor y valor, pero no se conocen story points, dependencias ni si existen referencias de UI.
 - *Comportamiento:* El agente crea `US-0XX-descarga-reporte-mensual-csv/` con `Estado: Draft`, documenta las lagunas en Observaciones, y en el cierre lanza una tanda de preguntas estructuradas:
-  - "¿Story points (Fibonacci)?" → opciones `1` / `2` / `3` / `5` (con `8`/`13` accesibles si pide más).
-  - "¿Hay dependencias con otra US o sistema?" → opciones `Ninguna` / `Otra US del backlog` / `Sistema externo`.
-  - "¿La historia involucra UI propia?" → opciones `Sí, tengo Figma` / `Sí, sin referencias aún` / `No, solo backend`.
+  - "¿Story points (Fibonacci)?" → Opciones: [1] / [2] / [3] / [5] (con `8`/`13` accesibles si pide más).
+  - "¿Hay dependencias con otra US o sistema?" → Opciones: [Ninguna] / [Otra US del backlog] / [Sistema externo].
+  - "¿La historia involucra UI propia?" → Opciones: [Sí, tengo Figma] / [Sí, sin referencias aún] / [No, solo backend].
 - *Resultado:* Con las respuestas, el agente actualiza el `README.md`, revalida INVEST y DoR, y promueve a `Estado: Ready` si los checklists quedan completos. Si el usuario salta una pregunta o queda residual, la US permanece en Draft con la nota correspondiente.
 
 ---
@@ -175,7 +176,7 @@ Posición: **inicio** del pipeline `work-define` → `work-plan` → `work-imple
 | **Entrada** | Necesidad funcional del usuario. No requiere US previa. |
 | **Salida mínima (creación)** | Carpeta `US-XXX-[nombre-corto]/README.md` con actor y valor de negocio; puede quedar en `Estado: Draft` con lagunas en Observaciones. |
 | **Salida para continuar** | `Estado: Ready` en el `README.md`; INVEST y DoR completos; al menos un `AC-XXX`; Observaciones sin pendientes abiertos. |
-| **Siguiente paso** | **`work-plan`** — invocar `/work-plan` (o continuidad explícita del usuario). No crear `TK-XXX` desde este skill. |
+| **Siguiente paso** | Con la US en `Ready`, sugerir: **`test-define`** — invocar `/test-define` si el usuario acepta definir los casos de prueba (no crear `TC-XXX` desde este skill); y **`work-plan`** — invocar `/work-plan` para las tareas (o continuidad explícita del usuario). No crear `TK-XXX` desde este skill. |
 | **Si queda en Draft** | No handoff a plan ni implement. Cerrar lagunas con preguntas estructuradas o mantener Draft documentado. |
 | **Regreso desde plan** | Conflicto US ↔ TK detectado en `work-plan` → actualizar la US aquí; `work-plan` corrige el TK. La US prevalece sobre el TK. |
 | **Regreso desde integrate** | Alcance reducido o `progress.md` incompleto detectado en `work-integrate` → ajustar la US aquí y alinear TKs con `work-plan` antes de reintentar el merge. |

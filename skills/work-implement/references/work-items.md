@@ -14,7 +14,6 @@ Flujo para **ejecutar en codigo** un work item de mantenimiento `WI-XXX` bajo `d
 | --------- | ---- |
 | Work item | `docs/specs/work-items/WI-XXX-[kebab-case]/README.md` |
 | Progreso | `docs/specs/work-items/WI-XXX-[kebab-case]/progress.md` |
-| Unidades de trabajo | `docs/specs/work-units.md` |
 | ADR | `docs/adr/` |
 | Documentacion tecnica | `docs/specs/technical-docs/` |
 | Glosario | `docs/specs/glossary.md` |
@@ -32,7 +31,7 @@ Flujo para **ejecutar en codigo** un work item de mantenimiento `WI-XXX` bajo `d
 | **WI a implementar** | Indicado por el usuario (numero o nombre) | Preguntar cual; no asumir |
 | **Alcance** | Un WI concreto o una lista de `WI-` hermanos | Preguntar si hay ambiguedad |
 | **Tipo** | Campo `Tipo` del WI (bug / refactor / deuda-tecnica / dependencias / operativa) | Leer del archivo; condiciona la rama y el cierre |
-| **Unidad de trabajo** | Campo `Unidad de trabajo` del WI; complementar con `work-units.md` | Preguntar; no asumir |
+| **Repositorio** | Campo `Repositorio` del WI (nombre del repositorio git al que afecta) | Leer del archivo; para `Ready` es obligatorio |
 | **Rama** | Derivada del WI segun convencion del equipo | Crear desde la rama base acordada |
 
 ---
@@ -46,10 +45,12 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 - **Referencia de UI (si toca UI):** si el WI modifica UI, debe tener referencia de diseno en **Referencias** (Figma/wireframe). Sin ella, parar y avisar.
 - **Test cases presentes:** verificar si existe la carpeta `docs/specs/work-items/WI-XXX-[kebab-case]/test-cases/` (dentro de la carpeta del WI) con al menos un archivo `TC-XXX-*.md`. Si no existe o esta vacia, **preguntar al usuario** (herramienta estructurada) antes de continuar:
 
-  > "El WI no tiene test cases definidos. Se recomienda definirlos con `test-define` antes de implementar. ¿Deseas continuar de todas formas?"
-  > Opciones: [Si, continuar sin test cases] / [No, detener aqui]
+  > "Este WI no tiene test cases definidos para la implementacion. ¿Como quieres continuar?"
+  > Opciones: [Definir test cases primero] / [Si, continuar sin test cases] / [No, detener aqui]
 
-  Si el usuario confirma, continuar normalmente. Si detiene, sugerir ejecutar `test-define` primero.
+  - Si elige **definir test cases con `test-define`**: hacer handoff al skill `test-define` para el WI actual; al completarse, retomar esta verificacion y continuar la implementacion.
+  - Si elige **continuar sin test cases**: continuar normalmente.
+  - Si elige **detener**: parar y sugerir ejecutar `test-define` primero.
 
 ---
 
@@ -64,12 +65,11 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 ### Paso 2 - Presentar alcance
 
 1. Leer **completo** cada `WI-*.md` del alcance: Requerimiento, Criterios de aceptacion, Dependencias, Referencias y Plan de implementacion.
-2. Consultar `work-units.md` si el alcance de la unidad no es claro.
-3. Construir dos listas:
+2. Construir dos listas:
    - **Implementables:** WI `Ready` con criterios de aceptacion, no marcados como `Done`.
    - **Excluidos:** el resto, con su estado entre parentesis - p. ej. `WI-007 - Limpieza de reportes (Draft)`.
-4. Mostrar ambas listas. **No ejecutar codigo en este turno.**
-5. Preguntar si continuar y **esperar confirmacion**.
+3. Mostrar ambas listas. **No ejecutar codigo en este turno.**
+4. Preguntar si continuar y **esperar confirmacion**.
 
 ### Paso 3 - Implementar WI a WI
 
@@ -94,7 +94,16 @@ Por cada WI aprobado:
 ### Paso 4 - Cierre
 
 1. Verificar que la suite de tests pase limpia y el working tree este limpio con commits hechos.
-2. **Handoff:** si el alcance esta en `Done`, sugerir `pr-create` o `work-integrate`. Si quedan WI pendientes, indicar que falta cerrar.
+2. **Handoff:** si el alcance esta en `Done`, **preguntar al usuario** (herramienta estructurada) como continuar:
+
+   > "Implementacion completada. ¿Que quieres hacer ahora?"
+   > Opciones: [Integrar el trabajo] / [Crear un PR] / [Terminar aqui]
+
+   - **Integrar el trabajo** => hacer handoff a `work-integrate`.
+   - **Crear un PR** => hacer handoff a `pr-create`.
+   - **Terminar aqui** => cerrar sin handoff; el trabajo queda commiteado en la rama.
+
+   Si quedan WI pendientes, indicar que falta cerrar antes de ofrecer estas opciones.
 
 ---
 
@@ -102,7 +111,7 @@ Por cada WI aprobado:
 
 **Repositorio:** working tree limpio; rama del WI activa o creada; `progress.md` leido o creado.
 
-**Alcance:** cada `WI-*.md` leido completo; `work-units.md` consultado si hizo falta; listas presentadas; confirmacion recibida antes del primer cambio de codigo.
+**Alcance:** cada `WI-*.md` leido completo; listas presentadas; confirmacion recibida antes del primer cambio de codigo.
 
 **Por cada WI:** `Ready` con criterios de aceptacion; no `Done`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; UI bajo `ui-specialist`; Figma via MCP; plan completo implementado; criterios de aceptacion cubiertos por tests; lint/typecheck/build/tests en verde; `progress.md` a `Done`; decisiones de sesion registradas; **confirmacion explicita antes del siguiente WI**.
 

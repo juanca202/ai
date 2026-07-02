@@ -7,7 +7,7 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 
 - Estado: {{Draft | Ready}}
 - Tipo: {{bug | refactor | deuda-técnica | dependencias | operativa}}
-- Unidad de trabajo: {{obligatorio para Ready: paquete / módulo / servicio / etc.; inferido del proyecto o indicado por el usuario}}
+- Repositorio: {{obligatorio para Ready: nombre del repositorio git al que afecta el work item; inferido del repo (git remote / carpeta) o indicado por el usuario}}
 - Asignado a: {{opcional: priorizar lo indicado por el usuario; si no, inferir con `git config user.name`; omitir línea si no aplica}}
 - ADO Work Item: {{enlace markdown al work item de ADO — solo si se creó; omitir línea si no aplica}}
 
@@ -33,7 +33,7 @@ Cada BR-XX debe estar verificada por al menos un AC-XXX en la sección Criterios
 
 ## Dependencias
 
-<!-- Inventario de lo que el work item usa o necesita dentro de la unidad de trabajo: componentes de UI, servicios o APIs internas, modelos / entidades / DTOs, librerías de terceros. No incluir ADRs ni referencias de diseño — eso va en Referencias. -->
+<!-- Inventario de lo que el work item usa o necesita dentro del alcance del work item: componentes de UI, servicios o APIs internas, modelos / entidades / DTOs, librerías de terceros. No incluir ADRs ni referencias de diseño — eso va en Referencias. -->
 
 - {{nombre o identificador del componente, servicio, modelo, librería}} — {{descripción breve del uso}}
 
@@ -67,7 +67,7 @@ Categorías no funcionales (ISO/IEC 25010): Idoneidad funcional · Eficiencia de
 <!-- Árbol con las rutas de los archivos que se crearán, modificarán o eliminarán. Usar símbolos: + creado · ~ modificado · - eliminado. Frente a cada archivo, una descripción muy corta y acotada de qué se hace en él. -->
 
 ```text
-{{unidad-de-trabajo}}/
+{{repositorio}}/
 └── src/
     ├── + {{ruta/archivo-nuevo.ext}}        # {{qué se crea aquí: muy corto}}
     ├── ~ {{ruta/archivo-modificado.ext}}   # {{qué se cambia aquí: muy corto}}

@@ -84,9 +84,9 @@ Tabla con los seis criterios de la plantilla. Para cada uno: `Cumple` / `No cump
 | ---------------------------------- | --------- |
 | Dependencias listas                | Prerrequisitos y dependencias con otras US o sistemas resueltos o confirmados. |
 | Inputs/outputs claros              | Entradas y salidas funcionales bien definidas. |
-| Unidades de trabajo definidas      | Unidades de trabajo identificadas (referencia a `docs/specs/work-units.md`). |
+| Repositorios definidos             | Repositorio(s) git al/los que afecta la historia identificados. |
 | Sin decisiones técnicas pendientes | No quedan decisiones técnicas abiertas que condicionen el alcance. |
 | Referencias de UI                  | Para US de UI: enlaces de diseño presentes (`No aplica` si no hay UI propia). |
 | Sin aclaraciones pendientes        | Observaciones vacías o «Ninguna»; nada pendiente con usuario/producto. |
 
-El estado **Ready** requiere todos los datos sin excepción: Criterios de aceptación completos (al menos un `AC-XXX`), DoR completado, unidades de trabajo identificadas y Observaciones sin pendientes abiertos.
+El estado **Ready** requiere todos los datos sin excepción: Criterios de aceptación completos (al menos un `AC-XXX`), DoR completado, repositorios afectados identificados y Observaciones sin pendientes abiertos.

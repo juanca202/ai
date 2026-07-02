@@ -331,9 +331,9 @@ ejecutar sus planes**. Pregunta con la herramienta de preguntas estructuradas
 (`ask_user_input_v0`):
 
 - *¿Cómo quieres ejecutar los planes de los proyectos destino?* →
-  `Secuencial por prioridad` / `En paralelo con tareas`.
+  `En secuencia por prioridad` / `En paralelo con tareas`.
 
-**Si elige secuencial por prioridad.** Ordena los proyectos destino por prioridad
+**Si elige en secuencia por prioridad.** Ordena los proyectos destino por prioridad
 —según lo indique el plan o el propio usuario— e implementa **cada uno** con
 `work-implement`, **uno tras otro en ese orden**: no inicies el siguiente hasta
 terminar el anterior. Se ejecutan todos; lo que cambia es el orden, sin paralelismo

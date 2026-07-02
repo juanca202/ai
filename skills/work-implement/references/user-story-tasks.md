@@ -13,7 +13,6 @@ Flujo para **ejecutar en codigo** las tareas tecnicas `TK-XXX` de una historia d
 | Historia de usuario | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md` |
 | Tareas | `docs/specs/user-stories/US-XXX-[nombre-corto]/TK-XXX-[nombre].md` |
 | Progreso | `docs/specs/user-stories/US-XXX-[nombre-corto]/progress.md` |
-| Unidades de trabajo | `docs/specs/work-units.md` |
 | Glosario | `docs/specs/glossary.md` |
 
 **Rama de trabajo:** `feature/US-XXX-[nombre-corto]` (el segmento tras `feature/` coincide con la carpeta de la US).
@@ -26,7 +25,7 @@ Flujo para **ejecutar en codigo** las tareas tecnicas `TK-XXX` de una historia d
 | ---- | -------------- | --------------------- |
 | **US padre** | Indicada por el usuario o inferida de la ruta | Preguntar a que `US-XXX` pertenece; no implementar hasta tenerla |
 | **Alcance** | Del mensaje: toda la US, una lista de TK, o un TK concreto | Preguntar si hay ambiguedad |
-| **Unidad de trabajo** | Campo `Unidad de trabajo` de cada TK; complementar con `work-units.md` | Preguntar al usuario; no asumir |
+| **Repositorio** | Campo `Repositorio` de cada TK (nombre del repositorio git al que afecta) | Leer del archivo; para `Ready` es obligatorio |
 | **Rama de la US** | `feature/US-XXX-[nombre-corto]` | Crear con `git checkout -b ...` desde la rama base acordada |
 | **Usuario asignado** | Campo `Asignado a` del TK; si no: `git config user.name` | Aplicar como filtro salvo instruccion explicita |
 
@@ -42,10 +41,12 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 - **TK en estado Ready:** solo encolar tareas con `Estado: Ready`. Las `Draft` o `Done` en `progress.md` no son ejecutables por defecto.
 - **Test cases presentes:** verificar si existe la carpeta `docs/specs/user-stories/US-XXX-[nombre-corto]/test-cases/` con al menos un archivo `TC-XXX-*.md`. Si no existe o esta vacia, **preguntar al usuario** (herramienta estructurada) antes de continuar:
 
-  > "La US no tiene test cases definidos. Se recomienda definirlos con `test-define` antes de implementar. ¿Deseas continuar de todas formas?"
-  > Opciones: [Si, continuar sin test cases] / [No, detener aqui]
+  > "Esta US no tiene test cases definidos para la implementacion. ¿Como quieres continuar?"
+  > Opciones: [Definir test cases primero] / [Si, continuar sin test cases] / [No, detener aqui]
 
-  Si el usuario confirma, continuar normalmente. Si detiene, sugerir ejecutar `test-define` primero.
+  - Si elige **definir test cases con `test-define`**: hacer handoff al skill `test-define` para la US actual; al completarse, retomar esta verificacion y continuar la implementacion.
+  - Si elige **continuar sin test cases**: continuar normalmente.
+  - Si elige **detener**: parar y sugerir ejecutar `test-define` primero.
 
 ---
 
@@ -61,12 +62,11 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 ### Paso 2 - Filtrar y presentar cola
 
 1. Leer `README.md` de la US y todos los `TK-*.md` del alcance indicado.
-2. Consultar `docs/specs/work-units.md` si el alcance de alguna unidad no es claro.
-3. Construir dos listas:
-   - **Implementables:** TK `Ready` que pasen los filtros de unidad y usuario asignado, no marcadas como `Done` en `progress.md`.
+2. Construir dos listas:
+   - **Implementables:** TK `Ready` que pasen los filtros de repositorio y usuario asignado, no marcadas como `Done` en `progress.md`.
    - **Excluidas:** el resto, con su estado entre parentesis - p. ej. `TK-002 - Ajuste de permisos (Draft)`.
-4. Mostrar ambas listas en orden numerico. **No ejecutar codigo en este turno.**
-5. Preguntar si continuar y **esperar confirmacion** antes de implementar.
+3. Mostrar ambas listas en orden numerico. **No ejecutar codigo en este turno.**
+4. Preguntar si continuar y **esperar confirmacion** antes de implementar.
 
 ### Paso 3 - Implementar tarea a tarea
 
@@ -90,7 +90,16 @@ Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto
 ### Paso 4 - Cierre
 
 1. Cuando no queden tareas pendientes (o el usuario detenga), verificar que la suite de tests pase limpia y el working tree este limpio con commits hechos.
-2. **Handoff:** si todo el alcance esta en `Done`, sugerir `pr-create` (si revisan por PR) o `work-integrate` (merge local). Si quedan TK pendientes, indicar que falta cerrar.
+2. **Handoff:** si todo el alcance esta en `Done`, **preguntar al usuario** (herramienta estructurada) como continuar:
+
+   > "Implementacion completada. ¿Que quieres hacer ahora?"
+   > Opciones: [Integrar el trabajo] / [Crear un PR] / [Terminar aqui]
+
+   - **Integrar el trabajo** => hacer handoff a `work-integrate` (merge local).
+   - **Crear un PR** => hacer handoff a `pr-create`.
+   - **Terminar aqui** => cerrar sin handoff; el trabajo queda commiteado en la rama.
+
+   Si quedan TK pendientes, indicar que falta cerrar antes de ofrecer estas opciones.
 
 ---
 
@@ -116,7 +125,7 @@ WARNING No es posible continuar con la implementacion:
 
 **Repositorio:** working tree limpio; rama `feature/US-XXX-[nombre-corto]` activa o creada; `progress.md` leido o creado.
 
-**Cola:** `README.md` y todos los `TK-*.md` del alcance leidos; `work-units.md` consultado si hizo falta; listas presentadas; confirmacion recibida antes del primer cambio de codigo.
+**Cola:** `README.md` y todos los `TK-*.md` del alcance leidos; listas presentadas; confirmacion recibida antes del primer cambio de codigo.
 
 **Por cada tarea:** TK `Ready`; no `Done` en `progress.md`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; UI bajo `ui-specialist`; Figma via MCP; lint/typecheck/build/tests ejecutados y en verde; `progress.md` a `Done`; decisiones de sesion registradas; **confirmacion explicita antes de la siguiente TK**.
 
@@ -126,7 +135,7 @@ WARNING No es posible continuar con la implementacion:
 
 ## Ejemplos
 
-**Ejemplo 1 - US completa con filtro de unidad**
+**Ejemplo 1 - US completa con filtro de repositorio**
 - *Entrada:* "Implementa lo Ready de la US-042; estoy en el paquete `@acme/web-app`."
 - *Salida:* checkout a `feature/US-042-*`; cola de Ready y excluidas; tras confirmacion, implementa **solo la primera TK Ready**, lint/build, actualiza `progress.md`, y **pausa para preguntar si continuar**.
 

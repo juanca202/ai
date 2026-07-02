@@ -7,7 +7,7 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 
 Estado: {{Draft | Ready}}
 Historia: {{enlace markdown al README.md de la historia US-XXX}}
-Unidad de trabajo: {{obligatorio: paquete / módulo / servicio / etc.; inferido del proyecto o indicado por el usuario}}
+Repositorio: {{obligatorio: nombre del repositorio git al que afecta la tarea; inferido del repo (git remote / carpeta) o indicado por el usuario}}
 Asignado a: {{opcional: priorizar lo indicado por el usuario; si no, inferir con `git config user.name`; omitir línea si no aplica}}
 ADO Work Item: {{enlace markdown al work item de ADO — solo si se creó; omitir línea si no aplica}}
 
@@ -17,7 +17,7 @@ ADO Work Item: {{enlace markdown al work item de ADO — solo si se creó; omiti
 
 ## Dependencias
 
-<!-- Inventario de lo que la tarea usa o necesita dentro de la unidad de trabajo: componentes de UI, servicios o APIs internas, modelos / entidades / DTOs, librerías de terceros. No incluir ADRs, technical-docs ni referencias de diseño — eso va en Referencias. -->
+<!-- Inventario de lo que la tarea usa o necesita dentro del alcance de la tarea: componentes de UI, servicios o APIs internas, modelos / entidades / DTOs, librerías de terceros. No incluir ADRs, technical-docs ni referencias de diseño — eso va en Referencias. -->
 
 - {{nombre o identificador del componente, servicio, modelo, librería}} — {{descripción breve del uso en esta tarea}}
 
@@ -40,7 +40,7 @@ Rutas permitidas: assets/ (recursos propios de esta tarea) o docs/specs/technica
 <!-- Árbol con las rutas de los archivos que se crearán, modificarán o eliminarán. Usar símbolos: + creado · ~ modificado · - eliminado. Frente a cada archivo, una descripción muy corta y acotada de qué se hace en él. -->
 
 ```text
-{{unidad-de-trabajo}}/
+{{repositorio}}/
 └── src/
     ├── + {{ruta/archivo-nuevo.ext}}        # {{qué se crea aquí: muy corto}}
     ├── ~ {{ruta/archivo-modificado.ext}}   # {{qué se cambia aquí: muy corto}}

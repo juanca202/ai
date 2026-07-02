@@ -71,10 +71,10 @@ Antes de generar ningún TC, resolver las dudas que puedan afectar la calidad de
 
 Preguntar usando la herramienta de preguntas estructuradas sobre:
 
-1. **Alcance**: ¿TCs para todos los criterios o para un subconjunto? (opciones: Todos / Seleccionar criterios).
+1. **Alcance**: ¿TCs para todos los criterios o para un subconjunto? Opciones: [Todos] / [Seleccionar criterios].
 2. **Entorno de referencia**: ¿desarrollo, staging o producción? Afecta URLs, datos de prueba y configuraciones.
 3. **Roles de usuario involucrados**: si el artefacto no los especifica, listar los inferidos y confirmar.
-4. **Datos de prueba**: ¿hay juegos de datos ya definidos o se proponen dentro del TC? (opciones: Ya existen / Proponer en el TC).
+4. **Datos de prueba**: ¿hay juegos de datos ya definidos o se proponen dentro del TC? Opciones: [Ya existen] / [Proponer en el TC].
 5. **Escenarios de error críticos**: ¿el negocio prioriza algún error específico que el artefacto no detalla?
 
 No avanzar al Paso 3 hasta recibir respuesta a las preguntas que apliquen.

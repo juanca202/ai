@@ -43,7 +43,7 @@ Redactar el informe y los mensajes al usuario en el idioma del mensaje de entrad
 Preguntar con la herramienta estructurada:
 
 1. **¿Qué quieres investigar?** (texto libre o selección de dominio)
-2. **¿Está vinculado a algún artefacto?** Opciones: [US-XXX / WI-XXX / MG-XXX / No, es independiente]
+2. **¿Está vinculado a algún artefacto?** Opciones: [Historia de usuario (US)] / [Mantenimiento (WI)] / [Migración (MG)] / [No, es independiente]
 
 ### Si el usuario proporcionó un tema
 
@@ -122,7 +122,7 @@ Ejecutar la investigación según el dominio identificado. Usar búsqueda web, d
 
 1. Redactar el informe usando `assets/research-template.md` como estructura base. Si no hay artefacto vinculado, marcar la sección **Impacto en el artefacto** como `N/A — investigación independiente`.
 2. Presentar el informe en el chat con un resumen ejecutivo de 2-3 oraciones al inicio.
-3. Preguntar al usuario (herramienta estructurada): "¿La investigación responde tu pregunta?" Opciones: [Sí, guardar resultado / Profundizar en un subtema / Descartar].
+3. Preguntar al usuario (herramienta estructurada): "¿La investigación responde tu pregunta?" Opciones: [Sí, guardar resultado] / [Profundizar en un subtema] / [Descartar].
    - **Sí, guardar resultado** → continuar al Paso 5 y guardar con `Estado: Ready`.
    - **Profundizar** → el usuario indica el subtema; ejecutar investigación adicional y volver al inicio de este paso.
    - **Descartar** → no guardar; el skill termina.

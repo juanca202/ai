@@ -29,7 +29,7 @@ La plantilla canónica está en `assets/work-item-template.md` (léela antes de 
 | Modo | Disparador | Flujo a aplicar |
 |------|------------|-----------------|
 | **A. Work item específico** | El usuario describe un trabajo de mantenimiento concreto (problema, alcance) o pide editar un `WI-XXX` existente. | *Flujo: Crear stub*, *Flujo: Crear WI completo* o *Flujo: Actualizar un WI existente* según la intención. |
-| **B. Descomposición de un esfuerzo grande** | El usuario describe un esfuerzo de mantenimiento amplio que no cabe en un único WI autocontenido (varias unidades técnicas independientes). | *Flujo: Proponer varios WI desde un esfuerzo grande* — proponer un conjunto de `WI-` autocontenidos, uno por unidad/alcance independiente. |
+| **B. Descomposición de un esfuerzo grande** | El usuario describe un esfuerzo de mantenimiento amplio que no cabe en un único WI autocontenido (varios repositorios o alcances técnicos independientes). | *Flujo: Proponer varios WI desde un esfuerzo grande* — proponer un conjunto de `WI-` autocontenidos, uno por repositorio/alcance independiente. |
 
 No existe aquí el modo «stubs desde una historia»: no hay US que descomponer. Mantener el modelo **plano** — un esfuerzo grande se parte en varios `WI-` hermanos, nunca en un `WI` con sub-tareas. En caso de duda entre A y B: preguntar al usuario antes de continuar.
 
@@ -41,7 +41,6 @@ No existe aquí el modo «stubs desde una historia»: no hay US que descomponer.
 |-----------|------|
 | Work item | `docs/specs/work-items/WI-XXX-[kebab-case]/README.md` |
 | Progreso | `docs/specs/work-items/WI-XXX-[kebab-case]/progress.md` |
-| Unidades de trabajo | `docs/specs/work-units.md` (compartido con el resto del repo) |
 | ADR | `docs/adr/` |
 | Documentación técnica | `docs/specs/technical-docs/` |
 | Glosario | `docs/specs/glossary.md` |
@@ -68,7 +67,7 @@ Antes de crear o editar cualquier WI, tener clara esta información. **No invent
 | **Intención** (modo A) | Del mensaje del usuario | Preguntar: ¿solo anclaje (stub) o WI completo listo para Ready? |
 | **Requerimiento** | Del mensaje del usuario: qué problema/necesidad motiva el trabajo | Para stub: basta un objetivo breve. Para WI completo: preguntar hasta entender el problema |
 | **Criterios de aceptación** (WI completo) | Del usuario o derivados del requerimiento: cómo se verifica que quedó hecho | Si no se pueden formular criterios verificables: publicar como stub en Draft y pedirlos |
-| **Unidad de trabajo** | Inferir del repo o indicada por el usuario | Stub: puede quedar `Por definir`. WI completo: obligatoria; sin ella el estado no puede ser `Ready` |
+| **Repositorio** | Nombre del repositorio git al que afecta el work item; inferir del repo (git remote / carpeta) o indicado por el usuario | Stub: puede quedar `Por definir`. WI completo: obligatorio; sin él el estado no puede ser `Ready` |
 | **Contexto técnico** (WI completo) | ADRs existentes, technical-docs, descripción del usuario | Si falta decisión técnica relevante: sugerir ADR al usuario, no crearlo |
 | **Referencia de UI** (solo si toca UI) | Figma, wireframe o imagen de alta fidelidad aportados por el usuario | Obligatoria para `Ready`; sin ella el WI de UI no puede salir de `Draft` |
 | **Tipo** | Del usuario o inferido del requerimiento (bug / refactor / deuda-técnica / dependencias / operativa) | Si es ambiguo, preguntar; condiciona el tipo de work item en ADO |
@@ -85,7 +84,7 @@ Antes de crear archivos, verificar estas condiciones. Si alguna falla, **no crea
 **¿Qué verificar?**
 - **ID disponible:** el número `WI-XXX` propuesto no existe ya como carpeta en `docs/specs/work-items/`. (Aplica también con IDs de ADO: verificar que no exista `WI-<ado_id>-*/`.)
 - **Solapamiento de alcance:** leer los `WI-*.md` existentes y comparar su requerimiento con el del nuevo. Si alguno ya cubre el mismo alcance: informar el conflicto y preguntar si prefiere actualizar el existente o ajustar el alcance del nuevo.
-- **Unidad definida (solo WI completo):** si la unidad sigue siendo `Por definir` tras preguntar, publicar como stub en Draft, no como WI completo.
+- **Repositorio definido (solo WI completo):** si el repositorio sigue siendo `Por definir` tras preguntar, publicar como stub en Draft, no como WI completo.
 
 **Si hay conflicto:**
 ```
@@ -104,15 +103,14 @@ Un stub reserva el ID. No requiere requerimiento detallado ni contexto técnico 
 2. Crear la carpeta `WI-<número>-[nombre-descriptivo]/` y dentro el archivo `README.md` con:
    - `Estado: Draft`
    - `Tipo`: el conocido o el más probable (confirmar si hay duda).
-   - `Unidad de trabajo`: la conocida o `Por definir`.
+   - `Repositorio`: el conocido o `Por definir`.
    - `Asignado a`: indicado por el usuario; si no, inferir con `git config user.name`; omitir si no aplica.
    - `ADO Work Item`: `[#<ado_id>](<url>)` — solo si se creó en ADO; omitir si no aplica.
    - **Requerimiento**: objetivo breve acordado — el *qué*, sin el cómo.
    - **Criterios de aceptación / Plan de implementación**: vacíos o ausentes si aún no están definidos.
    - **Observaciones**: pendientes reales; no rellenar con texto genérico.
-3. Actualizar `work-units.md` **solo si** la unidad del stub no es `Por definir`.
-4. **Parar aquí.** No continuar con los pasos de WI completo.
-5. **Handoff:** stub en `Draft` — completar a `Ready` con *Flujo: Crear WI completo* (modo A) antes de **`work-implement`**.
+3. **Parar aquí.** No continuar con los pasos de WI completo.
+4. **Handoff:** stub en `Draft` — completar a `Ready` con *Flujo: Crear WI completo* (modo A) antes de **`work-implement`**.
 
 ---
 
@@ -121,21 +119,17 @@ Un stub reserva el ID. No requiere requerimiento detallado ni contexto técnico 
 Un WI completo puede alcanzar `Estado: Ready` si cumple todas las condiciones del checklist.
 
 1. **Resolver el ID:** si el repo usa ADO con MCP disponible, seguir `references/azure-devops.md`. En cualquier otro caso, inferir el siguiente secuencial libre listando carpetas `WI-*/` en `docs/specs/work-items/`. Crear la carpeta `WI-<número>-[nombre-descriptivo]/` antes de escribir el `README.md`.
-2. **Gestionar `work-units.md`:**
-   - Crear desde `assets/work-units-template.md` si el archivo no existe.
-   - Si la unidad es nueva: añadir sección `## <nombre-unidad>` con párrafo de alcance. Si el alcance no está claro, preguntar antes de añadirla.
-   - No listar work items ni technical-docs dentro de `work-units.md`; solo nombre de unidad y párrafo de alcance.
-3. **Redactar el WI** siguiendo `assets/work-item-template.md`:
-   - **Metadatos**: `Tipo`; `Unidad de trabajo`; `Asignado a` indicado por el usuario, inferido con `git config user.name`, u omitido; `ADO Work Item: [#<ado_id>](<url>)` solo si se creó en ADO.
+2. **Redactar el WI** siguiendo `assets/work-item-template.md`:
+   - **Metadatos**: `Tipo`; `Repositorio` con el nombre del repositorio git afectado; `Asignado a` indicado por el usuario, inferido con `git config user.name`, u omitido; `ADO Work Item: [#<ado_id>](<url>)` solo si se creó en ADO.
    - **Requerimiento**: qué problema/necesidad motiva el trabajo — claro y concreto; sin diseño técnico.
    - **Criterios de aceptación**: cómo se verifica que quedó hecho; lista verificable. Tono imperativo; sin «podría», «quizá».
-   - **Dependencias**: solo piezas *dentro de la unidad de trabajo*. ADRs, technical-docs y referencias de diseño van en **Referencias**.
+   - **Dependencias**: solo piezas *dentro del alcance del work item*. ADRs, technical-docs y referencias de diseño van en **Referencias**.
    - **Referencias**: ADRs existentes, technical-docs, diseño. No crear ADRs; si falta una decisión, sugerirlo en Observaciones.
    - **Plan de implementación**: pasos concretos acordados o derivados de fuentes citadas en Referencias. Si no se conocen aún, **no inventar** — indicar en Observaciones qué falta.
    - **Observaciones**: solo si hay pendientes reales. Si no hay nada, **omitir la sección**. Con pendientes reales: `Estado: Draft`.
-4. **Actualizar** technical-docs y glossary si aplica (entradas breves; glossary no sustituye ADR ni technical-doc).
-5. **Verificar el checklist** antes de asignar `Estado: Ready`.
-6. **Handoff:** si el WI está `Ready`, sugerir **`work-implement`**. Si quedó en `Draft`, listar qué falta para completarlo.
+3. **Actualizar** technical-docs y glossary si aplica (entradas breves; glossary no sustituye ADR ni technical-doc).
+4. **Verificar el checklist** antes de asignar `Estado: Ready`.
+5. **Handoff:** si el WI está `Ready`, sugerir **`work-implement`**. Si quedó en `Draft`, listar qué falta para completarlo.
 
 ---
 
@@ -153,14 +147,14 @@ Un WI completo puede alcanzar `Estado: Ready` si cumple todas las condiciones de
 
 ## Flujo: Proponer varios WI desde un esfuerzo grande
 
-Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El propósito es partirlo en `WI-` hermanos, uno por unidad/alcance técnico independiente — manteniendo el modelo plano.
+Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El propósito es partirlo en `WI-` hermanos, uno por repositorio/alcance técnico independiente — manteniendo el modelo plano.
 
 **Pasos:**
 
 1. **Leer** todos los `WI-*.md` existentes en `docs/specs/work-items/`.
-2. **Identificar unidades / alcances independientes** a partir de la descripción del esfuerzo. **No inventar** alcances no soportados por el pedido; lo no claro queda `Por definir` o se pregunta.
-3. **Presentar la propuesta** al usuario, un ítem por `WI-` tentativo: `WI-XXX` (siguiente libre), nombre de archivo, tipo, unidad de trabajo (o `Por definir`) y objetivo breve. **No crear archivos en este turno** — dejarlo explícito al final del mensaje.
-4. **Confirmar con el usuario** mediante la herramienta de preguntas estructuradas: `Confirmar` / `Ajustar alcance` / `Cancelar`. Si elige ajustar, revisar y repetir pasos 3–4. **No continuar sin confirmación explícita.**
+2. **Identificar repositorios / alcances independientes** a partir de la descripción del esfuerzo. **No inventar** alcances no soportados por el pedido; lo no claro queda `Por definir` o se pregunta.
+3. **Presentar la propuesta** al usuario, un ítem por `WI-` tentativo: `WI-XXX` (siguiente libre), nombre de archivo, tipo, repositorio (o `Por definir`) y objetivo breve. **No crear archivos en este turno** — dejarlo explícito al final del mensaje.
+4. **Confirmar con el usuario** mediante la herramienta de preguntas estructuradas. Opciones: [Confirmar] / [Ajustar alcance] / [Cancelar]. Si elige ajustar, revisar y repetir pasos 3–4. **No continuar sin confirmación explícita.**
 5. **Crear cada WI** confirmado siguiendo el *Flujo: Crear stub* (o *WI completo* si el alcance ya está claro para alguno).
 6. **Reportar al usuario** la lista de WI creados con su objetivo breve.
 7. **Handoff:** los WI en `Draft` deben completarse a `Ready` (modo A) antes de **`work-implement`**.
@@ -168,7 +162,7 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 **Reglas invariantes:**
 - Un esfuerzo grande se parte en varios `WI-` hermanos, **nunca** en un `WI` con sub-tareas.
 - No crear archivos antes de la confirmación del paso 4.
-- Si el esfuerzo es ambiguo respecto a unidades: preguntar antes de crear; no inferir por cuenta propia.
+- Si el esfuerzo es ambiguo respecto a repositorios: preguntar antes de crear; no inferir por cuenta propia.
 
 ---
 
@@ -189,9 +183,9 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 **Condiciones para `Estado: Ready`:**
 - [ ] **Requerimiento** con problema/necesidad claros
 - [ ] **Criterios de aceptación** verificables
-- [ ] Unidad de trabajo definida (no `Por definir`) y sección en `work-units.md`
+- [ ] Repositorio definido (no `Por definir`) en la cabecera del WI
 - [ ] Si toca UI: referencia a Figma, wireframe o imagen de alta fidelidad en **Referencias**
-- [ ] **Dependencias** listadas dentro del alcance de la unidad
+- [ ] **Dependencias** listadas dentro del alcance del work item
 - [ ] **Plan de implementación** con pasos concretos
 - [ ] **Observaciones** sin pendientes abiertos — sección omitida o con *Sin pendientes documentados*
 - [ ] Referencias a ADRs y technical-docs con rutas relativas válidas
@@ -208,11 +202,11 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 
 **Ejemplo 1 — Stub**
 - *Entrada:* «Reserva un WI para el timeout intermitente del login, todavía no sé la causa.»
-- *Salida:* carpeta `WI-001-timeout-login/` con `README.md` en Draft, `Tipo: bug`, unidad `Por definir`, Requerimiento breve, Criterios y Plan vacíos, Observaciones con los pendientes reales. `work-units.md` sin cambios.
+- *Salida:* carpeta `WI-001-timeout-login/` con `README.md` en Draft, `Tipo: bug`, repositorio `Por definir`, Requerimiento breve, Criterios y Plan vacíos, Observaciones con los pendientes reales.
 
 **Ejemplo 2 — WI completo**
 - *Entrada:* «Actualiza Spring Boot a 3.3; el ADR de versiones está en `docs/adr/`; la suite debe quedar verde y sin warnings de deprecación.»
-- *Salida:* carpeta `WI-002-upgrade-spring-boot/` con `README.md`, `Tipo: dependencias`, Requerimiento, Criterios de aceptación verificables, unidad concreta, Plan con pasos, referencia al ADR con ruta relativa. `Estado: Ready` si Observaciones está limpia.
+- *Salida:* carpeta `WI-002-upgrade-spring-boot/` con `README.md`, `Tipo: dependencias`, Requerimiento, Criterios de aceptación verificables, repositorio concreto en la cabecera, Plan con pasos, referencia al ADR con ruta relativa. `Estado: Ready` si Observaciones está limpia.
 
 **Ejemplo 3 — Información incompleta**
 - *Entrada:* «WI para limpiar el módulo de reportes.»
@@ -220,7 +214,7 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 
 **Ejemplo 4 — Esfuerzo grande (modo B)**
 - *Entrada:* «Hay que migrar todo el logging a structured logging en API, workers y batch.»
-- *Comportamiento — turno 1:* Activa el *Flujo: Proponer varios WI*. Presenta `WI-003` (API), `WI-004` (workers), `WI-005` (batch), cada uno con objetivo breve y unidad. Pregunta `Confirmar` / `Ajustar alcance` / `Cancelar`. **No crea archivos.**
+- *Comportamiento — turno 1:* Activa el *Flujo: Proponer varios WI*. Presenta `WI-003` (API), `WI-004` (workers), `WI-005` (batch), cada uno con objetivo breve y repositorio. Pregunta con opciones: [Confirmar] / [Ajustar alcance] / [Cancelar]. **No crea archivos.**
 - *Comportamiento — turno 2:* Tras confirmación, crea los WI (stub o completo según claridad) y reporta rutas.
 
 **Ejemplo 5 — Repo vinculado a Azure DevOps** — ver `references/azure-devops.md` (el `Tipo` del WI determina el tipo de work item: `bug` → `Bug`, el resto → `Task`).
@@ -235,6 +229,7 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 - Crear ADRs sin pedido explícito del usuario; solo referenciar existentes o sugerir su creación.
 - Publicar `Estado: Ready` sin criterios de aceptación verificables.
 - Publicar `Estado: Ready` con pendientes en Observaciones.
+- Publicar `Estado: Ready` sin el repositorio afectado en la cabecera del WI.
 - Ignorar los WI existentes; duplicar o contradecir su alcance.
 - Inventar el requerimiento, los criterios o el plan en lugar de preguntar.
 - Rellenar secciones con supuestos o ejemplos genéricos; dejar pendientes reales sin listar en Observaciones.
@@ -257,6 +252,6 @@ Posición: **planificación** — un WI de mantenimiento es **autocontenido**, n
 | **Siguiente paso** | **`work-implement`** — solo cuando el WI a ejecutar está `Ready`. |
 | **Regreso desde implement** | Ambigüedad técnica o alcance incorrecto → ajustar el WI aquí. |
 
-### work-units.md
+### Repositorio afectado
 
-Compartido con el resto del repo (`docs/specs/work-units.md`). Cada sección `## <nombre-unidad>` contiene solo el nombre de la unidad y una descripción **corta** — qué cubre y, si reduce ambigüedad, qué queda fuera. No es un índice de work items ni un inventario de artefactos técnicos. Cuando la unidad de un stub es `Por definir`, no es obligatorio crear la sección hasta que se concrete.
+Cada WI declara en su cabecera el **repositorio git** al que afecta (campo `Repositorio`). Es el ámbito donde se materializará el trabajo. Se infiere del repo (git remote / carpeta) o lo indica el usuario; para `Estado: Ready` es obligatorio (no `Por definir`). Un stub puede dejarlo `Por definir` hasta que se concrete.
