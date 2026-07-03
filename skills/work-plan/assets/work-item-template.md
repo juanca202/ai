@@ -24,8 +24,9 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 ## Reglas de negocio
 
 <!--
+Sección opcional. Incluir solo si el dominio impone restricciones, obligaciones o prohibiciones que convenga declarar como reglas explícitas. Eliminar esta sección si no aplica.
 Cada regla de negocio lleva id secuencial BR-01, BR-02, … y un enunciado con palabra clave RFC 2119 en MAYÚSCULAS en el idioma de preferencia.
-Cada BR-XX debe estar verificada por al menos un AC-XXX en la sección Criterios de aceptación.
+Cuando existan, cada BR-XX debe estar verificada por al menos un AC-XXX en la sección Criterios de aceptación.
 -->
 
 - **BR-01:** {{enunciado con palabra clave RFC 2119 en MAYÚSCULAS; p. ej. «El sistema DEBE…» / «The system MUST NOT…»}} → verificado por {{AC-XXX}}
@@ -60,9 +61,18 @@ Categorías no funcionales (ISO/IEC 25010): Idoneidad funcional · Eficiencia de
 - **AC-001 ({{categoría}}):** {{enunciado con palabra clave RFC 2119 en MAYÚSCULAS; p. ej. «El sistema DEBE…» / «The system MUST NOT…»}}
 - **AC-002 ({{categoría}}):** {{…}}
 
-## Plan de implementación
+### Escenarios de comportamiento
 
-### Archivos afectados
+<!-- Subsección opcional. Incluir escenarios cuando ayuden a precisar el comportamiento esperado; eliminarla si no aplica. Cada escenario cubre uno o varios AC-XXX. Palabra clave Gherkin en TODO MAYÚSCULAS en el idioma de preferencia: DADO/CUANDO/ENTONCES/Y/PERO en español; GIVEN/WHEN/THEN/AND/BUT en inglés. -->
+
+```gherkin
+Escenario: SC-01 - {{Nombre del escenario}}
+{{DADO}} {{precondición}}
+{{CUANDO}} {{acción}}
+{{ENTONCES}} {{resultado esperado}}
+```
+
+## Archivos afectados
 
 <!-- Árbol con las rutas de los archivos que se crearán, modificarán o eliminarán. Usar símbolos: + creado · ~ modificado · - eliminado. Frente a cada archivo, una descripción muy corta y acotada de qué se hace en él. -->
 
@@ -74,13 +84,18 @@ Categorías no funcionales (ISO/IEC 25010): Idoneidad funcional · Eficiencia de
     └── - {{ruta/archivo-eliminado.ext}}    # {{por qué se elimina: muy corto}}
 ```
 
-### Subtareas
+## Plan de implementación
 
-<!-- Pasos concretos acordados o derivados de fuentes citadas en Referencias. Si no se conocen aún, omitir esta subsección e indicar en Observaciones qué falta. -->
+<!--
+Pasos concretos acordados o derivados de fuentes citadas en Referencias. Si no se conocen aún, omitir esta subsección e indicar en Observaciones qué falta.
+Cada tarea lleva id secuencial IT-01, IT-02, … único en el ámbito del documento; renumerar si se reordenan o eliminan tareas.
+Formato: `IT-XX` + una **descripción corta** de una línea (qué se implementa) — es lo único que se muestra en la herramienta de to-dos. El detalle amplía el **qué** (precisiones, referencias a recursos o código, notas) — nunca el cómo — y va en las líneas indentadas debajo; no se muestra en los to-dos.
+-->
 
-- [ ] {{tarea concreta — qué se implementa, no cómo}}
-- [ ] {{tarea concreta}}
-- [ ] {{tarea concreta}}
+- [ ] **IT-01** — {{descripción corta en una línea: qué se implementa}}
+  {{detalle opcional que amplía el qué se implementa, no el cómo: precisiones, referencias a recursos o código, notas; no se muestra en to-dos}}
+- [ ] **IT-02** — {{descripción corta en una línea}}
+- [ ] **IT-03** — {{descripción corta en una línea}}
 
 ## Observaciones
 

@@ -78,16 +78,16 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 Por cada WI aprobado:
 
 1. Aplicar el ciclo **TDD (Red → Green → Refactor)** por cada comportamiento del plan del WI:
-   - **Red:** escribir el test que describe el comportamiento esperado (basarse en los `TC-XXX` disponibles o en los Criterios de aceptacion del WI). El test debe fallar antes de escribir codigo de produccion.
+   - **Red:** escribir el test que describe el comportamiento esperado, basandose en los insumos de comportamiento del WI: sus criterios de aceptacion (`AC-XXX`) y —cuando existan— las reglas de negocio (`BR-XX`), los escenarios (`SC-XX`) o los casos de prueba (`TC-XXX`) disponibles. El test debe fallar antes de escribir codigo de produccion.
    - **Green:** escribir el minimo codigo de produccion para que el test pase.
    - **Refactor:** limpiar codigo de produccion y test sin romper los tests. Aplicar principios de Clean Architecture (ver `SKILL.md`).
 2. Si genera o modifica UI: ejecutar bajo `ui-specialist`. Si la referencia de diseno es Figma: usar el MCP de Figma.
 3. Al terminar todos los comportamientos del WI, ejecutar lint/typecheck/build y la suite de tests del paquete afectado. Si algo falla, corregir antes de continuar.
 4. **Verificar los criterios de aceptacion** del WI contra los tests; si algun criterio no tiene cobertura, completar el ciclo TDD para ese criterio antes de marcar `Done`.
 5. Actualizar el artefacto y el progreso:
-   - **Al iniciar el WI:** cambiar su estado en `progress.md` a `In Progress`.
-   - **Por cada tarea del plan completada:** marcar `[ ]` => `[x]` en la seccion del plan de implementacion del `WI-XXX.md` correspondiente.
-   - **Al cerrar el WI:** cambiar su estado en `progress.md` a `Done`; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
+   - **Al iniciar el WI:** cambiar su estado en `progress.md` a `In Progress` y **poblar la lista de to-dos del agente con las tareas del `Plan de implementacion` del `WI-XXX.md`** (una entrada por tarea `IT-XX`, en el orden del plan). Cada entrada muestra solo la descripcion corta (`IT-XX` + linea corta), no el detalle completo.
+   - **Por cada tarea del plan completada:** marcar `[ ]` => `[x]` en la seccion del plan de implementacion del `WI-XXX.md` correspondiente y marcar su entrada en la lista de to-dos del agente como `completed`.
+   - **Al cerrar el WI:** cambiar su estado en `progress.md` a `Done`, con todas las tareas de su plan ya `completed` en la lista de to-dos del agente; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
 6. **Detenerse y preguntar** (herramienta estructurada): "WI-XXX completado. Continuo con WI-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui]. Si el alcance es un unico WI, igualmente confirmar antes de pasar al cierre.
 7. Solo si confirma: siguiente WI. Si detiene, registrar nota y pasar al Paso 4.
 
@@ -144,7 +144,7 @@ Por cada WI aprobado:
 - Descomponer un WI en sub-tareas o tratarlo como si tuviera `TK-XXX`; el WI es un documento plano.
 - Implementar parte del plan del WI y pasar al siguiente sin completarlo ni verificar criterios.
 - Marcar `Done` sin que los tests de los criterios de aceptacion existan y pasen en verde.
-- Buscar criterios de US (`AC-XXX`) para los tests del WI: el WI no proviene de una US; los tests se basan en sus propios criterios de aceptacion.
+- Buscar los insumos de comportamiento en una US padre: el WI no proviene de una US; los tests se basan en los insumos del propio WI (`AC-XXX` y, si existen, `BR-XX` / `SC-XX` / `TC-XXX`).
 - Implementar un WI en `Draft` (stub) como si estuviera listo.
 - Escribir codigo de produccion antes del test (romper el ciclo Red→Green→Refactor).
 - Implementar UI sin `ui-specialist`, o UI con referencia Figma sin el MCP de Figma.

@@ -77,9 +77,9 @@ Por cada fase aprobada, en el orden del plan:
 4. **Validar con Golden Master:** ejecutar los casos de `validation.md` que aplican a la fase y **contrastar la salida del destino contra el golden master** de referencia (segun la estrategia de comparacion de cada caso). Si hay diferencias no justificadas, corregir antes de marcar la fase `Done`. Si una diferencia corresponde a un bug del origen marcado como excepcion en `validation.md`, no "congelarlo": dejar nota.
 5. Si aplica **Parallel Run + Reconciliation**, ejecutar el destino contra el origen en vivo y reconciliar antes de cerrar la fase de *coexistencia*.
 6. Actualizar el artefacto y el progreso:
-   - **Al iniciar la fase:** cambiar su estado en `progress.md` a `In Progress`.
-   - **Por cada tarea de la fase completada:** marcar `[ ]` => `[x]` en la seccion correspondiente del `plan.md`.
-   - **Al cerrar la fase:** cambiar su estado en `progress.md` a `Done`; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
+   - **Al iniciar la fase:** cambiar su estado en `progress.md` a `In Progress` y **poblar la lista de to-dos del agente con las tareas de la fase segun el `plan.md`** (una entrada por tarea `IT-XX`, en el orden del plan). Cada entrada muestra solo la descripcion corta (`IT-XX` + linea corta), no el detalle completo.
+   - **Por cada tarea de la fase completada:** marcar `[ ]` => `[x]` en la seccion correspondiente del `plan.md` y marcar su entrada en la lista de to-dos del agente como `completed`.
+   - **Al cerrar la fase:** cambiar su estado en `progress.md` a `Done`, con todas las tareas de la fase ya `completed` en la lista de to-dos del agente; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
 7. **Detenerse y preguntar** (herramienta estructurada): "Fase N completada y validada. Continuo con la Fase N+1 - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui].
 8. Solo si confirma: siguiente fase. Si detiene, registrar nota y pasar al Paso 4.
 

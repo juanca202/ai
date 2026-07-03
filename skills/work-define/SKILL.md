@@ -25,7 +25,7 @@ Carga el archivo correspondiente cuando vayas a ejecutar la tarea; el detalle í
 | Necesitas… | Archivo |
 | ---------- | ------- |
 | Flujo paso a paso de **crear** y **actualizar**, cómo preguntar al usuario, validación antes de crear, checklist completo, ejemplos, anti-patrones y handoffs del ciclo | [`references/flow.md`](references/flow.md) |
-| Detalle de **RFC 2119** (tabla de modalidades), **ISO 25010** (características de NFR), rúbrica **INVEST** y **DoR** ampliado | [`references/quality-criteria.md`](references/quality-criteria.md) |
+| Detalle de **RFC 2119** (tabla de modalidades), **ISO 25010** (categorías de criterios de aceptación no funcionales), rúbrica **INVEST** y **DoR** ampliado | [`references/quality-criteria.md`](references/quality-criteria.md) |
 | Estructura del `README.md` de una US | `assets/user-story-template.md` |
 
 ---

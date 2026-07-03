@@ -67,21 +67,27 @@ otra}} — {{por qué se eligió}}.
 
 Pasos para ejecutar la migración, agrupados por fases según la estrategia.
 
+<!--
+Cada tarea lleva id secuencial IT-01, IT-02, … único en el ámbito del `plan.md` (correlativo a través de todas las fases); renumerar si se reordenan o eliminan tareas.
+Formato: `IT-XX` + una **descripción corta** de una línea (qué se implementa) — es lo único que se muestra en la herramienta de to-dos. El detalle amplía el **qué** (precisiones, referencias a recursos o código, notas) — nunca el cómo — y va en las líneas indentadas debajo; no se muestra en los to-dos.
+-->
+
 ### Fase 1 — {{nombre de la fase}}
 
-- [ ] {{tarea}}
-- [ ] {{tarea}}
+- [ ] **IT-01** — {{descripción corta en una línea: qué se implementa}}
+  {{detalle opcional que amplía el qué se implementa, no el cómo: precisiones, referencias a recursos o código, notas; no se muestra en to-dos}}
+- [ ] **IT-02** — {{descripción corta en una línea}}
 
 ### Fase 2 — {{nombre de la fase}}
 
-- [ ] {{tarea}}
-- [ ] {{tarea}}
+- [ ] **IT-03** — {{descripción corta en una línea}}
+- [ ] **IT-04** — {{descripción corta en una línea}}
 
 ### Fase N — {{nombre de la fase}}
 
-- [ ] {{tarea}}
+- [ ] **IT-05** — {{descripción corta en una línea}}
 
-## Notas
+## Observaciones
 
 Supuestos y decisiones pendientes. **Mientras existan pendientes o secciones
 incompletas, el plan permanece en `Draft`.**

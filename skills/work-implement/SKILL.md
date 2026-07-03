@@ -12,7 +12,7 @@ Guia general para **ejecutar en codigo** trabajo ya especificado, de **distintos
 >
 > **Solo implementacion:** no modifica documentacion de producto (README de US, `TK-XXX`, `WI-XXX`, `discovery.md`, `validation.md`, `plan.md`, ADRs, technical-docs) - solo el `progress.md`. **Excepcion de checkboxes:** marcar `[ ]` como `[x]` en las subtareas del artefacto en ejecucion **a medida que se completan** es la unica modificacion permitida en archivos de especificacion; no se toca ninguna otra seccion del artefacto. El archivo a editar depende del tipo: `TK-XXX.md` para tareas de historia de usuario, `WI-XXX.md` para work items, `plan.md` para fases de migracion. Si se detecta un conflicto en la documentacion que pueda afectar el resultado, **parar inmediatamente y notificar al usuario** antes de continuar.
 >
-> **Ritmo obligatorio - una unidad por confirmacion:** implementar una unidad, actualizar `progress.md`, ejecutar lint/build, y **esperar confirmacion explicita del usuario antes de arrancar la siguiente**. Sin excepcion. La **unidad** depende del tipo (ver tabla de seleccion).
+> **Ritmo obligatorio - una unidad por confirmacion:** implementar una unidad, actualizar `progress.md` **y la lista de tareas (to-dos) del agente**, ejecutar lint/build, y **esperar confirmacion explicita del usuario antes de arrancar la siguiente**. Sin excepcion. La **unidad** depende del tipo (ver tabla de seleccion).
 
 ---
 
@@ -97,6 +97,18 @@ Cada tipo mantiene un `progress.md` como **unica bitacora** que este skill puede
 
 ---
 
+## Lista de tareas del agente (transversal)
+
+Durante la ejecucion, mantener la **herramienta de lista de tareas (to-dos) del agente** como reflejo vivo del **plan de implementacion en curso**: una entrada por cada tarea del plan. Da visibilidad del progreso en tiempo real y **no sustituye** al `progress.md`, que sigue siendo la bitacora persistente en el repositorio.
+
+- **Al empezar a ejecutar un plan de implementacion:** poblar la lista de to-dos con **una entrada por cada tarea del plan** (`IT-XX`), en el orden en que se van a abordar. **Cada entrada muestra unicamente la descripcion corta de la tarea** (su `IT-XX` + la linea corta), nunca el detalle largo, las referencias a codigo ni el texto completo de la tarea.
+- **A medida que se completa cada tarea:** marcar su entrada como `completed`, en el mismo momento en que se marca `[ ]` => `[x]` en el artefacto. **Solo una tarea `in_progress` a la vez.**
+- **Al terminar el plan:** todas las tareas quedan `completed`. Al comenzar el siguiente plan de implementacion, reemplazar la lista con sus tareas.
+- **Coherencia:** la lista de to-dos, los checkboxes del artefacto y `progress.md` no deben contradecirse.
+- **Fallback:** si el cliente no expone la herramienta de to-dos, basta con `progress.md` y los checkboxes del artefacto; no narrar el progreso como prosa paso a paso.
+
+---
+
 ## Documentacion de codigo segun ADR (transversal)
 
 Antes de escribir codigo, verificar si el proyecto tiene **algun ADR que defina como documentar el codigo** (estilo de docstrings, comentarios, JSDoc/TSDoc, convenciones de encabezado de archivo, anotaciones, etc.). Los ADR suelen vivir bajo `docs/adr/` o donde el proyecto los registre.
@@ -116,7 +128,7 @@ Toda implementacion, sea cual sea el tipo de artefacto, sigue estos dos principi
 
 El ciclo obligatorio por cada unidad de comportamiento es **Red → Green → Refactor**:
 
-1. **Red:** escribir el test que falla antes de escribir el codigo de produccion. El test debe describir el comportamiento esperado segun los criterios de aceptacion o los TC-XXX disponibles.
+1. **Red:** escribir el test que falla antes de escribir el codigo de produccion. El test debe describir el comportamiento esperado segun los **insumos de comportamiento** del artefacto: en US y WI, los criterios de aceptacion (`AC-XXX`) y —cuando existan— las reglas de negocio (`BR-XX`), los escenarios (`SC-XX`) y los casos de prueba (`TC-XXX`); en migraciones, los casos de Golden Master (`GM-XXX`).
 2. **Green:** escribir el minimo codigo necesario para que el test pase.
 3. **Refactor:** limpiar el codigo (produccion y test) sin romper los tests.
 

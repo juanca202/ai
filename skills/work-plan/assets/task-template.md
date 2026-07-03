@@ -33,9 +33,7 @@ Rutas permitidas: assets/ (recursos propios de esta tarea) o docs/specs/technica
 - **Documentación técnica:** {{enlace a `docs/specs/technical-docs/` si aplica — DTOs, ER, flujos, endpoints}}
 - **Diseño:** {{enlace a Figma, wireframe o imagen de alta fidelidad; obligatorio si la tarea es de UI}}
 
-## Plan de implementación
-
-### Archivos afectados
+## Archivos afectados
 
 <!-- Árbol con las rutas de los archivos que se crearán, modificarán o eliminarán. Usar símbolos: + creado · ~ modificado · - eliminado. Frente a cada archivo, una descripción muy corta y acotada de qué se hace en él. -->
 
@@ -47,13 +45,18 @@ Rutas permitidas: assets/ (recursos propios de esta tarea) o docs/specs/technica
     └── - {{ruta/archivo-eliminado.ext}}    # {{por qué se elimina: muy corto}}
 ```
 
-### Subtareas
+## Plan de implementación
 
-<!-- Pasos concretos acordados o derivados de fuentes citadas en Referencias. Si no se conocen aún, omitir esta subsección e indicar en Observaciones qué falta. -->
+<!--
+Pasos concretos acordados o derivados de fuentes citadas en Referencias. Si no se conocen aún, omitir esta subsección e indicar en Observaciones qué falta.
+Cada tarea lleva id secuencial IT-01, IT-02, … único en el ámbito del documento; renumerar si se reordenan o eliminan tareas.
+Formato: `IT-XX` + una **descripción corta** de una línea (qué se implementa) — es lo único que se muestra en la herramienta de to-dos. El detalle amplía el **qué** (precisiones, referencias a recursos o código, notas) — nunca el cómo — y va en las líneas indentadas debajo; no se muestra en los to-dos.
+-->
 
-- [ ] {{tarea concreta — qué se implementa, no cómo}}
-- [ ] {{tarea concreta}}
-- [ ] {{tarea concreta}}
+- [ ] **IT-01** — {{descripción corta en una línea: qué se implementa}}
+  {{detalle opcional que amplía el qué se implementa, no el cómo: precisiones, referencias a recursos o código, notas; no se muestra en to-dos}}
+- [ ] **IT-02** — {{descripción corta en una línea}}
+- [ ] **IT-03** — {{descripción corta en una línea}}
 
 ## Observaciones
 

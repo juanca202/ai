@@ -75,15 +75,15 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto:
 
 1. Aplicar el ciclo **TDD (Red → Green → Refactor)** por cada unidad de comportamiento de la TK:
-   - **Red:** escribir el test que describe el comportamiento esperado (basarse en los `TC-XXX` disponibles o en los `AC-XXX` del `README.md`). El test debe fallar antes de escribir codigo de produccion.
+   - **Red:** escribir el test que describe el comportamiento esperado, basandose en los insumos de comportamiento de la US: los criterios de aceptacion (`AC-XXX`) del `README.md` y —cuando existan— las reglas de negocio (`BR-XX`), los escenarios (`SC-XX`) o los casos de prueba (`TC-XXX`) disponibles. El test debe fallar antes de escribir codigo de produccion.
    - **Green:** escribir el minimo codigo de produccion para que el test pase.
    - **Refactor:** limpiar codigo de produccion y test sin romper los tests. Aplicar principios de Clean Architecture (ver `SKILL.md`).
 2. Si genera o modifica UI: ejecutar bajo `ui-specialist`. Si la referencia de diseno es Figma: usar el MCP de Figma.
 3. Al terminar todos los comportamientos de la TK, ejecutar lint/typecheck/build del paquete afectado y la suite de tests. Si algo falla, corregir antes de continuar.
 4. Actualizar el artefacto y el progreso:
-   - **Al iniciar la TK:** cambiar su estado en `progress.md` a `In Progress`.
-   - **Por cada subtarea completada:** marcar `[ ]` => `[x]` en la seccion de subtareas del `TK-XXX.md` correspondiente.
-   - **Al cerrar la TK:** cambiar su estado en `progress.md` a `Done`; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
+   - **Al iniciar la TK:** cambiar su estado en `progress.md` a `In Progress` y **poblar la lista de to-dos del agente con las tareas del `Plan de implementacion` del `TK-XXX.md`** (una entrada por tarea `IT-XX`, en el orden del plan). Cada entrada muestra solo la descripcion corta (`IT-XX` + linea corta), no el detalle completo.
+   - **Por cada subtarea completada:** marcar `[ ]` => `[x]` en la seccion de subtareas del `TK-XXX.md` correspondiente y marcar su entrada en la lista de to-dos del agente como `completed`.
+   - **Al cerrar la TK:** cambiar su estado en `progress.md` a `Done`, con todas las subtareas de su plan ya `completed` en la lista de to-dos del agente; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
 5. **Detenerse y preguntar** (herramienta estructurada): "TK-XXX completada. Continuo con TK-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui].
 6. Solo si el usuario confirma: pasar a la siguiente TK. Si detiene, registrar nota y pasar al Paso 4.
 
@@ -95,7 +95,7 @@ Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto
    > "Implementacion completada. ¿Que quieres hacer ahora?"
    > Opciones: [Integrar el trabajo] / [Crear un PR] / [Terminar aqui]
 
-   - **Integrar el trabajo** => hacer handoff a `work-integrate` (merge local).
+   - **Integrar el trabajo** => hacer handoff a `work-integrate`.
    - **Crear un PR** => hacer handoff a `pr-create`.
    - **Terminar aqui** => cerrar sin handoff; el trabajo queda commiteado en la rama.
 

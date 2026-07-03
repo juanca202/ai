@@ -25,8 +25,9 @@ ADO Work Item: {{enlace markdown al work item de ADO — solo si se creó; omiti
 ## Reglas de negocio
 
 <!--
+Sección opcional. Incluir solo si el dominio impone restricciones, obligaciones o prohibiciones que convenga declarar como reglas explícitas. Eliminar esta sección si no aplica.
 Cada regla de negocio lleva id secuencial BR-01, BR-02, … y un enunciado con palabra clave RFC 2119 en MAYÚSCULAS en el idioma de preferencia.
-Cada BR-XX debe estar verificada por al menos un AC-XXX en la sección Criterios de aceptación.
+Cuando existan, cada BR-XX debe estar verificada por al menos un AC-XXX en la sección Criterios de aceptación.
 -->
 
 - **BR-01:** {{enunciado con palabra clave RFC 2119 en MAYÚSCULAS; p. ej. «El sistema DEBE…» / «The system MUST NOT…»}} → verificado por {{AC-XXX}}
@@ -57,7 +58,7 @@ Categorías no funcionales (ISO/IEC 25010): Idoneidad funcional · Eficiencia de
 
 ### Escenarios de comportamiento
 
-<!-- Cada escenario cubre uno o varios AC-XXX. Palabra clave Gherkin en TODO MAYÚSCULAS en el idioma de preferencia: DADO/CUANDO/ENTONCES/Y/PERO en español; GIVEN/WHEN/THEN/AND/BUT en inglés. -->
+<!-- Subsección opcional. Incluir escenarios cuando ayuden a precisar el comportamiento esperado; eliminarla si no aplica. Cada escenario cubre uno o varios AC-XXX. Palabra clave Gherkin en TODO MAYÚSCULAS en el idioma de preferencia: DADO/CUANDO/ENTONCES/Y/PERO en español; GIVEN/WHEN/THEN/AND/BUT en inglés. -->
 
 ```gherkin
 Escenario: SC-01 - {{Nombre del escenario}}
