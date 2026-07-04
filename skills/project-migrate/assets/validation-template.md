@@ -5,11 +5,11 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 
 # Preparación de Validación
 
-- Estado: {{Draft | Ready}}
-- Fecha: {{YYYY-MM-DD}}
-- Discovery: [discovery.md](./discovery.md)
-- Proyecto origen: {{nombre / stack principal del origen}}
-- Proyecto destino: {{nombre / stack principal del destino}}
+Estado: {{Draft | Ready}}
+Fecha: {{YYYY-MM-DD}}
+Discovery: [discovery.md](./discovery.md)
+Proyecto origen: {{nombre / stack principal del origen}}
+Proyecto destino: {{nombre / stack principal del destino}}
 
 ## Descripción
 
