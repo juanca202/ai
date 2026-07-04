@@ -19,16 +19,11 @@ Nombre de archivo: RS-XXX-{slug}.md
 
 # RS-{{XXX}} — {{Título descriptivo de la investigación}}
 
-## Metadatos
-
-| Campo | Valor |
-|-------|-------|
-| **ID** | RS-{{XXX}} |
-| **Dominio** | {{Producto \| Arquitectura \| Técnica \| Cambio}} |
-| **Artefacto referenciado** | {{US-XXX \| WI-XXX \| MG-XXX \| N/A}} |
-| **Estado** | {{Draft \| Ready}} |
-| **Creado por** | {{git config user.name}} |
-| **Fecha** | {{YYYY-MM-DD}} |
+Estado: {{Draft | Ready}}
+Dominio: {{Producto | Arquitectura | Técnica | Cambio}}
+Artefacto referenciado: {{US-XXX | WI-XXX | MG-XXX | N/A}}
+Creado por: {{git config user.name}}
+Fecha: {{YYYY-MM-DD}}
 
 ## Pregunta de investigación
 
