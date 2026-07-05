@@ -81,9 +81,9 @@ Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto
 2. Si genera o modifica UI: ejecutar bajo `ui-specialist`. Si la referencia de diseno es Figma: usar el MCP de Figma.
 3. Al terminar todos los comportamientos de la TK, ejecutar lint/typecheck/build del paquete afectado y la suite de tests. Si algo falla, corregir antes de continuar.
 4. Actualizar el artefacto y el progreso:
-   - **Al iniciar la TK:** cambiar su estado en `progress.md` a `In Progress` y **poblar la lista de to-dos del agente con las tareas del `Plan de implementacion` del `TK-XXX.md`** (una entrada por tarea `IT-XX`, en el orden del plan). Cada entrada muestra solo la descripcion corta (`IT-XX` + linea corta), no el detalle completo.
+   - **Al iniciar la TK:** cambiar su estado en `progress.md` a `In Progress` y **poblar la lista de to-dos del agente**: la **primera entrada es el titulo de la TK** (`TK-XXX` + titulo), para tener siempre presente el artefacto en ejecucion, seguida de **las tareas del `Plan de implementacion` del `TK-XXX.md`** (una entrada por tarea `IT-XX`, en el orden del plan). Cada entrada de tarea muestra solo la descripcion corta (`IT-XX` + linea corta), no el detalle completo.
    - **Por cada subtarea completada:** marcar `[ ]` => `[x]` en la seccion de subtareas del `TK-XXX.md` correspondiente y marcar su entrada en la lista de to-dos del agente como `completed`.
-   - **Al cerrar la TK:** cambiar su estado en `progress.md` a `Done`, con todas las subtareas de su plan ya `completed` en la lista de to-dos del agente; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
+   - **Al cerrar la TK:** cambiar su estado en `progress.md` a `Done`, con todas las subtareas de su plan ya `completed` en la lista de to-dos del agente; marcar tambien la **primera entrada (titulo de la TK) como `completed`** una vez que todas las tareas del plan hayan finalizado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
 5. **Detenerse y preguntar** (herramienta estructurada): "TK-XXX completada. Continuo con TK-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui].
 6. Solo si el usuario confirma: pasar a la siguiente TK. Si detiene, registrar nota y pasar al Paso 4.
 

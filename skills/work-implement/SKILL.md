@@ -101,9 +101,10 @@ Cada tipo mantiene un `progress.md` como **unica bitacora** que este skill puede
 
 Durante la ejecucion, mantener la **herramienta de lista de tareas (to-dos) del agente** como reflejo vivo del **plan de implementacion en curso**: una entrada por cada tarea del plan. Da visibilidad del progreso en tiempo real y **no sustituye** al `progress.md`, que sigue siendo la bitacora persistente en el repositorio.
 
-- **Al empezar a ejecutar un plan de implementacion:** poblar la lista de to-dos con **una entrada por cada tarea del plan** (`IT-XX`), en el orden en que se van a abordar. **Cada entrada muestra unicamente la descripcion corta de la tarea** (su `IT-XX` + la linea corta), nunca el detalle largo, las referencias a codigo ni el texto completo de la tarea.
+- **Al empezar a ejecutar un plan de implementacion:** poblar la lista de to-dos con, **como primera entrada, el titulo del artefacto en ejecucion** (`TK-XXX`/`WI-XXX` + su titulo) para tener siempre presente que se esta ejecutando, seguida de **una entrada por cada tarea del plan** (`IT-XX`), en el orden en que se van a abordar. **Cada entrada de tarea muestra unicamente la descripcion corta** (su `IT-XX` + la linea corta), nunca el detalle largo, las referencias a codigo ni el texto completo de la tarea.
 - **A medida que se completa cada tarea:** marcar su entrada como `completed`, en el mismo momento en que se marca `[ ]` => `[x]` en el artefacto. **Solo una tarea `in_progress` a la vez.**
-- **Al terminar el plan:** todas las tareas quedan `completed`. Al comenzar el siguiente plan de implementacion, reemplazar la lista con sus tareas.
+- **La primera entrada (titulo del `TK`/`WI`)** se marca como `completed` **solo cuando todas las tareas del plan de implementacion hayan finalizado**; hasta entonces permanece como recordatorio del artefacto en curso.
+- **Al terminar el plan:** todas las tareas quedan `completed`, incluida la primera entrada del titulo. Al comenzar el siguiente plan de implementacion, reemplazar la lista con el titulo del nuevo artefacto y sus tareas.
 - **Coherencia:** la lista de to-dos, los checkboxes del artefacto y `progress.md` no deben contradecirse.
 - **Fallback:** si el cliente no expone la herramienta de to-dos, basta con `progress.md` y los checkboxes del artefacto; no narrar el progreso como prosa paso a paso.
 
