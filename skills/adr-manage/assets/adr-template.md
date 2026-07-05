@@ -13,11 +13,22 @@ Etiquetas: {{nextjs, app-router, rsc, performance, security, etc.}}
 
 ## Contexto 
 
-{{problema, restricciones, drivers técnicos o de negocio}}
+<!--
+Un ADR documenta una decisión que afecta a TODO el proyecto. El contexto debe ser
+general: describir el driver, la restricción o la tensión arquitectónica de forma
+transversal, no un caso puntual. Puede apoyarse en ejemplos para ilustrar, pero no
+debe plantearse como la resolución de un problema particular o aislado.
+-->
+{{problema, restricciones, drivers técnicos o de negocio — planteados a nivel de proyecto}}
  
 ## Decision
 
- {{decision concreta y alcance}}
+<!--
+La decisión también debe ser general y aplicable a todo el proyecto: una regla o
+lineamiento arquitectónico, no un arreglo específico. Los ejemplos sirven para
+aclarar el alcance, pero la decisión no resuelve un problema concreto y único.
+-->
+ {{decision concreta y alcance — regla o lineamiento aplicable a todo el proyecto}}
 
 ## Alternativas consideradas (opcional)
 
@@ -36,4 +47,10 @@ Etiquetas: {{nextjs, app-router, rsc, performance, security, etc.}}
 
 ## Referencias
 
-- {{links internos/externos}}
+<!--
+Las referencias NO deben apuntar a archivos de docs/specs. Las specs siguen a los ADR,
+no al revés: un ADR es una decisión transversal y estable, mientras que las specs son
+artefactos derivados que la aplican. Enlazar hacia specs invertiría esa dependencia.
+Referenciar aquí: otros ADR, documentación general del proyecto y fuentes externas.
+-->
+- {{links internos/externos — otros ADR, docs generales o fuentes externas; nunca docs/specs}}

@@ -17,6 +17,12 @@ Crea y actualiza Architecture Decision Records siguiendo el flujo de este docume
 
 > **Alcance de un ADR:** registrar la decisión y su justificación — no la implementación.
 > Puede incluir ejemplos, diagramas y referencias externas de apoyo.
+>
+> **Narrativa general, no puntual:** un ADR documenta una decisión que afecta a **todo el proyecto**.
+> Por eso el `## Contexto` y la `## Decision` deben redactarse de forma general (una regla,
+> driver o lineamiento arquitectónico transversal), no como la resolución de un problema
+> específico o aislado. Los ejemplos son bienvenidos para ilustrar, pero no deben convertir
+> al ADR en la solución de un caso particular.
 
 La plantilla canónica está en `assets/adr-template.md`. Leerla antes de redactar cualquier ADR.
 
