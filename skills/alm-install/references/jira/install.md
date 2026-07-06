@@ -1,8 +1,10 @@
-# Jira Install — MCP de Jira en Cursor
+# Jira Install — MCP de Jira (Claude Code / Cursor)
 
 Configura el **servidor MCP local** `mcp-atlassian` (ejecutado con `uvx mcp-atlassian`). Autenticación por **API token** de Atlassian (Basic auth `email:token`). **No** uses el servidor remoto de Atlassian con OAuth: se mantiene la misma filosofía local que el flujo de ADO.
 
-Cada entrada en `mcp.json` está ligada a un par **site (dominio Atlassian) + correo de usuario**. Esto permite tener varias cuentas activas al mismo tiempo, cada una con su propio API token.
+Cada entrada en el archivo de config está ligada a un par **site (dominio Atlassian) + correo de usuario**. Esto permite tener varias cuentas activas al mismo tiempo, cada una con su propio API token.
+
+> **Dónde se escribe la entrada** (`.cursor/mcp.json` en Cursor, `.mcp.json`/`~/.claude.json` en Claude Code) y **la sintaxis de la variable de token** (`{TOKEN_REF}`) dependen del agente: ver [../agents.md](../agents.md).
 
 ## Flujo del agente
 
@@ -14,15 +16,16 @@ Cada entrada en `mcp.json` está ligada a un par **site (dominio Atlassian) + co
    - **Alias env** `{ALIAS}`: `{SITE}_{PARTE_CORREO}` en mayúsculas (ej. `MIEMPRESA_JUAN`). Se usa en `JIRA_TOKEN_{ALIAS}` y Keychain.
    - **Clave servidor MCP** `{SERVER_KEY}`: nombre **corto** para `mcp.json` (ver «Nomenclatura»). **No** usar el alias completo como clave del servidor.
 5. **Indicar al usuario** que cree el API token en Atlassian (con ese correo) antes de continuar.
-6. **Leer el `.cursor/mcp.json` existente** si ya hay uno, para agregar la nueva entrada sin borrar las configuraciones previas. **Si el archivo existe pero NO es JSON válido** (corrupto o editado a mano), **no sobrescribir a ciegas**: informar al usuario, respaldarlo (ej. `mcp.json.bak`) y pedir confirmación antes de regenerarlo.
-7. **Escribir o actualizar** `.cursor/mcp.json` con la nueva entrada (plantilla abajo).
+6. **Leer el archivo de config del agente** (ver rutas en [../agents.md](../agents.md)) si ya existe, para agregar la nueva entrada sin borrar las configuraciones previas. **Si el archivo existe pero NO es JSON válido** (corrupto o editado a mano), **no sobrescribir a ciegas**: informar al usuario, respaldarlo (ej. `mcp.json.bak`) y pedir confirmación antes de regenerarlo.
+7. **Escribir o actualizar** el archivo de config del agente con la nueva entrada (plantilla abajo), usando su `{TOKEN_REF}` según [../agents.md](../agents.md).
 8. **Mostrar al usuario únicamente** el Paso 1 de la guía del SO (guardar el token: Keychain en macOS, variable de usuario en Windows). El agente **no** debe pedir ni almacenar el token en el chat. **Esperar confirmación** de que el usuario completó ese paso.
 9. **Automáticamente**, tras la confirmación, ejecutar los pasos del agente de la guía del SO:
    - **macOS:** export en `~/.zshrc` + LaunchAgent (Dock/Spotlight).
    - **Windows:** línea en `$PROFILE` de PowerShell.
    No mostrar estos pasos al usuario salvo que falle algo y haga falta intervención manual.
 10. **Verificar internamente** con los comandos de «Verificación del agente» en la guía del SO. El agente ejecuta las comprobaciones; **no** mostrarlas al usuario. Solo informar el resultado (éxito o error con diagnóstico).
-11. Pedir **reinicio completo de Cursor** (Cmd+Q / cerrar app) tras configurar variables.
+11. **Pedir la URL del proyecto** (ej. `https://{SITE}.atlassian.net/jira/software/projects/{KEY}/...`). Extraer `{SITE}` (validar que coincida con el configurado) y la `{KEY}` del proyecto. Persistir el contexto: `{SITE}` ya está en `JIRA_URL` del `env`; el **proyecto por defecto** (`{KEY}`), la URL, el correo y el nombre de la variable van a la **memoria persistente del proyecto** (p. ej. `CLAUDE.md` en Claude Code, reglas de proyecto en Cursor; anexar sin borrar, **sin** secretos). Ver [../agents.md](../agents.md) → «Contexto del proyecto (URL)».
+12. Pedir **reinicio del agente** tras configurar variables: Cursor → cierre completo (Cmd+Q); Claude Code → reiniciar la sesión. (En Claude Code, la primera vez con un `.mcp.json` de proyecto se debe **aprobar** el servidor.)
 
 ## Crear API token (usuario)
 
@@ -71,9 +74,9 @@ Algoritmo para calcular `{SERVER_KEY}`:
 6. **Colisión (otra cuenta):** si la clave ya existe en `mcp.json` para **otra** cuenta (site o correo distintos), añadir sufijo numérico (`jira-emp-mar2`).
 7. **Re-ejecución (misma cuenta):** si la entrada corresponde a la **misma** cuenta (site **y** correo idénticos), **actualizar/sobrescribir** la entrada existente — **no duplicar**. Tratar el token como **rotación**: regenerar su valor en Keychain (macOS) o variable de usuario (Windows) reutilizando el mismo `{SERVER_KEY}` y `JIRA_TOKEN_{ALIAS}`.
 
-## Plantilla `.cursor/mcp.json` (multi-cuenta)
+## Plantilla de entrada MCP (multi-cuenta)
 
-Cada cuenta es una entrada independiente. Cuando se agrega una segunda cuenta, **conservar** las entradas previas:
+Cada cuenta es una entrada independiente. Cuando se agrega una segunda cuenta, **conservar** las entradas previas. `{TOKEN_REF}` se resuelve según el agente (`${env:JIRA_TOKEN_{ALIAS}}` en Cursor, `${JIRA_TOKEN_{ALIAS}}` en Claude Code — ver [../agents.md](../agents.md)):
 
 ```json
 {
@@ -84,14 +87,14 @@ Cada cuenta es una entrada independiente. Cuando se agrega una segunda cuenta, *
       "env": {
         "JIRA_URL": "https://{SITE}.atlassian.net",
         "JIRA_USERNAME": "{EMAIL}",
-        "JIRA_API_TOKEN": "${env:JIRA_TOKEN_{ALIAS}}"
+        "JIRA_API_TOKEN": "{TOKEN_REF}"
       }
     }
   }
 }
 ```
 
-**Ejemplo con dos cuentas:**
+**Ejemplo con dos cuentas (sintaxis de Cursor):**
 
 ```json
 {
@@ -119,8 +122,9 @@ Cada cuenta es una entrada independiente. Cuando se agrega una segunda cuenta, *
 ```
 
 - `{SERVER_KEY}` ≤ 20 caracteres; `{ALIAS}` puede ser largo (solo env/Keychain).
-- No commitear secretos inline; usar siempre `${env:JIRA_TOKEN_{ALIAS}}`.
-- Cada servidor MCP aparecerá por separado en **Settings → MCP** de Cursor.
+- No commitear secretos inline; usar siempre la referencia a variable (`{TOKEN_REF}`).
+- En **Claude Code** la misma entrada va en `.mcp.json` con `"JIRA_API_TOKEN": "${JIRA_TOKEN_MIEMPRESA_MARIA}"` (sin `env:`).
+- Cada servidor MCP aparecerá por separado (Cursor: **Settings → MCP**; Claude Code: `/mcp`).
 
 ### Variante Docker
 
@@ -146,7 +150,7 @@ Precondición: Docker instalado y corriendo.
 
 La verificación previa al reinicio la ejecuta el agente (ver «Verificación del agente» en [macos.md](macos.md) o [windows.md](windows.md)). **No** mostrar esos comandos al usuario.
 
-Tras reiniciar Cursor, comprobar **Settings → MCP** → servidor `{SERVER_KEY}` en verde.
+Tras reiniciar el agente, comprobar que el servidor `{SERVER_KEY}` aparece conectado: Cursor → **Settings → MCP** en verde; Claude Code → `/mcp` (o `claude mcp list`).
 
 **Prueba funcional en chat:** listar proyectos o buscar issues del site usando el servidor `{SERVER_KEY}` (ej. una JQL simple).
 
