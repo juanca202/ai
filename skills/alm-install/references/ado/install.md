@@ -1,8 +1,3 @@
----
-name: ado-install
-description: Configura el MCP local de Azure DevOps (@azure-devops/mcp) en Cursor con autenticación PAT. Pregunta la organización y el correo del usuario ADO, genera mcp.json con soporte multi-cuenta, guía almacenamiento seguro del token (Keychain en macOS, variable de usuario en Windows) y verifica la conexión. Usar cuando el usuario pida instalar, configurar o reparar el MCP de Azure DevOps, ADO MCP, dev.azure.com, PAT, o conexión a work items/repos desde Cursor. También activar cuando el usuario quiera agregar una segunda organización, cuenta adicional o usuario distinto al MCP de ADO ya instalado.
----
-
 # ADO Install — MCP de Azure DevOps en Cursor
 
 Configura el **servidor MCP local** (`npx @azure-devops/mcp`). **No** uses el servidor remoto (`mcp.dev.azure.com`): Cursor no soporta su OAuth con Entra ID.
@@ -13,7 +8,7 @@ Cada entrada en `mcp.json` está ligada a un par **organización + correo de usu
 
 1. **Preguntar la organización** de Azure DevOps (ej. `Fabrikam`). Solo el nombre, sin URL completa.
 2. **Preguntar el correo** del usuario ADO asociado a esa organización (ej. `juan@empresa.com`). Se usa para nombrar la variable de entorno y la entrada del servidor de forma única.
-3. **Detectar SO**: macOS → [macos.md](references/macos.md); Windows → [windows.md](references/windows.md).
+3. **Detectar SO**: macOS → [macos.md](macos.md); Windows → [windows.md](windows.md).
    - **Precondición Node/npx:** como `mcp.json` usa `command: "npx"`, verificar que `node` y `npx` estén disponibles (`node -v`, `npx -v`; idealmente Node **20+**). Si faltan, avisar al usuario que debe instalarlos antes de continuar, ya que el servidor MCP fallaría al reiniciar Cursor.
 4. **Calcular identificadores** de la cuenta:
    - **Alias env** `{ALIAS}`: `{ORG}_{PARTE_CORREO}` en mayúsculas (ej. `BAYTEQDEV_JUANCA`). Se usa en `ADO_PAT_{ALIAS}` y Keychain.
@@ -146,7 +141,7 @@ Cada cuenta es una entrada independiente. Cuando se agrega una segunda cuenta, *
 
 ## Verificación
 
-La verificación previa al reinicio la ejecuta el agente (ver «Verificación del agente» en [macos.md](references/macos.md) o [windows.md](references/windows.md)). **No** mostrar esos comandos al usuario.
+La verificación previa al reinicio la ejecuta el agente (ver «Verificación del agente» en [macos.md](macos.md) o [windows.md](windows.md)). **No** mostrar esos comandos al usuario.
 
 Tras reiniciar Cursor, comprobar **Settings → MCP** → servidor `{SERVER_KEY}` en verde y **sin** aviso de *naming issues*.
 
@@ -165,8 +160,8 @@ Tras reiniciar Cursor, comprobar **Settings → MCP** → servidor `{SERVER_KEY}
 
 ## Referencias por plataforma
 
-- **macOS:** almacenamiento en Keychain + LaunchAgent + `.zshrc` → [macos.md](references/macos.md)
-- **Windows:** variable de usuario persistente → [windows.md](references/windows.md)
+- **macOS:** almacenamiento en Keychain + LaunchAgent + `.zshrc` → [macos.md](macos.md)
+- **Windows:** variable de usuario persistente → [windows.md](windows.md)
 
 > En ambas plataformas, repetir el proceso de almacenamiento por cada variable `ADO_PAT_{ALIAS}` que se agregue.
 
