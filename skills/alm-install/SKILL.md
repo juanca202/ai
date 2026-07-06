@@ -1,9 +1,8 @@
 ---
-
-## name: alm-install
+name: alm-install
 description: Instala, configura o repara el MCP local de una herramienta ALM (Application Lifecycle Management) en Claude Code o Cursor, con autenticación por token. Soporta Azure DevOps (ADO, @azure-devops/mcp) y Jira (mcp-atlassian). Primero pregunta con la herramienta de preguntas estructuradas qué herramienta instalar (ADO o Jira) y en qué agente(s) (Claude Code y/o Cursor); luego detecta, por agente, si la integración ya existe y, de existir, prueba que esté bien configurada e informa su estado; si no existe, ejecuta el flujo de instalación creando los archivos correspondientes de cada agente. Usar cuando el usuario pida instalar, configurar, reparar o verificar el MCP de Azure DevOps o de Jira, ADO MCP, Jira MCP, dev.azure.com, *.atlassian.net, PAT o API token en Cursor o Claude Code, o agregar una cuenta/organización adicional a una integración ya existente.
-
-
+license: MIT
+---
 
 # ALM Install — MCP de Azure DevOps o Jira en Claude Code / Cursor
 
