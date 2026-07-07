@@ -241,7 +241,9 @@ con `Estado: Pendiente` y el esbozo, para que la próxima auditoría la descubra
    ```
 2. Asegurar el directorio: `docs/adr/audits/` (crearlo si no existe).
 3. Leer `assets/audit-template.md` y redactar `docs/adr/audits/audit-<hoy>.md` siguiendo su estructura:
-   - Encabezado con fecha, alcance, fuentes normativas y tipo de ejecución.
+   - Encabezado con fecha, alcance, método, fuentes normativas y tipo de ejecución.
+     - **Alcance:** ser específico — indicar cuántos ADR se auditaron sobre el total y el desglose por estado de los excluidos, más las fuentes de AGENTS.md consideradas. Ejemplo: `10/12 · 1 Draft, 1 Superseded excluidos + AGENTS.md raíz`.
+     - **Método:** no es un texto fijo — describir en una frase corta qué se usó realmente en esta auditoría: las técnicas de inspección aplicadas (p. ej. `grep`, lectura de manifiestos) y las fitness functions ejecutadas. Aclarar que no se corre el build ni la suite completa.
    - **Resumen ejecutivo** con la tabla de conteos por prioridad y estado, y un veredicto general.
    - Hallazgos **agrupados por prioridad** (alta → media → baja). Por cada hallazgo: la regla/ADR incumplido, `Estado`, `Evidencias` (✔ a favor / ✖ en contra), `Incumplimientos` (rutas de archivos), y `Acción sugerida`. Si el ADR tiene fitness function, incluir en `Evidencias` el resultado de ejecutarla (PASS/FAIL + comando).
    - **Fitness functions**: una sub-tabla de las **existentes** (ADR, herramienta, comando, resultado PASS/FAIL/No ejecutable) y una lista de las **sugeridas** (ADR apto sin fitness function → qué medir, herramienta y esbozo).

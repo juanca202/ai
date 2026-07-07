@@ -12,9 +12,8 @@ de acciones. Un hallazgo = una regla incumplida (un ADR-XXX o una regla de AGENT
 
 Fecha: {{YYYY-MM-DD}}
 Repositorio: {{nombre/ruta del repo o subproyecto auditado}}
-Alcance: {{qué se auditó — p. ej. "todos los ADR Accepted + AGENTS.md raíz"}}
-Fuentes normativas: {{docs/adr/ (N ADR), AGENTS.md, .agents/MEMORY.md}}
-Método: Inspección estática (find / grep / manifiestos) + ejecución de fitness functions detectadas. No se corre el build ni la suite completa.
+Alcance: {{ADR auditados sobre el total y desglose por estado + fuentes AGENTS.md — p. ej. "10/12 · 1 Draft, 1 Superseded excluidos + AGENTS.md raíz"}}
+Método: {{descripción corta de lo que realmente se usó en esta auditoría — herramientas de inspección y fitness functions ejecutadas, p. ej. "grep + lectura de package.json/pom.xml; fitness function dependency-cruiser ejecutada". No se corre el build ni la suite completa.}}
 Tipo de ejecución: {{Nueva auditoría desde cero | Revalidación de audit-YYYY-MM-DD.md}}
 
 ## Resumen ejecutivo
