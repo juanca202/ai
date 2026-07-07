@@ -15,18 +15,13 @@ Nombre de archivo: TC-XXX-{slug}.md
 
 # TC-{{XXX}} — {{Título descriptivo del escenario}}
 
-## Metadatos
-
-| Campo | Valor |
-|-------|-------|
-| **ID** | TC-{{XXX}} |
-| **Tipo** | {{Happy Path \| Error \| Límite}} |
-| **Prioridad** | {{Alta \| Media \| Baja}} |
-| **Criterio de aceptación** | {{código del criterio + título corto — debe existir en el artefacto origen}} |
-| **Artefacto padre** | {{US-XXX \| WI-XXX}} |
-| **Estado** | {{Draft \| Ready \| Obsolete}} |
-| **Creado por** | {{nombre}} |
-| **Fecha** | {{YYYY-MM-DD}} |
+Tipo: {{Happy Path | Error | Límite}}
+Prioridad: {{Alta | Media | Baja}}
+Criterio de aceptación: {{código del criterio + título corto — debe existir en el artefacto origen}}
+Artefacto padre: {{US-XXX | WI-XXX}}
+Estado: {{Draft | Ready | Obsolete}}
+Creado por: {{nombre}}
+Fecha: {{YYYY-MM-DD}}
 
 ## Objetivo
 
@@ -55,16 +50,6 @@ Nombre de archivo: TC-XXX-{slug}.md
 
 {{Descripción del estado observable del sistema una vez ejecutados todos los pasos: respuesta de la UI, código HTTP, mensaje, registro en base de datos, evento publicado, etc.}}
 
-## Resultado real
-
-> _Completar durante la ejecución del test._
-
-{{Vacío hasta ejecutar}}
-
-## Veredicto
-
-{{✅ Aprobado | ❌ Rechazado | ⚠️ Aprobado con observaciones}}
-
-## Notas / Observaciones
+## Observaciones
 
 {{Dependencias con otros TCs, datos de entorno específicos, limitaciones conocidas, comportamientos aceptados como excepción.}}
