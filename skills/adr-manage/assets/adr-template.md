@@ -45,6 +45,24 @@ aclarar el alcance, pero la decisión no resuelve un problema concreto y único.
 
  - {{costos o riesgos asumidos}}
 
+## Fitness function
+
+<!--
+Registra el chequeo automatizado que valida el cumplimiento de esta decisión (arquitectura
+evolutiva). Sirve para que una auditoría (skill adr-audit) descubra y ejecute la verificación
+directamente desde el ADR.
+
+- Apto: Sí = el cumplimiento es objetivo/automatizable · No = depende de criterio humano o
+  evidencia externa (dejar el resto en blanco o "N/A" y explicar en Estado).
+- Estado: Creada · Pendiente (aún no implementada) · No aplica.
+- Al implementarla, completar Herramienta, Ubicación y Comando; si sigue pendiente, dejarlos como TODO.
+-->
+Apto: {{Sí | No}}
+Estado: {{Creada | Pendiente | No aplica}}
+Herramienta: {{ArchUnit | dependency-cruiser | import-linter | NetArchTest | script CI | N/A}}
+Ubicación: {{ruta del test/script que la implementa, p. ej. tests/arch/GraphQlOnlyTest.php}}
+Comando: {{comando acotado para ejecutarla, p. ej. npx depcruise --config .dependency-cruiser.js src}}
+
 ## Referencias
 
 <!--

@@ -113,7 +113,7 @@ Mostrar la lista al usuario en este formato:
 ```
 ## ADRs Candidatos Descubiertos
 
-### 🟢 Alta prioridad (decisiones con amplio impacto)
+### 🔴 Alta prioridad (decisiones con amplio impacto)
 
 **[C-01] Uso de TypeScript en modo strict**
 - Evidencia: `tsconfig.json` con `"strict": true`
@@ -175,4 +175,4 @@ Por cada candidato aprobado por el usuario:
 - **No proponer ADRs triviales.** "Usamos Git" no es un ADR.
 - **No repetir trabajo.** Si ya existe un ADR que cubre la decisión, omitir el candidato y mencionarlo en un pie de página: "X decisiones omitidas por estar ya documentadas."
 - **Priorizar calidad sobre cantidad.** Mejor 4 candidatos sólidos que 12 rellenos.
-- **Idioma:** seguir la convención de `.agents/MEMORY.md`; si no existe, usar el idioma del mensaje del usuario.
+- **Idioma:** usar la preferencia del contexto de la sesión; si no hay, la registrada en la memoria del proyecto; si tampoco, el idioma del mensaje del usuario.
