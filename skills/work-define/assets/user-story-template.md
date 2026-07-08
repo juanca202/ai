@@ -56,17 +56,6 @@ Categorías no funcionales (ISO/IEC 25010): Idoneidad funcional · Eficiencia de
 - **AC-001 ({{categoría}}):** {{enunciado con palabra clave RFC 2119 en MAYÚSCULAS; p. ej. «El sistema DEBE…» / «The system MUST NOT…»}}
 - **AC-002 ({{categoría}}):** {{…}}
 
-### Escenarios de comportamiento
-
-<!-- Subsección opcional. Incluir escenarios cuando ayuden a precisar el comportamiento esperado; eliminarla si no aplica. Cada escenario cubre uno o varios AC-XXX. Palabra clave Gherkin en TODO MAYÚSCULAS en el idioma de preferencia: DADO/CUANDO/ENTONCES/Y/PERO en español; GIVEN/WHEN/THEN/AND/BUT en inglés. -->
-
-```gherkin
-Escenario: SC-01 - {{Nombre del escenario}}
-{{DADO}} {{precondición}}
-{{CUANDO}} {{acción}}
-{{ENTONCES}} {{resultado esperado}}
-```
-
 ---
 
 ## Complejidad sugerida
