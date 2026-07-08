@@ -1,14 +1,33 @@
 # @juanca202/ai
 
-Skills y agentes del equipo para Cursor y otros asistentes de código.
+Skills y agentes del equipo para Cursor, Claude Code y otros asistentes de código.
 
-## Instalación
+## Instalación en Cursor
 
 ```bash
 npx skills add https://github.com/juanca202/ai
 ```
 
 El asistente te guiará paso a paso: dónde instalar (proyecto o global), qué agente usar y qué skills incluir.
+
+## Instalación en Claude Code
+
+Este repositorio también se distribuye como el plugin **SDD Devkit** de Claude Code — utilidades para el desarrollo de SDD (Spec-Driven Development): ADRs, historias de usuario, planificación e implementación de tareas y work items, definición y trazabilidad de pruebas, migraciones y code review (manifiesto en [.claude-plugin/plugin.json](.claude-plugin/plugin.json) y marketplace en [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)).
+
+Agrega el marketplace y luego instala el plugin:
+
+```
+/plugin marketplace add juanca202/ai
+/plugin install sdd-devkit@juanca202
+```
+
+Los skills quedan disponibles con prefijo de namespace (por ejemplo `/sdd-devkit:git-commit`) y también se invocan automáticamente según el contexto de la tarea. Los agentes de `agents/` aparecen en `/context` bajo Custom Agents.
+
+Para probar cambios locales antes de publicar, desde la raíz del repo:
+
+```bash
+claude --plugin-dir .
+```
 
 ## Skills incluidos
 

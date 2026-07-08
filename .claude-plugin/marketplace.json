@@ -1,0 +1,19 @@
+{
+  "name": "juanca202",
+  "owner": {
+    "name": "juanca202"
+  },
+  "description": "Marketplace con los skills y agentes del equipo para Claude Code.",
+  "plugins": [
+    {
+      "name": "sdd-devkit",
+      "displayName": "SDD Devkit",
+      "source": "./",
+      "description": "Utilidades para el desarrollo de SDD (Spec-Driven Development): ADRs, historias de usuario, planificacion e implementacion de tareas y work items, definicion y trazabilidad de pruebas, migraciones y code review.",
+      "version": "1.0.0",
+      "author": {
+        "name": "juanca202"
+      }
+    }
+  ]
+}
