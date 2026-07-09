@@ -13,7 +13,7 @@ Nombre de archivo: TC-XXX-{slug}.md
   slug → descripción corta en kebab-case del escenario (ej: login-password-incorrecto)
 -->
 
-# TC-{{XXX}} — {{Título descriptivo del escenario}}
+# TC-{{XXX}} — Dado {{contexto/precondición}}, Cuando {{acción/evento}}, Entonces {{resultado esperado}}
 
 Tipo: {{Happy Path | Error | Límite}}
 Prioridad: {{Alta | Media | Baja}}
@@ -22,10 +22,6 @@ Artefacto padre: {{US-XXX | WI-XXX}}
 Estado: {{Draft | Ready | Obsolete}}
 Creado por: {{nombre}}
 Fecha: {{YYYY-MM-DD}}
-
-## Objetivo
-
-{{Una oración que describe qué comportamiento del sistema valida este caso y por qué es relevante.}}
 
 ## Precondiciones
 

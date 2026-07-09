@@ -103,6 +103,7 @@ Si dentro de una perspectiva hay múltiples escenarios distintos que vale la pen
 
 Usar `assets/test-case-template.md` para todos los campos. Reglas de llenado:
 
+- **Título descriptivo:** redactarlo en formato Given–When–Then (GWT), **respetando el idioma del artefacto origen**: en español usar `Dado {{contexto/precondición}}, Cuando {{acción/evento}}, Entonces {{resultado esperado}}`; en inglés usar `Given {{context/precondition}}, When {{action/event}}, Then {{expected result}}`. Debe describir el escenario concreto que valida el TC, coherente con las precondiciones, los pasos y el resultado esperado final.
 - **Criterio de aceptación:** referenciar el identificador exacto (`AC-XXX` en US; identificador local asignado en Paso 1 para WI). Este campo no puede estar vacío ni ser genérico — es el vínculo de trazabilidad.
 - **Prioridad:** derivar del impacto del criterio en el negocio: Alta si el criterio es bloqueante o afecta seguridad/datos; Media si es funcional importante; Baja si es edge case o cosmético. Si no hay suficiente contexto, preguntar al usuario.
 - **Creado por:** usar `git config user.name` del repositorio. Si no está disponible, dejar el campo vacío.
