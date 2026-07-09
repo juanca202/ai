@@ -17,7 +17,7 @@ Referencia detallada del skill `trace-validate`. El `SKILL.md` mantiene el resum
 
 ### Paso 2 — Inventariar casos de prueba y artefactos de prueba automatizada
 
-1. Recopilar los **casos de prueba** documentados del proyecto que apliquen al trabajo, si existen.
+1. Recopilar los **casos de prueba** documentados del proyecto que apliquen al trabajo, si existen. Para cada TC leer su campo **`Automatización`** (`Manual` / `Automatizable` / `Automatizada`) del encabezado: es la fuente declarada de la naturaleza del caso y determina la columna `Automatica` de la matriz (ver Paso 4). Si el TC no trae el campo, inferir la naturaleza desde los artefactos hallados y dejar constancia en Observaciones.
 2. Buscar en el repo los **artefactos de prueba** relacionados y clasificarlos por **tipo**:
    - **unit** — pruebas unitarias (p. ej. `*.test.*`, `*.spec.*`, `*_test.*`, carpetas `__tests__/`, `tests/unit/`).
    - **integracion** — pruebas de integracion (carpetas/sufijos `integration`, `it`, `*.integration.*`).
@@ -39,7 +39,10 @@ Para **cada** criterio del trabajo, determinar:
 ### Paso 4 — Intentar ejecucion automatica
 
 1. Detectar el runner del proyecto (ver «Ejecucion automatica» mas abajo).
-2. Si es posible, **ejecutar las pruebas** asociadas al trabajo y registrar por artefacto/criterio: si **se pudo ejecutar automaticamente** (`Si` / `No` / `N/A` para pruebas manuales) y el **resultado** (`Paso` / `Fallo` / `No ejecutado`).
+2. Si es posible, **ejecutar las pruebas** asociadas al trabajo y registrar por artefacto/criterio: si **se pudo ejecutar automaticamente** (`Si` / `No` / `N/A`) y el **resultado** (`Paso` / `Fallo` / `No ejecutado`). La columna `Automatica` se decide por el campo `Automatización` del TC (Paso 2), no solo por si se halló un artefacto:
+   - TC `Manual` → `Automatica = N/A` (manual por diseño; no se espera artefacto automatizado).
+   - TC `Automatizable` sin artefacto todavía → `Automatica = No` (pendiente de automatizar; distinguirlo del manual en Observaciones).
+   - TC `Automatizada` (o con artefacto automatizado hallado) → `Automatica = Si` si el runner permitió ejecutarlo; `No` si existe pero no se pudo ejecutar (con la razón en Observaciones).
 3. Si no se puede ejecutar (sin runner, dependencias faltantes, entorno sin red, comando desconocido), registrar ejecucion automatica = `No` con la razon en Observaciones. **No** fabricar resultados.
 
 > Nunca reportar `Paso`/`Fallo` sin haber ejecutado realmente la prueba. Si no se ejecuto, el resultado es `No ejecutado`.
@@ -77,7 +80,7 @@ Reglas:
 - Ejecutar de forma **acotada** al trabajo/criterios cuando el runner lo permita (filtrar por archivo, patron o etiqueta); si no, ejecutar la suite relevante.
 - Registrar el **comando exacto** usado y el **resultado global** en el reporte.
 - Si el entorno **no permite ejecucion** (sin red para instalar dependencias, sin runner, comando desconocido), reportar ejecucion automatica = `No` y explicar la razon; aun asi entregar la matriz de cobertura con los artefactos hallados.
-- Para criterios validados solo manualmente, ejecucion automatica = `N/A`.
+- Para criterios cubiertos por TCs marcados `Manual` (manual por diseño), ejecucion automatica = `N/A`. No confundir con TCs `Automatizable` aún sin artefacto, que van como `No` (pendiente de automatizar).
 
 ---
 

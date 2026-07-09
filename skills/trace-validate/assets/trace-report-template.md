@@ -22,7 +22,7 @@ Veredicto: {{✅ Aprobado | ❌ Rechazado | ⚠️ Aprobado con observaciones}}
 
 ## Matriz de trazabilidad
 
-| Criterio | Descripcion | Caso(s) de prueba | Artefacto(s) (tipo) | Estado | Ejec. auto | Resultado | Observaciones |
+| Criterio | Descripcion | Caso(s) de prueba | Artefactos | Estado | Automatica | Resultado | Observaciones |
 |----------|-------------|-------------------|---------------------|--------|------------|-----------|---------------|
 | BR-01 / AC-1 / GM-001 | {{Criterio de aceptacion}} | {{TC-…/derivado}} | `ruta/al/test.ext` (unit) | Cubierto | Si | Paso | — |
 | SC-01 | {{Escenario}} | {{TC-…/derivado}} | `ruta/al/test.e2e.ext` (e2e) | Parcial | Si | Paso | {{Limite de la cobertura}} |
@@ -32,7 +32,7 @@ Veredicto: {{✅ Aprobado | ❌ Rechazado | ⚠️ Aprobado con observaciones}}
 Valores permitidos:
 - Criterio: AC-XXX (US) · AC-N (WI) · GM-XXX (MG)
 - Estado: Cubierto | Parcial | No cubierto
-- Ejec. auto: Si | No | N/A (solo manual)
+- Ejec. auto (segun campo `Automatización` del TC): Si (Automatizada y ejecutada) | No (Automatizable pendiente, o existe pero no se pudo ejecutar) | N/A (Manual por diseño)
 - Resultado: Paso | Fallo | No ejecutado
 - Tipo de artefacto: unit | integracion | e2e | golden master | manual
 - Celdas sin dato: «—»
@@ -45,7 +45,6 @@ Valores permitidos:
 | Unit | {{Si / No}} | {{rutas o «—»}} |
 | Integracion | {{Si / No}} | {{rutas o «—»}} |
 | E2E | {{Si / No}} | {{rutas o «—»}} |
-| Golden Master (solo migraciones) | {{Si / No / —}} | {{rutas o «—»}} |
 
 ## Ejecucion automatica
 

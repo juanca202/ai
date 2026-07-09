@@ -16,6 +16,7 @@ Nombre de archivo: TC-XXX-{slug}.md
 # TC-{{XXX}} — Dado {{contexto/precondición}}, Cuando {{acción/evento}}, Entonces {{resultado esperado}}
 
 Tipo: {{Happy Path | Error | Límite}}
+Automatización: {{Manual | Automatizable | Automatizada}}
 Prioridad: {{Alta | Media | Baja}}
 Criterio de aceptación: {{código del criterio + título corto — debe existir en el artefacto origen}}
 Artefacto padre: {{US-XXX | WI-XXX}}
