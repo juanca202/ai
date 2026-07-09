@@ -8,7 +8,7 @@ license: MIT
 
 Genera **casos de prueba documentados** (`TC-XXX`) a partir de los criterios de aceptación (`AC-XXX`) de un artefacto ya especificado (`US-XXX` o `WI-XXX`), siguiendo la estructura IEEE 29119-4. Como guía de cobertura mínima, cada criterio se analiza desde tres perspectivas —**happy path**, **error** y **límite**—, generando los TCs que el criterio requiera (una perspectiva puede omitirse si no aplica; ver Paso 3).
 
-> **Solo documentación de prueba:** este skill produce archivos `TC-XXX-{slug}.md`. No implementa código de prueba ni ejecuta tests — eso corresponde a `quality-specialist`. La única modificación permitida sobre el artefacto origen (US/WI) es agregar, bajo cada criterio de aceptación, la lista de casos de prueba que lo cubren (ver Paso 5); no altera ningún otro contenido del artefacto ni otros archivos existentes.
+> **Solo documentación de prueba:** este skill produce archivos `TC-XXX-{slug}.md` más un índice `test-cases/README.md`. No implementa código de prueba ni ejecuta tests. La única modificación permitida sobre el artefacto origen (US/WI) es agregar, bajo cada criterio de aceptación, la lista de casos de prueba que lo cubren (ver Paso 5); no altera ningún otro contenido del artefacto ni otros archivos existentes.
 
 ---
 
@@ -132,7 +132,18 @@ Usar `assets/test-case-template.md` para todos los campos. Reglas de llenado:
 
 1. Crear la carpeta `test-cases/` si no existe.
 2. Escribir cada `TC-XXX-{slug}.md` en la ruta correcta según la tabla de Selección del artefacto. Guardar cada TC con `Estado: Ready` salvo que el usuario indique lo contrario.
-3. Mostrar al usuario un resumen:
+3. Crear o actualizar el índice `test-cases/README.md` con una tabla que liste **todos** los TCs de la carpeta (los recién creados más los que ya existieran), ordenados por número de TC. La tabla lleva estas columnas:
+
+   | TC | Perspectiva | Automatización | Prioridad | Criterio de aceptación |
+   |----|-------------|----------------|-----------|------------------------|
+   | [TC-001](./TC-001-{slug}.md) | Happy Path | Automatizable (Integration) | Alta | AC-001 |
+
+   Reglas del índice:
+   - **TC:** ID enlazado por ruta relativa a su archivo `TC-XXX-{slug}.md`.
+   - **Perspectiva**, **Automatización** y **Prioridad:** copiar el valor tal como quedó en el encabezado del TC (Automatización incluye el tipo entre paréntesis si aplica).
+   - **Criterio de aceptación:** mostrar **solo el código** `AC-XXX`, sin el título.
+   - Regenerar el índice completo en cada corrida para reflejar el estado actual de la carpeta; redactarlo en el idioma del artefacto origen.
+4. Mostrar al usuario un resumen:
    - Criterios procesados.
    - TCs generados: ID · título · perspectiva.
    - TCs omitidos con justificación.
@@ -181,6 +192,7 @@ La trazabilidad inversa (de un criterio a sus TCs) se obtiene buscando el identi
 - Omitir una perspectiva que evidentemente debería existir sin dejar constancia del motivo (una perspectiva que no aplica al criterio puede omitirse sin justificación; ver Paso 3).
 - Dejar el campo **Criterio de aceptación** vacío o con un valor genérico ("criterio 1").
 - Reutilizar un número de secuencia ya existente en `test-cases/`.
+- Dejar el índice `test-cases/README.md` desactualizado tras crear o regenerar TCs (debe reflejar siempre todos los TCs de la carpeta).
 - Regenerar TCs existentes sin instrucción explícita del usuario.
 - Modificar el artefacto origen (README de US o WI-XXX.md) más allá de agregar la línea `Casos de prueba:` bajo cada criterio en el Paso 5; cualquier otro cambio al texto de los criterios o a otras secciones está prohibido.
 - Escribir código de prueba (Jest, Cypress, etc.); ese trabajo corresponde a `quality-specialist`.
