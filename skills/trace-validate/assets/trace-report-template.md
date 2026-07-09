@@ -30,7 +30,7 @@ Veredicto: {{✅ Aprobado | ❌ Rechazado | ⚠️ Aprobado con observaciones}}
 
 <!--
 Valores permitidos:
-- Criterio: AC-XXX (US y WI) · GM-XXX (MG). Formatos legados (AC-1, CA-1, BR-01, SC-01) se normalizan a AC-XXX.
+- Criterio: AC-XXX (US y WI) · GM-XXX (MG). Formatos legados (AC-1, CA-1, BR-01) se normalizan a AC-XXX.
 - Estado: Cubierto | Parcial | No cubierto
 - Ejec. auto (estado real al validar; el TC solo declara Manual/Automatizable): Sí (artefacto automatizado hallado y ejecutado) | No (Automatizable pendiente, o existe pero no se pudo ejecutar) | N/A (Manual por diseño)
 - Resultado: Paso | Fallo | No ejecutado

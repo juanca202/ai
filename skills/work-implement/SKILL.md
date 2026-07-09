@@ -88,6 +88,7 @@ Cada tipo mantiene un `progress.md` como **unica bitacora** que este skill puede
 - Crear desde `assets/progress-template.md` si no existe, adaptando el encabezado y las unidades al tipo (TK / WI / Fase) segun indique la referencia.
 - Por cada unidad: `Pending` => `In Progress` => `Done`; anadir notas si quedan aspectos parciales.
 - Registrar en `Decisiones adicionales` **toda decision tomada durante la sesion de chat** que no este ya documentada en la especificacion. Si no hubo decisiones nuevas, omitir la seccion.
+- **Cobertura de test cases:** cuando el artefacto tiene test cases, registrar en el campo `Cobertura de test cases` de la unidad la relacion entre los `TC-XXX` del `test-cases/README.md` y las pruebas automatizadas creadas. Documentar explicitamente **todo `TC-XXX` que no se pudo automatizar** (con el motivo) y **toda decision de crear un tipo de prueba distinto** al que sugiere el test case (p. ej. cubrir con integracion un TC pensado como unit). Si todos los `TC-XXX` se automatizaron tal cual, basta con indicarlo; si el artefacto no tiene test cases, omitir el campo.
 
 | Situacion | Que hacer |
 |-----------|-----------|
@@ -129,7 +130,9 @@ Toda implementacion, sea cual sea el tipo de artefacto, sigue estos dos principi
 
 El ciclo obligatorio por cada unidad de comportamiento es **Red → Green → Refactor**:
 
-1. **Red:** escribir el test que falla antes de escribir el codigo de produccion. El test debe describir el comportamiento esperado segun los **insumos de comportamiento** del artefacto: en US y WI, los criterios de aceptacion (`AC-XXX`) y —cuando existan— las reglas de negocio (`BR-XX`), los escenarios (`SC-XX`) y los casos de prueba (`TC-XXX`); en migraciones, los casos de Golden Master (`GM-XXX`).
+1. **Red:** escribir el test que falla antes de escribir el codigo de produccion. El test debe describir el comportamiento esperado segun los **insumos de comportamiento** del artefacto: en US y WI, los criterios de aceptacion (`AC-XXX`) y —cuando existan— las reglas de negocio (`BR-XX`) y los casos de prueba (`TC-XXX`); en migraciones, los casos de Golden Master (`GM-XXX`).
+
+> **Test cases como insumo de las pruebas automatizadas:** si el artefacto tiene test cases (carpeta `test-cases/` en la US o el WI), **leer su `README.md` antes de escribir codigo** para identificar que `TC-XXX` describen y cuales pueden convertirse en pruebas automatizadas (unit, integracion, e2e) dentro del ciclo TDD. Cada `TC-XXX` que sea automatizable se cubre con su prueba en la unidad correspondiente. Cuando un `TC-XXX` **no se pueda automatizar** (p. ej. es manual o exploratorio) o se **decida crear otro tipo de prueba** distinto al que sugiere el test case, **registrarlo en `progress.md`** (ver seccion `progress.md`).
 2. **Green:** escribir el minimo codigo necesario para que el test pase.
 3. **Refactor:** limpiar el codigo (produccion y test) sin romper los tests.
 

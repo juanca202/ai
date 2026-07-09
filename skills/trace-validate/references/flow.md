@@ -12,7 +12,7 @@ Referencia detallada del skill `trace-validate`. El `SKILL.md` mantiene el resum
    - **US:** `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md`.
    - **WI:** `docs/specs/work-items/WI-XXX-[kebab].md`.
    - **MG:** `docs/specs/migrations/MG-XXX-{slug}/validation.md` (criterios = casos de Golden Master).
-2. Leer el documento y extraer **todos los criterios de aceptación** con su texto, usando los códigos del tipo (`AC-XXX` para US y WI, `GM-XXX` para MG). Si el artefacto usa otro formato de código (`AC-1`, `CA-1`, `BR-01`, `SC-01`…), normalizarlo a `AC-XXX` al referenciarlo en el reporte.
+2. Leer el documento y extraer **todos los criterios de aceptación** con su texto, usando los códigos del tipo (`AC-XXX` para US y WI, `GM-XXX` para MG). Si el artefacto usa otro formato de código (`AC-1`, `CA-1`, `BR-01`…), normalizarlo a `AC-XXX` al referenciarlo en el reporte.
 3. Si no existe la sección de criterios o no hay criterios explícitos, **parar** y reportar (ver «Cuándo bloquear» en `SKILL.md`). No continuar con supuestos.
 
 ### Paso 2 — Inventariar casos de prueba y artefactos de prueba automatizada

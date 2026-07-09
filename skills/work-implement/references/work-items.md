@@ -52,6 +52,8 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
   - Si elige **continuar sin test cases**: continuar normalmente.
   - Si elige **detener**: parar y sugerir ejecutar `test-define` primero.
 
+- **README de test cases:** si la carpeta `test-cases/` existe, **leer su `README.md`** (`docs/specs/work-items/WI-XXX-[kebab-case]/test-cases/README.md`) para identificar que `TC-XXX` describen y cuales son **automatizables** (unit, integracion, e2e). Esta lectura alimenta el ciclo TDD del Paso 3 y las notas de cobertura en `progress.md`. Si el `README.md` no existe pero hay archivos `TC-XXX-*.md`, leer los propios test cases como fuente.
+
 ---
 
 ## Flujo de implementacion
@@ -78,7 +80,7 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 Por cada WI aprobado:
 
 1. Aplicar el ciclo **TDD (Red → Green → Refactor)** por cada comportamiento del plan del WI:
-   - **Red:** escribir el test que describe el comportamiento esperado, basandose en los insumos de comportamiento del WI: sus criterios de aceptacion (`AC-XXX`) y —cuando existan— las reglas de negocio (`BR-XX`), los escenarios (`SC-XX`) o los casos de prueba (`TC-XXX`) disponibles. El test debe fallar antes de escribir codigo de produccion.
+   - **Red:** escribir el test que describe el comportamiento esperado, basandose en los insumos de comportamiento del WI: sus criterios de aceptacion (`AC-XXX`) y —cuando existan— las reglas de negocio (`BR-XX`) o los casos de prueba (`TC-XXX`) disponibles. Cuando el WI tenga test cases, tomar del `test-cases/README.md` los `TC-XXX` automatizables que apliquen y crear su prueba correspondiente. El test debe fallar antes de escribir codigo de produccion.
    - **Green:** escribir el minimo codigo de produccion para que el test pase.
    - **Refactor:** limpiar codigo de produccion y test sin romper los tests. Aplicar principios de Clean Architecture (ver `SKILL.md`).
 2. Si genera o modifica UI: ejecutar bajo `ui-specialist`. Si la referencia de diseno es Figma: usar el MCP de Figma.
@@ -87,7 +89,7 @@ Por cada WI aprobado:
 5. Actualizar el artefacto y el progreso:
    - **Al iniciar el WI:** cambiar su estado en `progress.md` a `In Progress` y **poblar la lista de to-dos del agente**: la **primera entrada es el titulo del WI** (`WI-XXX` + titulo), para tener siempre presente el artefacto en ejecucion, seguida de **las tareas del `Plan de implementacion` del `WI-XXX.md`** (una entrada por tarea `IT-XX`, en el orden del plan). Cada entrada de tarea muestra solo la descripcion corta (`IT-XX` + linea corta), no el detalle completo.
    - **Por cada tarea del plan completada:** marcar `[ ]` => `[x]` en la seccion del plan de implementacion del `WI-XXX.md` correspondiente y marcar su entrada en la lista de to-dos del agente como `completed`.
-   - **Al cerrar el WI:** cambiar su estado en `progress.md` a `Done`, con todas las tareas de su plan ya `completed` en la lista de to-dos del agente; marcar tambien la **primera entrada (titulo del WI) como `completed`** una vez que todas las tareas del plan hayan finalizado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
+   - **Al cerrar el WI:** cambiar su estado en `progress.md` a `Done`, con todas las tareas de su plan ya `completed` en la lista de to-dos del agente; marcar tambien la **primera entrada (titulo del WI) como `completed`** una vez que todas las tareas del plan hayan finalizado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion. Si el WI tenia test cases, completar el campo `Cobertura de test cases` del WI: que `TC-XXX` se automatizaron y, sobre todo, **cuales no se pudieron crear** (con motivo) o **para cuales se decidio otro tipo de prueba** distinto al del test case.
 6. **Detenerse y preguntar** (herramienta estructurada): "WI-XXX completado. Continuo con WI-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui]. Si el alcance es un unico WI, igualmente confirmar antes de pasar al cierre.
 7. Solo si confirma: siguiente WI. Si detiene, registrar nota y pasar al Paso 4.
 
@@ -113,7 +115,7 @@ Por cada WI aprobado:
 
 **Alcance:** cada `WI-*.md` leido completo; listas presentadas; confirmacion recibida antes del primer cambio de codigo.
 
-**Por cada WI:** `Ready` con criterios de aceptacion; no `Done`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; UI bajo `ui-specialist`; Figma via MCP; plan completo implementado; criterios de aceptacion cubiertos por tests; lint/typecheck/build/tests en verde; `progress.md` a `Done`; decisiones de sesion registradas; **confirmacion explicita antes del siguiente WI**.
+**Por cada WI:** `Ready` con criterios de aceptacion; no `Done`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; test cases automatizables del `test-cases/README.md` cubiertos; UI bajo `ui-specialist`; Figma via MCP; plan completo implementado; criterios de aceptacion cubiertos por tests; lint/typecheck/build/tests en verde; `progress.md` a `Done` con `Cobertura de test cases` (TC no automatizados o con otro tipo de prueba documentados); decisiones de sesion registradas; **confirmacion explicita antes del siguiente WI**.
 
 **Cierre:** suite de tests en verde; working tree limpio; handoff a `pr-create` o `work-integrate`.
 
@@ -144,7 +146,7 @@ Por cada WI aprobado:
 - Descomponer un WI en sub-tareas o tratarlo como si tuviera `TK-XXX`; el WI es un documento plano.
 - Implementar parte del plan del WI y pasar al siguiente sin completarlo ni verificar criterios.
 - Marcar `Done` sin que los tests de los criterios de aceptacion existan y pasen en verde.
-- Buscar los insumos de comportamiento en una US padre: el WI no proviene de una US; los tests se basan en los insumos del propio WI (`AC-XXX` y, si existen, `BR-XX` / `SC-XX` / `TC-XXX`).
+- Buscar los insumos de comportamiento en una US padre: el WI no proviene de una US; los tests se basan en los insumos del propio WI (`AC-XXX` y, si existen, `BR-XX` / `TC-XXX`).
 - Implementar un WI en `Draft` (stub) como si estuviera listo.
 - Escribir codigo de produccion antes del test (romper el ciclo Red→Green→Refactor).
 - Implementar UI sin `ui-specialist`, o UI con referencia Figma sin el MCP de Figma.

@@ -48,6 +48,8 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
   - Si elige **continuar sin test cases**: continuar normalmente.
   - Si elige **detener**: parar y sugerir ejecutar `test-define` primero.
 
+- **README de test cases:** si la carpeta `test-cases/` existe, **leer su `README.md`** (`docs/specs/user-stories/US-XXX-[nombre-corto]/test-cases/README.md`) para identificar que `TC-XXX` describen y cuales son **automatizables** (unit, integracion, e2e). Esta lectura alimenta el ciclo TDD del Paso 3 y las notas de cobertura en `progress.md`. Si el `README.md` no existe pero hay archivos `TC-XXX-*.md`, leer los propios test cases como fuente.
+
 ---
 
 ## Flujo de implementacion
@@ -75,7 +77,7 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto:
 
 1. Aplicar el ciclo **TDD (Red → Green → Refactor)** por cada unidad de comportamiento de la TK:
-   - **Red:** escribir el test que describe el comportamiento esperado, basandose en los insumos de comportamiento de la US: los criterios de aceptacion (`AC-XXX`) del `README.md` y —cuando existan— las reglas de negocio (`BR-XX`), los escenarios (`SC-XX`) o los casos de prueba (`TC-XXX`) disponibles. El test debe fallar antes de escribir codigo de produccion.
+   - **Red:** escribir el test que describe el comportamiento esperado, basandose en los insumos de comportamiento de la US: los criterios de aceptacion (`AC-XXX`) del `README.md` y —cuando existan— las reglas de negocio (`BR-XX`) o los casos de prueba (`TC-XXX`) disponibles. Cuando la US tenga test cases, tomar del `test-cases/README.md` los `TC-XXX` automatizables que apliquen a la TK y crear su prueba correspondiente. El test debe fallar antes de escribir codigo de produccion.
    - **Green:** escribir el minimo codigo de produccion para que el test pase.
    - **Refactor:** limpiar codigo de produccion y test sin romper los tests. Aplicar principios de Clean Architecture (ver `SKILL.md`).
 2. Si genera o modifica UI: ejecutar bajo `ui-specialist`. Si la referencia de diseno es Figma: usar el MCP de Figma.
@@ -83,7 +85,7 @@ Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto
 4. Actualizar el artefacto y el progreso:
    - **Al iniciar la TK:** cambiar su estado en `progress.md` a `In Progress` y **poblar la lista de to-dos del agente**: la **primera entrada es el titulo de la TK** (`TK-XXX` + titulo), para tener siempre presente el artefacto en ejecucion, seguida de **las tareas del `Plan de implementacion` del `TK-XXX.md`** (una entrada por tarea `IT-XX`, en el orden del plan). Cada entrada de tarea muestra solo la descripcion corta (`IT-XX` + linea corta), no el detalle completo.
    - **Por cada subtarea completada:** marcar `[ ]` => `[x]` en la seccion de subtareas del `TK-XXX.md` correspondiente y marcar su entrada en la lista de to-dos del agente como `completed`.
-   - **Al cerrar la TK:** cambiar su estado en `progress.md` a `Done`, con todas las subtareas de su plan ya `completed` en la lista de to-dos del agente; marcar tambien la **primera entrada (titulo de la TK) como `completed`** una vez que todas las tareas del plan hayan finalizado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion.
+   - **Al cerrar la TK:** cambiar su estado en `progress.md` a `Done`, con todas las subtareas de su plan ya `completed` en la lista de to-dos del agente; marcar tambien la **primera entrada (titulo de la TK) como `completed`** una vez que todas las tareas del plan hayan finalizado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion. Si la US tenia test cases, completar el campo `Cobertura de test cases` de la TK: que `TC-XXX` se automatizaron y, sobre todo, **cuales no se pudieron crear** (con motivo) o **para cuales se decidio otro tipo de prueba** distinto al del test case.
 5. **Detenerse y preguntar** (herramienta estructurada): "TK-XXX completada. Continuo con TK-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui].
 6. Solo si el usuario confirma: pasar a la siguiente TK. Si detiene, registrar nota y pasar al Paso 4.
 
@@ -127,7 +129,7 @@ WARNING No es posible continuar con la implementacion:
 
 **Cola:** `README.md` y todos los `TK-*.md` del alcance leidos; listas presentadas; confirmacion recibida antes del primer cambio de codigo.
 
-**Por cada tarea:** TK `Ready`; no `Done` en `progress.md`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; UI bajo `ui-specialist`; Figma via MCP; lint/typecheck/build/tests ejecutados y en verde; `progress.md` a `Done`; decisiones de sesion registradas; **confirmacion explicita antes de la siguiente TK**.
+**Por cada tarea:** TK `Ready`; no `Done` en `progress.md`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; test cases automatizables del `test-cases/README.md` cubiertos; UI bajo `ui-specialist`; Figma via MCP; lint/typecheck/build/tests ejecutados y en verde; `progress.md` a `Done` con `Cobertura de test cases` (TC no automatizados o con otro tipo de prueba documentados); decisiones de sesion registradas; **confirmacion explicita antes de la siguiente TK**.
 
 **Cierre:** suite de tests en verde; working tree limpio; handoff a `pr-create` o `work-integrate`.
 

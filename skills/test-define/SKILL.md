@@ -52,7 +52,7 @@ El usuario indica un `US-XXX` o un `WI-XXX`. Si el identificador es ambiguo (sin
    - `Estado: Obsolete` → parar: el artefacto fue descartado; no generar TCs sobre él.
    - Cualquier otro estado → parar e informar: "El artefacto tiene estado [X], que no es soportado. Solo se procesan artefactos en estado `Ready`."
 3. Si no hay criterios de aceptación definidos (sección ausente o vacía), **parar** e indicar que el artefacto necesita criterios antes de poder generar TCs.
-4. Verificar que **cada criterio tenga su código de identificación `AC-XXX`** (formato único válido, tanto en US como en WI). Si el artefacto usa otro formato (p. ej. `AC-1`, `CA-1`, `BR-01`, `SC-01`), tratarlo como equivalente pero referenciarlo normalizado a `AC-XXX` en los TCs. Si uno o más criterios carecen de código, **parar** e informar al usuario:
+4. Verificar que **cada criterio tenga su código de identificación `AC-XXX`** (formato único válido, tanto en US como en WI). Si uno o más criterios carecen de código, **parar** e informar al usuario:
 
    ```
    ERROR Trazabilidad incompleta:
