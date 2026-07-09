@@ -1,11 +1,12 @@
 ---
 name: test-define
-description: 'Crear casos de prueba (TC-XXX) a partir de los criterios de aceptación de una historia de usuario (US-XXX) o un work item (WI-XXX), siguiendo el estándar IEEE 29119-4. Activar cuando el usuario pida "definir test cases", "crear casos de prueba", "generar TCs", "pruebas para la US/WI", "documentar pruebas", "casos de prueba para los criterios de aceptación", o cualquier variante que implique producir documentación de prueba a partir de requisitos ya especificados. También activar cuando el usuario mencione "test-define" o "/test-define".'
+description: 'Crear casos de prueba (TC-XXX) a partir de los criterios de aceptación (AC-XXX) de una historia de usuario (US-XXX) o un work item (WI-XXX), siguiendo el estándar IEEE 29119-4. Activar cuando el usuario pida "definir test cases", "crear casos de prueba", "generar TCs", "pruebas para la US/WI", "documentar pruebas", "casos de prueba para los criterios de aceptación", o cualquier variante que implique producir documentación de prueba a partir de requisitos ya especificados. También activar cuando el usuario mencione "test-define" o "/test-define".'
+license: MIT
 ---
 
 # Skill: Definir casos de prueba
 
-Genera **casos de prueba documentados** (`TC-XXX`) a partir de los criterios de aceptación de un artefacto ya especificado (`US-XXX` o `WI-XXX`), siguiendo la estructura IEEE 29119-4. Por cada criterio produce tres perspectivas: **happy path**, **error** y **límite**.
+Genera **casos de prueba documentados** (`TC-XXX`) a partir de los criterios de aceptación (`AC-XXX`) de un artefacto ya especificado (`US-XXX` o `WI-XXX`), siguiendo la estructura IEEE 29119-4. Como guía de cobertura mínima, cada criterio se analiza desde tres perspectivas —**happy path**, **error** y **límite**—, generando los TCs que el criterio requiera (una perspectiva puede omitirse si no aplica; ver Paso 3).
 
 > **Solo documentación de prueba:** este skill produce archivos `TC-XXX-{slug}.md`. No implementa código de prueba ni ejecuta tests — eso corresponde a `quality-specialist`. La única modificación permitida sobre el artefacto origen (US/WI) es agregar, bajo cada criterio de aceptación, la lista de casos de prueba que lo cubren (ver Paso 5); no altera ningún otro contenido del artefacto ni otros archivos existentes.
 
@@ -51,7 +52,7 @@ El usuario indica un `US-XXX` o un `WI-XXX`. Si el identificador es ambiguo (sin
    - `Estado: Obsolete` → parar: el artefacto fue descartado; no generar TCs sobre él.
    - Cualquier otro estado → parar e informar: "El artefacto tiene estado [X], que no es soportado. Solo se procesan artefactos en estado `Ready`."
 3. Si no hay criterios de aceptación definidos (sección ausente o vacía), **parar** e indicar que el artefacto necesita criterios antes de poder generar TCs.
-4. Verificar que **cada criterio tenga un código de identificación** (`AC-XXX` en US; cualquier identificador único en WI, p. ej. `AC-01`, `CA-1`, etc.). Si uno o más criterios carecen de código, **parar** e informar al usuario:
+4. Verificar que **cada criterio tenga su código de identificación `AC-XXX`** (formato único válido, tanto en US como en WI). Si el artefacto usa otro formato (p. ej. `AC-1`, `CA-1`, `BR-01`, `SC-01`), tratarlo como equivalente pero referenciarlo normalizado a `AC-XXX` en los TCs. Si uno o más criterios carecen de código, **parar** e informar al usuario:
 
    ```
    ERROR Trazabilidad incompleta:
@@ -103,9 +104,21 @@ Si dentro de una perspectiva hay múltiples escenarios distintos que vale la pen
 
 Usar `assets/test-case-template.md` para todos los campos. Reglas de llenado:
 
+- **Perspectiva:** registrar la perspectiva de cobertura del caso (`Happy Path`, `Error` o `Límite`), coherente con el sufijo del slug del archivo. No confundir con el tipo de prueba sugerido del campo Automatización (Unit/Integration/E2E…).
 - **Título descriptivo:** redactarlo en formato Given–When–Then (GWT), **respetando el idioma del artefacto origen**: en español usar `Dado {{contexto/precondición}}, Cuando {{acción/evento}}, Entonces {{resultado esperado}}`; en inglés usar `Given {{context/precondition}}, When {{action/event}}, Then {{expected result}}`. Debe describir el escenario concreto que valida el TC, coherente con las precondiciones, los pasos y el resultado esperado final.
-- **Criterio de aceptación:** referenciar el identificador exacto (`AC-XXX` en US; identificador local asignado en Paso 1 para WI). Este campo no puede estar vacío ni ser genérico — es el vínculo de trazabilidad.
-- **Automatización:** declarar la naturaleza del caso, independiente de si ya existe código de prueba: `Manual` (no se automatiza, requiere ejecución humana por diseño), `Automatizable` (debe automatizarse pero aún no hay artefacto) o `Automatizada` (ya existe artefacto de prueba automatizada que lo cubre). Este campo es la fuente que consume `trace-validate` para distinguir "manual por diseño" de "pendiente de automatizar"; no dejarlo vacío. Ante la duda entre Manual y Automatizable, preguntar al usuario.
+- **Criterio de aceptación:** referenciar el identificador `AC-XXX` (mismo formato en US y WI; si el artefacto origen usaba otro formato, normalizarlo a `AC-XXX` según el Paso 1). Este campo no puede estar vacío ni ser genérico — es el vínculo de trazabilidad.
+- **Automatización:** declarar la **intención de diseño** del caso, no su estado de ejecución. Como los TC se escriben **antes de implementar**, solo hay dos valores posibles: `Manual` (no se automatiza, requiere ejecución humana por diseño) o `Automatizable` (debe automatizarse). No usar "Automatizada": que un caso ya tenga artefacto de prueba y haya pasado es un **estado real** posterior a la implementación, que registra `trace-validate` en el `trace-report` (columnas `Automatica` y `Resultado`), no el TC — el TC no cambia cuando se ejecuta. Este campo es la fuente que consume `trace-validate` para distinguir "manual por diseño" de "pendiente de automatizar"; no dejarlo vacío. Ante la duda entre Manual y Automatizable, preguntar al usuario.
+  - Para `Automatizable`, agregar entre paréntesis el **tipo de prueba sugerido** junto a la etiqueta (p. ej. `Automatizable (Integration)`). Inferir el tipo recorriendo esta tabla de arriba hacia abajo y tomando la **primera** respuesta afirmativa:
+
+    | Pregunta | Sí | No |
+    |----------|----|----|
+    | ¿Puede probarse sin interfaz? | Unit / Integration | Continuar |
+    | ¿Necesita verificar varios servicios? | Integration | Continuar |
+    | ¿Debe validar la experiencia completa del usuario? | E2E | Continuar |
+    | ¿Solo verifica un endpoint? | API Test | Continuar |
+    | ¿Solo valida la apariencia? | Visual Test | Otro tipo |
+
+    Para los TC `Manual` no aplica tipo sugerido (omitir el paréntesis).
 - **Prioridad:** derivar del impacto del criterio en el negocio: Alta si el criterio es bloqueante o afecta seguridad/datos; Media si es funcional importante; Baja si es edge case o cosmético. Si no hay suficiente contexto, preguntar al usuario.
 - **Creado por:** usar `git config user.name` del repositorio. Si no está disponible, dejar el campo vacío.
 - **Precondiciones:** ser específico — incluir estado del sistema, datos existentes y permisos requeridos.
@@ -165,7 +178,7 @@ La trazabilidad inversa (de un criterio a sus TCs) se obtiene buscando el identi
 
 - Generar TCs sin haber completado la entrevista del Paso 2 (incluso si parece obvio).
 - Crear un TC que cubra más de un criterio de aceptación.
-- Omitir una perspectiva sin dejar nota justificada en el TC.
+- Omitir una perspectiva que evidentemente debería existir sin dejar constancia del motivo (una perspectiva que no aplica al criterio puede omitirse sin justificación; ver Paso 3).
 - Dejar el campo **Criterio de aceptación** vacío o con un valor genérico ("criterio 1").
 - Reutilizar un número de secuencia ya existente en `test-cases/`.
 - Regenerar TCs existentes sin instrucción explícita del usuario.

@@ -15,10 +15,10 @@ Nombre de archivo: TC-XXX-{slug}.md
 
 # TC-{{XXX}} — Dado {{contexto/precondición}}, Cuando {{acción/evento}}, Entonces {{resultado esperado}}
 
-Tipo: {{Happy Path | Error | Límite}}
-Automatización: {{Manual | Automatizable | Automatizada}}
+Perspectiva: {{Happy Path | Error | Límite}}
+Automatización: {{Manual | Automatizable (Tipo)}}  <!-- intención de diseño. Tipo ∈ {Unit | Integration | E2E | API Test | Visual Test}; obligatorio si Automatizable, omitir si Manual. -->
 Prioridad: {{Alta | Media | Baja}}
-Criterio de aceptación: {{código del criterio + título corto — debe existir en el artefacto origen}}
+Criterio de aceptación: {{AC-XXX + título corto — debe existir en el artefacto origen}}
 Artefacto padre: {{US-XXX | WI-XXX}}
 Estado: {{Draft | Ready | Obsolete}}
 Creado por: {{nombre}}
