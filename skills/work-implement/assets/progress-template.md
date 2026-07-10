@@ -19,7 +19,7 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 {{La "unidad" depende del tipo: TK para historias de usuario, el WI completo para work items, una Fase para migraciones.}}
 {{`Cobertura de test cases` es opcional: incluirla solo si el artefacto tiene carpeta `test-cases/`; omitirla si no hay test cases.}}
 
-- {{TK-XXX | WI-XXX | Fase N}} {{titulo corto}}
+- {{TK-XXX | WI-XXX | Fase N}}: {{titulo corto}}
   Estado: {{Pending | In Progress | Done}}
   Implementador: "{{inferido de git config user.name}}"
   Archivos: []
@@ -27,7 +27,7 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
   Cobertura de test cases: []
   Decisiones adicionales: []
 
-- {{TK-XXX | WI-XXX | Fase N}} {{titulo corto}}
+- {{TK-XXX | WI-XXX | Fase N}}: {{titulo corto}}
   Estado: {{Pending | In Progress | Done}}
   Implementador: "{{inferido de git config user.name}}"
   Archivos:
