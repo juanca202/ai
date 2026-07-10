@@ -90,18 +90,18 @@ Acción sugerida: {{…}}
 
 ### {{ADR-XXX | AGENTS.md §Regla}} — {{título}}
 
-Fuente: {{ruta}}
-Regla auditada: {{enunciado}}
-Estado: {{✅ | ⚠️ | ❌ | ❔}}
+**Fuente:** {{ruta}}
+**Regla auditada:** {{enunciado}}
+**Estado:** {{✅ | ⚠️ | ❌ | ❔}}
 
-Evidencias:
+**Evidencias:**
 - ✔ {{…}}
 - ✖ {{…}}
 
-Incumplimientos:
+**Incumplimientos:**
 - `{{ruta/archivo}}` — {{detalle}}
 
-Acción sugerida: {{…}}
+**Acción sugerida:** {{…}}
 
 ---
 
@@ -129,30 +129,14 @@ tienen una, escribir "Ninguna: todos los ADR aptos ya están cubiertos.".
 -->
 
 **{{ADR-007}} — {{título}}**
-- Qué medir: {{la característica arquitectónica a comprobar}}
-- Herramienta sugerida: {{ArchUnit \| dependency-cruiser \| import-linter \| NetArchTest \| script CI}}
-- Esbozo: {{una frase de cómo sería el chequeo}}
+- **Qué medir:** {{la característica arquitectónica a comprobar}}
+- **Herramienta sugerida:** {{ArchUnit \| dependency-cruiser \| import-linter \| NetArchTest \| script CI}}
+- **Esbozo:** {{una frase de cómo sería el chequeo}}
 
 ### ADR no aptos para fitness function
 
 <!-- ADR cuyo cumplimiento depende de criterio humano o evidencia externa; se auditan manualmente. -->
 - {{ADR-XXX}} — {{por qué no es automatizable}}
-
----
-
-## Resumen de acciones
-
-| # | Prioridad | Regla | Acción sugerida | Estado |
-|---|-----------|-------|-----------------|--------|
-| 1 | 🔴 Alta   | {{ADR-012}} | {{acción}} | {{⬜ Pendiente}} |
-| 2 | 🟡 Media  | {{ADR-XXX}} | {{acción}} | {{⬜ Pendiente}} |
-| 3 | ⚪ Baja   | {{AGENTS.md §X}} | {{acción}} | {{⬜ Pendiente}} |
-
-<!--
-Estados de acción sugeridos: ⬜ Pendiente · 🔄 En progreso · ✅ Resuelto · 🚫 No aplica (excepción aceptada).
-Esta tabla se escribe una sola vez, al crear el informe, y no se modifica en revalidaciones
-posteriores; sus cambios de estado se reflejan en las entradas de ## Revalidaciones al final.
--->
 
 ## Reglas no verificables por inspección estática
 

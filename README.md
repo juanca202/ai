@@ -33,12 +33,13 @@ claude --plugin-dir .
 
 | Skill | Uso |
 |-------|-----|
-| `ado-install` | Configurar el MCP de Azure DevOps en Cursor (PAT, multi-cuenta, verificación) |
-| `adr-discover` | Auditar un repositorio y proponer ADRs candidatos a partir de decisiones implícitas |
+| `alm-install` | Instalar, configurar o reparar el MCP de una herramienta ALM (Azure DevOps o Jira) en Cursor y/o Claude Code, con autenticación por token |
+| `adr-audit` | Auditar el cumplimiento de los ADR y de `AGENTS.md` contra el estado real del repo, generando un informe priorizado en `docs/adr/audits/` con revalidaciones incrementales |
+| `adr-discover` | Analiza un repositorio y proponer ADRs candidatos a partir de decisiones implícitas |
 | `adr-manage` | Crear o actualizar Architecture Decision Records en `docs/adr/` |
-| `code-review` | Batería de verificaciones automatizadas pre-merge según el stack detectado |
+| `code-review` | Revisión de código pre-merge: verificaciones automatizadas según el stack + revisión cualitativa (arquitectura, diseño, SOLID), con veredicto apto/no apto/incompleto |
 | `git-commit` | Preparar commits con mensajes Conventional Commits inferidos del diff |
-| `pr-create` | Crear PR o MR desde la rama actual (GitHub, GitLab, Azure Repos, etc.) |
+| `pr-create` | Crear PR o MR desde la rama actual (GitHub, GitLab, Azure Repos, etc.) con puertas de calidad obligatorias: code-review, trace-validate y Definition of Done |
 | `project-create` | Crear proyectos nuevos fusionando plantillas del equipo por stack |
 | `project-migrate` | Planificar y documentar migraciones tecnológicas entre proyectos (MG-XXX) |
 | `prompt-validate` | Validar y mejorar prompts para agentes de IA (efectividad y reescritura) |
