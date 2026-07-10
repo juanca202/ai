@@ -12,12 +12,6 @@ Guía para **crear o actualizar** historias de usuario en el repo del producto.
 
 La plantilla canónica está en `assets/user-story-template.md` (léela antes de escribir cualquier US).
 
-## Subagente
-
-**Si el proyecto define el subagente `docs-specialist`, ejecutar este skill bajo ese subagente.** Si no existe en el proyecto, ejecutar el flujo normalmente.
-
----
-
 ## Mapa de referencias
 
 Carga el archivo correspondiente cuando vayas a ejecutar la tarea; el detalle íntegro vive en `references/`.
@@ -26,7 +20,7 @@ Carga el archivo correspondiente cuando vayas a ejecutar la tarea; el detalle í
 | ---------- | ------- |
 | Flujo paso a paso de **crear** y **actualizar**, cómo preguntar al usuario, validación antes de crear, checklist completo, ejemplos, anti-patrones y handoffs del ciclo | [`references/flow.md`](references/flow.md) |
 | Detalle de **RFC 2119** (tabla de modalidades), **ISO 25010** (categorías de criterios de aceptación no funcionales), rúbrica **INVEST** y **DoR** ampliado | [`references/quality-criteria.md`](references/quality-criteria.md) |
-| Estructura del `README.md` de una US | `assets/user-story-template.md` |
+| Estructura del `README.md` de una US | [`assets/user-story-template.md`](assets/user-story-template.md) |
 
 ---
 
