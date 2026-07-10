@@ -42,7 +42,10 @@ automatizable), comprueba si ya existe y la ejecuta; si es apto pero no existe, 
 (alta / media / baja), donde cada hallazgo referencia el ADR o la regla de AGENTS.md incumplida,
 lista evidencias y archivos infractores, propone una acción y fija un estado. El informe incluye
 además una sección de **fitness functions**: cuáles existen y su resultado al ejecutarlas, y cuáles
-faltan (ADR aptos sin fitness function) con la sugerencia de crearlas.
+faltan (ADR aptos sin fitness function) con la sugerencia de crearlas. Este contenido se escribe una
+sola vez, al crear el informe, y permanece inalterado; cada revalidación posterior agrega una entrada
+nueva en la sección `## Revalidaciones` al final del **mismo** archivo (nunca se crea un archivo por
+revalidación), con la fecha/hora, el veredicto resultante y solo los cambios evidenciados.
 
 La plantilla canónica del informe está en `assets/audit-template.md`. **Leerla antes de redactar**
 cualquier informe y respetar su estructura.
@@ -78,7 +81,7 @@ ls docs/adr/audits/audit-*.md 2>/dev/null
 
   > "Encontré una auditoría previa: **audit-2026-06-30.md**. ¿Cómo quieres continuar?"
   > Opciones:
-  > - **Revalidar `audit-2026-06-30.md`** — vuelve a comprobar cada hallazgo previo contra el estado actual y actualiza estados.
+  > - **Revalidar `audit-2026-06-30.md`** — vuelve a comprobar cada hallazgo previo contra el estado actual y agrega los cambios como una nueva entrada en `## Revalidaciones`, sin tocar el informe original.
   > - **Nueva auditoría desde cero** — audita todas las normas de nuevo, ignorando el informe anterior.
 
   Una sola pregunta; opciones cortas y mutuamente excluyentes. Si el cliente no expone la
@@ -86,16 +89,45 @@ ls docs/adr/audits/audit-*.md 2>/dev/null
 
 ### Comportamiento en Revalidación
 
-1. Leer el informe previo elegido completo.
-2. Reevaluar **cada hallazgo** contra el estado actual del repo (misma inspección estática).
-3. Para cada uno, actualizar `Estado` y la columna de estado de acción:
-   - Incumplimiento ya no presente → marcar acción como **✅ Resuelto** y mover el hallazgo a una sección "Resueltos desde la última auditoría".
-   - Sigue presente → conservar/actualizar evidencias e incumplimientos con las rutas actuales.
-   - Nuevo incumplimiento de la misma regla → añadirlo.
-4. Detectar además **regresiones y hallazgos nuevos** aparecidos desde el informe anterior (no limitarse a las reglas ya listadas).
-5. Escribir el resultado en un archivo **nuevo** `audit-<hoy>.md` (nunca sobrescribir el anterior; el histórico se conserva). En el encabezado, `Tipo de ejecución: Revalidación de audit-YYYY-MM-DD.md`.
+El informe original (resumen ejecutivo, hallazgos, fitness functions, resumen de acciones, reglas
+no verificables) se preserva **tal cual se creó la primera vez** — una revalidación nunca reescribe,
+reordena ni elimina ese contenido. Los cambios de cada revalidación se documentan aparte.
 
-En una **Nueva auditoría desde cero** se ignora el histórico para el análisis y se parte de la Fase 1.
+1. Leer el informe previo elegido completo, incluida su sección `## Revalidaciones` si ya existe.
+   El **estado de referencia** para comparar no es solo el informe original: es el informe original
+   **ajustado** por los cambios acumulados en todas las entradas de `## Revalidaciones` previas (p.
+   ej. un hallazgo marcado `✅ Resuelto` en una revalidación anterior ya no cuenta como incumplimiento
+   vigente al comparar).
+2. Repetir la recopilación y verificación contra el estado actual del repo, reutilizando las mismas
+   fases que una auditoría nueva, sin modificar nada de lo ya escrito en el documento:
+   - **Fase 1** — detectar ADR o reglas de `AGENTS.md` **nuevas** desde la última verificación.
+   - **Fase 2** — reevaluar cada regla/hallazgo ya documentado contra el estado actual.
+   - **Fase 2B** — re-ejecutar las fitness functions existentes y las creadas desde la última verificación.
+   - **Fase 3.5** — reverificar las dependencias de los ADR auditados (ver esa fase); su resultado se
+     trata como un cambio evidenciado más, no se pregunta ni se escribe por separado.
+3. Identificar **solo los cambios evidenciados** en esta corrida frente al estado de referencia (paso 1):
+   - Incumplimiento ya no presente → cambio `✅ Resuelto`.
+   - Sigue presente pero con evidencia nueva relevante → registrar el cambio de evidencia.
+   - Nuevo incumplimiento o regresión (de una regla ya auditada o de una nueva) → registrarlo.
+   - Dependencia que faltaba y ya fue instalada, sigue faltando, o aparece una nueva (Fase 3.5) → registrarlo.
+   - Si no hubo ningún cambio desde la última verificación, la entrada lo indica explícitamente
+     ("Sin cambios respecto a la última verificación.") en vez de listar hallazgos sin novedad.
+4. Calcular fecha y hora de esta ejecución:
+   ```bash
+   date "+%F %H:%M"
+   ```
+5. Calcular el **veredicto resultante** de esta revalidación, considerando el estado combinado
+   (estado de referencia del paso 1 + cambios evidenciados en los pasos 2-3).
+6. **Añadir al final del mismo archivo** (nunca crear un archivo nuevo ni sobrescribir lo anterior)
+   una **única** entrada nueva en `## Revalidaciones`, con la fecha/hora, el veredicto resultante y
+   todos los cambios evidenciados (incluida la verificación de dependencias), siguiendo la estructura
+   de `assets/audit-template.md`.
+7. Actualizar el campo `Veredicto` de la **cabecera** de ese mismo archivo: conservar el
+   veredicto vigente y agregar junto a él `(revalidado YYYY-MM-DD HH:MM)` con la fecha/hora de esta
+   revalidación. Es el único dato del contenido original que una revalidación sí actualiza.
+
+En una **Nueva auditoría desde cero** se ignora el histórico para el análisis, se crea un archivo
+**nuevo** `audit-<hoy>.md` y se parte de la Fase 1.
 
 ---
 
@@ -235,19 +267,22 @@ con `Estado: Pendiente` y el esbozo, para que la próxima auditoría la descubra
 
 ## Fase 3 — Redactar el informe
 
+Esta fase aplica a una **Nueva auditoría desde cero**. Para revalidaciones, seguir en cambio el
+flujo de `Comportamiento en Revalidación` descrito en la Fase 0 — no se reescribe el informe.
+
 1. Calcular la fecha de hoy:
    ```bash
    date +%F
    ```
 2. Asegurar el directorio: `docs/adr/audits/` (crearlo si no existe).
 3. Leer `assets/audit-template.md` y redactar `docs/adr/audits/audit-<hoy>.md` siguiendo su estructura:
-   - Encabezado con fecha, alcance, método, fuentes normativas y tipo de ejecución.
+   - Encabezado con fecha, alcance, método, fuentes normativas, tipo de ejecución y **veredicto** (`✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones`, siguiendo el patrón de `trace-validate`).
      - **Alcance:** ser específico — indicar cuántos ADR se auditaron sobre el total y el desglose por estado de los excluidos, más las fuentes de AGENTS.md consideradas. Ejemplo: `10/12 · 1 Draft, 1 Superseded excluidos + AGENTS.md raíz`.
      - **Método:** no es un texto fijo — describir en una frase corta qué se usó realmente en esta auditoría: las técnicas de inspección aplicadas (p. ej. `grep`, lectura de manifiestos) y las fitness functions ejecutadas. Aclarar que no se corre el build ni la suite completa.
-   - **Resumen ejecutivo** con la tabla de conteos por prioridad y estado, y un veredicto general.
+   - **Resumen ejecutivo** con la tabla de conteos por prioridad y estado, seguida de 1-3 frases con la lectura global de la salud arquitectónica del repo.
    - Hallazgos **agrupados por prioridad** (alta → media → baja). Por cada hallazgo: la regla/ADR incumplido, `Estado`, `Evidencias` (✔ a favor / ✖ en contra), `Incumplimientos` (rutas de archivos), y `Acción sugerida`. Si el ADR tiene fitness function, incluir en `Evidencias` el resultado de ejecutarla (PASS/FAIL + comando).
    - **Fitness functions**: una sub-tabla de las **existentes** (ADR, herramienta, comando, resultado PASS/FAIL/No ejecutable) y una lista de las **sugeridas** (ADR apto sin fitness function → qué medir, herramienta y esbozo).
-   - **Resumen de acciones** en tabla, cada una con su estado (⬜ Pendiente por defecto; en revalidación arrastrar y actualizar los estados previos). Incluir aquí las sugerencias de creación de fitness functions como acciones.
+   - **Resumen de acciones** en tabla, cada una con su estado inicial `⬜ Pendiente`. Incluir aquí las sugerencias de creación de fitness functions como acciones. Esta tabla no se modifica en revalidaciones posteriores (ver Fase 0).
    - Sección de reglas **No verificables**.
 4. **Nunca sobrescribir** un informe anterior: el nombre lleva la fecha para conservar el histórico. Si ya existe un `audit-<hoy>.md` del mismo día, actualizarlo (no duplicar).
 
@@ -272,13 +307,58 @@ Acción sugerida: Migrar los 3 endpoints a resolvers GraphQL, o registrar un ADR
 
 ---
 
+## Fase 3.5 — Verificar dependencias de los ADR auditados
+
+Comprobar si las dependencias concretas que implican los ADR auditados están instaladas y
+configuradas en el proyecto.
+
+- **En una nueva auditoría:** se ejecuta después de generar el informe (Fase 3) y antes de
+  confirmar (Fase 4); si falta algo y el usuario rechaza instalarlo, se deja constancia editando
+  el informe recién escrito (aún no confirmado).
+- **En una revalidación:** se ejecuta como parte del paso 2-3 de `Comportamiento en Revalidación`
+  (Fase 0), **antes** de escribir la entrada en `## Revalidaciones`; su resultado se incorpora como
+  un cambio evidenciado más dentro de esa única entrada — no se escribe ni se pregunta por separado.
+
+1. **Extraer las dependencias concretas** que implica cada ADR auditado (priorizando los `Accepted`),
+   a partir de su `## Decision` (y `## Contexto`). Contar solo dependencias reales e instalables
+   (p. ej. `GraphQL → @apollo/server`, `Prisma`, `Spring Web`), no conceptos abstractos ("arquitectura
+   hexagonal" no es una dependencia).
+2. **Comprobar si ya existen**, leyendo el manifiesto del ecosistema y su lockfile: `package.json`,
+   `pom.xml`/`build.gradle`, `pyproject.toml`/`requirements.txt`, `*.csproj`, `go.mod`, `Cargo.toml`, etc.
+3. **Si falta una o más, notificar al usuario y preguntar explícitamente** con la herramienta de
+   preguntas estructuradas, agrupando todas las dependencias faltantes detectadas en la auditoría
+   (una sola pregunta, no una por ADR):
+
+   > "Los ADR auditados referencian dependencias que no están instaladas o configuradas en el
+   > proyecto: `<lista>`. ¿Quieres que las instale y configure ahora?"
+   > Opciones: [Sí, instalar y configurar] / [No, solo dejarlo señalado en el informe]
+
+   **No instalar ni configurar nada sin la aprobación explícita del usuario.**
+
+4. **Si acepta:**
+   - Instalar con el gestor del ecosistema detectado (`npm`/`pnpm`/`yarn`, `pip`/`poetry`/`uv`,
+     Maven/Gradle, `dotnet add package`, `go get`, `cargo add`, etc.), respetando el que ya use el repo.
+   - Aplicar la **configuración mínima** necesaria para que quede operativa (archivo de config, entrada
+     en el manifiesto, wiring básico), sin construir la feature completa.
+   - Mostrar los comandos ejecutados y los archivos tocados. No correr build ni despliegues por
+     iniciativa propia.
+   - Continuar a la Fase 4 dejando constancia de lo instalado en el resumen final.
+
+5. **Si rechaza:** dejar constancia de la dependencia faltante — en una nueva auditoría, como
+   incumplimiento adicional del ADR si corresponde o en `## Observaciones` / `## Reglas no
+   verificables por inspección estática`; en una revalidación, como parte de los cambios evidenciados
+   en la entrada de `## Revalidaciones` — para que sea visible en una futura verificación.
+
+---
+
 ## Fase 4 — Confirmar
 
 Al terminar, mostrar al usuario:
-- Ruta del informe generado (`docs/adr/audits/audit-<hoy>.md`).
-- El veredicto general y el conteo de hallazgos por prioridad (p. ej. "🔴 2 · 🟡 3 · ⚪ 1").
+- Ruta del informe (nuevo `audit-<hoy>.md`, o el mismo archivo si fue revalidación).
+- El veredicto vigente (con la fecha/hora de revalidación si aplica) y el conteo de hallazgos por prioridad (p. ej. "🔴 2 · 🟡 3 · ⚪ 1").
 - Resumen de fitness functions: cuántas se ejecutaron (PASS/FAIL) y cuántas se sugiere crear.
-- Si fue revalidación: cuántos hallazgos previos quedaron resueltos y cuántos nuevos aparecieron.
+- Resultado de la verificación de dependencias (Fase 3.5): cuáles faltaban, si se instalaron o quedaron señaladas en el informe.
+- Si fue revalidación: fecha/hora registrada y un resumen de los cambios evidenciados que se añadieron a `## Revalidaciones` (resueltos, nuevos, regresiones, o "sin cambios").
 
 Ofrecer, sin ejecutarlo salvo que el usuario lo pida, el siguiente paso lógico: documentar
 excepciones con `adr-manage`, crear las fitness functions sugeridas, o planificar la remediación de
@@ -288,12 +368,13 @@ los hallazgos de alta prioridad.
 
 ## Notas de comportamiento
 
-- **Auditar, no arreglar.** Este skill diagnostica y propone; no modifica código de la aplicación ni "corrige" incumplimientos por iniciativa propia. Tampoco crea las fitness functions: las **sugiere**.
-- **Ejecución acotada.** Solo se ejecutan las fitness functions / chequeos de arquitectura detectados, con comandos de solo lectura. Nunca correr scripts de propósito desconocido, ni comandos que instalen, desplieguen o modifiquen el repo; ante la duda, preguntar antes de ejecutar.
+- **Auditar, no arreglar.** Este skill diagnostica y propone; no modifica código de la aplicación ni "corrige" incumplimientos por iniciativa propia. Tampoco crea las fitness functions: las **sugiere**. La única excepción es instalar/configurar dependencias faltantes (Fase 3.5), y solo con aprobación explícita del usuario.
+- **Ejecución acotada.** Solo se ejecutan las fitness functions / chequeos de arquitectura detectados, con comandos de solo lectura. Nunca correr scripts de propósito desconocido, ni comandos que desplieguen o modifiquen el repo más allá de la instalación de dependencias aprobada en la Fase 3.5; ante la duda, preguntar antes de ejecutar.
 - **Rutas reales, no ejemplos.** Los `src/UserController.php` del ejemplo son ilustrativos; en el informe deben ir siempre rutas verdaderas del repo auditado.
 - **No inventar reglas ni veredictos.** Solo se auditan normas que existan en `docs/adr/` o `AGENTS.md`. Ante evidencia ambigua, preferir ⚠️ o ❔ y explicar la duda, en vez de afirmar un incumplimiento.
 - **Priorizar señal sobre volumen.** Mejor pocos hallazgos sólidos y bien evidenciados que una lista larga de detalles triviales.
 - **Sin ADR ni AGENTS.md:** si no hay ninguna fuente normativa, informarlo y sugerir `adr-discover` (para descubrir decisiones) o crear un `AGENTS.md`; no fabricar un informe vacío de reglas inventadas.
+- **Informe inmutable, revalidaciones aparte.** El contenido escrito al crear el informe (resumen ejecutivo, hallazgos, fitness functions, resumen de acciones, reglas no verificables) no se modifica nunca. Cada revalidación se documenta como una entrada nueva en `## Revalidaciones`; el único campo del contenido original que una revalidación actualiza es `Veredicto` en la cabecera.
 
 ---
 

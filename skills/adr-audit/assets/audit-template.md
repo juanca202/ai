@@ -5,7 +5,15 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el informe final.
 Esta plantilla es la referencia canónica del informe de auditoría de cumplimiento
 (Architecture Compliance Checking). El skill adr-audit la lee antes de redactar cada
 informe. Mantener la estructura: resumen → hallazgos agrupados por prioridad → resumen
-de acciones. Un hallazgo = una regla incumplida (un ADR-XXX o una regla de AGENTS.md).
+de acciones → reglas no verificables → revalidaciones (si las hay). Un hallazgo = una
+regla incumplida (un ADR-XXX o una regla de AGENTS.md).
+
+Todo el contenido hasta "## Reglas no verificables por inspección estática" (incluida la cabecera)
+se escribe una sola vez, al crear el informe, y permanece inalterado en el tiempo — las
+revalidaciones NO lo modifican, con una única excepción: el campo "Veredicto" de la
+cabecera, que sí se actualiza en cada revalidación para reflejar el veredicto vigente y la
+fecha/hora que lo confirma. Cada revalidación posterior agrega además una entrada nueva en
+"## Revalidaciones" al final del documento, sin tocar nada de lo anterior.
 -->
 
 # Informe de Auditoría de Cumplimiento — {{YYYY-MM-DD}}
@@ -14,7 +22,8 @@ de acciones. Un hallazgo = una regla incumplida (un ADR-XXX o una regla de AGENT
 **Repositorio**: {{nombre/ruta del repo o subproyecto auditado}}
 **Alcance**: {{ADR auditados sobre el total y desglose por estado + fuentes AGENTS.md — p. ej. "10/12 · 1 Draft, 1 Superseded excluidos + AGENTS.md raíz"}}
 **Método**: {{descripción corta de lo que realmente se usó en esta auditoría — herramientas de inspección y fitness functions ejecutadas, p. ej. "grep + lectura de package.json/pom.xml; fitness function dependency-cruiser ejecutada". No se corre el build ni la suite completa.}}
-**Tipo de ejecución**: {{Nueva auditoría desde cero | Revalidación de audit-YYYY-MM-DD.md}}
+**Tipo de ejecución**: Nueva auditoría desde cero {{este campo es fijo: el archivo se crea una sola vez y las revalidaciones no lo modifican; el historial de revalidaciones vive en ## Revalidaciones}}
+**Veredicto**: {{✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones}} {{si hubo alguna revalidación, agregar aquí mismo "(revalidado YYYY-MM-DD HH:MM)" con la fecha/hora de la última entrada de ## Revalidaciones; omitir si no hubo ninguna}}
 
 ## Resumen ejecutivo
 
@@ -24,7 +33,6 @@ de acciones. Un hallazgo = una regla incumplida (un ADR-XXX o una regla de AGENT
 | 🟡 Media  | {{n}}      | {{n}}     | {{n}}        | {{n}}             |
 | ⚪ Baja   | {{n}}      | {{n}}     | {{n}}        | {{n}}             |
 
-Veredicto general: {{Conforme | Conforme con observaciones | No conforme}}
 {{1–3 frases con la lectura global de la salud arquitectónica del repo frente a sus normas.}}
 
 ---
@@ -105,7 +113,7 @@ automatizados que validan los ADR). Dos partes: existentes (ejecutadas) y sugeri
 aptos que aún no tienen una). Si un ADR no es apto para automatizar, no listarlo aquí.
 -->
 
-### Existentes (ejecutadas)
+### Existentes
 
 | ADR | Fitness function / herramienta | Comando ejecutado | Resultado |
 |-----|-------------------------------|-------------------|-----------|
@@ -113,7 +121,7 @@ aptos que aún no tienen una). Si un ADR no es apto para automatizar, no listarl
 
 {{Si hay violaciones, detallarlas bajo el hallazgo del ADR correspondiente. Si no hay fitness functions existentes, escribir "Ninguna detectada.".}}
 
-### Sugeridas (ADR apto sin fitness function)
+### Sugeridas
 
 <!--
 Por cada ADR apto que NO tiene fitness function, sugerir crearla. Si todos los ADR aptos ya
@@ -142,7 +150,8 @@ tienen una, escribir "Ninguna: todos los ADR aptos ya están cubiertos.".
 
 <!--
 Estados de acción sugeridos: ⬜ Pendiente · 🔄 En progreso · ✅ Resuelto · 🚫 No aplica (excepción aceptada).
-En una revalidación, arrastrar los estados de la auditoría anterior y actualizarlos según la evidencia nueva.
+Esta tabla se escribe una sola vez, al crear el informe, y no se modifica en revalidaciones
+posteriores; sus cambios de estado se reflejan en las entradas de ## Revalidaciones al final.
 -->
 
 ## Reglas no verificables por inspección estática
@@ -153,3 +162,28 @@ Listar aquí las reglas/ADR cuyo cumplimiento no se puede confirmar solo leyendo
 Si no hay, escribir "Ninguna.".
 -->
 - {{ADR-XXX / regla}} — {{por qué no es verificable + evidencia que la confirmaría}}
+
+---
+
+## Revalidaciones
+
+<!--
+Esta sección solo existe si el informe fue revalidado al menos una vez. Todo lo anterior (resumen,
+hallazgos, fitness functions, resumen de acciones, reglas no verificables) se escribió una sola vez
+al crear el informe y no se toca en revalidaciones posteriores.
+
+Cada revalidación agrega una entrada NUEVA al final de esta sección (nunca editar ni eliminar
+entradas anteriores) mostrando solo los cambios evidenciados en esa corrida frente al estado
+anterior — no repetir hallazgos sin cambios. El veredicto resultante de la última entrada se
+refleja también en "Veredicto" de la cabecera, junto a la fecha/hora que lo confirma.
+-->
+
+### Revalidación — {{YYYY-MM-DD HH:MM}}
+
+**Veredicto resultante**: {{✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones}}
+
+**Cambios evidenciados:**
+
+- {{ADR-XXX | AGENTS.md §Regla}} — {{✅ Resuelto | ❌ Nuevo incumplimiento | ⚠️ Regresión / cambio de evidencia}}: {{descripción corta del cambio, con rutas afectadas si aplica}}
+
+{{Si no hubo ningún cambio desde la última verificación, escribir "Sin cambios respecto a la última verificación." y omitir la lista de arriba.}}
