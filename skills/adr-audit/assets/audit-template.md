@@ -22,10 +22,9 @@ fecha/hora que lo confirma. Cada revalidación posterior agrega además una entr
 **Repositorio**: {{nombre/ruta del repo o subproyecto auditado}}
 **Alcance**: {{ADR auditados sobre el total y desglose por estado + fuentes AGENTS.md — p. ej. "10/12 · 1 Draft, 1 Superseded excluidos + AGENTS.md raíz"}}
 **Método**: {{descripción corta de lo que realmente se usó en esta auditoría — herramientas de inspección y fitness functions ejecutadas, p. ej. "grep + lectura de package.json/pom.xml; fitness function dependency-cruiser ejecutada". No se corre el build ni la suite completa.}}
-**Tipo de ejecución**: Nueva auditoría desde cero {{este campo es fijo: el archivo se crea una sola vez y las revalidaciones no lo modifican; el historial de revalidaciones vive en ## Revalidaciones}}
 **Veredicto**: {{✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones}} {{si hubo alguna revalidación, agregar aquí mismo "(revalidado YYYY-MM-DD HH:MM)" con la fecha/hora de la última entrada de ## Revalidaciones; omitir si no hubo ninguna}}
 
-## Resumen ejecutivo
+## Resumen
 
 | Prioridad | Cumplido ✅ | Parcial ⚠️ | Incumplido ❌ | No verificable ❔ |
 |-----------|:----------:|:---------:|:------------:|:-----------------:|
