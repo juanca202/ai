@@ -5,10 +5,10 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 
 # Descubrimiento de Migración
 
-Estado: {{Draft | Ready}}
-Fecha: {{YYYY-MM-DD}}
-Proyecto origen: {{nombre / stack principal del origen}}
-Proyecto destino: {{nombre / stack principal del destino}}
+**Estado**: {{Draft | Ready}}
+**Fecha**: {{YYYY-MM-DD}}
+**Proyecto origen**: {{nombre / stack principal del origen}}
+**Proyecto destino**: {{nombre / stack principal del destino}}
 
 ## Descripción
 

@@ -5,11 +5,11 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 
 # TK-XXX: {{título corto de la tarea}}
 
-Estado: {{Draft | Ready}}
-Historia: {{enlace markdown al README.md de la historia US-XXX}}
-Repositorio: {{obligatorio: nombre del repositorio git al que afecta la tarea; inferido del repo (git remote / carpeta) o indicado por el usuario}}
-Asignado a: {{opcional: priorizar lo indicado por el usuario; si no, inferir con `git config user.name`; omitir línea si no aplica}}
-ADO Work Item: {{enlace markdown al work item de ADO — solo si se creó; omitir línea si no aplica}}
+**Estado**: {{Draft | Ready}}
+**Historia**: {{enlace markdown al README.md de la historia US-XXX}}
+**Repositorio**: {{obligatorio: nombre del repositorio git al que afecta la tarea; inferido del repo (git remote / carpeta) o indicado por el usuario}}
+**Asignado a**: {{opcional: priorizar lo indicado por el usuario; si no, inferir con `git config user.name`; omitir línea si no aplica}}
+**ADO Work Item**: {{enlace markdown al work item de ADO — solo si se creó; omitir línea si no aplica}}
 
 ## Descripción
 

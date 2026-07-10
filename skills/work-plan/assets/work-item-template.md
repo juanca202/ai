@@ -5,11 +5,11 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 
 # WI-XXX: {{título corto del work item}}
 
-Estado: {{Draft | Ready}}
-Tipo: {{bug | refactor | deuda-técnica | dependencias | operativa}}
-Repositorio: {{obligatorio para Ready: nombre del repositorio git al que afecta el work item; inferido del repo (git remote / carpeta) o indicado por el usuario}}
-Asignado a: {{opcional: priorizar lo indicado por el usuario; si no, inferir con `git config user.name`; omitir línea si no aplica}}
-ADO Work Item: {{enlace markdown al work item de ADO — solo si se creó; omitir línea si no aplica}}
+**Estado**: {{Draft | Ready}}
+**Tipo**: {{bug | refactor | deuda-técnica | dependencias | operativa}}
+**Repositorio**: {{obligatorio para Ready: nombre del repositorio git al que afecta el work item; inferido del repo (git remote / carpeta) o indicado por el usuario}}
+**Asignado a**: {{opcional: priorizar lo indicado por el usuario; si no, inferir con `git config user.name`; omitir línea si no aplica}}
+**ADO Work Item**: {{enlace markdown al work item de ADO — solo si se creó; omitir línea si no aplica}}
 
 ## Descripción
 

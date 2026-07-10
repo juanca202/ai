@@ -5,9 +5,9 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 
 # Progreso
 
-## Trabajo: {{identificador del trabajo}}
-- Tipo: {{historia de usuario | work item | migracion}}
-- Ultima actualizacion: {{YYYY-MM-DD}}
+## {{identificador del trabajo}}
+**Tipo:** {{historia de usuario | work item | migracion}}
+**Ultima actualizacion:** {{YYYY-MM-DD}}
 
 > **Valores del identificador:** `US-XXX` (historia), `Work items de mantenimiento` (WI compartido) o `MG-XXX-{{slug}}` (migración; p. ej. `MG-005-api-legacy`).
 > **Ubicacion y alcance por tipo:**

@@ -5,11 +5,11 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 
 # ADR-XXX: {{titulo}}
  
-Estado: {{Draft | Proposed | Accepted | Deprecated | Superseded}}
-Fecha de creación: {{YYYY-MM-DD}}
-Última actualización: {{YYYY-MM-DD}}
-Decisores: {{nombres/roles}}
-Etiquetas: {{nextjs, app-router, rsc, performance, security, etc.}}
+**Estado**: {{Draft | Proposed | Accepted | Deprecated | Superseded}}
+**Fecha de creación**: {{YYYY-MM-DD}}
+**Última actualización**: {{YYYY-MM-DD}}
+**Decisores**: {{nombres/roles}}
+**Etiquetas**: {{nextjs, app-router, rsc, performance, security, etc.}}
 
 ## Contexto 
 
