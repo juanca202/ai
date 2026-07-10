@@ -81,6 +81,17 @@ Verificar también si ya existen investigaciones previas en la carpeta `research
 
 ---
 
+## Paso 2.5 — Inspeccionar referencias visuales (imágenes y Figma)
+
+Si el usuario proporcionó referencias (imágenes adjuntas, capturas, enlaces a Figma u otros archivos de diseño) — ya sea en el mensaje o dentro del artefacto vinculado cargado en el Paso 2 — inspeccionarlas antes de investigar:
+
+1. **Abrir e inspeccionar cada referencia en detalle** — leer la imagen o el archivo de Figma (layouts, componentes, estados, anotaciones, specs de diseño), no de forma superficial.
+2. **Detectar lagunas** — si al inspeccionar surge cualquier duda, ambigüedad o falta de detalle necesario para especificar, planificar o implementar (p. ej. estado no cubierto, medida no definida, comportamiento no anotado, texto ilegible, componente sin especificar), no asumir ni rellenar por cuenta propia.
+3. **No dejar pasar nada sin resolver** — usar la herramienta de preguntas estructuradas para aclarar cada laguna detectada antes de continuar. No avanzar al Paso 3 con dudas pendientes sobre las referencias.
+4. Si el enlace de Figma no es accesible directamente, informarlo al usuario y pedir capturas o exportación del contenido relevante.
+
+---
+
 ## Paso 3 — Investigar
 
 Ejecutar la investigación según el dominio identificado. Usar búsqueda web, documentación oficial, repositorios públicos y cualquier recurso disponible.
@@ -167,6 +178,7 @@ Guardar directamente en `docs/specs/research/RS-XXX-{slug}.md` (el usuario ya co
 - Reutilizar un número de secuencia ya existente en la carpeta `research/`.
 - Asumir el artefacto vinculado sin haberlo leído; si no existe, avisar y continuar sin él.
 - Lanzar preguntas como prosa libre cuando el cliente expone herramienta de preguntas estructuradas.
+- Pasar por alto imágenes o enlaces de Figma referenciados sin inspeccionarlos, dejando lagunas sin resolver.
 
 ---
 
