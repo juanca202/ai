@@ -4,8 +4,8 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el informe final.
 
 Esta plantilla es la referencia canónica del informe de auditoría de cumplimiento
 (Architecture Compliance Checking). El skill adr-audit la lee antes de redactar cada
-informe. Mantener la estructura: resumen → hallazgos agrupados por prioridad → resumen
-de acciones → reglas no verificables → revalidaciones (si las hay). Un hallazgo = una
+informe. Mantener la estructura: resumen → hallazgos agrupados por prioridad → fitness
+functions → reglas no verificables → revalidaciones (si las hay). Un hallazgo = una
 regla incumplida (un ADR-XXX o una regla de AGENTS.md).
 
 Todo el contenido hasta "## Reglas no verificables por inspección estática" (incluida la cabecera)
@@ -46,21 +46,20 @@ Repetir el bloque siguiente por cada hallazgo. Si no hay hallazgos, escribir "Si
 
 ### {{ADR-012 | AGENTS.md §Regla}} — {{título de la regla o decisión}}
 
-Fuente: {{docs/adr/ADR-012-graphql.md | AGENTS.md §APIs}}
-Regla auditada: {{enunciado de la decisión/regla en una frase}}
-Estado: {{✅ Cumplido | ⚠️ Parcialmente cumplido | ❌ Incumplido | ❔ No verificable}}
+**Fuente:** {{docs/adr/ADR-012-graphql.md | AGENTS.md §APIs}}
+**Regla auditada:** {{enunciado de la decisión/regla en una frase}}
+**Estado:** {{✅ Cumplido | ⚠️ Parcialmente cumplido | ❌ Incumplido | ❔ No verificable}}
 
-Evidencias:
+**Evidencias:**
 - ✔ {{evidencia a favor — p. ej. "92% del código usa GraphQL"}}
 - ✖ {{evidencia en contra — p. ej. "Se encontraron 3 endpoints REST nuevos"}}
 
-Incumplimientos:
+**Incumplimientos:**
 - `{{src/UserController.php}}` — {{qué infringe concretamente}}
 - `{{src/ProductController.php}}` — {{qué infringe concretamente}}
 
-Acción sugerida: {{acción concreta y accionable — migrar, revertir, documentar excepción, crear/actualizar ADR, etc.}}
-
----
+**Acción sugerida:** 
+{{acción concreta y accionable — migrar, revertir, documentar excepción, crear/actualizar ADR, etc.}}
 
 ## 🟡 Prioridad media
 
@@ -68,20 +67,19 @@ Acción sugerida: {{acción concreta y accionable — migrar, revertir, document
 
 ### {{ADR-XXX | AGENTS.md §Regla}} — {{título}}
 
-Fuente: {{ruta}}
-Regla auditada: {{enunciado}}
-Estado: {{✅ | ⚠️ | ❌ | ❔}}
+**Fuente:** {{ruta}}
+**Regla auditada:** {{enunciado}}
+**Estado:** {{✅ | ⚠️ | ❌ | ❔}}
 
-Evidencias:
+**Evidencias:**
 - ✔ {{…}}
 - ✖ {{…}}
 
-Incumplimientos:
+**Incumplimientos:**
 - `{{ruta/archivo}}` — {{detalle}}
 
-Acción sugerida: {{…}}
-
----
+**Acción sugerida:** 
+{{…}}
 
 ## ⚪ Prioridad baja
 
@@ -100,7 +98,8 @@ Acción sugerida: {{…}}
 **Incumplimientos:**
 - `{{ruta/archivo}}` — {{detalle}}
 
-**Acción sugerida:** {{…}}
+**Acción sugerida:** 
+{{…}}
 
 ---
 
@@ -152,8 +151,8 @@ Si no hay, escribir "Ninguna.".
 
 <!--
 Esta sección solo existe si el informe fue revalidado al menos una vez. Todo lo anterior (resumen,
-hallazgos, fitness functions, resumen de acciones, reglas no verificables) se escribió una sola vez
-al crear el informe y no se toca en revalidaciones posteriores.
+hallazgos, fitness functions, reglas no verificables) se escribió una sola vez al crear el informe
+y no se toca en revalidaciones posteriores.
 
 Cada revalidación agrega una entrada NUEVA al final de esta sección (nunca editar ni eliminar
 entradas anteriores) mostrando solo los cambios evidenciados en esa corrida frente al estado

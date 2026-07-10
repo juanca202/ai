@@ -89,8 +89,8 @@ ls docs/adr/audits/audit-*.md 2>/dev/null
 
 ### Comportamiento en Revalidación
 
-El informe original (resumen ejecutivo, hallazgos, fitness functions, resumen de acciones, reglas
-no verificables) se preserva **tal cual se creó la primera vez** — una revalidación nunca reescribe,
+El informe original (resumen, hallazgos, fitness functions, reglas no verificables) se
+preserva **tal cual se creó la primera vez** — una revalidación nunca reescribe,
 reordena ni elimina ese contenido. Los cambios de cada revalidación se documentan aparte.
 
 1. Leer el informe previo elegido completo, incluida su sección `## Revalidaciones` si ya existe.
@@ -204,7 +204,7 @@ Asignar prioridad al **incumplimiento** (no a la regla en abstracto):
 - **🟡 Media** — decisión relevante de alcance acotado, o desviación parcial sin riesgo inmediato.
 - **⚪ Baja** — convenciones, estilo o impacto menor; desviaciones tolerables.
 
-Una regla en estado ✅ Cumplido no genera hallazgo con prioridad, pero cuenta en el resumen ejecutivo.
+Una regla en estado ✅ Cumplido no genera hallazgo con prioridad, pero cuenta en el resumen.
 
 ---
 
@@ -276,13 +276,12 @@ flujo de `Comportamiento en Revalidación` descrito en la Fase 0 — no se reesc
    ```
 2. Asegurar el directorio: `docs/adr/audits/` (crearlo si no existe).
 3. Leer `assets/audit-template.md` y redactar `docs/adr/audits/audit-<hoy>.md` siguiendo su estructura:
-   - Encabezado con fecha, alcance, método, fuentes normativas, tipo de ejecución y **veredicto** (`✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones`, siguiendo el patrón de `trace-validate`).
+   - Encabezado con fecha, repositorio, alcance, método y **veredicto** (`✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones`, siguiendo el patrón de `trace-validate`).
      - **Alcance:** ser específico — indicar cuántos ADR se auditaron sobre el total y el desglose por estado de los excluidos, más las fuentes de AGENTS.md consideradas. Ejemplo: `10/12 · 1 Draft, 1 Superseded excluidos + AGENTS.md raíz`.
      - **Método:** no es un texto fijo — describir en una frase corta qué se usó realmente en esta auditoría: las técnicas de inspección aplicadas (p. ej. `grep`, lectura de manifiestos) y las fitness functions ejecutadas. Aclarar que no se corre el build ni la suite completa.
-   - **Resumen ejecutivo** con la tabla de conteos por prioridad y estado, seguida de 1-3 frases con la lectura global de la salud arquitectónica del repo.
+   - **Resumen** con la tabla de conteos por prioridad y estado, seguida de 1-3 frases con la lectura global de la salud arquitectónica del repo.
    - Hallazgos **agrupados por prioridad** (alta → media → baja). Por cada hallazgo: la regla/ADR incumplido, `Estado`, `Evidencias` (✔ a favor / ✖ en contra), `Incumplimientos` (rutas de archivos), y `Acción sugerida`. Si el ADR tiene fitness function, incluir en `Evidencias` el resultado de ejecutarla (PASS/FAIL + comando).
    - **Fitness functions**: una sub-tabla de las **existentes** (ADR, herramienta, comando, resultado PASS/FAIL/No ejecutable) y una lista de las **sugeridas** (ADR apto sin fitness function → qué medir, herramienta y esbozo).
-   - **Resumen de acciones** en tabla, cada una con su estado inicial `⬜ Pendiente`. Incluir aquí las sugerencias de creación de fitness functions como acciones. Esta tabla no se modifica en revalidaciones posteriores (ver Fase 0).
    - Sección de reglas **No verificables**.
 4. **Nunca sobrescribir** un informe anterior: el nombre lleva la fecha para conservar el histórico. Si ya existe un `audit-<hoy>.md` del mismo día, actualizarlo (no duplicar).
 
@@ -290,19 +289,19 @@ flujo de `Comportamiento en Revalidación` descrito en la Fase 0 — no se reesc
 
 ```
 ### ADR-012 — Uso de GraphQL para la capa de API
-Fuente: docs/adr/ADR-012-graphql.md
-Regla auditada: Toda API expuesta debe implementarse en GraphQL, no REST.
-Estado: ⚠️ Parcialmente cumplido
+**Fuente:** docs/adr/ADR-012-graphql.md
+**Regla auditada:** Toda API expuesta debe implementarse en GraphQL, no REST.
+**Estado:** ⚠️ Parcialmente cumplido
 
-Evidencias:
+**Evidencias:**
 - ✔ 92% del código usa GraphQL
 - ✖ Se encontraron 3 endpoints REST nuevos
 
-Incumplimientos:
+**Incumplimientos:**
 - src/UserController.php — expone rutas REST (`GET /users`)
 - src/ProductController.php — expone rutas REST (`POST /products`)
 
-Acción sugerida: Migrar los 3 endpoints a resolvers GraphQL, o registrar un ADR de excepción si REST es intencional aquí.
+**Acción sugerida:** Migrar los 3 endpoints a resolvers GraphQL, o registrar un ADR de excepción si REST es intencional aquí.
 ```
 
 ---
@@ -374,7 +373,7 @@ los hallazgos de alta prioridad.
 - **No inventar reglas ni veredictos.** Solo se auditan normas que existan en `docs/adr/` o `AGENTS.md`. Ante evidencia ambigua, preferir ⚠️ o ❔ y explicar la duda, en vez de afirmar un incumplimiento.
 - **Priorizar señal sobre volumen.** Mejor pocos hallazgos sólidos y bien evidenciados que una lista larga de detalles triviales.
 - **Sin ADR ni AGENTS.md:** si no hay ninguna fuente normativa, informarlo y sugerir `adr-discover` (para descubrir decisiones) o crear un `AGENTS.md`; no fabricar un informe vacío de reglas inventadas.
-- **Informe inmutable, revalidaciones aparte.** El contenido escrito al crear el informe (resumen ejecutivo, hallazgos, fitness functions, resumen de acciones, reglas no verificables) no se modifica nunca. Cada revalidación se documenta como una entrada nueva en `## Revalidaciones`; el único campo del contenido original que una revalidación actualiza es `Veredicto` en la cabecera.
+- **Informe inmutable, revalidaciones aparte.** El contenido escrito al crear el informe (resumen, hallazgos, fitness functions, reglas no verificables) no se modifica nunca. Cada revalidación se documenta como una entrada nueva en `## Revalidaciones`; el único campo del contenido original que una revalidación actualiza es `Veredicto` en la cabecera.
 
 ---
 
