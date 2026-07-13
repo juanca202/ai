@@ -11,10 +11,10 @@ Referencias del skill **work-integrate**. Cubren los tres tipos de trabajo (`US-
 - *Entrada:* Rama `feature/US-042-exportacion-csv`, working tree limpio, `progress.md` con tres TK todas en `Done`, reflog indica `Created from develop`.
 - *Salida:* `git checkout develop` → `git merge --no-ff feature/US-042-exportacion-csv -m "Merge US-042: exportacion-csv"` → reporte: «Merged 7 commits de `feature/US-042-exportacion-csv` → `develop`. Commit de merge: `a1b2c3d`. HEAD en `develop`, working tree limpio. La rama no fue borrada ni se hizo push.»
 
-**Ejemplo 2 — Work item (progress.md compartido)**
+**Ejemplo 2 — Work item (progress.md por carpeta del WI)**
 
-- *Entrada:* Rama `fix/WI-007-fuga-memoria`, working tree limpio, `docs/specs/work-items/progress.md` con `WI-007` en `Done` y `WI-009` en `In Progress`, reflog indica `Created from main`.
-- *Salida:* Solo se verifica `WI-007` (la entrada de otros WI no bloquea). `git checkout main` → `git merge --no-ff fix/WI-007-fuga-memoria -m "Merge WI-007: fuga-memoria"` → reporte con commits integrados y hash de merge.
+- *Entrada:* Rama `fix/WI-007-fuga-memoria`, working tree limpio, `docs/specs/work-items/WI-007-fuga-memoria/progress.md` con todas las unidades del WI en `Done`, reflog indica `Created from main`.
+- *Salida:* `git checkout main` → `git merge --no-ff fix/WI-007-fuga-memoria -m "Merge WI-007: fuga-memoria"` → reporte con commits integrados y hash de merge.
 
 **Ejemplo 3 — Migración por fases**
 
@@ -58,7 +58,7 @@ Referencias del skill **work-integrate**. Cubren los tres tipos de trabajo (`US-
 ## Anti-patterns
 
 - Hacer merge sin verificar `progress.md` o ignorando unidades no `Done`.
-- Para work items, bloquear el merge porque **otros** WI del `progress.md` compartido no están `Done`; solo cuenta el `WI-XXX` de la rama.
+- Buscar el `progress.md` de un WI en un archivo compartido `docs/specs/work-items/progress.md`; cada WI tiene su propio `progress.md` dentro de su carpeta `WI-XXX-[kebab-case]/`.
 - Hacer merge sin haber ejecutado `code-review` o con veredicto **❌ No apto** / **⚠️ Incompleto** — el merge solo procede con veredicto **✅ Apto**.
 - Modificar `progress.md` para «forzar» que aparezcan en `Done` sin que el trabajo esté completo.
 - Aceptar ramas sin un identificador de trabajo reconocible o con prefijos no válidos para su tipo (p. ej. `bugfix/`, `hotfix/`, o `fix/` aplicado a una US/MG).

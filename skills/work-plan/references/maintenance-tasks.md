@@ -110,7 +110,7 @@ Un stub reserva el ID. No requiere requerimiento detallado ni contexto técnico 
    - **Criterios de aceptación / Plan de implementación**: vacíos o ausentes si aún no están definidos.
    - **Observaciones**: pendientes reales; no rellenar con texto genérico.
 3. **Parar aquí.** No continuar con los pasos de WI completo.
-4. **Handoff:** stub en `Draft` — completar a `Ready` con *Flujo: Crear WI completo* (modo A) antes de **`work-implement`**.
+4. **Handoff:** stub en `Draft` — completar a `Ready` con *Flujo: Crear WI completo* (modo A) antes de **`work-implement`**. La implementación, cuando proceda, se hace **invocando `/work-implement`**, no directamente.
 
 ---
 
@@ -129,7 +129,7 @@ Un WI completo puede alcanzar `Estado: Ready` si cumple todas las condiciones de
    - **Observaciones**: solo si hay pendientes reales. Si no hay nada, **omitir la sección**. Con pendientes reales: `Estado: Draft`.
 3. **Actualizar** technical-docs y glossary si aplica (entradas breves; glossary no sustituye ADR ni technical-doc).
 4. **Verificar el checklist** antes de asignar `Estado: Ready`.
-5. **Handoff:** si el WI está `Ready`, sugerir **`work-implement`**. Si quedó en `Draft`, listar qué falta para completarlo.
+5. **Handoff:** si el WI está `Ready` y el usuario quiere implementar, **invocar `/work-implement`** (no implementar directamente desde este skill). Si quedó en `Draft`, listar qué falta para completarlo.
 
 ---
 
@@ -249,7 +249,7 @@ Posición: **planificación** — un WI de mantenimiento es **autocontenido**, n
 |--|--|
 | **Entrada** | Petición de mantenimiento del usuario (bug, refactor, deuda técnica, dependencias, operativa). No requiere una US previa. |
 | **Salida para implementar** | WI en **`Estado: Ready`** (Requerimiento, Criterios, Plan, Dependencias y Referencias según checklist). Stubs en Draft **no** habilitan `work-implement`. |
-| **Siguiente paso** | **`work-implement`** — solo cuando el WI a ejecutar está `Ready`. |
+| **Siguiente paso** | **Invocar `/work-implement`** — solo cuando el WI a ejecutar está `Ready`. La implementación nunca se hace directamente desde `work-plan`. |
 | **Regreso desde implement** | Ambigüedad técnica o alcance incorrecto → ajustar el WI aquí. |
 
 ### Repositorio afectado

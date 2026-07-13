@@ -36,7 +36,7 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 **Validación:**
 - [ ] `git status --porcelain` sin salida (working tree limpio)
 - [ ] `progress.md` existe en la ubicación del tipo
-- [ ] **Todas** las unidades del trabajo de la rama en estado `Done` (para WI, solo su `WI-XXX`)
+- [ ] **Todas** las unidades del trabajo de la rama en estado `Done` (leídas del `progress.md` en la carpeta del trabajo)
 - [ ] **`code-review`** ejecutado con veredicto **✅ Apto**
 - [ ] Sin commits sin commitear ni stash sin aplicar relevante al alcance
 

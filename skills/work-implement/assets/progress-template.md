@@ -10,10 +10,10 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 **Ultima actualizacion:** {{YYYY-MM-DD}}
 
 <!--
-Valores del identificador: `US-XXX` (historia), `Work items de mantenimiento` (WI compartido) o `MG-XXX-{{slug}}` (migración; p. ej. `MG-005-api-legacy`).
-Ubicacion y alcance por tipo:
+Valores del identificador: `US-XXX` (historia), `WI-XXX-{{slug}}` (work item) o `MG-XXX-{{slug}}` (migración; p. ej. `MG-005-api-legacy`).
+Ubicacion y alcance por tipo (cada trabajo tiene su propio `progress.md` dentro de su carpeta):
 - Historia de usuario (`US-XXX`): un `progress.md` por carpeta de la US (`docs/specs/user-stories/US-XXX-{{nombre-corto}}/progress.md`); el encabezado lleva su `US-XXX` y las unidades son sus `TK-XXX`.
-- Work item de mantenimiento (`WI-XXX`): `progress.md` compartido (`docs/specs/work-items/progress.md`) que lista varios WI; el encabezado usa `Work items de mantenimiento` y cada unidad es un `WI-XXX` completo.
+- Work item de mantenimiento (`WI-XXX`): un `progress.md` por carpeta del WI (`docs/specs/work-items/WI-XXX-{{slug}}/progress.md`), específico de ese WI; el encabezado lleva su `WI-XXX` y la unidad es el `WI-XXX` completo (una sola entrada, sin sub-tareas).
 - Migracion (`MG-XXX-{{slug}}`): un `progress.md` por carpeta de la migracion (`docs/specs/migrations/MG-XXX-{{slug}}/progress.md`); el encabezado lleva su `MG-XXX-{{slug}}` y las unidades son sus `Fase N`. Destino fragmentado: un `progress.md` por proyecto destino.
 -->
 

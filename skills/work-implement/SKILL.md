@@ -214,6 +214,18 @@ La hace **el orquestador, una unidad a la vez** (nunca merges concurrentes), a m
 
 ---
 
+## Regla de handoff (transversal)
+
+Todo paso a otra fase del ciclo se realiza **invocando el skill correspondiente**, nunca ejecutando ese trabajo directamente desde este skill. Este skill implementa; **no planifica, no integra ni crea PRs por su cuenta**.
+
+- **Para integrar/cerrar el trabajo** (merge a la rama base): **invocar `/work-integrate`**. Este skill no hace el `git merge` a la rama base ni borra ramas por iniciativa propia. (El merge secuencial de worktrees a la rama del artefacto dentro del *modo de ejecucion paralela* es interno a la implementacion, no el cierre del trabajo.)
+- **Para crear un PR/MR:** **invocar `/pr-create`**. Este skill no crea PRs directamente.
+- **Si el artefacto necesita replanificarse** (TK/WI fuera de alcance, ambiguedad tecnica, criterios faltantes): escalar a **`/work-plan`** (o **`/work-define`** si el conflicto es funcional de la US); no reescribir la especificacion aqui.
+
+Las opciones de cierre se ofrecen con la herramienta de preguntas estructuradas (ver el Paso 4 de cada referencia) y cada una hace handoff **invocando** el skill dueño de esa fase.
+
+---
+
 ## Mensaje al usuario
 
 Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamiento interno ni narracion del trabajo en curso ("lei el TK", "cree la rama"). Las preguntas y confirmaciones van por la herramienta de preguntas estructuradas.

@@ -97,8 +97,8 @@ Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto
    > "Implementacion completada. ¿Que quieres hacer ahora?"
    > Opciones: [Integrar el trabajo] / [Crear un PR] / [Terminar aqui]
 
-   - **Integrar el trabajo** => hacer handoff a `work-integrate`.
-   - **Crear un PR** => hacer handoff a `pr-create`.
+   - **Integrar el trabajo** => **invocar `/work-integrate`** (no hacer el merge a la rama base directamente).
+   - **Crear un PR** => **invocar `/pr-create`** (no crear el PR directamente).
    - **Terminar aqui** => cerrar sin handoff; el trabajo queda commiteado en la rama.
 
    Si quedan TK pendientes, indicar que falta cerrar antes de ofrecer estas opciones.
