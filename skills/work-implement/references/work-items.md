@@ -4,7 +4,7 @@ Flujo para **ejecutar en codigo** un work item de mantenimiento `WI-XXX` bajo `d
 
 > **Naturaleza del WI:** documento **unico y combinado** - el requerimiento, los criterios de aceptacion y el plan de implementacion conviven en `WI-XXX-[kebab-case]/README.md`, que mapea 1:1 con un work item de ADO. **No se descompone en sub-tareas** (modelo plano). Un esfuerzo grande son varios `WI-` hermanos, nunca un WI con hijos.
 >
-> **Unidad de confirmacion:** **el `WI-XXX` completo.** Se implementa el plan del WI como una unidad; al terminarlo se actualiza `progress.md` y se pide confirmacion antes de pasar al siguiente WI (si el alcance incluye varios).
+> **Unidad de confirmacion:** **el `WI-XXX` completo.** Se implementa el plan del WI como una unidad; al terminarlo se actualiza `progress.md` y se pide confirmacion antes de pasar al siguiente WI (si el alcance incluye varios). **Excepcion:** si el alcance tiene varios WI y el usuario pide ejecutar **sin confirmacion**, se activa el **modo de ejecucion paralela** del `SKILL.md` (analisis de dependencias, subagentes con worktree — max 3 — y merge secuencial), que omite estas pausas.
 
 ---
 
@@ -130,6 +130,10 @@ Por cada WI aprobado:
 **Ejemplo 2 - Varios WI hermanos**
 - *Entrada:* "Implementa WI-003, WI-004 y WI-005 (structured logging en API, workers y batch)."
 - *Comportamiento:* cola con los tres `Ready`; implementa WI-003 completo, lint/build, `progress.md` a `Done`, **pausa y pregunta** si continuar con WI-004. Mismo ciclo por cada WI.
+
+**Ejemplo 2b - Varios WI hermanos sin confirmacion**
+- *Entrada:* "Implementa WI-003, WI-004 y WI-005 de corrido, sin preguntar."
+- *Comportamiento:* varios WI + peticion explicita de no confirmar => **modo de ejecucion paralela** (ver `SKILL.md`). Analisis de dependencias primero: si son independientes, corren en subagentes con worktree (max 3 en paralelo); si un WI depende de otro fuera del alcance, avisar para excluir o detener. Merge secuencial a la rama del artefacto, con lint/build/tests tras cada merge.
 
 **Ejemplo 3 - WI en Draft**
 - *Entrada:* "Ejecuta WI-007" y esta en Draft (stub sin criterios).

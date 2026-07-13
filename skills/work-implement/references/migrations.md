@@ -4,7 +4,7 @@ Flujo para **ejecutar en codigo** una migracion tecnologica `MG-XXX` bajo `docs/
 
 > **Naturaleza de la migracion:** el `plan.md` esta organizado **por fases** (Fase 1, Fase 2, ...) siguiendo una **estrategia incremental** (Strangler Fig, Branch by Abstraction, arquitectura transitoria; nunca *big bang*). La validacion **no** se escribe desde cero: se ejecuta el **Golden Master Testing** ya preparado en `validation.md`, contrastando la salida del destino contra la salida de referencia (golden master).
 >
-> **Unidad de confirmacion:** **una fase del plan.** Se implementa una fase, se valida (Golden Master de esa fase), se actualiza `progress.md` y se pide confirmacion antes de la siguiente fase.
+> **Unidad de confirmacion:** **una fase del plan.** Se implementa una fase, se valida (Golden Master de esa fase), se actualiza `progress.md` y se pide confirmacion antes de la siguiente fase. **Excepcion:** si hay varias fases y el usuario pide ejecutar **sin confirmacion**, aplica el **modo de ejecucion paralela** del `SKILL.md`. En la practica las fases de una migracion suelen ser **dependientes entre si** (estrategia incremental), por lo que el analisis de dependencias (Paso 0) casi siempre las serializa en olas; solo las fases realmente independientes correrian en paralelo. El Golden Master de cada fase se valida igual, y la integracion es por merge secuencial.
 
 ---
 
@@ -134,7 +134,8 @@ Por cada fase aprobada, en el orden del plan:
 ## Anti-patterns (especificos del tipo)
 
 - Implementar la migracion en *big bang* en vez de seguir la estrategia incremental del `plan.md`.
-- Implementar mas de una fase sin validar y confirmar entre ellas.
+- Implementar mas de una fase sin validar y confirmar entre ellas (salvo el modo de ejecucion paralela pedido explicitamente, y solo para fases sin dependencias entre si).
+- Paralelizar fases que dependen entre si en vez de serializarlas en olas segun el analisis de dependencias.
 - Marcar una fase `Done` sin ejecutar el **Golden Master** de sus casos.
 - Inventar casos de prueba en vez de usar los de `validation.md`; "congelar" un bug del origen marcado como excepcion.
 - Implementar con `plan.md`, `discovery.md` o `validation.md` en `Draft`.

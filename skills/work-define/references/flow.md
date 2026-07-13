@@ -1,22 +1,24 @@
 # Flujo detallado, ejemplos y anti-patrones
 
-Procedimiento paso a paso para **crear** y **actualizar** Historias de Usuario, más ejemplos y anti-patrones. Las anclas de calidad (`#rfc-2119`, `#iso-25010`, `#invest`, `#definition-of-ready-dor`) viven en [`quality-criteria.md`](quality-criteria.md).
+Procedimiento paso a paso para **crear** y **actualizar** Historias de Usuario, más ejemplos y anti-patrones. Las anclas de calidad (`#rfc-2119`, `#iso-25010`, `#invest`, `#definition-of-ready-dor`) viven en `[quality-criteria.md](quality-criteria.md)`.
 
 ---
 
 ## Cómo preguntar al usuario
 
-Cuando se indique **preguntar, pedir, confirmar, validar o sugerir** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** que ofrezca el cliente (la que renderiza opciones tappables o un selector de respuesta) en lugar de redactar la pregunta como prosa libre. Reglas:
+Cuando se indique **preguntar, pedir, confirmar, validar o sugerir** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas**, en lugar de redactar la pregunta como prosa libre. Reglas:
 
 - **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita categorías; usar entrada libre solo si no hay forma razonable de enumerar opciones (p. ej. el texto del valor de negocio).
 - **No repreguntar** lo que ya está respondido en el contexto, en `.agents/MEMORY.md` o en el `README.md` que se está editando.
 - **Recopilación inicial (antes de redactar):** el límite de **tres preguntas por bloque** es solo el tamaño de cada tanda, **no un tope al total de preguntas**. El agente debe preguntar **todo lo que necesite** hasta tener el contexto del requerimiento claro y libre de lagunas antes de redactar; si hacen falta más de tres preguntas, **encadenar tantas tandas como sea necesario** (no conformarse con una sola). La regla es agrupar los huecos en tandas —no ir descubriendo turno a turno— pero nunca omitir una pregunta necesaria por respetar el límite por bloque.
 - **Confirmaciones de flujo (después de redactar o en cierre Draft):** **una pregunta por turno** cuando sea posible; si hay más de tres lagunas, encadenar tandas como en el paso 5 del flujo de creación.
-- **Fallback**: si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
+- **Fallback**: si el agente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
 
 Cada sección que diga *preguntar al usuario*, *validar con el usuario* o *sugerir al usuario* asume este mecanismo.
 
 ---
+
+
 
 ## Validación antes de crear
 
@@ -40,13 +42,15 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 
 ---
 
+
+
 ## Flujo: Crear una historia nueva
 
 1. **Fijar el ID y nombre de carpeta**
   - Usar el `US-XXX` indicado por el usuario o inferir el siguiente libre listando carpetas `US-*` en `docs/specs/user-stories/`.
   - Proponer el `nombre-corto` en kebab-case; validar con el usuario si hay ambigüedad.
   - Crear la carpeta `US-XXX-[nombre-corto]/` y `assets/` si habrá archivos vinculados.
-2. **Escribir el `README.md`** usando `assets/user-story-template.md` como molde:
+2. **Escribir el** `README.md` usando `assets/user-story-template.md` como molde:
   - **Descripción:** Como/Quiero/Para con modalidad normativa RFC 2119 (ver [RFC 2119](quality-criteria.md#rfc-2119)) en el idioma de preferencia.
   - **Referencias:** enlaces de diseño y archivos en `assets/`; los archivos aportados no deben quedar solo en el chat. Si el requerimiento trae imágenes, enlaces a Figma o archivos `.md` con diagramas, wireframes o prototipos, **leerlos primero** para incorporarlos al contexto; ante lagunas, conflictos o falta de claridad detectados en ellos, trasladar esas dudas a la tanda de preguntas estructuradas antes de redactar (ver [Checklist antes de redactar](#checklist-antes-de-redactar)).
   - **Criterios de aceptación** (lista plana con ids `AC-XXX`):
@@ -60,7 +64,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
   - **Observaciones:** (1) prerrequisitos o dependencias aún no listas; (2) datos o aclaraciones pendientes del usuario o producto; (3) decisiones pendientes; (4) otras notas. Si no hay nada que reportar en algún ítem, dejarlo vacío.
 3. **Documentación técnica** (solo si el usuario la pide explícitamente)
   - Crear o actualizar documentos en `docs/specs/technical-docs/`.
-  - **No integrarla en la descripción funcional** de la US. Solo puede referenciarse desde las secciones INVEST u Observaciones del DoR para justificar complejidad, dependencias o restricciones técnicas que condicionan algún criterio (p. ej. *«Ver `technical-docs/contrato-api.md` — justifica la estimación de la dimensión E»*).
+  - **No integrarla en la descripción funcional** de la US. Solo puede referenciarse desde las secciones INVEST u Observaciones del DoR para justificar complejidad, dependencias o restricciones técnicas que condicionan algún criterio (p. ej. *«Ver* `technical-docs/contrato-api.md` *— justifica la estimación de la dimensión E»*).
 4. **Glosario** (si aplica)
   - Si aparecen términos de dominio nuevos, crear o reutilizar entrada en `docs/specs/glossary.md` con definición breve en contexto producto/dominio.
 5. **Cierre**
@@ -69,24 +73,28 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
     - Respetar el máximo de tres preguntas por bloque; si hay más lagunas, encadenar tandas hasta agotarlas o hasta que el usuario indique que prefiere mantener el resto como Draft.
     - Tras recibir respuestas, actualizar las secciones afectadas del `README.md`, revalidar los checklists de INVEST y DoR, y promover a `Estado: Ready` solo si quedan completos. Si alguna laguna sigue abierta, mantener `Draft` y reflejar el residual en Observaciones.
   - Si la US queda en **Ready**, sugerir explícitamente al usuario dos próximos pasos posibles: **[Definir casos de prueba]** o **[Planificar tareas]**.
-    - Si el usuario acepta definir los casos de prueba: **invocar `/test-define`** pasando el contexto de la US; no crear los `TC-XXX` directamente desde este skill. Su formato y reglas residen en ese skill.
-    - Si el usuario pide crear las tareas en continuidad o en el mismo turno: **invocar `/work-plan` obligatoriamente**; no crear tareas directamente desde este skill. El conocimiento y las reglas de formato de los `TK-XXX` residen en ese skill.
+    - Si el usuario acepta definir los casos de prueba: **invocar** `/test-define` pasando el contexto de la US; no crear los `TC-XXX` directamente desde este skill. Su formato y reglas residen en ese skill.
+    - Si el usuario pide crear las tareas en continuidad o en el mismo turno: **invocar** `/work-plan` **obligatoriamente**; no crear tareas directamente desde este skill. El conocimiento y las reglas de formato de los `TK-XXX` residen en ese skill.
 
 ---
+
+
 
 ## Flujo: Actualizar una historia existente
 
 1. **Identificar el archivo** — por ID, nombre-corto o título.
-2. **Leer el `README.md` actual** completo antes de editar.
+2. **Leer el** `README.md` **actual** completo antes de editar.
 3. **Aplicar los cambios** solicitados por el usuario. Reglas invariantes:
   - Si el cambio afecta criterios de aceptación: mantener los ids `AC-XXX` existentes; renumerar solo si se reordenan o eliminan criterios; conservar o corregir la categoría entre paréntesis.
   - Si hay conflicto entre el texto de un `TK-XXX` y el `README.md` de la US: **la US prevalece**. Corregir las tareas, no la historia.
   - Si el usuario cambia el estado a **Ready**: verificar todas las condiciones del checklist de Ready antes de guardar.
 4. **Criterios de aceptación:** si se añaden o modifican, aplicar las mismas reglas de formato del flujo de creación (paso 2).
-5. **Si la US queda en `Estado: Draft`** tras los cambios (sea porque ya lo estaba, sea porque los cambios la degradaron desde Ready), ofrecer al usuario las preguntas que cerrarían las lagunas residuales mediante la **herramienta de preguntas estructuradas**, aplicando las mismas reglas del paso 5 del flujo de creación (una pregunta por laguna, opciones cuando la respuesta admita categorías, máximo tres por bloque, encadenar tandas si hace falta). Si las respuestas completan los checklists de INVEST y DoR, promover a `Estado: Ready`. Si el usuario prefiere mantener Draft o salta preguntas, respetarlo y reflejar el residual en Observaciones.
+5. **Si la US queda en** `Estado: Draft` tras los cambios (sea porque ya lo estaba, sea porque los cambios la degradaron desde Ready), ofrecer al usuario las preguntas que cerrarían las lagunas residuales mediante la **herramienta de preguntas estructuradas**, aplicando las mismas reglas del paso 5 del flujo de creación (una pregunta por laguna, opciones cuando la respuesta admita categorías, máximo tres por bloque, encadenar tandas si hace falta). Si las respuestas completan los checklists de INVEST y DoR, promover a `Estado: Ready`. Si el usuario prefiere mantener Draft o salta preguntas, respetarlo y reflejar el residual en Observaciones.
 6. **Confirmar** mostrando las secciones modificadas.
 
 ---
+
+
 
 ## Checklist antes de redactar
 
@@ -105,7 +113,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 - Sin solapamiento de alcance con US existentes
 - Actor y valor de negocio identificados (mínimo para crear); si INVEST no es completamente valorable → `Estado: Draft` con lagunas en Observaciones
 
-**Condiciones para `Estado: Ready`:**
+**Condiciones para** `Estado: Ready`**:**
 
 - Sección **Criterios de aceptación** completa: al menos un `AC-XXX` con categoría entre paréntesis y enunciado RFC 2119 en MAYÚSCULAS
 - DoR completado según la plantilla
@@ -121,6 +129,8 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 - Detalle técnico en `technical-docs/` o `TK-XXX`, no en el `README.md`
 
 ---
+
+
 
 ## Ejemplos
 
@@ -155,6 +165,8 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 
 ---
 
+
+
 ## Anti-patterns
 
 - Inventar reglas de negocio o exclusiones que el usuario no dio.
@@ -168,16 +180,21 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 
 ---
 
+
+
 ## Handoffs del ciclo
 
 Posición: **inicio** del pipeline `work-define` → `work-plan` → `work-implement` → `work-integrate`.
 
-| | |
-|--|--|
-| **Entrada** | Necesidad funcional del usuario. No requiere US previa. |
-| **Salida mínima (creación)** | Carpeta `US-XXX-[nombre-corto]/README.md` con actor y valor de negocio; puede quedar en `Estado: Draft` con lagunas en Observaciones. |
-| **Salida para continuar** | `Estado: Ready` en el `README.md`; INVEST y DoR completos; al menos un `AC-XXX`; Observaciones sin pendientes abiertos. |
-| **Siguiente paso** | Con la US en `Ready`, sugerir: **`test-define`** — invocar `/test-define` si el usuario acepta definir los casos de prueba (no crear `TC-XXX` desde este skill); y **`work-plan`** — invocar `/work-plan` para las tareas (o continuidad explícita del usuario). No crear `TK-XXX` desde este skill. |
-| **Si queda en Draft** | No handoff a plan ni implement. Cerrar lagunas con preguntas estructuradas o mantener Draft documentado. |
-| **Regreso desde plan** | Conflicto US ↔ TK detectado en `work-plan` → actualizar la US aquí; `work-plan` corrige el TK. La US prevalece sobre el TK. |
-| **Regreso desde integrate** | Alcance reducido o `progress.md` incompleto detectado en `work-integrate` → ajustar la US aquí y alinear TKs con `work-plan` antes de reintentar el merge. |
+
+|                              |                                                                                                                                                                                                                                                                                              |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Entrada**                  | Necesidad funcional del usuario. No requiere US previa.                                                                                                                                                                                                                                      |
+| **Salida mínima (creación)** | Carpeta `US-XXX-[nombre-corto]/README.md` con actor y valor de negocio; puede quedar en `Estado: Draft` con lagunas en Observaciones.                                                                                                                                                        |
+| **Salida para continuar**    | `Estado: Ready` en el `README.md`; INVEST y DoR completos; al menos un `AC-XXX`; Observaciones sin pendientes abiertos.                                                                                                                                                                      |
+| **Siguiente paso**           | Con la US en `Ready`, sugerir: `test-define` — invocar `/test-define` si el usuario acepta definir los casos de prueba (no crear `TC-XXX` desde este skill); y `work-plan` — invocar `/work-plan` para las tareas (o continuidad explícita del usuario). No crear `TK-XXX` desde este skill. |
+| **Si queda en Draft**        | No handoff a plan ni implement. Cerrar lagunas con preguntas estructuradas o mantener Draft documentado.                                                                                                                                                                                     |
+| **Regreso desde plan**       | Conflicto US ↔ TK detectado en `work-plan` → actualizar la US aquí; `work-plan` corrige el TK. La US prevalece sobre el TK.                                                                                                                                                                  |
+| **Regreso desde integrate**  | Alcance reducido o `progress.md` incompleto detectado en `work-integrate` → ajustar la US aquí y alinear TKs con `work-plan` antes de reintentar el merge.                                                                                                                                   |
+
+

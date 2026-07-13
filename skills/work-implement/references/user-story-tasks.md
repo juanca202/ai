@@ -2,7 +2,7 @@
 
 Flujo para **ejecutar en codigo** las tareas tecnicas `TK-XXX` de una historia de usuario `US-XXX` bajo `docs/specs/user-stories/`. Esta referencia se carga desde `SKILL.md` cuando la seleccion de tipo resuelve a este caso. Asume ya resueltos el mecanismo de preguntas, el idioma, la validacion de repositorio y el ritmo de confirmacion (ver `SKILL.md`).
 
-> **Unidad de confirmacion:** **una `TK-XXX` por turno.** Al terminar cada TK, detenerse y preguntar si continuar con la siguiente. Sin excepcion, aunque el usuario haya aprobado la cola completa.
+> **Unidad de confirmacion:** **una `TK-XXX` por turno.** Al terminar cada TK, detenerse y preguntar si continuar con la siguiente, aunque el usuario haya aprobado la cola completa. **Excepcion:** si el alcance tiene varias TK y el usuario pide ejecutar **sin confirmacion**, se activa el **modo de ejecucion paralela** del `SKILL.md` (analisis de dependencias, subagentes con worktree — max 3 — y merge secuencial), que omite estas pausas.
 
 ---
 
@@ -150,14 +150,14 @@ WARNING No es posible continuar con la implementacion:
 - *Salida:* `TK-005 (Draft)` en excluidas; no se implementa hasta que este Ready.
 
 **Ejemplo 4 - "implementar todo de corrido"**
-- *Entrada:* "Implementa todas las tareas de una vez sin preguntar."
-- *Comportamiento:* Informar que el skill opera con **una TK por confirmacion** y no es posible omitir las pausas. Ofrecer continuar con el flujo estandar.
+- *Entrada:* "Implementa todas las tareas Ready de la US-042 de una vez, sin preguntar."
+- *Comportamiento:* varias TK + peticion explicita de no confirmar => **modo de ejecucion paralela** (ver `SKILL.md`). Primero el analisis de dependencias (Paso 0): ordenar por olas y, si alguna TK depende de trabajo fuera del alcance, avisar para excluirla o detener. Tras confirmar el plan una vez, ejecutar las TK independientes en subagentes con worktree (max 3 en paralelo) e integrarlas por merge secuencial a `feature/US-042-*`. Si el alcance fuera una sola TK o no se pidiera "sin preguntar", se mantiene el flujo estandar con una TK por confirmacion.
 
 ---
 
 ## Anti-patterns (especificos del tipo)
 
-- Arrancar la siguiente TK sin confirmacion explicita (aunque la cola este aprobada).
+- Arrancar la siguiente TK sin confirmacion explicita (aunque la cola este aprobada), salvo cuando el usuario haya pedido el **modo de ejecucion paralela**.
 - Omitir el mensaje de cola e ir directo al codigo.
 - Tratar tareas en Draft como ejecutables.
 - Escribir codigo de produccion antes del test (romper el ciclo Red→Green→Refactor).

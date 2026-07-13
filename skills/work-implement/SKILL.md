@@ -12,7 +12,9 @@ Guia general para **ejecutar en codigo** trabajo ya especificado, de **distintos
 >
 > **Solo implementacion:** no modifica documentacion de producto (README de US, `TK-XXX`, `WI-XXX`, `discovery.md`, `validation.md`, `plan.md`, ADRs, technical-docs) - solo el `progress.md`. **Excepcion de checkboxes:** marcar `[ ]` como `[x]` en las subtareas del artefacto en ejecucion **a medida que se completan** es la unica modificacion permitida en archivos de especificacion; no se toca ninguna otra seccion del artefacto. El archivo a editar depende del tipo: `TK-XXX.md` para tareas de historia de usuario, `WI-XXX.md` para work items, `plan.md` para fases de migracion. Si se detecta un conflicto en la documentacion que pueda afectar el resultado, **parar inmediatamente y notificar al usuario** antes de continuar.
 >
-> **Ritmo obligatorio - una unidad por confirmacion:** implementar una unidad, actualizar `progress.md` **y la lista de tareas (to-dos) del agente**, ejecutar lint/build, y **esperar confirmacion explicita del usuario antes de arrancar la siguiente**. Sin excepcion. La **unidad** depende del tipo (ver tabla de seleccion).
+> **Ritmo obligatorio - una unidad por confirmacion (modo por defecto):** implementar una unidad, actualizar `progress.md` **y la lista de tareas (to-dos) del agente**, ejecutar lint/build, y **esperar confirmacion explicita del usuario antes de arrancar la siguiente**. La **unidad** depende del tipo (ver tabla de seleccion).
+>
+> **Unica excepcion - modo de ejecucion paralela:** si el alcance incluye **mas de una unidad** y el usuario pide **explicitamente ejecutar sin confirmacion entre unidades** (p. ej. "sin preguntar", "de corrido", "todas a la vez"), se activa el modo de ejecucion paralela (ver seccion *Ejecucion paralela con subagentes y worktrees*), que corre las unidades independientes en subagentes con worktree y omite las pausas intermedias. Si falta cualquiera de las dos condiciones, se mantiene el modo secuencial.
 
 ---
 
@@ -162,6 +164,56 @@ El subagente `ui-specialist` solo se usa **si el proyecto lo define**; si no exi
 
 ---
 
+## Ejecucion paralela con subagentes y worktrees (transversal)
+
+Modo alternativo al ritmo secuencial por defecto. Aplica a los tres tipos (`TK-XXX`, `WI-XXX` y fases de `MG-XXX`). **Se activa unicamente cuando se cumplen las dos condiciones a la vez:**
+
+1. El alcance incluye **mas de una unidad** (varias `TK`, varios `WI` o varias fases de una `MG`).
+2. El usuario **pide explicitamente ejecutar sin confirmacion entre unidades** (p. ej. "sin preguntar", "de corrido", "todas a la vez", "sin pausas").
+
+Si falta cualquiera de las dos, se mantiene el **modo secuencial** con una unidad por confirmacion (comportamiento por defecto de cada referencia). El modo paralelo **no** cambia *como* se implementa cada unidad — ciclo TDD, Clean Architecture, lint/build, checkboxes del artefacto, cobertura de test cases, validacion (criterios de aceptacion o Golden Master) siguen igual —: solo cambia **cuantas** unidades avanzan a la vez y como se integran.
+
+### Paso 0 - Analisis de dependencias (obligatorio, antes de ejecutar nada)
+
+Es el **primer paso** y condiciona todo lo demas. No lanzar ningun subagente antes de completarlo.
+
+1. Leer cada unidad del alcance y su relacion de dependencias: el campo **`Dependencias`** del artefacto (TK/WI), las dependencias obvias descritas en el texto y —en migraciones— el orden de fases del `plan.md` (las fases de una migracion suelen ser dependientes por su naturaleza incremental).
+2. Clasificar cada unidad:
+   - **Independiente:** sin dependencias, o cuyas dependencias ya estan en `Done`.
+   - **Dependiente dentro del alcance:** depende de otra unidad que **si** esta en esta ejecucion.
+   - **Dependiente fuera del alcance:** depende de una unidad que **no** esta en esta ejecucion **ni** en `Done`.
+3. **Dependencia fuera del alcance => parar y preguntar.** Si alguna unidad depende de trabajo que no forma parte de esta ejecucion, **detenerse antes de ejecutar** e informar al usuario (herramienta de preguntas estructuradas) para que decida por cada caso:
+
+   > "La unidad X depende de Y, que no esta en esta ejecucion ni completada. ¿Como continuo?"
+   > Opciones: [Excluir X y continuar] / [Detener aqui]
+
+   No ejecutar hasta resolver todos estos casos.
+4. **Ordenar por olas (niveles topologicos).** Con las dependencias internas al alcance, agrupar las unidades en **olas**: cada ola contiene unidades que **no dependen entre si** y cuyas dependencias ya quedaron integradas en olas anteriores. Las unidades de una misma ola son candidatas a correr en paralelo; las olas se ejecutan **en secuencia**. Si se detecta un **ciclo** de dependencias (A depende de B y B de A), parar e informar: no es paralelizable; devolver a `work-plan` / `project-migrate` para revisar el alcance.
+5. Presentar el **plan de ejecucion** (olas, que corre en paralelo, que se excluye y por que) y confirmarlo **una sola vez**. Como el usuario ya pidio ejecutar sin confirmacion, no habra mas pausas entre unidades una vez aprobado este plan (salvo que un paso obligue a parar: dependencia externa, conflicto de merge no trivial o suite en rojo).
+
+### Concurrencia y worktrees
+
+- **Maximo 3 subagentes en paralelo.** Si una ola tiene mas de 3 unidades independientes, despacharlas en lotes de hasta 3; al liberarse un cupo, entra la siguiente unidad pendiente de la ola.
+- **Un worktree por unidad.** Cada subagente trabaja en su propio `git worktree`, en una rama derivada de la rama del artefacto:
+  - Rama base = la rama del artefacto de esta ejecucion (`feature/US-XXX-*`, la rama del `WI`, o la rama de la `MG`).
+  - Crear el worktree en una ruta temporal fuera del arbol principal con `git worktree add <ruta-temporal> -b wt/<unidad> <rama-base>` (p. ej. rama `wt/TK-003`). El worktree parte del estado de la rama base **ya integrado con las olas anteriores**.
+- Cada subagente **ejecuta el flujo completo de su unidad** segun la referencia del tipo (Paso 3 de la referencia correspondiente): ciclo TDD, lint/typecheck/build, validacion, checkboxes del artefacto, cobertura de test cases y commits dentro de su worktree. El subagente **no** integra ni mergea a la rama base ni ofrece handoffs; al terminar devuelve al orquestador el resultado (unidad, rama, estado, notas, resultado de tests/validacion).
+- El orquestador arranca una **nueva ola solo cuando la anterior este completamente integrada** en la rama base, para que las unidades dependientes vean el codigo de sus predecesoras.
+
+### Integracion (merge secuencial a la rama del artefacto)
+
+La hace **el orquestador, una unidad a la vez** (nunca merges concurrentes), a medida que los subagentes terminan:
+
+1. Sobre la rama del artefacto, hacer merge de la rama de la unidad: `git merge wt/<unidad>`.
+2. **Resolver conflictos** si los hay; si el conflicto no es trivial o el resultado queda ambiguo, **parar e informar al usuario** antes de continuar con el resto.
+3. Ejecutar **lint/typecheck/build y la suite de tests** (o el Golden Master, en migraciones) en la rama del artefacto tras el merge. Si algo falla, **parar** y avisar; no seguir integrando sobre una base rota.
+4. Marcar `progress.md` de esa unidad a `Done` (y su `Cobertura de test cases`) solo **despues** de un merge y una validacion en verde.
+5. Al integrar todas las unidades, **limpiar los worktrees y ramas temporales** (`git worktree remove <ruta-temporal>` y borrar la rama `wt/<unidad>`).
+
+`progress.md` y la lista de to-dos siguen siendo la bitacora: el orquestador refleja el avance global (una entrada por unidad + la ola en curso) y cada subagente mantiene los checkboxes de su propia unidad; la coherencia entre ambos se mantiene igual que en el modo secuencial. Al cerrar, el handoff es identico al del modo secuencial (`work-integrate` / `pr-create` / terminar).
+
+---
+
 ## Mensaje al usuario
 
 Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamiento interno ni narracion del trabajo en curso ("lei el TK", "cree la rama"). Las preguntas y confirmaciones van por la herramienta de preguntas estructuradas.
@@ -181,7 +233,11 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 
 ## Anti-patterns (transversales)
 
-- Implementar mas de una unidad por turno sin confirmacion intermedia del usuario.
+- Implementar mas de una unidad por turno sin confirmacion intermedia del usuario **en modo secuencial** (el modo por defecto); solo el modo de ejecucion paralela, pedido explicitamente, omite las pausas.
+- Activar el modo de ejecucion paralela sin que el usuario lo haya pedido explicitamente, o sin completar antes el analisis de dependencias (Paso 0).
+- Lanzar mas de 3 subagentes en paralelo, o integrar (mergear) varias unidades a la vez en la rama del artefacto.
+- Ejecutar una unidad que depende de trabajo fuera del alcance de la ejecucion sin avisar al usuario para excluirla o detener.
+- Arrancar una nueva ola antes de integrar la anterior en la rama del artefacto.
 - Mezclar dos tipos de implementacion en una misma ejecucion.
 - Codificar con working tree sucio sin avisar y pausar.
 - Implementar en `main` u otra rama que no sea la del artefacto sin instruccion explicita.
