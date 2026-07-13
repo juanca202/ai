@@ -35,9 +35,9 @@ El usuario indica un `US-XXX` o un `WI-XXX`. Si el identificador es ambiguo (sin
 | Tipo | Ubicación del artefacto | Ubicación de los TCs |
 |------|------------------------|----------------------|
 | Historia de usuario | `docs/specs/user-stories/US-XXX-{nombre}/README.md` | `docs/specs/user-stories/US-XXX-{nombre}/test-cases/` |
-| Work item | `docs/specs/work-items/WI-XXX-{kebab-case}.md` | `docs/specs/work-items/WI-XXX-{kebab-case}/test-cases/` |
+| Work item | `docs/specs/work-items/WI-XXX-{kebab-case}/README.md` | `docs/specs/work-items/WI-XXX-{kebab-case}/test-cases/` |
 
-> Para WI, la carpeta `WI-XXX-{kebab-case}/test-cases/` se crea si no existe; el archivo `.md` del WI permanece donde está.
+> Para WI, la carpeta `test-cases/` se crea dentro de la carpeta del WI (`WI-XXX-{kebab-case}/`) si no existe; el `README.md` del WI permanece donde está.
 
 ---
 
@@ -45,7 +45,7 @@ El usuario indica un `US-XXX` o un `WI-XXX`. Si el identificador es ambiguo (sin
 
 1. Leer el artefacto completo.
    - **US:** `README.md` de la historia. Los criterios son los bloques `AC-XXX` en la sección Criterios de aceptación.
-   - **WI:** el `WI-XXX-{kebab-case}.md`. Los criterios son los ítems de la sección **Criterios de aceptación**.
+   - **WI:** el `README.md` del WI (`WI-XXX-{kebab-case}/README.md`). Los criterios son los ítems de la sección **Criterios de aceptación**.
 2. Verificar el estado del artefacto:
    - `Estado: Ready` → continuar.
    - `Estado: Draft` → parar: el artefacto no está listo para producir TCs.
@@ -156,7 +156,7 @@ Usar `assets/test-case-template.md` para todos los campos. Reglas de llenado:
 
 ## Paso 5 — Actualizar el artefacto origen con la trazabilidad
 
-Una vez guardados y aceptados los TCs, editar el artefacto origen (README de la US o el `WI-XXX-{kebab-case}.md`) para dejar registrada la trazabilidad directa: bajo cada criterio de aceptación, agregar la lista de los casos de prueba que lo cubren.
+Una vez guardados y aceptados los TCs, editar el artefacto origen (el `README.md` de la US o el `README.md` del WI, `WI-XXX-{kebab-case}/README.md`) para dejar registrada la trazabilidad directa: bajo cada criterio de aceptación, agregar la lista de los casos de prueba que lo cubren.
 
 Reglas:
 
@@ -194,7 +194,7 @@ La trazabilidad inversa (de un criterio a sus TCs) se obtiene buscando el identi
 - Reutilizar un número de secuencia ya existente en `test-cases/`.
 - Dejar el índice `test-cases/README.md` desactualizado tras crear o regenerar TCs (debe reflejar siempre todos los TCs de la carpeta).
 - Regenerar TCs existentes sin instrucción explícita del usuario.
-- Modificar el artefacto origen (README de US o WI-XXX.md) más allá de agregar la línea `Casos de prueba:` bajo cada criterio en el Paso 5; cualquier otro cambio al texto de los criterios o a otras secciones está prohibido.
+- Modificar el artefacto origen (README de la US o README del WI) más allá de agregar la línea `Casos de prueba:` bajo cada criterio en el Paso 5; cualquier otro cambio al texto de los criterios o a otras secciones está prohibido.
 - Escribir código de prueba (Jest, Cypress, etc.); ese trabajo corresponde a `quality-specialist`.
 - Continuar si el artefacto no está en `Estado: Ready` o no tiene criterios de aceptación.
 - Asignar códigos de criterio automáticamente; si faltan, parar y pedirle al usuario que los agregue en el artefacto.

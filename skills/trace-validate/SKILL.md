@@ -29,7 +29,7 @@ El tipo se determina por el identificador que indique el usuario o por la ruta d
 | Tipo | Identificador | Dónde viven los criterios | Códigos a trazar |
 |------|---------------|---------------------------|------------------|
 | **Historia de usuario** | `US-XXX` | Sección **Criterios de aceptación** del `README.md` de la US (lista plana `AC-XXX`) | `AC-XXX` en el orden en que aparecen |
-| **Work item de mantenimiento** | `WI-XXX` | Sección **## Criterios de aceptación** del `WI-XXX-[kebab].md` | `AC-XXX` en el orden en que aparecen |
+| **Work item de mantenimiento** | `WI-XXX` | Sección **## Criterios de aceptación** del `README.md` del WI (`WI-XXX-[kebab]/README.md`) | `AC-XXX` en el orden en que aparecen |
 | **Migración** | `MG-XXX` | Casos de **Golden Master** definidos en `validation.md` de la migración | `GM-XXX` (o las variantes `GM-API-XXX` / `GM-UI-XXX` tal como estén en `validation.md`) |
 > En todo el flujo, «criterio» se refiere al código del tipo en curso: `AC-XXX` para US y WI, `GM-XXX` para MG. Si el trabajo **no tiene criterios de aceptación**, no hay nada que trazar → **bloquear** (ver «Cuándo bloquear»).
 
@@ -120,9 +120,9 @@ WARNING No es posible generar el reporte de trazabilidad:
 | Artefacto | Ruta |
 |-----------|------|
 | Historia de usuario | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md` |
-| Work item | `docs/specs/work-items/WI-XXX-[kebab].md` |
+| Work item | `docs/specs/work-items/WI-XXX-[kebab]/README.md` |
 | Migración (criterios) | `docs/specs/migrations/MG-XXX-{slug}/validation.md` (+ `validation/`) |
-| Reporte de trazabilidad (salida) | US: `…/US-XXX-[nombre-corto]/trace-report.md` · WI: `docs/specs/work-items/WI-XXX-[kebab]-trace-report.md` · MG: `…/MG-XXX-{slug}/trace-report.md` |
+| Reporte de trazabilidad (salida) | US: `…/US-XXX-[nombre-corto]/trace-report.md` · WI: `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` · MG: `…/MG-XXX-{slug}/trace-report.md` |
 
 ---
 

@@ -10,7 +10,7 @@ Referencia detallada del skill `trace-validate`. El `SKILL.md` mantiene el resum
 
 1. Resolver el tipo y la ubicación del trabajo:
    - **US:** `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md`.
-   - **WI:** `docs/specs/work-items/WI-XXX-[kebab].md`.
+   - **WI:** `docs/specs/work-items/WI-XXX-[kebab]/README.md`.
    - **MG:** `docs/specs/migrations/MG-XXX-{slug}/validation.md` (criterios = casos de Golden Master).
 2. Leer el documento y extraer **todos los criterios de aceptación** con su texto, usando los códigos del tipo (`AC-XXX` para US y WI, `GM-XXX` para MG). Si el artefacto usa otro formato de código (`AC-1`, `CA-1`, `BR-01`…), normalizarlo a `AC-XXX` al referenciarlo en el reporte.
 3. Si no existe la sección de criterios o no hay criterios explícitos, **parar** y reportar (ver «Cuándo bloquear» en `SKILL.md`). No continuar con supuestos.
@@ -59,7 +59,7 @@ Aplicar la tabla de «Veredicto» (en `SKILL.md`) sobre el conjunto de criterios
 
 1. Guardar el reporte (sobrescribir si ya existe, salvo que el usuario pida conservar histórico):
    - **US:** `docs/specs/user-stories/US-XXX-[nombre-corto]/trace-report.md`.
-   - **WI:** `docs/specs/work-items/WI-XXX-[kebab]-trace-report.md` (la carpeta de work items es compartida; el nombre lleva el `WI-XXX` para no colisionar).
+   - **WI:** `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` (dentro de la carpeta del WI).
    - **MG:** `docs/specs/migrations/MG-XXX-{slug}/trace-report.md`.
 2. Presentar al usuario el **veredicto** y el reporte. No modificar ningún otro artefacto del repo.
 

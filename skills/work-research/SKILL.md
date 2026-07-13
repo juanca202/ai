@@ -72,7 +72,7 @@ Si hay artefacto vinculado, leerlo **antes** de investigar:
 | Tipo | Archivo a leer | Qué extraer |
 |------|---------------|-------------|
 | `US-XXX` | `docs/specs/user-stories/US-XXX-{nombre}/README.md` | Objetivo, criterios de aceptación (`AC-XXX`), reglas de negocio, restricciones |
-| `WI-XXX` | `docs/specs/work-items/WI-XXX-{kebab-case}.md` | Requerimiento, criterios de aceptación, plan de implementación actual |
+| `WI-XXX` | `docs/specs/work-items/WI-XXX-{kebab-case}/README.md` | Requerimiento, criterios de aceptación, plan de implementación actual |
 | `MG-XXX` | `docs/specs/migrations/MG-XXX-{slug}/discovery.md` + `plan.md` | Contexto del origen/destino, estrategia, restricciones ya identificadas |
 
 Si el artefacto no existe o no está en `Estado: Ready` o `Draft`, avisar al usuario e investigar de todas formas con el contexto disponible — la investigación no depende del estado del artefacto.
@@ -173,7 +173,7 @@ Guardar directamente en `docs/specs/research/RS-XXX-{slug}.md` (el usuario ya co
 - Investigar sin formular primero la pregunta de investigación y confirmarla con el usuario.
 - Presentar hallazgos sin indicar la fuente o la fecha cuando la vigencia importa.
 - Sintetizar información contradictoria como si fuera consenso; señalar la contradicción explícitamente.
-- Modificar el artefacto vinculado (README de US, WI-XXX.md, plan.md) durante la investigación.
+- Modificar el artefacto vinculado (README de US, README del WI, plan.md) durante la investigación.
 - Guardar el RS sin haber presentado antes el informe al usuario para su revisión.
 - Reutilizar un número de secuencia ya existente en la carpeta `research/`.
 - Asumir el artefacto vinculado sin haberlo leído; si no existe, avisar y continuar sin él.
