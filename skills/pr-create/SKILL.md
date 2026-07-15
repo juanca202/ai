@@ -72,7 +72,7 @@ Antes de cualquier push o creación de PR se ejecutan **las tres** puertas en es
 - Apto = veredicto **`✅ Apto`** → continuar (aunque haya warnings o recomendaciones informativas).
 - No apto = **`❌ No apto`** o **`⚠️ Incompleto`** → detener.
 
-**4.2 — `trace-validate` (siempre).** Resolver el **trabajo** a validar (`US-XXX`, `WI-XXX` o `MG-XXX`) del patrón de la rama, del prefijo de los commits, o de la ruta de trabajo. `trace-validate` traza los **criterios de aceptacion del tipo**: `AC-XXX` (US), los Criterios de aceptación del WI (`AC-N`), o los casos Golden Master `GM-XXX` (MG). Si no se puede determinar el trabajo, preguntar al usuario cuál validar; si no lo provee, la puerta **no** puede quedar apta → detener. Invocar `trace-validate` sobre ese trabajo.
+**4.2 — `trace-validate` (siempre).** Resolver el **trabajo** a validar (`US-XXX` o `WI-XXX`) del patrón de la rama, del prefijo de los commits, o de la ruta de trabajo. `trace-validate` traza los **criterios de aceptación** `AC-XXX` del trabajo (mismo formato en US y WI). Si no se puede determinar el trabajo, preguntar al usuario cuál validar; si no lo provee, la puerta **no** puede quedar apta → detener. Invocar `trace-validate` sobre ese trabajo.
 - Apto = **`✅ Aprobado`** → continuar. **`⚠️ Aprobado con observaciones`** también se considera apto, pero se **muestran las observaciones al usuario** antes de seguir.
 - No apto = **`❌ Rechazado`** → detener.
 
@@ -139,7 +139,7 @@ Si la corrección está al alcance de este skill, ofrecer aplicarla antes de ped
 Cuando una de las tres puertas del Paso 4 no queda en apto, **detener** el flujo (sin push ni PR) y, en este orden:
 
 1. **Informar** al usuario qué puerta falló, con su veredicto/motivo y el reporte literal del skill (o la lista de ítems de DoD incumplidos).
-2. **Indicar las acciones concretas** que debe tomar para dejar la puerta en apto y poder reintentar la creación del PR (p. ej. «corregir los tests fallidos de `X`», «cubrir el criterio `AC-03` con un test», «cumplir el ítem "changelog actualizado" de la DoD»).
+2. **Indicar las acciones concretas** que debe tomar para dejar la puerta en apto y poder reintentar la creación del PR (p. ej. «corregir los tests fallidos de `X`», «cubrir el criterio `AC-003` con un test», «cumplir el ítem "changelog actualizado" de la DoD»).
 3. **Si la corrección está al alcance de este skill**, no aplicarla en automático: **preguntar al usuario** si desea que se aplique. Solo con su autorización explícita, aplicar la corrección mínima y **reintentar** la puerta que falló; si esa puerta vuelve a quedar apta, continuar con el resto del flujo (re-ejecutando las puertas posteriores que correspondan). Si el usuario no autoriza, terminar dejando las acciones indicadas.
 
 Notas:
@@ -158,7 +158,7 @@ Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`). Detecta GitLab 
 `code-review` devuelve `❌ No apto` (tests fallidos + eslint errors). El skill no crea el PR, no hace push, muestra el reporte, lista las acciones para reintentar y —al estar a su alcance— pregunta si aplica la corrección. Si el usuario no autoriza, termina.
 
 **Ejemplo 3 — trace-validate bloquea**
-`code-review` → `✅ Apto`, pero `trace-validate` de `US-042` devuelve `RECHAZADO` (criterio `AC-03` sin test). El skill no crea el PR; informa que falta cubrir `AC-03` y pregunta si desea que se intente la corrección (delegando al flujo correspondiente). Sin autorización, termina con las acciones indicadas.
+`code-review` → `✅ Apto`, pero `trace-validate` de `US-042` devuelve `RECHAZADO` (criterio `AC-003` sin test). El skill no crea el PR; informa que falta cubrir `AC-003` y pregunta si desea que se intente la corrección (delegando al flujo correspondiente). Sin autorización, termina con las acciones indicadas.
 
 **Ejemplo 4 — Definition of Done incumplida**
 Ambos skills en apto, pero `docs/policies/definition-of-done.md` exige «CHANGELOG.md actualizado» y el diff no lo toca. El skill detiene la creación, lista ese ítem como incumplido e indica la acción; si el usuario autoriza y la corrección está a su alcance, la aplica y reintenta la puerta.
@@ -184,7 +184,7 @@ La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con
 - Preguntar si correr `code-review` o `trace-validate`, u ofrecer saltarlos: son obligatorios.
 - Pedir confirmación de título o descripción (flujo no interactivo).
 - Crear el PR con `code-review` en `❌ No apto`/`⚠️ Incompleto`, con `trace-validate` en `RECHAZADO`, o con la Definition of Done incumplida.
-- Saltarse `trace-validate` por no encontrar el trabajo (US/WI/MG) en lugar de preguntarlo al usuario.
+- Saltarse `trace-validate` por no encontrar el trabajo (US/WI) en lugar de preguntarlo al usuario.
 - Tratar la ausencia de `docs/policies/definition-of-done.md` como un fallo: si no existe, esa puerta simplemente se omite.
 - Inventar el cumplimiento de un ítem de la DoD que no se puede determinar desde el repo o el diff.
 - Aplicar una corrección sin autorización explícita del usuario, o no re-ejecutar la puerta tras corregir.

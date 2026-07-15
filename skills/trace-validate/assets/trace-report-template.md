@@ -2,16 +2,16 @@
 Plantilla canónica del reporte de trazabilidad (trace-validate).
 - Rellenar solo con datos verificables del repo y del trabajo. No inventar cobertura ni resultados.
 - Una fila de matriz por cada criterio de aceptación del trabajo. Los códigos dependen del tipo:
-  AC-XXX (historia de usuario y work item), GM-XXX (migración / Golden Master).
+  AC-XXX (historia de usuario y work item).
 - Convención de placeholders: sustituir manualmente cada {{texto}}; no es un motor de plantillas.
 - Eliminar este bloque y sustituir todos los {{…}} al publicar el documento final.
 -->
 
-# Reporte de trazabilidad — {{US-XXX-nombre-corto | WI-XXX-nombre | MG-XXX-slug}}
+# Reporte de trazabilidad — {{US-XXX-nombre-corto | WI-XXX-nombre}}
 
 **Fecha**: {{YYYY-MM-DD HH:MM}}
-**Trabajo**: {{US-XXX | WI-XXX | MG-XXX}} · **Documento**: {{ruta-al-documento}}
-**Tipo**: {{historia de usuario | work item | migración}}
+**Trabajo**: {{US-XXX | WI-XXX}} · **Documento**: {{ruta-al-documento}}
+**Tipo**: {{historia de usuario | work item}}
 **Rama**: {{rama}}
 **Cobertura**: {{N}} de {{M}} criterios cubiertos ({{porcentaje}})
 **Veredicto**: {{✅ Aprobado | ❌ Rechazado | ⚠️ Aprobado con observaciones}}
@@ -30,11 +30,11 @@ Plantilla canónica del reporte de trazabilidad (trace-validate).
 
 <!--
 Valores permitidos:
-- Criterio: AC-XXX (US y WI) · GM-XXX (MG). Formatos legados (AC-1, CA-1, BR-01) se normalizan a AC-XXX.
+- Criterio: AC-XXX (US y WI). Formatos legados (AC-1, CA-1, BR-01) se normalizan a AC-XXX.
 - Estado: Cubierto | Parcial | No cubierto
 - Ejec. auto (estado real al validar; el TC solo declara Manual/Automatizable): Sí (artefacto automatizado hallado y ejecutado) | No (Automatizable pendiente, o existe pero no se pudo ejecutar) | N/A (Manual por diseño)
 - Resultado: Paso | Fallo | No ejecutado
-- Tipo de artefacto: unit | integración | e2e | golden master | manual
+- Tipo de artefacto: unit | integración | e2e | manual
 - Celdas sin dato: «—»
 -->
 
@@ -50,7 +50,7 @@ Valores permitidos:
 
 | | |
 |--|--|
-| **Runner detectado** | {{Jest / Vitest / pytest / arnés Golden Master / … / no detectado}} |
+| **Runner detectado** | {{Jest / Vitest / pytest / … / no detectado}} |
 | **Comando ejecutado** | `{{comando exacto o «no ejecutado»}}` |
 | **Resultado global** | {{X pasaron, Y fallaron, Z omitidos / no ejecutado: razón}} |
 

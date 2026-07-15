@@ -1,6 +1,6 @@
 ---
 name: work-implement
-description: 'Usar al pedir implementar, desarrollar o ejecutar en codigo trabajo ya especificado, de distintos tipos. Tres tipos de implementacion: (1) tareas tecnicas (TK-XXX) bajo una historia de usuario (US-XXX); (2) work items de mantenimiento (WI-XXX) sin historia asociada — bugs, refactor, deuda tecnica, dependencias, operativas; (3) migraciones tecnologicas (MG-XXX) entre proyectos. Activar siempre que el usuario pida "implementar", "desarrollar", "ejecutar tareas", "codificar", "trabajar en el TK/WI", "ejecutar la migracion" o cualquier variante que implique escribir codigo a partir de una especificacion ya redactada, aunque no nombre el tipo. Selecciona el tipo segun el artefacto referenciado y carga su flujo desde references/. Solo se implementa trabajo en estado Ready.'
+description: 'Usar al pedir implementar, desarrollar o ejecutar en codigo trabajo ya especificado, de distintos tipos. Dos tipos de implementacion: (1) tareas tecnicas (TK-XXX) bajo una historia de usuario (US-XXX); (2) work items de mantenimiento (WI-XXX) sin historia asociada — bugs, refactor, deuda tecnica, dependencias, operativas. Activar siempre que el usuario pida "implementar", "desarrollar", "ejecutar tareas", "codificar", "trabajar en el TK/WI" o cualquier variante que implique escribir codigo a partir de una especificacion ya redactada, aunque no nombre el tipo. Selecciona el tipo segun el artefacto referenciado y carga su flujo desde references/. Solo se implementa trabajo en estado Ready.'
 license: MIT
 ---
 
@@ -8,9 +8,9 @@ license: MIT
 
 Guia general para **ejecutar en codigo** trabajo ya especificado, de **distintos tipos**. Cada tipo de implementacion tiene su propio flujo (ubicaciones, validaciones, unidad de confirmacion, cierre) en `references/`. El cuerpo de este `SKILL.md` contiene solo lo **transversal** a todos los tipos; el detalle de cada tipo se carga unicamente cuando se necesita.
 
-> **Alcance (cualquier tipo):** consume especificaciones ya redactadas por los skills de planificacion (`work-plan`, `project-migrate`). **No reescribe ni reestructura** la especificacion - solo la implementa. Correcciones menores acordadas con el usuario son la unica excepcion.
+> **Alcance (cualquier tipo):** consume especificaciones ya redactadas por los skills de planificacion (`work-define`, `work-plan`). **No reescribe ni reestructura** la especificacion - solo la implementa. Correcciones menores acordadas con el usuario son la unica excepcion.
 >
-> **Solo implementacion:** no modifica documentacion de producto (README de US, `TK-XXX`, `WI-XXX`, `discovery.md`, `validation.md`, `plan.md`, ADRs, technical-docs) - solo el `progress.md`. **Excepcion de checkboxes:** marcar `[ ]` como `[x]` en las subtareas del artefacto en ejecucion **a medida que se completan** es la unica modificacion permitida en archivos de especificacion; no se toca ninguna otra seccion del artefacto. El archivo a editar depende del tipo: `TK-XXX.md` para tareas de historia de usuario, el `README.md` del WI para work items, `plan.md` para fases de migracion. Si se detecta un conflicto en la documentacion que pueda afectar el resultado, **parar inmediatamente y notificar al usuario** antes de continuar.
+> **Solo implementacion:** no modifica documentacion de producto (README de US, `TK-XXX`, `WI-XXX`, ADRs, technical-docs) - solo el `progress.md`. **Excepcion de checkboxes:** marcar `[ ]` como `[x]` en las subtareas del artefacto en ejecucion **a medida que se completan** es la unica modificacion permitida en archivos de especificacion; no se toca ninguna otra seccion del artefacto. El archivo a editar depende del tipo: `TK-XXX.md` para tareas de historia de usuario, el `README.md` del WI para work items. Si se detecta un conflicto en la documentacion que pueda afectar el resultado, **parar inmediatamente y notificar al usuario** antes de continuar.
 >
 > **Ritmo obligatorio - una unidad por confirmacion (modo por defecto):** implementar una unidad, actualizar `progress.md` **y la lista de tareas (to-dos) del agente**, ejecutar lint/build, y **esperar confirmacion explicita del usuario antes de arrancar la siguiente**. La **unidad** depende del tipo (ver tabla de seleccion).
 >
@@ -53,13 +53,12 @@ La senal que distingue los tipos es **el artefacto que el usuario referencia**.
 |------|--------------------|------------------------|--------------|
 | **Tarea de historia de usuario** | El trabajo referencia una historia `US-XXX` o una tarea `TK-XXX` que cuelga de ella; el artefacto vive bajo `docs/specs/user-stories/`. | **Una `TK-XXX`** | `references/user-story-tasks.md` — **leer antes de implementar.** |
 | **Work item de mantenimiento** | El trabajo referencia un `WI-XXX` (bug, refactor, deuda tecnica, dependencias, operativa) **sin historia asociada**; vive bajo `docs/specs/work-items/`. | **El `WI-XXX` completo** | `references/work-items.md` — **leer antes de implementar.** |
-| **Migracion entre proyectos** | El trabajo referencia una migracion `MG-XXX` o pide ejecutar/implementar una migracion; vive bajo `docs/specs/migrations/`. | **Una fase del plan** | `references/migrations.md` — **leer antes de implementar.** |
 
 Reglas de seleccion:
 
 - **Identificar el artefacto -> leer su referencia -> seguir unicamente su flujo.**
 - Si la referencia del usuario es ambigua (p. ej. un numero sin prefijo, o no esta claro si hay historia asociada), **preguntar al usuario** antes de continuar; no asumir el tipo ni inventar artefactos.
-- Solo se implementa trabajo en **`Estado: Ready`** (la US/TK, el WI o el `plan.md` de la migracion). Si esta en `Draft`, parar y devolver a planificacion.
+- Solo se implementa trabajo en **`Estado: Ready`** (la US/TK o el WI). Si esta en `Draft`, parar y devolver a planificacion.
 
 ---
 
@@ -70,7 +69,7 @@ Verificar estas condiciones antes de implementar, sea cual sea el tipo. Si algun
 - **No iniciar en la rama de otro trabajo (primera verificacion):** obtener la rama actual con `git branch --show-current`. Si ya tiene un prefijo de implementacion (`feature/`, `fix/`, `chore/`, `refactor/`) y **no** corresponde al artefacto que se va a implementar, **parar** e indicar al usuario que no se puede iniciar la implementacion desde la rama de otro trabajo; debe situarse en la rama base acordada (p. ej. `develop`/`main`) para que el skill cree o cambie a la rama del artefacto. **Excepcion - reanudar:** si la rama actual es precisamente la del artefacto pedido, continuar normalmente.
 - **Working tree limpio:** `git status --porcelain` sin cambios pendientes no resueltos.
 - **Rama correcta:** estar en (o crear) la rama de trabajo del artefacto. No implementar en `main` ni en ramas de otro trabajo sin instruccion explicita. El nombre de rama lo define cada referencia segun el tipo.
-- **Solo trabajo de la rama actual:** solo se implementan unidades (TK / WI / Fase) que pertenezcan a la historia, work item o migracion asociada a la rama de implementacion actual. No implementar tareas de otro artefacto o de otra rama: si la unidad pedida no corresponde a la rama actual, **parar** y cambiar a su rama correspondiente (o pedir al usuario que lo haga) antes de continuar; nunca mezclar trabajo de distintos artefactos en una misma rama.
+- **Solo trabajo de la rama actual:** solo se implementan unidades (TK / WI) que pertenezcan a la historia o work item asociado a la rama de implementacion actual. No implementar tareas de otro artefacto o de otra rama: si la unidad pedida no corresponde a la rama actual, **parar** y cambiar a su rama correspondiente (o pedir al usuario que lo haga) antes de continuar; nunca mezclar trabajo de distintos artefactos en una misma rama.
 - **Artefacto en `Ready`:** el artefacto a implementar existe y esta en `Estado: Ready` (lo verifica cada referencia con su regla propia).
 - **Solapamiento de progreso:** leer `progress.md` si existe; respetar unidades ya en `Done`; si hay alguna `In Progress`, revisar notas y estado real antes de continuar.
 
@@ -87,7 +86,7 @@ WARNING No es posible continuar:
 
 Cada tipo mantiene un `progress.md` como **unica bitacora** que este skill puede modificar (nunca la especificacion de producto). Estados validos por unidad: **`Pending`**, **`In Progress`**, **`Done`**. No usar `Skipped` ni otros valores.
 
-- Crear desde `assets/progress-template.md` si no existe, adaptando el encabezado y las unidades al tipo (TK / WI / Fase) segun indique la referencia.
+- Crear desde `assets/progress-template.md` si no existe, adaptando el encabezado y las unidades al tipo (TK / WI) segun indique la referencia.
 - Por cada unidad: `Pending` => `In Progress` => `Done`; anadir notas si quedan aspectos parciales.
 - Registrar en `Decisiones adicionales` **toda decision tomada durante la sesion de chat** que no este ya documentada en la especificacion. Si no hubo decisiones nuevas, omitir la seccion.
 - **Cobertura de test cases:** cuando el artefacto tiene test cases, registrar en el campo `Cobertura de test cases` de la unidad la relacion entre los `TC-XXX` del `test-cases/README.md` y las pruebas automatizadas creadas. Documentar explicitamente **todo `TC-XXX` que no se pudo automatizar** (con el motivo) y **toda decision de crear un tipo de prueba distinto** al que sugiere el test case (p. ej. cubrir con integracion un TC pensado como unit). Si todos los `TC-XXX` se automatizaron tal cual, basta con indicarlo; si el artefacto no tiene test cases, omitir el campo.
@@ -117,7 +116,7 @@ Durante la ejecucion, mantener la **herramienta de lista de tareas (to-dos) del 
 
 Antes de escribir codigo, verificar si el proyecto tiene **algun ADR que defina como documentar el codigo** (estilo de docstrings, comentarios, JSDoc/TSDoc, convenciones de encabezado de archivo, anotaciones, etc.). Los ADR suelen vivir bajo `docs/adr/` o donde el proyecto los registre.
 
-- Si existe un ADR **vigente** sobre documentacion de codigo, **aplicarlo dentro de la misma unidad que se implementa** (la TK, el WI o la fase). La documentacion que el ADR exige es **parte del entregable de esa unidad**, no un paso posterior.
+- Si existe un ADR **vigente** sobre documentacion de codigo, **aplicarlo dentro de la misma unidad que se implementa** (la TK o el WI). La documentacion que el ADR exige es **parte del entregable de esa unidad**, no un paso posterior.
 - **No diferir** esa documentacion "para otro momento", un commit aparte o una tarea futura. Una unidad cuyo codigo no cumple la documentacion que su ADR exige **no esta `Done`**.
 - Esto **no contradice** la regla de no modificar la especificacion de producto: seguir un ADR significa **obedecerlo al escribir el codigo**, no editar el ADR. El ADR se respeta, no se cambia.
 - Si hay varios ADR aplicables, o uno ambiguo respecto al alcance actual, **preguntar al usuario** antes de continuar en lugar de asumir.
@@ -132,7 +131,7 @@ Toda implementacion, sea cual sea el tipo de artefacto, sigue estos dos principi
 
 El ciclo obligatorio por cada unidad de comportamiento es **Red → Green → Refactor**:
 
-1. **Red:** escribir el test que falla antes de escribir el codigo de produccion. El test debe describir el comportamiento esperado segun los **insumos de comportamiento** del artefacto: en US y WI, los criterios de aceptacion (`AC-XXX`) y —cuando existan— las reglas de negocio (`BR-XX`) y los casos de prueba (`TC-XXX`); en migraciones, los casos de Golden Master (`GM-XXX`).
+1. **Red:** escribir el test que falla antes de escribir el codigo de produccion. El test debe describir el comportamiento esperado segun los **insumos de comportamiento** del artefacto: los criterios de aceptacion (`AC-XXX`) y —cuando existan— las reglas de negocio (`BR-XX`) y los casos de prueba (`TC-XXX`). **Nota:** si el artefacto (US o WI) referencia una investigacion de migracion con casos de Golden Master en su `validation.md`, esos casos forman parte de las pruebas de la unidad.
 
 > **Test cases como insumo de las pruebas automatizadas:** si el artefacto tiene test cases (carpeta `test-cases/` en la US o el WI), **leer su `README.md` antes de escribir codigo** para identificar que `TC-XXX` describen y cuales pueden convertirse en pruebas automatizadas (unit, integracion, e2e) dentro del ciclo TDD. Cada `TC-XXX` que sea automatizable se cubre con su prueba en la unidad correspondiente. Cuando un `TC-XXX` **no se pueda automatizar** (p. ej. es manual o exploratorio) o se **decida crear otro tipo de prueba** distinto al que sugiere el test case, **registrarlo en `progress.md`** (ver seccion `progress.md`).
 2. **Green:** escribir el minimo codigo necesario para que el test pase.
@@ -166,18 +165,18 @@ El subagente `ui-specialist` solo se usa **si el proyecto lo define**; si no exi
 
 ## Ejecucion paralela con subagentes y worktrees (transversal)
 
-Modo alternativo al ritmo secuencial por defecto. Aplica a los tres tipos (`TK-XXX`, `WI-XXX` y fases de `MG-XXX`). **Se activa unicamente cuando se cumplen las dos condiciones a la vez:**
+Modo alternativo al ritmo secuencial por defecto. Aplica a los dos tipos (`TK-XXX` y `WI-XXX`). **Se activa unicamente cuando se cumplen las dos condiciones a la vez:**
 
-1. El alcance incluye **mas de una unidad** (varias `TK`, varios `WI` o varias fases de una `MG`).
+1. El alcance incluye **mas de una unidad** (varias `TK` o varios `WI`).
 2. El usuario **pide explicitamente ejecutar sin confirmacion entre unidades** (p. ej. "sin preguntar", "de corrido", "todas a la vez", "sin pausas").
 
-Si falta cualquiera de las dos, se mantiene el **modo secuencial** con una unidad por confirmacion (comportamiento por defecto de cada referencia). El modo paralelo **no** cambia *como* se implementa cada unidad — ciclo TDD, Clean Architecture, lint/build, checkboxes del artefacto, cobertura de test cases, validacion (criterios de aceptacion o Golden Master) siguen igual —: solo cambia **cuantas** unidades avanzan a la vez y como se integran.
+Si falta cualquiera de las dos, se mantiene el **modo secuencial** con una unidad por confirmacion (comportamiento por defecto de cada referencia). El modo paralelo **no** cambia *como* se implementa cada unidad — ciclo TDD, Clean Architecture, lint/build, checkboxes del artefacto, cobertura de test cases, validacion por criterios de aceptacion siguen igual —: solo cambia **cuantas** unidades avanzan a la vez y como se integran.
 
 ### Paso 0 - Analisis de dependencias (obligatorio, antes de ejecutar nada)
 
 Es el **primer paso** y condiciona todo lo demas. No lanzar ningun subagente antes de completarlo.
 
-1. Leer cada unidad del alcance y su relacion de dependencias: el campo **`Dependencias`** del artefacto (TK/WI), las dependencias obvias descritas en el texto y —en migraciones— el orden de fases del `plan.md` (las fases de una migracion suelen ser dependientes por su naturaleza incremental).
+1. Leer cada unidad del alcance y su relacion de dependencias: el campo **`Dependencias`** del artefacto (TK/WI) y las dependencias obvias descritas en el texto.
 2. Clasificar cada unidad:
    - **Independiente:** sin dependencias, o cuyas dependencias ya estan en `Done`.
    - **Dependiente dentro del alcance:** depende de otra unidad que **si** esta en esta ejecucion.
@@ -188,14 +187,14 @@ Es el **primer paso** y condiciona todo lo demas. No lanzar ningun subagente ant
    > Opciones: [Excluir X y continuar] / [Detener aqui]
 
    No ejecutar hasta resolver todos estos casos.
-4. **Ordenar por olas (niveles topologicos).** Con las dependencias internas al alcance, agrupar las unidades en **olas**: cada ola contiene unidades que **no dependen entre si** y cuyas dependencias ya quedaron integradas en olas anteriores. Las unidades de una misma ola son candidatas a correr en paralelo; las olas se ejecutan **en secuencia**. Si se detecta un **ciclo** de dependencias (A depende de B y B de A), parar e informar: no es paralelizable; devolver a `work-plan` / `project-migrate` para revisar el alcance.
+4. **Ordenar por olas (niveles topologicos).** Con las dependencias internas al alcance, agrupar las unidades en **olas**: cada ola contiene unidades que **no dependen entre si** y cuyas dependencias ya quedaron integradas en olas anteriores. Las unidades de una misma ola son candidatas a correr en paralelo; las olas se ejecutan **en secuencia**. Si se detecta un **ciclo** de dependencias (A depende de B y B de A), parar e informar: no es paralelizable; devolver a `work-plan` / `work-define` para revisar el alcance.
 5. Presentar el **plan de ejecucion** (olas, que corre en paralelo, que se excluye y por que) y confirmarlo **una sola vez**. Como el usuario ya pidio ejecutar sin confirmacion, no habra mas pausas entre unidades una vez aprobado este plan (salvo que un paso obligue a parar: dependencia externa, conflicto de merge no trivial o suite en rojo).
 
 ### Concurrencia y worktrees
 
 - **Maximo 3 subagentes en paralelo.** Si una ola tiene mas de 3 unidades independientes, despacharlas en lotes de hasta 3; al liberarse un cupo, entra la siguiente unidad pendiente de la ola.
 - **Un worktree por unidad.** Cada subagente trabaja en su propio `git worktree`, en una rama derivada de la rama del artefacto:
-  - Rama base = la rama del artefacto de esta ejecucion (`feature/US-XXX-*`, la rama del `WI`, o la rama de la `MG`).
+  - Rama base = la rama del artefacto de esta ejecucion (`feature/US-XXX-*` o la rama del `WI`).
   - Crear el worktree en una ruta temporal fuera del arbol principal con `git worktree add <ruta-temporal> -b wt/<unidad> <rama-base>` (p. ej. rama `wt/TK-003`). El worktree parte del estado de la rama base **ya integrado con las olas anteriores**.
 - Cada subagente **ejecuta el flujo completo de su unidad** segun la referencia del tipo (Paso 3 de la referencia correspondiente): ciclo TDD, lint/typecheck/build, validacion, checkboxes del artefacto, cobertura de test cases y commits dentro de su worktree. El subagente **no** integra ni mergea a la rama base ni ofrece handoffs; al terminar devuelve al orquestador el resultado (unidad, rama, estado, notas, resultado de tests/validacion).
 - El orquestador arranca una **nueva ola solo cuando la anterior este completamente integrada** en la rama base, para que las unidades dependientes vean el codigo de sus predecesoras.
@@ -206,7 +205,7 @@ La hace **el orquestador, una unidad a la vez** (nunca merges concurrentes), a m
 
 1. Sobre la rama del artefacto, hacer merge de la rama de la unidad: `git merge wt/<unidad>`.
 2. **Resolver conflictos** si los hay; si el conflicto no es trivial o el resultado queda ambiguo, **parar e informar al usuario** antes de continuar con el resto.
-3. Ejecutar **lint/typecheck/build y la suite de tests** (o el Golden Master, en migraciones) en la rama del artefacto tras el merge. Si algo falla, **parar** y avisar; no seguir integrando sobre una base rota.
+3. Ejecutar **lint/typecheck/build y la suite de tests** en la rama del artefacto tras el merge. Si algo falla, **parar** y avisar; no seguir integrando sobre una base rota.
 4. Marcar `progress.md` de esa unidad a `Done` (y su `Cobertura de test cases`) solo **despues** de un merge y una validacion en verde.
 5. Al integrar todas las unidades, **limpiar los worktrees y ramas temporales** (`git worktree remove <ruta-temporal>` y borrar la rama `wt/<unidad>`).
 
@@ -238,7 +237,6 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 |---------|---------------|
 | `references/user-story-tasks.md` | Tipo = tarea de historia de usuario (`US-XXX` / `TK-XXX`). Ubicaciones, filtros, cola, ciclo TK-a-TK (con TDD), flujo "TK sin US", cierre, ejemplos y anti-patrones. |
 | `references/work-items.md` | Tipo = work item de mantenimiento (`WI-XXX`). Documento unico combinado, validacion por criterios de aceptacion, ciclo por WI completo, cierre, ejemplos y anti-patrones. |
-| `references/migrations.md` | Tipo = migracion (`MG-XXX`). Pre-requisito `plan.md` en `Ready`, ejecucion por fases, validacion por Golden Master Testing, destino fragmentado, ejemplos y anti-patrones. |
 | `assets/progress-template.md` | Plantilla de `progress.md`. Adaptar encabezado y unidades al tipo. |
 
 ---
@@ -254,7 +252,7 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 - Codificar con working tree sucio sin avisar y pausar.
 - Implementar en `main` u otra rama que no sea la del artefacto sin instruccion explicita.
 - Tratar como ejecutable un artefacto que no esta en `Ready`.
-- Modificar la especificacion de producto (US/TK/WI/discovery/validation/plan, ADRs, technical-docs) durante la implementacion, salvo marcar checkboxes de subtareas completadas en el artefacto activo.
+- Modificar la especificacion de producto (US/TK/WI, ADRs, technical-docs) durante la implementacion, salvo marcar checkboxes de subtareas completadas en el artefacto activo.
 - Diferir "para otro momento" la documentacion de codigo que un ADR vigente exige, o cerrar una unidad como `Done` sin esa documentacion.
 - Continuar cuando se detecta un conflicto en la documentacion sin notificar al usuario primero.
 - Diferir la escritura de tests para despues de la implementacion; el ciclo TDD es Red → Green → Refactor dentro de cada unidad.

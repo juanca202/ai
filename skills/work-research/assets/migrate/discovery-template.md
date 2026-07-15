@@ -1,11 +1,17 @@
 <!--
 Convención de placeholders: sustituir manualmente cada {{texto}}; no es un motor de plantillas.
 Eliminar este bloque y sustituir todos los {{…}} al publicar el documento final.
+
+Este es un ARCHIVO ADICIONAL del flujo B (migración), no el informe principal.
+Vive junto al README.md dentro de la carpeta de la investigación:
+  <destino>/docs/specs/research/RS-XXX-{slug}/discovery.md
+El informe principal (README.md) lo enlaza en su sección "Archivos adicionales".
 -->
 
 # Descubrimiento de Migración
 
 **Estado**: {{Draft | Ready}}
+**Investigación**: [README.md](./README.md)
 **Fecha**: {{YYYY-MM-DD}}
 **Proyecto origen**: {{nombre / stack principal del origen}}
 **Proyecto destino**: {{nombre / stack principal del destino}}

@@ -11,8 +11,7 @@ Referencia detallada del skill `trace-validate`. El `SKILL.md` mantiene el resum
 1. Resolver el tipo y la ubicación del trabajo:
    - **US:** `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md`.
    - **WI:** `docs/specs/work-items/WI-XXX-[kebab]/README.md`.
-   - **MG:** `docs/specs/migrations/MG-XXX-{slug}/validation.md` (criterios = casos de Golden Master).
-2. Leer el documento y extraer **todos los criterios de aceptación** con su texto, usando los códigos del tipo (`AC-XXX` para US y WI, `GM-XXX` para MG). Si el artefacto usa otro formato de código (`AC-1`, `CA-1`, `BR-01`…), normalizarlo a `AC-XXX` al referenciarlo en el reporte.
+2. Leer el documento y extraer **todos los criterios de aceptación** con su texto, usando los códigos del tipo (`AC-XXX` para US y WI). Si el artefacto usa otro formato de código (`AC-1`, `CA-1`, `BR-01`…), normalizarlo a `AC-XXX` al referenciarlo en el reporte.
 3. Si no existe la sección de criterios o no hay criterios explícitos, **parar** y reportar (ver «Cuándo bloquear» en `SKILL.md`). No continuar con supuestos.
 
 ### Paso 2 — Inventariar casos de prueba y artefactos de prueba automatizada
@@ -22,7 +21,6 @@ Referencia detallada del skill `trace-validate`. El `SKILL.md` mantiene el resum
    - **unit** — pruebas unitarias (p. ej. `*.test.*`, `*.spec.*`, `*_test.*`, carpetas `__tests__/`, `tests/unit/`).
    - **integración** — pruebas de integración (carpetas/sufijos `integration`, `it`, `*.integration.*`).
    - **e2e** — pruebas end-to-end (carpetas/sufijos `e2e`, `cypress/`, `playwright/`, `*.e2e.*`).
-   - **migración (Golden Master)** — para `MG-XXX`, los arneses y datos de referencia en `validation/` que comparan salida del destino contra el golden master.
 3. Para cada artefacto, registrar su **ruta** y a qué criterio apunta (por nombre del test, describe/it, comentarios o vínculo explícito al criterio).
 
 > El mapeo se infiere del contenido y nombres de los tests, no se inventa. Si un test no puede vincularse con certeza a un criterio, dejarlo en Observaciones en lugar de forzar el mapeo.
@@ -32,7 +30,7 @@ Referencia detallada del skill `trace-validate`. El `SKILL.md` mantiene el resum
 Para **cada** criterio del trabajo, determinar:
 
 - **Caso(s) de prueba** que lo validan (documentados o derivados de los tests).
-- **Artefacto(s)** de prueba que lo cubren, con su tipo (unit / integración / e2e / golden master / manual).
+- **Artefacto(s)** de prueba que lo cubren, con su tipo (unit / integración / e2e / manual).
 - **Estado de cobertura** según la tabla de «Estados de cobertura» en `SKILL.md`.
 - **Observaciones** si hace falta aclaración (cobertura parcial, ambigüedad, supuesto a confirmar, solo manual, etc.).
 
@@ -49,7 +47,7 @@ Para **cada** criterio del trabajo, determinar:
 
 ### Paso 5 — Construir la matriz de trazabilidad
 
-Usar la plantilla `assets/trace-report-template.md` (leerla antes de redactar). Sustituir cada `{{…}}` por datos verificables; el reporte publicado no debe conservar placeholders ni el bloque de comentario inicial. La matriz tiene una fila por cada criterio del trabajo con: criterio, descripción, casos de prueba, artefactos (con tipo), estado, ejecución automática, resultado y observaciones. Incluir además el resumen de artefactos de prueba automatizada disponibles (unit / integración / e2e / golden master).
+Usar la plantilla `assets/trace-report-template.md` (leerla antes de redactar). Sustituir cada `{{…}}` por datos verificables; el reporte publicado no debe conservar placeholders ni el bloque de comentario inicial. La matriz tiene una fila por cada criterio del trabajo con: criterio, descripción, casos de prueba, artefactos (con tipo), estado, ejecución automática, resultado y observaciones. Incluir además el resumen de artefactos de prueba automatizada disponibles (unit / integración / e2e).
 
 ### Paso 6 — Emitir el veredicto
 
@@ -60,7 +58,6 @@ Aplicar la tabla de «Veredicto» (en `SKILL.md`) sobre el conjunto de criterios
 1. Guardar el reporte (sobrescribir si ya existe, salvo que el usuario pida conservar histórico):
    - **US:** `docs/specs/user-stories/US-XXX-[nombre-corto]/trace-report.md`.
    - **WI:** `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` (dentro de la carpeta del WI).
-   - **MG:** `docs/specs/migrations/MG-XXX-{slug}/trace-report.md`.
 2. Presentar al usuario el **veredicto** y el reporte. No modificar ningún otro artefacto del repo.
 
 ---
@@ -73,7 +70,6 @@ Detectar el runner sin asumir uno por defecto. Señales habituales:
 - **Python:** `pytest`, `tox`, `unittest`; `pyproject.toml` / `pytest.ini` / `setup.cfg`.
 - **Java/Kotlin:** Maven (`mvn test`), Gradle (`gradle test`).
 - **.NET:** `dotnet test`. **Go:** `go test`. **Otros:** según el ecosistema del repo.
-- **Migración (Golden Master):** el arnés definido en `validation.md` / `validation/` que ejecuta la comparación contra la salida de referencia.
 
 Reglas:
 
@@ -87,8 +83,8 @@ Reglas:
 ## Checklist
 
 - [ ] Idioma resuelto (preferencia del usuario en la sesión, o idioma de la conversación)
-- [ ] Tipo de trabajo determinado y documento de criterios leído; criterios extraídos con los códigos del tipo, normalizados a `AC-XXX` (US/WI) o `GM-XXX` (MG)
-- [ ] Casos de prueba y artefactos (unit / integración / e2e / golden master) inventariados con su ruta y criterio
+- [ ] Tipo de trabajo determinado y documento de criterios leído; criterios extraídos con los códigos del tipo, normalizados a `AC-XXX` (US/WI)
+- [ ] Casos de prueba y artefactos (unit / integración / e2e) inventariados con su ruta y criterio
 - [ ] Cada criterio con estado (Cubierto / Parcial / No cubierto) y observaciones cuando aplica
 - [ ] Ejecución automática intentada; comando y resultado registrados; sin resultados inventados
 - [ ] Matriz construida desde `assets/trace-report-template.md`

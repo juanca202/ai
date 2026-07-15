@@ -14,19 +14,15 @@ Referencia del skill `trace-validate`. Casos de uso y errores a evitar.
 - *Entrada:* «Valida la cobertura de WI-007.»
 - *Comportamiento:* lee `docs/specs/work-items/WI-007-*.md`, extrae los criterios de la sección **## Criterios de aceptación** (referenciados como `AC-XXX`; si el WI usa otro formato, se normaliza a `AC-XXX`), mapea tests, ejecuta lo que pueda, guarda `WI-007-*-trace-report.md` y emite el veredicto.
 
-**Ejemplo 3 — Migración por Golden Master**
-- *Entrada:* «Genera la matriz de cobertura de MG-003.»
-- *Comportamiento:* lee `MG-003-*/validation.md`, extrae los casos `GM-XXX`, mapea cada caso a su arnés/insumos en `validation/`, ejecuta el Golden Master si el entorno lo permite, guarda `trace-report.md` en la carpeta de la migración y emite el veredicto.
-
-**Ejemplo 4 — Trabajo sin criterios**
+**Ejemplo 3 — Trabajo sin criterios**
 - *Entrada:* «Genera la matriz de cobertura de US-009» y el README no tiene `AC-XXX` (o el WI no tiene criterios de aceptación).
 - *Comportamiento:* bloquea, no genera reporte; informa que faltan criterios de aceptación y sugiere definirlos antes de validar.
 
-**Ejemplo 5 — No se puede ejecutar**
+**Ejemplo 4 — No se puede ejecutar**
 - *Entrada:* «Valida US-015» en un entorno sin runner instalado / sin red.
 - *Comportamiento:* genera la matriz de cobertura con los artefactos hallados, marca ejecución automática = `No` con la razón, resultados como `No ejecutado`, y emite el veredicto según la cobertura documentada (típicamente ⚠️ Aprobado con observaciones o ❌ Rechazado si falta cobertura).
 
-**Ejemplo 6 — Criterio sin prueba**
+**Ejemplo 5 — Criterio sin prueba**
 - *Entrada:* «Valida US-031.»
 - *Comportamiento:* un `AC-003` no tiene ningún test asociado -> estado `No cubierto`, Observación indicando el hueco -> veredicto **❌ Rechazado** listando `AC-003`.
 

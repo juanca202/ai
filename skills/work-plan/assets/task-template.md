@@ -33,6 +33,20 @@ Rutas permitidas: assets/ (recursos propios de esta tarea) o docs/specs/technica
 - **Documentación técnica:** {{enlace a `docs/specs/technical-docs/` si aplica — DTOs, ER, flujos, endpoints}}
 - **Diseño:** {{enlace a Figma, wireframe o imagen de alta fidelidad; obligatorio si la tarea es de UI}}
 
+## Migración (origen → destino)
+
+<!-- Sección opcional. Incluir solo si esta tarea ejecuta una migración entre proyectos derivada de una investigación (`research/RS-XXX-{slug}/`). Eliminar esta sección si no aplica. -->
+
+**Investigación**: {{enlace a la investigación, típ. `../../research/RS-XXX-{slug}/README.md`}}
+**Proyecto origen**: {{nombre / stack principal del origen}}
+**Proyecto destino**: {{nombre / stack principal del destino}}
+
+Esta tarea materializa parte de la migración investigada en el `RS-XXX`. Para no duplicar contexto, apóyate en sus archivos (contexto progresivo): el mapeo tecnológico, el estado del origen y los riesgos viven en su `discovery.md`; los casos de validación (Golden Master) en su `validation.md`.
+
+- **Archivos afectados** muestra el árbol resultante en el destino; el árbol de lo que se migra en el origen vive en el `discovery.md`.
+- Los **criterios de aceptación (`AC-XXX`) de la US** se validan con los casos Golden Master de `validation.md`: indica el/los `GM-XXX` que cubren cada criterio relevante para esta tarea.
+- Si la migración es incremental, organiza el **Plan de implementación** por fases según la estrategia elegida.
+
 ## Archivos afectados
 
 <!-- Árbol con las rutas de los archivos que se crearán, modificarán o eliminarán. Usar símbolos: + creado · ~ modificado · - eliminado. Frente a cada archivo, una descripción muy corta y acotada de qué se hace en él. -->

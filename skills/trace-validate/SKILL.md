@@ -1,6 +1,6 @@
 ---
 name: trace-validate
-description: "Genera un reporte de trazabilidad que valida la cobertura de los criterios de aceptación de un trabajo —una historia de usuario (US-XXX) con sus criterios de aceptación (AC-XXX), un work item de mantenimiento (WI-XXX) con sus criterios de aceptación (AC-XXX), o una migración (MG-XXX) con sus casos de Golden Master (GM-XXX)— contra los casos de prueba y los artefactos de prueba del repositorio (unit, integración, e2e). Para cada criterio indica los casos de prueba y artefactos que lo cubren, un estado (Cubierto / Parcial / No cubierto), observaciones cuando hace falta aclaración, si la prueba se pudo ejecutar automáticamente y su resultado, y finalmente un veredicto sobre si todos los criterios de aceptación quedan cubiertos. Activar siempre que el usuario pida validar cobertura, generar una matriz o reporte de trazabilidad, verificar que los criterios de aceptación están probados, comprobar que un trabajo está cubierto por pruebas, o mencione «trace-validate», «trazabilidad», «matriz de cobertura» o «validar criterios de aceptación», aunque no nombre el formato exacto."
+description: "Genera un reporte de trazabilidad que valida la cobertura de los criterios de aceptación de un trabajo —una historia de usuario (US-XXX) con sus criterios de aceptación (AC-XXX) o un work item de mantenimiento (WI-XXX) con sus criterios de aceptación (AC-XXX)— contra los casos de prueba y los artefactos de prueba del repositorio (unit, integración, e2e). Para cada criterio indica los casos de prueba y artefactos que lo cubren, un estado (Cubierto / Parcial / No cubierto), observaciones cuando hace falta aclaración, si la prueba se pudo ejecutar automáticamente y su resultado, y finalmente un veredicto sobre si todos los criterios de aceptación quedan cubiertos. Activar siempre que el usuario pida validar cobertura, generar una matriz o reporte de trazabilidad, verificar que los criterios de aceptación están probados, comprobar que un trabajo está cubierto por pruebas, o mencione «trace-validate», «trazabilidad», «matriz de cobertura» o «validar criterios de aceptación», aunque no nombre el formato exacto."
 license: MIT
 ---
 
@@ -30,8 +30,7 @@ El tipo se determina por el identificador que indique el usuario o por la ruta d
 |------|---------------|---------------------------|------------------|
 | **Historia de usuario** | `US-XXX` | Sección **Criterios de aceptación** del `README.md` de la US (lista plana `AC-XXX`) | `AC-XXX` en el orden en que aparecen |
 | **Work item de mantenimiento** | `WI-XXX` | Sección **## Criterios de aceptación** del `README.md` del WI (`WI-XXX-[kebab]/README.md`) | `AC-XXX` en el orden en que aparecen |
-| **Migración** | `MG-XXX` | Casos de **Golden Master** definidos en `validation.md` de la migración | `GM-XXX` (o las variantes `GM-API-XXX` / `GM-UI-XXX` tal como estén en `validation.md`) |
-> En todo el flujo, «criterio» se refiere al código del tipo en curso: `AC-XXX` para US y WI, `GM-XXX` para MG. Si el trabajo **no tiene criterios de aceptación**, no hay nada que trazar → **bloquear** (ver «Cuándo bloquear»).
+> En todo el flujo, «criterio» se refiere al código del tipo en curso: `AC-XXX` para US y WI. Si el trabajo **no tiene criterios de aceptación**, no hay nada que trazar → **bloquear** (ver «Cuándo bloquear»).
 
 ---
 
@@ -63,10 +62,10 @@ No inventar nada. Si un dato no es explícito, obtenerlo del repo o preguntar al
 
 | Dato | Cómo obtenerlo | Si no está disponible |
 |------|----------------|-----------------------|
-| **Trabajo a validar** | Indicado por el usuario o inferido de la ruta de trabajo; determinar el tipo (`US-XXX` / `WI-XXX` / `MG-XXX`) | Preguntar qué trabajo validar; sin él no se puede generar el reporte |
+| **Trabajo a validar** | Indicado por el usuario o inferido de la ruta de trabajo; determinar el tipo (`US-XXX` / `WI-XXX`) | Preguntar qué trabajo validar; sin él no se puede generar el reporte |
 | **Criterios de aceptación** | Según el tipo (ver [Tipos de trabajo y criterios](#tipos-de-trabajo-y-criterios)) | Si el trabajo no tiene criterios de aceptación: **bloquear** y reportar — sin criterios no hay nada que trazar |
 | **Casos de prueba** | Casos de prueba documentados (si el proyecto los tiene) y/o los tests del repo | Si no hay casos documentados, derivar la cobertura desde los artefactos de prueba del repo |
-| **Artefactos de prueba** | Buscar en el repo archivos de test unit / integración / e2e relacionados con el trabajo (ver «Inventariar casos y artefactos» en `references/flow.md`). Para migraciones, también los insumos de Golden Master en `validation/` | Si no se encuentran, marcar criterios sin artefacto como `No cubierto` y dejar Observación |
+| **Artefactos de prueba** | Buscar en el repo archivos de test unit / integración / e2e relacionados con el trabajo (ver «Inventariar casos y artefactos» en `references/flow.md`) | Si no se encuentran, marcar criterios sin artefacto como `No cubierto` y dejar Observación |
 | **Runner de pruebas** | Detectar del proyecto (ver «Ejecución automática» en `references/flow.md`) | Si no se puede determinar el runner: ejecución automática = `No`, con Observación |
 | **Alcance** | Todo el trabajo por defecto; el usuario puede acotar a ciertos criterios | Si es ambiguo, preguntar |
 
@@ -78,8 +77,8 @@ No inventar nada. Si un dato no es explícito, obtenerlo del repo o preguntar al
 
 Resumen de los 7 pasos. El detalle íntegro de cada paso está en **`references/flow.md`** (leerlo antes de ejecutar el flujo).
 
-1. **Localizar y leer el trabajo** — resolver tipo y ubicación; extraer todos los criterios con sus códigos, normalizados a `AC-XXX` (US/WI) o `GM-XXX` (MG). Sin criterios → bloquear (ver «Cuándo bloquear»).
-2. **Inventariar casos y artefactos** — recopilar casos documentados y clasificar tests por tipo (unit / integración / e2e / golden master), con ruta y criterio.
+1. **Localizar y leer el trabajo** — resolver tipo y ubicación; extraer todos los criterios con sus códigos, normalizados a `AC-XXX` (US/WI). Sin criterios → bloquear (ver «Cuándo bloquear»).
+2. **Inventariar casos y artefactos** — recopilar casos documentados y clasificar tests por tipo (unit / integración / e2e), con ruta y criterio.
 3. **Mapear cobertura criterio a criterio** — casos, artefactos, estado (ver «Estados de cobertura») y observaciones. No forzar mapeos inciertos.
 4. **Intentar ejecución automática** — detectar runner y ejecutar acotado; registrar ejecución (`Sí`/`No`/`N/A`) y resultado (`Paso`/`Fallo`/`No ejecutado`). Nunca fabricar resultados (ver «Ejecución automática» en `references/flow.md`).
 5. **Construir la matriz** desde `assets/trace-report-template.md` (leerla antes de redactar).
@@ -105,7 +104,7 @@ Resumen de los 7 pasos. El detalle íntegro de cada paso está en **`references/
 Parar y reportar (sin generar reporte parcial) cuando:
 
 - El trabajo no existe o no tiene su documento de criterios (README de la US / `WI-XXX` / `validation.md`).
-- No hay sección de criterios de aceptación o no hay criterios explícitos del tipo (`AC-XXX` para US y WI, `GM-XXX` para MG): no hay nada que trazar; sugerir alinear el trabajo con su skill de definición/planificación antes de validar.
+- No hay sección de criterios de aceptación o no hay criterios explícitos del tipo (`AC-XXX` para US y WI): no hay nada que trazar; sugerir alinear el trabajo con su skill de definición/planificación antes de validar.
 
 ```
 WARNING No es posible generar el reporte de trazabilidad:
@@ -121,8 +120,7 @@ WARNING No es posible generar el reporte de trazabilidad:
 |-----------|------|
 | Historia de usuario | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md` |
 | Work item | `docs/specs/work-items/WI-XXX-[kebab]/README.md` |
-| Migración (criterios) | `docs/specs/migrations/MG-XXX-{slug}/validation.md` (+ `validation/`) |
-| Reporte de trazabilidad (salida) | US: `…/US-XXX-[nombre-corto]/trace-report.md` · WI: `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` · MG: `…/MG-XXX-{slug}/trace-report.md` |
+| Reporte de trazabilidad (salida) | US: `…/US-XXX-[nombre-corto]/trace-report.md` · WI: `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` |
 
 ---
 
@@ -148,7 +146,7 @@ Posición: **validación / cierre de calidad** — después de `work-implement`.
 
 | | |
 |--|--|
-| **Entrada** | Trabajo (`US-XXX` / `WI-XXX` / `MG-XXX`) con **criterios de aceptación** (`AC-XXX` para US y WI, `GM-XXX` para MG); código implementado; idealmente tests escritos por `quality-specialist` en el cierre de `work-implement`. |
+| **Entrada** | Trabajo (`US-XXX` / `WI-XXX`) con **criterios de aceptación** (`AC-XXX`); código implementado; idealmente tests escritos por `quality-specialist` en el cierre de `work-implement`. |
 | **Salida** | `trace-report.md` en la ubicación del tipo + veredicto sobre la cobertura. |
 | **Veredicto ❌ Rechazado** | Volver a `work-implement` (fase de pruebas con `quality-specialist`) para cubrir los criterios faltantes; revalidar después. |
 | **Falta funcional en el trabajo** | Si la matriz revela que un criterio no es testeable o está mal definido, escalar a la definición/planificación del trabajo — no editar la especificación desde aquí. |
@@ -160,5 +158,5 @@ Posición: **validación / cierre de calidad** — después de `work-implement`.
 | Archivo | Cuándo leerlo |
 |---------|---------------|
 | `references/flow.md` | Flujo paso a paso (Pasos 1-7), detección de runners (ejecución automática) y checklist completo. Leer antes de ejecutar el flujo. |
-| `references/examples.md` | Ejemplos por tipo (US / WI / MG, sin criterios, sin runner, criterio sin prueba) y anti-patrones. Leer ante dudas de comportamiento. |
+| `references/examples.md` | Ejemplos por tipo (US / WI, sin criterios, sin runner, criterio sin prueba) y anti-patrones. Leer ante dudas de comportamiento. |
 | `assets/trace-report-template.md` | Plantilla canónica del reporte de trazabilidad. Leer antes de redactar el reporte. |

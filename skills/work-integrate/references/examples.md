@@ -1,6 +1,6 @@
 # Ejemplos, anti-patrones y notas
 
-Referencias del skill **work-integrate**. Cubren los tres tipos de trabajo (`US-XXX`, `WI-XXX`, `MG-XXX`).
+Referencias del skill **work-integrate**. Cubren los dos tipos de trabajo (`US-XXX`, `WI-XXX`).
 
 ---
 
@@ -16,12 +16,7 @@ Referencias del skill **work-integrate**. Cubren los tres tipos de trabajo (`US-
 - *Entrada:* Rama `fix/WI-007-fuga-memoria`, working tree limpio, `docs/specs/work-items/WI-007-fuga-memoria/progress.md` con todas las unidades del WI en `Done`, reflog indica `Created from main`.
 - *Salida:* `git checkout main` → `git merge --no-ff fix/WI-007-fuga-memoria -m "Merge WI-007: fuga-memoria"` → reporte con commits integrados y hash de merge.
 
-**Ejemplo 3 — Migración por fases**
-
-- *Entrada:* Rama `feature/MG-003-orm-a-prisma`, working tree limpio, `docs/specs/migrations/MG-003-orm-a-prisma/progress.md` con `Fase 1`, `Fase 2` y `Fase 3` todas en `Done`, reflog indica `Created from develop`.
-- *Salida:* `git checkout develop` → `git merge --no-ff feature/MG-003-orm-a-prisma -m "Merge MG-003: orm-a-prisma"` → reporte con commits integrados y hash de merge.
-
-**Ejemplo 4 — Unidad pendiente**
+**Ejemplo 3 — Unidad pendiente**
 
 - *Entrada:* Rama `feature/US-013-ajuste-permisos`, working tree limpio, `progress.md` con TK-001 en `Done` y TK-002 en `In Progress`.
 - *Salida:* Sin operaciones git. Mensaje:
@@ -33,25 +28,25 @@ Referencias del skill **work-integrate**. Cubren los tres tipos de trabajo (`US-
   - Completa o marca explícitamente cada unidad como Done antes de reintentar.
   ```
 
-**Ejemplo 5 — Rama base ambigua**
+**Ejemplo 4 — Rama base ambigua**
 
 - *Entrada:* Rama `feature/US-077-...`, reflog sin entrada `Created from`, sin upstream local; existen `main`, `develop` y `release/2026.q2` como ancestros plausibles.
 - *Comportamiento:* El agente lista los candidatos y pregunta cuál es la rama base correcta. No asume `main` ni `develop`. No mergea hasta tener respuesta.
 
-**Ejemplo 6 — Working tree sucio**
+**Ejemplo 5 — Working tree sucio**
 
-- *Entrada:* Rama `feature/MG-051-...`, dos archivos modificados sin commitear, `progress.md` íntegro en `Done`.
+- *Entrada:* Rama `feature/US-051-...`, dos archivos modificados sin commitear, `progress.md` íntegro en `Done`.
 - *Salida:* Sin operaciones git. Mensaje listando los archivos pendientes y pidiendo commit, stash o descarte antes de reintentar.
 
-**Ejemplo 7 — Conflicto en el merge**
+**Ejemplo 6 — Conflicto en el merge**
 
 - *Entrada:* Verificaciones OK, rama base `main`, `git merge --no-ff` produce conflictos en `src/app/Module.java`.
 - *Comportamiento:* El agente ejecuta `git merge --abort`, deja el repo en el estado previo, lista los archivos en conflicto y pide al usuario resolverlos manualmente. No reintenta.
 
-**Ejemplo 8 — Rama con prefijo inválido**
+**Ejemplo 7 — Rama con prefijo inválido**
 
 - *Entrada:* Rama `hotfix-cache` (sin identificador de trabajo reconocible), `progress.md` íntegro en `Done`.
-- *Salida:* Sin operaciones git. Mensaje: «La rama actual `hotfix-cache` no corresponde a ningún trabajo (`US-XXX`/`WI-XXX`/`MG-XXX`) ni cumple un patrón de rama válido. Renombra la rama al formato de su tipo (p. ej. `git branch -m fix/WI-012-cache-ttl`) antes de reintentar el submit.»
+- *Salida:* Sin operaciones git. Mensaje: «La rama actual `hotfix-cache` no corresponde a ningún trabajo (`US-XXX`/`WI-XXX`) ni cumple un patrón de rama válido. Renombra la rama al formato de su tipo (p. ej. `git branch -m fix/WI-012-cache-ttl`) antes de reintentar el submit.»
 
 ---
 
@@ -61,7 +56,7 @@ Referencias del skill **work-integrate**. Cubren los tres tipos de trabajo (`US-
 - Buscar el `progress.md` de un WI en un archivo compartido `docs/specs/work-items/progress.md`; cada WI tiene su propio `progress.md` dentro de su carpeta `WI-XXX-[kebab-case]/`.
 - Hacer merge sin haber ejecutado `code-review` o con veredicto **❌ No apto** / **⚠️ Incompleto** — el merge solo procede con veredicto **✅ Apto**.
 - Modificar `progress.md` para «forzar» que aparezcan en `Done` sin que el trabajo esté completo.
-- Aceptar ramas sin un identificador de trabajo reconocible o con prefijos no válidos para su tipo (p. ej. `bugfix/`, `hotfix/`, o `fix/` aplicado a una US/MG).
+- Aceptar ramas sin un identificador de trabajo reconocible o con prefijos no válidos para su tipo (p. ej. `bugfix/`, `hotfix/`, o `fix/` aplicado a una US).
 - Asumir `main`, `master` o `develop` como rama base sin confirmarlo por reflog, config o usuario.
 - Resolver conflictos automáticamente o usar `--strategy=ours` / `--strategy=theirs` para **hacerlo pasar**.
 - Usar merge fast-forward por defecto cuando el historial de la rama se perdería; preservar con `--no-ff` salvo petición explícita del usuario.
@@ -82,12 +77,12 @@ Posición: **cierre local** — último paso de los pipelines de trabajo (sin pu
 
 | | |
 |--|--|
-| **Entrada** | Rama del trabajo (`feature/US-XXX-...`, `feature/MG-XXX-...`, o `feature/`\|`fix/`\|`chore/`\|`refactor/` + `WI-XXX-...`); working tree limpio; commits de la implementación ya hechos (`git-commit`); `progress.md` con cada unidad del trabajo en `Done`; `code-review` con veredicto **✅ Apto**. |
+| **Entrada** | Rama del trabajo (`feature/US-XXX-...`, o `feature/`\|`fix/`\|`chore/`\|`refactor/` + `WI-XXX-...`); working tree limpio; commits de la implementación ya hechos (`git-commit`); `progress.md` con cada unidad del trabajo en `Done`; `code-review` con veredicto **✅ Apto**. |
 | **Salida** | Merge `--no-ff` a la rama base local; reporte con hash de merge. Sin push ni borrado de rama. |
 | **Siguiente paso (fuera del skill)** | Push de la rama base y CI — decisión del usuario. |
 | **PR/MR (`pr-create`)** | Abrir **antes** de este skill, estando en la rama del trabajo (o con la feature ya publicada en remoto). Tras el merge local, la rama activa es la **base**; `pr-create` bloquea en `main`/`master`/`develop`/`trunk`. |
 | **Regreso a implement** | Unidad no `Done` o `progress.md` incompleto → completar en **`work-implement`** y actualizar `progress.md` antes de reintentar. |
-| **Regreso a define / plan / migrate** | Alcance reducido o unidad fuera de entrega → alinear con **`work-define`** / **`work-plan`** (US/WI) o **`project-migrate`** (MG), corregir `progress.md` y reintentar. |
+| **Regreso a define / plan** | Alcance reducido o unidad fuera de entrega → alinear con **`work-define`** / **`work-plan`** (US/WI), corregir `progress.md` y reintentar. |
 
 ### progress.md
 

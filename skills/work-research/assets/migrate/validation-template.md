@@ -1,13 +1,19 @@
 <!--
 Convención de placeholders: sustituir manualmente cada {{texto}}; no es un motor de plantillas.
 Eliminar este bloque y sustituir todos los {{…}} al publicar el documento final.
+
+Este es un ARCHIVO ADICIONAL del flujo B (migración), no el informe principal.
+Vive junto al README.md y el discovery.md dentro de la carpeta de la investigación:
+  <destino>/docs/specs/research/RS-XXX-{slug}/validation.md
+El informe principal (README.md) lo enlaza en su sección "Archivos adicionales".
 -->
 
 # Preparación de Validación
 
 **Estado**: {{Draft | Ready}}
-**Fecha**: {{YYYY-MM-DD}}
+**Investigación**: [README.md](./README.md)
 **Discovery**: [discovery.md](./discovery.md)
+**Fecha**: {{YYYY-MM-DD}}
 **Proyecto origen**: {{nombre / stack principal del origen}}
 **Proyecto destino**: {{nombre / stack principal del destino}}
 

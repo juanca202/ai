@@ -1,0 +1,20 @@
+{
+  "name": "sdd-devkit",
+  "description": "Utilidades para el desarrollo de SDD (Spec-Driven Development): ADRs, historias de usuario, planificacion e implementacion de tareas y work items, definicion y trazabilidad de pruebas, migraciones y code review.",
+  "version": "1.0.0",
+  "author": {
+    "name": "juanca202"
+  },
+  "homepage": "https://github.com/juanca202/ai",
+  "repository": "https://github.com/juanca202/ai",
+  "license": "MIT",
+  "keywords": [
+    "adr",
+    "code-review",
+    "azure-devops",
+    "jira",
+    "user-stories",
+    "traceability",
+    "testing"
+  ]
+}

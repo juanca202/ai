@@ -10,6 +10,8 @@ npx skills add https://github.com/juanca202/ai
 
 El asistente te guiará paso a paso: dónde instalar (proyecto o global), qué agente usar y qué skills incluir.
 
+Este repositorio también incluye el manifiesto nativo de plugin de Cursor ([.cursor-plugin/plugin.json](.cursor-plugin/plugin.json)), que reutiliza los mismos directorios `skills/` y `agents/` de la raíz. Sirve para publicarlo en el [marketplace de Cursor](https://cursor.com/marketplace/publish) como plugin instalable directamente desde la UI, sin pasar por `npx skills`.
+
 ## Instalación en Claude Code
 
 Este repositorio también se distribuye como el plugin **SDD Devkit** de Claude Code — utilidades para el desarrollo de SDD (Spec-Driven Development): ADRs, historias de usuario, planificación e implementación de tareas y work items, definición y trazabilidad de pruebas, migraciones y code review (manifiesto en [.claude-plugin/plugin.json](.claude-plugin/plugin.json) y marketplace en [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)).

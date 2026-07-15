@@ -3,8 +3,11 @@
 Guía para elegir **cómo** ejecutar la migración de forma incremental y de bajo
 riesgo, en lugar de un *big bang*. Se basa en patrones establecidos de
 modernización/desplazamiento de sistemas legacy (Martin Fowler; Cartwright, Horn
-y Lewis, *Patterns of Legacy Displacement*). Úsala para definir las fases del
-"Plan de implementación" del `plan.md`.
+y Lewis, *Patterns of Legacy Displacement*). En este skill, úsala para **recomendar
+el enfoque de migración** en el informe y el *handoff* (Paso 3 del flujo B): ayuda a
+dimensionar el cambio y a describir cómo lo ejecutará luego `work-define` (varias US)
+o `work-plan` (un WI). El plan de implementación por fases se materializa en esas
+US/WI, no en este skill.
 
 ## Principios
 
@@ -44,12 +47,13 @@ antes de retirar el origen. Es especialmente útil en producción combinado con
 reconcilian las salidas y qué diferencias son aceptables (reutiliza las
 `ignore-fields` de los casos de `validation.md`).
 
-## Cómo usarlo en el plan
+## Cómo usarlo en el informe y el handoff
 
 1. Elige el patrón (o combinación) más adecuado al tamaño, criticidad y
    posibilidad de interceptar/enrutar peticiones del sistema.
-2. Estructura las **fases** del plan según ese patrón (p. ej. Transform → Coexist
-   → Eliminate).
+2. **Describe el enfoque por fases** que sugiere ese patrón (p. ej. Transform →
+   Coexist → Eliminate) en el informe (`README.md`); esas fases orientarán la
+   descomposición en US (`work-define`) o la definición del WI (`work-plan`).
 3. Indica qué arquitectura transitoria se necesita y cuándo se retira.
-4. Define el mecanismo de *cutover* y, si aplica, el Parallel Run + Reconciliation
-   para validar en vivo.
+4. Menciona el mecanismo de *cutover* y, si aplica, el Parallel Run +
+   Reconciliation para validar en vivo, como insumo del trabajo posterior.

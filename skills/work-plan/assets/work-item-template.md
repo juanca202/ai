@@ -56,6 +56,20 @@ Rutas permitidas: assets/ (recursos propios de este work item) o docs/specs/tech
 - **Documentación técnica:** {{enlace a `docs/specs/technical-docs/` si aplica}}
 - **Diseño:** {{enlace a Figma, wireframe o imagen de alta fidelidad; obligatorio si el work item toca UI}}
 
+## Migración (origen → destino)
+
+<!-- Sección opcional. Incluir solo si este WI ejecuta una migración entre proyectos derivada de una investigación (`research/RS-XXX-{slug}/`). Eliminar esta sección si no aplica. -->
+
+**Investigación**: {{enlace a la investigación, típ. `../../research/RS-XXX-{slug}/README.md`}}
+**Proyecto origen**: {{nombre / stack principal del origen}}
+**Proyecto destino**: {{nombre / stack principal del destino}}
+
+Este WI materializa la migración investigada en el `RS-XXX`. Para no duplicar contexto, apóyate en sus archivos (contexto progresivo): el mapeo tecnológico, el estado del origen y los riesgos viven en su `discovery.md`; los casos de validación (Golden Master) en su `validation.md`.
+
+- **Archivos afectados** muestra el árbol resultante en el destino; el árbol de lo que se migra en el origen vive en el `discovery.md`.
+- Los **criterios de aceptación (`AC-XXX`)** se validan con los casos Golden Master de `validation.md`: indica frente a cada `AC-XXX` el/los `GM-XXX` que lo cubren.
+- Si la migración es incremental, organiza el **Plan de implementación** por fases según la estrategia (Strangler Fig, Branch by Abstraction, Parallel Run, …).
+
 ## Criterios de aceptación
 
 <!--

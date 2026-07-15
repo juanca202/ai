@@ -1,43 +1,46 @@
-# Plantilla de investigación — RS-XXX
-
 <!--
-Convención de placeholders: sustituir manualmente cada {{texto}}.
-Eliminar este bloque al publicar el documento final.
+Convención de placeholders: sustituir manualmente cada {{texto}}; no es un motor de plantillas.
+Eliminar este bloque y sustituir todos los {{…}} al publicar el documento final.
 
-Ubicación por tipo de artefacto:
-  US: docs/specs/user-stories/US-XXX-{nombre}/research/RS-XXX-{slug}.md
-  WI: docs/specs/work-items/WI-XXX-{kebab-case}/research/RS-XXX-{slug}.md
-  MG: docs/specs/migrations/MG-XXX-{slug}/research/RS-XXX-{slug}.md
-  Sin artefacto: presentar en chat; guardar solo si el usuario lo solicita.
+Este es el README.md — el INFORME PRINCIPAL de la investigación. Vive en:
+  Con artefacto (flujo A):
+    US/TK: docs/specs/user-stories/US-XXX-{nombre}/research/RS-XXX-{slug}/README.md
+    WI:    docs/specs/work-items/WI-XXX-{kebab-case}/research/RS-XXX-{slug}/README.md
+  Sin artefacto (flujos B y C):
+    docs/specs/research/RS-XXX-{slug}/README.md   (migración: en el proyecto destino)
 
-Nombre de archivo: RS-XXX-{slug}.md
-  XXX  → secuencial de tres dígitos dentro del artefacto padre (001, 002, ...)
-         Si no hay artefacto padre, usar secuencial global en docs/specs/research/.
-  slug → descripción corta en kebab-case del tema investigado.
-         Ejemplo: RS-001-viabilidad-redis-cache, RS-002-impacto-refactor-pagos
+Nombre de carpeta: RS-XXX-{slug}
+  XXX  → secuencial de tres dígitos dentro de la carpeta base (001, 002, ...)
+  slug → descripción corta del tema en kebab-case
+         Ej.: RS-001-viabilidad-redis-cache, RS-002-orm-sequelize-a-prisma
+
+Archivos adicionales (solo si el flujo los define, en la misma carpeta):
+  Flujo B (migración): discovery.md, validation.md y carpeta validation/
 -->
 
 # RS-{{XXX}} — {{Título descriptivo de la investigación}}
 
 **Estado**: {{Draft | Ready}}
-**Dominio**: {{Producto | Arquitectura | Técnica | Cambio}}
-**Artefacto referenciado**: {{US-XXX | WI-XXX | MG-XXX | N/A}}
+**Flujo**: {{Artefacto | Migración | Investigación libre}}
+**Artefacto referenciado**: {{US-XXX | TK-XXX | WI-XXX | N/A}}
 **Creado por**: {{git config user.name}}
 **Fecha**: {{YYYY-MM-DD}}
 
 ## Pregunta de investigación
 
-{{Formulación precisa de lo que se quería averiguar. Una o dos oraciones.}}
+{{Formulación precisa de lo que se quería averiguar. Una o dos oraciones. En una
+migración: qué se migra y de qué proyecto origen a qué proyecto destino.}}
 
-## Contexto del artefacto
+## Contexto
 
-{{Si hay artefacto referenciado: resumen del objetivo, criterios relevantes o plan que motivaron esta investigación. Si no hay artefacto, describir el contexto del problema.}}
-
-> Si no aplica artefacto: "Investigación independiente."
+{{Si hay artefacto referenciado: resumen del objetivo, criterios o restricciones
+que motivaron esta investigación. Si es migración: origen, destino y alcance de lo
+que se migra. Si es investigación independiente: contexto del problema.}}
 
 ## Hallazgos
 
-{{Resultados concretos organizados por subtema. Incluir datos, comparaciones, limitaciones o condiciones encontradas. Citar fuentes en línea con el texto o al final.}}
+{{Resultados concretos organizados por subtema. Datos, comparaciones, limitaciones
+o condiciones encontradas. Citar fuentes en línea o al final.}}
 
 ### {{Subtema 1}}
 
@@ -47,13 +50,43 @@ Nombre de archivo: RS-XXX-{slug}.md
 
 {{...}}
 
+## Decisiones pendientes / opciones evaluadas
+
+<!--
+Sección opcional. Úsala sobre todo en el flujo A (lagunas y decisiones pendientes
+por tomar). Para cada disyuntiva: opciones consideradas, trade-offs y la opción
+recomendada con su justificación. Omitir si no aplica.
+-->
+
+- **{{Decisión 1}}** — opciones: {{A / B}}; recomendación: {{opción}} porque {{...}}
+
 ## Conclusión y recomendación
 
-{{Respuesta directa a la pregunta de investigación. Recomendación accionable: qué hacer, qué evitar, qué decidir. Si la investigación es inconclusa, indicar qué información adicional se necesita.}}
+{{Respuesta directa a la pregunta de investigación. Recomendación accionable: qué
+hacer, qué evitar, qué decidir. Si la investigación es inconclusa, indicar qué
+información adicional se necesita.}}
 
-## Impacto en el artefacto
+## Archivos adicionales
 
-{{Si hay artefacto: qué decisiones, criterios o secciones del US/WI/MG se ven afectados por estos hallazgos. Si no hay artefacto, omitir esta sección.}}
+<!--
+Solo si el flujo genera archivos de apoyo en esta misma carpeta. En una migración
+(flujo B): enlaces a discovery.md y validation.md. Omitir esta sección si no hay.
+-->
+
+- {{[discovery.md](./discovery.md) — mapeo tecnológico, verificación, golden master, riesgos}}
+- {{[validation.md](./validation.md) — casos de validación (Golden Master) y sus recursos}}
+
+## Impacto en el artefacto / próximo paso
+
+{{Si hay artefacto (flujo A): qué decisiones, criterios o secciones del US/WI se
+ven afectados por estos hallazgos.
+
+Si es migración (flujo B): el dimensionamiento del cambio (grande / pequeño) y el
+handoff recomendado — cambio grande → work-define (varias US); cambio pequeño →
+work-plan (un WI). El discovery y la validación son la referencia de ese siguiente
+paso.
+
+Si es investigación independiente (flujo C): N/A — investigación independiente.}}
 
 ## Fuentes
 

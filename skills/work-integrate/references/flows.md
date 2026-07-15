@@ -1,6 +1,6 @@
 # Flujos secundarios y checklist
 
-Referencias del skill **work-integrate**. Aplican a los tres tipos de trabajo (`US-XXX`, `WI-XXX`, `MG-XXX`).
+Referencias del skill **work-integrate**. Aplican a los dos tipos de trabajo (`US-XXX`, `WI-XXX`).
 
 ---
 
