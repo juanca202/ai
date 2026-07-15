@@ -22,6 +22,12 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 
 {{información adicional sobre el dominio, restricciones del negocio, decisiones previas o cualquier contexto necesario para entender la historia}}
 
+## Fuera de alcance
+
+<!-- Sección opcional. Incluir solo si ayuda a delimitar la historia declarando explícitamente qué NO se debe incluir (funcionalidad, casos o entregables que podrían asumirse pero quedan fuera). Eliminar esta sección si no aplica. -->
+
+- {{funcionalidad, caso o entregable que queda fuera del alcance de esta historia; opcionalmente indicar dónde se aborda o por qué se excluye}}
+
 ## Reglas de negocio
 
 <!--
