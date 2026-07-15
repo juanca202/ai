@@ -81,17 +81,17 @@ Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto
    - **Green:** escribir el minimo codigo de produccion para que el test pase.
    - **Refactor:** limpiar codigo de produccion y test sin romper los tests. Aplicar principios de Clean Architecture (ver `SKILL.md`).
 2. Si genera o modifica UI: ejecutar bajo `ui-specialist`. Si la referencia de diseno es Figma: usar el MCP de Figma.
-3. Al terminar todos los comportamientos de la TK, ejecutar lint/typecheck/build del paquete afectado y la suite de tests. Si algo falla, corregir antes de continuar.
+3. Al terminar todos los comportamientos de la TK, ejecutar lint/typecheck/build y la suite de tests **solo del paquete/archivos afectados** — nunca la bateria completa del repo. Si algo falla, corregir antes de continuar.
 4. Actualizar el artefacto y el progreso:
    - **Al iniciar la TK:** cambiar su estado en `progress.md` a `In Progress` y **poblar la lista de to-dos del agente**: la **primera entrada es el titulo de la TK** (`TK-XXX` + titulo), para tener siempre presente el artefacto en ejecucion, seguida de **las tareas del `Plan de implementacion` del `TK-XXX.md`** (una entrada por tarea `IT-XX`, en el orden del plan). Cada entrada de tarea muestra solo la descripcion corta (`IT-XX` + linea corta), no el detalle completo.
    - **Por cada subtarea completada:** marcar `[ ]` => `[x]` en la seccion de subtareas del `TK-XXX.md` correspondiente y marcar su entrada en la lista de to-dos del agente como `completed`.
-   - **Al cerrar la TK:** cambiar su estado en `progress.md` a `Done`, con todas las subtareas de su plan ya `completed` en la lista de to-dos del agente; marcar tambien la **primera entrada (titulo de la TK) como `completed`** una vez que todas las tareas del plan hayan finalizado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion. Si la US tenia test cases, completar el campo `Cobertura de test cases` de la TK: que `TC-XXX` se automatizaron y, sobre todo, **cuales no se pudieron crear** (con motivo) o **para cuales se decidio otro tipo de prueba** distinto al del test case.
+   - **Al cerrar la TK:** cambiar su estado en `progress.md` a `Done`, con todas las subtareas de su plan ya `completed` en la lista de to-dos del agente; marcar tambien la **primera entrada (titulo de la TK) como `completed`** una vez que todas las tareas del plan hayan finalizado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion. Si la US tenia test cases, completar el campo `Cobertura de test cases` de la TK solo con observaciones puntuales: **cuales `TC-XXX` no se pudieron crear** (con motivo) o **para cuales se decidio otro tipo de prueba** distinto al del test case. Si todos se automatizaron como se esperaba, dejar el campo sin comentarios.
 5. **Detenerse y preguntar** (herramienta estructurada): "TK-XXX completada. Continuo con TK-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui].
 6. Solo si el usuario confirma: pasar a la siguiente TK. Si detiene, registrar nota y pasar al Paso 4.
 
 ### Paso 4 - Cierre
 
-1. Cuando no queden tareas pendientes (o el usuario detenga), verificar que la suite de tests pase limpia y el working tree este limpio con commits hechos.
+1. Cuando no queden tareas pendientes (o el usuario detenga), verificar que la suite de tests **de los archivos afectados** pase limpia y el working tree este limpio con commits hechos. **La bateria completa de pruebas no se corre aqui:** la ejecuta `code-review` al integrar (`work-integrate`) o crear el PR (`pr-create`).
 2. **Handoff:** si todo el alcance esta en `Done`, **preguntar al usuario** (herramienta estructurada) como continuar:
 
    > "Implementacion completada. ¿Que quieres hacer ahora?"
@@ -131,7 +131,7 @@ WARNING No es posible continuar con la implementacion:
 
 **Por cada tarea:** TK `Ready`; no `Done` en `progress.md`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; test cases automatizables del `test-cases/README.md` cubiertos; UI bajo `ui-specialist`; Figma via MCP; lint/typecheck/build/tests ejecutados y en verde; `progress.md` a `Done` con `Cobertura de test cases` (TC no automatizados o con otro tipo de prueba documentados); decisiones de sesion registradas; **confirmacion explicita antes de la siguiente TK**.
 
-**Cierre:** suite de tests en verde; working tree limpio; handoff a `pr-create` o `work-integrate`.
+**Cierre:** suite de tests de los archivos afectados en verde (la bateria completa la corre `code-review`, no este skill); working tree limpio; handoff a `pr-create` o `work-integrate`.
 
 ---
 

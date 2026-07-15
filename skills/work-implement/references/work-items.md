@@ -84,18 +84,18 @@ Por cada WI aprobado:
    - **Green:** escribir el minimo codigo de produccion para que el test pase.
    - **Refactor:** limpiar codigo de produccion y test sin romper los tests. Aplicar principios de Clean Architecture (ver `SKILL.md`).
 2. Si genera o modifica UI: ejecutar bajo `ui-specialist`. Si la referencia de diseno es Figma: usar el MCP de Figma.
-3. Al terminar todos los comportamientos del WI, ejecutar lint/typecheck/build y la suite de tests del paquete afectado. Si algo falla, corregir antes de continuar.
+3. Al terminar todos los comportamientos del WI, ejecutar lint/typecheck/build y la suite de tests **solo del paquete/archivos afectados** — nunca la bateria completa del repo. Si algo falla, corregir antes de continuar.
 4. **Verificar los criterios de aceptacion** del WI contra los tests; si algun criterio no tiene cobertura, completar el ciclo TDD para ese criterio antes de marcar `Done`.
 5. Actualizar el artefacto y el progreso:
    - **Al iniciar el WI:** cambiar su estado en `progress.md` a `In Progress` y **poblar la lista de to-dos del agente**: la **primera entrada es el titulo del WI** (`WI-XXX` + titulo), para tener siempre presente el artefacto en ejecucion, seguida de **las tareas del `Plan de implementacion` del `README.md` del WI** (una entrada por tarea `IT-XX`, en el orden del plan). Cada entrada de tarea muestra solo la descripcion corta (`IT-XX` + linea corta), no el detalle completo.
    - **Por cada tarea del plan completada:** marcar `[ ]` => `[x]` en la seccion del plan de implementacion del `README.md` del WI y marcar su entrada en la lista de to-dos del agente como `completed`.
-   - **Al cerrar el WI:** cambiar su estado en `progress.md` a `Done`, con todas las tareas de su plan ya `completed` en la lista de to-dos del agente; marcar tambien la **primera entrada (titulo del WI) como `completed`** una vez que todas las tareas del plan hayan finalizado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion. Si el WI tenia test cases, completar el campo `Cobertura de test cases` del WI: que `TC-XXX` se automatizaron y, sobre todo, **cuales no se pudieron crear** (con motivo) o **para cuales se decidio otro tipo de prueba** distinto al del test case.
+   - **Al cerrar el WI:** cambiar su estado en `progress.md` a `Done`, con todas las tareas de su plan ya `completed` en la lista de to-dos del agente; marcar tambien la **primera entrada (titulo del WI) como `completed`** una vez que todas las tareas del plan hayan finalizado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion. Si el WI tenia test cases, completar el campo `Cobertura de test cases` del WI solo con observaciones puntuales: **cuales `TC-XXX` no se pudieron crear** (con motivo) o **para cuales se decidio otro tipo de prueba** distinto al del test case. Si todos se automatizaron como se esperaba, dejar el campo sin comentarios.
 6. **Detenerse y preguntar** (herramienta estructurada): "WI-XXX completado. Continuo con WI-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui]. Si el alcance es un unico WI, igualmente confirmar antes de pasar al cierre.
 7. Solo si confirma: siguiente WI. Si detiene, registrar nota y pasar al Paso 4.
 
 ### Paso 4 - Cierre
 
-1. Verificar que la suite de tests pase limpia y el working tree este limpio con commits hechos.
+1. Verificar que la suite de tests **de los archivos afectados** pase limpia y el working tree este limpio con commits hechos. **La bateria completa de pruebas no se corre aqui:** la ejecuta `code-review` al integrar (`work-integrate`) o crear el PR (`pr-create`).
 2. **Handoff:** si el alcance esta en `Done`, **preguntar al usuario** (herramienta estructurada) como continuar:
 
    > "Implementacion completada. ¿Que quieres hacer ahora?"
@@ -117,7 +117,7 @@ Por cada WI aprobado:
 
 **Por cada WI:** `Ready` con criterios de aceptacion; no `Done`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; test cases automatizables del `test-cases/README.md` cubiertos; UI bajo `ui-specialist`; Figma via MCP; plan completo implementado; criterios de aceptacion cubiertos por tests; lint/typecheck/build/tests en verde; `progress.md` a `Done` con `Cobertura de test cases` (TC no automatizados o con otro tipo de prueba documentados); decisiones de sesion registradas; **confirmacion explicita antes del siguiente WI**.
 
-**Cierre:** suite de tests en verde; working tree limpio; handoff a `pr-create` o `work-integrate`.
+**Cierre:** suite de tests de los archivos afectados en verde (la bateria completa la corre `code-review`, no este skill); working tree limpio; handoff a `pr-create` o `work-integrate`.
 
 ---
 

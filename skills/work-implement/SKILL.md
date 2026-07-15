@@ -15,6 +15,8 @@ Guia general para **ejecutar en codigo** trabajo ya especificado, de **distintos
 > **Ritmo obligatorio - una unidad por confirmacion (modo por defecto):** implementar una unidad, actualizar `progress.md` **y la lista de tareas (to-dos) del agente**, ejecutar lint/build, y **esperar confirmacion explicita del usuario antes de arrancar la siguiente**. La **unidad** depende del tipo (ver tabla de seleccion).
 >
 > **Unica excepcion - modo de ejecucion paralela:** si el alcance incluye **mas de una unidad** y el usuario pide **explicitamente ejecutar sin confirmacion entre unidades** (p. ej. "sin preguntar", "de corrido", "todas a la vez"), se activa el modo de ejecucion paralela (ver seccion *Ejecucion paralela con subagentes y worktrees*), que corre las unidades independientes en subagentes con worktree y omite las pausas intermedias. Si falta cualquiera de las dos condiciones, se mantiene el modo secuencial.
+>
+> **Alcance de las pruebas - solo archivos afectados:** este skill ejecuta las pruebas (y `lint`/`typecheck`/`build`) **unicamente sobre los archivos o el paquete afectados** por la unidad implementada — tanto por unidad (Paso 3) como en el cierre (Paso 4) y tras cada merge en modo paralelo. **Nunca corre la bateria completa de pruebas del repositorio.** Ejecutar **toda la bateria de pruebas** (regresion de todo el repo) es responsabilidad **exclusiva de `code-review`**, que corre en `work-integrate` / `pr-create` antes de integrar o crear el PR; este skill no la sustituye ni la anticipa.
 
 ---
 
@@ -89,7 +91,7 @@ Cada tipo mantiene un `progress.md` como **unica bitacora** que este skill puede
 - Crear desde `assets/progress-template.md` si no existe, adaptando el encabezado y las unidades al tipo (TK / WI) segun indique la referencia.
 - Por cada unidad: `Pending` => `In Progress` => `Done`; anadir notas si quedan aspectos parciales.
 - Registrar en `Decisiones adicionales` **toda decision tomada durante la sesion de chat** que no este ya documentada en la especificacion. Si no hubo decisiones nuevas, omitir la seccion.
-- **Cobertura de test cases:** cuando el artefacto tiene test cases, registrar en el campo `Cobertura de test cases` de la unidad la relacion entre los `TC-XXX` del `test-cases/README.md` y las pruebas automatizadas creadas. Documentar explicitamente **todo `TC-XXX` que no se pudo automatizar** (con el motivo) y **toda decision de crear un tipo de prueba distinto** al que sugiere el test case (p. ej. cubrir con integracion un TC pensado como unit). Si todos los `TC-XXX` se automatizaron tal cual, basta con indicarlo; si el artefacto no tiene test cases, omitir el campo.
+- **Cobertura de test cases:** cuando el artefacto tiene test cases, el campo `Cobertura de test cases` de la unidad **no es un detalle exhaustivo de cada `TC-XXX`**: registrar solo observaciones puntuales -- **todo `TC-XXX` que no se pudo automatizar** (con el motivo) y **toda decision de crear un tipo de prueba distinto** al que sugiere el test case (p. ej. cubrir con integracion un TC pensado como unit). Si la implementacion fue como se esperaba (todos los `TC-XXX` se automatizaron tal cual), **no es necesario comentar nada** en el campo; si el artefacto no tiene test cases, omitirlo.
 
 | Situacion | Que hacer |
 |-----------|-----------|
@@ -205,7 +207,7 @@ La hace **el orquestador, una unidad a la vez** (nunca merges concurrentes), a m
 
 1. Sobre la rama del artefacto, hacer merge de la rama de la unidad: `git merge wt/<unidad>`.
 2. **Resolver conflictos** si los hay; si el conflicto no es trivial o el resultado queda ambiguo, **parar e informar al usuario** antes de continuar con el resto.
-3. Ejecutar **lint/typecheck/build y la suite de tests** en la rama del artefacto tras el merge. Si algo falla, **parar** y avisar; no seguir integrando sobre una base rota.
+3. Ejecutar **lint/typecheck/build y la suite de tests de los archivos/paquete afectados** por las unidades integradas, en la rama del artefacto tras el merge (no la bateria completa; esa la corre `code-review`). Si algo falla, **intentar corregirlo**; solo si el error **persiste tras varios intentos** (p. ej. 2-3), **parar** y avisar. No seguir integrando sobre una base rota.
 4. Marcar `progress.md` de esa unidad a `Done` (y su `Cobertura de test cases`) solo **despues** de un merge y una validacion en verde.
 5. Al integrar todas las unidades, **limpiar los worktrees y ramas temporales** (`git worktree remove <ruta-temporal>` y borrar la rama `wt/<unidad>`).
 
@@ -256,6 +258,7 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 - Diferir "para otro momento" la documentacion de codigo que un ADR vigente exige, o cerrar una unidad como `Done` sin esa documentacion.
 - Continuar cuando se detecta un conflicto en la documentacion sin notificar al usuario primero.
 - Diferir la escritura de tests para despues de la implementacion; el ciclo TDD es Red → Green → Refactor dentro de cada unidad.
+- Correr la **bateria completa de pruebas** del repositorio desde este skill: solo se ejecutan las pruebas de los archivos/paquete afectados; la bateria completa es tarea exclusiva de `code-review` (en `work-integrate` / `pr-create`).
 - Escribir un estado no definido en `progress.md`; estados validos: `Pending`, `In Progress`, `Done`.
 - Lanzar preguntas como prosa libre cuando el cliente expone herramienta de preguntas estructuradas.
 - Aceptar como confirmacion una respuesta ambigua sin opciones explicitas; si hay duda, repreguntar.

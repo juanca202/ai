@@ -77,11 +77,11 @@ Checks canónicos en **orden de ejecución**. La categoría real depende del sta
 |---|-------|----------------|----------|
 | 1 | Tipado | Bloqueante o Condicional según stack | **Fail-fast**: si aplica y falla, no se ejecuta nada más. |
 | 2 | Linter | Bloqueante o Condicional según stack | Bloquea solo si hay severidad `error`. `warning` = informativo (salvo `include-linter-warnings`). |
-| 3 | Unit tests | Bloqueante | FAIL si exit ≠ 0 o algún test falla. |
-| 4 | Coverage | Bloqueante | PASS si exit 0 **y** (sin umbrales configurados **o** umbrales cumplidos). FAIL si exit ≠ 0 **o** umbral configurado incumplido. |
-| 5 | Build | Bloqueante (Condicional en Python sin empaquetado) | FAIL si exit ≠ 0. En stacks compilados (Java, Go, Rust, .NET) cubre la compilación. Prerrequisito habitual de e2e. |
+| 3 | Pruebas unitarias | Bloqueante | FAIL si exit ≠ 0 o algún test falla. |
+| 4 | Cobertura | Bloqueante | PASS si exit 0 **y** (sin umbrales configurados **o** umbrales cumplidos). FAIL si exit ≠ 0 **o** umbral configurado incumplido. |
+| 5 | Compilación | Bloqueante (Condicional en Python sin empaquetado) | FAIL si exit ≠ 0. En stacks compilados (Java, Go, Rust, .NET) cubre la compilación. Prerrequisito habitual de e2e. |
 | 6 | E2E | Condicional | Se ejecuta sobre el artefacto ya compilado. |
-| 7 | Sonar | Informativo | Nunca bloquea. |
+| 7 | Análisis estático (Sonar) | Informativo | Nunca bloquea. |
 
 El orden sigue la pirámide de tests (*rápido → lento*, *dependencias antes que consumidores*): estático (tipado/linter) → unit+coverage → build → e2e → sonar. El fail-fast solo aplica al tipado, para evitar ruido en cascada. Justificación detallada en [`references/execution.md`](references/execution.md#paso-2--etapa-automatizada-puerta-dura).
 

@@ -2,6 +2,8 @@
 
 Skills y agentes del equipo para Cursor, Claude Code y otros asistentes de código.
 
+Este repositorio es el plugin **SDD Devkit** (`sdd-devkit`): utilidades para Spec-Driven Development — ADRs, historias de usuario, planificación e implementación de tareas y work items, definición y trazabilidad de pruebas, investigación (incluida la migración entre proyectos) y code review. Reutiliza los directorios `skills/` y `agents/` de la raíz para Cursor y para Claude Code.
+
 ## Instalación en Cursor
 
 ```bash
@@ -10,11 +12,9 @@ npx skills add https://github.com/juanca202/ai
 
 El asistente te guiará paso a paso: dónde instalar (proyecto o global), qué agente usar y qué skills incluir.
 
-Este repositorio también incluye el manifiesto nativo de plugin de Cursor ([.cursor-plugin/plugin.json](.cursor-plugin/plugin.json)), que reutiliza los mismos directorios `skills/` y `agents/` de la raíz. Sirve para publicarlo en el [marketplace de Cursor](https://cursor.com/marketplace/publish) como plugin instalable directamente desde la UI, sin pasar por `npx skills`.
-
 ## Instalación en Claude Code
 
-Este repositorio también se distribuye como el plugin **SDD Devkit** de Claude Code — utilidades para el desarrollo de SDD (Spec-Driven Development): ADRs, historias de usuario, planificación e implementación de tareas y work items, definición y trazabilidad de pruebas, migraciones y code review (manifiesto en [.claude-plugin/plugin.json](.claude-plugin/plugin.json) y marketplace en [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)).
+Se distribuye como el mismo plugin **SDD Devkit** (manifiesto en [.claude-plugin/plugin.json](.claude-plugin/plugin.json) y marketplace en [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)).
 
 Agrega el marketplace y luego instala el plugin:
 
@@ -33,25 +33,23 @@ claude --plugin-dir .
 
 ## Skills incluidos
 
+Los skills viven en [`skills/`](skills/).
+
 | Skill | Uso |
 |-------|-----|
-| `alm-install` | Instalar, configurar o reparar el MCP de una herramienta ALM (Azure DevOps o Jira) en Cursor y/o Claude Code, con autenticación por token |
 | `adr-audit` | Auditar el cumplimiento de los ADR y de `AGENTS.md` contra el estado real del repo, generando un informe priorizado en `docs/adr/audits/` con revalidaciones incrementales |
-| `adr-discover` | Analiza un repositorio y proponer ADRs candidatos a partir de decisiones implícitas |
+| `adr-discover` | Analizar un repositorio y proponer ADRs candidatos a partir de decisiones implícitas |
 | `adr-manage` | Crear o actualizar Architecture Decision Records en `docs/adr/` |
 | `code-review` | Revisión de código pre-merge: verificaciones automatizadas según el stack + revisión cualitativa (arquitectura, diseño, SOLID), con veredicto apto/no apto/incompleto |
 | `git-commit` | Preparar commits con mensajes Conventional Commits inferidos del diff |
 | `pr-create` | Crear PR o MR desde la rama actual (GitHub, GitLab, Azure Repos, etc.) con puertas de calidad obligatorias: code-review, trace-validate y Definition of Done |
-| `project-create` | Crear proyectos nuevos fusionando plantillas del equipo por stack |
-| `project-migrate` | Planificar y documentar migraciones tecnológicas entre proyectos (MG-XXX) |
-| `prompt-validate` | Validar y mejorar prompts para agentes de IA (efectividad y reescritura) |
 | `test-define` | Crear casos de prueba (TC-XXX) desde los criterios de aceptación de una US o WI (IEEE 29119-4) |
-| `trace-validate` | Reporte de trazabilidad: criterios de aceptación de US/WI/MG ↔ casos y artefactos de prueba, con veredicto de cobertura |
-| `work-research` | Investigar un tema y sintetizarlo en un informe (RS-XXX): producto, arquitectura, técnica o cambio |
+| `trace-validate` | Reporte de trazabilidad: criterios de aceptación de US/WI ↔ casos y artefactos de prueba, con veredicto de cobertura |
+| `work-research` | Investigar y sintetizar en un informe (RS-XXX). Genérico con tres flujos: artefacto (US/TK/WI → lagunas y decisiones pendientes), migración (origen→destino → discovery y validación, con handoff a `work-define` o `work-plan`) e investigación libre (producto, arquitectura, técnica o cambio) |
 | `work-define` | Crear o actualizar historias de usuario (US-XXX) |
 | `work-plan` | Planificar tareas técnicas (TK-XXX) o work items de mantenimiento (WI-XXX) |
-| `work-implement` | Implementar TK, WI o migraciones (MG-XXX) a partir de specs en estado Ready |
-| `work-integrate` | Cerrar e integrar el trabajo de una US, WI o MG (merge de la rama feature previa verificación en `progress.md`) |
+| `work-implement` | Implementar tareas (TK-XXX) o work items (WI-XXX) a partir de specs en estado Ready |
+| `work-integrate` | Cerrar e integrar el trabajo de una US o WI (merge de la rama feature previa verificación en `progress.md`) |
 
 ## Agentes incluidos
 
