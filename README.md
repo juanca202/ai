@@ -4,6 +4,8 @@ Skills y agentes del equipo para Cursor, Claude Code y otros asistentes de códi
 
 Este repositorio es el plugin **SDD Devkit** (`sdd-devkit`): utilidades para Spec-Driven Development — ADRs, historias de usuario, planificación e implementación de tareas y work items, definición y trazabilidad de pruebas, investigación (incluida la migración entre proyectos) y code review. Reutiliza los directorios `skills/` y `agents/` de la raíz para Cursor y para Claude Code.
 
+[![skills.sh](https://skills.sh/b/juanca202/skills)](https://skills.sh/juanca202/skills)
+
 ## Instalación en Cursor
 
 ```bash
