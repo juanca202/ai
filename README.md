@@ -60,3 +60,11 @@ Los agentes viven en `agents/` y se pueden referenciar desde reglas de Cursor o 
 | `docs-specialist` | Especificación Markdown: US, TK, ADR, technical-docs, glosario y trazabilidad en `docs/specs` |
 | `quality-specialist` | Autor senior de pruebas automatizadas; deriva casos de criterios de aceptación (SC/BR) |
 | `ui-specialist` | UI agnóstica de framework; descubre stack, aplica `DESIGN.md` y convenciones del repo |
+
+## Contribuir
+
+Las contribuciones son bienvenidas. Antes de abrir un issue o un Pull Request, lee la [guía de contribución](CONTRIBUTING.md).
+
+## Licencia
+
+Este proyecto es de código abierto y se distribuye bajo la licencia [MIT](LICENSE).
