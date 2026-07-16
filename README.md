@@ -1,4 +1,4 @@
-# @juanca202/ai
+# SDD Devkit
 
 Skills y agentes del equipo para Cursor, Claude Code y otros asistentes de código.
 
