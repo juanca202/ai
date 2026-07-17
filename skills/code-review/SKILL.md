@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: 'Revisar código antes de aceptarlo para merge en dos planos: (1) verificaciones automatizadas según el stack (tipado, linter, unit tests, coverage, build, e2e, sonar) y (2) revisión cualitativa estilo ingeniero senior — intención del cambio, arquitectura y diseño (SOLID, Clean Architecture, acoplamiento, duplicación) y feedback accionable que explica el PORQUÉ y propone cambios concretos. Devuelve un informe con estado por check, hallazgos con severidad, veredicto unificado (apto/no apto/incompleto) y próximas acciones. Usar SOLO cuando se invoca explícitamente: el usuario pide una revisión de código ("code review", "revisión de código", "revisa antes de PR/merge") o nombra el skill, o lo llama otro skill (p. ej. work-integrate, pr-create). Proceso posterior a la implementación: NO activarlo de forma proactiva ni durante el desarrollo. Nunca corrige por iniciativa propia: solo aplica cambios si el usuario lo autoriza, y tras corregir vuelve a ejecutar las pruebas.'
+description: 'Revisar código antes de aceptarlo para merge en dos planos: (1) verificaciones automatizadas según el stack (tipado, linter, unit tests, coverage, build, e2e, sonar) y (2) revisión cualitativa estilo ingeniero senior — intención del cambio, arquitectura y diseño (SOLID, Clean Architecture, acoplamiento, duplicación) y feedback accionable que explica el PORQUÉ y propone cambios concretos. Devuelve un informe con estado por check, hallazgos con severidad, veredicto unificado (aprobado/rechazado/incompleto) y próximas acciones. Usar SOLO cuando se invoca explícitamente: el usuario pide una revisión de código ("code review", "revisión de código", "revisa antes de PR/merge") o nombra el skill, o lo llama otro skill (p. ej. work-integrate, pr-create). Proceso posterior a la implementación: NO activarlo de forma proactiva ni durante el desarrollo. Nunca corrige por iniciativa propia: solo aplica cambios si el usuario lo autoriza, y tras corregir vuelve a ejecutar las pruebas.'
 license: MIT
 ---
 
@@ -42,8 +42,8 @@ Todo check pertenece a **una** de estas tres categorías (sin solape).
 
 | Categoría | Cuándo se ejecuta | Si FALLA | Si no se puede ejecutar |
 |-----------|-------------------|----------|--------------------------|
-| **Bloqueante** | Siempre (el stack lo exige). | `❌ No apto` | Herramienta/config ausente → `SKIPPED` → `⚠️ Incompleto` |
-| **Condicional** | Solo si hay config o herramienta del check presente. | `❌ No apto` | Config presente pero binario/tarea rota → `SKIPPED` → `⚠️ Incompleto`. Sin config **ni** herramienta → `N/A` (no afecta veredicto). |
+| **Bloqueante** | Siempre (el stack lo exige). | `❌ Rechazado` | Herramienta/config ausente → `SKIPPED` → `⚠️ Incompleto` |
+| **Condicional** | Solo si hay config o herramienta del check presente. | `❌ Rechazado` | Config presente pero binario/tarea rota → `SKIPPED` → `⚠️ Incompleto`. Sin config **ni** herramienta → `N/A` (no afecta veredicto). |
 | **Informativo** | Si hay config presente. | No afecta veredicto (FAIL informativo). | `N/A` o `SKIPPED` → no afecta veredicto. |
 
 ### SKIPPED vs N/A (definición tajante)
@@ -59,11 +59,11 @@ El veredicto unifica **los dos planos**: los checks automatizados (esta sección
 
 | Veredicto | Condición exacta |
 |-----------|------------------|
-| `✅ Apto` | **Cero** FAIL en checks Bloqueantes y Condicionales-presentes, **cero** `SKIPPED`, **y cero** hallazgos cualitativos bloqueantes sin resolver. Informativos / hallazgos menores en cualquier estado. |
-| `❌ No apto` | **Al menos un** Bloqueante o Condicional-presente en FAIL, **o** al menos un hallazgo cualitativo bloqueante (🔴/🟠) sin corregir ni justificar. (Tiene prioridad sobre Incompleto.) |
+| `✅ Aprobado` | **Cero** FAIL en checks Bloqueantes y Condicionales-presentes, **cero** `SKIPPED`, **y cero** hallazgos cualitativos bloqueantes sin resolver. Informativos / hallazgos menores en cualquier estado. |
+| `❌ Rechazado` | **Al menos un** Bloqueante o Condicional-presente en FAIL, **o** al menos un hallazgo cualitativo bloqueante (🔴/🟠) sin corregir ni justificar. (Tiene prioridad sobre Incompleto.) |
 | `⚠️ Incompleto` | **Cero** FAIL y cero hallazgos bloqueantes sin resolver, pero **al menos un** `SKIPPED` (Bloqueante, o Condicional con config rota). |
 
-Precedencia: `❌ No apto` > `⚠️ Incompleto` > `✅ Apto`.
+Precedencia: `❌ Rechazado` > `⚠️ Incompleto` > `✅ Aprobado`.
 
 > Un hallazgo bloqueante **justificado por el usuario y aceptado** deja de bloquear, pero se **registra** la justificación (ver el Paso 5 en [`references/execution.md`](references/execution.md)): queda trazado quién aceptó el estado actual y por qué. El comportamiento bajo `qualitative-only` y demás modificadores está en [Modificadores de invocación](#modificadores-de-invocación).
 
@@ -121,7 +121,7 @@ Clasifica cada hallazgo. Solo los dos primeros niveles **bloquean**.
 
 > El skill **nunca** corrige sin que el usuario lo pida expresamente. Si no autoriza ni justifica, el hallazgo sigue bloqueando.
 
-Mientras haya hallazgos bloqueantes sin resolver, el veredicto es `❌ No apto`. Tras presentarlos, **pausa y pide al usuario** elegir corregir o justificar cada uno antes de finalizar.
+Mientras haya hallazgos bloqueantes sin resolver, el veredicto es `❌ Rechazado`. Tras presentarlos, **pausa y pide al usuario** elegir corregir o justificar cada uno antes de finalizar.
 
 ---
 
@@ -151,7 +151,8 @@ Las **claves** de los modificadores son siempre en inglés (estándar). Si el us
 | `only <check>` | Ejecutar ÚNICAMENTE ese check (p. ej. `only build`) y **omitir la revisión cualitativa**; el resto → `N/A`. En el informe, la sección cualitativa: *"No ejecutada — omitida por modificador `only <check>`."* |
 | `save-report` | Persistir el informe en `docs/code-review/<YYYYMMDD-HHMMSS>.md`. |
 | `checks-only` | Solo el plano automatizado; omitir la cualitativa (el veredicto no la considera). Sección 2: *"No ejecutada — omitida por modificador `checks-only`."* (distinto de *"… la etapa automatizada no se superó."*). |
-| `qualitative-only` | Solo la revisión cualitativa; los checks automatizados cuentan como `N/A` (no `⚠️ Incompleto`). Veredicto SOLO con hallazgos cualitativos: `✅ Apto` si no hay 🔴/🟠 sin resolver. |
+| `qualitative-only` | Solo la revisión cualitativa; los checks automatizados cuentan como `N/A` (no `⚠️ Incompleto`). Veredicto SOLO con hallazgos cualitativos: `✅ Aprobado` si no hay 🔴/🟠 sin resolver. |
+| `tests-only` | Ejecutar **solo los checks de ejecución de pruebas** (unit, coverage, integración y e2e; build solo si es prerrequisito de e2e); omitir tipado/linter/sonar y la cualitativa. Pensado como **objetivo de delegación de `trace-validate`**: honra la caché de corrida de pruebas — si existe un `test-run.json` **fresco** (fingerprint coincide, ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate)) **reutiliza** ese resultado sin re-ejecutar; si no, ejecuta y escribe/actualiza la caché. Devuelve los resultados por suite y la ruta de `test-run.json`. No emite veredicto de review (no aplica). |
 
 > Todo check omitido **por modificador del usuario** es `N/A`, nunca `SKIPPED`: una omisión solicitada no convierte el veredicto en Incompleto.
 
@@ -165,8 +166,70 @@ Dos etapas con puertas. **Ninguna corrección se aplica sin autorización explí
 2. **Etapa automatizada (puerta dura):** ejecutar los checks secuencialmente. Si hay FAIL, mostrar reporte y preguntar si corregir; sin FAIL ni SKIPPED, avanzar.
 3. **Revisión cualitativa senior:** solo si la etapa automatizada se superó; evaluar las tres dimensiones y emitir hallazgos, con puerta para los 🔴/🟠.
 4. **Construir informe:** rellenar [`assets/code-review-template.md`](assets/code-review-template.md) con el veredicto unificado.
-5. **Registro y salida:** escribir `code-review.md` en la carpeta de la US si aplica; si no, mostrar en chat (o `save-report`).
+5. **Registro y salida:** en proyectos con `docs/specs/`, escribir `docs/specs/code-review.md` (ubicación fija — es la revisión completa de la rama, no por unidad); si no, mostrar en chat (o `save-report`).
 6. **Presentar resultado:** devolver el informe. **No** hacer commit/push/merge sin instrucción explícita.
+
+---
+
+## Caché de corrida de pruebas (compartida con trace-validate)
+
+Cuando este skill **ejecuta los checks de pruebas** (unit, coverage, integración, e2e), persiste el
+resultado en un artefacto reutilizable `test-run.json`. Así `trace-validate` **no vuelve a correr las
+pruebas**: si el código no cambió desde esta corrida, reutiliza estos resultados; si cambió, delega de
+nuevo en este skill.
+
+> **Contexto de ejecución.** Este skill es una **compuerta de cierre**: corre al integrar (`work-integrate`)
+> o antes del PR (`pr-create`), sobre la rama **consolidada**, no por tarea ni durante la implementación.
+> La caché se computa y se lee en ese checkout de cierre. Las pruebas acotadas que `work-implement` corre
+> durante el desarrollo (a veces en **worktrees** aislados por subagente) son **otra cosa**: no producen
+> este `test-run.json` ni sirven como caché. La **corrida completa y autoritativa** de la batería de
+> pruebas ocurre aquí, en el cierre; este skill es el único productor de `test-run.json`.
+
+**Ubicación fija — `docs/specs/test-run.json`** (junto a `docs/specs/code-review.md`), **no** por unidad:
+como el review es siempre una **corrida completa** de la rama consolidada, sus artefactos residen
+directamente en `docs/specs/`, sin importar desde qué `US`/`WI` se invocó. Se **sobrescribe** en cada
+corrida (es el estado vigente de la rama).
+
+Si el proyecto **no** usa `docs/specs/` (repo no spec-driven), no se escribe caché (no hay consumidor).
+
+**Fingerprint canónico del estado del código** — clave de frescura, **la misma en toda la tubería**
+(`code-review` y `trace-validate`). Hash reproducible del commit + working tree + cambios sin commitear,
+**excluyendo los tres artefactos generados** (`trace-report.md`, `code-review.md`, `test-run.json`) para
+que escribirlos no desplace la clave:
+
+```bash
+FINGERPRINT=$( { git rev-parse HEAD; \
+  git status --porcelain -- ':(exclude,glob)**/trace-report.md' ':(exclude,glob)**/code-review.md' ':(exclude,glob)**/test-run.json'; \
+  git diff HEAD          -- ':(exclude,glob)**/trace-report.md' ':(exclude,glob)**/code-review.md' ':(exclude,glob)**/test-run.json'; \
+} | git hash-object --stdin )
+```
+
+Cubre todo lo relevante (código fuente, specs/criterios, tests); no cubre el **contenido** de un archivo
+que permanezca sin trackear. La caché es **fresca** si el `fingerprint` guardado coincide con el
+recalculado ahora; si difiere, hubo cambios y es **obsoleta** (re-ejecutar).
+
+**Esquema `test-run.json`** (`schema: test-run/v1`):
+
+```json
+{
+  "schema": "test-run/v1",
+  "generatedBy": "code-review",
+  "timestamp": "2026-07-17T10:20:00-05:00",
+  "work": "US-004-checkout",
+  "git": { "branch": "feature/US-004-checkout", "commit": "abc1234", "workingTreeClean": true,
+           "fingerprint": "<hash>" },
+  "suites": [
+    { "type": "unit",        "command": "npm test",              "result": "PASS", "summary": "48 passed" },
+    { "type": "coverage",    "command": "npm run coverage",      "result": "PASS", "summary": "line 82%" },
+    { "type": "integration", "command": "npm run test:it",       "result": "N/A",  "summary": "sin suite" },
+    { "type": "e2e",         "command": "npx playwright test",   "result": "FAIL", "summary": "2 failed" }
+  ]
+}
+```
+
+`result` de cada suite: `PASS` · `FAIL` · `SKIPPED` (correspondía pero no se pudo ejecutar) · `N/A` (no
+aplica al repo). El detalle operativo (cuándo escribirla, cómo reutilizarla en `tests-only`) está en
+[`references/execution.md`](references/execution.md#caché-de-corrida-de-pruebas).
 
 ---
 
@@ -177,7 +240,8 @@ Dos etapas con puertas. **Ninguna corrección se aplica sin autorización explí
 Usar este skill **solo cuando se le invoca explícitamente** (ni de forma proactiva, ni "por si acaso", ni al detectar que se terminó código):
 
 - **El usuario lo pide explícitamente** — solicita una revisión de código, validar antes de PR/merge, o nombra este skill.
-- **Otro skill lo invoca explícitamente**, p. ej. `work-integrate` (requiere `✅ Apto`, con hallazgos cualitativos resueltos o justificados, antes de integrar) o `pr-create` (puede invocarlo de forma bloqueante antes de crear el PR).
+- **Otro skill lo invoca explícitamente**, p. ej. `work-integrate` (requiere `✅ Aprobado`, con hallazgos cualitativos resueltos o justificados, antes de integrar) o `pr-create` (puede invocarlo de forma bloqueante antes de crear el PR).
+- **`trace-validate` delega en este skill la ejecución de pruebas.** `trace-validate` no corre pruebas por sí mismo: reutiliza el `test-run.json` fresco de una corrida previa de este skill o, si no hay una fresca, invoca este skill en modo `tests-only` para producirlo. Este skill es la **única** autoridad que ejecuta la batería de pruebas del trabajo. Ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
 
 Es un proceso **posterior a la implementación**: no forma parte de `work-implement` ni del desarrollo de tareas. Sin invocación explícita, no corresponde usarlo.
 

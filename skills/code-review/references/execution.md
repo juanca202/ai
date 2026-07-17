@@ -19,10 +19,21 @@ Detalla **cómo** ejecutar el code review paso a paso y cómo actuar ante cada s
 1. Identificar el ecosistema y cargar lo relativo a ese stack desde [`stacks.md`](stacks.md) (categoría por check, comando, parseo). Si no se detecta stack o el monorepo es ambiguo, parar y preguntar.
 2. Resolver el comando concreto de cada check (scripts del manifiesto + *fallback* canónico).
 3. Capturar metadata: stack detectado, rama (`git rev-parse --abbrev-ref HEAD`), commit corto (`git rev-parse --short HEAD`), working tree (`git status --porcelain`), y la **intención** del cambio (US/TK, rama, commits) para el Paso 3.
+4. Calcular el **fingerprint canónico del estado del código** (recipe exacto en [`SKILL.md` → Caché de corrida de pruebas](../SKILL.md); es el mismo que usa `trace-validate`). Clave de frescura de la caché de pruebas (ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas)).
 
 ### Paso 2 — Etapa automatizada (puerta dura)
 
-Con `qualitative-only`, saltar este paso. En otro caso, ejecutar **secuencialmente** (no en paralelo) los checks Bloqueantes y Condicionales-con-config-presente, midiendo la duración:
+Con `qualitative-only`, saltar este paso.
+
+**Con `tests-only`** (objetivo de delegación de `trace-validate`): ejecutar únicamente los checks de
+**pruebas** (unit, coverage, integración y e2e; build solo si es prerrequisito de e2e), omitiendo
+tipado, linter y sonar. Antes de ejecutar, comprobar la **caché**: si existe `docs/specs/test-run.json`
+con `git.fingerprint` == `FINGERPRINT` (Paso 1), **reutilizar** esos resultados sin
+re-ejecutar y saltar a la salida. Si no hay caché o está obsoleta, ejecutar las suites, **escribir/
+actualizar `test-run.json`** (ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas)) y devolver
+los resultados por suite. En `tests-only` no hay Paso 3 ni veredicto de review.
+
+En otro caso, ejecutar **secuencialmente** (no en paralelo) los checks Bloqueantes y Condicionales-con-config-presente, midiendo la duración:
 
 1. **tipado** — solo si Bloqueante (TS) o Condicional con config. Si **FAIL** → **fail-fast**: marcar el resto `— (no ejecutado)` y pasar a la evaluación de la etapa.
 2. **linter** — parsear `error` vs `warning` según la herramienta.
@@ -49,7 +60,7 @@ Con `qualitative-only`, saltar este paso. En otro caso, ejecutar **secuencialmen
 - **Hay al menos un FAIL** (Bloqueante o Condicional-presente): **mostrar el reporte de la etapa al usuario** y **preguntar si quiere que se corrijan** los errores. **No corregir sin autorización.**
   - Si **autoriza la corrección automática** → aplicar los cambios mínimos para resolver los FAIL (sin tocar más de lo necesario), **re-ejecutar el check/prueba que fallaba para confirmar que ya pasa**, y solo entonces **re-ejecutar TODO el set automatizado** (reiniciar el Paso 2). Si el check puntual sigue en FAIL, iterar la corrección antes de reiniciar.
   - Si **corrige manualmente** e indica que ya está → **re-ejecutar el check/prueba que fallaba**; si pasa, **re-ejecutar TODO el set automatizado**; si no, avisar y volver a la corrección.
-  - Si **no desea corregir ahora** → terminar con veredicto `❌ No apto`. **No** se ejecuta la revisión cualitativa.
+  - Si **no desea corregir ahora** → terminar con veredicto `❌ Rechazado`. **No** se ejecuta la revisión cualitativa.
   - Repetir hasta que la etapa quede sin FAIL o el usuario detenga.
 - **Solo SKIPPED, sin FAIL** (`⚠️ Incompleto`): reportar el motivo y **preguntar** si resolver el tooling primero o continuar a la cualitativa asumiendo el Incompleto. No avanzar en silencio.
 - **Sin FAIL ni SKIPPED**: etapa superada → continuar al Paso 3.
@@ -82,20 +93,27 @@ Rellenar la plantilla [`../assets/code-review-template.md`](../assets/code-revie
 
 ### Paso 5 — Registro y salida
 
-Decidir **dónde** queda el informe según el contexto:
+Decidir **dónde** queda el informe según el contexto. El review es una **corrida completa** de la rama,
+no de una unidad, así que su informe reside en una **ubicación fija**, no en la carpeta de la US/WI:
 
-- **La revisión corresponde a una historia de usuario** (rama `feature/US-XXX-*` activa, o el usuario referencia una US, o se trabaja bajo `docs/specs/user-stories/US-XXX-*/`): **escribir** `docs/specs/user-stories/US-XXX-[nombre-corto]/code-review.md` rellenando la plantilla [`../assets/code-review-template.md`](../assets/code-review-template.md) (checks + revisión cualitativa + veredicto). Si el usuario dio **justificaciones** para hallazgos de las tres dimensiones, completarlas en la sección "Justificaciones aceptadas". Sobrescribir el archivo en re-ejecuciones (es el estado vigente). Mostrar también un resumen en el chat.
-- **La revisión no corresponde a ninguna historia de usuario:** **no** escribir archivo; mostrar el informe completo en el chat. (Salvo que el usuario pase `save-report`, que lo persiste en `docs/code-review/<YYYYMMDD-HHMMSS>.md`.)
+- **Proyecto spec-driven** (existe `docs/specs/`): **escribir** `docs/specs/code-review.md` rellenando la plantilla [`../assets/code-review-template.md`](../assets/code-review-template.md) (checks + revisión cualitativa + veredicto), sin importar desde qué `US`/`WI` se invocó. Si el usuario dio **justificaciones** para hallazgos de las tres dimensiones, completarlas en la sección "Justificaciones aceptadas". Sobrescribir el archivo en re-ejecuciones (es el estado vigente de la rama). Mostrar también un resumen en el chat.
+- **Proyecto sin `docs/specs/`:** **no** escribir archivo; mostrar el informe completo en el chat. (Salvo que el usuario pase `save-report`, que lo persiste en `docs/code-review/<YYYYMMDD-HHMMSS>.md`.)
+
+**Escribir la caché de corrida de pruebas.** Si en esta corrida **se ejecutaron los checks de pruebas**
+(unit/coverage/integración/e2e — es decir, cualquier modo salvo `qualitative-only`, `no-tests` u `only <no-test>`)
+**y** el proyecto usa `docs/specs/`, escribir/actualizar `docs/specs/test-run.json` (junto a
+`docs/specs/code-review.md`) con el `FINGERPRINT` del Paso 1 y el resultado por suite. Ver
+[Caché de corrida de pruebas](#caché-de-corrida-de-pruebas). En modo `tests-only` este es el artefacto de salida.
 
 ### Paso 6 — Presentar resultado
 
-Devolver el informe completo (y la ruta del `code-review.md` si se escribió). **No** continuar con `git commit`, push ni merge aunque el veredicto sea `✅ Apto` — salvo instrucción explícita del usuario.
+Devolver el informe completo (y la ruta del `code-review.md` si se escribió). **No** continuar con `git commit`, push ni merge aunque el veredicto sea `✅ Aprobado` — salvo instrucción explícita del usuario.
 
 ---
 
 ## Formato del informe
 
-La estructura canónica del informe está en la plantilla [`../assets/code-review-template.md`](../assets/code-review-template.md). **Rellénala** (no la reescribas desde cero) para todo informe, tanto el que se muestra en chat como el `code-review.md` que se escribe en la carpeta de una US.
+La estructura canónica del informe está en la plantilla [`../assets/code-review-template.md`](../assets/code-review-template.md). **Rellénala** (no la reescribas desde cero) para todo informe, tanto el que se muestra en chat como el `docs/specs/code-review.md` que se escribe en proyectos spec-driven.
 
 La plantilla incluye: encabezado con metadata y veredicto, **Resumen**, **1. Verificaciones automatizadas** (tabla + detalle de fallidos), **2. Revisión cualitativa (senior)** (intención + las tres dimensiones), **Veredicto** con su justificación de una línea, **Próximas acciones** y **Justificaciones aceptadas**.
 
@@ -109,6 +127,36 @@ Reglas al rellenar:
 - Si la etapa automatizada no se superó, la sección 2 dice *"No ejecutada — la etapa automatizada no se superó."*
 - Si la revisión cualitativa se omitió por modificador (`checks-only` u `only nombre-del-check`), la sección 2 dice *"No ejecutada — omitida por modificador `checks-only`"* (o *"… `only nombre-del-check`"*) — motivo distinto al fallo de la etapa automatizada.
 - Si no hubo justificaciones, la sección final dice «Ninguna».
+
+---
+
+## Caché de corrida de pruebas
+
+Artefacto reutilizable que evita que `trace-validate` vuelva a ejecutar las pruebas. La semántica y el
+esquema están en `SKILL.md` ([Caché de corrida de pruebas](../SKILL.md)); aquí, lo operativo.
+
+**Cuándo se escribe.** Al final de una corrida que ejecutó los checks de pruebas (Paso 5), si el proyecto
+usa `docs/specs/`. Ruta **fija**: `docs/specs/test-run.json` (junto a `docs/specs/code-review.md`), no por
+unidad. Se **sobrescribe** en cada corrida (es el estado vigente de la rama). Sin `docs/specs/` no se
+escribe (no hay consumidor).
+
+**Qué se guarda.** El `FINGERPRINT` del Paso 1 en `git.fingerprint`, más una entrada por suite de prueba
+ejecutada (`unit`, `coverage`, `integration`, `e2e`) con su `command`, `result` (`PASS`/`FAIL`/`SKIPPED`/`N/A`)
+y un `summary` corto. Mapear los resultados de los checks de la etapa automatizada a estas suites:
+`unit tests` → `unit`, `coverage` → `coverage`, `e2e` → `e2e`; una suite de integración separada, si el
+stack la distingue, → `integration` (si no existe, `result: "N/A"`). No inventar suites que el repo no tiene.
+
+**Cómo se reutiliza (`tests-only`).** Recalcular el `FINGERPRINT` (Paso 1) y compararlo con
+`git.fingerprint` del `test-run.json` existente:
+- **Coincide** → caché **fresca**: devolver esos resultados sin ejecutar nada. Es el camino que hace que,
+  si no hubo cambios desde la última corrida de pruebas, no se repita el trabajo.
+- **Diferente o no existe** → caché **obsoleta/ausente**: ejecutar las suites, sobrescribir `test-run.json`
+  y devolver los nuevos resultados.
+
+**Validez.** El fingerprint canónico (recipe en `SKILL.md`) cubre código, specs y tests, y excluye los
+tres artefactos generados; no detecta la edición de **contenido** de un archivo que permanezca sin
+trackear — si el resultado pudiera depender de eso, tratar la caché como no concluyente. Si el árbol
+estaba sucio, `workingTreeClean: false` queda registrado como señal para el consumidor.
 
 ---
 
@@ -139,7 +187,7 @@ Reglas al rellenar:
 | Usuario justifica un hallazgo 🔴/🟠 | Registrar la justificación; el hallazgo deja de bloquear. En una US, incluirla en `code-review.md`. |
 | Diff vacío o sin cambios de código | No hay nada que revisar cualitativamente; reportarlo y ejecutar solo los checks aplicables. |
 | FAIL en la etapa automatizada | Mostrar reporte y **preguntar** si corregir. Nunca corregir sin autorización. Tras corregir (auto autorizada o manual), **re-ejecutar el check que fallaba**; si pasa, **re-ejecutar todo el set automatizado**. |
-| Usuario no quiere corregir los FAIL automatizados | Terminar en `❌ No apto`; **no** ejecutar la revisión cualitativa. |
+| Usuario no quiere corregir los FAIL automatizados | Terminar en `❌ Rechazado`; **no** ejecutar la revisión cualitativa. |
 | Corrección de un hallazgo cualitativo 🔴/🟠 (auto autorizada o manual) | Verificar que funciona (re-ejecutar el check/prueba afectado); solo si pasa, reiniciar **todo el code review desde el Paso 1**. |
 | Corrección aplicada que **no** resuelve el fallo (el check puntual sigue en FAIL) | **No reiniciar.** Iterar la corrección hasta que el check puntual pase; recién entonces disparar el reinicio. |
 | Usuario pide "corrige tú" sin más contexto | Confirmar el alcance exacto a corregir antes de tocar nada; aplicar solo lo mínimo; luego re-ejecutar. |
@@ -157,7 +205,7 @@ Reglas al rellenar:
 - **Corregir código sin autorización explícita** del usuario — por defecto solo se audita y propone.
 - Usar `--fix` / `--write` / `--force` **al ejecutar un check** (falsea el resultado); la corrección autorizada es un paso aparte y deliberado.
 - Modificar manifiestos para añadir scripts faltantes.
-- Declarar `✅ Apto` con algún Bloqueante o Condicional-presente en `SKIPPED` — es `⚠️ Incompleto`.
+- Declarar `✅ Aprobado` con algún Bloqueante o Condicional-presente en `SKIPPED` — es `⚠️ Incompleto`.
 - **Avanzar a la revisión cualitativa con algún FAIL automatizado sin resolver** — la etapa automatizada es puerta dura.
 - **Corregir y no volver a ejecutar** las pruebas, o no reiniciar el review tras una corrección cualitativa.
 - **Reiniciar el review con un arreglo sin verificar** — primero confirma que el check/prueba que fallaba ya pasa, y solo entonces reinicia.
@@ -168,12 +216,12 @@ Reglas al rellenar:
 - Truncar errores sin `… y N más`.
 - Ejecutar checks en paralelo salvo petición explícita.
 - Instalar dependencias — reportar `SKIPPED` y dejar al usuario.
-- Continuar a commit/push/merge tras `✅ Apto` sin instrucción explícita.
+- Continuar a commit/push/merge tras `✅ Aprobado` sin instrucción explícita.
 - **Comportarse como una herramienta de CI:** entregar solo la tabla de checks y omitir la revisión cualitativa.
 - **Solo reportar violaciones de reglas** sin razonar sobre la intención del diseño ni el impacto en el sistema.
 - Dar un hallazgo sin explicar el **porqué** o sin **sugerencia concreta** (un "esto está mal" pelado no es feedback senior).
 - Marcar 🔴/🟠 algo que es 🟡/💡 (inflar severidad) o al revés (minimizar un defecto real de diseño).
-- Declarar `✅ Apto` con un hallazgo bloqueante sin corregir **ni** justificar.
+- Declarar `✅ Aprobado` con un hallazgo bloqueante sin corregir **ni** justificar.
 - Aceptar una justificación y **no registrarla** en el `code-review.md` de la US.
-- Escribir `code-review.md` fuera de la carpeta de la US, o no escribirlo estando dentro de una US.
+- Escribir `code-review.md` en la carpeta de una US/WI en vez de en `docs/specs/`, o no escribirlo en un proyecto spec-driven.
 - Revisar todo el repo en lugar del diff bajo revisión.

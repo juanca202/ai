@@ -21,7 +21,7 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 
 1. **Listar los candidatos** detectados (p. ej. `main`, `develop`, ramas de release con commits ancestros del HEAD actual).
 2. **Preguntar al usuario** cuál es la rama base correcta. No proponer un default ni inferir por convención del proyecto sin confirmación.
-3. **Esperar respuesta** antes de continuar al paso 7 del flujo estándar. Sin respuesta clara, no hay merge.
+3. **Esperar respuesta** antes de continuar al paso 8 del flujo estándar (calcular delta). Sin respuesta clara, no hay merge.
 
 ---
 
@@ -37,7 +37,8 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 - [ ] `git status --porcelain` sin salida (working tree limpio)
 - [ ] `progress.md` existe en la ubicación del tipo
 - [ ] **Todas** las unidades del trabajo de la rama en estado `Done` (leídas del `progress.md` en la carpeta del trabajo)
-- [ ] **`code-review`** ejecutado con veredicto **✅ Apto**
+- [ ] **`code-review`** ejecutado con veredicto **✅ Aprobado**
+- [ ] **`trace-validate`** ejecutado (después de `code-review`) con veredicto **✅ Aprobado** (o **⚠️ Aprobado con observaciones**)
 - [ ] Sin commits sin commitear ni stash sin aplicar relevante al alcance
 
 **Ejecución:**

@@ -9,7 +9,7 @@ Referencias del skill **work-integrate**. Cubren los dos tipos de trabajo (`US-X
 **Ejemplo 1 — Historia de usuario (camino feliz)**
 
 - *Entrada:* Rama `feature/US-042-exportacion-csv`, working tree limpio, `progress.md` con tres TK todas en `Done`, reflog indica `Created from develop`.
-- *Salida:* `git checkout develop` → `git merge --no-ff feature/US-042-exportacion-csv -m "Merge US-042: exportacion-csv"` → reporte: «Merged 7 commits de `feature/US-042-exportacion-csv` → `develop`. Commit de merge: `a1b2c3d`. HEAD en `develop`, working tree limpio. La rama no fue borrada ni se hizo push.»
+- *Salida:* `code-review` → **✅ Aprobado** (persiste `docs/specs/test-run.json`); `trace-validate` → **✅ Aprobado** (reutiliza ese `test-run.json`, sin re-ejecutar pruebas); `git checkout develop` → `git merge --no-ff feature/US-042-exportacion-csv -m "Merge US-042: exportacion-csv"` → reporte: «Merged 7 commits de `feature/US-042-exportacion-csv` → `develop`. Commit de merge: `a1b2c3d`. HEAD en `develop`, working tree limpio. La rama no fue borrada ni se hizo push.»
 
 **Ejemplo 2 — Work item (progress.md por carpeta del WI)**
 
@@ -48,13 +48,19 @@ Referencias del skill **work-integrate**. Cubren los dos tipos de trabajo (`US-X
 - *Entrada:* Rama `hotfix-cache` (sin identificador de trabajo reconocible), `progress.md` íntegro en `Done`.
 - *Salida:* Sin operaciones git. Mensaje: «La rama actual `hotfix-cache` no corresponde a ningún trabajo (`US-XXX`/`WI-XXX`) ni cumple un patrón de rama válido. Renombra la rama al formato de su tipo (p. ej. `git branch -m fix/WI-012-cache-ttl`) antes de reintentar el submit.»
 
+**Ejemplo 8 — Trazabilidad rechaza**
+
+- *Entrada:* Rama `feature/US-088-...`, working tree limpio, todas las TK en `Done`, `code-review` → **✅ Aprobado**.
+- *Comportamiento:* `trace-validate` devuelve **❌ Rechazado** (criterio `AC-003` sin prueba que lo cubra). Sin operaciones git: se reporta el criterio faltante y se pide cubrirlo (vía `work-implement`) antes de reintentar el submit. No se mergea.
+
 ---
 
 ## Anti-patterns
 
 - Hacer merge sin verificar `progress.md` o ignorando unidades no `Done`.
 - Buscar el `progress.md` de un WI en un archivo compartido `docs/specs/work-items/progress.md`; cada WI tiene su propio `progress.md` dentro de su carpeta `WI-XXX-[kebab-case]/`.
-- Hacer merge sin haber ejecutado `code-review` o con veredicto **❌ No apto** / **⚠️ Incompleto** — el merge solo procede con veredicto **✅ Apto**.
+- Hacer merge sin haber ejecutado `code-review` o con veredicto **❌ Rechazado** / **⚠️ Incompleto** — el merge solo procede con veredicto **✅ Aprobado**.
+- Hacer merge sin haber ejecutado `trace-validate`, con veredicto **❌ Rechazado**, o corriéndolo **antes** de `code-review` (perdería la reutilización de `test-run.json`) — va después de `code-review` y solo procede con **✅ Aprobado** / **⚠️ Aprobado con observaciones**.
 - Modificar `progress.md` para «forzar» que aparezcan en `Done` sin que el trabajo esté completo.
 - Aceptar ramas sin un identificador de trabajo reconocible o con prefijos no válidos para su tipo (p. ej. `bugfix/`, `hotfix/`, o `fix/` aplicado a una US).
 - Asumir `main`, `master` o `develop` como rama base sin confirmarlo por reflog, config o usuario.
@@ -77,7 +83,7 @@ Posición: **cierre local** — último paso de los pipelines de trabajo (sin pu
 
 | | |
 |--|--|
-| **Entrada** | Rama del trabajo (`feature/US-XXX-...`, o `feature/`\|`fix/`\|`chore/`\|`refactor/` + `WI-XXX-...`); working tree limpio; commits de la implementación ya hechos (`git-commit`); `progress.md` con cada unidad del trabajo en `Done`; `code-review` con veredicto **✅ Apto**. |
+| **Entrada** | Rama del trabajo (`feature/US-XXX-...`, o `feature/`\|`fix/`\|`chore/`\|`refactor/` + `WI-XXX-...`); working tree limpio; commits de la implementación ya hechos (`git-commit`); `progress.md` con cada unidad del trabajo en `Done`; puertas de cierre en aprobado: `code-review` **✅ Aprobado** y `trace-validate` **✅ Aprobado**. |
 | **Salida** | Merge `--no-ff` a la rama base local; reporte con hash de merge. Sin push ni borrado de rama. |
 | **Siguiente paso (fuera del skill)** | Push de la rama base y CI — decisión del usuario. |
 | **PR/MR (`pr-create`)** | Abrir **antes** de este skill, estando en la rama del trabajo (o con la feature ya publicada en remoto). Tras el merge local, la rama activa es la **base**; `pr-create` bloquea en `main`/`master`/`develop`/`trunk`. |

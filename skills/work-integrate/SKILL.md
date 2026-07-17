@@ -1,12 +1,12 @@
 ---
 name: work-integrate
-description: Cerrar e integrar el trabajo de una historia de usuario (US-XXX) o un work item de mantenimiento (WI-XXX) haciendo merge de la rama feature hacia la rama desde la que se creó, previa verificación de que progress.md tenga todas las unidades del trabajo en Done. Activar cuando el usuario pida cerrar, entregar, mergear, integrar, finalizar o hacer submit del trabajo de una historia, un WI o de la rama actual.
+description: Cerrar e integrar el trabajo de una historia de usuario (US-XXX) o un work item de mantenimiento (WI-XXX) haciendo merge de la rama feature hacia la rama desde la que se creó, previa verificación de que progress.md tenga todas las unidades del trabajo en Done y de que pasen las puertas de calidad de cierre (code-review y trace-validate). Activar cuando el usuario pida cerrar, entregar, mergear, integrar, finalizar o hacer submit del trabajo de una historia, un WI o de la rama actual.
 license: MIT
 ---
 
 # Skill: Integración de trabajo
 
-Guía para **cerrar e integrar** el trabajo ya implementado —una historia de usuario `US-XXX` o un work item de mantenimiento `WI-XXX`— verificando que su `progress.md` tenga todas las unidades del trabajo en `Done`, y luego hacer **merge** de la rama actual hacia la rama desde la que se creó.
+Guía para **cerrar e integrar** el trabajo ya implementado —una historia de usuario `US-XXX` o un work item de mantenimiento `WI-XXX`— verificando que su `progress.md` tenga todas las unidades del trabajo en `Done`, que pasen las **puertas de calidad de cierre** (`code-review` y `trace-validate`, en ese orden), y luego hacer **merge** de la rama actual hacia la rama desde la que se creó.
 
 > **Alcance del submit:** El skill **cierra** localmente lo ya implementado. Verifica condiciones y ejecuta `git merge --no-ff`. No hace push, no borra ramas, no crea MRs/PRs, no resuelve conflictos, no modifica `progress.md`. Lo que no esté en `Done` bloquea el merge — el usuario decide cómo proceder, nunca se fuerza.
 
@@ -98,7 +98,8 @@ Antes de cambiar de rama o ejecutar el merge, verificar las siguientes condicion
 - **Working tree limpio:** `git status --porcelain` sin salida. Cualquier cambio sin commitear bloquea el merge.
 - **Carpeta/documento del trabajo existe:** la ubicación correspondiente al tipo, con su `progress.md`.
 - **Unidades del trabajo en `Done`:** parsear `progress.md` y confirmar que **cada unidad del trabajo de la rama** tiene estado `Done` (case-insensitive, sin espacios extra). El `progress.md` vive en la carpeta del trabajo (la US o el WI) y contiene solo ese trabajo: para US son sus `TK`, para WI las unidades de su propio `progress.md`. Estados como `Pending`, `In Progress` o vacío bloquean el merge.
-- **Code review con veredicto Apto:** ejecutar **`code-review`** (modificador `default`) antes del merge. Solo un veredicto **✅ Apto** permite continuar. **❌ No apto** e **⚠️ Incompleto** bloquean el merge hasta que el usuario corrija los problemas y el review se repita con resultado Apto.
+- **Code review con veredicto Aprobado:** ejecutar **`code-review`** (modificador `default`) antes del merge — es la **compuerta de cierre** que corre la batería completa de pruebas sobre la rama consolidada y persiste `docs/specs/test-run.json`. Solo un veredicto **✅ Aprobado** permite continuar. **❌ Rechazado** e **⚠️ Incompleto** bloquean el merge hasta que el usuario corrija los problemas y el review se repita con resultado Aprobado.
+- **Trazabilidad con veredicto aprobado:** ejecutar **`trace-validate`** sobre el trabajo de la rama (`US-XXX`/`WI-XXX`), **después** de `code-review` para que reutilice su `test-run.json` sin re-ejecutar pruebas. Solo **✅ Aprobado** (o **⚠️ Aprobado con observaciones**, mostrando las observaciones) permite continuar; **❌ Rechazado** (algún criterio de aceptación sin cubrir o con prueba fallida) bloquea el merge.
 - **Rama base resoluble:** identificada por reflog, por config, o confirmada explícitamente por el usuario. Si hay varios candidatos plausibles y ninguno definitivo, preguntar.
 
 **Si hay conflicto:**
@@ -120,15 +121,16 @@ Camino feliz cuando todas las verificaciones pasan.
 2. **Verificar working tree limpio** con `git status --porcelain`. Si hay salida, parar e informar.
 3. **Localizar la carpeta/documento del trabajo** según el tipo (ver [Tipos de trabajo](#tipos-de-trabajo)). Si no existe o hay varias coincidentes, parar.
 4. **Leer `progress.md`** (en la carpeta del trabajo) y validar que **todas las unidades del trabajo de la rama** tienen estado `Done`. Si alguna no lo está, parar mostrando la lista completa de unidades no `Done` con su estado actual.
-5. **Ejecutar `code-review`** (modificador `default`) sobre la rama actual. Si el veredicto es **❌ No apto** o **⚠️ Incompleto**, parar y reportar el informe al usuario — no continuar con el merge hasta obtener veredicto **✅ Apto** en una nueva ejecución.
-6. **Resolver la rama base:**
+5. **Ejecutar `code-review`** (modificador `default`) sobre la rama actual. Si el veredicto es **❌ Rechazado** o **⚠️ Incompleto**, parar y reportar el informe al usuario — no continuar con el merge hasta obtener veredicto **✅ Aprobado** en una nueva ejecución.
+6. **Ejecutar `trace-validate`** sobre el trabajo de la rama (después de `code-review`, para reutilizar su `test-run.json`). Si el veredicto es **❌ Rechazado**, parar y reportar los criterios faltantes/fallidos — no mergear hasta obtener **✅ Aprobado** (o **⚠️ Aprobado con observaciones**, mostrando las observaciones al usuario).
+7. **Resolver la rama base:**
    - `git reflog show <branch>` → buscar la entrada inicial con `Created from <ref>` o `branch: Created from <ref>`.
    - Fallback: `git config --get branch.<branch>.merge` y derivar la rama base local correspondiente.
    - Si ninguno concluye o hay ambigüedad: preguntar al usuario sin proponer un default.
-7. **Calcular delta** con `git rev-list --count <base>..HEAD` para reportar cuántos commits se van a integrar.
-8. **Cambiar a la rama base** con `git checkout <base>`. Si falla, parar y reportar.
-9. **Ejecutar el merge** con `git merge --no-ff <feature-branch> -m "Merge <ID>: <nombre-corto>"`, donde `<ID>` es el identificador del trabajo (`US-XXX` o `WI-XXX`) y `<nombre-corto>` su nombre/slug sin el prefijo de rama. Si surge conflicto, ir al flujo de conflictos.
-10. **Reportar resultado** al usuario: rama origen (con su prefijo), rama destino, número de commits integrados, hash del commit de merge, estado del HEAD y nota explícita de que **no** se hizo push ni se borró la rama del trabajo.
+8. **Calcular delta** con `git rev-list --count <base>..HEAD` para reportar cuántos commits se van a integrar.
+9. **Cambiar a la rama base** con `git checkout <base>`. Si falla, parar y reportar.
+10. **Ejecutar el merge** con `git merge --no-ff <feature-branch> -m "Merge <ID>: <nombre-corto>"`, donde `<ID>` es el identificador del trabajo (`US-XXX` o `WI-XXX`) y `<nombre-corto>` su nombre/slug sin el prefijo de rama. Si surge conflicto, ir al flujo de conflictos.
+11. **Reportar resultado** al usuario: rama origen (con su prefijo), rama destino, número de commits integrados, hash del commit de merge, estado del HEAD y nota explícita de que **no** se hizo push ni se borró la rama del trabajo.
 
 ---
 

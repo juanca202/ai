@@ -11,11 +11,11 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 **Working tree**: {{limpio | sucio (N archivos modificados)}}
 **Modo**: {{default | checks-only | qualitative-only | only nombre-del-check | …}}
 **Historia**: {{US-XXX-nombre-corto (Enlazada al archivo de la historia) | — (fuera de US)}}
-**Veredicto**: {{✅ Apto | ❌ No apto | ⚠️ Incompleto}}
+**Veredicto**: {{✅ Aprobado | ❌ Rechazado | ⚠️ Incompleto}}
 
 ## Resumen
 
-{{2-3 frases: qué se revisó, el resultado global y, si algo bloquea, qué falta para llegar a Apto. Sin listar aún el detalle.}}
+{{2-3 frases: qué se revisó, el resultado global y, si algo bloquea, qué falta para llegar a Aprobado. Sin listar aún el detalle.}}
 
 ## 1. Verificaciones automatizadas
 
@@ -66,7 +66,7 @@ Símbolos de severidad: `🔴` Crítico · `🟠` Mayor · `🟡` Menor · `💡
 
 ## Próximas acciones
 
-{{Orden de prioridad: hallazgos 🔴/🟠 sin resolver → FAIL Bloqueantes/Condicionales → warnings de linter → Sonar → SKIPPED por config ausente/rota → hallazgos 🟡/💡. Si el veredicto es Apto y no hay pendientes: «Sin acciones pendientes».}}
+{{Orden de prioridad: hallazgos 🔴/🟠 sin resolver → FAIL Bloqueantes/Condicionales → warnings de linter → Sonar → SKIPPED por config ausente/rota → hallazgos 🟡/💡. Si el veredicto es Aprobado y no hay pendientes: «Sin acciones pendientes».}}
 
 1. {{acción concreta}}
 2. {{…}}

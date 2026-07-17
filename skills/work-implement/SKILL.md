@@ -135,11 +135,32 @@ El ciclo obligatorio por cada unidad de comportamiento es **Red → Green → Re
 
 1. **Red:** escribir el test que falla antes de escribir el codigo de produccion. El test debe describir el comportamiento esperado segun los **insumos de comportamiento** del artefacto: los criterios de aceptacion (`AC-XXX`) y —cuando existan— las reglas de negocio (`BR-XX`) y los casos de prueba (`TC-XXX`). **Nota:** si el artefacto (US o WI) referencia una investigacion de migracion con casos de Golden Master en su `validation.md`, esos casos forman parte de las pruebas de la unidad.
 
-> **Test cases como insumo de las pruebas automatizadas:** si el artefacto tiene test cases (carpeta `test-cases/` en la US o el WI), **leer su `README.md` antes de escribir codigo** para identificar que `TC-XXX` describen y cuales pueden convertirse en pruebas automatizadas (unit, integracion, e2e) dentro del ciclo TDD. Cada `TC-XXX` que sea automatizable se cubre con su prueba en la unidad correspondiente. Cuando un `TC-XXX` **no se pueda automatizar** (p. ej. es manual o exploratorio) o se **decida crear otro tipo de prueba** distinto al que sugiere el test case, **registrarlo en `progress.md`** (ver seccion `progress.md`).
+> **Test cases como insumo de las pruebas automatizadas:** si el artefacto tiene test cases (carpeta `test-cases/` en la US o el WI), **leer su `README.md` antes de escribir codigo** para identificar que `TC-XXX` describen y cuales pueden convertirse en pruebas automatizadas (unit, integracion, e2e) dentro del ciclo TDD. Cada `TC-XXX` que sea automatizable se cubre con su prueba en la unidad correspondiente. Cuando un `TC-XXX` **no se pueda automatizar** (p. ej. es manual o exploratorio) o se **decida crear otro tipo de prueba** distinto al que sugiere el test case, **registrarlo en `progress.md`** (ver seccion `progress.md`). Escribir la prueba en el ciclo TDD es una cosa; **ejecutarla** sigue el [Uso escalonado de pruebas](#uso-escalonado-de-pruebas-optimizacion) (unit siempre, integracion cuando aplica, e2e en el cierre).
 2. **Green:** escribir el minimo codigo necesario para que el test pase.
 3. **Refactor:** limpiar el codigo (produccion y test) sin romper los tests.
 
 Los tests son parte del entregable de la unidad, no una fase posterior. Una unidad no esta `Done` si sus tests no existen o no pasan.
+
+### Uso escalonado de pruebas (optimizacion)
+
+El ciclo TDD siempre **define** las pruebas de la unidad (unit / integracion / e2e segun corresponda),
+pero **ejecutarlas todas en cada iteracion es caro**. Escalonar la *ejecucion* por nivel — esto cambia
+*cuando y cuantas veces* se corren, no *que* se escribe ni la definicion de `Done`:
+
+- **Unitarias — siempre.** Las pruebas unitarias del codigo implementado se corren en **cada** ciclo
+  Red→Green→Refactor y en cada iteracion de la unidad. Son rapidas y son la red de seguridad primaria;
+  nunca se difieren.
+- **Integracion — solo cuando se considere necesario.** Ejecutarlas cuando la unidad realmente cruza un
+  limite que las unitarias (con dobles/mocks) no cubren: acceso a base de datos, integracion entre
+  modulos, contrato con un servicio externo, wiring de infraestructura. Si el cambio no toca esas
+  fronteras, no re-correr integracion en cada iteracion; basta al consolidar la unidad.
+- **E2E — solo en el cierre de la implementacion.** No correr e2e por unidad ni en cada ciclo TDD (son
+  lentas y fragiles). Diferirlas al **cierre de la implementacion** (Paso 4 de la referencia del tipo, o
+  el paso de Integracion en modo paralelo), una sola vez sobre el codigo consolidado. La corrida
+  exhaustiva de e2e como **puerta formal** la realiza `code-review` en `work-integrate` / `pr-create`.
+
+Registrar en `progress.md` cuando una prueba de integracion o e2e se **difiera** o se **decida no
+ejecutar** en una iteracion, para que la decision quede trazada.
 
 ### Clean Architecture
 
@@ -207,9 +228,10 @@ La hace **el orquestador, una unidad a la vez** (nunca merges concurrentes), a m
 
 1. Sobre la rama del artefacto, hacer merge de la rama de la unidad: `git merge wt/<unidad>`.
 2. **Resolver conflictos** si los hay; si el conflicto no es trivial o el resultado queda ambiguo, **parar e informar al usuario** antes de continuar con el resto.
-3. Ejecutar **lint/typecheck/build y la suite de tests de los archivos/paquete afectados** por las unidades integradas, en la rama del artefacto tras el merge (no la bateria completa; esa la corre `code-review`). Si algo falla, **intentar corregirlo**; solo si el error **persiste tras varios intentos** (p. ej. 2-3), **parar** y avisar. No seguir integrando sobre una base rota.
+3. Ejecutar **lint/typecheck/build y las pruebas unitarias (mas las de integracion si el merge tocó una frontera relevante)** de los archivos/paquete afectados por las unidades integradas, en la rama del artefacto tras el merge (no la bateria completa; esa la corre `code-review`). **E2E no se corre por merge:** se difiere al cierre (paso 6). Ver [Uso escalonado de pruebas](#uso-escalonado-de-pruebas-optimizacion). Si algo falla, **intentar corregirlo**; solo si el error **persiste tras varios intentos** (p. ej. 2-3), **parar** y avisar. No seguir integrando sobre una base rota.
 4. Marcar `progress.md` de esa unidad a `Done` (y su `Cobertura de test cases`) solo **despues** de un merge y una validacion en verde.
 5. Al integrar todas las unidades, **limpiar los worktrees y ramas temporales** (`git worktree remove <ruta-temporal>` y borrar la rama `wt/<unidad>`).
+6. **Cierre de la implementacion:** con todas las unidades integradas, correr **una sola vez** las pruebas **e2e** que apliquen al alcance sobre el codigo consolidado (si el repo las tiene). La corrida exhaustiva como puerta formal la hara luego `code-review`.
 
 `progress.md` y la lista de to-dos siguen siendo la bitacora: el orquestador refleja el avance global (una entrada por unidad + la ola en curso) y cada subagente mantiene los checkboxes de su propia unidad; la coherencia entre ambos se mantiene igual que en el modo secuencial. Al cerrar, el handoff es identico al del modo secuencial (`work-integrate` / `pr-create` / terminar).
 
@@ -259,6 +281,7 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 - Continuar cuando se detecta un conflicto en la documentacion sin notificar al usuario primero.
 - Diferir la escritura de tests para despues de la implementacion; el ciclo TDD es Red → Green → Refactor dentro de cada unidad.
 - Correr la **bateria completa de pruebas** del repositorio desde este skill: solo se ejecutan las pruebas de los archivos/paquete afectados; la bateria completa es tarea exclusiva de `code-review` (en `work-integrate` / `pr-create`).
+- Correr **e2e en cada ciclo TDD o por cada merge**, o **integracion en cada iteracion** cuando el cambio no cruza esa frontera: unitarias siempre, integracion solo cuando aplica, e2e solo en el cierre (ver [Uso escalonado de pruebas](#uso-escalonado-de-pruebas-optimizacion)).
 - Escribir un estado no definido en `progress.md`; estados validos: `Pending`, `In Progress`, `Done`.
 - Lanzar preguntas como prosa libre cuando el cliente expone herramienta de preguntas estructuradas.
 - Aceptar como confirmacion una respuesta ambigua sin opciones explicitas; si hay duda, repreguntar.

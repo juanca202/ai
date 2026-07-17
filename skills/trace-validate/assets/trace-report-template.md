@@ -5,6 +5,7 @@ Plantilla canónica del reporte de trazabilidad (trace-validate).
   AC-XXX (historia de usuario y work item).
 - Convención de placeholders: sustituir manualmente cada {{texto}}; no es un motor de plantillas.
 - Eliminar este bloque y sustituir todos los {{…}} al publicar el documento final.
+- EXCEPCIÓN: conservar la marca de pie `<!-- trace-validate:fingerprint=… -->` (idempotencia, Paso 0/7).
 -->
 
 # Reporte de trazabilidad — {{US-XXX-nombre-corto | WI-XXX-nombre}}
@@ -48,12 +49,17 @@ Valores permitidos:
 
 ## Ejecución automática
 
+Los resultados de pruebas los produce `code-review` (trace-validate no ejecuta la suite).
+
 | | |
 |--|--|
-| **Runner detectado** | {{Jest / Vitest / pytest / … / no detectado}} |
-| **Comando ejecutado** | `{{comando exacto o «no ejecutado»}}` |
+| **Procedencia** | {{caché fresca de code-review (commit abc1234, YYYY-MM-DD) / corrida `tests-only` disparada ahora / no ejecutable: razón}} |
+| **Comando(s)** | `{{comando(s) de test-run.json o «no ejecutado»}}` |
 | **Resultado global** | {{X pasaron, Y fallaron, Z omitidos / no ejecutado: razón}} |
 
 ## Observaciones y pendientes
 
 - {{Criterio: aclaración, supuesto a confirmar o acción sugerida. Omitir la sección si no hay pendientes.}}
+
+<!-- trace-validate:fingerprint={{hash}} · generado={{YYYY-MM-DD}} -->
+
