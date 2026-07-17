@@ -56,12 +56,15 @@ directamente desde el ADR.
   evidencia externa (dejar el resto en blanco o "N/A" y explicar en Estado).
 - Estado: Creada · Pendiente (aún no implementada) · No aplica.
 - Al implementarla, completar Herramienta, Ubicación y Comando; si sigue pendiente, dejarlos como TODO.
+- Cuando Estado: Creada, la fitness function también queda registrada en el agrupador del proyecto
+  (scripts/arch/verify-architecture.sh), que ejecuta TODAS las validaciones de arquitectura de una vez.
 -->
 Apto: {{Sí | No}}
 Estado: {{Creada | Pendiente | No aplica}}
 Herramienta: {{ArchUnit | dependency-cruiser | import-linter | NetArchTest | script CI | N/A}}
 Ubicación: {{ruta del test/script que la implementa, p. ej. tests/arch/GraphQlOnlyTest.php}}
-Comando: {{comando acotado para ejecutarla, p. ej. npx depcruise --config .dependency-cruiser.js src}}
+Comando: {{comando acotado individual, p. ej. npx depcruise --config .dependency-cruiser.js src}}
+Agrupador: {{sh scripts/arch/verify-architecture.sh — ejecuta esta y el resto de validaciones | N/A}}
 
 ## Referencias
 

@@ -213,11 +213,38 @@ Una regla en estado ✅ Cumplido no genera hallazgo con prioridad, pero cuenta e
 Para cada ADR **apto** (marcado en la Fase 1), determinar si ya existe una fitness function y, si
 existe, ejecutarla para validar el cumplimiento.
 
+### 0. Preferir el agrupador de validaciones de arquitectura
+
+Antes de ejecutar chequeos uno por uno, comprobar si el proyecto tiene un **agrupador** que corre
+todas las validaciones de arquitectura de una vez (lo crea `adr-manage`):
+
+```bash
+ls scripts/arch/verify-architecture.sh scripts/arch/checks/*.sh 2>/dev/null
+```
+
+- **Si existe**, es la vía preferida: una sola corrida acotada valida todos los ADR con fitness
+  function. Ejecutar el entrypoint (`sh scripts/arch/verify-architecture.sh`, o el alias nativo del
+  repo — `npm run arch`, target de `Makefile`, etc.) aplicando las mismas cautelas del paso 2
+  (no correr build/suite completa; si requiere instalar dependencias pesadas, preguntar antes).
+  El runner imprime un bloque `=== ADR-XXX-<slug> ===` con `PASS`/`FAIL` por check: **mapear cada
+  bloque a su ADR por el nombre del wrapper** (`checks/ADR-XXX-*.sh`) y alimentar ese resultado al
+  estado del ADR en la Fase 2. El resumen final (Total / PASS / FAIL) y el código de salida agregado
+  resumen la salud arquitectónica ejecutable.
+- Un ADR con `## Fitness function` `Estado: Creada` cuyo wrapper **no** aparece en `checks/`, o que
+  no quedó cubierto por la corrida del agrupador, se ejecuta individualmente (pasos 1-2) y además se
+  anota como observación: la fitness function no está registrada en el agrupador (sugerir corregirlo
+  vía `adr-manage`).
+- **Si no existe** el agrupador, continuar con la detección y ejecución individuales (pasos 1-2) y,
+  si hay dos o más fitness functions sueltas, **sugerir crear el agrupador** (`scripts/arch/verify-architecture.sh`)
+  vía `adr-manage`, para que en adelante todas se ejecuten con un solo comando.
+
 ### 1. Detectar fitness functions existentes
 
 **Primero, leer la sección `## Fitness function` del propio ADR** (la escribe `adr-manage`). Es la
 fuente más fiable: si declara `Estado: Creada` con `Ubicación` y `Comando`, usar ese comando
-directamente. Si declara `Estado: Pendiente`, el ADR es apto pero aún no tiene fitness function →
+directamente (salvo que el agrupador del paso 0 ya lo haya cubierto). Si además trae un campo
+`Agrupador`, confirma que la validación está enganchada al entrypoint `scripts/arch/verify-architecture.sh`.
+Si declara `Estado: Pendiente`, el ADR es apto pero aún no tiene fitness function →
 va a las sugerencias (paso 3). Si declara `Apto: No` / `No aplica`, no automatizarlo.
 
 Si la sección no existe o está incompleta (ADR antiguos, creados antes de esta convención), caer al
@@ -229,7 +256,7 @@ Si la sección no existe o está incompleta (ADR antiguos, creados antes de esta
 | JS/TS | `dependency-cruiser` (`.dependency-cruiser.js`), `ts-arch`, reglas ESLint de `import/no-restricted-paths`, `eslint-plugin-boundaries` |
 | .NET | `NetArchTest`, `ArchUnitNET` |
 | Python | `import-linter` (`.importlinter`), `pytest-arch` |
-| Cualquiera | scripts en `scripts/`, `tools/`, `arch/` con nombres como `check-architecture`, `fitness`, `compliance`; jobs de CI (`.github/workflows/*`, `.gitlab-ci.yml`, `azure-pipelines.yml`) con pasos de arquitectura |
+| Cualquiera | agrupador `scripts/arch/verify-architecture.sh` + `scripts/arch/checks/ADR-*.sh` (ver paso 0); otros scripts en `scripts/`, `tools/`, `arch/` con nombres como `check-architecture`, `fitness`, `compliance`; jobs de CI (`.github/workflows/*`, `.gitlab-ci.yml`, `azure-pipelines.yml`) con pasos de arquitectura |
 
 ```bash
 # Rastreo genérico de fitness functions / chequeos de arquitectura
@@ -245,7 +272,7 @@ Mapear cada fitness function encontrada al ADR que valida (por el nombre, coment
 
 Ejecutar **solo** el chequeo de arquitectura, no la suite completa, usando el comando más acotado disponible:
 
-- Preferir el comando documentado en el `README`, `package.json` (script `arch`/`fitness`/`depcruise`), `Makefile` o el propio ADR.
+- Preferir el agrupador (`sh scripts/arch/verify-architecture.sh`, paso 0) cuando exista; si no, el comando documentado en el `README`, `package.json` (script `arch`/`fitness`/`depcruise`), `Makefile` o el propio ADR.
 - Ejemplos: `npx depcruise --config .dependency-cruiser.js src`, `mvn -Dtest=*ArchTest test`, `lint-imports`, `pytest -k arch`.
 - Si el comando exacto es ambiguo o requiere instalar dependencias pesadas, **preguntar al usuario** con la herramienta de preguntas estructuradas antes de ejecutarlo, mostrando el comando propuesto. No ejecutar nada destructivo ni que modifique el repo.
 - Capturar: comando corrido, resultado (**PASS / FAIL**), y las líneas relevantes de la salida (violaciones concretas con sus rutas). Si falla por entorno (falta un runtime/dependencia), registrar **No ejecutable** con el motivo, no marcarlo como incumplimiento.
@@ -261,7 +288,9 @@ Si un ADR es **apto** pero no tiene fitness function, añadirlo a la lista de **
 
 Esto no crea la fitness function (eso es otra tarea); solo la **recomienda** en el informe. Sugerir
 además dejar constancia en el ADR: actualizar su sección `## Fitness function` (vía `adr-manage`)
-con `Estado: Pendiente` y el esbozo, para que la próxima auditoría la descubra sin heurística.
+con `Estado: Pendiente` y el esbozo, para que la próxima auditoría la descubra sin heurística. Al
+crearla, `adr-manage` la registrará en el agrupador `scripts/arch/verify-architecture.sh` para que
+quede incluida en la ejecución conjunta.
 
 ---
 
@@ -281,7 +310,7 @@ flujo de `Comportamiento en Revalidación` descrito en la Fase 0 — no se reesc
      - **Método:** no es un texto fijo — describir en una frase corta qué se usó realmente en esta auditoría: las técnicas de inspección aplicadas (p. ej. `grep`, lectura de manifiestos) y las fitness functions ejecutadas. Aclarar que no se corre el build ni la suite completa.
    - **Resumen** con la tabla de conteos por prioridad y estado, seguida de 1-3 frases con la lectura global de la salud arquitectónica del repo.
    - Hallazgos **agrupados por prioridad** (alta → media → baja). Por cada hallazgo: la regla/ADR incumplido, `Estado`, `Evidencias` (✔ a favor / ✖ en contra), `Incumplimientos` (rutas de archivos), y `Acción sugerida`. Si el ADR tiene fitness function, incluir en `Evidencias` el resultado de ejecutarla (PASS/FAIL + comando).
-   - **Fitness functions**: una sub-tabla de las **existentes** (ADR, herramienta, comando, resultado PASS/FAIL/No ejecutable) y una lista de las **sugeridas** (ADR apto sin fitness function → qué medir, herramienta y esbozo).
+   - **Fitness functions**: indicar si existe el **agrupador** (`scripts/arch/verify-architecture.sh`) y su resultado conjunto (Total / PASS / FAIL); una sub-tabla de las **existentes** (ADR, herramienta, comando, si está registrada en el agrupador, resultado PASS/FAIL/No ejecutable) y una lista de las **sugeridas** (ADR apto sin fitness function → qué medir, herramienta y esbozo). Si hay dos o más fitness functions sueltas y no existe el agrupador, recomendarlo aquí.
    - Sección de reglas **No verificables**.
 4. **Nunca sobrescribir** un informe anterior: el nombre lleva la fecha para conservar el histórico. Si ya existe un `audit-<hoy>.md` del mismo día, actualizarlo (no duplicar).
 

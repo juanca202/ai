@@ -70,13 +70,13 @@ Antes de redactar un ADR nuevo:
 4. **Escribir el ADR** desde `assets/adr-template.md`:
    - `Fecha de creación` = hoy; `Última actualización` = hoy
    - Estado por defecto: `Draft`
-5. **Evaluar y (opcionalmente) crear la fitness function** — ver sección [Fitness function al crear un ADR](#fitness-function-al-crear-un-adr).
+5. **Evaluar y (opcionalmente) crear la fitness function** — ver sección [Fitness function al crear un ADR](#fitness-function-al-crear-un-adr). Al crearla, **registrarla en el agrupador de validaciones de arquitectura** — ver sección [Agrupador de validaciones de arquitectura](#agrupador-de-validaciones-de-arquitectura).
 6. **Ofrecer instalar dependencias referenciadas ausentes** — ver sección [Dependencias referenciadas por el ADR](#dependencias-referenciadas-por-el-adr).
 7. **Actualizar `docs/adr/README.md`**:
    - Si no existe, crearlo con encabezado y lista vacía
    - Añadir `- [ADR-XXX: Título](ADR-XXX-slug.md)` en orden ascendente
    - Nunca reordenar ni eliminar entradas existentes
-8. **Confirmar** mostrando ruta del ADR y la línea añadida al README (y, si aplica, la fitness function y las dependencias instaladas)
+8. **Confirmar** mostrando ruta del ADR y la línea añadida al README (y, si aplica, la fitness function, el comando agrupador `sh scripts/arch/verify-architecture.sh` que la incluye, y las dependencias instaladas)
 
 ---
 
@@ -107,9 +107,68 @@ completar en consecuencia la sección `## Fitness function` del documento.
    - Escribir el chequeo que corresponde a la `## Decision` del ADR (p. ej. prohibir imports que violen la capa, o endpoints REST cuando la decisión es GraphQL).
    - Confirmar con el usuario el comando acotado para ejecutarla. No ejecutar build ni suites completas por iniciativa propia; si hace falta instalar dependencias, avisar al usuario.
 
-5. **Referenciar en el ADR:** completar la sección `## Fitness function` con `Apto: Sí`, `Estado: Creada`, `Herramienta`, `Ubicación` (ruta real del test/script creado) y `Comando`. Así `adr-audit` la descubre y ejecuta directamente desde el ADR.
+5. **Registrar la fitness function en el agrupador** — dejarla enganchada al punto de entrada único que ejecuta *todas* las validaciones de arquitectura del proyecto. Ver [Agrupador de validaciones de arquitectura](#agrupador-de-validaciones-de-arquitectura). En resumen: crear (si no existe) `scripts/arch/verify-architecture.sh` y añadir el wrapper `scripts/arch/checks/ADR-XXX-<slug>.sh` que invoca el comando acotado del paso 4.
 
-> Cuando `adr-manage` es invocado en lote (p. ej. por `adr-discover`), hacer esta evaluación por cada ADR apto, pero agrupar de forma razonable para no abrumar: se puede preguntar una vez si el usuario quiere crear fitness functions para todos los ADR aptos del lote, o elegir cuáles.
+6. **Referenciar en el ADR:** completar la sección `## Fitness function` con `Apto: Sí`, `Estado: Creada`, `Herramienta`, `Ubicación` (ruta real del test/script creado o del wrapper en `scripts/arch/checks/`) y `Comando` (el comando acotado individual). Así `adr-audit` la descubre y ejecuta directamente desde el ADR, y además queda incluida en el agrupador `scripts/arch/verify-architecture.sh`.
+
+> Cuando `adr-manage` es invocado en lote (p. ej. por `adr-discover`), hacer esta evaluación por cada ADR apto, pero agrupar de forma razonable para no abrumar: se puede preguntar una vez si el usuario quiere crear fitness functions para todos los ADR aptos del lote, o elegir cuáles. Cada fitness function creada en el lote se registra en el mismo agrupador (un wrapper por ADR en `scripts/arch/checks/`).
+
+---
+
+## Agrupador de validaciones de arquitectura
+
+Las fitness functions individuales tienden a quedar dispersas (una en `tests/arch/`, otra en un
+`.dependency-cruiser.js`, otra en un script suelto), y entonces no hay un único comando que las
+ejecute todas. Por eso el proyecto mantiene **un punto de entrada único** que corre *todas* las
+validaciones de arquitectura registradas. La fitness function individual puede seguir existiendo en
+su ubicación natural; el agrupador no la reemplaza, la **orquesta**.
+
+### Convención
+
+```
+scripts/arch/
+├── verify-architecture.sh   # Agrupador: descubre y ejecuta TODOS los checks
+└── checks/
+    ├── ADR-012-graphql.sh    # Un wrapper por ADR (nombre = ADR-XXX-<slug>.sh)
+    └── ADR-018-layers.sh
+```
+
+- **`scripts/arch/verify-architecture.sh`** — corre cada `checks/*.sh`, imprime `PASS`/`FAIL` por
+  ADR y un resumen, y sale con código `0` solo si todas pasan (distinto de `0` si alguna falla, apto
+  como gate de CI o local). **Se descubre por convención: no se edita al añadir validaciones.**
+- **`scripts/arch/checks/ADR-XXX-<slug>.sh`** — un wrapper delgado por ADR que invoca la fitness
+  function real (dependency-cruiser, ArchUnit, import-linter, NetArchTest o un script propio). El
+  nombre `ADR-XXX-<slug>.sh` permite mapear cada resultado a su ADR. Si el chequeo real vive en otra
+  herramienta (p. ej. un test JVM en `tests/arch/`), el wrapper solo lo invoca — no se duplica la lógica.
+
+Los archivos de referencia de esta convención están en `assets/arch-fitness/`
+(`verify-architecture.sh`, `checks/ADR-XXX-example.sh.template` y un `README.md`). **Leerlos antes de
+crear o modificar el agrupador** y copiarlos al repo respetando las rutas.
+
+### Cómo registrar una fitness function
+
+Al crear una fitness function apta (paso 4 anterior), engancharla al agrupador:
+
+1. **Asegurar el agrupador.** Si `scripts/arch/verify-architecture.sh` no existe, crearlo copiando
+   `assets/arch-fitness/verify-architecture.sh` (y el `README.md` de esa carpeta) tal cual. Crear el
+   directorio `scripts/arch/checks/` si falta. Si ya existe el agrupador, no tocarlo — descubre los
+   checks solo.
+2. **Añadir el wrapper del ADR.** Crear `scripts/arch/checks/ADR-XXX-<slug>.sh` a partir de
+   `assets/arch-fitness/checks/ADR-XXX-example.sh.template`, reemplazando el comando por el chequeo
+   acotado del paso 4 (p. ej. `exec npx depcruise --config .dependency-cruiser.js src`). El wrapper
+   debe salir `0` si la decisión se cumple y distinto de `0` si se viola.
+3. **Cablear el atajo nativo (opcional, según stack).** Si el repo tiene un mecanismo natural,
+   añadir un alias que llame al agrupador sin duplicar lógica: script `arch` en `package.json`
+   (`"arch": "sh scripts/arch/verify-architecture.sh"`), un target de `Makefile`, un job de CI, etc.
+   No inventar setup pesado; es solo un alias al mismo entrypoint.
+4. **No ejecutar** el agrupador ni el check por iniciativa propia si requiere instalar dependencias o
+   correr suites pesadas; ofrecer el comando acotado y dejar que el usuario decida (igual que con la
+   fitness function individual).
+
+> **Stacks sin `sh` (p. ej. Windows puro).** Mantener el mismo contrato con el equivalente idóneo
+> (un `verify-architecture.ps1`, o un runner en el lenguaje del repo que descubra y ejecute los
+> checks). Lo esencial es que exista **un** comando que ejecute todas las validaciones y devuelva un
+> código de salida agregado.
 
 ---
 
