@@ -2,16 +2,17 @@
 # =============================================================================
 # verify-architecture.sh — Agrupador de fitness functions de arquitectura
 # -----------------------------------------------------------------------------
-# Ejecuta TODAS las validaciones de arquitectura (fitness functions) registradas
-# por los ADR del proyecto. Cada fitness function individual vive como un script
-# ejecutable en el directorio hermano `checks/`, con el nombre `ADR-XXX-<slug>.sh`.
+# Ejecuta TODAS las validaciones de arquitectura (fitness functions) del proyecto.
+# Cada fitness function individual verifica un REQUISITO de un estándar de dominio
+# (docs/standards/) y vive como un script ejecutable en el directorio hermano
+# `checks/`, con el nombre `<estándar>-<requisito>.sh` (p. ej. testing-unit-testing.sh).
 #
 # Este agrupador NO se edita al añadir una nueva fitness function: descubre y
 # ejecuta automáticamente cada `checks/*.sh`. Para registrar una validación
-# nueva, basta con dejar su wrapper en `checks/` (lo hace el skill `adr-manage`).
+# nueva, basta con dejar su wrapper en `checks/` (lo hace el skill `arch-manage`).
 #
 # Contrato:
-#   - Corre cada check, imprime PASS/FAIL por ADR y un resumen final.
+#   - Corre cada check, imprime PASS/FAIL por requisito y un resumen final.
 #   - Sale con código 0 solo si TODAS pasan; distinto de 0 si alguna falla.
 #     Apto para usarse como paso de CI o gate local.
 #
