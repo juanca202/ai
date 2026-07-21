@@ -13,12 +13,12 @@ nunca se documentaron formalmente.
 Cada hallazgo se traduce en artefactos de dos tipos (ver el skill `arch-manage` para la distinción completa):
 
 - Un **ADR** — la *decisión* histórica: por qué se eligió algo. Todo hallazgo relevante produce un ADR candidato.
-- Un **requisito** dentro de un **estándar de dominio** — la *regla viva* que el código sigue hoy (`docs/standards/`). El estándar es **amplio** (un dominio entero: *Testing Standards*, *API Standards*…) y agrupa varios requisitos; cada requisito se redacta con RFC 2119/8174 (MUST/SHOULD/MAY…). Un hallazgo que es una norma continua y verificable propone **un requisito**, dentro del estándar de dominio que le corresponde (agrupándolo con otros del mismo dominio).
+- Un **requisito** dentro de un **estándar de dominio** — la *regla viva* que el código sigue hoy (`docs/standards/`). El estándar es **amplio** (un **dominio técnico o funcional** entero: *Testing Standards*, *API Standards*…; un aspecto de arquitectura, no un dominio de negocio/DDD) y agrupa varios requisitos; cada requisito se redacta con RFC 2119/8174 (MUST/SHOULD/MAY…). Un hallazgo que es una norma continua y verificable propone **un requisito**, dentro del estándar de dominio que le corresponde (agrupándolo con otros del mismo dominio). La unidad verificable fina —el **criterio de cumplimiento** (`CR-XXX`) medible dentro del requisito— la formaliza `arch-manage` al crear el artefacto; en descubrimiento basta con proponer el requisito y su regla.
 
 Ejemplo: detectar "unit tests con PHPUnit" y "e2e con Playwright" son **dos decisiones** (dos ADR),
 pero **un solo estándar de dominio** *Testing Standards* con **dos requisitos** («Unit testing»,
 «E2E testing»). En cambio detectar "hubo una migración de Webpack a Vite" es una decisión histórica
-(**ADR** sin requisito): no hay una norma continua que cumplir, solo un hecho.
+(**ADR** sin criterio de cumplimiento): no hay una norma continua que cumplir, solo un hecho.
 
 El output es una **lista priorizada de candidatos**, agrupando los requisitos por estándar de dominio.
 El usuario decide cuáles documentar; el skill luego invoca `arch-manage` para cada uno aprobado, que
@@ -104,7 +104,7 @@ Para cada señal encontrada, evaluar si amerita documentarse usando estos criter
 - Es la opción por defecto obvia del stack (ej: usar Jest en un proyecto CRA)
 - Es una decisión de implementación, no arquitectónica
 
-### Clasificar cada candidato: ¿fija un requisito? ¿de qué dominio?
+### Clasificar cada candidato: ¿fija un requisito? ¿de qué dominio técnico/funcional?
 
 Por cada candidato, además de la decisión (ADR), determinar si hay una **regla viva** que documentar como **requisito** dentro de un **estándar de dominio**:
 
@@ -115,17 +115,19 @@ Por cada candidato, además de la decisión (ADR), determinar si hay una **regla
 
 ### Categorías / dominios típicos a buscar
 
-| Dominio (estándar) | Ejemplos de señales | Requisitos que suele agrupar |
+Estos son los **dominios funcionales canónicos** (los mismos que usa `arch-manage`; el `slug` es el `domain` del estándar). Al proponer un candidato, clasificar su estándar en uno de ellos y **proponer un dominio nuevo solo si no encaja en ninguno**.
+
+| Dominio funcional (`slug`) | Ejemplos de señales | Requisitos que suele agrupar |
 |---|---|---|
-| **Lenguaje / runtime** | TypeScript strict, versión de Node/Python, Deno/Bun | "strict obligatorio", versión mínima |
-| **Arquitectura / modularidad** | Capas (controller/service/repo), DDD, hexagonal, CQRS, límites de módulo | límites de capa, imports permitidos |
-| **Persistencia** | Elección de BD, ORM vs query builder, migraciones | ORM obligatorio, estrategia de migraciones |
-| **API** | REST vs GraphQL vs tRPC, versioning | protocolo obligatorio, versioning |
-| **Seguridad / auth** | JWT vs sesiones, OAuth, refresh tokens, cifrado | mecanismo de auth, manejo de secretos |
-| **Frontend / UI** | Estado global, SSR vs CSR, design system | gestión de estado, design system |
-| **Testing** | Herramienta unit/e2e, cobertura, mocking | unit testing, e2e testing, umbral de cobertura |
-| **Observabilidad** | Logger, estrategia de errores, tracing | logger obligatorio, formato de logs |
-| **CI/CD** | Pipeline, deploy, feature flags | gates de pipeline, estrategia de deploy |
+| **Calidad y pruebas** (`testing`) | Herramienta unit/e2e, cobertura, mocking, Quality Gates | unit testing, e2e testing, umbral de cobertura |
+| **Arquitectura y diseño** (`architecture`) | Capas (controller/service/repo), DDD, hexagonal, CQRS, límites de módulo | límites de capa, imports permitidos, desacoplamiento |
+| **Interfaces / APIs** (`api`) | REST vs GraphQL vs tRPC, versioning, formato de errores | protocolo obligatorio, versioning, payloads/errores |
+| **Seguridad** (`security`) | JWT vs sesiones, OAuth, refresh tokens, cifrado, secretos | mecanismo de auth, manejo de secretos, sanitización |
+| **Estilo de código** (`coding-style`) | ESLint/Prettier/Biome, EditorConfig, TypeScript strict, convenciones de nombres | reglas de linter/formato, nomenclatura, JSDoc |
+| **Frontend / UX** (`frontend`) | Estado global vs local, SSR vs CSR, design system, WCAG | gestión de estado, design system, accesibilidad |
+| **Persistencia y datos** (`persistence`) | Elección de BD, ORM vs query builder, migraciones, índices | ORM obligatorio, estrategia de migraciones, patrón repositorio |
+| **Infraestructura y DevOps** (`devops`) | Dockerfiles, pipeline CI/CD, deploy, feature flags, versión de runtime, SemVer | gates de pipeline, estrategia de deploy/branching, variables por entorno |
+| **Observabilidad** (`observability`) | Logger, estrategia de errores, tracing, métricas | logger obligatorio, formato de logs, Correlation IDs |
 
 ---
 
@@ -193,7 +195,7 @@ Por cada candidato aprobado por el usuario:
    - Las alternativas implícitas detectadas (si las hay)
    - Los **Decisores** y el **idioma**, acordados una sola vez para todo el lote, de modo que `arch-manage` no vuelva a preguntar lo mismo por cada artefacto
 
-2. Dejar que `arch-manage` ejecute su flujo completo: crea el ADR y, cuando corresponda, añade el requisito al estándar de dominio (creándolo o ampliándolo, con su enlace `emits`/`source_adrs` y la evaluación de fitness function).
+2. Dejar que `arch-manage` ejecute su flujo completo: crea el ADR y, cuando corresponda, añade el requisito al estándar de dominio (creándolo o ampliándolo), formaliza sus **criterios de cumplimiento** (`CR-XXX`) con su `Enfoque` (bloqueante/warning), enlaza `emits` (a nivel de CR) / `source_adrs` y evalúa la fitness function de cada criterio.
 
 3. **Agrupar por dominio en el lote:** procesar juntos los candidatos del mismo dominio para que sus requisitos caigan en el **mismo** estándar (no crear un estándar por candidato).
 

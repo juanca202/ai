@@ -1,15 +1,18 @@
 #!/usr/bin/env sh
 # =============================================================================
-# Fitness function — {{<estándar>/<requisito>}}: {{título del requisito}}
+# Fitness function — {{<estándar>/CR-XXX}}: {{descripción del criterio}}
 # -----------------------------------------------------------------------------
-# Wrapper que ejecuta el chequeo de arquitectura que valida este REQUISITO
-# (un requisito de un estándar de dominio en docs/standards/). El agrupador
+# Wrapper que ejecuta el chequeo de arquitectura que valida este CRITERIO de
+# cumplimiento (un CR de un estándar de dominio en docs/standards/). El agrupador
 # (../verify-architecture.sh) descubre y corre este archivo automáticamente
 # junto al resto de validaciones.
 #
 # Reglas:
-#   - Nombre del archivo: <estándar>-<requisito>.sh  (p. ej. testing-unit-testing.sh; mapea el resultado a su requisito).
-#   - Debe salir con código 0 si el requisito se cumple, distinto de 0 si se viola.
+#   - Nombre del archivo según el Enfoque del CR:
+#       * bloqueante: <estándar>-CR-XXX.sh       (p. ej. testing-CR-001.sh; su fallo tumba el gate)
+#       * warning:    <estándar>-CR-XXX.warn.sh  (p. ej. testing-CR-002.warn.sh; su fallo se reporta como WARN)
+#     El nombre mapea el resultado a su criterio; el sufijo .warn.sh es lo que el agrupador reconoce.
+#   - Debe salir con código 0 si el criterio se cumple, distinto de 0 si se viola.
 #   - Invoca la herramienta real de la fitness function (dependency-cruiser,
 #     ArchUnit, import-linter, NetArchTest, o un script propio). Si la validación
 #     ya vive en otro sitio (p. ej. un test JVM en tests/arch/), este wrapper solo
@@ -17,7 +20,7 @@
 # =============================================================================
 set -e
 
-# Sustituir por el comando ACOTADO de la fitness function de este requisito. Ejemplos:
+# Sustituir por el comando ACOTADO de la fitness function de este criterio. Ejemplos:
 #   exec npx depcruise --config .dependency-cruiser.js src
 #   exec mvn -q -Dtest=GraphQlOnlyArchTest test
 #   exec lint-imports --config .importlinter

@@ -1,20 +1,24 @@
+<!--
+Convención: sustituir manualmente cada {{texto}}. No es un motor de plantillas.
+Un ADR registra UNA decisión arquitectónica en un punto del tiempo: es histórico e
+inmutable una vez Accepted. Para cambiar de rumbo se crea un ADR nuevo que lo supersede.
+La REGLA viva y verificable que esta decisión pone en vigor vive aparte, como estándar en
+docs/standards/ (ver campo `emits`). No mezclar aquí el enunciado normativo del estándar.
+
+`emits`: criterios de cumplimiento (CR) que esta decisión fija — referencia `<estándar>/CR-XXX`
+dentro del estándar de dominio correspondiente (p. ej. testing/CR-001). Cada CR vive en el requisito
+que lo agrupa y traza de vuelta a este ADR por su columna Origen. Vacío si la decisión es
+puntual/histórica y no establece una norma continua que cumplir.
+-->
 ---
-# Convención: sustituir manualmente cada {{texto}}. No es un motor de plantillas.
-# Un ADR registra UNA decisión arquitectónica en un punto del tiempo: es histórico e
-# inmutable una vez Accepted. Para cambiar de rumbo se crea un ADR nuevo que lo supersede.
-# La REGLA viva y verificable que esta decisión pone en vigor vive aparte, como estándar en
-# docs/standards/ (ver campo `emits`). No mezclar aquí el enunciado normativo del estándar.
 id: ADR-{{XXX}}
 status: {{Draft | Proposed | Accepted | Deprecated | Superseded}}
-date: {{YYYY-MM-DD}}
+last_update: {{YYYY-MM-DD}}
 deciders: [{{nombres o roles}}]
 tags: [{{nextjs, app-router, performance, security, etc.}}]
 supersedes: {{null | ADR-XXX}}
 superseded_by: {{null | ADR-XXX}}
-# Requisitos de estándar que esta decisión fija — referencia `<estándar>/<requisito>` dentro del
-# estándar de dominio correspondiente (p. ej. testing/unit-testing). Vacío si la decisión es
-# puntual/histórica y no establece una norma continua que cumplir.
-emits: [{{testing/unit-testing}}]
+emits: [{{testing/CR-001}}]
 ---
 
 # ADR-{{XXX}}: {{título}}
