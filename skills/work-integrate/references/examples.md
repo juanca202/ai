@@ -36,7 +36,7 @@ Referencias del skill **work-integrate**. Cubren los dos tipos de trabajo (`US-X
 **Ejemplo 5 — Working tree sucio**
 
 - *Entrada:* Rama `feature/US-051-...`, dos archivos modificados sin commitear, `progress.md` íntegro en `Done`.
-- *Salida:* Sin operaciones git. Mensaje listando los archivos pendientes y pidiendo commit, stash o descarte antes de reintentar.
+- *Salida:* Sin operaciones git. Mensaje listando los archivos pendientes y **sugiriendo commitear con el skill `git-commit`** antes de reintentar (stash o descarte como alternativas si el usuario lo prefiere).
 
 **Ejemplo 6 — Conflicto en el merge**
 
