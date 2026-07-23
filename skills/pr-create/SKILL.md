@@ -52,7 +52,7 @@ Cuando el idioma resuelto obliga a traducir el título, el prefijo de ticket (`[
 1. `git rev-parse --is-inside-work-tree` — confirmar repo git.
 2. `git rev-parse --abbrev-ref HEAD` — obtener rama actual.
 3. Si la rama actual ∈ {`main`, `master`, `develop`, `trunk`}: **parar** y avisar.
-4. `git status --porcelain` — debe estar vacío; si no, **parar** y avisar. No ejecutar `git add` ni `git commit` automáticos.
+4. `git status --porcelain` — debe estar vacío; si no, **parar**, avisar listando los archivos pendientes y **sugerir al usuario** commitear esos cambios con el skill **`git-commit`** antes de continuar (stash o descarte quedan como alternativas a su decisión). No ejecutar `git add` ni `git commit` automáticos.
 
 ### Paso 2 — Detectar plataforma y CLI
 
@@ -174,7 +174,10 @@ No existe `docs/policies/definition-of-done.md`. Esa puerta se omite; el PR se c
 **Ejemplo 7 — Rama protegida**
 Usuario en `main`: «crea un PR a develop.» Parar en pre-flight: «Estás en `main`. Cambia a una rama de feature antes de crear el PR.»
 
-**Ejemplo 8 — PR ya existente**
+**Ejemplo 8 — Working tree sucio**
+`git status --porcelain` devuelve dos archivos modificados sin commitear. Parar en pre-flight sin push ni PR: listar los archivos pendientes y sugerir commitearlos con el skill `git-commit` antes de reintentar (stash o descarte como alternativas si el usuario lo prefiere).
+
+**Ejemplo 9 — PR ya existente**
 La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con nota «Ya existe un PR para esta combinación». No crear uno nuevo.
 
 ---
@@ -190,7 +193,7 @@ La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con
 - Tratar la ausencia de `docs/policies/definition-of-done.md` como un fallo: si no existe, esa puerta simplemente se omite.
 - Inventar el cumplimiento de un ítem de la DoD que no se puede determinar desde el repo o el diff.
 - Aplicar una corrección sin autorización explícita del usuario, o no re-ejecutar la puerta tras corregir.
-- Hacer `git add`, `git commit -am` o cualquier mutación de historia si hay cambios sin commitear.
+- Hacer `git add`, `git commit -am` o cualquier mutación de historia si hay cambios sin commitear; ante working tree sucio se para y se sugiere el skill `git-commit`, sin commitear por iniciativa propia.
 - Usar `git push --force` o `--force-with-lease`.
 - Asignar reviewers, labels o milestones por iniciativa propia.
 - Re-implementar la lógica de `code-review` o `trace-validate` en lugar de invocar el flujo existente.
