@@ -81,7 +81,7 @@ Antes de tocar git, el agente debe tener clara la siguiente información. **No a
 | **Rama actual y tipo** | `git branch --show-current`; el tipo se infiere del identificador (`US-`/`WI-`) | Si no encaja con un patrón válido: preguntar a qué trabajo corresponde antes de continuar |
 | **Carpeta/documento del trabajo** | Derivar del nombre de rama según el tipo (ver [Tipos de trabajo](#tipos-de-trabajo)) | Si no existe: parar e informar; si hay varias coincidentes: preguntar cuál |
 | **Estado de `progress.md`** | Leer el archivo en la ubicación correspondiente al tipo | Si no existe: parar e informar; el merge requiere `progress.md` poblado |
-| **Working tree** | `git status --porcelain` | Si hay salida: parar e informar; no se mergea con cambios pendientes |
+| **Working tree** | `git status --porcelain` | Si hay salida: parar e informar; no se mergea con cambios pendientes. Sugerir commitear con el skill **`git-commit`** antes de continuar |
 | **Rama base** | (1) `git reflog show <branch>` → línea `Created from`; (2) `git config --get branch.<branch>.merge`; (3) preguntar al usuario | No asumir `main`, `master` ni `develop` por defecto |
 | **Idioma de preferencia** | Ver [Resolución de idioma](#resolución-de-idioma) | Preguntar y persistir en `.agents/MEMORY.md` con `preferred language: <código>` |
 
@@ -95,7 +95,7 @@ Antes de cambiar de rama o ejecutar el merge, verificar las siguientes condicion
 
 **¿Qué verificar?**
 - **Rama actual con formato válido para su tipo:** `feature/US-XXX-...`, o `feature/`|`fix/`|`chore/`|`refactor/` + `WI-XXX-...`. Sin un identificador reconocible no se puede derivar la carpeta/documento del trabajo.
-- **Working tree limpio:** `git status --porcelain` sin salida. Cualquier cambio sin commitear bloquea el merge.
+- **Working tree limpio:** `git status --porcelain` sin salida. Cualquier cambio sin commitear bloquea el merge. Al informar el bloqueo, **sugerir al usuario** hacer commit de los cambios pendientes con el skill **`git-commit`** antes de continuar (stash o descarte quedan como alternativas a decisión del usuario).
 - **Carpeta/documento del trabajo existe:** la ubicación correspondiente al tipo, con su `progress.md`.
 - **Unidades del trabajo en `Done`:** parsear `progress.md` y confirmar que **cada unidad del trabajo de la rama** tiene estado `Done` (case-insensitive, sin espacios extra). El `progress.md` vive en la carpeta del trabajo (la US o el WI) y contiene solo ese trabajo: para US son sus `TK`, para WI las unidades de su propio `progress.md`. Estados como `Pending`, `In Progress` o vacío bloquean el merge.
 - **Code review con veredicto Aprobado:** ejecutar **`code-review`** (modificador `default`) antes del merge — es la **compuerta de cierre** que corre la batería completa de pruebas sobre la rama consolidada y persiste `docs/specs/test-run.json`. Solo un veredicto **✅ Aprobado** permite continuar. **❌ Rechazado** e **⚠️ Incompleto** bloquean el merge hasta que el usuario corrija los problemas y el review se repita con resultado Aprobado.
@@ -118,7 +118,7 @@ Ejemplos de razón concreta: `Rama actual no cumple un patrón válido: rama es 
 Camino feliz cuando todas las verificaciones pasan.
 
 1. **Detectar rama actual** con `git branch --show-current`, identificar el **tipo** por el identificador (`US-`/`WI-`) y validar el patrón de rama de ese tipo. Si no encaja, parar y preguntar.
-2. **Verificar working tree limpio** con `git status --porcelain`. Si hay salida, parar e informar.
+2. **Verificar working tree limpio** con `git status --porcelain`. Si hay salida, parar, informar y sugerir commitear los cambios pendientes con el skill **`git-commit`** antes de reintentar.
 3. **Localizar la carpeta/documento del trabajo** según el tipo (ver [Tipos de trabajo](#tipos-de-trabajo)). Si no existe o hay varias coincidentes, parar.
 4. **Leer `progress.md`** (en la carpeta del trabajo) y validar que **todas las unidades del trabajo de la rama** tienen estado `Done`. Si alguna no lo está, parar mostrando la lista completa de unidades no `Done` con su estado actual.
 5. **Ejecutar `code-review`** (modificador `default`) sobre la rama actual. Si el veredicto es **❌ Rechazado** o **⚠️ Incompleto**, parar y reportar el informe al usuario — no continuar con el merge hasta obtener veredicto **✅ Aprobado** en una nueva ejecución.

@@ -1,14 +1,14 @@
 ---
 name: test-define
-description: 'Crear casos de prueba (TC-XXX) a partir de los criterios de aceptación (AC-XXX) de una historia de usuario (US-XXX) o un work item (WI-XXX), siguiendo el estándar IEEE 29119-4. Activar cuando el usuario pida "definir test cases", "crear casos de prueba", "generar TCs", "pruebas para la US/WI", "documentar pruebas", "casos de prueba para los criterios de aceptación", o cualquier variante que implique producir documentación de prueba a partir de requisitos ya especificados. También activar cuando el usuario mencione "test-define" o "/test-define".'
+description: 'Crear casos de prueba (TC-XXX) a partir de los criterios de aceptación (AC-XXX) de una historia de usuario (US-XXX), un work item (WI-XXX) o un feature de funcionalidad ya implementada (FEAT-XXX), siguiendo el estándar IEEE 29119-4. Activar cuando el usuario pida "definir test cases", "crear casos de prueba", "generar TCs", "pruebas para la US/WI/FEAT", "documentar pruebas", "casos de prueba para los criterios de aceptación", o cualquier variante que implique producir documentación de prueba a partir de requisitos ya especificados. También activar cuando el usuario mencione "test-define" o "/test-define".'
 license: MIT
 ---
 
 # Skill: Definir casos de prueba
 
-Genera **casos de prueba documentados** (`TC-XXX`) a partir de los criterios de aceptación (`AC-XXX`) de un artefacto ya especificado (`US-XXX` o `WI-XXX`), siguiendo la estructura IEEE 29119-4. Como guía de cobertura mínima, cada criterio se analiza desde tres perspectivas —**happy path**, **error** y **límite**—, generando los TCs que el criterio requiera (una perspectiva puede omitirse si no aplica; ver Paso 3).
+Genera **casos de prueba documentados** (`TC-XXX`) a partir de los criterios de aceptación (`AC-XXX`) de un artefacto ya especificado (`US-XXX`, `WI-XXX` o `FEAT-XXX`), siguiendo la estructura IEEE 29119-4. Como guía de cobertura mínima, cada criterio se analiza desde tres perspectivas —**happy path**, **error** y **límite**—, generando los TCs que el criterio requiera (una perspectiva puede omitirse si no aplica; ver Paso 3).
 
-> **Solo documentación de prueba:** este skill produce archivos `TC-XXX-{slug}.md` más un índice `test-cases/README.md`. No implementa código de prueba ni ejecuta tests. La única modificación permitida sobre el artefacto origen (US/WI) es agregar, bajo cada criterio de aceptación, la lista de casos de prueba que lo cubren (ver Paso 5); no altera ningún otro contenido del artefacto ni otros archivos existentes.
+> **Solo documentación de prueba:** este skill produce archivos `TC-XXX-{slug}.md` más un índice `test-cases/README.md`. No implementa código de prueba ni ejecuta tests. La única modificación permitida sobre el artefacto origen (US/WI/FEAT) es agregar, bajo cada criterio de aceptación, la lista de casos de prueba que lo cubren (ver Paso 5); no altera ningún otro contenido del artefacto ni otros archivos existentes.
 
 ---
 
@@ -30,14 +30,28 @@ Redactar los TCs y los mensajes al usuario en el idioma del artefacto origen. Si
 
 ## Selección del artefacto
 
-El usuario indica un `US-XXX` o un `WI-XXX`. Si el identificador es ambiguo (sin prefijo, o no está claro el tipo), **preguntar** antes de continuar.
+El usuario indica un `US-XXX`, un `WI-XXX` o un `FEAT-XXX`. Si el identificador es ambiguo (sin prefijo, o no está claro el tipo), **preguntar** antes de continuar.
 
 | Tipo | Ubicación del artefacto | Ubicación de los TCs |
 |------|------------------------|----------------------|
 | Historia de usuario | `docs/specs/user-stories/US-XXX-{nombre}/README.md` | `docs/specs/user-stories/US-XXX-{nombre}/test-cases/` |
 | Work item | `docs/specs/work-items/WI-XXX-{kebab-case}/README.md` | `docs/specs/work-items/WI-XXX-{kebab-case}/test-cases/` |
+| Feature (funcionalidad ya implementada) | `docs/features/FEAT-XXX-{slug}/README.md` | `docs/features/FEAT-XXX-{slug}/test-cases/` |
 
-> Para WI, la carpeta `test-cases/` se crea dentro de la carpeta del WI (`WI-XXX-{kebab-case}/`) si no existe; el `README.md` del WI permanece donde está.
+> Para WI y FEAT, la carpeta `test-cases/` se crea dentro de la carpeta del artefacto (`WI-XXX-{kebab-case}/` o `FEAT-XXX-{slug}/`) si no existe; el `README.md` del artefacto permanece donde está.
+
+### Feature (`FEAT-XXX`) — funcionalidad ya implementada
+
+Un `FEAT-XXX` es el registro de una funcionalidad **ya implementada**, que vive en
+`docs/features/`. Puede nacer del flujo D (análisis legacy) de `work-research` —feature
+inferido de código— o documentar funcionalidad existente en general; en ambos casos
+`test-define` lo trata **igual** que una US o un WI: lee sus `AC-XXX` de la sección
+**Criterios de aceptación** del `README.md` (que debe estar en `Estado: Ready`), sigue el
+flujo normal (entrevista, perspectivas happy/error/límite, índice, trazabilidad del Paso
+5) y guarda los TCs bajo `docs/features/FEAT-XXX-{slug}/test-cases/`. Particularidad: los
+criterios del feature describen el comportamiento **ya implementado**, así que los TCs son
+la **red de seguridad** para cubrirlo; cuando un TC valide un comportamiento que el
+discovery marcó como posible bug preservado, anotarlo para trazabilidad.
 
 ---
 
@@ -46,6 +60,7 @@ El usuario indica un `US-XXX` o un `WI-XXX`. Si el identificador es ambiguo (sin
 1. Leer el artefacto completo.
    - **US:** `README.md` de la historia. Los criterios son los bloques `AC-XXX` en la sección Criterios de aceptación.
    - **WI:** el `README.md` del WI (`WI-XXX-{kebab-case}/README.md`). Los criterios son los ítems de la sección **Criterios de aceptación**.
+   - **FEAT:** el `README.md` del feature (`docs/features/FEAT-XXX-{slug}/README.md`). Los criterios son los `AC-XXX` de la sección **Criterios de aceptación**; describen el comportamiento de una funcionalidad ya implementada.
 2. Verificar el estado del artefacto:
    - `Estado: Ready` → continuar.
    - `Estado: Draft` → parar: el artefacto no está listo para producir TCs.
@@ -156,7 +171,7 @@ Usar `assets/test-case-template.md` para todos los campos. Reglas de llenado:
 
 ## Paso 5 — Actualizar el artefacto origen con la trazabilidad
 
-Una vez guardados y aceptados los TCs, editar el artefacto origen (el `README.md` de la US o el `README.md` del WI, `WI-XXX-{kebab-case}/README.md`) para dejar registrada la trazabilidad directa: bajo cada criterio de aceptación, agregar la lista de los casos de prueba que lo cubren.
+Una vez guardados y aceptados los TCs, editar el artefacto origen (el `README.md` de la US, del WI `WI-XXX-{kebab-case}/README.md`, o del feature `docs/features/FEAT-XXX-{slug}/README.md`) para dejar registrada la trazabilidad directa: bajo cada criterio de aceptación, agregar la lista de los casos de prueba que lo cubren.
 
 Reglas:
 
@@ -194,7 +209,7 @@ La trazabilidad inversa (de un criterio a sus TCs) se obtiene buscando el identi
 - Reutilizar un número de secuencia ya existente en `test-cases/`.
 - Dejar el índice `test-cases/README.md` desactualizado tras crear o regenerar TCs (debe reflejar siempre todos los TCs de la carpeta).
 - Regenerar TCs existentes sin instrucción explícita del usuario.
-- Modificar el artefacto origen (README de la US o README del WI) más allá de agregar la línea `Casos de prueba:` bajo cada criterio en el Paso 5; cualquier otro cambio al texto de los criterios o a otras secciones está prohibido.
+- Modificar el artefacto origen (README de la US, del WI o del FEAT) más allá de agregar la línea `Casos de prueba:` bajo cada criterio en el Paso 5; cualquier otro cambio al texto de los criterios o a otras secciones está prohibido.
 - Escribir código de prueba (Jest, Cypress, etc.); ese trabajo corresponde a `quality-specialist`.
 - Continuar si el artefacto no está en `Estado: Ready` o no tiene criterios de aceptación.
 - Asignar códigos de criterio automáticamente; si faltan, parar y pedirle al usuario que los agregue en el artefacto.
