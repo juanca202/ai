@@ -36,19 +36,19 @@ El usuario indica un `US-XXX`, un `WI-XXX` o un `FEAT-XXX`. Si el identificador 
 |------|------------------------|----------------------|
 | Historia de usuario | `docs/specs/user-stories/US-XXX-{nombre}/README.md` | `docs/specs/user-stories/US-XXX-{nombre}/test-cases/` |
 | Work item | `docs/specs/work-items/WI-XXX-{kebab-case}/README.md` | `docs/specs/work-items/WI-XXX-{kebab-case}/test-cases/` |
-| Feature (funcionalidad ya implementada) | `docs/features/FEAT-XXX-{slug}/README.md` | `docs/features/FEAT-XXX-{slug}/test-cases/` |
+| Feature (funcionalidad ya implementada) | `docs/specs/features/FEAT-XXX-{slug}/README.md` | `docs/specs/features/FEAT-XXX-{slug}/test-cases/` |
 
 > Para WI y FEAT, la carpeta `test-cases/` se crea dentro de la carpeta del artefacto (`WI-XXX-{kebab-case}/` o `FEAT-XXX-{slug}/`) si no existe; el `README.md` del artefacto permanece donde está.
 
 ### Feature (`FEAT-XXX`) — funcionalidad ya implementada
 
 Un `FEAT-XXX` es el registro de una funcionalidad **ya implementada**, que vive en
-`docs/features/`. Puede nacer del flujo D (análisis legacy) de `work-research` —feature
+`docs/specs/features/`. Puede nacer del flujo D (análisis legacy) de `work-research` —feature
 inferido de código— o documentar funcionalidad existente en general; en ambos casos
 `test-define` lo trata **igual** que una US o un WI: lee sus `AC-XXX` de la sección
 **Criterios de aceptación** del `README.md` (que debe estar en `Estado: Ready`), sigue el
 flujo normal (entrevista, perspectivas happy/error/límite, índice, trazabilidad del Paso
-5) y guarda los TCs bajo `docs/features/FEAT-XXX-{slug}/test-cases/`. Particularidad: los
+5) y guarda los TCs bajo `docs/specs/features/FEAT-XXX-{slug}/test-cases/`. Particularidad: los
 criterios del feature describen el comportamiento **ya implementado**, así que los TCs son
 la **red de seguridad** para cubrirlo; cuando un TC valide un comportamiento que el
 discovery marcó como posible bug preservado, anotarlo para trazabilidad.
@@ -60,7 +60,7 @@ discovery marcó como posible bug preservado, anotarlo para trazabilidad.
 1. Leer el artefacto completo.
    - **US:** `README.md` de la historia. Los criterios son los bloques `AC-XXX` en la sección Criterios de aceptación.
    - **WI:** el `README.md` del WI (`WI-XXX-{kebab-case}/README.md`). Los criterios son los ítems de la sección **Criterios de aceptación**.
-   - **FEAT:** el `README.md` del feature (`docs/features/FEAT-XXX-{slug}/README.md`). Los criterios son los `AC-XXX` de la sección **Criterios de aceptación**; describen el comportamiento de una funcionalidad ya implementada.
+   - **FEAT:** el `README.md` del feature (`docs/specs/features/FEAT-XXX-{slug}/README.md`). Los criterios son los `AC-XXX` de la sección **Criterios de aceptación**; describen el comportamiento de una funcionalidad ya implementada.
 2. Verificar el estado del artefacto:
    - `Estado: Ready` → continuar.
    - `Estado: Draft` → parar: el artefacto no está listo para producir TCs.
@@ -171,7 +171,7 @@ Usar `assets/test-case-template.md` para todos los campos. Reglas de llenado:
 
 ## Paso 5 — Actualizar el artefacto origen con la trazabilidad
 
-Una vez guardados y aceptados los TCs, editar el artefacto origen (el `README.md` de la US, del WI `WI-XXX-{kebab-case}/README.md`, o del feature `docs/features/FEAT-XXX-{slug}/README.md`) para dejar registrada la trazabilidad directa: bajo cada criterio de aceptación, agregar la lista de los casos de prueba que lo cubren.
+Una vez guardados y aceptados los TCs, editar el artefacto origen (el `README.md` de la US, del WI `WI-XXX-{kebab-case}/README.md`, o del feature `docs/specs/features/FEAT-XXX-{slug}/README.md`) para dejar registrada la trazabilidad directa: bajo cada criterio de aceptación, agregar la lista de los casos de prueba que lo cubren.
 
 Reglas:
 

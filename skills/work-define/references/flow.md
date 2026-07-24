@@ -62,9 +62,11 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
   - **Validación — INVEST:** tabla con las seis dimensiones (I, N, V, E, S, T); valor de cada una: `Cumple` / `No cumple` / `Parcial` con nota. Si alguna dimensión falla, documentarlo sin disimular (ver [INVEST](quality-criteria.md#invest)).
   - **Validación — Definition of Ready (DoR):** tabla con los seis criterios de la plantilla. Para cada uno: `Cumple` / `No cumple` / `Parcial` (el criterio **Referencias de UI** admite además `No aplica`). Ver criterios exactos en [Definition of Ready (DoR)](quality-criteria.md#definition-of-ready-dor).
   - **Observaciones:** (1) prerrequisitos o dependencias aún no listas; (2) datos o aclaraciones pendientes del usuario o producto; (3) decisiones pendientes; (4) otras notas. Si no hay nada que reportar en algún ítem, dejarlo vacío.
-3. **Documentación técnica** (solo si el usuario la pide explícitamente)
-  - Crear o actualizar documentos en `docs/specs/technical-docs/`.
-  - **No integrarla en la descripción funcional** de la US. Solo puede referenciarse desde las secciones INVEST u Observaciones del DoR para justificar complejidad, dependencias o restricciones técnicas que condicionan algún criterio (p. ej. *«Ver* `technical-docs/contrato-api.md` *— justifica la estimación de la dimensión E»*).
+3. **Documentación técnica** (delegada a `design-define`)
+  - **Detectar la necesidad:** si el requerimiento define o modifica **flujos, modelos de datos o APIs** (nuevos o existentes), la especificación técnica de esos elementos debe existir en `docs/specs/technical-docs/`. También aplica si el usuario la pide explícitamente.
+  - **Nunca crear ni editar documentos técnicos desde este skill.** Delegar mediante un **subagente que invoque `/design-define`**, pasándole: el texto relevante de la US (descripción, reglas, criterios), la capability inferida si se conoce, la ruta del `README.md` de la US y el idioma resuelto. El grilling técnico (tipos, contratos, ramas de flujo) es responsabilidad de `design-define`.
+  - **Enlazar las referencias devueltas:** el subagente responde con la lista de elementos creados/actualizados (ruta + ancla, p. ej. `docs/specs/technical-docs/facturacion.md#api-01-crear-factura`). Agregarlas a la sección **Referencias** del `README.md` de la US. Si el subagente reporta lagunas técnicas pendientes, reflejarlas en Observaciones de la US.
+  - **No integrarla en la descripción funcional** de la US. Además de Referencias, solo puede citarse desde las secciones INVEST u Observaciones del DoR para justificar complejidad, dependencias o restricciones técnicas que condicionan algún criterio (p. ej. *«Ver* `technical-docs/facturacion.md#api-01-crear-factura` *— justifica la estimación de la dimensión E»*).
 4. **Glosario** (si aplica)
   - Si aparecen términos de dominio nuevos, crear o reutilizar entrada en `docs/specs/glossary.md` con definición breve en contexto producto/dominio.
 5. **Cierre**
@@ -175,6 +177,8 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 - Declarar `Estado: Ready` con Observaciones que aún listen aclaraciones o pendientes sin resolver.
 - Resolver un conflicto entre `TK-XXX` y el `README.md` de la US degradando la US; la US prevalece.
 - Crear tareas `TK-XXX` directamente desde este skill sin invocar `/work-plan`; la creación de tareas siempre se delega a ese skill.
+- Crear o editar documentos en `docs/specs/technical-docs/` directamente desde este skill; la documentación técnica siempre se delega a `/design-define` vía subagente, y aquí solo se enlazan las referencias devueltas.
+- Redactar la US sin delegar a `/design-define` cuando el requerimiento define flujos, modelos o APIs; la US quedaría sin su referencia técnica de implementación.
 - Copiar `assets/user-story-template.md` al repo del producto como artefacto en lugar de usarlo como molde.
 - Lanzar preguntas al usuario como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas; o ir descubriendo huecos turno a turno en lugar de agrupar todas las preguntas pendientes en una sola tanda al inicio.
 
@@ -196,5 +200,6 @@ Posición: **inicio** del pipeline `work-define` → `work-plan` → `work-imple
 | **Si queda en Draft**        | No handoff a plan ni implement. Cerrar lagunas con preguntas estructuradas o mantener Draft documentado.                                                                                                                                                                                     |
 | **Regreso desde plan**       | Conflicto US ↔ TK detectado en `work-plan` → actualizar la US aquí; `work-plan` corrige el TK. La US prevalece sobre el TK.                                                                                                                                                                  |
 | **Regreso desde integrate**  | Alcance reducido o `progress.md` incompleto detectado en `work-integrate` → ajustar la US aquí y alinear TKs con `work-plan` antes de reintentar el merge.                                                                                                                                   |
+| **Delegación a design-define** | Requerimiento que define flujos, modelos o APIs → subagente con `/design-define` crea/actualiza `docs/specs/technical-docs/[capability].md` y devuelve las referencias (ruta + ancla) que este skill agrega a Referencias de la US. Si `design-define` detecta inconsistencias en la US, se corrigen aquí — el documento técnico no redefine la historia.                                                                                                                                   |
 
 

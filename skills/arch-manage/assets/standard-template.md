@@ -12,8 +12,9 @@ Ej.: "usar PHPUnit para unit tests" NO es un estándar — es el requisito «Uni
 MISMO estándar, no se crea uno nuevo.
 
 El estándar se identifica por su NOMBRE. Cada requisito describe qué es / cómo se usa /
-cómo se implementa, y su **Alcance** se redacta con términos normativos RFC 2119 / RFC 8174
-(MUST, SHOULD, MAY…). La unidad verificable es el **criterio de cumplimiento** (`CR-XXX`) dentro de
+cómo se implementa, y su **Alcance** se redacta como un enunciado con palabra clave RFC 2119 / RFC 8174
+en MAYÚSCULAS en el idioma de preferencia (MUST/DEBE, SHOULD/DEBERÍA, MAY/PUEDE…). La unidad
+verificable es el **criterio de cumplimiento** (`CR-XXX`) dentro de
 cada requisito: es lo que audita `arch-audit` y lo que traza a su ADR de origen. El estándar
 es vivo (se actualiza); el ADR es historia inmutable.
 
@@ -71,7 +72,7 @@ Si un requisito necesita documentos de apoyo (guías, ejemplos, matrices), usar 
 {{Cuál es el requisito, cómo se usa en el proyecto y cómo se implementa (herramientas, convenciones, ubicación típica).}}
 
 ### Alcance
-{{Enunciado normativo con RFC 2119: dónde aplica, qué **MUST** / **SHOULD** / **MAY** cumplirse y dónde no aplica. Ej.: "Las pruebas unitarias **MUST** implementarse con PHPUnit; no **SHALL** introducirse otro framework de unit testing en `tests/unit/`."}}
+{{Enunciado con palabra clave RFC 2119 en MAYÚSCULAS en el idioma de preferencia: dónde aplica, qué **MUST**/**DEBE**, **SHOULD**/**DEBERÍA**, **MAY**/**PUEDE** cumplirse y dónde no aplica. Ej.: "Las pruebas unitarias **DEBEN** implementarse con PHPUnit; no **DEBE** introducirse otro framework de unit testing en `tests/unit/`."}}
 
 ### Excepciones
 {{casos permitidos, o "Ninguna"}}
@@ -83,7 +84,8 @@ Ej.: el requisito «Unit testing» puede tener el criterio «cobertura ≥ 80%»
 Columnas:
   - ID: `CR-XXX` (prefijo + 3 dígitos), único en el estándar. Su referencia global es
     `<estándar>/CR-XXX` (p. ej. testing/CR-001); es lo que el ADR de Origen lista en `emits`.
-  - Descripción: qué se mide (umbral, check, evidencia); usar RFC 2119 si el criterio es normativo.
+  - Descripción: qué se mide (umbral, check, evidencia); si el criterio es normativo, usar palabra clave
+    RFC 2119 en MAYÚSCULAS en el idioma de preferencia.
   - Origen: el ADR que fijó este criterio de cumplimiento (traza CR → ADR).
   - Automatable: yes = objetivo/automatizable como fitness function; no = criterio humano/evidencia externa.
   - Enfoque: `bloqueante` = su incumplimiento hace fallar el gate (exit ≠ 0 del agrupador); `warning` =
@@ -97,7 +99,7 @@ Columnas:
 
 | ID | Descripción | Origen | Automatable | Enfoque | Verificación |
 |----|-------------|--------|-------------|---------|----------------|
-| CR-{{001}} | Cobertura de pruebas unitarias **MUST** ser ≥ {{80%}} | [ADR-{{XXX}}](../adr/ADR-{{XXX}}-{{slug}}.md) | {{yes \| no}} | {{bloqueante \| warning}} | {{scripts/arch/checks/testing-CR-001.sh}} |
+| CR-{{001}} | Cobertura de pruebas unitarias **DEBE** ser ≥ {{80%}} | [ADR-{{XXX}}](../adr/ADR-{{XXX}}-{{slug}}.md) | {{yes \| no}} | {{bloqueante \| warning}} | {{scripts/arch/checks/testing-CR-001.sh}} |
 | CR-{{002}} | {{…otro criterio del mismo requisito, si aplica}} | [ADR-{{XXX}}](../adr/ADR-{{XXX}}-{{slug}}.md) | {{yes \| no}} | {{bloqueante \| warning}} | {{N/A}} |
 
 ## {{E2E testing}}
@@ -106,7 +108,7 @@ Columnas:
 {{Qué es, cómo se usa y cómo se implementa (p. ej. Playwright, convención de specs, flujos críticos).}}
 
 ### Alcance
-{{Ej.: "Las pruebas end-to-end **MUST** implementarse con Playwright; los flujos críticos definidos por producto **SHOULD** tener cobertura e2e."}}
+{{Enunciado con palabra clave RFC 2119 en MAYÚSCULAS en el idioma de preferencia. Ej.: "Las pruebas end-to-end **DEBEN** implementarse con Playwright; los flujos críticos definidos por producto **DEBERÍAN** tener cobertura e2e."}}
 
 ### Excepciones
 {{…}}
@@ -115,7 +117,7 @@ Columnas:
 
 | ID | Descripción | Origen | Automatable | Enfoque | Verificación |
 |----|-------------|--------|-------------|---------|----------------|
-| CR-{{003}} | Los flujos críticos definidos por producto **MUST** tener cobertura e2e con Playwright | [ADR-{{YYY}}](../adr/ADR-{{YYY}}-{{slug}}.md) | {{yes \| no}} | {{bloqueante \| warning}} | {{scripts/arch/checks/testing-CR-003.sh}} |
+| CR-{{003}} | Los flujos críticos definidos por producto **DEBEN** tener cobertura e2e con Playwright | [ADR-{{YYY}}](../adr/ADR-{{YYY}}-{{slug}}.md) | {{yes \| no}} | {{bloqueante \| warning}} | {{scripts/arch/checks/testing-CR-003.sh}} |
 
 ## Referencias
 

@@ -16,7 +16,7 @@ Nombre de archivo: TC-XXX-{slug}.md
 # TC-{{XXX}} — Dado {{contexto/precondición}}, Cuando {{acción/evento}}, Entonces {{resultado esperado}}
 
 **Perspectiva**: {{Happy Path | Error | Límite}}
-**Automatización**: {{Manual | Automatizable (Tipo)}}  <!-- intención de diseño. Tipo ∈ {Unit | Integration | E2E | API Test | Visual Test}; obligatorio si Automatizable, omitir si Manual. -->
+**Tipo de prueba**: {{Manual | Tipo[, Tipo…]}}  <!-- intención de diseño. Tipo ∈ {Unit | Integration | E2E | API Test | Visual Test}; uno o varios separados por coma, ordenados del nivel más bajo al más alto (p. ej. Unit, E2E). Manual solo cuando el caso no se automatiza por diseño; no se combina con tipos. -->
 **Prioridad**: {{Alta | Media | Baja}}
 **Criterio de aceptación**: {{AC-XXX + título corto — debe existir en el artefacto origen}}
 **Artefacto padre**: {{US-XXX | WI-XXX}}

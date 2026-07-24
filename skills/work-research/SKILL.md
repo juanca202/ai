@@ -1,6 +1,6 @@
 ---
 name: work-research
-description: 'Investigar y sintetizar hallazgos en un informe estructurado (RS-XXX). Skill genérico que corre varios flujos según la entrada: (1) artefacto — si hay un US-XXX, TK-XXX o WI-XXX en contexto, investigar lagunas y decisiones pendientes por tomar sobre ese artefacto; (2) migración — si hay un proyecto de origen y uno de destino, tomar los archivos de esos proyectos y generar el discovery y la preparación de validación, decidiendo si el cambio es grande (continúa work-define) o pequeño (continúa work-plan); (3) investigación libre — si no hay artefacto, investigar un tema de producto, arquitectura, técnica o cambio; (4) análisis legacy — si la entrada es código existente sin (o con insuficiente) documentación de requisitos o cobertura de pruebas, descubrir features, casos de uso y reglas de negocio desde el código y crear por cada feature una carpeta docs/features/FEAT-XXX-{slug}/ (objetivo, reglas de negocio, criterios de aceptación, referencias) que documenta el comportamiento ya implementado, más sus casos de prueba inferidos, para luego validar con trace-validate si ese código está cubierto por pruebas. Activar cuando el usuario pida "investiga", "research", "¿es viable?", "¿cómo funciona X?", "¿qué impacto tiene?", "¿qué alternativas existen?", "compara opciones", "necesito contexto sobre", "migrar/migración entre proyectos", "analiza este código legacy", "crea features/pruebas desde el código", "ingeniería inversa de requisitos", "documentar código heredado para probarlo", o cualquier variante que implique recopilar información antes de decidir. También activar con "/work-research" o cuando se mencione "RS-XXX". Si hay un artefacto US/TK/WI o un par origen→destino en contexto, usarlo automáticamente sin preguntar.'
+description: 'Investigar y sintetizar hallazgos en un informe estructurado (RS-XXX). Skill genérico que corre varios flujos según la entrada: (1) artefacto — si hay un US-XXX, TK-XXX o WI-XXX en contexto, investigar lagunas y decisiones pendientes por tomar sobre ese artefacto; (2) migración — si hay un proyecto de origen y uno de destino, tomar los archivos de esos proyectos y generar el discovery y la preparación de validación, decidiendo si el cambio es grande (continúa work-define) o pequeño (continúa work-plan); (3) investigación libre — si no hay artefacto, investigar un tema de producto, arquitectura, técnica o cambio; (4) análisis legacy — si la entrada es código existente sin (o con insuficiente) documentación de requisitos o cobertura de pruebas, descubrir features, casos de uso y reglas de negocio desde el código y crear por cada feature una carpeta docs/specs/features/FEAT-XXX-{slug}/ (objetivo, reglas de negocio, criterios de aceptación, referencias) que documenta el comportamiento ya implementado, más sus casos de prueba inferidos, para luego validar con trace-validate si ese código está cubierto por pruebas. Activar cuando el usuario pida "investiga", "research", "¿es viable?", "¿cómo funciona X?", "¿qué impacto tiene?", "¿qué alternativas existen?", "compara opciones", "necesito contexto sobre", "migrar/migración entre proyectos", "analiza este código legacy", "crea features/pruebas desde el código", "ingeniería inversa de requisitos", "documentar código heredado para probarlo", o cualquier variante que implique recopilar información antes de decidir. También activar con "/work-research" o cuando se mencione "RS-XXX". Si hay un artefacto US/TK/WI o un par origen→destino en contexto, usarlo automáticamente sin preguntar.'
 license: MIT
 ---
 
@@ -28,7 +28,7 @@ misma ejecución.
 | **A · Artefacto** | Un `US-XXX`, `TK-XXX` o `WI-XXX` en contexto | Lagunas y **decisiones pendientes por tomar** sobre ese artefacto antes de planificar o implementar | Paso 3A (abajo) |
 | **B · Migración** | Un **proyecto origen** y uno **destino** | `discovery` (mapeo tecnológico, verificación, golden master, riesgos) y **preparación de validación**; luego dimensiona el cambio y hace *handoff* a `work-define` (grande) o `work-plan` (pequeño) | [`references/migrate/flow.md`](references/migrate/flow.md) |
 | **C · Investigación libre** | Un tema, **sin artefacto** | Hallazgos de Producto, Arquitectura, Técnica o Cambio | Paso 3C (abajo) |
-| **D · Análisis legacy** | **Código existente** (módulo/carpeta/repo) sin requisitos o con cobertura de pruebas inadecuada | `discovery` de ingeniería inversa (features → casos de uso → reglas de negocio) y, por cada feature, una carpeta `docs/features/FEAT-XXX-{slug}/` (objetivo, reglas de negocio, criterios de aceptación, referencias) que documenta el comportamiento ya implementado, más sus casos de prueba vía `test-define`, **inferidos desde el código**; luego `trace-validate` verifica si ese código está cubierto por pruebas | [`references/legacy/flow.md`](references/legacy/flow.md) |
+| **D · Análisis legacy** | **Código existente** (módulo/carpeta/repo) sin requisitos o con cobertura de pruebas inadecuada | `discovery` de ingeniería inversa (features → casos de uso → reglas de negocio) y, por cada feature, una carpeta `docs/specs/features/FEAT-XXX-{slug}/` (objetivo, reglas de negocio, criterios de aceptación, referencias) que documenta el comportamiento ya implementado, más sus casos de prueba vía `test-define`, **inferidos desde el código**; luego `trace-validate` verifica si ese código está cubierto por pruebas | [`references/legacy/flow.md`](references/legacy/flow.md) |
 
 > **Migración (flujo B):** la entrada es un proyecto origen y uno destino. El
 > discovery y la validación los produce este skill; el plan lo continúa
@@ -40,9 +40,10 @@ misma ejecución.
 > implementable: no genera código funcional. Su valor es servir de base para que
 > `trace-validate` verifique si el código existente está **cubierto por pruebas** y
 > revele los huecos de cobertura. Cada feature descubierto se materializa como un
-> `FEAT-XXX` en `docs/features/`. Los features y sus casos de prueba son **inferidos**
-> (no definidos por negocio) y por eso viven bajo `docs/features/`, nunca en
-> `docs/specs/**`. Los artefactos **implementables** siguen siendo US/TK y WI.
+> `FEAT-XXX` en `docs/specs/features/`. Los features y sus casos de prueba son **inferidos**
+> (no definidos por negocio) y por eso viven en su propio subárbol `docs/specs/features/`,
+> junto a `user-stories/` y `work-items/` pero **no mezclados** con ellos. Los artefactos
+> **implementables** siguen siendo US/TK y WI.
 
 ---
 
@@ -68,13 +69,14 @@ del flujo D usa `assets/legacy/discovery-template.md`.
 
 > **Salida adicional del flujo D (fuera de `research/`).** El análisis legacy, además
 > del `RS-XXX` (informe + `discovery.md`), **crea features**: por cada feature
-> descubierto, una carpeta `docs/features/FEAT-XXX-{slug}/` con un `README.md`
+> descubierto, una carpeta `docs/specs/features/FEAT-XXX-{slug}/` con un `README.md`
 > (objetivo, reglas de negocio `BR-XX`, criterios de aceptación `AC-XXX`, referencias)
 > a partir de `assets/legacy/feature-template.md`, y sus casos de prueba en
-> `docs/features/FEAT-XXX-{slug}/test-cases/` vía `test-define`. Estos viven bajo
-> `docs/features/` —**no** en `docs/specs/**`— para distinguir que fueron **inferidos
-> desde el código**, no definidos por negocio. La numeración `FEAT-XXX`/`TC-XXX` es
-> **independiente** de la de `docs/specs/`.
+> `docs/specs/features/FEAT-XXX-{slug}/test-cases/` vía `test-define`. Estos viven en su
+> propio subárbol `docs/specs/features/` —junto a `user-stories/` y `work-items/` pero
+> **no mezclados** con ellos— para distinguir que fueron **inferidos desde el código**, no
+> definidos por negocio. La numeración `FEAT-XXX`/`TC-XXX` es **independiente** de la de
+> `docs/specs/user-stories/` y `docs/specs/work-items/`.
 
 ---
 
@@ -175,7 +177,7 @@ no duplicar; mostrarlas al usuario si las hay.
 
 **Flujo D (análisis legacy).** Delimitar el código en alcance (rutas, módulos,
 entrypoints) y leerlo para entender qué hace: puntos de entrada, dominio, flujos y
-pruebas ya existentes. Verificar si ya hay features previos en `docs/features/` para
+pruebas ya existentes. Verificar si ya hay features previos en `docs/specs/features/` para
 continuar la numeración `FEAT-XXX` y no duplicar. Detalle en
 [`references/legacy/flow.md`](references/legacy/flow.md).
 
@@ -240,10 +242,10 @@ en un `discovery.md`. Describe el comportamiento **actual** del código (incluid
 posibles bugs, marcados como tales), **no** el deseado; cita la evidencia (archivo y
 símbolo) de cada hallazgo y no inventa comportamiento ausente. Registra dónde falta
 cobertura de pruebas. Con el discovery en `Ready`, **crea por cada feature** una
-carpeta `docs/features/FEAT-XXX-{slug}/README.md` (objetivo, reglas de negocio,
+carpeta `docs/specs/features/FEAT-XXX-{slug}/README.md` (objetivo, reglas de negocio,
 criterios de aceptación, referencias) con `assets/legacy/feature-template.md`, y luego
 hace *handoff* a `test-define` para generar sus casos de prueba dentro de la misma
-carpeta. Todo bajo `docs/features/`, con marca de procedencia "inferido desde código".
+carpeta. Todo bajo `docs/specs/features/`, con marca de procedencia "inferido desde código".
 El `FEAT-XXX` es la **especificación de código ya implementado**, no un artefacto
 implementable: cerrado el feature, el siguiente paso es `trace-validate` para verificar
 si ese código está cubierto por pruebas (no se pasa a `work-implement`).
@@ -310,8 +312,8 @@ donde se indica.
 | Lagunas/decisiones de un `US`/`TK`/`WI` | `work-define` (US) o `work-plan` (TK/WI) | El RS se referencia y actualiza el artefacto en su skill dueño |
 | **Migración (flujo B), cambio grande** | `work-define` | Crear varias US a partir del discovery/validación; el RS es la referencia. Ver criterio de dimensionamiento en [`references/migrate/flow.md`](references/migrate/flow.md) |
 | **Migración (flujo B), cambio pequeño** | `work-plan` (WI) | Crear un `WI-XXX` a partir del discovery/validación; el RS es la referencia |
-| **Análisis legacy (flujo D): crear features** | Este mismo skill (Paso 3D / [`references/legacy/flow.md`](references/legacy/flow.md)) | Por cada feature descubierto, crear `docs/features/FEAT-XXX-{slug}/README.md` (objetivo, reglas de negocio, criterios de aceptación, referencias) con procedencia "inferido desde código"; el discovery es la referencia |
-| **Análisis legacy (flujo D): definir pruebas** | `test-define` | Tras cada `FEAT-XXX` en `Ready`, generar sus `TC-XXX` en `docs/features/FEAT-XXX-{slug}/test-cases/` |
+| **Análisis legacy (flujo D): crear features** | Este mismo skill (Paso 3D / [`references/legacy/flow.md`](references/legacy/flow.md)) | Por cada feature descubierto, crear `docs/specs/features/FEAT-XXX-{slug}/README.md` (objetivo, reglas de negocio, criterios de aceptación, referencias) con procedencia "inferido desde código"; el discovery es la referencia |
+| **Análisis legacy (flujo D): definir pruebas** | `test-define` | Tras cada `FEAT-XXX` en `Ready`, generar sus `TC-XXX` en `docs/specs/features/FEAT-XXX-{slug}/test-cases/` |
 | **Análisis legacy (flujo D): validar cobertura** | `trace-validate` | Sobre el `FEAT-XXX`, verificar si sus `AC-XXX`/`TC-XXX` tienen implementación de pruebas en el repo y revelar los huecos de cobertura del código existente. El `FEAT` no se implementa: solo escribir las **pruebas** faltantes, nunca código funcional |
 | Decisión de arquitectura | `engineering:architecture` (ADR) | El RS alimenta la sección "Contexto" del ADR |
 | Técnica de implementación concreta | `work-plan` → `work-implement` | El RS se referencia en el TK o WI |
@@ -324,7 +326,7 @@ Al cerrar, si el flujo lo sugiere, ofrecer al usuario el *handoff* correspondien
 con la referencia al RS generado. En el flujo B, **ofrecer explícitamente** el
 *handoff* según el dimensionamiento del cambio (grande → `work-define`; pequeño →
 `work-plan`). En el flujo D, **ofrecer explícitamente** —una vez el discovery esté
-en `Ready`— crear un `FEAT-XXX` por feature descubierto en `docs/features/`; tras
+en `Ready`— crear un `FEAT-XXX` por feature descubierto en `docs/specs/features/`; tras
 cada feature en `Ready`, el *handoff* a `test-define` (definir sus casos de prueba en
 la carpeta del feature); y, con los TC definidos, el *handoff* a `trace-validate` para
 verificar si el código existente está cubierto por esas pruebas. Todo con procedencia
@@ -365,8 +367,9 @@ verificar si el código existente está cubierto por esas pruebas. Todo con proc
   estructurada.
 - **(Flujo D)** Crear historias de usuario (`US-XXX`) desde el código: el flujo D
   **no** genera historias; cada feature descubierto se materializa como un `FEAT-XXX`.
-- **(Flujo D)** Guardar los features o sus casos de prueba en `docs/specs/**` (junto a
-  los definidos por negocio) en vez de bajo `docs/features/`.
+- **(Flujo D)** Guardar los features o sus casos de prueba mezclados con los definidos por
+  negocio (en `docs/specs/user-stories/` o `docs/specs/work-items/`) en vez de en su propio
+  subárbol `docs/specs/features/`.
 - **(Flujo D)** Redactar features o reglas de negocio con comportamiento **deseado**
   o inventado en lugar del comportamiento **real** que implementa el código; o no
   citar la evidencia (archivo/símbolo) de cada hallazgo.
