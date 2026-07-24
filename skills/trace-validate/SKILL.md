@@ -1,6 +1,6 @@
 ---
 name: trace-validate
-description: "Genera un reporte de trazabilidad que valida la cobertura de los criterios de aceptación de un trabajo —una historia de usuario (US-XXX), un work item de mantenimiento (WI-XXX) o un feature inferido de código legacy (FEAT-XXX), cada uno con sus criterios de aceptación (AC-XXX)— contra los casos de prueba y los artefactos de prueba del repositorio (unit, integración, e2e). Para cada criterio indica los casos de prueba y artefactos que lo cubren, un estado (Cubierto / Parcial / No cubierto), observaciones cuando hace falta aclaración, si la prueba se pudo ejecutar automáticamente y su resultado, y finalmente un veredicto sobre si todos los criterios de aceptación quedan cubiertos. Activar siempre que el usuario pida validar cobertura, generar una matriz o reporte de trazabilidad, verificar que los criterios de aceptación están probados, comprobar que un trabajo o un feature está cubierto por pruebas, o mencione «trace-validate», «trazabilidad», «matriz de cobertura» o «validar criterios de aceptación», aunque no nombre el formato exacto."
+description: "Genera un reporte de trazabilidad que valida la cobertura de los criterios de aceptación de un trabajo —una historia de usuario (US-XXX), un work item de mantenimiento (WI-XXX) o un feature de funcionalidad ya implementada (FEAT-XXX), cada uno con sus criterios de aceptación (AC-XXX)— contra los casos de prueba y los artefactos de prueba del repositorio (unit, integración, e2e). Para cada criterio indica los casos de prueba y artefactos que lo cubren, un estado (Cubierto / Parcial / No cubierto), observaciones cuando hace falta aclaración, si la prueba se pudo ejecutar automáticamente y su resultado, y finalmente un veredicto sobre si todos los criterios de aceptación quedan cubiertos. Activar siempre que el usuario pida validar cobertura, generar una matriz o reporte de trazabilidad, verificar que los criterios de aceptación están probados, comprobar que un trabajo o un feature está cubierto por pruebas, o mencione «trace-validate», «trazabilidad», «matriz de cobertura» o «validar criterios de aceptación», aunque no nombre el formato exacto."
 license: MIT
 ---
 
@@ -34,7 +34,7 @@ El tipo se determina por el identificador que indique el usuario o por la ruta d
 |------|---------------|---------------------------|------------------|
 | **Historia de usuario** | `US-XXX` | Sección **Criterios de aceptación** del `README.md` de la US (lista plana `AC-XXX`) | `AC-XXX` en el orden en que aparecen |
 | **Work item de mantenimiento** | `WI-XXX` | Sección **## Criterios de aceptación** del `README.md` del WI (`WI-XXX-[kebab]/README.md`) | `AC-XXX` en el orden en que aparecen |
-| **Feature (funcionalidad ya implementada)** | `FEAT-XXX` | Sección **## Criterios de aceptación** del `README.md` del feature (`docs/features/FEAT-XXX-[slug]/README.md`) | `AC-XXX` en el orden en que aparecen |
+| **Feature (funcionalidad ya implementada)** | `FEAT-XXX` | Sección **## Criterios de aceptación** del `README.md` del feature (`docs/specs/features/FEAT-XXX-[slug]/README.md`) | `AC-XXX` en el orden en que aparecen |
 > En todo el flujo, «criterio» se refiere al código del tipo en curso: `AC-XXX` para US, WI y FEAT. Si el trabajo **no tiene criterios de aceptación**, no hay nada que trazar → **bloquear** (ver «Cuándo bloquear»).
 
 > **FEAT — validar cobertura de funcionalidad ya implementada.** Un `FEAT-XXX` es el
@@ -44,7 +44,7 @@ El tipo se determina por el identificador que indique el usuario o por la ruta d
 > cubierta por pruebas?* Un criterio **No cubierto** significa que ese comportamiento
 > **carece de pruebas** (un hueco a cerrar escribiendo tests), **no** que falte código
 > funcional. Sus casos de prueba documentados viven en
-> `docs/features/FEAT-XXX-[slug]/test-cases/`, igual que en una US o un WI.
+> `docs/specs/features/FEAT-XXX-[slug]/test-cases/`, igual que en una US o un WI.
 
 ---
 
@@ -211,9 +211,9 @@ WARNING No es posible generar el reporte de trazabilidad:
 |-----------|------|
 | Historia de usuario | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md` |
 | Work item | `docs/specs/work-items/WI-XXX-[kebab]/README.md` |
-| Feature de código legacy | `docs/features/FEAT-XXX-[slug]/README.md` |
+| Feature (funcionalidad ya implementada) | `docs/specs/features/FEAT-XXX-[slug]/README.md` |
 | Caché de corrida de pruebas (entrada, la produce `code-review`) | `docs/specs/test-run.json` (ubicación fija, no por unidad) |
-| Reporte de trazabilidad (salida) | US: `…/US-XXX-[nombre-corto]/trace-report.md` · WI: `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` · FEAT: `docs/features/FEAT-XXX-[slug]/trace-report.md` |
+| Reporte de trazabilidad (salida) | US: `…/US-XXX-[nombre-corto]/trace-report.md` · WI: `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` · FEAT: `docs/specs/features/FEAT-XXX-[slug]/trace-report.md` |
 
 ---
 
