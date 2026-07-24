@@ -8,7 +8,7 @@ license: MIT
 
 Guía para **crear o actualizar** historias de usuario en el repo del producto.
 
-> **Alcance de una US:** El `README.md` es un documento **funcional**. Registra el valor para el usuario, los **criterios de aceptación** (lista plana con ids `AC-XXX`, categoría entre paréntesis y enunciado RFC 2119) y el estado de avance. El detalle de implementación (DTOs, endpoints, esquemas) va en `docs/specs/technical-docs/` o en tareas `TK-XXX`, nunca en la narrativa de la historia. Los documentos técnicos **no son parte de la descripción funcional**; pueden referenciarse únicamente para justificar criterios de INVEST o condiciones del DoR.
+> **Alcance de una US:** El `README.md` es un documento **funcional**. Registra el valor para el usuario, los **criterios de aceptación** (lista plana con ids `AC-XXX`, categoría entre paréntesis y enunciado RFC 2119) y el estado de avance. El detalle de implementación (DTOs, endpoints, esquemas) va en `docs/specs/technical-docs/` — creado y mantenido por el skill **`design-define`**, nunca directamente desde aquí — o en tareas `TK-XXX`, nunca en la narrativa de la historia. Los documentos técnicos **no son parte de la descripción funcional**; se enlazan desde la sección Referencias de la US y pueden citarse para justificar criterios de INVEST o condiciones del DoR.
 
 La plantilla canónica está en `assets/user-story-template.md` (léela antes de escribir cualquier US).
 
@@ -41,7 +41,7 @@ El idioma de la US (criterios de aceptación, INVEST, DoR y texto natural) se de
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | Historia de usuario   | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md`                                                            |
 | Archivos de apoyo     | `docs/specs/user-stories/US-XXX-[nombre-corto]/assets/`                                                              |
-| Documentación técnica | `docs/specs/technical-docs/` (no parte de la descripción funcional; referenciable solo para justificar INVEST o DoR) |
+| Documentación técnica | `docs/specs/technical-docs/[capability].md` (propiedad del skill `design-define`; este skill solo la referencia, nunca la crea ni edita directamente) |
 | Glosario              | `docs/specs/glossary.md` (opcional)                                                                                  |
 
 
@@ -78,7 +78,7 @@ Antes de crear o editar cualquier US, el agente debe tener clara la siguiente in
 
 El procedimiento completo —cómo preguntar al usuario, validación antes de crear, los pasos de **Crear** y **Actualizar**, el checklist y los ejemplos/anti-patrones— está en [`references/flow.md`](references/flow.md). Síntesis:
 
-- **Crear:** fijar ID y carpeta `US-XXX-[nombre-corto]/` → redactar el `README.md` con la plantilla (Descripción RFC 2119, Referencias, Criterios `AC-XXX` con categoría y enunciado RFC 2119, Repositorios, Complejidad Fibonacci, INVEST, DoR, Observaciones) → documentación técnica solo si se pide → glosario si aplica → cierre.
+- **Crear:** fijar ID y carpeta `US-XXX-[nombre-corto]/` → redactar el `README.md` con la plantilla (Descripción RFC 2119, Referencias, Criterios `AC-XXX` con categoría y enunciado RFC 2119, Repositorios, Complejidad Fibonacci, INVEST, DoR, Observaciones) → si el requerimiento define modelos, APIs o flujos, **delegar la documentación técnica a `/design-define` mediante subagente** y agregar las referencias devueltas a la sección Referencias → glosario si aplica → cierre.
 - **Actualizar:** identificar y leer el `README.md` → aplicar cambios conservando ids `AC-XXX` (renumerar solo si se reordenan/eliminan) → revalidar → confirmar. Ante conflicto `TK-XXX` ↔ US, **la US prevalece**.
 - **Cierre:** si queda **Draft**, cerrar lagunas con preguntas estructuradas (una por laguna, máx. tres por bloque); si queda **Ready**, sugerir como próximos pasos definir los casos de prueba (si el usuario acepta, invocar `/test-define`) y crear las `TK-XXX` con `/work-plan` (nunca crear TCs ni tareas directamente desde este skill).
 

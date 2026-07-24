@@ -19,6 +19,7 @@ Todo paso a otra fase del ciclo se realiza **invocando el skill correspondiente*
 - **Si el usuario pide implementar** (escribir código, crear/ejecutar pruebas, "impleméntalo", "hazlo", "desarróllalo") mientras se está en `work-plan`: **invocar `/work-implement`** pasándole el contexto del artefacto. Este skill **no** escribe código ni ejecuta pruebas bajo ninguna circunstancia.
 - **Solo se implementa trabajo en `Estado: Ready`.** Si el artefacto sigue en `Draft` (stub o incompleto), no hacer handoff a implementación: completarlo primero en este skill.
 - **Si el conflicto es funcional** (contradice el `README.md` de una US), escalar a **`work-define`**; este skill no modifica la US.
+- **Si una TK/WI menciona elementos técnicos sin especificación** (un modelo, API o flujo citado que no existe en `docs/specs/technical-docs/`) y el usuario pide más detalle sobre alguno de ellos, **delegar mediante subagente a `/design-define`**: ese skill hace el grilling técnico, crea/actualiza el documento de la capability y devuelve las referencias (ruta + ancla) para agregarlas a la sección **Referencias** de la TK/WI. Este skill **no** crea ni edita documentos en `technical-docs/`.
 
 No sustituir una invocación de skill por "hacer el trabajo aquí". El handoff es explícito y por skill en cada frontera del ciclo.
 

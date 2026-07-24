@@ -23,16 +23,14 @@ Ubicacion y alcance por tipo (cada trabajo tiene su propio `progress.md` dentro 
 La "unidad" depende del tipo: TK para historias de usuario, el WI completo para work items.
 `Cobertura de test cases` es opcional: incluirla solo si el artefacto tiene carpeta `test-cases/`; omitirla si no hay test cases.
 -->
+
 ### {{TK-XXX | WI-XXX}}: {{titulo corto}}
 **Estado:** {{Pending | In Progress | Done}}
 **Implementador:** {{inferido de git config user.name}}
 **Archivos:** []
-
 **Notas:** []
-
 <!-- Opcional: incluir solo si existen test cases (carpeta test-cases/) para este trabajo. No es un detalle exhaustivo de cada TC: solo observaciones puntuales si no se automatizo o hubo algun inconveniente al implementarlo. Si la implementacion fue como se esperaba, no es necesario comentar nada. -->
 **Cobertura de test cases:** []
-
 **Decisiones adicionales:** []
 
 ### {{TK-XXX | WI-XXX}}: {{titulo corto}}
