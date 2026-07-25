@@ -5,13 +5,13 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 
 # Code Review — {{US-XXX-nombre-corto | repositorio · rama}}
 
-**Fecha**: {{YYYY-MM-DD HH:MM}}
-**Repositorio**: {{nombre o ruta}}
-**Rama**: {{rama}} · **Commit**: {{sha-corto}}
-**Working tree**: {{limpio | sucio (N archivos modificados)}}
-**Modo**: {{default | checks-only | qualitative-only | only nombre-del-check | …}}
-**Historia**: {{US-XXX-nombre-corto (Enlazada al archivo de la historia) | — (fuera de US)}}
-**Veredicto**: {{✅ Aprobado | ❌ Rechazado | ⚠️ Incompleto}}
+**Fecha:** {{YYYY-MM-DD HH:MM}}
+**Repositorio:** {{nombre o ruta}}
+**Rama:** {{rama}} · **Commit:** {{sha-corto}}
+**Working tree:** {{limpio | sucio (N archivos modificados)}}
+**Modo:** {{default | checks-only | qualitative-only | only nombre-del-check | …}}
+**Historia:** {{US-XXX-nombre-corto (Enlazada al archivo de la historia) | — (fuera de US)}}
+**Veredicto:** {{✅ Aprobado | ❌ Rechazado | ⚠️ Incompleto}}
 
 ## Resumen
 

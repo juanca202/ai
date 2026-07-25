@@ -5,11 +5,11 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 
 # WI-XXX: {{título corto del work item}}
 
-**Estado**: {{Draft | Ready}}
-**Tipo**: {{bug | refactor | deuda-técnica | dependencias | operativa}}
-**Repositorio**: {{obligatorio para Ready: nombre del repositorio git al que afecta el work item; inferido del repo (git remote / carpeta) o indicado por el usuario}}
-**Asignado a**: {{opcional: priorizar lo indicado por el usuario; si no, inferir con `git config user.name`; omitir línea si no aplica}}
-**ADO Work Item**: {{enlace markdown al work item de ADO — solo si se creó; omitir línea si no aplica}}
+**Estado:** {{Draft | Ready}}
+**Tipo:** {{bug | refactor | deuda-técnica | dependencias | operativa}}
+**Repositorio:** {{obligatorio para Ready: nombre del repositorio git al que afecta el work item; inferido del repo (git remote / carpeta) o indicado por el usuario}}
+**Asignado a:** {{opcional: priorizar lo indicado por el usuario; si no, inferir con `git config user.name`; omitir línea si no aplica}}
+**ADO Work Item:** {{enlace markdown al work item de ADO — solo si se creó; omitir línea si no aplica}}
 
 ## Descripción
 
@@ -60,9 +60,9 @@ Rutas permitidas: assets/ (recursos propios de este work item) o docs/specs/tech
 
 <!-- Sección opcional. Incluir solo si este WI ejecuta una migración entre proyectos derivada de una investigación (`research/RS-XXX-{slug}/`). Eliminar esta sección si no aplica. -->
 
-**Investigación**: {{enlace a la investigación, típ. `../../research/RS-XXX-{slug}/README.md`}}
-**Proyecto origen**: {{nombre / stack principal del origen}}
-**Proyecto destino**: {{nombre / stack principal del destino}}
+**Investigación:** {{enlace a la investigación, típ. `../../research/RS-XXX-{slug}/README.md`}}
+**Proyecto origen:** {{nombre / stack principal del origen}}
+**Proyecto destino:** {{nombre / stack principal del destino}}
 
 Este WI materializa la migración investigada en el `RS-XXX`. Para no duplicar contexto, apóyate en sus archivos (contexto progresivo): el mapeo tecnológico, el estado del origen y los riesgos viven en su `discovery.md`; los casos de validación (Golden Master) en su `validation.md`.
 

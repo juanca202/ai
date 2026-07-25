@@ -16,11 +16,11 @@ Reglas:
 
 # RS-{{XXX}} · Discovery legacy — {{Nombre del código/módulo analizado}}
 
-**Estado**: {{Draft | Ready}}
-**Código en alcance**: {{rutas / módulos / entrypoints}}
-**Versión analizada**: {{commit | branch | tag}}
-**Creado por**: {{git config user.name}}
-**Fecha**: {{YYYY-MM-DD}}
+**Estado:** {{Draft | Ready}}
+**Código en alcance:** {{rutas / módulos / entrypoints}}
+**Versión analizada:** {{commit | branch | tag}}
+**Creado por:** {{git config user.name}}
+**Fecha:** {{YYYY-MM-DD}}
 
 ## 1. Features descubiertas
 

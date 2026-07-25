@@ -18,11 +18,11 @@ fecha/hora que lo confirma. Cada revalidación posterior agrega además una entr
 
 # Informe de Auditoría de Cumplimiento — {{YYYY-MM-DD}}
 
-**Fecha**: {{YYYY-MM-DD}}
-**Repositorio**: {{nombre/ruta del repo o subproyecto auditado}}
-**Alcance**: {{ADR auditados sobre el total y desglose por estado + fuentes AGENTS.md — p. ej. "10/12 · 1 Draft, 1 Superseded excluidos + AGENTS.md raíz"}}
-**Método**: {{descripción corta de lo que realmente se usó en esta auditoría — herramientas de inspección y fitness functions ejecutadas, p. ej. "grep + lectura de package.json/pom.xml; fitness function dependency-cruiser ejecutada". No se corre el build ni la suite completa.}}
-**Veredicto**: {{✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones}} {{si hubo alguna revalidación, agregar aquí mismo "(revalidado YYYY-MM-DD HH:MM)" con la fecha/hora de la última entrada de ## Revalidaciones; omitir si no hubo ninguna}}
+**Fecha:** {{YYYY-MM-DD}}
+**Repositorio:** {{nombre/ruta del repo o subproyecto auditado}}
+**Alcance:** {{ADR auditados sobre el total y desglose por estado + fuentes AGENTS.md — p. ej. "10/12 · 1 Draft, 1 Superseded excluidos + AGENTS.md raíz"}}
+**Método:** {{descripción corta de lo que realmente se usó en esta auditoría — herramientas de inspección y fitness functions ejecutadas, p. ej. "grep + lectura de package.json/pom.xml; fitness function dependency-cruiser ejecutada". No se corre el build ni la suite completa.}}
+**Veredicto:** {{✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones}} {{si hubo alguna revalidación, agregar aquí mismo "(revalidado YYYY-MM-DD HH:MM)" con la fecha/hora de la última entrada de ## Revalidaciones; omitir si no hubo ninguna}}
 
 ## Resumen
 
@@ -162,7 +162,7 @@ refleja también en "Veredicto" de la cabecera, junto a la fecha/hora que lo con
 
 ### Revalidación — {{YYYY-MM-DD HH:MM}}
 
-**Veredicto resultante**: {{✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones}}
+**Veredicto resultante:** {{✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones}}
 
 **Cambios evidenciados:**
 

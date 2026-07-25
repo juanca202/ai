@@ -5,11 +5,11 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 
 # TK-XXX: {{título corto de la tarea}}
 
-**Estado**: {{Draft | Ready}}
-**Historia**: {{enlace markdown al README.md de la historia US-XXX}}
-**Repositorio**: {{obligatorio: nombre del repositorio git al que afecta la tarea; inferido del repo (git remote / carpeta) o indicado por el usuario}}
-**Asignado a**: {{opcional: priorizar lo indicado por el usuario; si no, inferir con `git config user.name`; omitir línea si no aplica}}
-**ADO Work Item**: {{enlace markdown al work item de ADO — solo si se creó; omitir línea si no aplica}}
+**Estado:** {{Draft | Ready}}
+**Historia:** {{enlace markdown al README.md de la historia US-XXX}}
+**Repositorio:** {{obligatorio: nombre del repositorio git al que afecta la tarea; inferido del repo (git remote / carpeta) o indicado por el usuario}}
+**Asignado a:** {{opcional: priorizar lo indicado por el usuario; si no, inferir con `git config user.name`; omitir línea si no aplica}}
+**ADO Work Item:** {{enlace markdown al work item de ADO — solo si se creó; omitir línea si no aplica}}
 
 ## Descripción
 
@@ -37,9 +37,9 @@ Rutas permitidas: assets/ (recursos propios de esta tarea) o docs/specs/technica
 
 <!-- Sección opcional. Incluir solo si esta tarea ejecuta una migración entre proyectos derivada de una investigación (`research/RS-XXX-{slug}/`). Eliminar esta sección si no aplica. -->
 
-**Investigación**: {{enlace a la investigación, típ. `../../research/RS-XXX-{slug}/README.md`}}
-**Proyecto origen**: {{nombre / stack principal del origen}}
-**Proyecto destino**: {{nombre / stack principal del destino}}
+**Investigación:** {{enlace a la investigación, típ. `../../research/RS-XXX-{slug}/README.md`}}
+**Proyecto origen:** {{nombre / stack principal del origen}}
+**Proyecto destino:** {{nombre / stack principal del destino}}
 
 Esta tarea materializa parte de la migración investigada en el `RS-XXX`. Para no duplicar contexto, apóyate en sus archivos (contexto progresivo): el mapeo tecnológico, el estado del origen y los riesgos viven en su `discovery.md`; los casos de validación (Golden Master) en su `validation.md`.
 

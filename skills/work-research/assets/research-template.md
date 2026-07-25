@@ -20,11 +20,11 @@ Archivos adicionales (solo si el flujo los define, en la misma carpeta):
 
 # RS-{{XXX}} — {{Título descriptivo de la investigación}}
 
-**Estado**: {{Draft | Ready}}
-**Flujo**: {{Artefacto | Migración | Investigación libre}}
-**Artefacto referenciado**: {{US-XXX | TK-XXX | WI-XXX | N/A}}
-**Creado por**: {{git config user.name}}
-**Fecha**: {{YYYY-MM-DD}}
+**Estado:** {{Draft | Ready}}
+**Flujo:** {{Artefacto | Migración | Investigación libre}}
+**Artefacto referenciado:** {{US-XXX | TK-XXX | WI-XXX | N/A}}
+**Creado por:** {{git config user.name}}
+**Fecha:** {{YYYY-MM-DD}}
 
 ## Pregunta de investigación
 

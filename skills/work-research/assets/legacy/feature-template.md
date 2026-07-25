@@ -25,10 +25,10 @@ Reglas de contenido:
 
 # FEAT-XXX: {{título corto del feature}}
 
-**Estado**: {{Draft | Ready}}
-**Procedencia**: {{Funcionalidad ya implementada. Origen: "inferido de código legacy (RS-XXX · commit/branch)" | "registro de funcionalidad existente"}}
-**Fecha de creación**: {{YYYY-MM-DD}}
-**Última actualización**: {{YYYY-MM-DD}}
+**Estado:** {{Draft | Ready}}
+**Procedencia:** {{Funcionalidad ya implementada. Origen: "inferido de código legacy (RS-XXX · commit/branch)" | "registro de funcionalidad existente"}}
+**Fecha de creación:** {{YYYY-MM-DD}}
+**Última actualización:** {{YYYY-MM-DD}}
 
 ## Objetivo
 

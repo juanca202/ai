@@ -10,12 +10,11 @@ Plantilla canónica del reporte de trazabilidad (trace-validate).
 
 # Reporte de trazabilidad — {{US-XXX-nombre-corto | WI-XXX-nombre}}
 
-**Fecha**: {{YYYY-MM-DD HH:MM}}
-**Trabajo**: {{US-XXX | WI-XXX}} · **Documento**: {{ruta-al-documento}}
-**Tipo**: {{historia de usuario | work item}}
-**Rama**: {{rama}}
-**Cobertura**: {{N}} de {{M}} criterios cubiertos ({{porcentaje}})
-**Veredicto**: {{✅ Aprobado | ❌ Rechazado | ⚠️ Aprobado con observaciones}}
+**Fecha:** {{YYYY-MM-DD HH:MM}}
+**Trabajo:** [{{US-XXX | WI-XXX}}](./README.md)
+**Rama:** {{rama}}
+**Cobertura:** {{N}} de {{M}} criterios cubiertos ({{porcentaje}})
+**Veredicto:** {{✅ Aprobado | ❌ Rechazado | ⚠️ Aprobado con observaciones}}
 
 ## Resumen
 

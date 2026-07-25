@@ -5,10 +5,10 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 
 # US-XXX: {{título corto de la historia de usuario}}
 
-**Estado**: {{Draft | Ready}}
-**Fecha de creación**: {{YYYY-MM-DD}}
-**Última actualización**: {{YYYY-MM-DD}}
-**ADO Work Item**: {{enlace markdown al work item de ADO — solo si se creó; omitir línea si no aplica}}
+**Estado:** {{Draft | Ready}}
+**Fecha de creación:** {{YYYY-MM-DD}}
+**Última actualización:** {{YYYY-MM-DD}}
+**ADO Work Item:** {{enlace markdown al work item de ADO — solo si se creó; omitir línea si no aplica}}
 
 ## Descripción
 

@@ -10,12 +10,12 @@ El informe principal (README.md) lo enlaza en su sección "Archivos adicionales"
 
 # Preparación de Validación
 
-**Estado**: {{Draft | Ready}}
-**Investigación**: [README.md](./README.md)
-**Discovery**: [discovery.md](./discovery.md)
-**Fecha**: {{YYYY-MM-DD}}
-**Proyecto origen**: {{nombre / stack principal del origen}}
-**Proyecto destino**: {{nombre / stack principal del destino}}
+**Estado:** {{Draft | Ready}}
+**Investigación:** [README.md](./README.md)
+**Discovery:** [discovery.md](./discovery.md)
+**Fecha:** {{YYYY-MM-DD}}
+**Proyecto origen:** {{nombre / stack principal del origen}}
+**Proyecto destino:** {{nombre / stack principal del destino}}
 
 ## Descripción
 

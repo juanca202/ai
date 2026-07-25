@@ -8,6 +8,7 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 ## {{identificador del trabajo}}
 **Estado:** {{Pending | In Progress | Done}}
 **Tipo:** {{historia de usuario | work item}}
+**Fecha de creación:** {{YYYY-MM-DD HH:mm}}
 **Ultima actualizacion:** {{YYYY-MM-DD HH:mm}}
 
 <!--
@@ -25,6 +26,8 @@ La "unidad" depende del tipo: TK para historias de usuario, el WI completo para 
 -->
 ### {{TK-XXX | WI-XXX}}: {{titulo corto}}
 **Estado:** {{Pending | In Progress | Done}}
+**Iniciado:** {{YYYY-MM-DD HH:mm}}
+**Finalizado:** {{YYYY-MM-DD HH:mm}}
 **Implementador:** {{inferido de git config user.name}}
 **Archivos:** []
 
@@ -37,6 +40,8 @@ La "unidad" depende del tipo: TK para historias de usuario, el WI completo para 
 
 ### {{TK-XXX | WI-XXX}}: {{titulo corto}}
 **Estado:** {{Pending | In Progress | Done}}
+**Iniciado:** {{YYYY-MM-DD HH:mm}}
+**Finalizado:** {{YYYY-MM-DD HH:mm}}
 **Implementador:** {{inferido de git config user.name}}
 **Archivos:**
 - {{src/ruta/al/archivo.ext}}
