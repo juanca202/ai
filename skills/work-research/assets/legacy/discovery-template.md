@@ -62,7 +62,7 @@ Reglas:
 ## 5. Mapa Feature → FEAT-XXX propuesto
 
 {{Puente hacia la creación de features. Una fila por feature descubierto: se
-materializará como una carpeta `docs/features/FEAT-XXX-{slug}/`. Los casos de uso
+materializará como una carpeta `docs/specs/features/FEAT-XXX-{slug}/`. Los casos de uso
 alimentan sus criterios de aceptación y las reglas de negocio sus BR-XX.}}
 
 | Feature | FEAT propuesto (slug) | Casos de uso incluidos | Reglas de negocio (BR-XX) | Prioridad (según gap de cobertura) |

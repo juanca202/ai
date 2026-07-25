@@ -19,7 +19,7 @@ Descubrir Casos de Uso      │  (este skill, work-research)
 Descubrir Reglas de Negocio ┘
     │
     ▼
-Crear Features (FEAT-XXX)        ← docs/features/FEAT-XXX-{slug}/README.md
+Crear Features (FEAT-XXX)        ← docs/specs/features/FEAT-XXX-{slug}/README.md
     │                              (objetivo, reglas de negocio, criterios de aceptación, referencias)
     ▼
 Definir Casos de Prueba          ← handoff a test-define (dentro de la misma carpeta del FEAT)
@@ -35,7 +35,7 @@ existente, nunca código funcional.
 > **Qué produce este flujo (y qué no).** Produce el `discovery.md` (features, casos
 > de uso, reglas de negocio, cobertura existente) como archivo adicional dentro de
 > `research/RS-XXX-{slug}/`, más el `README.md` (informe principal); y, por cada
-> feature descubierto, una carpeta `docs/features/FEAT-XXX-{slug}/` con su `README.md`.
+> feature descubierto, una carpeta `docs/specs/features/FEAT-XXX-{slug}/` con su `README.md`.
 > **No escribe código de pruebas ni de aplicación.** El último paso —definir casos de
 > prueba— se ejecuta haciendo *handoff* a `test-define`; y con los TC definidos se
 > puede correr `trace-validate` para verificar si el código existente ya está cubierto
@@ -62,9 +62,11 @@ ese feature esté en `Estado: Ready`.
    referencia el **archivo y símbolo** (función/clase/endpoint) del que se dedujo.
    Un hallazgo sin evidencia es una hipótesis, no un hallazgo: se marca como
    `⚠️ Sin evidencia` y se resuelve o descarta.
-3. **Separación de artefactos.** Los features y las pruebas resultantes son
-   **inferidos** desde código, no definidos por negocio. Por eso viven bajo
-   `docs/features/` (no en `docs/specs/**`) y llevan marca de procedencia.
+3. **Separación de artefactos.** Los features y las pruebas resultantes registran
+   funcionalidad **ya implementada** (aquí, inferida desde código), no trabajo por
+   construir definido por negocio. Por eso viven en su propio subárbol
+   `docs/specs/features/` —junto a `docs/specs/user-stories/` y `docs/specs/work-items/`,
+   pero **no mezclados** con ellos— y llevan marca de procedencia.
 4. **Orientado a probabilidad de prueba.** El fin último es cubrir el código con
    pruebas. Prioriza descubrir el comportamiento **verificable** (entradas → salidas,
    efectos observables) por encima de la narrativa.
@@ -81,11 +83,11 @@ El `RS-XXX` de análisis legacy se guarda en el proyecto que contiene el código
                           #   (plantilla assets/legacy/discovery-template.md)
 ```
 
-Los **features** creados a partir del discovery viven **fuera** de `research/`, bajo
-`docs/features/` (raíz separada de `docs/specs/`):
+Los **features** creados a partir del discovery viven **fuera** de `research/`, en su
+propio subárbol `docs/specs/features/` (junto a `user-stories/` y `work-items/`):
 
 ```text
-<proyecto>/docs/features/
+<proyecto>/docs/specs/features/
 └── FEAT-XXX-{slug}/
     ├── README.md          # feature inferido (plantilla assets/legacy/feature-template.md)
     └── test-cases/
@@ -100,8 +102,8 @@ Los **features** creados a partir del discovery viven **fuera** de `research/`, 
 - `{slug}` del FEAT: descripción corta del feature en *kebab-case*, p. ej.
   `emision-factura`, `calculo-impuestos`.
 - `XXX` del FEAT: secuencial de tres dígitos sobre las carpetas `FEAT-XXX-*` de
-  `docs/features/` (mayor + 1; `001` si no hay). Es independiente de la numeración de
-  `docs/specs/`.
+  `docs/specs/features/` (mayor + 1; `001` si no hay). Es independiente de la numeración
+  de `docs/specs/user-stories/` y `docs/specs/work-items/`.
 
 ## Entradas necesarias
 
@@ -199,12 +201,12 @@ creación de features + pruebas.
 ## Paso 2 — Crear los Features (`FEAT-XXX`)
 
 Solo con el discovery en **`Ready`** y confirmado por el usuario. Por cada feature del
-mapa (Paso 1.5), crea una carpeta `docs/features/FEAT-XXX-{slug}/` con un `README.md`
+mapa (Paso 1.5), crea una carpeta `docs/specs/features/FEAT-XXX-{slug}/` con un `README.md`
 a partir de `assets/legacy/feature-template.md`:
 
 1. **Numeración.** Calcula el siguiente `FEAT-XXX` leyendo **solo** las carpetas
-   `FEAT-XXX-*` de `docs/features/` (mayor + 1; `001` si no hay). Independiente de
-   `docs/specs/`.
+   `FEAT-XXX-*` de `docs/specs/features/` (mayor + 1; `001` si no hay). Independiente de
+   la numeración de `user-stories/` y `work-items/`.
 2. **Contenido del `README.md`:**
    - **Objetivo:** qué capacidad ofrece el feature, descrita desde lo que hace el
      código.
@@ -234,7 +236,7 @@ Por cada `FEAT-XXX` en **`Estado: Ready`**, invoca `test-define`:
 1. Genera los `TC-XXX` a partir de los `AC-XXX` del feature, siguiendo el flujo normal
    de `test-define` (perspectivas happy/error/límite como cobertura mínima).
 2. **Destino:** los TCs se guardan **dentro de la misma carpeta del feature**, en
-   `docs/features/FEAT-XXX-{slug}/test-cases/`, con su índice `README.md`, igual que
+   `docs/specs/features/FEAT-XXX-{slug}/test-cases/`, con su índice `README.md`, igual que
    ocurre con una US o un WI.
 3. Los TCs describen el comportamiento **actual** del código (son la red de seguridad
    para cubrirlo). Cuando un TC valide un comportamiento marcado como posible bug
@@ -268,9 +270,10 @@ Al terminar, indica al usuario:
 
 - La carpeta `research/RS-XXX-{slug}/` creada, con `README.md` y `discovery.md`, y su
   estado (`Draft`/`Ready`) con una línea de por qué.
-- Los features creados en `docs/features/` (IDs `FEAT-XXX` y títulos) y sus casos de
+- Los features creados en `docs/specs/features/` (IDs `FEAT-XXX` y títulos) y sus casos de
   prueba en cada `test-cases/`, recordando que son **inferidos desde código**
-  (procedencia marcada) y viven separados de `docs/specs/`.
+  (procedencia marcada) y viven en su propio subárbol, separados de las historias y
+  work items.
 - El resultado de `trace-validate` sobre cada feature: qué comportamiento del código ya
   está cubierto por pruebas y qué huecos quedan. El próximo paso sugerido es **escribir
   las pruebas faltantes** sobre el código existente (no código funcional); el `FEAT-XXX`

@@ -10,7 +10,7 @@ Referencia detallada del skill `trace-validate`. El `SKILL.md` mantiene el resum
 
 Antes de trabajar, evitar regenerar si nada cambió (ver [Reutilización del reporte](../SKILL.md) en `SKILL.md`).
 
-1. Resolver la ubicación del trabajo y su `trace-report.md` (`…/US-XXX-*/trace-report.md`, `…/WI-XXX-*/trace-report.md` o `docs/features/FEAT-XXX-*/trace-report.md`).
+1. Resolver la ubicación del trabajo y su `trace-report.md` (`…/US-XXX-*/trace-report.md`, `…/WI-XXX-*/trace-report.md` o `docs/specs/features/FEAT-XXX-*/trace-report.md`).
 2. Si **no existe** → no hay caché; continuar en el Paso 1.
 3. Si **existe**, leer su marca de pie `<!-- trace-validate:fingerprint=<hash> · generado=YYYY-MM-DD -->` y calcular el **fingerprint canónico** de la tubería (excluye los tres artefactos generados; es el mismo de `code-review`):
    ```bash
@@ -29,7 +29,7 @@ Antes de trabajar, evitar regenerar si nada cambió (ver [Reutilización del rep
 1. Resolver el tipo y la ubicación del trabajo:
    - **US:** `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md`.
    - **WI:** `docs/specs/work-items/WI-XXX-[kebab]/README.md`.
-   - **FEAT:** `docs/features/FEAT-XXX-[slug]/README.md` (registro de funcionalidad ya implementada —inferida de código legacy o documentada como existente—; su cobertura responde si esa funcionalidad ya existente tiene pruebas).
+   - **FEAT:** `docs/specs/features/FEAT-XXX-[slug]/README.md` (registro de funcionalidad ya implementada —inferida de código legacy o documentada como existente—; su cobertura responde si esa funcionalidad ya existente tiene pruebas).
 2. Leer el documento y extraer **todos los criterios de aceptación** con su texto, usando los códigos del tipo (`AC-XXX` para US, WI y FEAT). Si el artefacto usa otro formato de código (`AC-1`, `CA-1`, `BR-01`…), normalizarlo a `AC-XXX` al referenciarlo en el reporte.
 3. Si no existe la sección de criterios o no hay criterios explícitos, **parar** y reportar (ver «Cuándo bloquear» en `SKILL.md`). No continuar con supuestos.
 
@@ -92,7 +92,7 @@ Aplicar la tabla de «Veredicto» (en `SKILL.md`) sobre el conjunto de criterios
 1. Guardar el reporte (sobrescribir si ya existe, salvo que el usuario pida conservar histórico):
    - **US:** `docs/specs/user-stories/US-XXX-[nombre-corto]/trace-report.md`.
    - **WI:** `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` (dentro de la carpeta del WI).
-   - **FEAT:** `docs/features/FEAT-XXX-[slug]/trace-report.md` (dentro de la carpeta del feature).
+   - **FEAT:** `docs/specs/features/FEAT-XXX-[slug]/trace-report.md` (dentro de la carpeta del feature).
 2. **Grabar el fingerprint** para la próxima comprobación de frescura (Paso 0): escribir al pie del reporte
    la marca `<!-- trace-validate:fingerprint=<FP> · generado=YYYY-MM-DD -->` con el `FP` calculado
    (Paso 0 / Paso 4). Esta marca se **conserva** en el documento publicado.
