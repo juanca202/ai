@@ -1,41 +1,18 @@
 # SDD Devkit
 
-Skills y agentes del equipo para Cursor, Claude Code y otros asistentes de código.
+**SDD Devkit** (`sdd-devkit`) es un conjunto de skills para practicar Spec-Driven Development: parte de un requerimiento, lo convierte en documentación viva (historias de usuario, ADRs/estándares, diseño técnico, casos de prueba) y guía la implementación paso a paso hasta un entregable verificado. Cubre:
 
-Este repositorio es el plugin **SDD Devkit** (`sdd-devkit`): utilidades para Spec-Driven Development — ADRs, historias de usuario, planificación e implementación de tareas y work items, definición y trazabilidad de pruebas, investigación (incluida la migración entre proyectos) y code review. Reutiliza los directorios `skills/` y `agents/` de la raíz para Cursor y para Claude Code.
+- Documentación de arquitectura: ADRs, estándares y auditoría de cumplimiento.
+- Historias de usuario, planificación e implementación de tareas técnicas y work items de mantenimiento.
+- Definición y trazabilidad de casos de prueba.
+- Investigación de producto, arquitectura o técnica (incluida migración entre proyectos).
+- Code review, integración y creación de PR con puertas de calidad.
 
-[![skills.sh](https://skills.sh/b/juanca202/ai)](https://skills.sh/juanca202/ai)
+## Instalación
 
-## Instalación en Cursor
-
-```bash
-npx skills add https://github.com/juanca202/ai
-```
-
-El asistente te guiará paso a paso: dónde instalar (proyecto o global), qué agente usar y qué skills incluir.
-
-## Instalación en Claude Code
-
-Se distribuye como el mismo plugin **SDD Devkit** (manifiesto en [.claude-plugin/plugin.json](.claude-plugin/plugin.json) y marketplace en [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)).
-
-Agrega el marketplace y luego instala el plugin:
-
-```
-/plugin marketplace add juanca202/ai
-/plugin install sdd-devkit@juanca202
-```
-
-Los skills quedan disponibles con prefijo de namespace (por ejemplo `/sdd-devkit:git-commit`) y también se invocan automáticamente según el contexto de la tarea. Los agentes de `agents/` aparecen en `/context` bajo Custom Agents.
-
-Para probar cambios locales antes de publicar, desde la raíz del repo:
-
-```bash
-claude --plugin-dir .
-```
+Ver la [guía de instalación](INSTALL.md) para Cursor y Claude Code.
 
 ## Skills incluidos
-
-Los skills viven en [`skills/`](skills/).
 
 | Skill | Uso |
 |-------|-----|
@@ -43,6 +20,7 @@ Los skills viven en [`skills/`](skills/).
 | `adr-discover` | Analizar un repositorio y proponer ADRs candidatos a partir de decisiones implícitas |
 | `adr-manage` | Crear o actualizar Architecture Decision Records en `docs/adr/` |
 | `code-review` | Revisión de código pre-merge: verificaciones automatizadas según el stack + revisión cualitativa (arquitectura, diseño, SOLID), con veredicto apto/no apto/incompleto |
+| `design-define` | Crear o actualizar documentación técnica (modelos de datos, APIs/endpoints, flujos, diagramas de clases/C4) en `docs/specs/technical-docs/` como referencia de implementación |
 | `git-commit` | Preparar commits con mensajes Conventional Commits inferidos del diff |
 | `pr-create` | Crear PR o MR desde la rama actual (GitHub, GitLab, Azure Repos, etc.) con puertas de calidad obligatorias: code-review, trace-validate y Definition of Done |
 | `test-define` | Crear casos de prueba (TC-XXX) desde los criterios de aceptación de una US o WI (IEEE 29119-4) |
@@ -53,15 +31,78 @@ Los skills viven en [`skills/`](skills/).
 | `work-implement` | Implementar tareas (TK-XXX) o work items (WI-XXX) a partir de specs en estado Ready |
 | `work-integrate` | Cerrar e integrar el trabajo de una US o WI (merge de la rama feature previa verificación en `progress.md`) |
 
-## Agentes incluidos
+## Definición de harness
 
-Los agentes viven en `agents/` y se pueden referenciar desde reglas de Cursor o invocar con la herramienta Task.
+Un **harness** es el "andamiaje" que sostiene y guía todo el proceso de desarrollo: el conjunto de skills, plantillas y puertas de calidad conectados entre sí para que un requerimiento avance de forma ordenada y repetible desde la idea hasta el código en producción — en vez de depender de que cada persona improvise su propio camino. En SDD Devkit, el harness es el recorrido completo (arquitectura → pruebas → implementación → verificación) que conecta los skills de este repo en un flujo único.
 
-| Agente | Uso |
-|--------|-----|
-| `docs-specialist` | Especificación Markdown: US, TK, ADR, technical-docs, glosario y trazabilidad en `docs/specs` |
-| `quality-specialist` | Autor senior de pruebas automatizadas; deriva casos de criterios de aceptación (SC/BR) |
-| `ui-specialist` | UI agnóstica de framework; descubre stack, aplica `DESIGN.md` y convenciones del repo |
+A continuación, la vista de alto nivel de cómo se usa el harness completo, desde que arranca un proyecto hasta que se entrega trabajo. Hay dos puntos de entrada según el estado del proyecto — **Greenfield** (proyecto nuevo) o **Brownfield** (proyecto existente) — que convergen en la misma [implementación de requerimientos](#implementación-de-requerimientos) y terminan en las mismas puertas de calidad.
+
+> Los pasos marcados con `*` son skills planeados, aún no implementados en [`skills/`](skills/).
+
+```mermaid
+flowchart TD
+    subgraph GF["Greenfield"]
+        GA["Inicialización<br/>**/arch-init***"]
+    end
+    subgraph BF["Brownfield"]
+        BA["Descubrimiento de arquitectura<br/>**/arch-discover***"]
+        BA -.-> WR["Descubrimiento de características<br/>**/work-research**"]
+        WR -.-> TD["Casos de prueba<br/>**/test-define**"]
+    end
+    GA --> T["Definición de framework de pruebas*"]
+    BA --> T
+    WR -.-> T
+    TD -.-> T
+    T --> S["Definición de ADRs/Estándares<br/>**/arch-manage***"]
+    S -.-> AUD["Auditoría<br/>**/arch-audit***"]
+    S --> IMPL["Implementación de requerimientos<br/>(ver sección siguiente)"]
+    IMPL --> V1["Verificación de código<br/>**/code-review**"]
+    V1 --> V2["Validación de requisitos<br/>**/trace-validate**"]
+    V2 --> DONE(["🏁 Entregable"])
+```
+
+1. **Inicio (Greenfield)**: se inicializa el proyecto con `arch-init` *(planeado)*.
+   **Inicio (Brownfield)**: se descubre la arquitectura del proyecto existente con `arch-discover` *(planeado)* y, opcionalmente, se descubren características con `work-research`, desde donde también se pueden derivar casos de prueba con `test-define`.
+2. Ambos flujos convergen en la definición del framework de pruebas *(planeado)*.
+3. Luego se definen o actualizan los ADRs/Estándares del proyecto con `arch-manage` *(planeado; hoy cubierto parcialmente por `adr-manage`)*. `arch-manage` incluye además un flujo opcional de auditoría de cumplimiento con `arch-audit` *(planeado; hoy cubierto parcialmente por `adr-audit`)*.
+4. Con la base arquitectónica lista, el trabajo entra a la [implementación de requerimientos](#implementación-de-requerimientos) (historias → planificación → implementación → integración/PR).
+5. El código resultante pasa por verificación (`code-review`) y validación de requisitos (`trace-validate`).
+6. El flujo termina en un entregable: trabajo verificado, validado y listo para producción.
+
+## Implementación de requerimientos
+
+Es el camino concreto que sigue un requerimiento desde que se escribe hasta que se convierte en código verificado y listo para producción: se documenta como historia de usuario, se descompone en tareas, se codifica y se cierra con una integración o un Pull Request. Es la parte "central" del harness — la que se repite en cada requerimiento, dentro de la base arquitectónica que ya dejó definida el harness.
+
+**Ventajas de seguir este flujo:**
+
+- **Trazabilidad de punta a punta**: cada línea de código puede rastrearse hasta la historia de usuario y el criterio de aceptación que la originó.
+- **Calidad consistente**: toda entrega pasa por las mismas puertas (`code-review`, `trace-validate`) sin importar quién la implemente.
+- **Menos retrabajo**: los pasos opcionales (casos de prueba, diseño técnico, investigación) se activan solo cuando aportan valor, evitando documentación innecesaria pero sin perder cobertura cuando sí se necesita.
+- **Handoffs claros**: cada skill tiene una entrada y salida bien definidas, así que el trabajo se puede pausar y retomar (o pasar a otra persona) sin perder contexto.
+
+Los pasos con línea punteada en el diagrama son opcionales.
+
+```mermaid
+flowchart TD
+    A[Requerimiento] --> B["Historias de usuario<br/>**/work-define**"]
+    B -.-> C["Casos de prueba<br/>**/test-define**"]
+    B -.-> D["Diseño arquitectónico<br/>**/design-define**"]
+    B --> E["Planificación de tareas<br/>**/work-plan**"]
+    E -.-> F["Investigación<br/>**/work-research**"]
+    E -.-> D
+    E --> G["Implementación<br/>**/work-implement**"]
+    G --> H["Integración a rama de desarrollo<br/>**/work-integrate**"]
+    G --> I["Creación de PR<br/>**/pr-create**"]
+    H --> J(["🏁 Entregable:<br/>trabajo listo para producción"])
+    I --> J
+```
+
+1. **Inicio**: un requerimiento se convierte en historias de usuario con `work-define`.
+2. Opcionalmente, desde las historias se definen casos de prueba (`test-define`) y/o diseño arquitectónico (`design-define`).
+3. Las historias pasan a `work-plan` para descomponerlas en tareas técnicas (TK-XXX) o work items (WI-XXX).
+4. Durante la planificación, opcionalmente se investiga con `work-research` y/o se ajusta el diseño arquitectónico con `design-define`.
+5. Las tareas planificadas pasan a `work-implement` para su codificación.
+6. El flujo termina por uno de dos caminos, cada uno con puertas de calidad (`code-review`, `trace-validate`), y ambos llegan al mismo entregable — el trabajo listo para producción, ya sea integrado directo (`work-integrate`) o vía Pull/Merge Request (`pr-create`).
 
 ## Contribuir
 
