@@ -2,18 +2,16 @@
 name: arch-manage
 description: >
   Crear o actualizar la arquitectura documentada del proyecto: Architecture Decision Records
-  (ADR, en docs/adr/) y estándares de arquitectura por dominio técnico/funcional (en docs/standards/). Un ADR registra
-  una decisión (el "por qué", histórico e inmutable); un estándar es un documento normativo de dominio
-  (p. ej. "Testing Standards") que agrupa varios requisitos verificables — el "qué hay que cumplir hoy".
-  Cada decisión que establece una regla añade o actualiza un requisito dentro del estándar de dominio
-  que corresponda (no crea un estándar por decisión). Activar siempre que el usuario quiera documentar,
-  registrar, actualizar o cambiar el estado de una decisión arquitectónica o de una norma/convención del
-  proyecto — incluso si no usa las palabras "ADR" o "estándar".
-  Frases que activan este skill: "registrar decisión", "documentar por qué usamos X",
-  "dejar constancia de esta elección técnica", "decision record", "cambiar ADR a Accepted",
-  "marcar como Superseded", "crear ADR", "actualizar ADR", "nuevo ADR", "ADR-XXX",
-  "definir un estándar", "documentar la convención de X", "actualizar el estándar de testing", "añadir un requisito".
-  Usar también cuando el usuario describa una tensión arquitectónica que deba quedar documentada.
+  (ADR, en docs/adr/) y estándares de arquitectura por dominio técnico/funcional (en docs/standards/). Un ADR
+  registra el "por qué" de una decisión (histórico, inmutable); un estándar (p. ej. "Testing Standards")
+  agrupa los requisitos verificables de un dominio — el "qué hay que cumplir hoy". Cada decisión que fija
+  una regla añade o actualiza un requisito del estándar de dominio (no crea un estándar por decisión).
+  Activar para documentar, registrar o cambiar el estado de una decisión arquitectónica o norma del
+  proyecto, aunque no use las palabras "ADR" o "estándar".
+  Frases que activan este skill: "registrar decisión", "documentar por qué usamos X", "decision record",
+  "cambiar ADR a Accepted", "marcar como Superseded", "crear/actualizar ADR", "ADR-XXX", "definir un
+  estándar", "añadir un requisito".
+  Usar también ante una tensión arquitectónica que deba quedar documentada.
 license: MIT
 ---
 
@@ -185,13 +183,13 @@ Antes de redactar un ADR nuevo o de añadir un requisito:
    - Un bloque `## <Nombre del requisito>` con: `**ID:** <slug-requisito>`, el párrafo de qué es / cómo se usa / cómo se implementa (sin RFC 2119), `### Alcance` (**enunciado normativo con RFC 2119**, MUST/SHOULD/MAY… en mayúsculas), `### Excepciones` y `### Criterios de cumplimiento` (la tabla de `CR-XXX`). El **origen y la verificación se registran por criterio (CR)**, no a nivel de requisito.
    - Añadir a la tabla la fila (o filas) `CR-XXX` que esta decisión fija: `ID` (`CR-XXX`, correlativo único en el estándar), `Descripción` (medible, con RFC 2119 si es normativa), `Origen` (`ADR-XXX`), `Automatable` (yes/no), `Enfoque` (`bloqueante`/`warning`; por defecto `bloqueante`) y `Verificación`.
    - **Enlazar en ambos sentidos:** añadir la referencia global de cada CR (`<slug-estándar>/CR-XXX`, p. ej. `testing/CR-001`) al `emits` del ADR, y el `ADR-XXX` a `source_adrs` del estándar (a nivel de documento) además de en la columna `Origen` del CR.
-7. **Evaluar y (opcionalmente) crear la fitness function de cada criterio (CR)** — flujo completo en [`references/fitness-functions.md`](references/fitness-functions.md). La verificación cuelga de **cada criterio de cumplimiento**, no del requisito, del ADR ni del estándar entero. Al crearla, **registrarla en el agrupador** (misma referencia).
-8. **Ofrecer instalar dependencias referenciadas ausentes** — flujo en [`references/dependencies.md`](references/dependencies.md).
+7. **Evaluar y (opcionalmente) crear la fitness function de cada criterio (CR)** — flujo completo en [`references/fitness-functions.md`](references/fitness-functions.md): incluye **investigar** la forma más común y eficiente de verificarlo (nunca inventar un script propio si ya hay una herramienta/convención establecida), **instalar y configurar** esa herramienta si hace falta, y registrar el **par** de wrappers `.sh`/`.ps1` en los dos agrupadores (`scripts/arch/verify.sh` y `scripts/arch/verify.ps1`) para que la compuerta corra igual en macOS y en Windows. La verificación cuelga de **cada criterio de cumplimiento**, no del requisito, del ADR ni del estándar entero.
+8. **Ofrecer instalar dependencias referenciadas ausentes** — flujo en [`references/dependencies.md`](references/dependencies.md) (no repite las herramientas de fitness function ya resueltas en el paso 7).
 9. **Actualizar los índices `README.md`**:
    - `docs/adr/README.md`: añadir `- [ADR-XXX: Título](ADR-XXX-slug.md)` en orden ascendente.
    - `docs/standards/README.md`: si el estándar de dominio es nuevo, añadir `- [Nombre del estándar](<slug>.md)` (forma simple) o `- [Nombre del estándar](<slug>/README.md)` (forma carpeta); si ya existía, no duplicar.
    - Crearlos con encabezado y lista si no existen. Nunca reordenar ni eliminar entradas.
-10. **Confirmar** mostrando: ruta del ADR, estándar de dominio y requisito(s) añadido(s)/actualizado(s), líneas de índice, y —si aplica— la fitness function creada, el comando agrupador `sh scripts/arch/verify-architecture.sh` y las dependencias instaladas.
+10. **Confirmar** mostrando: ruta del ADR, estándar de dominio y requisito(s) añadido(s)/actualizado(s), líneas de índice, y —si aplica— la fitness function creada (con su par de wrappers), los comandos agrupadores `sh scripts/arch/verify.sh` / `powershell -File scripts/arch/verify.ps1` y las dependencias instaladas.
 
 ---
 
@@ -242,13 +240,13 @@ mantiene ligero):
 
 - `assets/adr-template.md` — plantilla del ADR. Leer antes de escribir un ADR.
 - `assets/standard-template.md` — plantilla del estándar (requisitos + tabla de `CR-XXX`). Leer antes de crear/editar un estándar.
-- `assets/arch-fitness/` — archivos de referencia del agrupador (`verify-architecture.sh`, `checks/example.sh.template`, `README.md`). Copiar al repo al crear el agrupador.
+- `assets/arch-fitness/` — archivos de referencia del agrupador, en su par macOS/Linux y Windows (`verify.sh`, `verify.ps1`, `checks/example.sh.template`, `checks/example.ps1.template`, `README.md`). Copiar al repo al crear el agrupador.
 
 **Referencias de consulta (`references/` — leer bajo demanda):**
 
 - [`references/functional-domains.md`](references/functional-domains.md) — catálogo de los 9 dominios funcionales canónicos. Leer al **clasificar el dominio** de un estándar (casos B/C).
 - [`references/conventions.md`](references/conventions.md) — convenciones de identidad, numeración y **frontmatter** de ADR / estándar / requisito / CR. Leer al escribir frontmatter o identificadores.
-- [`references/fitness-functions.md`](references/fitness-functions.md) — cómo crear la **fitness function** de un CR y registrarla en el **agrupador** `scripts/arch/verify-architecture.sh`. Leer al automatizar un CR o tocar el agrupador.
+- [`references/fitness-functions.md`](references/fitness-functions.md) — cómo crear la **fitness function** de un CR y registrarla en el **agrupador** `scripts/arch/verify.sh`. Leer al automatizar un CR o tocar el agrupador.
 - [`references/dependencies.md`](references/dependencies.md) — flujo para ofrecer **instalar dependencias** ausentes que referencia la decisión. Leer tras crear los artefactos si referencian una tecnología concreta.
 
 ---

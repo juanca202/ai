@@ -7,7 +7,10 @@ explícita del usuario.
 1. **Extraer las dependencias concretas** que la decisión implica, del `## Decisión` del ADR y del
    enunciado del requisito. Contar solo dependencias reales e instalables (p. ej. `PHPUnit`, `Playwright`,
    `GraphQL → @apollo/server`, `Prisma`), no conceptos abstractos ("arquitectura hexagonal" no es una
-   dependencia). No inventar nombres de paquete: si el exacto no es claro, preguntarlo.
+   dependencia). No inventar nombres de paquete: si el exacto no es claro, preguntarlo. **No incluir aquí**
+   las herramientas de verificación de una fitness function (dependency-cruiser, ArchUnit, import-linter,
+   NetArchTest, etc.) — esas se investigan e instalan en su propio momento, dentro del paso 4 de
+   [`references/fitness-functions.md`](fitness-functions.md), para no preguntar dos veces por lo mismo.
 2. **Comprobar si ya existen** en el proyecto, leyendo el manifiesto del ecosistema y su lockfile:
    `package.json`, `pom.xml`/`build.gradle`, `pyproject.toml`/`requirements.txt`, `composer.json`,
    `*.csproj`, `go.mod`, `Cargo.toml`, etc. Si todas están presentes, no hay nada que ofrecer — fin.

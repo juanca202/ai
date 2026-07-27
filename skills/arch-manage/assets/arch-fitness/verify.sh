@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # =============================================================================
-# verify-architecture.sh — Agrupador de fitness functions de arquitectura
+# verify.sh — Agrupador de fitness functions de arquitectura
 # -----------------------------------------------------------------------------
 # Ejecuta TODAS las validaciones de arquitectura (fitness functions) del proyecto.
 # Cada fitness function individual verifica un CRITERIO de cumplimiento (CR) de un
@@ -16,12 +16,15 @@
 # ejecuta automáticamente cada `checks/*.sh`. Para registrar una validación
 # nueva, basta con dejar su wrapper en `checks/` (lo hace el skill `arch-manage`).
 #
+# Par de Windows: verify.ps1 (mismo directorio), que descubre y ejecuta checks/*.ps1
+# con el mismo contrato. Los dos agrupadores siempre existen juntos en el proyecto.
+#
 # Contrato:
 #   - Corre cada check, imprime PASS/FAIL/WARN por criterio (CR) y un resumen final.
 #   - Sale con código 0 salvo que falle algún CR BLOQUEANTE; los CR `warning` que fallan
 #     se reportan como WARN sin cambiar el código de salida. Apto como gate de CI o local.
 #
-# Uso:   sh scripts/arch/verify-architecture.sh
+# Uso:   sh scripts/arch/verify.sh
 #        (o `npm run arch` / target equivalente si el repo lo cablea)
 # =============================================================================
 set -u

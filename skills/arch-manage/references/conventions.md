@@ -14,7 +14,7 @@ requisito o un criterio (CR). Leer al redactar/editar cualquiera de estos artefa
 
 - Los `slug` son kebab-case, minúsculas y cortos. El número del ADR y el número de CR son zero-padded a 3 dígitos.
 - **Nunca pedir el número del ADR al usuario**: se calcula listando `docs/adr/`. El número del CR se calcula releyendo los `CR-XXX` ya usados en el estándar.
-- La **unidad verificable y trazable es el criterio de cumplimiento (CR)**, no el requisito. La **referencia global del CR** (`<slug-estándar>/CR-XXX`, p. ej. `testing/CR-001`) es lo que un ADR referencia en `emits`; el wrapper de su fitness function es `scripts/arch/checks/<slug-estándar>-CR-XXX.sh` (la `/` se sustituye por `-`, p. ej. `testing-CR-001.sh`). El requisito es la agrupación legible que da contexto a sus CR.
+- La **unidad verificable y trazable es el criterio de cumplimiento (CR)**, no el requisito. La **referencia global del CR** (`<slug-estándar>/CR-XXX`, p. ej. `testing/CR-001`) es lo que un ADR referencia en `emits`; el wrapper de su fitness function es `scripts/arch/checks/<slug-estándar>-CR-XXX.sh` (la `/` se sustituye por `-`, p. ej. `testing-CR-001.sh`), siempre acompañado de su par `scripts/arch/checks/<slug-estándar>-CR-XXX.ps1` para Windows (mismo comando, distinta sintaxis). El requisito es la agrupación legible que da contexto a sus CR.
 - Si se crean varios ADR en una tanda (p. ej. desde `arch-discover`), **recalcular** el número releyendo `docs/adr/` antes de cada nuevo ADR.
 
 ## Frontmatter
@@ -60,5 +60,5 @@ requisito o un criterio (CR). Leer al redactar/editar cualquiera de estos artefa
 | `Descripción` | Qué se mide (umbral, check, evidencia); usar RFC 2119 si es normativa |
 | `Origen` | El `ADR-XXX` que fijó este criterio (traza CR → ADR) |
 | `Automatable` | `yes` = objetivo/automatizable como fitness function; `no` = criterio humano/evidencia externa |
-| `Enfoque` | `bloqueante` (por defecto) = su incumplimiento hace fallar el gate; `warning` = se reporta sin tumbar el gate. Un CR `warning` automatizable usa el wrapper con sufijo `.warn.sh` |
-| `Verificación` | Para un CR automatizable, el wrapper `scripts/arch/checks/<slug-estándar>-CR-XXX.sh` (o `…-CR-XXX.warn.sh` si `Enfoque: warning`); si no, la evidencia externa (archivo, job CI…). `TODO` si apto pero pendiente; `N/A` si no aplica |
+| `Enfoque` | `bloqueante` (por defecto) = su incumplimiento hace fallar el gate; `warning` = se reporta sin tumbar el gate. Un CR `warning` automatizable usa el par de wrappers con sufijo `.warn.sh`/`.warn.ps1` |
+| `Verificación` | Para un CR automatizable, la ruta del wrapper `scripts/arch/checks/<slug-estándar>-CR-XXX.sh` (o `…-CR-XXX.warn.sh` si `Enfoque: warning`) como referencia canónica — su par `…-CR-XXX.ps1`/`…-CR-XXX.warn.ps1` para Windows vive junto a él, mismo nombre, otra extensión; si no, la evidencia externa (archivo, job CI…). `TODO` si apto pero pendiente; `N/A` si no aplica |

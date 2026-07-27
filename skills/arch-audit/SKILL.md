@@ -270,20 +270,22 @@ existe, ejecutarla para validar el cumplimiento. Las fitness functions son **por
 ### 0. Preferir el agrupador de validaciones de arquitectura
 
 Antes de ejecutar chequeos uno por uno, comprobar si el proyecto tiene un **agrupador** que corre
-todas las validaciones de arquitectura de una vez (lo crea `arch-manage`):
+todas las validaciones de arquitectura de una vez (lo crea `arch-manage`, en su par macOS/Linux +
+Windows):
 
 ```bash
-ls scripts/arch/verify-architecture.sh scripts/arch/checks/*.sh 2>/dev/null
+ls scripts/arch/verify.sh scripts/arch/verify.ps1 scripts/arch/checks/*.sh scripts/arch/checks/*.ps1 2>/dev/null
 ```
 
 - **Si existe**, es la vía preferida: una sola corrida acotada valida todos los criterios con fitness
-  function. Ejecutar el entrypoint (`sh scripts/arch/verify-architecture.sh`, o el alias nativo del
-  repo — `npm run arch`, target de `Makefile`, etc.) aplicando las mismas cautelas del paso 2
-  (no correr build/suite completa; si requiere instalar dependencias pesadas, preguntar antes).
+  function. Ejecutar el entrypoint de la plataforma desde la que se está auditando (`sh
+  scripts/arch/verify.sh` en macOS/Linux, `powershell -File scripts/arch/verify.ps1` en Windows, o el
+  alias nativo del repo — `npm run arch`, target de `Makefile`, etc.) aplicando las mismas cautelas del
+  paso 2 (no correr build/suite completa; si requiere instalar dependencias pesadas, preguntar antes).
   El runner imprime, por cada check, un bloque `=== <nombre> (<enfoque>) ===` con `PASS` / `FAIL` /
   `WARN`: **mapear cada bloque a su criterio por el nombre del wrapper**
-  (`checks/<estándar>-CR-XXX.sh` si es `bloqueante`, o `checks/<estándar>-CR-XXX.warn.sh` si es
-  `warning` — el sufijo `.warn.sh` marca el enfoque; p. ej. `testing-CR-001.sh`) y alimentar ese
+  (`checks/<estándar>-CR-XXX.sh`/`.ps1` si es `bloqueante`, o `checks/<estándar>-CR-XXX.warn.sh`/`.warn.ps1`
+  si es `warning` — el sufijo `.warn.*` marca el enfoque; p. ej. `testing-CR-001.sh`) y alimentar ese
   resultado al estado del criterio en la Fase 2. El resumen final (Total / PASS / WARN / FAIL) y el
   código de salida agregado resumen la salud arquitectónica ejecutable: el runner sale con código ≠ 0
   **solo** si falla algún criterio `bloqueante`; un criterio `warning` que falla se reporta como `WARN`
@@ -291,9 +293,12 @@ ls scripts/arch/verify-architecture.sh scripts/arch/checks/*.sh 2>/dev/null
 - Un criterio con la `Verificación` apuntando a un wrapper que **no** aparece en `checks/`, o que no
   quedó cubierto por la corrida del agrupador, se ejecuta individualmente (pasos 1-2) y además se anota
   como observación: la fitness function no está registrada en el agrupador (sugerir corregirlo vía `arch-manage`).
+  Si el wrapper de la plataforma actual existe pero falta su par (p. ej. hay `.sh` y no `.ps1`), anotarlo
+  también como observación: la compuerta no corre igual en ambas plataformas.
 - **Si no existe** el agrupador, continuar con la detección y ejecución individuales (pasos 1-2) y,
-  si hay dos o más fitness functions sueltas, **sugerir crear el agrupador** (`scripts/arch/verify-architecture.sh`)
-  vía `arch-manage`, para que en adelante todas se ejecuten con un solo comando.
+  si hay dos o más fitness functions sueltas, **sugerir crear el agrupador** (`scripts/arch/verify.sh` +
+  `scripts/arch/verify.ps1`) vía `arch-manage`, para que en adelante todas se ejecuten con un solo
+  comando en cualquiera de las dos plataformas.
 
 ### 1. Detectar fitness functions existentes
 
@@ -313,7 +318,7 @@ Si la fila no existe o está incompleta (estándares antiguos, o ADR sin criteri
 | JS/TS | `dependency-cruiser` (`.dependency-cruiser.js`), `ts-arch`, reglas ESLint de `import/no-restricted-paths`, `eslint-plugin-boundaries` |
 | .NET | `NetArchTest`, `ArchUnitNET` |
 | Python | `import-linter` (`.importlinter`), `pytest-arch` |
-| Cualquiera | agrupador `scripts/arch/verify-architecture.sh` + `scripts/arch/checks/*.sh` (ver paso 0); otros scripts en `scripts/`, `tools/`, `arch/` con nombres como `check-architecture`, `fitness`, `compliance`; jobs de CI (`.github/workflows/*`, `.gitlab-ci.yml`, `azure-pipelines.yml`) con pasos de arquitectura |
+| Cualquiera | agrupador `scripts/arch/verify.sh`/`verify.ps1` + `scripts/arch/checks/*.sh`/`*.ps1` (ver paso 0); otros scripts en `scripts/`, `tools/`, `arch/` con nombres como `check-architecture`, `fitness`, `compliance`; jobs de CI (`.github/workflows/*`, `.gitlab-ci.yml`, `azure-pipelines.yml`) con pasos de arquitectura |
 
 ```bash
 # Rastreo genérico de fitness functions / chequeos de arquitectura
@@ -323,13 +328,13 @@ find . -type f \( -iname "*archtest*" -o -iname "*fitness*" -o -iname ".dependen
   -not -path "*/node_modules/*" 2>/dev/null
 ```
 
-Mapear cada fitness function encontrada al criterio que valida (por el nombre `<estándar>-CR-XXX.sh`, o `<estándar>-CR-XXX.warn.sh` para enfoque `warning`; comentarios, o la regla que comprueba). Un criterio puede no tener ninguna, tener una, o varias.
+Mapear cada fitness function encontrada al criterio que valida (por el nombre `<estándar>-CR-XXX.sh`/`.ps1`, o `<estándar>-CR-XXX.warn.sh`/`.warn.ps1` para enfoque `warning`; comentarios, o la regla que comprueba). Un criterio puede no tener ninguna, tener una, o varias.
 
 ### 2. Ejecutar las fitness functions detectadas
 
 Ejecutar **solo** el chequeo de arquitectura, no la suite completa, usando el comando más acotado disponible:
 
-- Preferir el agrupador (`sh scripts/arch/verify-architecture.sh`, paso 0) cuando exista; si no, el comando de la ruta en `Verificación` del criterio, el `README`, `package.json` (script `arch`/`fitness`/`depcruise`) o `Makefile`.
+- Preferir el agrupador de la plataforma actual (`sh scripts/arch/verify.sh` en macOS/Linux, `powershell -File scripts/arch/verify.ps1` en Windows; paso 0) cuando exista; si no, el comando de la ruta en `Verificación` del criterio, el `README`, `package.json` (script `arch`/`fitness`/`depcruise`) o `Makefile`.
 - Ejemplos: `npx depcruise --config .dependency-cruiser.js src`, `mvn -Dtest=*ArchTest test`, `lint-imports`, `pytest -k arch`.
 - Si el comando exacto es ambiguo o requiere instalar dependencias pesadas, **preguntar al usuario** con la herramienta de preguntas estructuradas antes de ejecutarlo, mostrando el comando propuesto. No ejecutar nada destructivo ni que modifique el repo.
 - Capturar: comando corrido, resultado (**PASS / FAIL / WARN**), y las líneas relevantes de la salida (violaciones concretas con sus rutas). Un criterio `warning` que falla se reporta como **WARN** (no cambia el veredicto ejecutable). Si falla por entorno (falta un runtime/dependencia), registrar **No ejecutable** con el motivo, no marcarlo como incumplimiento.
@@ -345,10 +350,12 @@ Si un criterio es **apto** pero no tiene fitness function (`Verificación: TODO`
 
 Esto no crea la fitness function (eso es otra tarea); solo la **recomienda** en el informe. Sugerir
 además dejar constancia en el criterio: mantener su columna `Verificación: TODO` con el esbozo (vía `arch-manage`),
-para que la próxima auditoría la descubra sin heurística. Al crearla, `arch-manage` escribirá en
-`Verificación` la ruta del wrapper (`scripts/arch/checks/<estándar>-CR-XXX.sh`, o `.warn.sh` si el
-enfoque es `warning`) y lo registrará en el agrupador `scripts/arch/verify-architecture.sh` para que
-quede incluido en la ejecución conjunta.
+para que la próxima auditoría la descubra sin heurística. Al crearla, `arch-manage` investigará la forma
+más común/eficiente de verificarla, instalará lo necesario si hace falta, y escribirá en `Verificación`
+la ruta del wrapper (`scripts/arch/checks/<estándar>-CR-XXX.sh`, o `.warn.sh` si el enfoque es
+`warning`) junto a su par `.ps1` para Windows, registrando ambos en los dos agrupadores
+(`scripts/arch/verify.sh` y `scripts/arch/verify.ps1`) para que queden incluidos en la ejecución
+conjunta en cualquiera de las dos plataformas.
 
 ---
 
@@ -368,7 +375,7 @@ flujo de `Comportamiento en Revalidación` descrito en la Fase 0 — no se reesc
      - **Método:** no es un texto fijo — describir en una frase corta qué se usó realmente en esta auditoría: las técnicas de inspección aplicadas (p. ej. `grep`, lectura de manifiestos) y las fitness functions ejecutadas. Aclarar que no se corre el build ni la suite completa.
    - **Resumen** con la tabla de conteos por prioridad y estado, seguida de 1-3 frases con la lectura global de la salud arquitectónica del repo.
    - Hallazgos **agrupados por prioridad** (alta → media → baja). Por cada hallazgo: el criterio (con su referencia `<estándar>/CR-XXX`, el requisito que lo agrupa, el nombre de su estándar de dominio, su ADR de origen y su `Enfoque` bloqueante/warning) o la regla de AGENTS.md incumplida, `Estado`, `Evidencias` (✔ a favor / ✖ en contra), `Incumplimientos` (rutas de archivos), y `Acción sugerida`. Si el criterio tiene fitness function, incluir en `Evidencias` el resultado de ejecutarla (PASS/FAIL/WARN + comando).
-   - **Fitness functions**: indicar si existe el **agrupador** (`scripts/arch/verify-architecture.sh`) y su resultado conjunto (Total / PASS / WARN / FAIL); una sub-tabla de las **existentes** (criterio `CR-XXX`, enfoque, herramienta, comando, si está registrada en el agrupador, resultado PASS/FAIL/WARN/No ejecutable) y una lista de las **sugeridas** (criterio apto sin fitness function → qué medir, herramienta y esbozo). Si hay dos o más fitness functions sueltas y no existe el agrupador, recomendarlo aquí.
+   - **Fitness functions**: indicar si existen los **agrupadores** (`scripts/arch/verify.sh` y/o `scripts/arch/verify.ps1`, según qué plataformas tenga cubiertas el repo) y su resultado conjunto (Total / PASS / WARN / FAIL); una sub-tabla de las **existentes** (criterio `CR-XXX`, enfoque, herramienta, comando, si está registrada en el agrupador, resultado PASS/FAIL/WARN/No ejecutable) y una lista de las **sugeridas** (criterio apto sin fitness function → qué medir, herramienta y esbozo). Si hay dos o más fitness functions sueltas y no existe el agrupador, o si solo existe uno de los dos pares de plataforma, recomendarlo aquí.
    - Sección de reglas **No verificables**.
    - Sección de **Decisiones sin criterio** (opcional): ADR `Accepted` con regla enforceable que no fijó ningún criterio (`emits: []`) → sugerir emitirlo vía `arch-manage`.
 4. **Nunca sobrescribir** un informe anterior: el nombre lleva la fecha para conservar el histórico. Si ya existe un `audit-<hoy>.md` del mismo día, actualizarlo (no duplicar).

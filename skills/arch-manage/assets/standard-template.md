@@ -56,7 +56,8 @@ cada una con ID `CR-XXX` (único en el estándar), Origen (el ADR que lo fijó),
 function) y la evidencia de Verificación. Un CR es lo que un ADR referencia en `emits` mediante su
 referencia global `<slug-del-estándar>/CR-XXX` (p. ej. testing/CR-001), y de esa referencia se deriva
 el nombre del wrapper de su fitness function sustituyendo `/` por `-`
-(scripts/arch/checks/<slug-del-estándar>-CR-XXX.sh, p. ej. testing-CR-001.sh).
+(scripts/arch/checks/<slug-del-estándar>-CR-XXX.sh, p. ej. testing-CR-001.sh) — siempre junto a su par
+scripts/arch/checks/<slug-del-estándar>-CR-XXX.ps1 para Windows (mismo comando, distinta sintaxis).
 
 Rutas relativas a los ADR en la columna Origen: dependen de la forma del estándar. Forma simple
 (docs/standards/<slug>.md) → `../adr/`. Forma con carpeta (docs/standards/<slug>/README.md) →
@@ -90,9 +91,11 @@ Columnas:
   - Automatable: yes = objetivo/automatizable como fitness function; no = criterio humano/evidencia externa.
   - Enfoque: `bloqueante` = su incumplimiento hace fallar el gate (exit ≠ 0 del agrupador); `warning` =
     se reporta pero NO tumba el gate. Por defecto `bloqueante`. Un CR `warning` automatizable usa el
-    wrapper con sufijo `.warn.sh` (`scripts/arch/checks/<estándar>-CR-XXX.warn.sh`).
+    par de wrappers con sufijo `.warn.sh`/`.warn.ps1` (`scripts/arch/checks/<estándar>-CR-XXX.warn.sh` +
+    `...warn.ps1`).
   - Verificación: para un CR automatizable, el wrapper del agrupador
-    `scripts/arch/checks/<estándar>-CR-XXX.sh` (bloqueante) o `<estándar>-CR-XXX.warn.sh` (warning);
+    `scripts/arch/checks/<estándar>-CR-XXX.sh` (bloqueante) o `<estándar>-CR-XXX.warn.sh` (warning) como
+    referencia canónica — siempre creado junto a su par `.ps1` para Windows, mismo comando;
     si no, la evidencia externa (archivo, job CI, etc.). `N/A` si aún no existe o si Automatable es no
     y no hay artefacto.
 -->

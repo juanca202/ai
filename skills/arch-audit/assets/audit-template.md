@@ -26,7 +26,7 @@ fecha/hora que lo confirma. Cada revalidación posterior agrega además una entr
 **Fecha**: {{YYYY-MM-DD}}
 **Repositorio**: {{nombre/ruta del repo o subproyecto auditado}}
 **Alcance**: {{criterios auditados y estándares/requisitos de contexto cubiertos + fuentes AGENTS.md — p. ej. "14 criterios en 4 estándares (Testing, API, Persistence, Security) · 2 en Draft excluidos + AGENTS.md raíz"}}
-**Método**: {{descripción corta de lo que realmente se usó — herramientas de inspección y fitness functions ejecutadas, p. ej. "grep + lectura de package.json/composer.json; agrupador scripts/arch/verify-architecture.sh ejecutado". No se corre el build ni la suite completa.}}
+**Método**: {{descripción corta de lo que realmente se usó — herramientas de inspección y fitness functions ejecutadas, p. ej. "grep + lectura de package.json/composer.json; agrupador scripts/arch/verify.sh (o verify.ps1 en Windows) ejecutado". No se corre el build ni la suite completa.}}
 **Veredicto**: {{✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones}} {{si hubo alguna revalidación, agregar aquí mismo "(revalidado YYYY-MM-DD HH:MM)" con la fecha/hora de la última entrada de ## Revalidaciones; omitir si no hubo ninguna}}
 
 ## Resumen
@@ -124,8 +124,8 @@ Repetir el bloque siguiente por cada hallazgo. Si no hay hallazgos, escribir "Si
 Sección de arquitectura evolutiva. Reportar el estado de las fitness functions (chequeos automatizados
 que validan CRITERIOS, uno por CR). Dos partes: existentes (ejecutadas) y sugeridas (criterios aptos que
 aún no tienen una). Si un criterio no es apto para automatizar, no listarlo aquí. Indicar también, si
-existe, el agrupador scripts/arch/verify-architecture.sh y su resultado conjunto (Total / PASS / WARN / FAIL);
-sale con código ≠ 0 solo si falla algún CR bloqueante (un CR warning que falla es WARN, no cambia el veredicto).
+existen, los agrupadores scripts/arch/verify.sh / verify.ps1 y su resultado conjunto (Total / PASS / WARN / FAIL);
+salen con código ≠ 0 solo si falla algún CR bloqueante (un CR warning que falla es WARN, no cambia el veredicto).
 -->
 
 ### Existentes
