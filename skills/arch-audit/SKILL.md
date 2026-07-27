@@ -55,7 +55,7 @@ técnico o funcional), no el estándar entero, ni el requisito como bloque, ni e
 - `docs/standards/` — todos los estándares de dominio (técnico o funcional) y sus **criterios de cumplimiento** (`CR-XXX`), agrupados por requisito, priorizando los de estándares `Active` (obligatorios). Criterios en estándares `Draft` se listan pero no generan hallazgo con prioridad ni afectan el veredicto; `Deprecated`/`Superseded` no generan hallazgos salvo que el código siga dependiendo de ellos.
 - `AGENTS.md` (y `AGENTS.md` anidados por subcarpeta, si existen) — cada regla explícita del documento.
 - `docs/adr/` — **solo como trazabilidad**: para cada criterio auditado, citar su ADR de origen; y para detectar ADR `Accepted` con regla enforceable que aún no fijó ningún criterio.
-- `.agents/MEMORY.md` (si existe) — contexto de stack e idioma, **no** es fuente de reglas por sí mismo.
+- `.agents/MEMORY.md` (si existe) — contexto de idioma, **no** es fuente de reglas por sí mismo (el stack vive en `AGENTS.md § Stack tecnológico`, no aquí).
 
 **Evidencia (el "ser"):** el código, la estructura de carpetas y los manifiestos de dependencias del repo.
 
@@ -196,8 +196,9 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
    una regla accionable. A cada regla asignarle un identificador estable con el formato
    `AGENTS.md §<sección>` (p. ej. `AGENTS.md §APIs`).
 
-4. **Contexto de stack** — leer `.agents/MEMORY.md` si existe, para saber lenguajes/frameworks y
-   afinar los patrones de búsqueda (evita falsos negativos por buscar en el lenguaje equivocado).
+4. **Contexto de stack** — leer `## Stack tecnológico` en `AGENTS.md` si existe, para saber
+   lenguajes/frameworks y afinar los patrones de búsqueda (evita falsos negativos por buscar en el
+   lenguaje equivocado).
 
 Construir una **lista de reglas a auditar**: cada entrada = un **criterio de cumplimiento**
 (`<estándar>/CR-XXX`, con el requisito que lo agrupa) o una regla de AGENTS.md, con su enunciado, su ADR
@@ -309,26 +310,10 @@ ya lo haya cubierto). Si `Automatable: yes` pero `Verificación: TODO`, el crite
 tiene fitness function → va a las sugerencias (paso 3). Si `Automatable: no` / `Verificación: N/A`, no
 automatizarlo.
 
-Si la fila no existe o está incompleta (estándares antiguos, o ADR sin criterio), caer al
-**rastreo heurístico** por señales del stack:
-
-| Ecosistema | Herramientas / señales típicas |
-|---|---|
-| JVM (Java/Kotlin) | ArchUnit (`import com.tngtech.archunit`), tests `*ArchTest`, `*ArchitectureTest` |
-| JS/TS | `dependency-cruiser` (`.dependency-cruiser.js`), `ts-arch`, reglas ESLint de `import/no-restricted-paths`, `eslint-plugin-boundaries` |
-| .NET | `NetArchTest`, `ArchUnitNET` |
-| Python | `import-linter` (`.importlinter`), `pytest-arch` |
-| Cualquiera | agrupador `scripts/arch/verify.sh`/`verify.ps1` + `scripts/arch/checks/*.sh`/`*.ps1` (ver paso 0); otros scripts en `scripts/`, `tools/`, `arch/` con nombres como `check-architecture`, `fitness`, `compliance`; jobs de CI (`.github/workflows/*`, `.gitlab-ci.yml`, `azure-pipelines.yml`) con pasos de arquitectura |
-
-```bash
-# Rastreo genérico de fitness functions / chequeos de arquitectura
-grep -rniE "archunit|dependency-cruiser|import-linter|netarchtest|ts-arch|fitness|arch.?test|boundaries" \
-  . --include="*.*" -l 2>/dev/null | grep -viE "node_modules|/.git/" | head -40
-find . -type f \( -iname "*archtest*" -o -iname "*fitness*" -o -iname ".dependency-cruiser*" -o -iname ".importlinter" \) \
-  -not -path "*/node_modules/*" 2>/dev/null
-```
-
-Mapear cada fitness function encontrada al criterio que valida (por el nombre `<estándar>-CR-XXX.sh`/`.ps1`, o `<estándar>-CR-XXX.warn.sh`/`.warn.ps1` para enfoque `warning`; comentarios, o la regla que comprueba). Un criterio puede no tener ninguna, tener una, o varias.
+Si la fila no existe o está incompleta (estándares antiguos, o ADR sin criterio), leer
+[`references/fitness-function-heuristics.md`](references/fitness-function-heuristics.md) para el
+**rastreo heurístico** por señales del stack (tabla de herramientas típicas por ecosistema + comandos
+`grep`/`find` genéricos) y mapear lo encontrado al criterio que valida.
 
 ### 2. Ejecutar las fitness functions detectadas
 
@@ -345,7 +330,7 @@ Alimentar el resultado al estado del criterio en la Fase 2 (PASS → refuerza �
 
 Si un criterio es **apto** pero no tiene fitness function (`Verificación: TODO`), añadirlo a la lista de **sugerencias**. Para cada uno proponer:
 - **Qué medir** — la característica arquitectónica a comprobar (la `Descripción` del criterio).
-- **Herramienta sugerida** — según el stack (tabla de arriba).
+- **Herramienta sugerida** — según el stack (tabla de [`references/fitness-function-heuristics.md`](references/fitness-function-heuristics.md)).
 - **Esbozo** — una frase de cómo sería el chequeo (p. ej. "regla dependency-cruiser: prohibir imports desde `src/api/**` que no sean del esquema GraphQL").
 
 Esto no crea la fitness function (eso es otra tarea); solo la **recomienda** en el informe. Sugerir
@@ -380,27 +365,8 @@ flujo de `Comportamiento en Revalidación` descrito en la Fase 0 — no se reesc
    - Sección de **Decisiones sin criterio** (opcional): ADR `Accepted` con regla enforceable que no fijó ningún criterio (`emits: []`) → sugerir emitirlo vía `arch-manage`.
 4. **Nunca sobrescribir** un informe anterior: el nombre lleva la fecha para conservar el histórico. Si ya existe un `audit-<hoy>.md` del mismo día, actualizarlo (no duplicar).
 
-### Formato de un hallazgo (referencia)
-
-```
-### api/CR-001 — API en GraphQL, no REST
-**Criterio:** api/CR-001 (requisito `api/api-protocol`, estándar de dominio «API Standards»)
-**Fuente:** docs/standards/api.md → requisito «API protocol» → CR-001
-**Decisión de origen:** ADR-012 (docs/adr/ADR-012-graphql.md)
-**Enfoque:** bloqueante
-**Regla auditada (RFC 2119):** Toda API expuesta **MUST** implementarse en GraphQL; no **SHALL** añadirse endpoints REST nuevos.
-**Estado:** ⚠️ Parcialmente cumplido
-
-**Evidencias:**
-- ✔ 92% del código usa GraphQL
-- ✖ Se encontraron 3 endpoints REST nuevos
-
-**Incumplimientos:**
-- src/UserController.php — expone rutas REST (`GET /users`)
-- src/ProductController.php — expone rutas REST (`POST /products`)
-
-**Acción sugerida:** Migrar los 3 endpoints a resolvers GraphQL, o registrar una excepción en el criterio (o un ADR de excepción) si REST es intencional aquí.
-```
+El formato exacto de cada hallazgo (qué campos lleva y en qué orden) es el que ya trae
+`assets/audit-template.md` — no se repite aquí; seguir esa plantilla al redactar.
 
 ---
 
@@ -416,36 +382,9 @@ configuradas en el proyecto.
   (Fase 0), **antes** de escribir la entrada en `## Revalidaciones`; su resultado se incorpora como
   un cambio evidenciado más dentro de esa única entrada — no se escribe ni se pregunta por separado.
 
-1. **Extraer las dependencias concretas** que implica cada norma auditada (priorizando los criterios
-   de estándares `Active` y sus ADR de origen), a partir de la `Descripción` del criterio / `## Decisión`
-   (y contexto). Contar solo dependencias reales e instalables (p. ej. `PHPUnit`, `Playwright`,
-   `GraphQL → @apollo/server`, `Prisma`, `Spring Web`), no conceptos abstractos ("arquitectura
-   hexagonal" no es una dependencia).
-2. **Comprobar si ya existen**, leyendo el manifiesto del ecosistema y su lockfile: `package.json`,
-   `pom.xml`/`build.gradle`, `pyproject.toml`/`requirements.txt`, `*.csproj`, `go.mod`, `Cargo.toml`, etc.
-3. **Si falta una o más, notificar al usuario y preguntar explícitamente** con la herramienta de
-   preguntas estructuradas, agrupando todas las dependencias faltantes detectadas en la auditoría
-   (una sola pregunta, no una por norma):
-
-   > "Las normas auditadas referencian dependencias que no están instaladas o configuradas en el
-   > proyecto: `<lista>`. ¿Quieres que las instale y configure ahora?"
-   > Opciones: [Sí, instalar y configurar] / [No, solo dejarlo señalado en el informe]
-
-   **No instalar ni configurar nada sin la aprobación explícita del usuario.**
-
-4. **Si acepta:**
-   - Instalar con el gestor del ecosistema detectado (`npm`/`pnpm`/`yarn`, `pip`/`poetry`/`uv`,
-     Maven/Gradle, `dotnet add package`, `go get`, `cargo add`, etc.), respetando el que ya use el repo.
-   - Aplicar la **configuración mínima** necesaria para que quede operativa (archivo de config, entrada
-     en el manifiesto, wiring básico), sin construir la feature completa.
-   - Mostrar los comandos ejecutados y los archivos tocados. No correr build ni despliegues por
-     iniciativa propia.
-   - Continuar a la Fase 4 dejando constancia de lo instalado en el resumen final.
-
-5. **Si rechaza:** dejar constancia de la dependencia faltante — en una nueva auditoría, como
-   incumplimiento adicional del criterio si corresponde o en `## Observaciones` / `## Reglas no
-   verificables por inspección estática`; en una revalidación, como parte de los cambios evidenciados
-   en la entrada de `## Revalidaciones` — para que sea visible en una futura verificación.
+Leer [`references/dependency-verification.md`](references/dependency-verification.md) para el flujo
+completo: qué contar como dependencia, cómo comprobar si ya existen, la pregunta exacta al usuario, y
+qué hacer según acepte o rechace.
 
 ---
 
@@ -472,8 +411,20 @@ planificar la remediación de los hallazgos de alta prioridad.
 - **Rutas reales, no ejemplos.** Los `src/UserController.php` del ejemplo son ilustrativos; en el informe deben ir siempre rutas verdaderas del repo auditado.
 - **No inventar reglas ni veredictos.** Solo se auditan normas que existan en `docs/standards/` o `AGENTS.md`. Ante evidencia ambigua, preferir ⚠️ o ❔ y explicar la duda, en vez de afirmar un incumplimiento.
 - **Priorizar señal sobre volumen.** Mejor pocos hallazgos sólidos y bien evidenciados que una lista larga de detalles triviales.
-- **Sin estándares ni AGENTS.md:** si no hay ninguna fuente normativa, informarlo y sugerir `arch-discover` (para descubrir decisiones y reglas) o crear un `AGENTS.md`; no fabricar un informe vacío de reglas inventadas. Si solo hay ADR pero ningún criterio, señalar que las decisiones no han emitido reglas auditables y sugerir emitirlas vía `arch-manage`.
+- **Sin estándares ni AGENTS.md:** si no hay ninguna fuente normativa, informarlo y sugerir `arch-init` — bootstrapea `AGENTS.md`, `.agents/MEMORY.md`, `docs/adr/` y `docs/standards/`, e invoca `arch-discover` por su cuenta si el repo ya tiene implementación — en vez de crear un `AGENTS.md` a mano; no fabricar un informe vacío de reglas inventadas. Si solo hay ADR pero ningún criterio, señalar que las decisiones no han emitido reglas auditables y sugerir emitirlas vía `arch-manage`.
 - **Informe inmutable, revalidaciones aparte.** El contenido escrito al crear el informe (resumen, hallazgos, fitness functions, reglas no verificables) no se modifica nunca. Cada revalidación se documenta como una entrada nueva en `## Revalidaciones`; el único campo del contenido original que una revalidación actualiza es `Veredicto` en la cabecera.
+
+---
+
+## Archivos del skill (contexto progresivo)
+
+Este `SKILL.md` contiene el flujo completo de las cinco fases. El rastreo heurístico de fitness
+functions y el mecanismo de verificación de dependencias viven en `references/`; el formato de cada
+hallazgo vive en `assets/`. **Leerlos solo cuando la fase correspondiente lo pida**:
+
+- [`references/fitness-function-heuristics.md`](references/fitness-function-heuristics.md) — tabla de herramientas típicas por ecosistema + comandos de rastreo genérico. Leer en la Fase 2B, paso 1, solo cuando la fila del criterio no exista o esté incompleta.
+- [`references/dependency-verification.md`](references/dependency-verification.md) — flujo completo (extraer, comprobar, preguntar, instalar o dejar constancia) para las dependencias que implican las normas auditadas. Leer en la Fase 3.5.
+- [`assets/audit-template.md`](assets/audit-template.md) — plantilla del informe, incluido el formato exacto de cada hallazgo. Leer en la Fase 3, al redactar.
 
 ---
 
@@ -481,4 +432,4 @@ planificar la remediación de los hallazgos de alta prioridad.
 
 - [Architecture Decision Records](https://github.com/joelparkerhenderson/architecture-decision-record)
 - *Building Evolutionary Architectures* (Ford, Parsons, Kua) — concepto de fitness functions.
-- Skills relacionados en este repositorio: `arch-manage` (crear/actualizar ADR y estándares), `arch-discover` (descubrir decisiones y reglas implícitas).
+- Skills relacionados en este repositorio: `arch-init` (bootstrapear el harness cuando no hay ninguna fuente normativa), `arch-manage` (crear/actualizar ADR y estándares), `arch-discover` (descubrir decisiones y reglas implícitas).

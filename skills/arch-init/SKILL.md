@@ -22,8 +22,8 @@ Inicializa, en un proyecto **en cualquier punto de partida**, las primeras instr
 | Skill | Qué asume/hace, y cómo se relaciona con `arch-init` |
 | ----- | ----------------------------------------------------- |
 | `arch-manage` | Crea/actualiza ADRs y estándares de dominio. `arch-init` lo invoca en el Paso 5 con los candidatos que se aceptaron en el Paso 4 — nunca redacta un ADR/estándar por su cuenta. |
-| `arch-discover` | Infiere ADR/estándares candidatos **del código ya existente**. `arch-init` lo invoca en el Paso 4 cuando el punto de partida es "con implementación" — no reimplementa esa inspección. |
-| `arch-audit` | Audita `docs/standards/` y `AGENTS.md` contra el repo, y lee `.agents/MEMORY.md` para el contexto de stack/idioma. `arch-init` es lo que le da a `arch-audit` algo que auditar la primera vez. |
+| `arch-discover` | Infiere ADR/estándares candidatos **del código ya existente** y los crea por su cuenta (su Fase 5 invoca `arch-manage`). `arch-init` lo invoca **completo** en el Paso 4.1 cuando el punto de partida es "con implementación" — no reimplementa esa inspección ni repite su creación de artefactos. |
+| `arch-audit` | Audita `docs/standards/` y `AGENTS.md` contra el repo — de `AGENTS.md` toma también el contexto de stack (`## Stack tecnológico`) — y lee `.agents/MEMORY.md` para el idioma. `arch-init` es lo que le da a `arch-audit` algo que auditar la primera vez. |
 | `code-review` | Sabe qué se suele validar por stack — tipado, linter, unit tests, coverage, build, e2e, sonar (`references/stacks.md` de ese skill). `arch-init` lo **consulta** en el Paso 4 para saber qué le falta a la compuerta de calidad; no ejecuta el review completo (corre sobre un diff de código, no aplica en una inicialización). |
 | `work-define` / `work-plan` | Reciben el handoff que `arch-init` ofrece al cerrar (Paso 5). |
 
@@ -56,7 +56,7 @@ Cada vez que una sección posterior diga *preguntar*, *confirmar* o *sugerir* al
 | ------- | --------- | ---------- |
 | `AGENTS.md` | Reglas operativas/arquitectónicas + sección `Stack tecnológico` | Paso 3 (stub) → Paso 5 (stack definitivo) |
 | `CLAUDE.md` | Solo `@AGENTS.md`, por compatibilidad | Paso 3 |
-| `.agents/MEMORY.md` | Memoria persistente (preferencias, stack, reglas operativas) | Paso 3 (stub) → Paso 5 (stack definitivo) |
+| `.agents/MEMORY.md` | Memoria persistente (idioma, preferencias, reglas operativas — **no** el stack, eso vive solo en `AGENTS.md`) | Paso 3 (stub, con idioma) |
 | `docs/adr/README.md` | Índice de ADRs vigentes | Paso 3 (stub) → Paso 5 (poblado por `arch-manage`) |
 | `docs/standards/README.md` | Índice de estándares vigentes | Paso 3 (stub) → Paso 5 (poblado por `arch-manage`) |
 
@@ -146,10 +146,10 @@ Antes de escribir cualquier archivo, aplicar la regla de [Idempotencia](#idempot
 
 Leer `references/adr-candidates.md` completo antes de este paso.
 
-- **Con implementación** (Paso 1.2) → delegar en un **subagente** que ejecute el skill **`arch-discover`** sobre el repo, para encontrar decisiones y reglas implícitas ya vigentes en el código. `arch-discover` presenta sus candidatos al usuario y sabe agruparlos por dominio funcional por su cuenta — no repetir esa presentación aquí; solo incorporar sus candidatos **aceptados** a la lista consolidada de este paso.
+- **Con implementación** (Paso 1.2) → delegar en un **subagente** que ejecute el skill **`arch-discover`** **completo** sobre el repo — sus cinco fases, incluida la Fase 5, en la que `arch-discover` mismo crea los artefactos aprobados invocando `/arch-manage` por su cuenta. `arch-discover` presenta sus candidatos al usuario, los agrupa por dominio funcional y los delega en `arch-manage` sin intervención de `arch-init` — **no** repetir esa presentación aquí, ni volver a delegarlos en `arch-manage` en el Paso 5.1: `arch-discover` ya es dueño de esa lista de principio a fin. Lo único que se retiene de esta ejecución es un resumen (cuántos ADR/estándares creó, con sus rutas) para reportarlo en el cierre (Paso 5.3) — **no** se agrega nada de esto a la lista consolidada del Paso 4.1/5.1.
 - **Con código base** o **Sin código** (tras el Paso 2) → no hay nada que "descubrir" en código que todavía no existe: el candidato es la **decisión de stack** tomada en el Paso 1.3 o el Paso 2 (con sus alternativas, si vinieron de una investigación), clasificada por dominio funcional según `adr-candidates.md § 1`.
 
-En ambos casos la lista queda pendiente de confirmación — no delegar en `arch-manage` todavía; eso ocurre en el Paso 5, junto con lo que aporte el 4.2.
+La lista consolidada que llega al Paso 5.1 se arma solo con la rama "con código base"/"sin código" de arriba (cuando aplica) más lo que aporte el 4.2 — nunca con los candidatos de `arch-discover`, que ya quedaron resueltos por su propia Fase 5. No delegar nada en `arch-manage` todavía desde aquí; eso ocurre en el Paso 5.1.
 
 ### 4.2 Compuerta de calidad
 
@@ -167,19 +167,19 @@ Leer `references/quality-gate.md` completo antes de este paso.
 
 ### 5.1 Documentar las decisiones aceptadas
 
-Presentar la lista consolidada de candidatos (4.1 + lo añadido en 4.2) agrupada por dominio funcional, con la herramienta de preguntas estructuradas en **selección múltiple** (incluir siempre `Ninguno por ahora`). Si el usuario acepta algo: resolver **decisores** e **idioma** una sola vez para todo el lote (`adr-candidates.md § 3`) y delegar en un **subagente** que ejecute **`/arch-manage`**, agrupando los candidatos aceptados **por dominio** en la misma invocación. `arch-manage` crea los ADR y, cuando corresponda, los requisitos en el estándar de dominio, actualizando ambos índices por su cuenta. Esperar su respuesta antes de continuar.
+Presentar la lista consolidada de candidatos agrupada por dominio funcional, con la herramienta de preguntas estructuradas en **selección múltiple** (incluir siempre `Ninguno por ahora`). Esta lista es la decisión de stack del 4.1 (**solo** si la situación fue "con código base" o "sin código" — si fue "con implementación", esos candidatos ya los gestionó `arch-discover` en su propia Fase 5 y **no** se repiten aquí) más lo añadido en el 4.2. Si la lista queda vacía (p. ej. situación "con implementación" y la compuerta de calidad ya estaba completa), saltar directo al 5.2 sin preguntar. Si el usuario acepta algo: resolver **decisores** e **idioma** una sola vez para todo el lote (`adr-candidates.md § 3`) y delegar en un **subagente** que ejecute **`/arch-manage`**, agrupando los candidatos aceptados **por dominio** en la misma invocación. `arch-manage` crea los ADR y, cuando corresponda, los requisitos en el estándar de dominio, actualizando ambos índices por su cuenta. Esperar su respuesta antes de continuar.
 
 ### 5.2 Actualizar el stack
 
-Reemplazar el contenido (vacío) bajo `## Stack tecnológico` en `AGENTS.md` con el stack definitivo — lenguaje(s), framework(s) y versión, gestor de paquetes/build, y las capas de testing configuradas en el 4.2 — y rellenar `## Stack` en `.agents/MEMORY.md` con lo mismo, en forma breve. Este es el **único** momento del flujo en que se escriben esas secciones.
+Reemplazar el contenido (vacío) bajo `## Stack tecnológico` en `AGENTS.md` con el stack definitivo — lenguaje(s), framework(s) y versión, gestor de paquetes/build, y las capas de testing configuradas en el 4.2. **`AGENTS.md` es la única fuente del stack** — no se repite en `.agents/MEMORY.md` (ese archivo no lleva sección de stack; ver plantilla). Este es el **único** momento del flujo en que se escribe esa sección.
 
 ### 5.3 Confirmar y sugerir el siguiente paso
 
-Confirmar al usuario que el harness inicial quedó listo, resumiendo: punto de partida (situación del Paso 1.2), repositorio git (creado o ya existía), archivos del harness creados, stack definitivo, compuerta de calidad configurada, y — si aplica — los ADR/estándares creados con sus rutas.
+Confirmar al usuario que el harness inicial quedó listo, resumiendo: punto de partida (situación del Paso 1.2), repositorio git (creado o ya existía), archivos del harness creados, stack definitivo, compuerta de calidad configurada, y — si aplica — los ADR/estándares creados con sus rutas: los del Paso 5.1 y, si la situación fue "con implementación", también los que creó `arch-discover` en su propia Fase 5 (retenidos del Paso 4.1).
 
 Después, ofrecer el siguiente paso natural con la herramienta de preguntas estructuradas — **es una sugerencia, no un paso bloqueante**: *"¿Quieres continuar con...?"* opciones: `Escribir la primera historia de usuario (work-define)` / `Planificar tareas o work items (work-plan)` / `Nada por ahora`.
 
-No confirmar el cierre antes de que `AGENTS.md` y `.agents/MEMORY.md` tengan el stack ya escrito.
+No confirmar el cierre antes de que `AGENTS.md` tenga el stack ya escrito.
 
 ---
 
@@ -200,7 +200,8 @@ No confirmar el cierre antes de que `AGENTS.md` y `.agents/MEMORY.md` tengan el 
 
 ## Anti-patterns
 
-- Rellenar `## Stack tecnológico` en `AGENTS.md`/`.agents/MEMORY.md` antes del Paso 5, aunque el stack ya se conozca desde el Paso 1 o el Paso 2.
+- Rellenar `## Stack tecnológico` en `AGENTS.md` antes del Paso 5, aunque el stack ya se conozca desde el Paso 1 o el Paso 2.
+- Escribir el stack (o duplicarlo) en `.agents/MEMORY.md` — ese archivo no lleva sección de stack; `AGENTS.md` es la única fuente.
 - Sobrescribir un `AGENTS.md`/`CLAUDE.md`/etc. existente con contenido propio del usuario sin preguntar primero.
 - Ejecutar el Paso 2 (conseguir el stack) cuando el Paso 1.2 ya clasificó "con código base" o "con implementación".
 - Clasificar la situación del Paso 1.2 sin evidencia clara, en vez de preguntar ante la ambigüedad.
@@ -208,12 +209,13 @@ No confirmar el cierre antes de que `AGENTS.md` y `.agents/MEMORY.md` tengan el 
 - Sugerir o investigar un stack sin haber capturado antes la necesidad real (2.1) — avanzar con una descripción vaga ("una app") sin repreguntar.
 - Investigar el stack (2.2) sin pedirle al subagente los comandos de instalación de cada opción.
 - Reimplementar en el Paso 4.1 la inspección de código que ya hace `arch-discover`, en vez de delegarle esa identificación cuando el punto de partida es "con implementación".
+- Volver a presentar o delegar en `/arch-manage` los candidatos que `arch-discover` ya creó por su cuenta en su propia Fase 5 — es trabajo duplicado y puede generar un ADR casi-idéntico; el Paso 5.1 solo agrupa lo que **no** pasó por `arch-discover`.
 - Reinventar en el Paso 4.2 un catálogo propio de qué validar por stack en vez de consultar `code-review/references/stacks.md`.
 - Ejecutar el review completo de `code-review` sobre el repo — ese skill corre sobre un diff, no en una inicialización sin cambios que revisar.
 - Sugerir E2E, API testing u otras capas que no aportan valor de validación al tipo de proyecto.
 - Cerrar el Paso 4.2 sin ejecutar la suite de pruebas al menos una vez para confirmar que corre.
 - Delegar en `/arch-manage` sin que el usuario haya aceptado explícitamente al menos un candidato, o sin agrupar por dominio los candidatos que comparten estándar.
-- Confirmar el cierre antes de actualizar el stack definitivo en `AGENTS.md` y `.agents/MEMORY.md`.
+- Confirmar el cierre antes de actualizar el stack definitivo en `AGENTS.md`.
 - Forzar el handoff a `work-define`/`work-plan` en el 5.3 en vez de ofrecerlo como sugerencia que el usuario puede declinar.
 - Hacer commit automático del harness sin que el usuario lo pida (queda para `git-commit`, fuera de este skill).
 - Lanzar preguntas como prosa libre cuando el cliente expone la herramienta de preguntas estructuradas.
@@ -224,11 +226,11 @@ No confirmar el cierre antes de que `AGENTS.md` y `.agents/MEMORY.md` tengan el 
 
 **Ejemplo 1 — Sin código, necesidad con restricciones que ameritan investigar**
 
-Carpeta vacía salvo un `README.md`. Paso 1: no hay repo git → `git init`; sin manifiestos → situación "sin código". Paso 2.1: a "¿qué quieres desarrollar?" el usuario responde "una API para gestionar pedidos de un e-commerce, con picos fuertes de tráfico en fechas de descuentos" — sin preferencia de stack. Paso 2.2: la restricción de picos de tráfico no es trivial → se decide investigar; el subagente de `work-research` compara Node/Fastify, Python/FastAPI y Go con foco en throughput, con comandos de instalación para cada uno; el usuario elige Fastify + TypeScript. Paso 2.3: se ejecuta el scaffold. Paso 3: se crean los cinco archivos del harness. Paso 4.1: como no hay implementación todavía, el único candidato es "Fastify + TypeScript" (dominio `api`, con las alternativas del `RS-XXX`). Paso 4.2: se consulta `code-review/references/stacks.md` para Node+TS (tipado, linter, unit, coverage y build son bloqueantes); no hay nada configurado → se sugiere Vitest (unit) y, por tratarse de una API, Supertest (API testing); el usuario acepta ambos y se configuran. Se suma "Vitest + Supertest" (dominio `testing`) a la lista. Paso 5.1: el usuario acepta documentar ambos candidatos → subagente `/arch-manage` crea los ADR y los estándares de dominio `api` y `testing`. Paso 5.2: se escribe el stack en `AGENTS.md`/`.agents/MEMORY.md`. Paso 5.3: se confirma el cierre y se ofrece continuar con `work-define`; el usuario acepta.
+Carpeta vacía salvo un `README.md`. Paso 1: no hay repo git → `git init`; sin manifiestos → situación "sin código". Paso 2.1: a "¿qué quieres desarrollar?" el usuario responde "una API para gestionar pedidos de un e-commerce, con picos fuertes de tráfico en fechas de descuentos" — sin preferencia de stack. Paso 2.2: la restricción de picos de tráfico no es trivial → se decide investigar; el subagente de `work-research` compara Node/Fastify, Python/FastAPI y Go con foco en throughput, con comandos de instalación para cada uno; el usuario elige Fastify + TypeScript. Paso 2.3: se ejecuta el scaffold. Paso 3: se crean los cinco archivos del harness. Paso 4.1: como no hay implementación todavía, el único candidato es "Fastify + TypeScript" (dominio `api`, con las alternativas del `RS-XXX`). Paso 4.2: se consulta `code-review/references/stacks.md` para Node+TS (tipado, linter, unit, coverage y build son bloqueantes); no hay nada configurado → se sugiere Vitest (unit) y, por tratarse de una API, Supertest (API testing); el usuario acepta ambos y se configuran. Se suma "Vitest + Supertest" (dominio `testing`) a la lista. Paso 5.1: el usuario acepta documentar ambos candidatos → subagente `/arch-manage` crea los ADR y los estándares de dominio `api` y `testing`. Paso 5.2: se escribe el stack en `AGENTS.md`. Paso 5.3: se confirma el cierre y se ofrece continuar con `work-define`; el usuario acepta.
 
 **Ejemplo 2 — Con implementación, delegando en arch-discover**
 
-Repo git con historial de dos años, `package.json` con NestJS + Prisma, `docs/specs/user-stories/` con 40 historias. Paso 1: repo ya existe; stack detectado (NestJS/Prisma); situación "con implementación" → se salta el Paso 2. Paso 3: `AGENTS.md` y `.agents/MEMORY.md` no existían → se crean con stub. Paso 4.1: se delega en un subagente que corre `arch-discover`, que encuentra y presenta candidatos como "por qué Prisma" y "arquitectura en capas"; el usuario acepta 3. Paso 4.2: ya hay Jest configurado con buena cobertura de unit (bloqueantes cubiertos según `code-review/references/stacks.md`); falta E2E para los flujos de checkout → se sugiere y el usuario acepta agregar Playwright, que se suma como candidato de dominio `testing`. Paso 5.1: se documentan los 3 candidatos de `arch-discover` más el de Playwright → `/arch-manage` los crea. Paso 5.2: stack definitivo (NestJS x.y, Prisma x.y, Jest + Playwright) se escribe en `AGENTS.md`/`.agents/MEMORY.md`. Paso 5.3: se confirma el cierre y se ofrece continuar con `work-plan` (hay deuda técnica pendiente); el usuario prefiere `Nada por ahora`.
+Repo git con historial de dos años, `package.json` con NestJS + Prisma, `docs/specs/user-stories/` con 40 historias. Paso 1: repo ya existe; stack detectado (NestJS/Prisma); situación "con implementación" → se salta el Paso 2. Paso 3: `AGENTS.md` y `.agents/MEMORY.md` no existían → se crean con stub. Paso 4.1: se delega en un subagente que corre `arch-discover` **completo**; encuentra y presenta candidatos como "por qué Prisma" y "arquitectura en capas", el usuario acepta 3, y el propio `arch-discover` los crea invocando `arch-manage` en su Fase 5 — `arch-init` no vuelve a presentarlos ni a delegarlos. Paso 4.2: ya hay Jest configurado con buena cobertura de unit (bloqueantes cubiertos según `code-review/references/stacks.md`); falta E2E para los flujos de checkout → se sugiere y el usuario acepta agregar Playwright, que se suma como candidato de dominio `testing`. Paso 5.1: la lista consolidada tiene solo el candidato de Playwright (los 3 de `arch-discover` ya quedaron creados) → se documenta y `/arch-manage` lo crea. Paso 5.2: stack definitivo (NestJS x.y, Prisma x.y, Jest + Playwright) se escribe en `AGENTS.md`. Paso 5.3: se confirma el cierre reportando los 3 ADR/estándares que creó `arch-discover` más el de Playwright, y se ofrece continuar con `work-plan` (hay deuda técnica pendiente); el usuario prefiere `Nada por ahora`.
 
 **Ejemplo 3 — Con código base, sugerencia directa sin investigar**
 
@@ -248,5 +250,5 @@ El usuario vuelve a pedir `arch-init` sobre un proyecto donde ya corrió antes. 
 | Harness inicializado, hay trabajo técnico que planificar | `work-plan` | Ofrecido explícitamente en el Paso 5.3. |
 | Se necesita investigar algo más allá del stack inicial | `work-research` | Puede referenciar el `RS-XXX` generado en el Paso 2.2. |
 | Se quieren agregar más ADR/estándares después del cierre | `arch-manage` | Los índices `docs/adr/README.md` y `docs/standards/README.md` ya existen y se amplían, no se recrean. |
-| Verificar cumplimiento de lo documentado | `arch-audit` | Lee `AGENTS.md` y `docs/standards/`; `.agents/MEMORY.md` ya tiene el contexto de stack/idioma que necesita. |
+| Verificar cumplimiento de lo documentado | `arch-audit` | Lee `AGENTS.md` (incluido el stack) y `docs/standards/`; `.agents/MEMORY.md` ya tiene el idioma que necesita. |
 | Primer commit del harness | `git-commit` | El working tree recién creado por este skill. |

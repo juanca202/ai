@@ -134,7 +134,7 @@ Las claves de frontmatter, los identificadores (`ADR-XXX`, referencias de requis
 
 ## Información requerida antes de redactar
 
-Recopilar en **una sola tanda de preguntas** al inicio usando la herramienta de opciones tappables del cliente (máx. 3 preguntas por bloque; opciones cortas y mutuamente excluyentes). No inventar datos — si no están en contexto, preguntar.
+Recopilar en **una sola tanda de preguntas** al inicio usando la herramienta de preguntas estructuradas del cliente (máx. 3 preguntas por bloque; opciones cortas y mutuamente excluyentes). No inventar datos — si no están en contexto, preguntar.
 
 | Dato | Fuente preferida | Si no está |
 |------|-----------------|------------|
@@ -227,6 +227,22 @@ excepción, añadir un requisito a un dominio existente). El estándar es **vivo
 4. Reevaluar la fitness function de cada CR afectado: si cambió su descripción, ajustar el chequeo y su wrapper en el agrupador (ver [`references/fitness-functions.md`](references/fitness-functions.md)).
 5. Si el nuevo estado del estándar o de un requisito es `Deprecated`/`Superseded`, enlazar el reemplazo y actualizar `docs/standards/README.md`.
 6. **Confirmar** los cambios.
+
+---
+
+## Anti-patterns
+
+- Mezclar el alcance de ADR y estándar: meter el enunciado normativo (RFC 2119) o los criterios de cumplimiento dentro del ADR, o el contexto/alternativas/consecuencias dentro del estándar. Cada uno contiene solo lo suyo y se enlazan por referencia (`emits` ↔ `source_adrs`/`Origen`).
+- Crear un estándar nuevo por cada decisión en vez de añadir un requisito al estándar de dominio existente — el estándar es de **dominio**, no de decisión.
+- Redactar un ADR o un requisito sin pasar primero por la [Validación de conflictos](#validación-de-conflictos-solo-al-crear): duplicar o contradecir un ADR `Accepted` o un requisito `Active` ya existente.
+- Reescribir la decisión de un ADR `Accepted` en vez de crear uno nuevo que lo supersede — un ADR es histórico e inmutable una vez aceptado.
+- Marcar un ADR `Superseded`/`Deprecated` sin revisar los criterios (`emits`) que fijó: dejar CR huérfanos vigentes en un estándar cuando la decisión que los originó ya no rige.
+- Crear una fitness function sin la aprobación explícita del usuario, o sin investigar primero si ya existe una herramienta/convención establecida para ese chequeo en el stack — un script propio a medida es el último recurso, no el primero (`references/fitness-functions.md`).
+- Dejar la herramienta de verificación de una fitness function sin instalar cuando el usuario aceptó instalarla, o repreguntar por ella en el paso de dependencias generales (`references/dependencies.md`) después de ya haberla resuelto en `references/fitness-functions.md`.
+- Registrar un wrapper de fitness function en un solo sistema operativo — cada CR automatizable necesita su **par** `.sh`/`.ps1`, y los agrupadores `verify.sh`/`verify.ps1` se crean juntos.
+- Instalar o configurar dependencias sin la aprobación explícita del usuario, o correr build/suites completas por iniciativa propia.
+- Al invocarse en lote (p. ej. desde `arch-discover`), volver a preguntar decisores/idioma o la instalación de dependencias por cada artefacto en vez de resolverlo una sola vez para todo el lote.
+- Pedirle al usuario el número del próximo ADR o CR — siempre se calcula releyendo `docs/adr/` o la tabla del estándar, nunca se pregunta.
 
 ---
 

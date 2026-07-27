@@ -23,6 +23,21 @@ pero **un solo estándar de dominio** *Testing Standards* con **dos requisitos**
 El output es una **lista priorizada de candidatos**, agrupando los requisitos por estándar de dominio.
 El usuario decide cuáles documentar; el skill luego invoca `arch-manage` para cada uno aprobado, que
 crea el ADR y —cuando aplique— añade su requisito al estándar de dominio (creándolo o ampliándolo).
+Este skill es **autocontenido**: cuando se invoca (directamente o como subagente desde otro skill,
+p. ej. `arch-init`), corre sus cinco fases hasta el final, incluida la creación de los artefactos
+aprobados — nadie más los vuelve a crear después.
+
+---
+
+## Resolución de idioma
+
+Decidir el idioma de los mensajes al usuario y de lo que se le pasa a `arch-manage` en este orden;
+detenerse en el primer paso que aplique:
+
+1. Si en el contexto de la sesión existe una preferencia de idioma del usuario, usarla.
+2. Si hay una preferencia registrada en `.agents/MEMORY.md` (línea `preferred language: <código>`), usarla.
+3. Si no, usar el idioma del mensaje del usuario y preguntar si desea persistir esa preferencia en `.agents/MEMORY.md`.
+4. Si no se puede inferir, **preguntar** qué idioma prefiere; no decidir el idioma por cuenta propia.
 
 ---
 
@@ -30,7 +45,7 @@ crea el ADR y —cuando aplique— añade su requisito al estándar de dominio (
 
 Antes de inspeccionar, determinar el alcance:
 
-1. **Leer `.agents/MEMORY.md`** (si existe) para entender el stack y contexto ya conocido.
+1. **Leer `AGENTS.md`** (si existe, sección `## Stack tecnológico`) y **`.agents/MEMORY.md`** (si existe, idioma y contexto operativo) para entender lo ya conocido — el stack vive solo en `AGENTS.md`, no se duplica en `MEMORY.md`.
 2. **Leer `docs/adr/` y `docs/standards/`** para listar los artefactos ya existentes — nunca proponer un candidato que duplique un ADR o estándar existente (en cualquier estado).
 3. Si el usuario no indicó ruta, asumir raíz del repositorio actual.
 
@@ -115,71 +130,19 @@ Por cada candidato, además de la decisión (ADR), determinar si hay una **regla
 
 ### Categorías / dominios típicos a buscar
 
-Estos son los **dominios funcionales canónicos** (los mismos que usa `arch-manage`; el `slug` es el `domain` del estándar). Al proponer un candidato, clasificar su estándar en uno de ellos y **proponer un dominio nuevo solo si no encaja en ninguno**.
-
-| Dominio funcional (`slug`) | Ejemplos de señales | Requisitos que suele agrupar |
-|---|---|---|
-| **Calidad y pruebas** (`testing`) | Herramienta unit/e2e, cobertura, mocking, Quality Gates | unit testing, e2e testing, umbral de cobertura |
-| **Arquitectura y diseño** (`architecture`) | Capas (controller/service/repo), DDD, hexagonal, CQRS, límites de módulo | límites de capa, imports permitidos, desacoplamiento |
-| **Interfaces / APIs** (`api`) | REST vs GraphQL vs tRPC, versioning, formato de errores | protocolo obligatorio, versioning, payloads/errores |
-| **Seguridad** (`security`) | JWT vs sesiones, OAuth, refresh tokens, cifrado, secretos | mecanismo de auth, manejo de secretos, sanitización |
-| **Estilo de código** (`coding-style`) | ESLint/Prettier/Biome, EditorConfig, TypeScript strict, convenciones de nombres | reglas de linter/formato, nomenclatura, JSDoc |
-| **Frontend / UX** (`frontend`) | Estado global vs local, SSR vs CSR, design system, WCAG | gestión de estado, design system, accesibilidad |
-| **Persistencia y datos** (`persistence`) | Elección de BD, ORM vs query builder, migraciones, índices | ORM obligatorio, estrategia de migraciones, patrón repositorio |
-| **Infraestructura y DevOps** (`devops`) | Dockerfiles, pipeline CI/CD, deploy, feature flags, versión de runtime, SemVer | gates de pipeline, estrategia de deploy/branching, variables por entorno |
-| **Observabilidad** (`observability`) | Logger, estrategia de errores, tracing, métricas | logger obligatorio, formato de logs, Correlation IDs |
+Leer [`references/functional-domains.md`](references/functional-domains.md) para el catálogo completo
+de los nueve **dominios funcionales canónicos** (los mismos que usa `arch-manage`) y clasificar cada
+candidato en uno de ellos — proponer un dominio nuevo solo si de verdad no encaja en ninguno.
 
 ---
 
 ## Fase 4 — Presentación de candidatos
 
-Mostrar la lista al usuario en este formato:
-
-```
-## Arquitectura descubierta
-
-Los candidatos se agrupan por el estándar de dominio al que aportarían un requisito.
-
-### 🔴 Alta prioridad (amplio impacto)
-
-**[C-01] Testing con PHPUnit + Playwright** → estándar de dominio **Testing Standards**
-- Evidencia: `phpunit.xml`, `tests/unit/`; `playwright.config.ts`, `tests/e2e/`
-- Decisiones (ADR): 1) unit tests con PHPUnit · 2) e2e con Playwright
-- Requisitos (RFC 2119): «Unit testing» — *unit tests MUST usar PHPUnit*; «E2E testing» — *e2e MUST usar Playwright*
-- Ya documentado: no
-
-**[C-02] Arquitectura en capas (Controller → Service → Repository)** → estándar **Architecture / Modularidad**
-- Evidencia: `src/controllers/`, `src/services/`, `src/repositories/`
-- Decisión (ADR): separación en capas
-- Requisito (RFC 2119): «Límites de capa» — *el dominio MUST NOT importar infraestructura*
-- Ya documentado: no
-
-### 🟡 Media prioridad (alcance acotado)
-
-**[C-03] Uso de Prisma como ORM** → solo ADR (sin requisito continuo evidente)
-- Evidencia: `@prisma/client` en `package.json`, carpeta `prisma/`
-- Decisión (ADR): Prisma frente a TypeORM/Drizzle/Sequelize
-- Requisito: no (elección de herramienta sin una regla continua clara)
-- Ya documentado: no
-
-### ⚪ Baja prioridad (convenciones menores)
-
-**[C-04] ESLint + Prettier** → estándar de dominio **Code Quality**
-- Evidencia: `.eslintrc.js`, `.prettierrc`
-- Decisión (ADR): estándar de calidad de código
-- Requisito (RFC 2119): «Lint y formato» — *el código MUST pasar lint y formato antes de merge*
-- Ya documentado: no
-
----
-Total: X candidatos (agrupados en N estándares de dominio). ¿Cuáles quieres documentar?
-```
-
-Tras mostrar la lista, preguntar con la **herramienta de preguntas estructuradas**:
-
-> "¿Cuáles quieres documentar?"
-> Opciones: [Todos] / [Solo los de alta prioridad] / [Elegir algunos]
->
-> - Si elige **Elegir algunos**: pedir que indique los códigos (p. ej. `C-01, C-03`) o un rango (`C-01 a C-04`).
+Leer [`references/candidate-presentation.md`](references/candidate-presentation.md) para el formato
+exacto (con ejemplo) en el que se muestra la lista al usuario, agrupada por prioridad (🔴 alta / 🟡
+media / ⚪ baja) e indicando a qué estándar de dominio aportaría cada requisito. Al final de la lista,
+preguntar con la herramienta de preguntas estructuradas cuáles documentar (esa referencia trae la
+pregunta exacta y sus opciones).
 
 ---
 
@@ -201,6 +164,10 @@ Por cada candidato aprobado por el usuario:
 
 4. Una vez creado cada artefacto, continuar con el siguiente candidato aprobado.
 
+Este skill no deja candidatos "aceptados pero pendientes de crear": todo lo que el usuario aprueba en
+la Fase 4 queda creado al final de la Fase 5, en la misma ejecución. Un skill que invoque `arch-discover`
+como subagente (p. ej. `arch-init`) debe dejarlo correr hasta aquí — no hay un modo que se detenga antes.
+
 ---
 
 ## Notas de comportamiento
@@ -210,4 +177,13 @@ Por cada candidato aprobado por el usuario:
 - **No repetir trabajo.** Si ya existe un ADR o un requisito de estándar que cubre el hallazgo, omitir el candidato y mencionarlo en un pie de página: "X hallazgos omitidos por estar ya documentados."
 - **Distinguir decisión de regla, y agrupar por dominio.** No todo ADR fija un requisito; proponer requisito solo cuando hay una norma continua y verificable. Consolidar los requisitos del mismo dominio en un solo estándar (no un estándar por regla).
 - **Priorizar calidad sobre cantidad.** Mejor 4 candidatos sólidos que 12 rellenos.
-- **Idioma:** usar la preferencia del contexto de la sesión; si no hay, la registrada en la memoria del proyecto; si tampoco, el idioma del mensaje del usuario.
+
+---
+
+## Archivos del skill (contexto progresivo)
+
+Este `SKILL.md` contiene el flujo completo de las cinco fases. El catálogo de dominios y el formato de
+presentación están en `references/`; **leerlos solo cuando la fase correspondiente lo pida**:
+
+- [`references/functional-domains.md`](references/functional-domains.md) — catálogo de los 9 dominios funcionales canónicos. Leer en la Fase 3, al clasificar el dominio de cada candidato.
+- [`references/candidate-presentation.md`](references/candidate-presentation.md) — formato y ejemplo completo para presentar la lista de candidatos al usuario. Leer en la Fase 4.

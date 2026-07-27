@@ -36,19 +36,18 @@ Ver la [guía de instalación](INSTALL.md) para Cursor y Claude Code.
 
 Un **harness** es el "andamiaje" que sostiene y guía todo el proceso de desarrollo: el conjunto de skills, plantillas y puertas de calidad conectados entre sí para que un requerimiento avance de forma ordenada y repetible desde la idea hasta el código en producción — en vez de depender de que cada persona improvise su propio camino. En SDD Devkit, el harness es el recorrido completo (arquitectura → pruebas → implementación → verificación) que conecta los skills de este repo en un flujo único.
 
-A continuación, la vista de alto nivel de cómo se usa el harness completo, desde que arranca un proyecto hasta que se entrega trabajo. Hay dos puntos de entrada según el estado del proyecto — **Greenfield** (proyecto nuevo) o **Brownfield** (proyecto existente) — que convergen en la misma [implementación de requerimientos](#implementación-de-requerimientos) y terminan en las mismas puertas de calidad.
+A continuación, la vista de alto nivel de cómo se usa el harness completo. El punto de entrada único es **`arch-init`**: identifica el punto de partida del proyecto, inicializa el harness y, según corresponda, deriva al descubrimiento brownfield y a la compuerta de calidad. Desde ahí se llega a la [implementación de requerimientos](#implementación-de-requerimientos) y a las mismas puertas de cierre.
 
 ```mermaid
 flowchart TD
-    subgraph GF["Greenfield"]
-        GA["Inicialización<br/>**/arch-init**"]
-    end
+    INIT["Inicialización<br/>**/arch-init**"]
     subgraph BF["Brownfield"]
         BA["Descubrimiento de arquitectura<br/>**/arch-discover**"]
         BA -.-> WR["Descubrimiento de características<br/>**/work-research**"]
         WR -.-> TD["Casos de prueba<br/>**/test-define**"]
     end
-    GA --> T["Compuerta de calidad<br/>(vía **/arch-init**)"]
+    INIT --> BA
+    INIT --> T["Compuerta de calidad<br/>(vía **/arch-init**)"]
     BA --> T
     WR -.-> T
     TD -.-> T
@@ -60,13 +59,13 @@ flowchart TD
     V2 --> DONE(["🏁 Entregable"])
 ```
 
-1. **Inicio (Greenfield)**: se inicializa el proyecto con `arch-init` (harness, stack y compuerta de calidad).
-   **Inicio (Brownfield)**: se descubre la arquitectura del proyecto existente con `arch-discover` y, opcionalmente, se descubren características con `work-research`, desde donde también se pueden derivar casos de prueba con `test-define`.
-2. Ambos flujos convergen en la compuerta de calidad (configurada en `arch-init` o alineada con lo que ya exista en brownfield).
-3. Luego se definen o actualizan los ADRs/Estándares del proyecto con `arch-manage`. Opcionalmente se audita el cumplimiento con `arch-audit`.
-4. Con la base arquitectónica lista, el trabajo entra a la [implementación de requerimientos](#implementación-de-requerimientos) (historias → planificación → implementación → integración/PR).
-5. El código resultante pasa por verificación (`code-review`) y validación de requisitos (`trace-validate`).
-6. El flujo termina en un entregable: trabajo verificado, validado y listo para producción.
+1. **Inicio**: todo arranca con `arch-init` (harness, stack y diagnóstico del punto de partida).
+2. Si el proyecto ya tiene implementación, `arch-init` deriva al **Brownfield**: descubrimiento de arquitectura con `arch-discover` y, opcionalmente, características con `work-research` y casos de prueba con `test-define`.
+3. En paralelo (o a continuación), se configura la **compuerta de calidad** vía `arch-init`; el camino brownfield también converge ahí.
+4. Luego se definen o actualizan los ADRs/Estándares con `arch-manage`. Opcionalmente se audita el cumplimiento con `arch-audit`.
+5. Con la base arquitectónica lista, el trabajo entra a la [implementación de requerimientos](#implementación-de-requerimientos) (historias → planificación → implementación → integración/PR).
+6. El código resultante pasa por verificación (`code-review`) y validación de requisitos (`trace-validate`).
+7. El flujo termina en un entregable: trabajo verificado, validado y listo para producción.
 
 ## Implementación de requerimientos
 
@@ -94,6 +93,9 @@ flowchart TD
     G --> I["Creación de PR<br/>**/pr-create**"]
     H --> J(["🏁 Entregable:<br/>trabajo listo para producción"])
     I --> J
+
+    classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    class A,B,E,G,I,J main
 ```
 
 1. **Inicio**: un requerimiento se convierte en historias de usuario con `work-define`.
