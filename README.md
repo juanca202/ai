@@ -16,9 +16,10 @@ Ver la [guía de instalación](INSTALL.md) para Cursor y Claude Code.
 
 | Skill | Uso |
 |-------|-----|
-| `adr-audit` | Auditar el cumplimiento de los ADR y de `AGENTS.md` contra el estado real del repo, generando un informe priorizado en `docs/adr/audits/` con revalidaciones incrementales |
-| `adr-discover` | Analizar un repositorio y proponer ADRs candidatos a partir de decisiones implícitas |
-| `adr-manage` | Crear o actualizar Architecture Decision Records en `docs/adr/` |
+| `arch-init` | Inicializar el harness de un proyecto (nuevo o existente): repo git, diagnóstico base limpia/con características implementadas, stack tecnológico (detectado o investigado y scaffolded), placeholders `AGENTS.md`/`CLAUDE.md`/`.agents/MEMORY.md`/`docs/adr/README.md`/`docs/standards/README.md`, compuerta de calidad y los primeros ADR/estándares vía `arch-manage` |
+| `arch-manage` | Crear o actualizar ADRs (decisiones, en `docs/adr/`) y estándares de arquitectura **por dominio** (en `docs/standards/`, p. ej. *Testing Standards*). Cada decisión añade un **requisito** — redactado con RFC 2119/8174 (MUST/SHOULD/MAY) — al estándar del dominio que corresponda; el ADR lo referencia (`emits`) y el estándar traza a sus decisiones (`source_adrs`). Las fitness functions cuelgan de cada requisito |
+| `arch-discover` | Analizar un repositorio y proponer ADRs y requisitos candidatos, agrupados por estándar de dominio, a partir de decisiones y reglas implícitas |
+| `arch-audit` | Auditar el cumplimiento de los **requisitos** de los estándares (`docs/standards/`) y de `AGENTS.md` contra el estado real del repo — requisito por requisito, según su término RFC 2119, citando el ADR de origen — y generar un informe priorizado en `docs/audits/` con revalidaciones incrementales |
 | `code-review` | Revisión de código pre-merge: verificaciones automatizadas según el stack + revisión cualitativa (arquitectura, diseño, SOLID), con veredicto apto/no apto/incompleto |
 | `design-define` | Crear o actualizar documentación técnica (modelos de datos, APIs/endpoints, flujos, diagramas de clases/C4) en `docs/specs/technical-docs/` como referencia de implementación |
 | `git-commit` | Preparar commits con mensajes Conventional Commits inferidos del diff |
@@ -37,34 +38,32 @@ Un **harness** es el "andamiaje" que sostiene y guía todo el proceso de desarro
 
 A continuación, la vista de alto nivel de cómo se usa el harness completo, desde que arranca un proyecto hasta que se entrega trabajo. Hay dos puntos de entrada según el estado del proyecto — **Greenfield** (proyecto nuevo) o **Brownfield** (proyecto existente) — que convergen en la misma [implementación de requerimientos](#implementación-de-requerimientos) y terminan en las mismas puertas de calidad.
 
-> Los pasos marcados con `*` son skills planeados, aún no implementados en [`skills/`](skills/).
-
 ```mermaid
 flowchart TD
     subgraph GF["Greenfield"]
-        GA["Inicialización<br/>**/arch-init***"]
+        GA["Inicialización<br/>**/arch-init**"]
     end
     subgraph BF["Brownfield"]
-        BA["Descubrimiento de arquitectura<br/>**/arch-discover***"]
+        BA["Descubrimiento de arquitectura<br/>**/arch-discover**"]
         BA -.-> WR["Descubrimiento de características<br/>**/work-research**"]
         WR -.-> TD["Casos de prueba<br/>**/test-define**"]
     end
-    GA --> T["Definición de framework de pruebas*"]
+    GA --> T["Compuerta de calidad<br/>(vía **/arch-init**)"]
     BA --> T
     WR -.-> T
     TD -.-> T
-    T --> S["Definición de ADRs/Estándares<br/>**/arch-manage***"]
-    S -.-> AUD["Auditoría<br/>**/arch-audit***"]
+    T --> S["Definición de ADRs/Estándares<br/>**/arch-manage**"]
+    S -.-> AUD["Auditoría<br/>**/arch-audit**"]
     S --> IMPL["Implementación de requerimientos<br/>(ver sección siguiente)"]
     IMPL --> V1["Verificación de código<br/>**/code-review**"]
     V1 --> V2["Validación de requisitos<br/>**/trace-validate**"]
     V2 --> DONE(["🏁 Entregable"])
 ```
 
-1. **Inicio (Greenfield)**: se inicializa el proyecto con `arch-init` *(planeado)*.
-   **Inicio (Brownfield)**: se descubre la arquitectura del proyecto existente con `arch-discover` *(planeado)* y, opcionalmente, se descubren características con `work-research`, desde donde también se pueden derivar casos de prueba con `test-define`.
-2. Ambos flujos convergen en la definición del framework de pruebas *(planeado)*.
-3. Luego se definen o actualizan los ADRs/Estándares del proyecto con `arch-manage` *(planeado; hoy cubierto parcialmente por `adr-manage`)*. `arch-manage` incluye además un flujo opcional de auditoría de cumplimiento con `arch-audit` *(planeado; hoy cubierto parcialmente por `adr-audit`)*.
+1. **Inicio (Greenfield)**: se inicializa el proyecto con `arch-init` (harness, stack y compuerta de calidad).
+   **Inicio (Brownfield)**: se descubre la arquitectura del proyecto existente con `arch-discover` y, opcionalmente, se descubren características con `work-research`, desde donde también se pueden derivar casos de prueba con `test-define`.
+2. Ambos flujos convergen en la compuerta de calidad (configurada en `arch-init` o alineada con lo que ya exista en brownfield).
+3. Luego se definen o actualizan los ADRs/Estándares del proyecto con `arch-manage`. Opcionalmente se audita el cumplimiento con `arch-audit`.
 4. Con la base arquitectónica lista, el trabajo entra a la [implementación de requerimientos](#implementación-de-requerimientos) (historias → planificación → implementación → integración/PR).
 5. El código resultante pasa por verificación (`code-review`) y validación de requisitos (`trace-validate`).
 6. El flujo termina en un entregable: trabajo verificado, validado y listo para producción.

@@ -30,21 +30,31 @@ La "unidad" depende del tipo: TK para historias de usuario, el WI completo para 
 **Iniciado:** {{YYYY-MM-DD HH:mm}}
 **Finalizado:** {{YYYY-MM-DD HH:mm}}
 **Implementador:** {{inferido de git config user.name}}
-**Archivos:** []
-**Notas:** []
+
+**Archivos:** 
+[]
+
+**Notas:** 
+[]
+
 <!-- Opcional: incluir solo si existen test cases (carpeta test-cases/) para este trabajo. No es un detalle exhaustivo de cada TC: solo observaciones puntuales si no se automatizo o hubo algun inconveniente al implementarlo. Si la implementacion fue como se esperaba, no es necesario comentar nada. -->
-**Cobertura de test cases:** []
-**Decisiones adicionales:** []
+**Cobertura de test cases:** 
+[]
+
+**Decisiones adicionales:** 
+[]
 
 ### {{TK-XXX | WI-XXX}}: {{titulo corto}}
 **Estado:** {{Pending | In Progress | Done}}
 **Iniciado:** {{YYYY-MM-DD HH:mm}}
 **Finalizado:** {{YYYY-MM-DD HH:mm}}
 **Implementador:** {{inferido de git config user.name}}
+
 **Archivos:**
 - {{src/ruta/al/archivo.ext}}
 
 <!-- Opcional: incluir solo si existen test cases (carpeta test-cases/) para este trabajo. No es un detalle exhaustivo de cada TC: solo observaciones puntuales si no se automatizo o hubo algun inconveniente al implementarlo. Si la implementacion fue como se esperaba, no es necesario comentar nada. -->
+
 **Cobertura de test cases:**
 - {{TC-XXX => nota solo si no se automatizo (motivo) o hubo un inconveniente al implementarlo}}
 
