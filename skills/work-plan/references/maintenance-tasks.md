@@ -85,6 +85,7 @@ Antes de crear archivos, verificar estas condiciones. Si alguna falla, **no crea
 - **ID disponible:** el número `WI-XXX` propuesto no existe ya como carpeta en `docs/specs/work-items/`. (Aplica también con IDs de ADO: verificar que no exista `WI-<ado_id>-*/`.)
 - **Solapamiento de alcance:** leer los `WI-*.md` existentes y comparar su requerimiento con el del nuevo. Si alguno ya cubre el mismo alcance: informar el conflicto y preguntar si prefiere actualizar el existente o ajustar el alcance del nuevo.
 - **Repositorio definido (solo WI completo):** si el repositorio sigue siendo `Por definir` tras preguntar, publicar como stub en Draft, no como WI completo.
+- **Rama de trabajo actual:** determinar la rama git activa (`git branch --show-current`). Si coincide con el patrón de rama de implementación de una US o WI (`feature/US-XXX-*`, `feature/WI-XXX-*`, `fix/WI-XXX-*`, `chore/WI-XXX-*`, `refactor/WI-XXX-*`), crear el work item nuevo ahí lo mezclaría con ese trabajo en curso. No bloquea automáticamente — ver manejo específico abajo.
 
 **Si hay conflicto:**
 ```
@@ -92,6 +93,15 @@ Antes de crear archivos, verificar estas condiciones. Si alguna falla, **no crea
 - <razón concreta>
 - [WI-XXX: Título](WI-XXX-nombre.md) — <razón del solapamiento, si aplica>
 ```
+
+**Si la rama actual es de implementación de una US o WI:**
+
+No bloquear la creación automáticamente. Advertir al usuario mediante la **herramienta de preguntas estructuradas**:
+```
+⚠️ Estás en la rama `<rama-detectada>`, que parece ser la rama de implementación de <US-XXX/WI-XXX>.
+Crear un work item nuevo aquí puede mezclar sus archivos con ese trabajo en curso.
+```
+Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **Detenerme aquí**, no crear ningún archivo hasta que cambie a la rama base (u otra rama neutral) y lo confirme. Si elige **Continuar**, proceder con el resto del flujo normalmente.
 
 ---
 
@@ -180,6 +190,7 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 **Validación:**
 - [ ] ID `WI-XXX` libre en `docs/specs/work-items/`
 - [ ] Sin solapamiento de alcance con WI existentes
+- [ ] Rama de trabajo actual verificada; si es una rama de implementación de otra US o WI, se advirtió al usuario y se preguntó `Continuar` / `Detenerme aquí` antes de crear
 
 **Condiciones para `Estado: Ready`:**
 - [ ] **Requerimiento** con problema/necesidad claros
@@ -237,6 +248,7 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 - Inventar el requerimiento, los criterios o el plan en lugar de preguntar.
 - Rellenar secciones con supuestos o ejemplos genéricos; dejar pendientes reales sin listar en Observaciones.
 - Narrar el trabajo realizado en el mensaje al usuario; solo reportar resultados y pendientes.
+- Crear un work item nuevo estando en la rama de implementación de otra US o WI sin advertir al usuario y preguntar `Continuar` / `Detenerme aquí` primero.
 - **Modo B**: crear WI sin haber presentado la propuesta y recibido confirmación.
 - Lanzar preguntas como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas.
 

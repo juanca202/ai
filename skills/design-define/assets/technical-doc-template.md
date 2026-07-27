@@ -8,8 +8,8 @@ Las secciones Modelos de datos / APIs / Flujos / Diagramas son opcionales: inclu
 
 # Capability: {{nombre de la capability}}
 
-Fecha de creación: {{YYYY-MM-DD}}
-Última actualización: {{YYYY-MM-DD}}
+**Fecha de creación:** {{YYYY-MM-DD}}
+**Última actualización:** {{YYYY-MM-DD}}
 
 ## Propósito
 

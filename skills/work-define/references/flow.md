@@ -22,13 +22,14 @@ Cada sección que diga *preguntar al usuario*, *validar con el usuario* o *suger
 
 ## Validación antes de crear
 
-Antes de crear archivos, verificar las siguientes condiciones. Si alguna falla, **no crear** — informar al usuario y resolver primero.
+Antes de crear archivos, verificar las siguientes condiciones. Si alguna falla, **no crear** — informar al usuario y resolver primero. La verificación de **rama de trabajo** es la excepción: no bloquea por sí sola, se resuelve preguntando al usuario (ver más abajo).
 
 **¿Qué verificar?**
 
 - **Duplicado de ID:** si el usuario proporciona `US-XXX`, confirmar que esa carpeta no existe en `docs/specs/user-stories/`.
 - **Solapamiento de alcance:** revisar los títulos y descripciones de otras US para detectar si el actor + valor + alcance ya está cubierto por una historia existente.
 - **INVEST parcialmente valorable:** si la información recibida no permite valorar todas las dimensiones, la historia **sí puede crearse** pero con `Estado: Draft` y las lagunas documentadas en Observaciones. Solo es un bloqueante si el actor o el valor de negocio son completamente desconocidos.
+- **Rama de trabajo actual:** determinar la rama git activa (`git branch --show-current`). Si coincide con el patrón de rama de implementación de una US o WI (`feature/US-XXX-*`, `feature/WI-XXX-*`, `fix/WI-XXX-*`, `chore/WI-XXX-*`, `refactor/WI-XXX-*`), crear la historia nueva ahí la mezclaría con ese trabajo en curso. No bloquea automáticamente — ver manejo específico abajo.
 
 **Si hay conflicto de ID o solapamiento de alcance:**
 
@@ -39,6 +40,17 @@ Antes de crear archivos, verificar las siguientes condiciones. Si alguna falla, 
 ```
 
 Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c) proporcionar la información faltante.
+
+**Si la rama actual es de implementación de una US o WI:**
+
+No bloquear la creación automáticamente. Advertir al usuario mediante la **herramienta de preguntas estructuradas**:
+
+```
+⚠️ Estás en la rama `<rama-detectada>`, que parece ser la rama de implementación de <US-XXX/WI-XXX>.
+Crear una historia nueva aquí puede mezclar sus archivos con ese trabajo en curso.
+```
+
+Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **Detenerme aquí**, no crear ningún archivo hasta que cambie a la rama base (u otra rama neutral) y lo confirme. Si elige **Continuar**, proceder con el resto del flujo normalmente.
 
 ---
 
@@ -114,6 +126,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 - ID `US-XXX` sin carpeta existente (creación) o carpeta identificada (actualización)
 - Sin solapamiento de alcance con US existentes
 - Actor y valor de negocio identificados (mínimo para crear); si INVEST no es completamente valorable → `Estado: Draft` con lagunas en Observaciones
+- Rama de trabajo actual verificada; si es una rama de implementación de otra US o WI, se advirtió al usuario y se preguntó `Continuar` / `Detenerme aquí` antes de crear
 
 **Condiciones para** `Estado: Ready`**:**
 
@@ -181,6 +194,7 @@ Sugerir al usuario: (a) ajustar el alcance, (b) actualizar la US existente, o (c
 - Redactar la US sin delegar a `/design-define` cuando el requerimiento define flujos, modelos o APIs; la US quedaría sin su referencia técnica de implementación.
 - Copiar `assets/user-story-template.md` al repo del producto como artefacto en lugar de usarlo como molde.
 - Lanzar preguntas al usuario como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas; o ir descubriendo huecos turno a turno en lugar de agrupar todas las preguntas pendientes en una sola tanda al inicio.
+- Crear una historia nueva estando en la rama de implementación de otra US o WI sin advertir al usuario y preguntar `Continuar` / `Detenerme aquí` primero.
 
 ---
 

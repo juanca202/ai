@@ -87,6 +87,7 @@ Antes de crear archivos, verificar estas condiciones. Si alguna falla, **no crea
 - **ID disponible:** el número `TK-XXX` propuesto no existe ya en la carpeta. (Aplica también con IDs de ADO: verificar que no exista `TK-<ado_id>-*.md`.)
 - **Solapamiento de alcance:** leer todas las `TK-*.md` de la carpeta y comparar su objetivo con el de la nueva tarea. Si alguna ya cubre el mismo alcance: informar al usuario el conflicto y preguntar si prefiere actualizar la existente o ajustar el alcance de la nueva.
 - **Repositorio definido (solo TK completa):** si el repositorio sigue siendo `Por definir` tras preguntar, publicar como stub en Draft, no como TK completa.
+- **Rama de trabajo actual:** determinar la rama git activa (`git branch --show-current`). La rama de implementación de la TK es la de su **propia** US padre: `feature/US-XXX-[nombre-corto]` (ver `work-implement`). Si la rama activa es una rama de implementación (`feature/US-*`, `feature/WI-*`, `fix/WI-*`, `chore/WI-*`, `refactor/WI-*`) **distinta** de esa —por ejemplo la de otra US o de un WI—, la TK quedaría documentada en el contexto de otro trabajo. No bloquea automáticamente — ver manejo específico abajo.
 
 **Si hay conflicto:**
 ```
@@ -94,6 +95,15 @@ Antes de crear archivos, verificar estas condiciones. Si alguna falla, **no crea
 - <razón concreta>
 - [TK-XXX: Título](TK-XXX-nombre.md) — <razón del solapamiento, si aplica>
 ```
+
+**Si la rama actual es una rama de implementación distinta de la propia US padre:**
+
+No bloquear la creación automáticamente. Advertir al usuario mediante la **herramienta de preguntas estructuradas**:
+```
+⚠️ Estás en la rama `<rama-detectada>`, que parece ser la rama de implementación de <US-XXX/WI-XXX>, distinta de la US padre de esta tarea (`feature/US-XXX-[nombre-corto]`).
+Crear esta TK aquí puede mezclarla con ese otro trabajo en curso.
+```
+Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **Detenerme aquí**, no crear ningún archivo hasta que cambie a la rama de la US padre (o a la rama base) y lo confirme. Si elige **Continuar**, proceder con el resto del flujo normalmente.
 
 ---
 
@@ -194,6 +204,7 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - [ ] Carpeta de la US existe con `README.md`
 - [ ] ID `TK-XXX` libre en la carpeta
 - [ ] Sin solapamiento de alcance con TKs existentes
+- [ ] Rama de trabajo actual verificada; si es una rama de implementación distinta de la propia US padre, se advirtió al usuario y se preguntó `Continuar` / `Detenerme aquí` antes de crear
 
 **Condiciones para `Estado: Ready`:**
 - [ ] Repositorio definido (no `Por definir`) en la cabecera del TK
@@ -258,6 +269,7 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - **Modo B**: incluir identificadores `AC-XXX` dentro del archivo `TK-XXX.md`; la cobertura se reporta al usuario, no se documenta.
 - **Modo B**: forzar un mapeo 1 stub = 1 `AC-XXX`; los stubs se agrupan por repositorio.
 - **Modo B**: redactar Plan, Dependencias o Referencias detalladas en stubs propuestos desde una US.
+- Crear una TK estando en una rama de implementación distinta de la propia US padre sin advertir al usuario y preguntar `Continuar` / `Detenerme aquí` primero.
 - **Modo B**: crear stubs sin haber presentado la propuesta (paso 5) y recibido confirmación (paso 6).
 - Lanzar preguntas como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas.
 

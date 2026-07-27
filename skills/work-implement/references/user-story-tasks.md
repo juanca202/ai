@@ -86,12 +86,12 @@ Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto
    - **Al iniciar la TK:** cambiar su estado en `progress.md` a `In Progress` y **poblar la lista de to-dos del agente**: la **primera entrada es el titulo de la TK** (`TK-XXX` + titulo), para tener siempre presente el artefacto en ejecucion, seguida de **las tareas del `Plan de implementacion` del `TK-XXX.md`** (una entrada por tarea `IT-XX`, en el orden del plan). Cada entrada de tarea muestra solo la descripcion corta (`IT-XX` + linea corta), no el detalle completo.
    - **Por cada subtarea completada:** marcar `[ ]` => `[x]` en la seccion de subtareas del `TK-XXX.md` correspondiente y marcar su entrada en la lista de to-dos del agente como `completed`.
    - **Al cerrar la TK:** cambiar su estado en `progress.md` a `Done`, con todas las subtareas de su plan ya `completed` en la lista de to-dos del agente; marcar tambien la **primera entrada (titulo de la TK) como `completed`** una vez que todas las tareas del plan hayan finalizado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion. Si la US tenia test cases, completar el campo `Cobertura de test cases` de la TK solo con observaciones puntuales: **cuales `TC-XXX` no se pudieron crear** (con motivo) o **para cuales se decidio otro tipo de prueba** distinto al del test case. Si todos se automatizaron como se esperaba, dejar el campo sin comentarios.
-5. **Detenerse y preguntar** (herramienta estructurada): "TK-XXX completada. Continuo con TK-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui].
-6. Solo si el usuario confirma: pasar a la siguiente TK. Si detiene, registrar nota y pasar al Paso 4.
+5. **Detenerse y preguntar** (herramienta estructurada), **sin commitear todavia los cambios de la TK**: "TK-XXX completada. Continuo con TK-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui]. Esta pausa, con el working tree aun sin commitear, es la ventana para que el usuario revise el resultado, aplique correcciones manuales o le indique ajustes al agente antes de que el cambio quede commiteado.
+6. Solo si el usuario confirma: **hacer commit de los cambios de TK-XXX** (mensaje que la referencie) y recien despues pasar a la siguiente TK. Si detiene, registrar nota y pasar al Paso 4 — el commit de esta TK se hace ahi, en el cierre.
 
 ### Paso 4 - Cierre
 
-1. Cuando no queden tareas pendientes (o el usuario detenga), verificar que las pruebas **de los archivos afectados** pasen limpias (unitarias y las de integracion que apliquen) y, **una sola vez sobre el codigo consolidado, correr las pruebas e2e** del alcance si el repo las tiene (ver [Uso escalonado de pruebas](../SKILL.md) en `SKILL.md`); el working tree limpio y con commits hechos. **La bateria completa de pruebas no se corre aqui:** la ejecuta `code-review` al integrar (`work-integrate`) o crear el PR (`pr-create`).
+1. Si la ultima TK completada quedo sin commitear (el usuario detuvo el flujo en el Paso 3 antes de confirmar la siguiente), **hacer commit de sus cambios ahora**. Cuando no queden tareas pendientes (o el usuario detenga), verificar que las pruebas **de los archivos afectados** pasen limpias (unitarias y las de integracion que apliquen) y, **una sola vez sobre el codigo consolidado, correr las pruebas e2e** del alcance si el repo las tiene (ver [Uso escalonado de pruebas](../SKILL.md) en `SKILL.md`); el working tree limpio y con todos los commits hechos. **La bateria completa de pruebas no se corre aqui:** la ejecuta `code-review` al integrar (`work-integrate`) o crear el PR (`pr-create`).
 2. **Handoff:** si todo el alcance esta en `Done`, **preguntar al usuario** (herramienta estructurada) como continuar:
 
    > "Implementacion completada. ¿Que quieres hacer ahora?"
@@ -129,7 +129,7 @@ WARNING No es posible continuar con la implementacion:
 
 **Cola:** `README.md` y todos los `TK-*.md` del alcance leidos; listas presentadas; confirmacion recibida antes del primer cambio de codigo.
 
-**Por cada tarea:** TK `Ready`; no `Done` en `progress.md`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; test cases automatizables del `test-cases/README.md` cubiertos; UI bajo `ui-specialist`; Figma via MCP; lint/typecheck/build/tests ejecutados y en verde; `progress.md` a `Done` con `Cobertura de test cases` (TC no automatizados o con otro tipo de prueba documentados); decisiones de sesion registradas; **confirmacion explicita antes de la siguiente TK**.
+**Por cada tarea:** TK `Ready`; no `Done` en `progress.md`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; test cases automatizables del `test-cases/README.md` cubiertos; UI bajo `ui-specialist`; Figma via MCP; lint/typecheck/build/tests ejecutados y en verde; `progress.md` a `Done` con `Cobertura de test cases` (TC no automatizados o con otro tipo de prueba documentados); decisiones de sesion registradas; **confirmacion explicita antes de la siguiente TK**; commit de la TK hecho recien al confirmar el avance (no antes) — o en el cierre, si el usuario detiene ahi.
 
 **Cierre:** pruebas unitarias (e integracion aplicable) de los archivos afectados en verde y e2e del alcance corridas una vez sobre el codigo consolidado (la bateria completa la corre `code-review`, no este skill); working tree limpio; handoff a `pr-create` o `work-integrate`.
 
@@ -158,6 +158,7 @@ WARNING No es posible continuar con la implementacion:
 ## Anti-patterns (especificos del tipo)
 
 - Arrancar la siguiente TK sin confirmacion explicita (aunque la cola este aprobada), salvo cuando el usuario haya pedido el **modo de ejecucion paralela**.
+- Comitear los cambios de una TK inmediatamente al terminarla, antes de la pausa de confirmacion; el commit se hace al confirmar el avance a la siguiente TK (o en el cierre, si el usuario detiene ahi).
 - Omitir el mensaje de cola e ir directo al codigo.
 - Tratar tareas en Draft como ejecutables.
 - Escribir codigo de produccion antes del test (romper el ciclo Red→Green→Refactor).
