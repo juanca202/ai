@@ -34,12 +34,12 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 - [ ] Idioma de preferencia determinado y `.agents/MEMORY.md` actualizado si fue necesario
 
 **Validación:**
-- [ ] `git status --porcelain` sin salida (working tree limpio)
+- [ ] `git status --porcelain` sin salida (working tree limpio) — si hubo cambios pendientes, ya se comitearon automáticamente vía `git-commit` sin preguntar al usuario
 - [ ] `progress.md` existe en la ubicación del tipo
 - [ ] **Todas** las unidades del trabajo de la rama en estado `Done` (leídas del `progress.md` en la carpeta del trabajo)
 - [ ] **`code-review`** ejecutado con veredicto **✅ Aprobado**
 - [ ] **`trace-validate`** ejecutado (después de `code-review`) con veredicto **✅ Aprobado** (o **⚠️ Aprobado con observaciones**)
-- [ ] Sin commits sin commitear ni stash sin aplicar relevante al alcance
+- [ ] Sin stash sin aplicar relevante al alcance
 
 **Ejecución:**
 - [ ] `git checkout <base>` exitoso

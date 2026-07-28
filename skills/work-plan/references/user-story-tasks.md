@@ -17,6 +17,7 @@ La plantilla canónica está en `assets/task-template.md` (léela antes de escri
 - [Flujo: Crear TK completa](#flujo-crear-tk-completa)
 - [Flujo: Actualizar una TK existente](#flujo-actualizar-una-tk-existente)
 - [Flujo: Sugerir stubs desde una US](#flujo-sugerir-stubs-desde-una-us)
+- [Orden y priorización de tareas](#orden-y-priorización-de-tareas)
 - [Checklist antes de redactar](#checklist-antes-de-redactar)
 - [Ejemplos](#ejemplos)
 - [Anti-patrones](#anti-patrones)
@@ -172,7 +173,7 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 2. **Verificar las precondiciones de bloqueo.** Si alguna falla, no continuar: reportar qué falta y sugerir el skill correspondiente (`work-define` para alinear la US, etc.).
 3. **Identificar los repositorios afectados** a partir del alcance de la US y sus criterios de aceptación (`AC-XXX`). Un trabajo puede tocar uno o varios repositorios. **No inventar** repositorios no soportados por la US; lo no claro queda `Por definir` o se pregunta.
 4. **Cubrir los AC-XXX.** Cada `AC-XXX` debe quedar cubierto por al menos un stub; agrupar los que comparten repositorio y alcance.
-5. **Presentar la propuesta de stubs** agrupada por repositorio. Por cada stub: `TK-XXX` tentativo (siguiente libre), nombre de archivo, repositorio (o `Por definir`), objetivo breve y qué `AC-XXX` cubre. No es 1 stub por `AC-XXX`: varios `AC-XXX` pueden caer en un mismo stub si comparten repositorio y alcance; un `AC-XXX` amplio puede dividirse si abarca varios repositorios. **No crear archivos en este turno** — dejarlo explícito al final del mensaje.
+5. **Presentar la propuesta de stubs** agrupada por repositorio. Por cada stub: `TK-XXX` tentativo (siguiente libre), nombre de archivo, repositorio (o `Por definir`), objetivo breve y qué `AC-XXX` cubre. No es 1 stub por `AC-XXX`: varios `AC-XXX` pueden caer en un mismo stub si comparten repositorio y alcance; un `AC-XXX` amplio puede dividirse si abarca varios repositorios. **Ordenar la propuesta** según **[Orden y priorización de tareas](#orden-y-priorización-de-tareas)**: infraestructura compartida primero, luego tareas sin dependencias, y al final las que dependen de otras. **No crear archivos en este turno** — dejarlo explícito al final del mensaje.
 6. **Confirmar con el usuario** mediante la herramienta de preguntas estructuradas. Opciones: [Confirmar stubs] / [Ajustar alcance] / [Cancelar]. Si elige ajustar, revisar y repetir pasos 5–6. **No continuar sin confirmación explícita**, salvo que el mensaje inicial ya describiera la descomposición con detalle suficiente para considerarla aprobada.
 7. **Crear cada stub** confirmado siguiendo el *Flujo: Crear stub* (Estado: Draft, descripción breve sin referenciar `AC-XXX` en el documento, plan vacío).
 8. **Reportar al usuario** la lista de stubs creados, agrupados por repositorio, indicando qué `AC-XXX` cubre cada uno.
@@ -184,6 +185,23 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - **No crear archivos `TK-*.md` antes de la confirmación del paso 6.** La traza AC-XXX → stub vive en la propuesta (paso 5) y en el reporte (paso 8).
 - Si la US es ambigua respecto a repositorios: preguntar antes de crear stubs; no inferir repositorios por cuenta propia.
 - Si dos stubs se solapan: consolidarlos en la propuesta (paso 5) o preguntar antes de confirmar.
+- El orden de los stubs propuestos sigue **[Orden y priorización de tareas](#orden-y-priorización-de-tareas)**: infraestructura compartida → sin dependencias → con dependencias; ninguna TK antes de otra de la que depende.
+
+---
+
+## Orden y priorización de tareas
+
+Aplica siempre que se planifiquen o secuencien **varias TK dentro de la misma US** — típicamente en *Flujo: Sugerir stubs desde una US* (modo B), pero también al redactar **Dependencias** en *Flujo: Crear TK completa* cuando ya existen otras TK de la historia. El objetivo es liberar cuanto antes la ejecución en paralelo y evitar que una tarea quede bloqueada por otra que se implementa después.
+
+**Criterio de prioridad** (de mayor a menor) al ordenar o secuenciar las TK de una misma US:
+
+1. **Infraestructura compartida** — piezas base que otras tareas del alcance necesitan (modelos de dominio comunes, contratos, configuración base, esquemas, migraciones). Van primero: al completarse, liberan la ejecución en paralelo de las tareas que dependen de ellas.
+2. **Tareas sin dependencias** — pueden ejecutarse en paralelo entre sí y con las de infraestructura ya resueltas.
+3. **Tareas con dependencias** — al final, y solo referenciando TK de prioridad igual o superior (infraestructura o sin dependencias) ya creadas o ya secuenciadas antes; nunca una TK que se cree o secuencie después.
+
+**Regla de secuencia (sin bloqueos hacia adelante):** la sección **Dependencias** de una TK solo puede referenciar tareas de igual o mayor prioridad en este orden. Si al redactar una TK, su Plan de implementación o sus Dependencias requieren algo que solo entrega una TK posterior en la secuencia propuesta: **reordenar la propuesta** — mover esa pieza a infraestructura compartida o adelantar la tarea de la que depende — en lugar de dejar la implementación bloqueada por una tarea futura. Esto aplica tanto al **orden de presentación** de los stubs (paso 5 de *Flujo: Sugerir stubs desde una US*) como al orden en que se documentan las Dependencias entre TK ya existentes.
+
+**Escenarios E2E:** los escenarios E2E se derivan de los `AC-XXX` de la US durante la especificación (aquí, en `work-plan`), igual que el resto de la cobertura. Por naturaleza dependen de que los componentes del flujo completo estén disponibles, así que la TK que los cubre cae en el grupo 3 (con dependencias) y se secuencia **al final**, después de las tareas que atraviesa (posiblemente en varios repositorios). Su **implementación** (los propios casos/artefactos E2E) se realiza cuando esas dependencias ya están resueltas; su **ejecución**, en cambio, no es un requisito de `Estado: Ready` de esa TK — forma parte del **Quality Gate** previo a integrar o liberar la funcionalidad (ver `trace-validate` / `pr-create`).
 
 ---
 
@@ -197,6 +215,8 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - [ ] Modo B: AC-XXX identificados en **Criterios de aceptación** del `README.md`; US en `Estado: Ready`
 - [ ] Modo B: propuesta presentada al usuario (paso 5) sin archivos creados
 - [ ] Modo B: confirmación estructurada recibida (paso 6) antes del primer `TK-*.md`
+- [ ] Orden entre TKs de la misma US según [Orden y priorización de tareas](#orden-y-priorización-de-tareas): infraestructura compartida → sin dependencias → con dependencias; ninguna TK depende de otra posterior en la secuencia
+- [ ] Si hay escenario E2E: su TK queda secuenciada al final (tras las tareas que atraviesa) y su ejecución no se exige como condición de `Estado: Ready`, sino en el Quality Gate previo a integrar/liberar
 - [ ] Idioma de preferencia determinado (preferencia en contexto, idioma del mensaje, o preguntado al usuario)
 - [ ] **ADO**: vinculación verificada (ver `SKILL.md`); si está vinculado, seguido `references/azure-devops.md` y `ado_id` extraído antes de crear el archivo local
 
@@ -239,7 +259,7 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 
 **Ejemplo 4 — Stubs desde una US (modo B)**
 - *Entrada:* «Crea las tareas necesarias para implementar US-004.» (sin describir tareas específicas).
-- *Comportamiento — turno 1:* Activa el *Flujo: Sugerir stubs desde una US*. Verifica que `US-004/README.md` está en `Ready` y contiene `AC-XXX`. Lee la US completa, identifica los repositorios afectados, y presenta la propuesta agrupada por repositorio (paso 5) con `TK-XXX` tentativo, nombre de archivo, objetivo breve y cobertura de `AC-XXX` por stub. Pregunta con opciones: [Confirmar stubs] / [Ajustar alcance] / [Cancelar]. **No crea archivos.**
+- *Comportamiento — turno 1:* Activa el *Flujo: Sugerir stubs desde una US*. Verifica que `US-004/README.md` está en `Ready` y contiene `AC-XXX`. Lee la US completa, identifica los repositorios afectados, y presenta la propuesta agrupada por repositorio (paso 5) con `TK-XXX` tentativo, nombre de archivo, objetivo breve y cobertura de `AC-XXX` por stub, ordenada según [Orden y priorización de tareas](#orden-y-priorización-de-tareas): primero la infraestructura compartida (p. ej. modelo de dominio común), luego las tareas sin dependencias, y al final las que dependen de otras — el eventual escenario E2E queda último. Pregunta con opciones: [Confirmar stubs] / [Ajustar alcance] / [Cancelar]. **No crea archivos.**
 - *Comportamiento — turno 2:* Tras confirmación, crea cada stub en `Estado: Draft` sin referencias a `AC-XXX` en el archivo (paso 7) y reporta rutas creadas con cobertura AC (paso 8).
 - *Salida:* Stubs `TK-001-...md` a `TK-NNN-...md` en Draft.
 
@@ -271,6 +291,9 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 - **Modo B**: redactar Plan, Dependencias o Referencias detalladas en stubs propuestos desde una US.
 - Crear una TK estando en una rama de implementación distinta de la propia US padre sin advertir al usuario y preguntar `Continuar` / `Detenerme aquí` primero.
 - **Modo B**: crear stubs sin haber presentado la propuesta (paso 5) y recibido confirmación (paso 6).
+- Secuenciar o presentar TKs de modo que una dependa de otra creada o ejecutada después (bloqueo hacia adelante); ver [Orden y priorización de tareas](#orden-y-priorización-de-tareas).
+- Postergar la infraestructura compartida en lugar de priorizarla, retrasando la posibilidad de ejecutar tareas en paralelo.
+- Exigir la ejecución de escenarios E2E como condición de `Estado: Ready` de una TK individual, en lugar de dejarla al Quality Gate previo a integrar o liberar la funcionalidad.
 - Lanzar preguntas como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas.
 
 ---

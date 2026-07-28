@@ -9,9 +9,11 @@ license: MIT
 
 Crear un PR o MR desde la **rama actual** hacia una **rama destino preguntada al usuario**, sobre cualquier repo git con remoto configurado.
 
-> **Origen = rama actual**, sin excepción. Si está en `main`, `master`, `develop` o `trunk`: parar y avisar.
+> **Origen = rama actual**, sin excepción. Debe ser una **rama de implementación** con prefijo reconocido (`feature/`, `fix/`, `chore/`, `refactor/`) y no estar en `main`, `master`, `develop` ni `trunk`; si no cumple ambas condiciones, parar y avisar.
 >
 > **Plataforma se auto-detecta** del remoto `origin`. No preguntar.
+>
+> **Working tree sucio no detiene el flujo ni se pregunta al usuario:** si hay cambios sin commitear, se invoca automáticamente el flujo de **`git-commit`** sobre ellos (con su propia detección de secretos y confirmación del mensaje) y, una vez commiteados, se continúa. Solo bloquea si `git-commit` no logra completar el commit.
 >
 > **Puertas de calidad obligatorias y bloqueantes:** antes de crear el PR se ejecutan **siempre** `code-review` y `trace-validate`, y —si existe— se verifica la **Definition of Done** (`docs/policies/definition-of-done.md`). Las tres deben quedar en **aprobado**; si alguna no lo está, **no** se crea el PR. No hay flujo "crear como draft" ni "ignorar y continuar".
 >
@@ -51,8 +53,8 @@ Cuando el idioma resuelto obliga a traducir el título, el prefijo de ticket (`[
 
 1. `git rev-parse --is-inside-work-tree` — confirmar repo git.
 2. `git rev-parse --abbrev-ref HEAD` — obtener rama actual.
-3. Si la rama actual ∈ {`main`, `master`, `develop`, `trunk`}: **parar** y avisar.
-4. `git status --porcelain` — debe estar vacío; si no, **parar**, avisar listando los archivos pendientes y **sugerir al usuario** commitear esos cambios con el skill **`git-commit`** antes de continuar (stash o descarte quedan como alternativas a su decisión). No ejecutar `git add` ni `git commit` automáticos.
+3. **Validar rama de implementación:** la rama actual debe empezar por un prefijo reconocido (`feature/`, `fix/`, `chore/`, `refactor/`) **y** no estar en `{main, master, develop, trunk}`. Si falla cualquiera de las dos condiciones: **parar** y avisar (rama protegida, o rama sin prefijo de implementación reconocido).
+4. `git status --porcelain` — si hay salida (cambios sin commitear): **no preguntar al usuario si debe commitear**; invocar automáticamente el flujo de **`git-commit`** sobre esos cambios (aplica su propia detección de secretos y muestra su propia confirmación del mensaje) y, una vez completado el commit, continuar con el resto del pre-flight. Si `git-commit` no logra completar el commit (p. ej. detecta un secreto y queda bloqueado), **parar** y reportar ese bloqueo tal cual lo devuelve `git-commit`.
 
 ### Paso 2 — Detectar plataforma y CLI
 
@@ -174,8 +176,11 @@ No existe `docs/policies/definition-of-done.md`. Esa puerta se omite; el PR se c
 **Ejemplo 7 — Rama protegida**
 Usuario en `main`: «crea un PR a develop.» Parar en pre-flight: «Estás en `main`. Cambia a una rama de feature antes de crear el PR.»
 
+**Ejemplo 7b — Rama sin prefijo de implementación**
+Usuario en `reportes-2026` (no está en la lista de protegidas, pero tampoco empieza por `feature/`, `fix/`, `chore/` ni `refactor/`): «crea el PR.» Parar en pre-flight: «La rama `reportes-2026` no es una rama de implementación reconocida (`feature/`, `fix/`, `chore/`, `refactor/`). Renombra o cambia de rama antes de crear el PR.»
+
 **Ejemplo 8 — Working tree sucio**
-`git status --porcelain` devuelve dos archivos modificados sin commitear. Parar en pre-flight sin push ni PR: listar los archivos pendientes y sugerir commitearlos con el skill `git-commit` antes de reintentar (stash o descarte como alternativas si el usuario lo prefiere).
+`git status --porcelain` devuelve dos archivos modificados sin commitear en `feature/US-042-...`. El skill no pregunta si debe commitear: invoca automáticamente el flujo de `git-commit` sobre esos archivos (que muestra su propia propuesta de commit y detecta secretos), y tras completarse el commit continúa con el resto del pre-flight y el flujo normal hasta crear el PR.
 
 **Ejemplo 9 — PR ya existente**
 La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con nota «Ya existe un PR para esta combinación». No crear uno nuevo.
@@ -193,7 +198,9 @@ La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con
 - Tratar la ausencia de `docs/policies/definition-of-done.md` como un fallo: si no existe, esa puerta simplemente se omite.
 - Inventar el cumplimiento de un ítem de la DoD que no se puede determinar desde el repo o el diff.
 - Aplicar una corrección sin autorización explícita del usuario, o no re-ejecutar la puerta tras corregir.
-- Hacer `git add`, `git commit -am` o cualquier mutación de historia si hay cambios sin commitear; ante working tree sucio se para y se sugiere el skill `git-commit`, sin commitear por iniciativa propia.
+- Ejecutar `git add`/`git commit -am` manualmente en lugar de invocar el flujo del skill `git-commit` (se pierde su detección de secretos y su confirmación de mensaje).
+- Detener el pre-flight preguntándole al usuario si desea commitear los cambios pendientes, en lugar de invocar `git-commit` automáticamente.
+- Crear el PR desde una rama sin prefijo de implementación reconocido (`feature/`, `fix/`, `chore/`, `refactor/`), o saltarse esa validación además de la lista de ramas protegidas.
 - Usar `git push --force` o `--force-with-lease`.
 - Asignar reviewers, labels o milestones por iniciativa propia.
 - Re-implementar la lógica de `code-review` o `trace-validate` en lugar de invocar el flujo existente.
