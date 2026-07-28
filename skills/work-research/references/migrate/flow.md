@@ -202,7 +202,7 @@ Presenta la recomendación y ofrece continuar (herramienta estructurada):
   cada US se planifica luego con `work-plan` (TK) y se implementa con
   `work-implement`. La migración incremental (fases/estrategia) se materializa como
   las US/TK correspondientes.
-- **Cambio pequeño → `work-plan`.** Crear un `WI-XXX` de mantenimiento que ejecute la
+- **Cambio pequeño → `work-plan`.** Crear una tarea de mantenimiento (`WI-XXX`) que ejecute la
   migración como una unidad; se implementa con `work-implement`.
 
 En ambos casos el `RS-XXX` (con su `discovery.md` y `validation.md`) es la

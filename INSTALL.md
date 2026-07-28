@@ -22,11 +22,3 @@ Agrega el marketplace y luego instala el plugin:
 ```
 
 Los skills quedan disponibles con prefijo de namespace (por ejemplo `/sdd-devkit:git-commit`) y también se invocan automáticamente según el contexto de la tarea. Los agentes de `agents/` aparecen en `/context` bajo Custom Agents.
-
-### Probar cambios locales antes de publicar
-
-Desde la raíz del repo:
-
-```bash
-claude --plugin-dir .
-```

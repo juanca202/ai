@@ -39,17 +39,17 @@ Invocación típica: `/nombre-skill` o una frase que active la descripción del 
 
 ### arch-manage
 
-**Cuándo:** documentar o cambiar una decisión arquitectónica (ADR) o una norma de dominio (estándar / requisito).
+**Cuándo:** documentar o cambiar una decisión arquitectónica (ADR) o una norma de dominio (estándar / criterio de cumplimiento).
 
-**Produce:** `docs/adr/ADR-XXX-*.md` y/o requisitos en `docs/standards/` (p. ej. *Testing Standards*), con criterios `CR-XXX` y fitness functions cuando apliquen.
+**Produce:** `docs/adr/ADR-XXX-*.md` y/o criterios de cumplimiento (`CR-XXX`) en `docs/standards/` (p. ej. *Testing Standards*), con fitness functions cuando apliquen.
 
 **Opciones — qué se produce:**
 
 | Caso | Input | Resultado |
 |------|-------|-----------|
 | **A. Solo ADR** | Decisión puntual/histórica sin regla continua | ADR con `emits: []`; no toca estándares |
-| **B. ADR + estándar** | Decisión que fija una regla verificable | ADR + criterio(s) en el estándar del dominio |
-| **C. Solo estándar** | Regla sin decisión nueva | Requisito/criterio en un estándar existente (o nuevo) |
+| **B. ADR + estándar** | Decisión que fija una regla verificable | ADR + criterio(s) de cumplimiento en el estándar del dominio |
+| **C. Solo estándar** | Regla sin decisión nueva | Criterio(s) de cumplimiento en un estándar existente (o nuevo) |
 
 **Estados habituales:** ADR `Draft` / `Proposed` / `Accepted` / `Superseded` / `Deprecated`; estándar `Draft` / `Active` / `Deprecated` / `Superseded`. Un ADR `Accepted` no se reescribe: se supersede.
 
@@ -82,7 +82,7 @@ Invocación típica: `/nombre-skill` o una frase que active la descripción del 
 | Tipo | Qué proponer |
 |------|----------------|
 | **Solo ADR** | Elección histórica/puntual sin regla continua |
-| **ADR + requisito** | Decisión que además fija una norma verificable en un dominio |
+| **ADR + criterio de cumplimiento** | Decisión que además fija una norma verificable en un dominio |
 
 Los candidatos se agrupan por **dominio técnico/funcional** (testing, api, security, etc.; ver catálogo en el skill). No hay modo que se detenga antes de la Fase 5: tras aprobar, se crean los artefactos en la misma ejecución.
 
@@ -104,7 +104,7 @@ Los candidatos se agrupan por **dominio técnico/funcional** (testing, api, secu
 
 ### arch-audit
 
-**Cuándo:** comprobar si el repo cumple los requisitos de `docs/standards/` y las reglas de `AGENTS.md`.
+**Cuándo:** comprobar si el repo cumple los criterios de cumplimiento de `docs/standards/` y las reglas de `AGENTS.md`.
 
 **Produce:** `docs/audits/audit-YYYY-MM-DD.md` con hallazgos priorizados y veredicto.
 

@@ -32,7 +32,7 @@ Plantilla canónica del reporte de trazabilidad (trace-validate).
 Valores permitidos:
 - Criterio: AC-XXX (US y WI). Formatos legados (AC-1, CA-1, BR-01) se normalizan a AC-XXX.
 - Estado: Cubierto | Parcial | No cubierto
-- Ejec. auto (estado real al validar; el TC solo declara Manual/Automatizable): Sí (artefacto automatizado hallado y ejecutado) | No (Automatizable pendiente, o existe pero no se pudo ejecutar) | N/A (Manual por diseño)
+- Ejec. auto (estado real al validar; el TC solo declara su `Tipo de prueba`: Manual, o uno o varios tipos): Sí (artefacto automatizado hallado y ejecutado) | No (tipo(s) automatizable(s) pendiente(s), o existe pero no se pudo ejecutar) | N/A (Manual por diseño)
 - Resultado: Paso | Fallo | No ejecutado
 - Tipo de artefacto: unit | integración | e2e | manual
 - Celdas sin dato: «—»

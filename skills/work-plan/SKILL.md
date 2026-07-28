@@ -1,6 +1,6 @@
 ---
 name: work-plan
-description: "Planifica trabajo de distintos tipos sin generar código ni pruebas. Dos tipos de plan: (1) tareas técnicas (TK-XXX) bajo una historia de usuario existente; (2) work items de mantenimiento (WI-XXX) sin historia asociada — bugs, refactor, deuda técnica, actualización de dependencias, tareas operativas. Activar siempre que el usuario pida planificar implementación, descomponer trabajo, definir alcance técnico, documentar especificaciones técnicas o planificar mantenimiento / deuda técnica / refactor, aunque no nombre «tarea», «TK» o «WI». Activar también — por defecto — cuando solo entregue una referencia a una historia (p. ej. «US-004», «planifica US-007», «tareas para esta historia»): proponer stubs agrupados por repositorio que cubran los criterios de aceptacion (AC-XXX). Selecciona el tipo según haya o no historia asociada y carga su definición desde references/."
+description: "Planifica trabajo de distintos tipos sin generar código ni pruebas. Dos tipos de plan: (1) tareas técnicas (TK-XXX) bajo una historia de usuario existente; (2) tareas de mantenimiento (WI-XXX) sin historia asociada — bugs, refactor, deuda técnica, actualización de dependencias, tareas operativas. Activar siempre que el usuario pida planificar implementación, descomponer trabajo, definir alcance técnico, documentar especificaciones técnicas o planificar mantenimiento / deuda técnica / refactor, aunque no nombre «tarea», «TK» o «WI». Activar también — por defecto — cuando solo entregue una referencia a una historia (p. ej. «US-004», «planifica US-007», «tareas para esta historia»): proponer stubs agrupados por repositorio que cubran los criterios de aceptacion (AC-XXX). Selecciona el tipo según haya o no historia asociada y carga su definición desde references/."
 license: MIT
 ---
 
@@ -98,4 +98,4 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 | `references/maintenance-tasks.md` | Tipo de plan = tarea de mantenimiento. |
 | `references/azure-devops.md` | Solo si se detecta vinculación a ADO (ver sección anterior). |
 | `assets/task-template.md` | Plantilla canónica de una tarea de historia de usuario (`TK-XXX`). Leer antes de redactar el documento. |
-| `assets/work-item-template.md` | Plantilla canónica de un work item de mantenimiento (`WI-XXX`). Leer antes de redactar el documento. |
+| `assets/work-item-template.md` | Plantilla canónica de una tarea de mantenimiento (`WI-XXX`). Leer antes de redactar el documento. |

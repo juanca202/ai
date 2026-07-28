@@ -177,7 +177,7 @@ Reemplazar el contenido (vacío) bajo `## Stack tecnológico` en `AGENTS.md` con
 
 Confirmar al usuario que el harness inicial quedó listo, resumiendo: punto de partida (situación del Paso 1.2), repositorio git (creado o ya existía), archivos del harness creados, stack definitivo, compuerta de calidad configurada, y — si aplica — los ADR/estándares creados con sus rutas: los del Paso 5.1 y, si la situación fue "con implementación", también los que creó `arch-discover` en su propia Fase 5 (retenidos del Paso 4.1).
 
-Después, ofrecer el siguiente paso natural con la herramienta de preguntas estructuradas — **es una sugerencia, no un paso bloqueante**: *"¿Quieres continuar con...?"* opciones: `Escribir la primera historia de usuario (work-define)` / `Planificar tareas o work items (work-plan)` / `Nada por ahora`.
+Después, ofrecer el siguiente paso natural con la herramienta de preguntas estructuradas — **es una sugerencia, no un paso bloqueante**: *"¿Quieres continuar con...?"* opciones: `Escribir la primera historia de usuario (work-define)` / `Planificar tareas técnicas o de mantenimiento (work-plan)` / `Nada por ahora`.
 
 No confirmar el cierre antes de que `AGENTS.md` tenga el stack ya escrito.
 

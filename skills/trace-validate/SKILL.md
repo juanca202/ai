@@ -1,6 +1,6 @@
 ---
 name: trace-validate
-description: "Genera un reporte de trazabilidad que valida la cobertura de los criterios de aceptación de un trabajo —una historia de usuario (US-XXX), un work item de mantenimiento (WI-XXX) o un feature de funcionalidad ya implementada (FEAT-XXX), cada uno con sus criterios de aceptación (AC-XXX)— contra los casos de prueba y los artefactos de prueba del repositorio (unit, integración, e2e). Para cada criterio indica los casos de prueba y artefactos que lo cubren, un estado (Cubierto / Parcial / No cubierto), observaciones cuando hace falta aclaración, si la prueba se pudo ejecutar automáticamente y su resultado, y finalmente un veredicto sobre si todos los criterios de aceptación quedan cubiertos. Activar siempre que el usuario pida validar cobertura, generar una matriz o reporte de trazabilidad, verificar que los criterios de aceptación están probados, comprobar que un trabajo o un feature está cubierto por pruebas, o mencione «trace-validate», «trazabilidad», «matriz de cobertura» o «validar criterios de aceptación», aunque no nombre el formato exacto."
+description: "Genera un reporte de trazabilidad que valida la cobertura de los criterios de aceptación de un trabajo —una historia de usuario (US-XXX), una tarea de mantenimiento (WI-XXX) o un feature de funcionalidad ya implementada (FEAT-XXX), cada uno con sus criterios de aceptación (AC-XXX)— contra los casos de prueba y los artefactos de prueba del repositorio (unit, integración, e2e). Para cada criterio indica los casos de prueba y artefactos que lo cubren, un estado (Cubierto / Parcial / No cubierto), observaciones cuando hace falta aclaración, si la prueba se pudo ejecutar automáticamente y su resultado, y finalmente un veredicto sobre si todos los criterios de aceptación quedan cubiertos. Activar siempre que el usuario pida validar cobertura, generar una matriz o reporte de trazabilidad, verificar que los criterios de aceptación están probados, comprobar que un trabajo o un feature está cubierto por pruebas, o mencione «trace-validate», «trazabilidad», «matriz de cobertura» o «validar criterios de aceptación», aunque no nombre el formato exacto."
 license: MIT
 ---
 
@@ -33,7 +33,7 @@ El tipo se determina por el identificador que indique el usuario o por la ruta d
 | Tipo | Identificador | Dónde viven los criterios | Códigos a trazar |
 |------|---------------|---------------------------|------------------|
 | **Historia de usuario** | `US-XXX` | Sección **Criterios de aceptación** del `README.md` de la US (lista plana `AC-XXX`) | `AC-XXX` en el orden en que aparecen |
-| **Work item de mantenimiento** | `WI-XXX` | Sección **## Criterios de aceptación** del `README.md` del WI (`WI-XXX-[kebab]/README.md`) | `AC-XXX` en el orden en que aparecen |
+| **Tarea de mantenimiento** | `WI-XXX` | Sección **## Criterios de aceptación** del `README.md` del WI (`WI-XXX-[kebab]/README.md`) | `AC-XXX` en el orden en que aparecen |
 | **Feature (funcionalidad ya implementada)** | `FEAT-XXX` | Sección **## Criterios de aceptación** del `README.md` del feature (`docs/specs/features/FEAT-XXX-[slug]/README.md`) | `AC-XXX` en el orden en que aparecen |
 > En todo el flujo, «criterio» se refiere al código del tipo en curso: `AC-XXX` para US, WI y FEAT. Si el trabajo **no tiene criterios de aceptación**, no hay nada que trazar → **bloquear** (ver «Cuándo bloquear»).
 
@@ -249,7 +249,7 @@ Posición: **validación / cierre de calidad** — después de `work-implement`.
 | **Entrada** | Trabajo (`US-XXX` / `WI-XXX`) con **criterios de aceptación** (`AC-XXX`); código implementado; idealmente tests escritos por `quality-specialist` en el cierre de `work-implement`. Resultados de pruebas **vía `code-review`** (caché `test-run.json` o delegación `tests-only`). **O** un `FEAT-XXX` (registro de funcionalidad ya implementada — inferida de código legacy o documentada como existente) para comprobar si está cubierta por pruebas. |
 | **Salida** | `trace-report.md` en la ubicación del tipo + veredicto sobre la cobertura. |
 | **Veredicto ❌ Rechazado (US/WI)** | Volver a `work-implement` (fase de pruebas con `quality-specialist`) para cubrir los criterios faltantes; revalidar después. |
-| **Veredicto ❌ Rechazado (FEAT)** | Hay comportamiento ya implementado **sin pruebas**: escribir los tests faltantes sobre el código existente (no código funcional; el `FEAT` no pasa a `work-implement`) y revalidar. Formalizar ese trabajo como un `WI-XXX` de mantenimiento es opcional y lo decide el usuario. |
+| **Veredicto ❌ Rechazado (FEAT)** | Hay comportamiento ya implementado **sin pruebas**: escribir los tests faltantes sobre el código existente (no código funcional; el `FEAT` no pasa a `work-implement`) y revalidar. Formalizar ese trabajo como una tarea de mantenimiento (`WI-XXX`) es opcional y lo decide el usuario. |
 | **Falta funcional en el trabajo** | Si la matriz revela que un criterio no es testeable o está mal definido, escalar a la definición/planificación del trabajo — para un `FEAT`, a quien lo registró (el flujo de análisis legacy de `work-research` u otra fuente de la funcionalidad); no editar la especificación desde aquí. |
 
 ---

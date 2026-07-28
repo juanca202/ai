@@ -223,9 +223,11 @@ a partir de `assets/legacy/feature-template.md`:
      el estado de cobertura **no** se duplican aquí: viven en el discovery
      (`RS-XXX/discovery.md`, Pasos 1.1–1.4).
    - **Procedencia:** marca "Inferido desde código (RS-XXX · commit/branch)".
-3. **Estado.** `Ready` si todos los `AC-XXX` tienen identificador y enunciado RFC 2119
-   y no quedan lagunas; en caso contrario `Draft` con los pendientes en Observaciones.
-   Solo los features en `Ready` pasan al Paso 3.
+3. **Estado.** `Ready` si todos los `AC-XXX` tienen identificador y enunciado RFC 2119,
+   **cada `BR-XX` declarada queda verificada por al menos un `AC-XXX`** (ninguna `BR-XX`
+   sin su `AC-XXX` correspondiente — ver bullet **Criterios de aceptación** arriba) y no
+   quedan lagunas; en caso contrario `Draft` con los pendientes en Observaciones. Solo los
+   features en `Ready` pasan al Paso 3.
 
 ---
 
@@ -259,7 +261,7 @@ si el código existente está cubierto por pruebas:
 3. **Cerrar los huecos es escribir pruebas, no funcionalidad.** El `FEAT-XXX` no pasa a
    `work-implement`; las pruebas faltantes se escriben sobre el código que ya existe.
    Si el equipo quiere formalizar ese trabajo de cobertura como una unidad rastreable,
-   puede crear un `WI-XXX` de mantenimiento (deuda técnica de pruebas) que referencie
+   puede crear una tarea de mantenimiento (`WI-XXX`) (deuda técnica de pruebas) que referencie
    el `FEAT-XXX` — esa es una decisión del usuario, no un paso automático de este flujo.
 
 ---

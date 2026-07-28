@@ -1,6 +1,6 @@
 ---
 name: work-implement
-description: 'Usar al pedir implementar, desarrollar o ejecutar en codigo trabajo ya especificado, de distintos tipos. Dos tipos de implementacion: (1) tareas tecnicas (TK-XXX) bajo una historia de usuario (US-XXX); (2) work items de mantenimiento (WI-XXX) sin historia asociada — bugs, refactor, deuda tecnica, dependencias, operativas. Activar siempre que el usuario pida "implementar", "desarrollar", "ejecutar tareas", "codificar", "trabajar en el TK/WI" o cualquier variante que implique escribir codigo a partir de una especificacion ya redactada, aunque no nombre el tipo. Selecciona el tipo segun el artefacto referenciado y carga su flujo desde references/. Solo se implementa trabajo en estado Ready.'
+description: 'Usar al pedir implementar, desarrollar o ejecutar en codigo trabajo ya especificado, de distintos tipos. Dos tipos de implementacion: (1) tareas tecnicas (TK-XXX) bajo una historia de usuario (US-XXX); (2) tareas de mantenimiento (WI-XXX) sin historia asociada — bugs, refactor, deuda tecnica, dependencias, operativas. Activar siempre que el usuario pida "implementar", "desarrollar", "ejecutar tareas", "codificar", "trabajar en el TK/WI" o cualquier variante que implique escribir codigo a partir de una especificacion ya redactada, aunque no nombre el tipo. Selecciona el tipo segun el artefacto referenciado y carga su flujo desde references/. Solo se implementa trabajo en estado Ready.'
 license: MIT
 ---
 
@@ -10,7 +10,7 @@ Guia general para **ejecutar en codigo** trabajo ya especificado, de **distintos
 
 > **Alcance (cualquier tipo):** consume especificaciones ya redactadas por los skills de planificacion (`work-define`, `work-plan`). **No reescribe ni reestructura** la especificacion - solo la implementa. Correcciones menores acordadas con el usuario son la unica excepcion.
 >
-> **Solo implementacion:** no modifica documentacion de producto (README de US, `TK-XXX`, `WI-XXX`, ADRs, technical-docs) - solo el `progress.md`. **Excepcion de checkboxes:** marcar `[ ]` como `[x]` en las subtareas del artefacto en ejecucion **a medida que se completan** es la unica modificacion permitida en archivos de especificacion; no se toca ninguna otra seccion del artefacto. El archivo a editar depende del tipo: `TK-XXX.md` para tareas de historia de usuario, el `README.md` del WI para work items. Si se detecta un conflicto en la documentacion que pueda afectar el resultado, **parar inmediatamente y notificar al usuario** antes de continuar.
+> **Solo implementacion:** no modifica documentacion de producto (README de US, `TK-XXX`, `WI-XXX`, ADRs, technical-docs) - solo el `progress.md`. **Excepcion de checkboxes:** marcar `[ ]` como `[x]` en las subtareas del artefacto en ejecucion **a medida que se completan** es la unica modificacion permitida en archivos de especificacion; no se toca ninguna otra seccion del artefacto. El archivo a editar depende del tipo: `TK-XXX.md` para tareas de historia de usuario, el `README.md` del WI para tareas de mantenimiento. Si se detecta un conflicto en la documentacion que pueda afectar el resultado, **parar inmediatamente y notificar al usuario** antes de continuar.
 >
 > **Ritmo obligatorio - una unidad por confirmacion (modo por defecto):** implementar una unidad, actualizar `progress.md` **y la lista de tareas (to-dos) del agente**, ejecutar lint/build, y **esperar confirmacion explicita del usuario antes de arrancar la siguiente**. La **unidad** depende del tipo (ver tabla de seleccion). **El commit de la unidad terminada no se hace al completarla:** queda pendiente durante la pausa de confirmacion, dejando una ventana para que el usuario revise el resultado, aplique correcciones manuales o le indique ajustes al agente antes de que el cambio quede commiteado. El commit se hace **al confirmar el avance**, como primer paso antes de arrancar la siguiente unidad (o, si el usuario detiene el flujo ahi, en el cierre — ver Paso 4 de cada referencia).
 >
@@ -54,7 +54,7 @@ La senal que distingue los tipos es **el artefacto que el usuario referencia**.
 | Tipo | Como se identifica | Unidad de confirmacion | Flujo a leer |
 |------|--------------------|------------------------|--------------|
 | **Tarea de historia de usuario** | El trabajo referencia una historia `US-XXX` o una tarea `TK-XXX` que cuelga de ella; el artefacto vive bajo `docs/specs/user-stories/`. | **Una `TK-XXX`** | `references/user-story-tasks.md` — **leer antes de implementar.** |
-| **Work item de mantenimiento** | El trabajo referencia un `WI-XXX` (bug, refactor, deuda tecnica, dependencias, operativa) **sin historia asociada**; vive bajo `docs/specs/work-items/`. | **El `WI-XXX` completo** | `references/work-items.md` — **leer antes de implementar.** |
+| **Tarea de mantenimiento** | El trabajo referencia un `WI-XXX` (bug, refactor, deuda tecnica, dependencias, operativa) **sin historia asociada**; vive bajo `docs/specs/work-items/`. | **El `WI-XXX` completo** | `references/work-items.md` — **leer antes de implementar.** |
 
 Reglas de seleccion:
 
@@ -71,7 +71,7 @@ Verificar estas condiciones antes de implementar, sea cual sea el tipo. Si algun
 - **No iniciar en la rama de otro trabajo (primera verificacion):** obtener la rama actual con `git branch --show-current`. Si ya tiene un prefijo de implementacion (`feature/`, `fix/`, `chore/`, `refactor/`) y **no** corresponde al artefacto que se va a implementar, **parar** e indicar al usuario que no se puede iniciar la implementacion desde la rama de otro trabajo; debe situarse en la rama base acordada (p. ej. `develop`/`main`) para que el skill cree o cambie a la rama del artefacto. **Excepcion - reanudar:** si la rama actual es precisamente la del artefacto pedido, continuar normalmente.
 - **Working tree limpio:** `git status --porcelain` sin cambios pendientes no resueltos **al iniciar la sesion de implementacion** (o al reanudarla). No aplica durante la pausa de confirmacion entre unidades: los cambios de la unidad recien terminada quedan sin commitear ahi a proposito (ver *Ritmo obligatorio*), hasta que el usuario confirma avanzar.
 - **Rama correcta:** estar en (o crear) la rama de trabajo del artefacto. No implementar en `main` ni en ramas de otro trabajo sin instruccion explicita. El nombre de rama lo define cada referencia segun el tipo.
-- **Solo trabajo de la rama actual:** solo se implementan unidades (TK / WI) que pertenezcan a la historia o work item asociado a la rama de implementacion actual. No implementar tareas de otro artefacto o de otra rama: si la unidad pedida no corresponde a la rama actual, **parar** y cambiar a su rama correspondiente (o pedir al usuario que lo haga) antes de continuar; nunca mezclar trabajo de distintos artefactos en una misma rama.
+- **Solo trabajo de la rama actual:** solo se implementan unidades (TK / WI) que pertenezcan a la historia o tarea de mantenimiento asociada a la rama de implementacion actual. No implementar tareas de otro artefacto o de otra rama: si la unidad pedida no corresponde a la rama actual, **parar** y cambiar a su rama correspondiente (o pedir al usuario que lo haga) antes de continuar; nunca mezclar trabajo de distintos artefactos en una misma rama.
 - **Artefacto en `Ready`:** el artefacto a implementar existe y esta en `Estado: Ready` (lo verifica cada referencia con su regla propia).
 - **Solapamiento de progreso:** leer `progress.md` si existe; respetar unidades ya en `Done`; si hay alguna `In Progress`, revisar notas y estado real antes de continuar.
 
@@ -260,7 +260,7 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 | Archivo | Cuando leerlo |
 |---------|---------------|
 | `references/user-story-tasks.md` | Tipo = tarea de historia de usuario (`US-XXX` / `TK-XXX`). Ubicaciones, filtros, cola, ciclo TK-a-TK (con TDD), flujo "TK sin US", cierre, ejemplos y anti-patrones. |
-| `references/work-items.md` | Tipo = work item de mantenimiento (`WI-XXX`). Documento unico combinado, validacion por criterios de aceptacion, ciclo por WI completo, cierre, ejemplos y anti-patrones. |
+| `references/work-items.md` | Tipo = tarea de mantenimiento (`WI-XXX`). Documento unico combinado, validacion por criterios de aceptacion, ciclo por WI completo, cierre, ejemplos y anti-patrones. |
 | `assets/progress-template.md` | Plantilla de `progress.md`. Adaptar encabezado y unidades al tipo. |
 
 ---

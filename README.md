@@ -3,7 +3,7 @@
 **SDD Devkit** (`sdd-devkit`) es un conjunto de skills para practicar Spec-Driven Development: parte de un requerimiento, lo convierte en documentación viva (historias de usuario, ADRs/estándares, diseño técnico, casos de prueba) y guía la implementación paso a paso hasta un entregable verificado. Cubre:
 
 - Documentación de arquitectura: ADRs, estándares y auditoría de cumplimiento.
-- Historias de usuario, planificación e implementación de tareas técnicas y work items de mantenimiento.
+- Historias de usuario, planificación e implementación de tareas técnicas y tareas de mantenimiento.
 - Definición y trazabilidad de casos de prueba.
 - Investigación de producto, arquitectura o técnica (incluida migración entre proyectos).
 - Code review, integración y creación de PR con puertas de calidad.
@@ -25,9 +25,9 @@ Un **harness** es el "andamiaje" que sostiene y guía todo el proceso de desarro
 | Skill | Uso |
 |-------|-----|
 | [arch‑init](SKILLS.md#arch-init) | Inicializar el harness de un proyecto (nuevo o existente): repo git, diagnóstico base limpia/con características implementadas, stack tecnológico (detectado o investigado y scaffolded), placeholders `AGENTS.md`/`CLAUDE.md`/`.agents/MEMORY.md`/`docs/adr/README.md`/`docs/standards/README.md`, compuerta de calidad y los primeros ADR/estándares vía `arch-manage` |
-| [arch‑manage](SKILLS.md#arch-manage) | Crear o actualizar ADRs (decisiones, en `docs/adr/`) y estándares de arquitectura **por dominio** (en `docs/standards/`, p. ej. *Testing Standards*). Cada decisión añade un **requisito** — redactado con RFC 2119/8174 (MUST/SHOULD/MAY) — al estándar del dominio que corresponda; el ADR lo referencia (`emits`) y el estándar traza a sus decisiones (`source_adrs`). Las fitness functions cuelgan de cada requisito |
-| [arch‑discover](SKILLS.md#arch-discover) | Analizar un repositorio y proponer ADRs y requisitos candidatos, agrupados por estándar de dominio, a partir de decisiones y reglas implícitas |
-| [arch‑audit](SKILLS.md#arch-audit) | Auditar el cumplimiento de los **requisitos** de los estándares (`docs/standards/`) y de `AGENTS.md` contra el estado real del repo — requisito por requisito, según su término RFC 2119, citando el ADR de origen — y generar un informe priorizado en `docs/audits/` con revalidaciones incrementales |
+| [arch‑manage](SKILLS.md#arch-manage) | Crear o actualizar ADRs (decisiones, en `docs/adr/`) y estándares de arquitectura **por dominio** (en `docs/standards/`, p. ej. *Testing Standards*). |
+| [arch‑discover](SKILLS.md#arch-discover) | Analizar un repositorio y proponer ADRs y criterios de cumplimiento candidatos, agrupados por estándar de dominio, a partir de decisiones y reglas implícitas |
+| [arch‑audit](SKILLS.md#arch-audit) | Auditar los **criterios de cumplimiento** de los estándares (`docs/standards/`) y de `AGENTS.md` contra el estado real del repo — criterio por criterio, citando el ADR de origen — y generar un informe priorizado en `docs/audits/` con revalidaciones incrementales |
 | [git‑commit](SKILLS.md#git-commit) | Preparar commits con mensajes Conventional Commits inferidos del diff |
 
 #### Flujo del harness
@@ -54,7 +54,7 @@ flowchart TD
     end
     S --> IMPL
     IMPL --> V1["Verificación de código<br/>**/code-review**"]
-    V1 --> V2["Validación de requisitos<br/>**/trace-validate**"]
+    V1 --> V2["Validación de criterios de aceptación<br/>**/trace-validate**"]
     V2 --> DONE(["Entregable"])
 
     classDef nestedFlow fill:#fff7ed,stroke:#ea580c,stroke-width:2px,stroke-dasharray:5 5,color:#9a3412
@@ -66,7 +66,7 @@ flowchart TD
 3. En paralelo (o a continuación), se configura la **compuerta de calidad** vía `arch-init`; el camino brownfield también converge ahí.
 4. Luego se definen o actualizan los ADRs/Estándares con `arch-manage`. Opcionalmente se audita el cumplimiento con `arch-audit`.
 5. Con la base arquitectónica lista, el trabajo entra a la implementación de requerimientos (otro flujo: historias → planificación → implementación → integración/PR).
-6. El código resultante pasa por verificación (`code-review`) y validación de requisitos (`trace-validate`).
+6. El código resultante pasa por verificación (`code-review`) y validación de criterios de aceptación (`trace-validate`).
 7. El flujo termina en un entregable: trabajo verificado, validado y listo para producción.
 
 ### Specs
@@ -79,8 +79,8 @@ Skills del ciclo de vida de un requerimiento: de la historia de usuario al PR me
 | [work‑define](SKILLS.md#work-define) | Crear o actualizar historias de usuario (US-XXX) |
 | [design‑define](SKILLS.md#design-define) | Crear o actualizar documentación técnica (modelos de datos, APIs/endpoints, flujos, diagramas de clases/C4) en `docs/specs/technical-docs/` como referencia de implementación |
 | [test‑define](SKILLS.md#test-define) | Crear casos de prueba (TC-XXX) desde los criterios de aceptación de una US o WI (IEEE 29119-4) |
-| [work‑plan](SKILLS.md#work-plan) | Planificar tareas técnicas (TK-XXX) o work items de mantenimiento (WI-XXX) |
-| [work‑implement](SKILLS.md#work-implement) | Implementar tareas (TK-XXX) o work items (WI-XXX) a partir de specs en estado Ready |
+| [work‑plan](SKILLS.md#work-plan) | Planificar tareas técnicas (TK-XXX) o tareas de mantenimiento (WI-XXX) |
+| [work‑implement](SKILLS.md#work-implement) | Implementar tareas técnicas (TK-XXX) o de mantenimiento (WI-XXX) a partir de specs en estado Ready |
 | [code‑review](SKILLS.md#code-review) | Revisión de código pre-merge: verificaciones automatizadas según el stack + revisión cualitativa (arquitectura, diseño, SOLID), con veredicto apto/no apto/incompleto |
 | [trace‑validate](SKILLS.md#trace-validate) | Reporte de trazabilidad: criterios de aceptación de US/WI ↔ casos y artefactos de prueba, con veredicto de cobertura |
 | [work‑integrate](SKILLS.md#work-integrate) | Cerrar e integrar el trabajo de una US o WI (merge de la rama feature previa verificación en `progress.md`) |
@@ -103,6 +103,7 @@ flowchart TD
     B -.-> C["Casos de prueba<br/>**/test-define**"]
     B -.-> D["Diseño arquitectónico<br/>**/design-define**"]
     B --> E["Planificación de tareas<br/>**/work-plan**"]
+    A -.->|tareas de mantenimiento| E
     E -.-> F["Investigación<br/>**/work-research**"]
     E -.-> D
     E --> G["Implementación<br/>**/work-implement**"]
@@ -115,9 +116,9 @@ flowchart TD
     class A,B,E,G,I,J main
 ```
 
-1. **Inicio**: un requerimiento se convierte en historias de usuario con `work-define`.
+1. **Inicio**: un requerimiento se convierte en historias de usuario con `work-define`. Si son tareas de mantenimiento, el requerimiento entra directo a **Planificación de tareas** (`work-plan`) —nota en la línea del diagrama—.
 2. Opcionalmente, desde las historias se definen casos de prueba (`test-define`) y/o diseño arquitectónico (`design-define`).
-3. Las historias pasan a `work-plan` para descomponerlas en tareas técnicas (TK-XXX) o work items (WI-XXX).
+3. **Planificación de tareas** (`work-plan`): desde una historia produce tareas técnicas (`TK-XXX`); sin historia, tareas de mantenimiento (`WI-XXX`).
 4. Durante la planificación, opcionalmente se investiga con `work-research` y/o se ajusta el diseño arquitectónico con `design-define`.
 5. Las tareas planificadas pasan a `work-implement` para su codificación.
 6. El flujo termina por uno de dos caminos, cada uno con puertas de calidad (`code-review`, `trace-validate`), y ambos llegan al mismo entregable — el trabajo listo para producción, ya sea integrado directo (`work-integrate`) o vía Pull/Merge Request (`pr-create`).

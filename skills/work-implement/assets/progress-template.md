@@ -7,21 +7,21 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 
 ## {{identificador del trabajo}}
 **Estado:** {{Pending | In Progress | Done}}
-**Tipo:** {{historia de usuario | work item}}
+**Tipo:** {{historia de usuario | tarea de mantenimiento}}
 **Fecha de creación:** {{YYYY-MM-DD HH:mm}}
 **Ultima actualizacion:** {{YYYY-MM-DD HH:mm}}
 
 <!--
-Valores del identificador: `US-XXX-{{slug}}` (historia) o `WI-XXX-{{slug}}` (work item).
+Valores del identificador: `US-XXX-{{slug}}` (historia) o `WI-XXX-{{slug}}` (tarea de mantenimiento).
 Ubicacion y alcance por tipo (cada trabajo tiene su propio `progress.md` dentro de su carpeta):
 - Historia de usuario (`US-XXX`): un `progress.md` por carpeta de la US (`docs/specs/user-stories/US-XXX-{{nombre-corto}}/progress.md`); el encabezado lleva su `US-XXX` y las unidades son sus `TK-XXX`.
-- Work item de mantenimiento (`WI-XXX`): un `progress.md` por carpeta del WI (`docs/specs/work-items/WI-XXX-{{slug}}/progress.md`), específico de ese WI; el encabezado lleva su `WI-XXX` y la unidad es el `WI-XXX` completo (una sola entrada, sin sub-tareas).
+- Tarea de mantenimiento (`WI-XXX`): un `progress.md` por carpeta del WI (`docs/specs/work-items/WI-XXX-{{slug}}/progress.md`), específico de ese WI; el encabezado lleva su `WI-XXX` y la unidad es el `WI-XXX` completo (una sola entrada, sin sub-tareas).
 -->
 
 ### Unidades
 
 <!--
-La "unidad" depende del tipo: TK para historias de usuario, el WI completo para work items.
+La "unidad" depende del tipo: TK para historias de usuario, el WI completo para tareas de mantenimiento.
 `Cobertura de test cases` es opcional: incluirla solo si el artefacto tiene carpeta `test-cases/`; omitirla si no hay test cases.
 -->
 

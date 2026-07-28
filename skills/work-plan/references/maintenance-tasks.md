@@ -2,7 +2,7 @@
 
 Definición del tipo de plan **tarea de mantenimiento (`WI-XXX`)**: trabajo **sin historia de usuario asociada** — corrección de bugs, refactor, deuda técnica, actualización de dependencias, tareas operativas o de infraestructura. Esta referencia se carga desde `SKILL.md` cuando la selección de tipo de plan resuelve a este caso. Asume ya resueltos el subagente, el mecanismo de preguntas y el idioma (ver `SKILL.md`).
 
-> **Alcance de un WI:** documento **único y combinado** de especificación. A diferencia de una historia de usuario —donde el requerimiento (`README.md`) y la especificación técnica (`TK-XXX`) viven en archivos separados porque la historia es un artefacto con dueño y fase propios—, un work item de mantenimiento no tiene fase funcional separada ni se descompone en sub-tareas: el requerimiento, los criterios de aceptación y la especificación técnica conviven en **un solo documento** (`WI-XXX-[kebab-case]/README.md`), que mapea 1:1 con un único work item de ADO (`Bug`/`Task`). No implementa código, no ejecuta pruebas, no crea ADRs. Lo no acordado va en **Observaciones** o se pregunta — nunca se inventa.
+> **Alcance de un WI:** documento **único y combinado** de especificación. A diferencia de una historia de usuario —donde el requerimiento (`README.md`) y la especificación técnica (`TK-XXX`) viven en archivos separados porque la historia es un artefacto con dueño y fase propios—, una tarea de mantenimiento no tiene fase funcional separada ni se descompone en sub-tareas: el requerimiento, los criterios de aceptación y la especificación técnica conviven en **un solo documento** (`WI-XXX-[kebab-case]/README.md`), que mapea 1:1 con un único work item de ADO (`Bug`/`Task`). No implementa código, no ejecuta pruebas, no crea ADRs. Lo no acordado va en **Observaciones** o se pregunta — nunca se inventa.
 
 La plantilla canónica está en `assets/work-item-template.md` (léela antes de escribir cualquier WI).
 
@@ -260,7 +260,7 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 
 ### Handoffs del ciclo
 
-Posición: **planificación** — un WI de mantenimiento es **autocontenido**, no proviene de `work-define` (no hay historia que definir). El propio WI reúne requerimiento, criterios y especificación técnica.
+Posición: **planificación** — una tarea de mantenimiento (`WI`) es **autocontenida**, no proviene de `work-define` (no hay historia que definir). El propio WI reúne requerimiento, criterios y especificación técnica.
 
 | | |
 |--|--|

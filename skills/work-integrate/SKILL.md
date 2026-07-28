@@ -1,16 +1,16 @@
 ---
 name: work-integrate
-description: Cerrar e integrar el trabajo de una historia de usuario (US-XXX) o un work item de mantenimiento (WI-XXX) haciendo merge de la rama feature hacia la rama desde la que se creó, previa verificación de que progress.md tenga todas las unidades del trabajo en Done y de que pasen las puertas de calidad de cierre (code-review y trace-validate). Activar cuando el usuario pida cerrar, entregar, mergear, integrar, finalizar o hacer submit del trabajo de una historia, un WI o de la rama actual.
+description: Cerrar e integrar el trabajo de una historia de usuario (US-XXX) o una tarea de mantenimiento (WI-XXX) haciendo merge de la rama feature hacia la rama desde la que se creó, previa verificación de que progress.md tenga todas las unidades del trabajo en Done y de que pasen las puertas de calidad de cierre (code-review y trace-validate). Activar cuando el usuario pida cerrar, entregar, mergear, integrar, finalizar o hacer submit del trabajo de una historia, un WI o de la rama actual.
 license: MIT
 ---
 
 # Skill: Integración de trabajo
 
-Guía para **cerrar e integrar** el trabajo ya implementado —una historia de usuario `US-XXX` o un work item de mantenimiento `WI-XXX`— verificando que su `progress.md` tenga todas las unidades del trabajo en `Done`, que pasen las **puertas de calidad de cierre** (`code-review` y `trace-validate`, en ese orden), y luego hacer **merge** de la rama actual hacia la rama desde la que se creó.
+Guía para **cerrar e integrar** el trabajo ya implementado —una historia de usuario `US-XXX` o una tarea de mantenimiento `WI-XXX`— verificando que su `progress.md` tenga todas las unidades del trabajo en `Done`, que pasen las **puertas de calidad de cierre** (`code-review` y `trace-validate`, en ese orden), y luego hacer **merge** de la rama actual hacia la rama desde la que se creó.
 
 > **Alcance del submit:** El skill **cierra** localmente lo ya implementado. Verifica condiciones y ejecuta `git merge --no-ff`. No hace push, no borra ramas, no crea MRs/PRs, no resuelve conflictos, no modifica `progress.md`. Lo que no esté en `Done` bloquea el merge — el usuario decide cómo proceder, nunca se fuerza.
 
-Encaja al final de los ciclos **work-define** → **work-plan** → **work-implement** (historias y work items). Ver Handoffs del ciclo en [references/examples.md](references/examples.md).
+Encaja al final de los ciclos **work-define** → **work-plan** → **work-implement** (historias y tareas de mantenimiento). Ver Handoffs del ciclo en [references/examples.md](references/examples.md).
 
 ---
 
@@ -45,7 +45,7 @@ El tipo se determina por el **identificador presente en el nombre de rama**. Cad
 | Tipo | Identificador en la rama | `progress.md` | Unidad a verificar en `Done` |
 |------|--------------------------|---------------|------------------------------|
 | **Historia de usuario** | `US-XXX` | `docs/specs/user-stories/US-XXX-[nombre-corto]/progress.md` (por carpeta de la US) | **todas** las `TK-XXX` de la US |
-| **Work item de mantenimiento** | `WI-XXX` | `docs/specs/work-items/WI-XXX-[kebab-case]/progress.md` (por carpeta del WI) | **todas** las unidades del `WI-XXX` en su propio `progress.md` |
+| **Tarea de mantenimiento** | `WI-XXX` | `docs/specs/work-items/WI-XXX-[kebab-case]/progress.md` (por carpeta del WI) | **todas** las unidades del `WI-XXX` en su propio `progress.md` |
 
 > **Una rama = un trabajo.** El skill cierra el trabajo asociado a la rama actual. Cada tipo tiene su `progress.md` **dentro de la carpeta del trabajo** (la US o el WI) y contiene únicamente ese trabajo; se verifican **todas** sus unidades.
 
@@ -81,7 +81,7 @@ Antes de tocar git, el agente debe tener clara la siguiente información. **No a
 | **Rama actual y tipo** | `git branch --show-current`; el tipo se infiere del identificador (`US-`/`WI-`) | Si no encaja con un patrón válido: preguntar a qué trabajo corresponde antes de continuar |
 | **Carpeta/documento del trabajo** | Derivar del nombre de rama según el tipo (ver [Tipos de trabajo](#tipos-de-trabajo)) | Si no existe: parar e informar; si hay varias coincidentes: preguntar cuál |
 | **Estado de `progress.md`** | Leer el archivo en la ubicación correspondiente al tipo | Si no existe: parar e informar; el merge requiere `progress.md` poblado |
-| **Working tree** | `git status --porcelain` | Si hay salida: invocar automáticamente el flujo del skill **`git-commit`** sobre los cambios pendientes (sin preguntar al usuario) y continuar una vez quede limpio; si `git-commit` no logra dejarlo limpio, parar e informar el motivo. Detalle operativo (fallback sin `git-commit`, working tree parcialmente limpio): ver [Validación antes de mergear](#validación-antes-de-mergear) |
+| **Working tree** | `git status --porcelain` | Si hay salida: invocar automáticamente el flujo del skill **`git-commit`** sobre los cambios pendientes (sin preguntar al usuario si conviene invocarlo — la decisión de invocar es automática; `git-commit` sí puede pausar con su propia propuesta y pedir confirmación antes de comitear, eso no lo decide `work-integrate`) y continuar una vez quede limpio; si `git-commit` no logra dejarlo limpio, parar e informar el motivo. Detalle operativo (fallback sin `git-commit`, working tree parcialmente limpio): ver [Validación antes de mergear](#validación-antes-de-mergear) |
 | **Rama base** | (1) `git reflog show <branch>` → línea `Created from`; (2) `git config --get branch.<branch>.merge`; (3) preguntar al usuario | No asumir `main`, `master` ni `develop` por defecto |
 | **Idioma de preferencia** | Ver [Resolución de idioma](#resolución-de-idioma) | Preguntar y persistir en `.agents/MEMORY.md` con `preferred language: <código>` |
 
@@ -95,7 +95,7 @@ Antes de cambiar de rama o ejecutar el merge, verificar las siguientes condicion
 
 **¿Qué verificar?**
 - **Rama actual con formato válido para su tipo:** `feature/US-XXX-...`, o `feature/`|`fix/`|`chore/`|`refactor/` + `WI-XXX-...`. Sin un identificador reconocible no se puede derivar la carpeta/documento del trabajo.
-- **Working tree limpio:** `git status --porcelain` sin salida. Si hay cambios sin commitear, **invocar automáticamente el flujo del skill `git-commit`** sobre ellos (sin preguntar al usuario) y continuar una vez el working tree quede limpio. La invocación delega en `git-commit` todo su criterio operativo (agrupación por cambio lógico, inferencia de tipo/scope/mensaje, staging, detección de secretos, confirmación de la propuesta) — `work-integrate` no decide un mensaje de commit ni qué stagear por su cuenta.
+- **Working tree limpio:** `git status --porcelain` sin salida. Si hay cambios sin commitear, **invocar automáticamente el flujo del skill `git-commit`** sobre ellos (sin preguntar al usuario si conviene invocarlo — la decisión de invocar es automática, no requiere permiso previo) y continuar una vez el working tree quede limpio. La invocación delega en `git-commit` todo su criterio operativo (agrupación por cambio lógico, inferencia de tipo/scope/mensaje, staging, detección de secretos, confirmación de la propuesta) — `work-integrate` no decide un mensaje de commit ni qué stagear por su cuenta. **`git-commit` no tiene modo silencioso**: normalmente pausa mostrando su propuesta y pidiendo confirmación al usuario antes de comitear (y puede detenerse del todo si detecta secretos); ese comportamiento no se suprime ni se evita al invocarlo desde aquí — «sin preguntar al usuario» se refiere solo a que `work-integrate` no pide permiso para *invocar* `git-commit`, no a que `git-commit` deje de confirmar su propio commit.
   - **Si `git-commit` no está disponible** (skill no instalado o no localizable en el entorno): parar y avisar, mostrando los archivos pendientes y sugiriendo al usuario commitear manualmente antes de reintentar — no ejecutar `git add`/`git commit` directos como sustituto.
   - **Si `git-commit` deja el working tree parcialmente limpio por una decisión de alcance suya** (p. ej. commiteó unos archivos pero dejó otros fuera deliberadamente): no es un error — volver a comprobar `git status --porcelain` e invocar `git-commit` de nuevo sobre el remanente (mismo criterio, sin preguntar) hasta que quede limpio o se detenga por un motivo real.
   - Si `git-commit` se detiene sin dejarlo limpio (p. ej. por secretos detectados, o por una decisión que el propio `git-commit` no puede resolver solo), eso sí bloquea el merge — informar el motivo reportado.
@@ -121,7 +121,7 @@ Ejemplos de razón concreta: `Rama actual no cumple un patrón válido: rama es 
 Camino feliz cuando todas las verificaciones pasan.
 
 1. **Detectar rama actual** con `git branch --show-current`, identificar el **tipo** por el identificador (`US-`/`WI-`) y validar el patrón de rama de ese tipo. Si no encaja, parar y preguntar.
-2. **Verificar working tree limpio** con `git status --porcelain`. Si hay salida, **invocar automáticamente el flujo del skill `git-commit`** sobre los cambios pendientes (sin preguntar al usuario) y esperar a que termine; con el working tree limpio, continuar al siguiente paso. Si `git-commit` no logra dejarlo limpio (incluido el caso de quedar parcialmente limpio, o de no estar disponible), aplicar el criterio de [Validación antes de mergear](#validación-antes-de-mergear) — reintentar sobre el remanente o parar e informar el motivo, según corresponda.
+2. **Verificar working tree limpio** con `git status --porcelain`. Si hay salida, **invocar automáticamente el flujo del skill `git-commit`** sobre los cambios pendientes (sin preguntar al usuario si conviene invocarlo) y esperar a que termine; con el working tree limpio, continuar al siguiente paso. Si `git-commit` no logra dejarlo limpio (incluido el caso de quedar parcialmente limpio, o de no estar disponible), aplicar el criterio de [Validación antes de mergear](#validación-antes-de-mergear) — reintentar sobre el remanente o parar e informar el motivo, según corresponda.
 3. **Localizar la carpeta/documento del trabajo** según el tipo (ver [Tipos de trabajo](#tipos-de-trabajo)). Si no existe o hay varias coincidentes, parar.
 4. **Leer `progress.md`** (en la carpeta del trabajo) y validar que **todas las unidades del trabajo de la rama** tienen estado `Done`. Si alguna no lo está, parar mostrando la lista completa de unidades no `Done` con su estado actual.
 5. **Ejecutar `code-review`** (modificador `default`) sobre la rama actual. Si el veredicto es **❌ Rechazado** o **⚠️ Incompleto**, parar y reportar el informe al usuario — no continuar con el merge hasta obtener veredicto **✅ Aprobado** en una nueva ejecución.
