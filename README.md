@@ -8,6 +8,8 @@
 - Investigación de producto, arquitectura o técnica (incluida migración entre proyectos).
 - Code review, integración y creación de PR con puertas de calidad.
 
+
+
 ## Instalación
 
 Ver la [guía de instalación](INSTALL.md) para Cursor y Claude Code.
@@ -22,17 +24,21 @@ Skills que sostienen el andamiaje del repo (arquitectura y control de versiones)
 
 Un **harness** es el "andamiaje" que sostiene y guía todo el proceso de desarrollo: el conjunto de skills, plantillas y puertas de calidad conectados entre sí para que un requerimiento avance de forma ordenada y repetible desde la idea hasta el código en producción — en vez de depender de que cada persona improvise su propio camino. En SDD Devkit, el harness es el recorrido completo (arquitectura → pruebas → implementación → verificación) que conecta los skills de este repo en un flujo único.
 
-| Skill | Uso |
-|-------|-----|
-| [arch‑init](SKILLS.md#arch-init) | Inicializar el harness de un proyecto (nuevo o existente): repo git, diagnóstico base limpia/con características implementadas, stack tecnológico (detectado o investigado y scaffolded), placeholders `AGENTS.md`/`CLAUDE.md`/`.agents/MEMORY.md`/`docs/adr/README.md`/`docs/standards/README.md`, compuerta de calidad y los primeros ADR/estándares vía `arch-manage` |
-| [arch‑manage](SKILLS.md#arch-manage) | Crear o actualizar ADRs (decisiones, en `docs/adr/`) y estándares de arquitectura **por dominio** (en `docs/standards/`, p. ej. *Testing Standards*). |
-| [arch‑discover](SKILLS.md#arch-discover) | Analizar un repositorio y proponer ADRs y criterios de cumplimiento candidatos, agrupados por estándar de dominio, a partir de decisiones y reglas implícitas |
-| [arch‑audit](SKILLS.md#arch-audit) | Auditar los **criterios de cumplimiento** de los estándares (`docs/standards/`) y de `AGENTS.md` contra el estado real del repo — criterio por criterio, citando el ADR de origen — y generar un informe priorizado en `docs/audits/` con revalidaciones incrementales |
-| [git‑commit](SKILLS.md#git-commit) | Preparar commits con mensajes Conventional Commits inferidos del diff |
+
+| Skill                                    | Uso                                                                                                                                                                                                                                                                                                                                                                      |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [arch‑init](SKILLS.md#arch-init)         | Inicializar el harness de un proyecto (nuevo o existente): repo git, diagnóstico base limpia/con características implementadas, stack tecnológico (detectado o investigado y scaffolded), placeholders `AGENTS.md`/`CLAUDE.md`/`.agents/MEMORY.md`/`docs/adr/README.md`/`docs/standards/README.md`, compuerta de calidad y los primeros ADR/estándares vía `arch-manage` |
+| [arch‑manage](SKILLS.md#arch-manage)     | Crear o actualizar ADRs (decisiones, en `docs/adr/`) y estándares de arquitectura **por dominio** (en `docs/standards/`, p. ej. *Testing Standards*).                                                                                                                                                                                                                    |
+| [arch‑discover](SKILLS.md#arch-discover) | Analizar un repositorio y proponer ADRs y criterios de cumplimiento candidatos, agrupados por estándar de dominio, a partir de decisiones y reglas implícitas                                                                                                                                                                                                            |
+| [arch‑audit](SKILLS.md#arch-audit)       | Auditar los **criterios de cumplimiento** de los estándares (`docs/standards/`) y de `AGENTS.md` contra el estado real del repo — criterio por criterio, citando el ADR de origen — y generar un informe priorizado en `docs/audits/` con revalidaciones incrementales                                                                                                   |
+| [git‑commit](SKILLS.md#git-commit)       | Preparar commits con mensajes Conventional Commits inferidos del diff                                                                                                                                                                                                                                                                                                    |
+
+
+
 
 #### Flujo del harness
 
-Vista de alto nivel del harness. El punto de entrada único es **`arch-init`**: identifica el punto de partida del proyecto, inicializa el harness y, según corresponda, deriva al descubrimiento brownfield y a la compuerta de calidad. Desde ahí se entra a la implementación de requerimientos (otro flujo, detallado en Specs) y a las mismas puertas de cierre.
+Vista de alto nivel del harness. El punto de entrada único es `arch-init`: identifica el punto de partida del proyecto, inicializa el harness y, según corresponda, deriva al descubrimiento brownfield y a la compuerta de calidad. Desde ahí se entra a la implementación de requerimientos (otro flujo, detallado en Specs) y a las mismas puertas de cierre.
 
 ```mermaid
 flowchart TD
@@ -61,6 +67,8 @@ flowchart TD
     class IMPL nestedFlow
 ```
 
+
+
 1. **Inicio**: todo arranca con `arch-init` (harness, stack y diagnóstico del punto de partida).
 2. Si el proyecto ya tiene implementación, `arch-init` deriva al **Brownfield**: descubrimiento de arquitectura con `arch-discover` y, opcionalmente, características con `work-research` y casos de prueba con `test-define`.
 3. En paralelo (o a continuación), se configura la **compuerta de calidad** vía `arch-init`; el camino brownfield también converge ahí.
@@ -69,22 +77,28 @@ flowchart TD
 6. El código resultante pasa por verificación (`code-review`) y validación de trazabilidad (`trace-validate`).
 7. El flujo termina en un entregable: trabajo verificado, validado y listo para producción.
 
+
+
 ### Specs
 
 Skills del ciclo de vida de un requerimiento: de la historia de usuario al PR mergeado. Es el camino concreto que sigue un requerimiento hasta convertirse en código verificado — la parte "central" del harness, que se repite en cada requerimiento dentro de la base arquitectónica ya definida.
 
-| Skill | Uso |
-|-------|-----|
-| [work‑research](SKILLS.md#work-research) | Investigar y sintetizar en un informe (RS-XXX). Genérico con tres flujos: artefacto (US/TK/WI → lagunas y decisiones pendientes), migración (origen→destino → discovery y validación, con handoff a `work-define` o `work-plan`) e investigación libre (producto, arquitectura, técnica o cambio) |
-| [work‑define](SKILLS.md#work-define) | Crear o actualizar historias de usuario (US-XXX) |
-| [design‑define](SKILLS.md#design-define) | Crear o actualizar documentación técnica (modelos de datos, APIs/endpoints, flujos, diagramas de clases/C4) en `docs/specs/technical-docs/` como referencia de implementación |
-| [test‑define](SKILLS.md#test-define) | Crear casos de prueba (TC-XXX) desde los criterios de aceptación de una US o WI (IEEE 29119-4) |
-| [work‑plan](SKILLS.md#work-plan) | Planificar tareas técnicas (TK-XXX) o tareas de mantenimiento (WI-XXX) |
-| [work‑implement](SKILLS.md#work-implement) | Implementar tareas técnicas (TK-XXX) o de mantenimiento (WI-XXX) a partir de specs en estado Ready |
-| [code‑review](SKILLS.md#code-review) | Revisión de código pre-merge: verificaciones automatizadas según el stack + revisión cualitativa (arquitectura, diseño, SOLID), con veredicto apto/no apto/incompleto |
-| [trace‑validate](SKILLS.md#trace-validate) | Reporte de trazabilidad: criterios de aceptación de US/WI ↔ casos y artefactos de prueba, con veredicto de cobertura |
-| [work‑integrate](SKILLS.md#work-integrate) | Cerrar e integrar el trabajo de una US o WI (merge de la rama feature previa verificación en `progress.md`) |
-| [pr‑create](SKILLS.md#pr-create) | Crear PR o MR desde la rama actual (GitHub, GitLab, Azure Repos, etc.) con puertas de calidad obligatorias: code-review, trace-validate y Definition of Done |
+
+| Skill                                      | Uso                                                                                                                                                                                                                                                                                               |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [work‑research](SKILLS.md#work-research)   | Investigar y sintetizar en un informe (RS-XXX). Genérico con tres flujos: artefacto (US/TK/WI → lagunas y decisiones pendientes), migración (origen→destino → discovery y validación, con handoff a `work-define` o `work-plan`) e investigación libre (producto, arquitectura, técnica o cambio) |
+| [work‑define](SKILLS.md#work-define)       | Crear o actualizar historias de usuario (US-XXX)                                                                                                                                                                                                                                                  |
+| [design‑define](SKILLS.md#design-define)   | Crear o actualizar documentación técnica (modelos de datos, APIs/endpoints, flujos, diagramas de clases/C4) en `docs/specs/technical-docs/` como referencia de implementación                                                                                                                     |
+| [test‑define](SKILLS.md#test-define)       | Crear casos de prueba (TC-XXX) desde los criterios de aceptación de una US o WI (IEEE 29119-4)                                                                                                                                                                                                    |
+| [work‑plan](SKILLS.md#work-plan)           | Planificar tareas técnicas (TK-XXX) o tareas de mantenimiento (WI-XXX)                                                                                                                                                                                                                            |
+| [work‑implement](SKILLS.md#work-implement) | Implementar tareas técnicas (TK-XXX) o de mantenimiento (WI-XXX) a partir de specs en estado Ready                                                                                                                                                                                                |
+| [code‑review](SKILLS.md#code-review)       | Revisión de código pre-merge: verificaciones automatizadas según el stack + revisión cualitativa (arquitectura, diseño, SOLID), con veredicto apto/no apto/incompleto                                                                                                                             |
+| [trace‑validate](SKILLS.md#trace-validate) | Reporte de trazabilidad: criterios de aceptación de US/WI ↔ casos y artefactos de prueba, con veredicto de cobertura                                                                                                                                                                              |
+| [work‑integrate](SKILLS.md#work-integrate) | Cerrar e integrar el trabajo de una US o WI (merge de la rama feature previa verificación en `progress.md`)                                                                                                                                                                                       |
+| [pr‑create](SKILLS.md#pr-create)           | Crear PR o MR desde la rama actual (GitHub, GitLab, Azure Repos, etc.) con puertas de calidad obligatorias: code-review, trace-validate y Definition of Done                                                                                                                                      |
+
+
+
 
 #### Flujo de implementación
 
@@ -116,12 +130,16 @@ flowchart TD
     class A,B,E,G,I,J main
 ```
 
+
+
 1. **Inicio**: un requerimiento se convierte en historias de usuario con `work-define`. Si son tareas de mantenimiento, el requerimiento entra directo a **Planificación de tareas** (`work-plan`) —nota en la línea del diagrama—.
 2. Opcionalmente, desde las historias se definen casos de prueba (`test-define`) y/o diseño arquitectónico (`design-define`).
 3. **Planificación de tareas** (`work-plan`): desde una historia produce tareas técnicas (`TK-XXX`); sin historia, tareas de mantenimiento (`WI-XXX`).
 4. Durante la planificación, opcionalmente se investiga con `work-research` y/o se ajusta el diseño arquitectónico con `design-define`.
 5. Las tareas planificadas pasan a `work-implement` para su codificación.
 6. El flujo termina por uno de dos caminos, cada uno con puertas de calidad (`code-review`, `trace-validate`), y ambos llegan al mismo entregable — el trabajo listo para producción, ya sea integrado directo (`work-integrate`) o vía Pull/Merge Request (`pr-create`).
+
+
 
 #### Specs (frameworks de terceros)
 
@@ -148,10 +166,32 @@ flowchart TD
     class S nestedFlow
 ```
 
+
+
 1. **Inicio**: el requerimiento se convierte en historias de usuario con `work-define`.
 2. Opcionalmente, desde las historias se investiga (`work-research`), se definen casos de prueba (`test-define`) y/o diseño arquitectónico (`design-define`).
 3. Las historias alimentan **Specs de terceros** (la implementación la corre el framework elegido: Speckit, OpenSpec, AgentOS, etc.).
 4. El flujo termina por uno de dos caminos, igual que en Specs: integración directa (`work-integrate`) o vía Pull/Merge Request (`pr-create`), cada uno con puertas de calidad (`code-review`, `trace-validate`); ambos llegan al entregable.
+
+
+
+## Nivel de responsabilidades
+
+El humano define la intención, las restricciones y las decisiones importantes; el agente decide los detalles de implementación dentro de esos límites.
+
+
+| Nivel                     | Lo define normalmente  | Asistido por IA                    |
+| ------------------------- | ---------------------- | ---------------------------------- |
+| Problema de negocio       | Humano / Product Owner | `/work-define`                     |
+| Comportamiento esperado   | Humano / Desarrollador | `/work-plan` o Spec Framework      |
+| Casos de prueba           | Humano / QA            | `/test-define`                     |
+| UX/UI (cómo debe verse)   | Humano / Diseñador     | —                                  |
+| Modelo de dominio / datos | Humano / Arquitecto    | `/design-define`                   |
+| Arquitectura              | Humano / Arquitecto    | `/adr-manage`                      |
+| Implementación detallada  | Agente                 | `/work-implement` o Spec Framework |
+
+
+
 
 ## Contribuir
 
