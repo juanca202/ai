@@ -52,7 +52,7 @@ flowchart TD
     S --> IMPL["Implementación de requerimientos<br/>(ver Specs)"]
     IMPL --> V1["Verificación de código<br/>**/code-review**"]
     V1 --> V2["Validación de requisitos<br/>**/trace-validate**"]
-    V2 --> DONE(["🏁 Entregable"])
+    V2 --> DONE(["Entregable"])
 ```
 
 1. **Inicio**: todo arranca con `arch-init` (harness, stack y diagnóstico del punto de partida).
@@ -102,7 +102,7 @@ flowchart TD
     E --> G["Implementación<br/>**/work-implement**"]
     G --> H["Integración a rama de desarrollo<br/>**/work-integrate**"]
     G --> I["Creación de PR<br/>**/pr-create**"]
-    H --> J(["🏁 Entregable:<br/>trabajo listo para producción"])
+    H --> J(["Entregable"])
     I --> J
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
