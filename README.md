@@ -32,7 +32,7 @@ Un **harness** es el "andamiaje" que sostiene y guía todo el proceso de desarro
 
 #### Flujo del harness
 
-Vista de alto nivel del harness. El punto de entrada único es **`arch-init`**: identifica el punto de partida del proyecto, inicializa el harness y, según corresponda, deriva al descubrimiento brownfield y a la compuerta de calidad. Desde ahí se entra al [flujo de implementación](#flujo-de-implementación) (Specs) —otro flujo completo, anidado aquí— y a las mismas puertas de cierre.
+Vista de alto nivel del harness. El punto de entrada único es **`arch-init`**: identifica el punto de partida del proyecto, inicializa el harness y, según corresponda, deriva al descubrimiento brownfield y a la compuerta de calidad. Desde ahí se entra a la implementación de requerimientos (otro flujo, detallado en Specs) y a las mismas puertas de cierre.
 
 ```mermaid
 flowchart TD
@@ -49,8 +49,8 @@ flowchart TD
     TD -.-> T
     T --> S["Definición de ADRs/Estándares<br/>**/arch-manage**"]
     S -.-> AUD["Auditoría<br/>**/arch-audit**"]
-    subgraph NESTED["Otro flujo · Specs"]
-        IMPL["Implementación de requerimientos<br/>→ Flujo de implementación ↓"]
+    subgraph NESTED["Otro flujo"]
+        IMPL["Flujo de implementación"]
     end
     S --> IMPL
     IMPL --> V1["Verificación de código<br/>**/code-review**"]
@@ -59,16 +59,13 @@ flowchart TD
 
     classDef nestedFlow fill:#fff7ed,stroke:#ea580c,stroke-width:2px,stroke-dasharray:5 5,color:#9a3412
     class IMPL nestedFlow
-    click IMPL href "#flujo-de-implementación" "Ir al Flujo de implementación"
 ```
-
-El nodo naranja con borde discontinuo es **otro flujo** (no un skill suelto): el detalle está en [Flujo de implementación](#flujo-de-implementación).
 
 1. **Inicio**: todo arranca con `arch-init` (harness, stack y diagnóstico del punto de partida).
 2. Si el proyecto ya tiene implementación, `arch-init` deriva al **Brownfield**: descubrimiento de arquitectura con `arch-discover` y, opcionalmente, características con `work-research` y casos de prueba con `test-define`.
 3. En paralelo (o a continuación), se configura la **compuerta de calidad** vía `arch-init`; el camino brownfield también converge ahí.
 4. Luego se definen o actualizan los ADRs/Estándares con `arch-manage`. Opcionalmente se audita el cumplimiento con `arch-audit`.
-5. Con la base arquitectónica lista, el trabajo entra al [flujo de implementación](#flujo-de-implementación) (historias → planificación → implementación → integración/PR).
+5. Con la base arquitectónica lista, el trabajo entra a la implementación de requerimientos (otro flujo: historias → planificación → implementación → integración/PR).
 6. El código resultante pasa por verificación (`code-review`) y validación de requisitos (`trace-validate`).
 7. El flujo termina en un entregable: trabajo verificado, validado y listo para producción.
 
