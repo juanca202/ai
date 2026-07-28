@@ -60,16 +60,16 @@ En otro caso, ejecutar **secuencialmente** (no en paralelo) los checks Bloqueant
 - **Hay al menos un FAIL** (Bloqueante o Condicional-presente): **mostrar el reporte de la etapa al usuario** y **preguntar si quiere que se corrijan** los errores. **No corregir sin autorización.**
   - Si **autoriza la corrección automática** → aplicar los cambios mínimos para resolver los FAIL (sin tocar más de lo necesario), **re-ejecutar el check/prueba que fallaba para confirmar que ya pasa**, y solo entonces **re-ejecutar TODO el set automatizado** (reiniciar el Paso 2). Si el check puntual sigue en FAIL, iterar la corrección antes de reiniciar.
   - Si **corrige manualmente** e indica que ya está → **re-ejecutar el check/prueba que fallaba**; si pasa, **re-ejecutar TODO el set automatizado**; si no, avisar y volver a la corrección.
-  - Si **no desea corregir ahora** → terminar con veredicto `❌ Rechazado`. **No** se ejecuta la revisión cualitativa.
-  - Repetir hasta que la etapa quede sin FAIL o el usuario detenga.
+  - Si **no desea corregir ahora** → continuar de todos modos al Paso 3 (revisión cualitativa) sobre el diff tal cual está, para que el usuario vea en una sola pasada tanto el FAIL automatizado como los hallazgos de diseño — así puede decidir y corregir todo junto en vez de descubrir los cualitativos en una segunda invocación. Al construir el informe (Paso 4), el veredicto es `❌ Rechazado` por el FAIL automatizado sin resolver, sin importar el resultado de la cualitativa.
+  - Repetir el ciclo de corrección hasta que la etapa quede sin FAIL o el usuario detenga (en cuyo caso se sigue igual al Paso 3, como arriba).
 - **Solo SKIPPED, sin FAIL** (`⚠️ Incompleto`): reportar el motivo y **preguntar** si resolver el tooling primero o continuar a la cualitativa asumiendo el Incompleto. No avanzar en silencio.
 - **Sin FAIL ni SKIPPED**: etapa superada → continuar al Paso 3.
 
-> Con `checks-only`, terminar aquí (no hay Paso 3): construir informe y veredicto solo con la etapa automatizada.
+> Con `checks-only`, terminar aquí (no hay Paso 3): construir informe y veredicto solo con la etapa automatizada. Es la única forma de omitir la revisión cualitativa por un resultado de la etapa automatizada — un FAIL o un `❌ Rechazado` en la etapa automatizada, por sí solos, **ya no** la omiten (ver Paso 2 arriba).
 
 ### Paso 3 — Revisión cualitativa senior
 
-Ejecutar solo si la etapa automatizada se superó (o si el modo es `qualitative-only`). Ver la sección "Revisión cualitativa (análisis senior)" en `SKILL.md` y el detalle en [`qualitative-review.md`](qualitative-review.md):
+Se ejecuta **siempre** tras el Paso 2 (con FAIL resuelto, sin resolver, o sin FAIL) salvo modificador `checks-only`/`only <check>` (que la omiten explícitamente), o si el modo es `qualitative-only` (que salta directo aquí sin Paso 2). Ver la sección "Revisión cualitativa (análisis senior)" en `SKILL.md` y el detalle en [`qualitative-review.md`](qualitative-review.md):
 
 1. Obtener el diff bajo revisión (`git diff` contra la rama base acordada, o los archivos que el usuario indique). No revisar todo el repo.
 2. Recuperar la **intención** capturada en el Paso 1.
@@ -124,8 +124,8 @@ Símbolos a usar (exactamente estos):
 Reglas al rellenar:
 - Sustituir cada `{{…}}` de la plantilla por el valor real; el informe publicado no debe conservar placeholders ni el bloque de comentario inicial.
 - Incluir solo las filas de checks que aplican; el detalle de checks va **solo** para FAIL o SKIPPED (truncar a 10 errores por check con `… y N más`).
-- Si la etapa automatizada no se superó, la sección 2 dice *"No ejecutada — la etapa automatizada no se superó."*
-- Si la revisión cualitativa se omitió por modificador (`checks-only` u `only nombre-del-check`), la sección 2 dice *"No ejecutada — omitida por modificador `checks-only`"* (o *"… `only nombre-del-check`"*) — motivo distinto al fallo de la etapa automatizada.
+- La revisión cualitativa se ejecuta y se reporta sin importar el resultado de la etapa automatizada (ver Paso 3); la sección 2 solo dice *"No ejecutada"* cuando se omitió por modificador.
+- Si la revisión cualitativa se omitió por modificador (`checks-only` u `only nombre-del-check`), la sección 2 dice *"No ejecutada — omitida por modificador `checks-only`"* (o *"… `only nombre-del-check`"*).
 - Si no hubo justificaciones, la sección final dice «Ninguna».
 
 ---
@@ -187,7 +187,7 @@ estaba sucio, `workingTreeClean: false` queda registrado como señal para el con
 | Usuario justifica un hallazgo 🔴/🟠 | Registrar la justificación; el hallazgo deja de bloquear. En una US, incluirla en `code-review.md`. |
 | Diff vacío o sin cambios de código | No hay nada que revisar cualitativamente; reportarlo y ejecutar solo los checks aplicables. |
 | FAIL en la etapa automatizada | Mostrar reporte y **preguntar** si corregir. Nunca corregir sin autorización. Tras corregir (auto autorizada o manual), **re-ejecutar el check que fallaba**; si pasa, **re-ejecutar todo el set automatizado**. |
-| Usuario no quiere corregir los FAIL automatizados | Terminar en `❌ Rechazado`; **no** ejecutar la revisión cualitativa. |
+| Usuario no quiere corregir los FAIL automatizados | Ejecutar igual la revisión cualitativa (Paso 3) sobre el diff, para mostrar todos los hallazgos en una sola pasada; terminar en `❌ Rechazado` por el FAIL sin resolver, sin importar el resultado cualitativo. |
 | Corrección de un hallazgo cualitativo 🔴/🟠 (auto autorizada o manual) | Verificar que funciona (re-ejecutar el check/prueba afectado); solo si pasa, reiniciar **todo el code review desde el Paso 1**. |
 | Corrección aplicada que **no** resuelve el fallo (el check puntual sigue en FAIL) | **No reiniciar.** Iterar la corrección hasta que el check puntual pase; recién entonces disparar el reinicio. |
 | Usuario pide "corrige tú" sin más contexto | Confirmar el alcance exacto a corregir antes de tocar nada; aplicar solo lo mínimo; luego re-ejecutar. |
@@ -206,7 +206,7 @@ estaba sucio, `workingTreeClean: false` queda registrado como señal para el con
 - Usar `--fix` / `--write` / `--force` **al ejecutar un check** (falsea el resultado); la corrección autorizada es un paso aparte y deliberado.
 - Modificar manifiestos para añadir scripts faltantes.
 - Declarar `✅ Aprobado` con algún Bloqueante o Condicional-presente en `SKIPPED` — es `⚠️ Incompleto`.
-- **Avanzar a la revisión cualitativa con algún FAIL automatizado sin resolver** — la etapa automatizada es puerta dura.
+- **Dejar que hallazgos cualitativos, por bien resueltos que estén, cambien un veredicto `❌ Rechazado` causado por un FAIL automatizado sin resolver** — el plano automatizado es la puerta dura del **veredicto** (no de si la revisión cualitativa se ejecuta: esa corre siempre a continuación, salvo `checks-only`/`only <check>`, para mostrar todos los hallazgos en una sola pasada).
 - **Corregir y no volver a ejecutar** las pruebas, o no reiniciar el review tras una corrección cualitativa.
 - **Reiniciar el review con un arreglo sin verificar** — primero confirma que el check/prueba que fallaba ya pasa, y solo entonces reinicia.
 - Aplicar una corrección **automáticamente sin que el usuario la pida expresamente**.

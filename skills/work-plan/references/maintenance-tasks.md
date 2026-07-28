@@ -132,6 +132,7 @@ Un WI completo puede alcanzar `Estado: Ready` si cumple todas las condiciones de
 2. **Redactar el WI** siguiendo `assets/work-item-template.md`:
    - **Metadatos**: `Tipo`; `Repositorio` con el nombre del repositorio git afectado; `Asignado a` indicado por el usuario, inferido con `git config user.name`, u omitido; `ADO Work Item: [#<ado_id>](<url>)` solo si se creó en ADO.
    - **Requerimiento**: qué problema/necesidad motiva el trabajo — claro y concreto; sin diseño técnico.
+   - **Reglas de negocio** (opcional — incluir solo si el dominio impone restricciones, obligaciones o prohibiciones explícitas; omitir si no aplica): cada regla lleva id secuencial `BR-01`, `BR-02`, … con enunciado RFC 2119 en MAYÚSCULAS. **Cada `BR-XX` declarada debe quedar verificada por al menos un `AC-XXX`** de la sección Criterios de aceptación (anotar `→ verificado por AC-XXX` junto a la regla); si al redactar los criterios alguna `BR-XX` queda sin ningún `AC-XXX` que la verifique, es una laguna — cerrarla con una pregunta o registrarla en Observaciones, nunca dejarla sin verificar.
    - **Criterios de aceptación**: cómo se verifica que quedó hecho; lista verificable. Tono imperativo; sin «podría», «quizá».
    - **Dependencias**: solo piezas *dentro del alcance del work item*. ADRs, technical-docs y referencias de diseño van en **Referencias**.
    - **Referencias**: ADRs existentes, technical-docs (con ancla al elemento concreto, p. ej. `technical-docs/facturacion.md#api-01-crear-factura`), diseño. No crear ADRs; si falta una decisión, sugerirlo en Observaciones. Si el WI depende de un modelo, API o flujo **sin especificación** en `technical-docs/`, registrarlo en Observaciones; si el usuario pide detallarlo, **delegar a `/design-define` vía subagente** y agregar aquí la referencia devuelta.
@@ -195,6 +196,7 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 **Condiciones para `Estado: Ready`:**
 - [ ] **Requerimiento** con problema/necesidad claros
 - [ ] **Criterios de aceptación** verificables
+- [ ] Si hay **Reglas de negocio** (`BR-XX`) declaradas: cada una verificada por al menos un `AC-XXX` — ninguna `BR-XX` sin su `AC-XXX` correspondiente
 - [ ] Repositorio definido (no `Por definir`) en la cabecera del WI
 - [ ] Si toca UI: referencia a Figma, wireframe o imagen de alta fidelidad en **Referencias**
 - [ ] **Dependencias** listadas dentro del alcance del work item

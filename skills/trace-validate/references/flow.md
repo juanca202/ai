@@ -71,6 +71,7 @@ ejecución) y los mapea a los criterios.
    - TC `Manual` → `Automática = N/A` (manual por diseño; no se espera artefacto automatizado).
    - TC `Automatizable` **sin** artefacto todavía → `Automática = No` (pendiente de automatizar; distinguirlo del manual en Observaciones).
    - TC `Automatizable` **con** artefacto automatizado → `Automática = Sí` si `code-review` lo ejecutó (registrar `Resultado` de la suite correspondiente); `No` si existe pero no se pudo ejecutar (con la razón en Observaciones).
+   - **Granularidad suite vs. criterio:** `result` es por **suite completa** (p. ej. toda la suite `unit`), no por test individual. Cuando **varios criterios** mapean a tests dentro de la **misma suite** y esa suite da `FAIL`, no propagar automáticamente `Fallo`/`No cubierto` a todos ellos por igual: revisar si el `summary` (u otro detalle que `code-review` haya incluido) identifica qué test(s) específico(s) fallaron y cotejarlo contra el archivo/nombre de test que el Paso 2 vinculó a cada criterio. Si se puede aislar, marcar `Fallo`/`No cubierto` solo en el/los criterio(s) cuyo test efectivamente falló; el resto de la suite se reporta `Paso`. Si el `summary` **no** trae detalle por test (solo un conteo agregado, p. ej. `"47 passed, 1 failed"` sin decir cuál), no asumir cuál criterio es el afectado: marcar esos criterios como `Parcial` (no `No cubierto`) con una Observación explicando que la suite falló pero no se pudo aislar el test específico, y sugerir revisar el log completo de `code-review` o re-ejecutar el test de forma aislada.
 4. **Si `code-review` no puede ejecutarlas** (stack no detectable, entorno sin poder correr, dependencias
    faltantes, usuario declina, o `code-review` no disponible en la sesión), registrar ejecución automática
    = `No` con la razón en Observaciones y entregar igualmente la cobertura estática. **No** fabricar
@@ -129,7 +130,7 @@ Reglas:
 
 - Registrar en el reporte el **comando** y el **resultado global** tomados de `test-run.json` (no volver a
   ejecutar), y la **procedencia** (caché fresca del commit X, o corrida `tests-only` disparada ahora).
-- `result` por suite → resultado del criterio: `PASS`→`Paso`, `FAIL`→`Fallo`, `SKIPPED`/no ejecutado→`No ejecutado`.
+- `result` por suite → resultado del criterio: `PASS`→`Paso`, `FAIL`→`Fallo`, `SKIPPED`/no ejecutado→`No ejecutado`. **Excepción:** cuando varios criterios comparten suite y esta da `FAIL`, no basta con propagar `Fallo` a todos — ver «Granularidad suite vs. criterio» en el Paso 4 más arriba; si no se puede aislar el test que falló, el criterio va como `Parcial`, no `Fallo`/`No cubierto`.
 - Para criterios cubiertos por TCs marcados `Manual` (manual por diseño), ejecución automática = `N/A`. No confundir con TCs `Automatizable` aún sin artefacto, que van como `No` (pendiente de automatizar).
 - Si `workingTreeClean` es `false` en la caché, anotarlo como caveat (resultado sobre un árbol sucio).
 

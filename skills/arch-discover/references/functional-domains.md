@@ -15,9 +15,14 @@ con columnas para descubrimiento). Al proponer un candidato, clasificar su está
 | **Estilo de código** (`coding-style`) | ESLint/Prettier/Biome, EditorConfig, TypeScript strict, convenciones de nombres | reglas de linter/formato, nomenclatura, JSDoc |
 | **Frontend / UX** (`frontend`) | Estado global vs local, SSR vs CSR, design system, WCAG | gestión de estado, design system, accesibilidad |
 | **Persistencia y datos** (`persistence`) | Elección de BD, ORM vs query builder, migraciones, índices | ORM obligatorio, estrategia de migraciones, patrón repositorio |
-| **Infraestructura y DevOps** (`devops`) | Dockerfiles, pipeline CI/CD, deploy, feature flags, versión de runtime, SemVer | gates de pipeline, estrategia de deploy/branching, variables por entorno |
+| **Infraestructura y DevOps** (`devops`) | Dockerfiles, pipeline CI/CD, deploy, feature flags, versión de runtime, SemVer, Conventional Commits u otra convención de mensajes de commit | gates de pipeline, estrategia de deploy/branching, variables por entorno, convención de mensajes de commit |
 | **Observabilidad** (`observability`) | Logger, estrategia de errores, tracing, métricas | logger obligatorio, formato de logs, Correlation IDs |
 
 **Agrupar por dominio:** varios candidatos del mismo dominio se consolidan en **un** estándar. P. ej.
 "unit tests con PHPUnit" + "e2e con Playwright" + "cobertura ≥ 80%" → un estándar *Testing Standards*
 con tres requisitos, no tres estándares distintos.
+
+**Desempate — convenciones de commits/versionado:** una convención de mensajes de commit (Conventional
+Commits u otra) o de versionado de releases (SemVer) siempre clasifica en **Infraestructura y DevOps**
+(`devops`), no en Estilo de código (`coding-style`) — aunque toque "convenciones", no es una regla sobre
+el código fuente en sí sino sobre el flujo de entrega/versionado del repo.

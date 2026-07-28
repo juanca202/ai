@@ -107,7 +107,7 @@ Resumen de los pasos. El detalle íntegro de cada paso está en **`references/fl
 | Estado | Cuándo aplicarlo |
 |--------|------------------|
 | **Cubierto** | El criterio tiene al menos un caso de prueba **y** un artefacto que lo valida de forma completa. Si se ejecutó automáticamente, pasó. |
-| **Parcial** | El criterio está cubierto solo en parte: hay prueba pero no abarca todo el criterio, solo existe validación manual, el artefacto existe pero no se pudo ejecutar, o el resultado fue parcial. Detallar el límite en Observaciones. |
+| **Parcial** | El criterio está cubierto solo en parte: hay prueba pero no abarca todo el criterio, solo existe validación manual, el artefacto existe pero no se pudo ejecutar, el resultado fue parcial, o la suite que agrupa su test dio `FAIL` pero no se pudo aislar si el test específico del criterio fue el que falló (ver «Mapeo a la matriz» más abajo). Detallar el límite en Observaciones. |
 | **No cubierto** | No existe caso de prueba ni artefacto que valide el criterio, o la prueba asociada **falló**. |
 
 > La cobertura (existe prueba que valida el criterio) es distinta de la ejecución (la prueba corrió y su resultado). Un criterio con prueba que **falló** se reporta como **No cubierto** con el fallo en Observaciones.
@@ -183,6 +183,13 @@ una **corrida completa** de la rama, este artefacto vive en una **ubicación fij
 reporta **No cubierto** con el fallo en Observaciones (ver «Estados de cobertura»). La columna
 `Automática` sigue combinando la intención del TC (Paso 2) con lo hallado; el **resultado** proviene de
 `test-run.json`.
+
+> **Granularidad suite vs. criterio:** `result` es por **suite completa**, no por test individual. Si
+> varios criterios mapean a tests dentro de la misma suite y esa suite da `FAIL`, no propagar `Fallo`/`No
+> cubierto` a todos ellos sin más: si el `summary` u otro detalle de `code-review` permite aislar qué test
+> falló, marcar solo ese criterio; si no hay forma de aislarlo, marcar los criterios afectados como
+> `Parcial` (no `No cubierto`) con la ambigüedad explicada en Observaciones. Detalle completo en
+> `references/flow.md` (Paso 4).
 
 > Si el proyecto no usa `code-review` (no está disponible en la sesión), degradar con elegancia: reportar
 > ejecución automática = `No` («ejecución delegada no disponible») y entregar la cobertura estática. No

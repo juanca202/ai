@@ -93,6 +93,8 @@ Antes de aceptar el staging, seguir [references/secret-detection.md](references/
 
 **Detener** el commit si hay coincidencias en el comando **o** si el staging incluye archivos sensibles por nombre (`.env*`, `*.pem`, `*.key`, `id_rsa*`, `*.p12`, `*.pfx`). Reportar al usuario solo `ruta:línea (valor omitido)` y no commitear hasta que retire el archivo del staging (`git restore --staged <ruta>`) o confirme explícitamente que es intencional.
 
+**Una instrucción genérica de alcance nunca autoriza incluir un archivo sensible.** Si el usuario pidió "haz commit de todo lo pendiente" (o equivalente) y eso técnicamente incluye un archivo sensible por nombre o contenido, la detección se aplica igual — no interpretar "todo" como permiso implícito para saltarla. Solo una confirmación explícita **sobre ese archivo en particular**, después de haberlo señalado, levanta el bloqueo.
+
 ## Selección de flujo
 
 | Condición | Flujo |
@@ -135,10 +137,10 @@ Antes de aceptar el staging, seguir [references/secret-detection.md](references/
 
 ## Flujo: Múltiples cambios lógicos
 
-1. Agrupar archivos por afinidad desde el diff (área, tipo de cambio, intención).
-2. Proponer la lista ordenada de commits: tipo/scope, archivos y descripción tentativa de cada uno.
+1. Agrupar archivos por afinidad desde el diff (área, tipo de cambio, intención). Al agrupar, ya se puede aplicar la parte de la [detección de secretos](#detección-de-secretos-en-el-diff) que **no** requiere staging (nombre de archivo sensible: `.env*`, `*.pem`, `*.key`, `id_rsa*`, `*.p12`, `*.pfx`, contra `git status --porcelain`) — no hace falta esperar al paso 4 para eso.
+2. Proponer la lista ordenada de commits: tipo/scope, archivos y descripción tentativa de cada uno. **Marcar ya aquí** cualquier archivo sensible por nombre detectado en el paso 1 (`⚠️ <ruta> — archivo sensible, se excluirá salvo confirmación`), para que el usuario lo vea en la propuesta inicial y no se entere recién al intentar stagearlo.
 3. Esperar confirmación o ajustes antes de tocar el staging.
-4. Por cada grupo confirmado, en orden: `git reset` para vaciar staging (preserva el working tree) → `git add <archivos>` del grupo → [Validación](#validación-antes-de-ejecutar) → [Propuesta](#propuesta-de-commit) y confirmación → `git commit` y registrar el SHA.
+4. Por cada grupo confirmado, en orden: `git reset` para vaciar staging (preserva el working tree) → `git add <archivos>` del grupo → [Validación](#validación-antes-de-ejecutar) — incluida la detección **por contenido** (`grep` sobre el diff staged), que sí necesita el staging hecho → [Propuesta](#propuesta-de-commit) y confirmación → `git commit` y registrar el SHA.
 5. Reportar la secuencia final de SHAs y mensajes en el orden ejecutado.
 
 ## Flujo: Recuperación tras fallo de hook
@@ -174,7 +176,7 @@ Gate obligatorio antes de cada `git commit`. Detenerse si algún punto falla.
 - **Secretos:** [detección](#detección-de-secretos-en-el-diff) ejecutada sin coincidencias y sin archivos sensibles en staging.
 - **Aislamiento:** un solo cambio lógico en el commit.
 - **Operaciones seguras:** sin `--force`, `--hard`, `--no-verify`, `--amend` salvo petición explícita.
-- **Rama:** segura, o el usuario confirmó commit directo en `main`/`master`/`develop`/`release/*`.
+- **Rama:** segura, o el usuario confirmó commit directo en `main`/`master`/`develop`/`release/*`. **Una sola vez por invocación** (no por cada commit): la rama no cambia entre los commits de un mismo [flujo de múltiples cambios lógicos](#flujo-múltiples-cambios-lógicos), así que la confirmación obtenida para el primer commit del lote cubre a todos los siguientes — no volver a preguntar en cada iteración del paso 4 de ese flujo.
 - **Formato:** primera línea `<type>[scope]: <description>` válida según [convenciones](#convenciones-del-mensaje); breaking change y footer de issue marcados si aplican.
 - **Confirmación:** [propuesta](#propuesta-de-commit) mostrada y confirmada.
 

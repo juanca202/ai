@@ -14,29 +14,25 @@ Ver la [guía de instalación](INSTALL.md) para Cursor y Claude Code.
 
 ## Skills incluidos
 
-| Skill | Uso |
-|-------|-----|
-| `arch-init` | Inicializar el harness de un proyecto (nuevo o existente): repo git, diagnóstico base limpia/con características implementadas, stack tecnológico (detectado o investigado y scaffolded), placeholders `AGENTS.md`/`CLAUDE.md`/`.agents/MEMORY.md`/`docs/adr/README.md`/`docs/standards/README.md`, compuerta de calidad y los primeros ADR/estándares vía `arch-manage` |
-| `arch-manage` | Crear o actualizar ADRs (decisiones, en `docs/adr/`) y estándares de arquitectura **por dominio** (en `docs/standards/`, p. ej. *Testing Standards*). Cada decisión añade un **requisito** — redactado con RFC 2119/8174 (MUST/SHOULD/MAY) — al estándar del dominio que corresponda; el ADR lo referencia (`emits`) y el estándar traza a sus decisiones (`source_adrs`). Las fitness functions cuelgan de cada requisito |
-| `arch-discover` | Analizar un repositorio y proponer ADRs y requisitos candidatos, agrupados por estándar de dominio, a partir de decisiones y reglas implícitas |
-| `arch-audit` | Auditar el cumplimiento de los **requisitos** de los estándares (`docs/standards/`) y de `AGENTS.md` contra el estado real del repo — requisito por requisito, según su término RFC 2119, citando el ADR de origen — y generar un informe priorizado en `docs/audits/` con revalidaciones incrementales |
-| `code-review` | Revisión de código pre-merge: verificaciones automatizadas según el stack + revisión cualitativa (arquitectura, diseño, SOLID), con veredicto apto/no apto/incompleto |
-| `design-define` | Crear o actualizar documentación técnica (modelos de datos, APIs/endpoints, flujos, diagramas de clases/C4) en `docs/specs/technical-docs/` como referencia de implementación |
-| `git-commit` | Preparar commits con mensajes Conventional Commits inferidos del diff |
-| `pr-create` | Crear PR o MR desde la rama actual (GitHub, GitLab, Azure Repos, etc.) con puertas de calidad obligatorias: code-review, trace-validate y Definition of Done |
-| `test-define` | Crear casos de prueba (TC-XXX) desde los criterios de aceptación de una US o WI (IEEE 29119-4) |
-| `trace-validate` | Reporte de trazabilidad: criterios de aceptación de US/WI ↔ casos y artefactos de prueba, con veredicto de cobertura |
-| `work-research` | Investigar y sintetizar en un informe (RS-XXX). Genérico con tres flujos: artefacto (US/TK/WI → lagunas y decisiones pendientes), migración (origen→destino → discovery y validación, con handoff a `work-define` o `work-plan`) e investigación libre (producto, arquitectura, técnica o cambio) |
-| `work-define` | Crear o actualizar historias de usuario (US-XXX) |
-| `work-plan` | Planificar tareas técnicas (TK-XXX) o work items de mantenimiento (WI-XXX) |
-| `work-implement` | Implementar tareas (TK-XXX) o work items (WI-XXX) a partir de specs en estado Ready |
-| `work-integrate` | Cerrar e integrar el trabajo de una US o WI (merge de la rama feature previa verificación en `progress.md`) |
+Detalle de uso, opciones y handoffs de cada skill: [SKILLS.md](SKILLS.md).
 
-## Definición de harness
+### Harness
+
+Skills que sostienen el andamiaje del repo (arquitectura y control de versiones), independientes de qué requerimiento se esté trabajando.
 
 Un **harness** es el "andamiaje" que sostiene y guía todo el proceso de desarrollo: el conjunto de skills, plantillas y puertas de calidad conectados entre sí para que un requerimiento avance de forma ordenada y repetible desde la idea hasta el código en producción — en vez de depender de que cada persona improvise su propio camino. En SDD Devkit, el harness es el recorrido completo (arquitectura → pruebas → implementación → verificación) que conecta los skills de este repo en un flujo único.
 
-A continuación, la vista de alto nivel de cómo se usa el harness completo. El punto de entrada único es **`arch-init`**: identifica el punto de partida del proyecto, inicializa el harness y, según corresponda, deriva al descubrimiento brownfield y a la compuerta de calidad. Desde ahí se llega a la [implementación de requerimientos](#implementación-de-requerimientos) y a las mismas puertas de cierre.
+| Skill | Uso |
+|-------|-----|
+| [arch-init](SKILLS.md#arch-init) | Inicializar el harness de un proyecto (nuevo o existente): repo git, diagnóstico base limpia/con características implementadas, stack tecnológico (detectado o investigado y scaffolded), placeholders `AGENTS.md`/`CLAUDE.md`/`.agents/MEMORY.md`/`docs/adr/README.md`/`docs/standards/README.md`, compuerta de calidad y los primeros ADR/estándares vía `arch-manage` |
+| [arch-manage](SKILLS.md#arch-manage) | Crear o actualizar ADRs (decisiones, en `docs/adr/`) y estándares de arquitectura **por dominio** (en `docs/standards/`, p. ej. *Testing Standards*). Cada decisión añade un **requisito** — redactado con RFC 2119/8174 (MUST/SHOULD/MAY) — al estándar del dominio que corresponda; el ADR lo referencia (`emits`) y el estándar traza a sus decisiones (`source_adrs`). Las fitness functions cuelgan de cada requisito |
+| [arch-discover](SKILLS.md#arch-discover) | Analizar un repositorio y proponer ADRs y requisitos candidatos, agrupados por estándar de dominio, a partir de decisiones y reglas implícitas |
+| [arch-audit](SKILLS.md#arch-audit) | Auditar el cumplimiento de los **requisitos** de los estándares (`docs/standards/`) y de `AGENTS.md` contra el estado real del repo — requisito por requisito, según su término RFC 2119, citando el ADR de origen — y generar un informe priorizado en `docs/audits/` con revalidaciones incrementales |
+| [git-commit](SKILLS.md#git-commit) | Preparar commits con mensajes Conventional Commits inferidos del diff |
+
+#### Flujo del harness
+
+Vista de alto nivel del harness. El punto de entrada único es **`arch-init`**: identifica el punto de partida del proyecto, inicializa el harness y, según corresponda, deriva al descubrimiento brownfield y a la compuerta de calidad. Desde ahí se llega a la [implementación de requerimientos](#flujo-de-implementación) (Specs) y a las mismas puertas de cierre.
 
 ```mermaid
 flowchart TD
@@ -53,7 +49,7 @@ flowchart TD
     TD -.-> T
     T --> S["Definición de ADRs/Estándares<br/>**/arch-manage**"]
     S -.-> AUD["Auditoría<br/>**/arch-audit**"]
-    S --> IMPL["Implementación de requerimientos<br/>(ver sección siguiente)"]
+    S --> IMPL["Implementación de requerimientos<br/>(ver Specs)"]
     IMPL --> V1["Verificación de código<br/>**/code-review**"]
     V1 --> V2["Validación de requisitos<br/>**/trace-validate**"]
     V2 --> DONE(["🏁 Entregable"])
@@ -63,13 +59,28 @@ flowchart TD
 2. Si el proyecto ya tiene implementación, `arch-init` deriva al **Brownfield**: descubrimiento de arquitectura con `arch-discover` y, opcionalmente, características con `work-research` y casos de prueba con `test-define`.
 3. En paralelo (o a continuación), se configura la **compuerta de calidad** vía `arch-init`; el camino brownfield también converge ahí.
 4. Luego se definen o actualizan los ADRs/Estándares con `arch-manage`. Opcionalmente se audita el cumplimiento con `arch-audit`.
-5. Con la base arquitectónica lista, el trabajo entra a la [implementación de requerimientos](#implementación-de-requerimientos) (historias → planificación → implementación → integración/PR).
+5. Con la base arquitectónica lista, el trabajo entra a la [implementación de requerimientos](#flujo-de-implementación) (historias → planificación → implementación → integración/PR).
 6. El código resultante pasa por verificación (`code-review`) y validación de requisitos (`trace-validate`).
 7. El flujo termina en un entregable: trabajo verificado, validado y listo para producción.
 
-## Implementación de requerimientos
+### Specs
 
-Es el camino concreto que sigue un requerimiento desde que se escribe hasta que se convierte en código verificado y listo para producción: se documenta como historia de usuario, se descompone en tareas, se codifica y se cierra con una integración o un Pull Request. Es la parte "central" del harness — la que se repite en cada requerimiento, dentro de la base arquitectónica que ya dejó definida el harness.
+Skills del ciclo de vida de un requerimiento: de la historia de usuario al PR mergeado. Es el camino concreto que sigue un requerimiento hasta convertirse en código verificado — la parte "central" del harness, que se repite en cada requerimiento dentro de la base arquitectónica ya definida.
+
+| Skill | Uso |
+|-------|-----|
+| [work-research](SKILLS.md#work-research) | Investigar y sintetizar en un informe (RS-XXX). Genérico con tres flujos: artefacto (US/TK/WI → lagunas y decisiones pendientes), migración (origen→destino → discovery y validación, con handoff a `work-define` o `work-plan`) e investigación libre (producto, arquitectura, técnica o cambio) |
+| [work-define](SKILLS.md#work-define) | Crear o actualizar historias de usuario (US-XXX) |
+| [design-define](SKILLS.md#design-define) | Crear o actualizar documentación técnica (modelos de datos, APIs/endpoints, flujos, diagramas de clases/C4) en `docs/specs/technical-docs/` como referencia de implementación |
+| [test-define](SKILLS.md#test-define) | Crear casos de prueba (TC-XXX) desde los criterios de aceptación de una US o WI (IEEE 29119-4) |
+| [work-plan](SKILLS.md#work-plan) | Planificar tareas técnicas (TK-XXX) o work items de mantenimiento (WI-XXX) |
+| [work-implement](SKILLS.md#work-implement) | Implementar tareas (TK-XXX) o work items (WI-XXX) a partir de specs en estado Ready |
+| [code-review](SKILLS.md#code-review) | Revisión de código pre-merge: verificaciones automatizadas según el stack + revisión cualitativa (arquitectura, diseño, SOLID), con veredicto apto/no apto/incompleto |
+| [trace-validate](SKILLS.md#trace-validate) | Reporte de trazabilidad: criterios de aceptación de US/WI ↔ casos y artefactos de prueba, con veredicto de cobertura |
+| [work-integrate](SKILLS.md#work-integrate) | Cerrar e integrar el trabajo de una US o WI (merge de la rama feature previa verificación en `progress.md`) |
+| [pr-create](SKILLS.md#pr-create) | Crear PR o MR desde la rama actual (GitHub, GitLab, Azure Repos, etc.) con puertas de calidad obligatorias: code-review, trace-validate y Definition of Done |
+
+#### Flujo de implementación
 
 **Ventajas de seguir este flujo:**
 

@@ -70,7 +70,7 @@ El idioma del documento técnico (descripciones y texto natural; los nombres de 
 | **Directo** | El usuario | «Documenta el modelo de factura», «especifica la API de pagos», «dame más detalle del flujo de aprobación de la TK-004» | Documento creado/actualizado + resumen al usuario + oferta de enlazarlo desde la US/TK/WI relacionada |
 | **Delegado** | `work-define` o `work-plan` vía subagente | Contexto de la US/TK/WI + los elementos técnicos a especificar | Documento creado/actualizado y, **como respuesta final del subagente, la lista de referencias** (ruta relativa + ancla de cada elemento) para que el skill llamador las agregue a la sección Referencias del artefacto |
 
-En modo delegado, el grilling de preguntas se dirige igualmente al usuario (el subagente hereda la herramienta de preguntas estructuradas); si el entorno no permite preguntar, documentar las lagunas en Observaciones y reportarlas en la respuesta final en lugar de inventar.
+En modo delegado, el grilling de preguntas se dirige igualmente al usuario (el subagente hereda la herramienta de preguntas estructuradas); si el entorno no permite preguntar, documentar las lagunas en Observaciones y reportarlas en la respuesta final en lugar de inventar. **En modo directo**, si el entorno tampoco permite preguntar (p. ej. sesión desatendida/programada sin nadie que responda en el momento), aplicar el mismo criterio: no inventar, documentar cada laguna en Observaciones citando el elemento afectado, y destacarlas de forma prominente al principio del resumen final — a diferencia del modo delegado, aquí no hay un skill llamador que las recoja, así que es el propio resumen al usuario el único lugar donde quedan visibles.
 
 ---
 
@@ -89,7 +89,7 @@ El detalle de **qué preguntar por tipo de elemento** (campos sin tipo, códigos
 
 ## Información requerida antes de redactar
 
-**No inventar nada** — si un dato no es explícito ni inferible del repo, preguntar al usuario (o reportarlo como laguna en modo delegado sin interacción).
+**No inventar nada** — si un dato no es explícito ni inferible del repo, preguntar al usuario (o reportarlo como laguna, en cualquier modo, cuando el entorno no permite preguntar — ver [Modos de invocación](#modos-de-invocación)).
 
 | Dato | Cómo obtenerlo | Si no está disponible |
 | ---- | -------------- | --------------------- |

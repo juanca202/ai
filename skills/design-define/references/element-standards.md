@@ -8,7 +8,12 @@ Reglas comunes a todos los tipos:
 - **Encabezado enlazable:** cada elemento es un `### ID: Nombre`. El ancla resultante (`#md-01-factura`) es la referencia que consumen US/TK/WI.
 - **Referencias cruzadas por id:** cuando un elemento usa otro (una API recibe un modelo, un flujo invoca una API), citarlo por su id (`MD-01`, `API-02`) — dentro de la misma capability con ancla local; entre capabilities con ruta relativa + ancla (`[MD-01 de facturación](facturacion.md#md-01-factura)`).
 - **No inventar:** todo tipo, código de error, regla o rama de flujo que no venga del input, del código del repo o de la US/TK/WI de origen se pregunta (grilling) o queda en Observaciones. Un dato plausible pero no confirmado es peor que una laguna documentada.
-- **Idioma:** los nombres de campos, rutas y payloads se escriben como existirán en el código (normalmente inglés); las descripciones, en el idioma de preferencia.
+- **Idioma:** los nombres de campos, rutas y payloads se escriben como existirán en el código. Resolver así, deteniéndose en el primer paso que aplique:
+  1. Si ya existen modelos/DTOs/endpoints en el repo (código o documentos técnicos previos), seguir **su** convención de idioma tal cual está, aunque sea español — no imponer inglés sobre un código que ya usa español.
+  2. Si es el primer elemento técnico del proyecto (sin precedente en el repo) y el idioma no es evidente del contexto, **preguntarlo explícitamente** en el grilling inicial (p. ej. «¿los nombres de campo van en español o en inglés?») en vez de asumir inglés por defecto — es una decisión recurrente en proyectos hispanohablantes y asumirla sin preguntar genera documentos inconsistentes con lo que el equipo termina escribiendo.
+  3. Sin precedente y sin poder preguntar (ver "Sin canal de respuesta disponible" en `flow.md`): usar inglés como default y dejar constancia en Observaciones de que la convención de idioma de campos quedó asumida, no confirmada.
+
+  Las descripciones (prosa) van siempre en el idioma de preferencia resuelto para el documento, sin importar el idioma elegido para los nombres de campo.
 
 ---
 

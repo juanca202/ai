@@ -119,21 +119,21 @@ Si dentro de una perspectiva hay múltiples escenarios distintos que vale la pen
 
 Usar `assets/test-case-template.md` para todos los campos. Reglas de llenado:
 
-- **Perspectiva:** registrar la perspectiva de cobertura del caso (`Happy Path`, `Error` o `Límite`), coherente con el sufijo del slug del archivo. No confundir con el tipo de prueba sugerido del campo Automatización (Unit/Integration/E2E…).
+- **Perspectiva:** registrar la perspectiva de cobertura del caso (`Happy Path`, `Error` o `Límite`), coherente con el sufijo del slug del archivo. No confundir con el o los tipos de prueba del campo Tipo de prueba (Unit/Integration/E2E…).
 - **Título descriptivo:** redactarlo en formato Given–When–Then (GWT), **respetando el idioma del artefacto origen**: en español usar `Dado {{contexto/precondición}}, Cuando {{acción/evento}}, Entonces {{resultado esperado}}`; en inglés usar `Given {{context/precondition}}, When {{action/event}}, Then {{expected result}}`. Debe describir el escenario concreto que valida el TC, coherente con las precondiciones, los pasos y el resultado esperado final.
 - **Criterio de aceptación:** referenciar el identificador `AC-XXX` (mismo formato en US y WI; si el artefacto origen usaba otro formato, normalizarlo a `AC-XXX` según el Paso 1). Este campo no puede estar vacío ni ser genérico — es el vínculo de trazabilidad.
-- **Automatización:** declarar la **intención de diseño** del caso, no su estado de ejecución. Como los TC se escriben **antes de implementar**, solo hay dos valores posibles: `Manual` (no se automatiza, requiere ejecución humana por diseño) o `Automatizable` (debe automatizarse). Este campo es la fuente que consume `trace-validate` para distinguir "manual por diseño" de "pendiente de automatizar"; no dejarlo vacío. Ante la duda entre Manual y Automatizable, preguntar al usuario.
-  - Para `Automatizable`, agregar entre paréntesis el **tipo de prueba sugerido** junto a la etiqueta (p. ej. `Automatizable (Integration)`). Inferir el tipo recorriendo esta tabla de arriba hacia abajo y tomando la **primera** respuesta afirmativa:
+- **Tipo de prueba:** declarar la **intención de diseño** del caso, no su estado de ejecución. Como los TC se escriben **antes de implementar**, el valor es `Manual` (no se automatiza, requiere ejecución humana por diseño) **o** uno o varios tipos de entre `Unit`, `Integration`, `API Test`, `Visual Test`, `E2E`, separados por coma y ordenados de menor a mayor nivel (p. ej. `Unit, E2E`) — ver la tabla siguiente para inferirlos. `Manual` no se combina con tipos. Este campo es la fuente que consume `trace-validate` para distinguir "manual por diseño" de "pendiente de automatizar"; no dejarlo vacío. Ante la duda entre `Manual` y automatizable, o sobre qué tipo(s) asignar, preguntar al usuario.
+  - Para determinar el o los tipos de prueba (cuando el valor no es `Manual`), recorrer esta tabla de arriba hacia abajo **evaluando cada fila de forma independiente** — a diferencia de una tabla de decisión que se detiene en la primera coincidencia, aquí se **acumulan todos los tipos cuya pregunta aplique**: un mismo TC puede necesitar más de un tipo (p. ej. una API que conviene cubrir tanto a nivel de unidad como end-to-end).
 
-    | Pregunta | Sí | No |
-    |----------|----|----|
-    | ¿Puede probarse sin interfaz? | Unit / Integration | Continuar |
-    | ¿Necesita verificar varios servicios? | Integration | Continuar |
-    | ¿Debe validar la experiencia completa del usuario? | E2E | Continuar |
-    | ¿Solo verifica un endpoint? | API Test | Continuar |
-    | ¿Solo valida la apariencia? | Visual Test | Otro tipo |
+    | Pregunta | ¿Aplica? → agrega |
+    |----------|--------------------|
+    | ¿Puede probarse de forma aislada, sin dependencias externas ni servicios reales? | Unit |
+    | ¿Necesita verificar la interacción real entre dos o más componentes/servicios (DB, colas, otros servicios)? | Integration |
+    | ¿Solo verifica el contrato de un endpoint (request/response), sin recorrer la lógica interna completa? | API Test |
+    | ¿Solo valida la apariencia visual (layout, estilos, snapshots)? | Visual Test |
+    | ¿Debe validar la experiencia completa del usuario de punta a punta? | E2E |
 
-    Para los TC `Manual` no aplica tipo sugerido (omitir el paréntesis).
+    El valor final del campo es la lista de tipos marcados como aplicables, escrita de menor a mayor nivel según el orden de la tabla (`Unit, Integration, API Test, Visual Test, E2E`). Si ninguna pregunta aplica, reconsiderar si el caso es en realidad `Manual`. Para los TC `Manual` no aplica ningún tipo (el campo queda solo en `Manual`).
 - **Prioridad:** derivar del impacto del criterio en el negocio: Alta si el criterio es bloqueante o afecta seguridad/datos; Media si es funcional importante; Baja si es edge case o cosmético. Si no hay suficiente contexto, preguntar al usuario.
 - **Creado por:** usar `git config user.name` del repositorio. Si no está disponible, dejar el campo vacío.
 - **Precondiciones:** ser específico — incluir estado del sistema, datos existentes y permisos requeridos.
@@ -149,13 +149,13 @@ Usar `assets/test-case-template.md` para todos los campos. Reglas de llenado:
 2. Escribir cada `TC-XXX-{slug}.md` en la ruta correcta según la tabla de Selección del artefacto. Guardar cada TC con `Estado: Ready` salvo que el usuario indique lo contrario.
 3. Crear o actualizar el índice `test-cases/README.md` con una tabla que liste **todos** los TCs de la carpeta (los recién creados más los que ya existieran), ordenados por número de TC. La tabla lleva estas columnas:
 
-   | TC | Perspectiva | Automatización | Prioridad | Criterio de aceptación |
+   | TC | Perspectiva | Tipo de prueba | Prioridad | Criterio de aceptación |
    |----|-------------|----------------|-----------|------------------------|
-   | [TC-001](./TC-001-{slug}.md) | Happy Path | Automatizable (Integration) | Alta | AC-001 |
+   | [TC-001](./TC-001-{slug}.md) | Happy Path | Unit, E2E | Alta | AC-001 |
 
    Reglas del índice:
    - **TC:** ID enlazado por ruta relativa a su archivo `TC-XXX-{slug}.md`.
-   - **Perspectiva**, **Automatización** y **Prioridad:** copiar el valor tal como quedó en el encabezado del TC (Automatización incluye el tipo entre paréntesis si aplica).
+   - **Perspectiva**, **Tipo de prueba** y **Prioridad:** copiar el valor tal como quedó en el encabezado del TC (Tipo de prueba se copia tal cual, con todos los tipos separados por coma si son varios).
    - **Criterio de aceptación:** mostrar **solo el código** `AC-XXX`, sin el título.
    - Regenerar el índice completo en cada corrida para reflejar el estado actual de la carpeta; redactarlo en el idioma del artefacto origen.
 4. Mostrar al usuario un resumen:

@@ -168,7 +168,10 @@ Antes de redactar un ADR nuevo o de añadir un requisito:
 1. **Número y archivo del ADR** — correlativo en `docs/adr/`; archivo `docs/adr/ADR-XXX-<slug>.md`. Convenciones de identidad/numeración y frontmatter: [`references/conventions.md`](references/conventions.md).
 2. **Recopilar información faltante** (ver tabla anterior).
 3. **Escribir el ADR** desde `assets/adr-template.md`:
-   - Frontmatter YAML: `id: ADR-XXX`, `status: Draft` (por defecto), `last_update` = hoy, `deciders`, `tags`, `supersedes: null`, `superseded_by: null`, `emits: []` (campos completos en [`references/conventions.md`](references/conventions.md)).
+   - Frontmatter YAML: `id: ADR-XXX`, `status` (ver regla de default abajo), `last_update` = hoy, `deciders`, `tags`, `supersedes: null`, `superseded_by: null`, `emits: []` (campos completos en [`references/conventions.md`](references/conventions.md)).
+   - **Default de `status`:**
+     - **Por defecto, `Draft`** — la decisión todavía no está en vigor o sigue en discusión.
+     - **`Accepted`** si la decisión ya está vigente y el código la implementa y cumple **hoy** — típicamente al venir de `arch-discover` documentando retroactivamente algo que el repo ya hace (no una decisión nueva a futuro). No usar `Draft` para una decisión que ya rige: `Draft`/`Proposed` implican que aún no aplica, lo cual sería falso en ese caso.
    - Cuerpo: `## Contexto`, `## Decisión`, `## Alternativas consideradas` (opcional), `## Consecuencias`, `## Referencias`. **Solo el porqué** — sin enunciados normativos ni criterios (eso va al estándar).
 4. **Decidir si la decisión establece una regla continua.** Preguntarse: *¿esta decisión fija una regla
    que el equipo deberá cumplir de forma continua?*
@@ -188,6 +191,7 @@ Antes de redactar un ADR nuevo o de añadir un requisito:
 9. **Actualizar los índices `README.md`**:
    - `docs/adr/README.md`: añadir `- [ADR-XXX: Título](ADR-XXX-slug.md)` en orden ascendente.
    - `docs/standards/README.md`: si el estándar de dominio es nuevo, añadir `- [Nombre del estándar](<slug>.md)` (forma simple) o `- [Nombre del estándar](<slug>/README.md)` (forma carpeta); si ya existía, no duplicar.
+   - **Si el índice no existe todavía y la carpeta ya tenía artefactos previos** (p. ej. `docs/adr/ADR-001-*.md` y `ADR-002-*.md` ya existían pero nunca hubo `docs/adr/README.md`): al crear el índice por primera vez, listar **todos** los artefactos existentes en la carpeta (`ls docs/adr/*.md` / `docs/standards/*.md` o `*/README.md`), no solo el que se acaba de crear — el índice debe reflejar el estado real de la carpeta desde su primera versión, en el mismo orden ascendente que usaría en adelante. Si la carpeta no tenía nada más, el índice arranca con la única entrada nueva.
    - Crearlos con encabezado y lista si no existen. Nunca reordenar ni eliminar entradas.
 10. **Confirmar** mostrando: ruta del ADR, estándar de dominio y requisito(s) añadido(s)/actualizado(s), líneas de índice, y —si aplica— la fitness function creada (con su par de wrappers), los comandos agrupadores `sh scripts/arch/verify.sh` / `powershell -File scripts/arch/verify.ps1` y las dependencias instaladas.
 

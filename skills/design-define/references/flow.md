@@ -60,6 +60,7 @@ Priorizar: preguntar primero lo que **bloquea la implementación** (tipos, contr
    - Revisar la US/TK/WI de origen (si la hay) y el código del repo cuando el elemento describa algo ya implementado — el código existente es fuente, no se contradice sin avisar.
 3. **Grilling**
    - Contrastar el input con los estándares y lanzar la(s) tanda(s) de preguntas por las lagunas reales. Con las respuestas (o con las lagunas asumidas como pendientes), continuar.
+   - **Sin canal de respuesta disponible** (modo directo en una sesión desatendida/programada, o modo delegado cuyo subagente no puede interactuar): no inventar ninguna respuesta — documentar cada laguna en Observaciones citando el elemento afectado y continuar con lo que sí está confirmado. Mismo criterio en ambos modos; solo cambia dónde queda visible (respuesta final del subagente en delegado, resumen al usuario en directo — ver [Modos de invocación](../SKILL.md#modos-de-invocación) en `SKILL.md`).
 4. **Redactar**
    - Documento nuevo: usar `assets/technical-doc-template.md` como molde (Propósito, secciones de elementos que apliquen, Observaciones). No copiar la plantilla como artefacto al repo; es un molde.
    - Cada elemento según su estándar en [`element-standards.md`](element-standards.md), con id siguiente de su secuencia y encabezado `### ID: Nombre`.

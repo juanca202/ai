@@ -67,11 +67,15 @@ Resolver el comando concreto leyendo scripts/tareas del manifiesto; *fallback* a
 | Tipado | `tsc --noEmit` | — | — | `mypy .` / `pyright` | — | `cargo check` | — |
 | Linter | script `lint` → `eslint` | `mvn checkstyle:check` / plugin | `gradle checkstyleMain` / `lint` | `ruff check` / script `lint` | `golangci-lint run` | `cargo clippy` | `dotnet format --verify-no-changes` |
 | Unit | script `test` | `mvn test` | `gradle test` | `pytest` / script `test` | `go test ./...` | `cargo test` | `dotnet test` |
-| Coverage | `test:coverage` → `coverage` | JaCoCo en `mvn verify` / `jacoco:report` | `gradle jacocoTestReport` | `pytest --cov` | `go test -coverprofile=...` | `cargo llvm-cov` / tarpaulin | `dotnet test /p:CollectCoverage=true` |
-| Build | script `build` | `mvn package -DskipTests` | `gradle build -x test` | script `build` si existe | `go build ./...` | `cargo build` | `dotnet build` |
+| Coverage | `test:coverage` → `coverage` → *(sin script)* ver nota¹ | JaCoCo en `mvn verify` / `jacoco:report` | `gradle jacocoTestReport` | `pytest --cov` | `go test -coverprofile=...` | `cargo llvm-cov` / tarpaulin | `dotnet test /p:CollectCoverage=true` |
+| Build | script `build` → *(sin script)* ver nota² | `mvn package -DskipTests` | `gradle build -x test` | script `build` si existe | `go build ./...` | `cargo build` | `dotnet build` |
 | E2E | `test:e2e` → `e2e` | `mvn verify` (Failsafe) / perfil e2e | `gradle e2e` / task custom | script e2e / Playwright | script e2e | script e2e | script e2e |
 
 **Node:** detectar runner por lockfile (`package-lock.json` → npm, `yarn.lock` → yarn, `pnpm-lock.yaml` → pnpm). Leer `package.json.scripts` **antes** de invocar `npx`.
+
+¹ **Coverage/Node sin script `test:coverage` ni `coverage`:** detectar el test runner desde `devDependencies` (`jest`, `vitest`, `mocha`+`nyc`, `ava`, etc.) y usar su bandera nativa de cobertura como comando canónico — `jest --coverage`, `vitest run --coverage`, `nyc mocha`, etc. Si no se puede identificar el runner con certeza, preguntar al usuario en vez de adivinar un comando.
+
+² **Build/Node + TS sin script `build`:** si el repo no tiene bundler propio (Webpack, Vite, esbuild, tsup…) — es decir, un proyecto TS puro que solo transpila — el build canónico es `tsc` (compilación real, **sin** `--noEmit`). Esto es casi el mismo comando que el check de **Tipado** (`tsc --noEmit`), solo que Build sí emite salida. Cuando ambos terminan resolviendo al mismo comando base, ejecutarlos igual como dos checks independientes (siguen siendo señales distintas: Tipado valida tipos, Build valida que el output se genera), pero **señalarlo en el informe** — una nota breve de que Build y Tipado comparten el mismo compilador en este repo — en vez de presentarlos como si fueran verificaciones completamente independientes que por casualidad coinciden.
 
 > Al **ejecutar** un check nunca añadir `--fix`, `--write`, `--force` ni equivalentes: falsearían el resultado. Las correcciones autorizadas por el usuario son un paso aparte y deliberado (ver `SKILL.md` → Flujo de ejecución).
 

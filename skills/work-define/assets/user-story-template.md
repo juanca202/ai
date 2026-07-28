@@ -8,7 +8,7 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 **Estado:** {{Draft | Ready}}
 **Fecha de creación:** {{YYYY-MM-DD}}
 **Última actualización:** {{YYYY-MM-DD}}
-**ADO Work Item:** {{enlace markdown al work item de ADO — solo si se creó; omitir línea si no aplica}}
+**ADO Work Item:** {{enlace markdown al work item de ADO — solo si se creó manualmente para esta historia; omitir línea si no aplica. A diferencia de TK-XXX/WI-XXX (que work-plan sí sincroniza automáticamente con ADO), ningún skill de esta suite crea o pobla este campo por su cuenta}}
 
 ## Descripción
 
@@ -50,6 +50,21 @@ Rutas permitidas: assets/ (recursos propios de esta historia) o docs/specs/techn
 - **Diseño / prototipo:** {{enlace markdown al diseño o prototipo}}
 - **Archivo local:** {{enlace markdown al archivo en assets/}}
 - {{añadir entradas adicionales o indicar «Ninguna por ahora»}}
+
+## Migración (origen → destino)
+
+<!--
+Sección opcional. Incluir solo si esta US es una de las historias en que se descompuso una migración grande entre proyectos, investigada por work-research (flujo B, `research/RS-XXX-{slug}/`) y dimensionada como cambio grande. Eliminar esta sección si no aplica.
+-->
+
+**Investigación:** {{enlace a la investigación, típ. `../../research/RS-XXX-{slug}/README.md`}}
+**Proyecto origen:** {{nombre / stack principal del origen}}
+**Proyecto destino:** {{nombre / stack principal del destino}}
+
+Esta US materializa una porción de la migración investigada en el `RS-XXX` (dimensionada como cambio grande, descompuesta en varias US). Para no duplicar contexto, apóyate en sus archivos (contexto progresivo): el mapeo tecnológico, el estado del origen y los riesgos viven en su `discovery.md`; los casos de validación (Golden Master) en su `validation.md`.
+
+- Los **criterios de aceptación (`AC-XXX`)** de esta US describen el comportamiento migrado; su validación contra los casos Golden Master (`GM-XXX` de `validation.md`) se detalla a nivel de `TK-XXX` en `work-plan` (que ya trae su propia sección Migración para ese mapeo), no aquí.
+- Si la migración es incremental, indícalo en **Contexto** con la estrategia (Strangler Fig, Branch by Abstraction, Parallel Run, …) y qué fase cubre esta US específicamente.
 
 ## Criterios de aceptación
 

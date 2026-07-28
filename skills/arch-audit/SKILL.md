@@ -172,7 +172,10 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
    ```
    De cada estándar de dominio técnico o funcional (identificado por su **nombre**, sin código; su línea
    visible bajo el título es `**Dominio:** <slug>`; archivo `docs/standards/<slug>.md` o carpeta
-   `docs/standards/<slug>/README.md`) extraer su `name`, `domain`, `status` y `source_adrs`. Dentro del
+   `docs/standards/<slug>/README.md`) extraer su `name`, `domain`, `status` y `source_adrs`. **Si el
+   estándar no trae la línea `**Dominio:** <slug>`** (formato antiguo o más simple, previo a esta
+   convención), usar el nombre del archivo/carpeta como `domain` de facto y señalarlo como observación
+   (formato de estándar desactualizado) — no bloquea la auditoría de sus criterios. Dentro del
    documento, cada **requisito** (`## <Nombre>` con `**ID:** <slug-requisito>`; referencia
    `<slug-estándar>/<slug-requisito>`) es una **agrupación legible**: leer su tabla `### Criterios de
    cumplimiento` y extraer **de cada fila `CR-XXX`** (la unidad auditable; referencia global
@@ -186,7 +189,11 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
    mano su ADR de origen para citarlo (el ADR referencia en `emits` los criterios que fija, p. ej.
    `emits: [testing/CR-001]`). Además, detectar **ADR `Accepted` con una regla claramente enforceable
    que no fijó ningún criterio** (`emits: []`): no auditar el ADR como norma, sino anotarlo como
-   observación → sugerir emitir el criterio vía `arch-manage`.
+   observación → sugerir emitir el criterio vía `arch-manage`. **Si el ADR no tiene el campo `emits`
+   en absoluto** (formato antiguo, previo a esta convención) en vez de `emits: []`, tratarlo igual que
+   un ADR sin criterio para esta fase (mismo tratamiento: observación + sugerir emitir vía
+   `arch-manage`), pero señalar además que el ADR usa un formato desactualizado (sin `emits`), para no
+   confundirlo con una decisión deliberada de no fijar criterios.
 
 3. **AGENTS.md** — leer el/los archivo(s):
    ```bash
@@ -195,6 +202,15 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
    Descomponer el documento en **reglas atómicas y verificables**. Ignorar prosa de contexto sin
    una regla accionable. A cada regla asignarle un identificador estable con el formato
    `AGENTS.md §<sección>` (p. ej. `AGENTS.md §APIs`).
+
+   **Regla duplicada con un criterio existente:** si una regla de `AGENTS.md` repite, en sustancia,
+   el mismo contenido normativo que un `CR-XXX` ya extraído en el paso 1 (mismo requisito, mismo
+   MUST/SHOULD), **no** crear una entrada separada en la lista de reglas a auditar. Fusionarla bajo
+   ese `CR-XXX`: agregar `AGENTS.md §<sección>` como fuente adicional (junto al estándar) en el campo
+   `Fuente` del hallazgo, y evaluarla una sola vez. Solo tratarla como regla independiente si añade
+   una condición, alcance o matiz que el criterio no cubre. Este criterio de fusión se aplica siempre
+   — no queda a discreción de cada corrida, precisamente para que dos auditorías del mismo repo no
+   difieran en el conteo de hallazgos por esta razón.
 
 4. **Contexto de stack** — leer `## Stack tecnológico` en `AGENTS.md` si existe, para saber
    lenguajes/frameworks y afinar los patrones de búsqueda (evita falsos negativos por buscar en el
@@ -259,7 +275,13 @@ El **`Enfoque`** del criterio modula la prioridad, a igualdad de término RFC 21
 `bloqueante` incumplido pesa más (tiende a Alta/Media) que un criterio `warning` incumplido (tiende a
 Media/Baja), coherente con que un `warning` no cambia el veredicto ejecutable (ver Fase 2B).
 
-Un criterio en estado ✅ Cumplido no genera hallazgo con prioridad, pero cuenta en el resumen.
+Un criterio en estado ✅ Cumplido no genera un **hallazgo** (no lleva su propia entrada bajo
+🔴/🟡/⚪ en la Fase 3), pero sí cuenta en la tabla del **Resumen**. Para ubicarlo en una fila de esa
+tabla (Alta/Media/Baja), usar la **prioridad potencial** del criterio — la que tendría si estuviera
+incumplido, según los mismos criterios de arriba (término RFC 2119, `Enfoque`, alcance e impacto) —
+no la prioridad de un hallazgo real, que no existe en este caso. Lo mismo aplica a un criterio
+❔ No verificable: se ubica por su prioridad potencial, y además se detalla aparte en la sección
+`## Reglas no verificables por inspección estática`.
 
 ---
 
@@ -363,6 +385,7 @@ flujo de `Comportamiento en Revalidación` descrito en la Fase 0 — no se reesc
    - **Fitness functions**: indicar si existen los **agrupadores** (`scripts/arch/verify.sh` y/o `scripts/arch/verify.ps1`, según qué plataformas tenga cubiertas el repo) y su resultado conjunto (Total / PASS / WARN / FAIL); una sub-tabla de las **existentes** (criterio `CR-XXX`, enfoque, herramienta, comando, si está registrada en el agrupador, resultado PASS/FAIL/WARN/No ejecutable) y una lista de las **sugeridas** (criterio apto sin fitness function → qué medir, herramienta y esbozo). Si hay dos o más fitness functions sueltas y no existe el agrupador, o si solo existe uno de los dos pares de plataforma, recomendarlo aquí.
    - Sección de reglas **No verificables**.
    - Sección de **Decisiones sin criterio** (opcional): ADR `Accepted` con regla enforceable que no fijó ningún criterio (`emits: []`) → sugerir emitirlo vía `arch-manage`.
+   - Sección de **Observaciones** (opcional): notas operativas que no son un hallazgo de incumplimiento (fitness function no registrada en el agrupador, wrapper sin su par de plataforma, estándar/ADR en formato antiguo, dependencia rechazada en la Fase 3.5, etc.) — es el destino de cualquier "señalar/anotar como observación" mencionado en las fases anteriores.
 4. **Nunca sobrescribir** un informe anterior: el nombre lleva la fecha para conservar el histórico. Si ya existe un `audit-<hoy>.md` del mismo día, actualizarlo (no duplicar).
 
 El formato exacto de cada hallazgo (qué campos lleva y en qué orden) es el que ya trae

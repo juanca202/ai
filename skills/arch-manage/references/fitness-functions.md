@@ -33,6 +33,14 @@ tumbar el gate.
 
    4.1. **Investigar la forma idónea antes de elegir.** Detectar el stack (manifiestos: `package.json`,
    `pom.xml`, `pyproject.toml`, `*.csproj`, `go.mod`, etc.).
+      - **Si no hay ningún manifiesto de dependencias en el repo** (no hay ecosistema de paquetes que
+        instalar — p. ej. un repo de scripts sueltos, de infraestructura pura, o de documentación): no
+        hay gestor de paquetes con el que instalar una herramienta externa. En ese caso, el **script
+        propio** (`grep`/`find`/comando nativo del shell) deja de ser el último recurso y pasa a ser la
+        opción por defecto — explicarlo así al usuario en vez de ofrecer instalar una herramienta que no
+        tiene dónde vivir. Si el criterio referencia un ecosistema concreto que sí se puede inferir del
+        contenido (p. ej. Terraform por `*.tf`, Ansible por `playbooks/`), tratar esa señal como el
+        "manifiesto" para el resto de este paso.
       - Primero comprobar si el repo **ya tiene** configurada una herramienta apta para este tipo de
         chequeo (p. ej. ya usa `dependency-cruiser` para otra regla, o ya hay tests con ArchUnit) — en
         ese caso, **añadir la regla ahí**, no montar una herramienta nueva en paralelo.

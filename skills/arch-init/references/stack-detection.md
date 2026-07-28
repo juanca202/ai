@@ -57,5 +57,5 @@ No asumir: preguntar al usuario con la herramienta estructurada — *"¿Cómo de
 ### Por qué importa
 
 - **Sin código** → el Paso 2 (conseguir el stack) es obligatorio completo: capturar la necesidad, sugerir o investigar, instalar.
-- **Con código base** → se salta el Paso 2; el stack ya está decidido por el scaffold. El Paso 4.1 usa esa decisión de stack (sin alternativas registradas, salvo que el usuario las mencione) como único candidato de arquitectura.
+- **Con código base** → se salta el Paso 2; el stack ya está decidido por el scaffold. El Paso 4.1 usa esa decisión de stack (sin alternativas registradas, salvo que el usuario las mencione) como candidato de arquitectura **si aplica** — sigue sujeto al mismo criterio de exclusión de candidatos triviales de `references/adr-candidates.md` § 2 (punto 1): si es la elección obvia y sin comparación real de un scaffold, se puede dejar pasar sin proponerlo, o documentarlo igual como ADR con `emits: []` solo si el usuario lo pide.
 - **Con implementación** → se salta el Paso 2 igual que "con código base". Además, el Paso 4.1 delega en un subagente de `arch-discover` para minar las decisiones y reglas ya implícitas en el código — no se asume que la única decisión relevante sea el stack. La compuerta de calidad (Paso 4.2) debe partir de lo que **ya existe** (tests actuales) en vez de proponer un set desde cero.

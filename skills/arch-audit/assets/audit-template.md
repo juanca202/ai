@@ -171,6 +171,18 @@ estándar de dominio que corresponda) para que la regla sea auditable. Si no hay
 -->
 - {{ADR-XXX}} — {{regla enforceable sin criterio emitido (emits: [])}} → sugerir emitir criterio vía `arch-manage`.
 
+## Observaciones
+
+<!--
+Opcional. Notas operativas que no son un hallazgo de incumplimiento (no van bajo 🔴/🟡/⚪) ni una
+decisión sin criterio, pero que la próxima auditoría o el mantenimiento del harness debería conocer.
+Ejemplos: una fitness function ejecutada individualmente porque no está registrada en el agrupador
+scripts/arch/verify.sh/.ps1; un wrapper que existe para una plataforma pero no tiene su par en la
+otra; un estándar o ADR en formato antiguo (sin "**Dominio:**" o sin "emits"); una dependencia que el
+usuario rechazó instalar (Fase 3.5). Si no hay ninguna, omitir esta sección o escribir "Ninguna.".
+-->
+- {{criterio o archivo afectado}} — {{qué se observó y qué acción se sugiere, si aplica}}
+
 ---
 
 ## Revalidaciones
