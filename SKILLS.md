@@ -2,7 +2,7 @@
 
 Guía práctica de cuándo y cómo usar cada skill de **SDD Devkit**. Para el flujo completo del harness, ver el [README](README.md).
 
-Invocación típica: `/nombre-skill` o una frase que active la descripción del skill (p. ej. «inicializa el harness», «crea el PR»).
+Invocación típica: `/nombre-skill` o una frase que active la descripción del skill. Donde el skill admite contexto (artefacto, alcance, tema), pásalo en el mismo mensaje.
 
 ---
 
@@ -24,6 +24,17 @@ Invocación típica: `/nombre-skill` o una frase que active la descripción del 
 
 **Handoffs:** `arch-discover` (brownfield), `arch-manage` (candidatos aceptados), consulta a `code-review` (qué validar por stack). Reejecutable: solo completa lo que falte.
 
+**Ejemplos de invocación:**
+
+```text
+/arch-init
+/arch-init este repo ya tiene código; completa lo que falte del harness
+```
+
+- «Inicializa el harness del proyecto»
+- «Prepara este repo para agentes: AGENTS.md, MEMORY y docs/adr»
+- «Bootstrapea el harness; queremos una API en NestJS con Postgres» (sin código → define stack con ese contexto)
+
 ---
 
 ### arch-manage
@@ -44,6 +55,20 @@ Invocación típica: `/nombre-skill` o una frase que active la descripción del 
 
 **Handoffs:** lo consume `arch-audit`; lo invocan `arch-init` y `arch-discover`.
 
+**Ejemplos de invocación:**
+
+```text
+/arch-manage
+/arch-manage documenta que usamos GraphQL y cobertura unitaria ≥ 80%
+/arch-manage marca ADR-003 como Superseded por ADR-012
+/arch-manage añade al Testing Standards: e2e MUST con Playwright
+```
+
+- «Registra la decisión de migrar de MySQL a Postgres en 2026» → caso A (solo ADR)
+- «Documenta por qué las APIs son GraphQL y la norma que lo exige» → caso B
+- «Aclara la excepción del umbral de cobertura en Testing Standards» → caso C
+- «Cambia ADR-007 a Accepted»
+
 ---
 
 ### arch-discover
@@ -62,6 +87,18 @@ Invocación típica: `/nombre-skill` o una frase que active la descripción del 
 Los candidatos se agrupan por **dominio técnico/funcional** (testing, api, security, etc.; ver catálogo en el skill). No hay modo que se detenga antes de la Fase 5: tras aprobar, se crean los artefactos en la misma ejecución.
 
 **Handoffs:** `arch-manage` (creación); suele invocarlo `arch-init` en brownfield.
+
+**Ejemplos de invocación:**
+
+```text
+/arch-discover
+/arch-discover enfócate en testing y api
+/arch-discover solo el módulo src/payments
+```
+
+- «¿Qué decisiones arquitectónicas tiene este proyecto?»
+- «Descubre ADRs y estándares implícitos en el repo»
+- «Analiza la arquitectura; prioriza seguridad y persistencia»
 
 ---
 
@@ -82,6 +119,20 @@ Los candidatos se agrupan por **dominio técnico/funcional** (testing, api, secu
 
 Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Deprecated`/`Superseded` solo si el código sigue dependiendo de ellos.
 
+**Ejemplos de invocación:**
+
+```text
+/arch-audit
+/arch-audit revalida la última auditoría
+/arch-audit nueva auditoría desde cero
+/arch-audit solo Testing Standards
+```
+
+- «¿El código respeta los estándares?»
+- «Audita el cumplimiento de AGENTS.md y docs/standards»
+- «Revalida audit-2026-06-30.md»
+- «Chequea las reglas del repo; enfócate en API Standards»
+
 ---
 
 ### git-commit
@@ -100,6 +151,20 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 | Falló un pre-commit hook | Corrige, re-stagea y **nuevo** commit (sin `--amend` ni `--no-verify` salvo petición explícita) |
 
 **Tipos de mensaje:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert` (tipo/scope en inglés). Detiene el commit ante secretos o archivos sensibles salvo confirmación explícita sobre ese archivo.
+
+**Ejemplos de invocación:**
+
+```text
+/git-commit
+/commit
+/git-commit separa docs y feat en commits distintos
+/git-commit Closes #42
+```
+
+- «Haz commit de lo pendiente»
+- «Genera el mensaje Conventional Commits y confirma»
+- «Separa los cambios en varios commits lógicos»
+- «Commit con footer Closes #128» (solo si aportas el número)
 
 ---
 
@@ -120,6 +185,22 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 | **C · Libre** | Tema sin artefacto | Hallazgos por dominio: Producto, Arquitectura, Técnica o Cambio |
 | **D · Legacy** | Código sin requisitos/pruebas suficientes | `FEAT-XXX` + TCs vía `test-define` → `trace-validate` (solo pruebas, no código funcional) |
 
+**Ejemplos de invocación:**
+
+```text
+/work-research
+/work-research US-004
+/work-research TK-012 ¿qué falta por decidir antes de implementar?
+/work-research migrar ../legacy-app → este repo
+/work-research analiza el módulo src/billing (legacy)
+/work-research ¿monolito o microservicios para el catálogo?
+```
+
+- «Investiga las lagunas de US-007» → flujo A
+- «Migración de proyecto-origen a proyecto-destino» → flujo B
+- «¿Es viable usar Temporal para orquestación?» → flujo C (técnica)
+- «Documenta features desde el código de `src/orders`» → flujo D
+
 ---
 
 ### work-define
@@ -137,6 +218,19 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 
 **Estados:** `Draft` (lagunas en Observaciones) · `Ready` (DoR + INVEST + repos + AC completos). En Ready sugiere `test-define` y `work-plan`.
 
+**Ejemplos de invocación:**
+
+```text
+/work-define
+/work-define como comprador quiero guardar favoritos
+/work-define actualiza US-003: añade AC de timeout 3s
+/work-define a partir de RS-002
+```
+
+- «Crea una historia de usuario para el checkout con tarjeta»
+- «Refina US-011: faltan criterios de accesibilidad»
+- «Estructura esta necesidad en una US Ready» (+ descripción del valor)
+
 ---
 
 ### design-define
@@ -153,6 +247,20 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 | **Delegado** | `work-define` / `work-plan` vía subagente | Documento + lista de referencias (ruta + ancla) para el llamador |
 
 **Tipos de elemento:** modelo de datos, API/endpoint, flujo/proceso, diagrama (clases / C4).
+
+**Ejemplos de invocación:**
+
+```text
+/design-define
+/design-define modelo de Factura y API de pagos
+/design-define diagrama C4 de contenedores para billing
+/design-define detalle técnico de TK-004 (flujo de aprobación)
+/design-define enlázalo desde US-008
+```
+
+- «Documenta el modelo de datos de Pedido»
+- «Especifica los endpoints REST de autenticación»
+- «Dame más detalle del flujo de reembolso de la TK-004»
 
 ---
 
@@ -172,6 +280,20 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 
 **Tipo de prueba (intención de diseño):** `Manual` **o** uno/varios de `Unit`, `Integration`, `API Test`, `Visual Test`, `E2E`.
 
+**Ejemplos de invocación:**
+
+```text
+/test-define
+/test-define US-005
+/test-define WI-003
+/test-define FEAT-002
+/test-define US-005 solo criterios AC-001 y AC-003
+```
+
+- «Crea casos de prueba para US-009»
+- «Genera TCs desde los AC de WI-014»
+- «Documenta pruebas para el feature FEAT-001 (legacy)»
+
 ---
 
 ### work-plan
@@ -186,6 +308,21 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 | **Mantenimiento** | Sin US (bug, refactor, deuda, deps, operativa) | `WI-XXX` en `docs/specs/work-items/` |
 
 Solo se hace handoff a `work-implement` si el artefacto está en `Ready`. Si hay vinculación ADO en `.agents/MEMORY.md`, sincroniza work items antes de crear archivos locales. Puede delegar detalle técnico a `design-define`.
+
+**Ejemplos de invocación:**
+
+```text
+/work-plan
+/work-plan US-007
+/work-plan planifica tareas para US-004 agrupadas por repo
+/work-plan WI: actualizar Spring Boot a 3.3
+/work-plan completa TK-002 a Ready
+```
+
+- «Planifica US-007» → stubs `TK-XXX` por repositorio / AC
+- «Tareas para esta historia» (+ US en contexto)
+- «Plan de mantenimiento: refactor del módulo de auth» → `WI-XXX`
+- «Descompón el bug de timeouts en un WI»
 
 ---
 
@@ -208,6 +345,21 @@ Solo se hace handoff a `work-implement` si el artefacto está en `Ready`. Si hay
 | **Paralelo** | Solo si hay **más de una** unidad **y** el usuario pide explícitamente «sin preguntar» / «de corrido»; worktrees + subagentes tras análisis de dependencias |
 
 Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrate` o `pr-create`.
+
+**Ejemplos de invocación:**
+
+```text
+/work-implement
+/work-implement TK-003
+/work-implement US-006
+/work-implement WI-002
+/work-implement US-006 de corrido (sin preguntar entre TKs)
+```
+
+- «Implementa TK-011»
+- «Desarrolla las tareas Ready de US-006»
+- «Ejecuta WI-005»
+- «Implementa todas las TK de US-008 sin pausas» → modo paralelo (si hay >1 unidad)
 
 ---
 
@@ -270,6 +422,20 @@ No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `code-r
 
 **Reporte:** `trace-report.md` en la carpeta del artefacto.
 
+**Ejemplos de invocación:**
+
+```text
+/trace-validate
+/trace-validate US-012
+/trace-validate WI-004
+/trace-validate FEAT-001
+/trace-validate US-012 solo AC-002 y AC-005
+```
+
+- «Genera la matriz de trazabilidad de US-012»
+- «¿Los criterios de WI-004 están cubiertos por pruebas?»
+- «Valida cobertura del feature FEAT-003 (legacy)»
+
 ---
 
 ### work-integrate
@@ -284,6 +450,19 @@ No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `code-r
 | `WI-XXX` | Todas las unidades del WI |
 
 **Puertas (obligatorias):** `code-review` → `trace-validate`. Working tree sucio → invoca `git-commit` automáticamente.
+
+**Ejemplos de invocación:**
+
+```text
+/work-integrate
+/work-integrate US-006
+/work-integrate WI-002
+```
+
+- «Cierra e integra US-006»
+- «Haz merge de esta rama feature a la base»
+- «Finaliza el WI-002 e intégralo»
+- (Desde la rama `feature/US-…` o `feature/WI-…` el skill infiere el trabajo)
 
 ---
 
@@ -300,3 +479,15 @@ No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `code-r
 3. Definition of Done (`docs/policies/definition-of-done.md`) — **solo si existe**; si no, se omite
 
 Working tree sucio → `git-commit` automático. Título/descripción se generan sin pedir confirmación. Ante fallo de puerta: informa, propone acciones y solo corrige con autorización explícita.
+
+**Ejemplos de invocación:**
+
+```text
+/pr-create
+/pr-create hacia develop
+/pr-create base main
+```
+
+- «Crea el PR»
+- «Abre un MR a develop»
+- «Súbelo a main» (el destino se confirma; las puertas no se pueden saltar)
