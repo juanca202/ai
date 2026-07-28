@@ -123,6 +123,34 @@ flowchart TD
 5. Las tareas planificadas pasan a `work-implement` para su codificación.
 6. El flujo termina por uno de dos caminos, cada uno con puertas de calidad (`code-review`, `trace-validate`), y ambos llegan al mismo entregable — el trabajo listo para producción, ya sea integrado directo (`work-integrate`) o vía Pull/Merge Request (`pr-create`).
 
+#### Specs (frameworks de terceros)
+
+Variante del flujo Specs **cuando la implementación la ejecuta un framework de terceros** (p. ej. Speckit, OpenSpec, AgentOS): se especifican las historias y el entregable de specs, sin pasar por planificación ni implementación propias del harness.
+
+```mermaid
+flowchart TD
+    A[Requerimiento] --> B["Historias de usuario<br/>**/work-define**"]
+    B -.-> R["Investigación<br/>**/work-research**"]
+    B -.-> C["Casos de prueba<br/>**/test-define**"]
+    B -.-> D["Diseño arquitectónico<br/>**/design-define**"]
+    subgraph NESTED["Otro flujo · Speckit / OpenSpec / AgentOS …"]
+        S["Specs de terceros"]
+    end
+    B --> S
+    S --> I["Creación de PR<br/>**/pr-create**"]
+    I --> J(["Entregable"])
+
+    classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef nestedFlow fill:#fff7ed,stroke:#ea580c,stroke-width:2px,stroke-dasharray:5 5,color:#9a3412
+    class A,B,I,J main
+    class S nestedFlow
+```
+
+1. **Inicio**: el requerimiento se convierte en historias de usuario con `work-define`.
+2. Opcionalmente, desde las historias se investiga (`work-research`), se definen casos de prueba (`test-define`) y/o diseño arquitectónico (`design-define`).
+3. Las historias alimentan **Specs de terceros** (la implementación la corre el framework elegido: Speckit, OpenSpec, AgentOS, etc.).
+4. El flujo cierra con **Creación de PR** (`pr-create`) y llega al entregable.
+
 ## Contribuir
 
 Las contribuciones son bienvenidas. Antes de abrir un issue o un Pull Request, lee la [guía de contribución](CONTRIBUTING.md).
