@@ -137,24 +137,21 @@ flowchart TD
         S["Specs de terceros"]
     end
     B --> S
-    subgraph PR["Creación de PR · **/pr-create**"]
-        V1["Verificación de código<br/>**/code-review**"]
-        V2["Validación de trazabilidad<br/>**/trace-validate**"]
-        V1 --> V2
-    end
-    S --> V1
-    V2 --> J(["Entregable"])
+    S --> H["Integración a rama de desarrollo<br/>**/work-integrate**"]
+    S --> I["Creación de PR<br/>**/pr-create**"]
+    H --> J(["Entregable"])
+    I --> J
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
     classDef nestedFlow fill:#fff7ed,stroke:#ea580c,stroke-width:2px,stroke-dasharray:5 5,color:#9a3412
-    class A,B,J,V1,V2 main
+    class A,B,H,I,J main
     class S nestedFlow
 ```
 
 1. **Inicio**: el requerimiento se convierte en historias de usuario con `work-define`.
 2. Opcionalmente, desde las historias se investiga (`work-research`), se definen casos de prueba (`test-define`) y/o diseño arquitectónico (`design-define`).
 3. Las historias alimentan **Specs de terceros** (la implementación la corre el framework elegido: Speckit, OpenSpec, AgentOS, etc.).
-4. El flujo cierra con el grupo **Creación de PR** (`pr-create`), que agrupa verificación de código (`code-review`) y validación de trazabilidad (`trace-validate`), y llega al entregable.
+4. El flujo termina por uno de dos caminos, igual que en Specs: integración directa (`work-integrate`) o vía Pull/Merge Request (`pr-create`), cada uno con puertas de calidad (`code-review`, `trace-validate`); ambos llegan al entregable.
 
 ## Contribuir
 
