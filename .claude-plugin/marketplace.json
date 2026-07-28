@@ -10,7 +10,7 @@
       "displayName": "SDD Devkit",
       "source": "./",
       "description": "Utilidades para el desarrollo de SDD (Spec-Driven Development): ADRs, historias de usuario, planificacion e implementacion de tareas y work items, definicion y trazabilidad de pruebas, migraciones y code review.",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "author": {
         "name": "juanca202"
       }
