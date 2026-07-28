@@ -24,11 +24,11 @@ Un **harness** es el "andamiaje" que sostiene y guía todo el proceso de desarro
 
 | Skill | Uso |
 |-------|-----|
-| [arch-init](SKILLS.md#arch-init) | Inicializar el harness de un proyecto (nuevo o existente): repo git, diagnóstico base limpia/con características implementadas, stack tecnológico (detectado o investigado y scaffolded), placeholders `AGENTS.md`/`CLAUDE.md`/`.agents/MEMORY.md`/`docs/adr/README.md`/`docs/standards/README.md`, compuerta de calidad y los primeros ADR/estándares vía `arch-manage` |
-| [arch-manage](SKILLS.md#arch-manage) | Crear o actualizar ADRs (decisiones, en `docs/adr/`) y estándares de arquitectura **por dominio** (en `docs/standards/`, p. ej. *Testing Standards*). Cada decisión añade un **requisito** — redactado con RFC 2119/8174 (MUST/SHOULD/MAY) — al estándar del dominio que corresponda; el ADR lo referencia (`emits`) y el estándar traza a sus decisiones (`source_adrs`). Las fitness functions cuelgan de cada requisito |
-| [arch-discover](SKILLS.md#arch-discover) | Analizar un repositorio y proponer ADRs y requisitos candidatos, agrupados por estándar de dominio, a partir de decisiones y reglas implícitas |
-| [arch-audit](SKILLS.md#arch-audit) | Auditar el cumplimiento de los **requisitos** de los estándares (`docs/standards/`) y de `AGENTS.md` contra el estado real del repo — requisito por requisito, según su término RFC 2119, citando el ADR de origen — y generar un informe priorizado en `docs/audits/` con revalidaciones incrementales |
-| [git-commit](SKILLS.md#git-commit) | Preparar commits con mensajes Conventional Commits inferidos del diff |
+| [arch‑init](SKILLS.md#arch-init) | Inicializar el harness de un proyecto (nuevo o existente): repo git, diagnóstico base limpia/con características implementadas, stack tecnológico (detectado o investigado y scaffolded), placeholders `AGENTS.md`/`CLAUDE.md`/`.agents/MEMORY.md`/`docs/adr/README.md`/`docs/standards/README.md`, compuerta de calidad y los primeros ADR/estándares vía `arch-manage` |
+| [arch‑manage](SKILLS.md#arch-manage) | Crear o actualizar ADRs (decisiones, en `docs/adr/`) y estándares de arquitectura **por dominio** (en `docs/standards/`, p. ej. *Testing Standards*). Cada decisión añade un **requisito** — redactado con RFC 2119/8174 (MUST/SHOULD/MAY) — al estándar del dominio que corresponda; el ADR lo referencia (`emits`) y el estándar traza a sus decisiones (`source_adrs`). Las fitness functions cuelgan de cada requisito |
+| [arch‑discover](SKILLS.md#arch-discover) | Analizar un repositorio y proponer ADRs y requisitos candidatos, agrupados por estándar de dominio, a partir de decisiones y reglas implícitas |
+| [arch‑audit](SKILLS.md#arch-audit) | Auditar el cumplimiento de los **requisitos** de los estándares (`docs/standards/`) y de `AGENTS.md` contra el estado real del repo — requisito por requisito, según su término RFC 2119, citando el ADR de origen — y generar un informe priorizado en `docs/audits/` con revalidaciones incrementales |
+| [git‑commit](SKILLS.md#git-commit) | Preparar commits con mensajes Conventional Commits inferidos del diff |
 
 #### Flujo del harness
 
@@ -69,16 +69,16 @@ Skills del ciclo de vida de un requerimiento: de la historia de usuario al PR me
 
 | Skill | Uso |
 |-------|-----|
-| [work-research](SKILLS.md#work-research) | Investigar y sintetizar en un informe (RS-XXX). Genérico con tres flujos: artefacto (US/TK/WI → lagunas y decisiones pendientes), migración (origen→destino → discovery y validación, con handoff a `work-define` o `work-plan`) e investigación libre (producto, arquitectura, técnica o cambio) |
-| [work-define](SKILLS.md#work-define) | Crear o actualizar historias de usuario (US-XXX) |
-| [design-define](SKILLS.md#design-define) | Crear o actualizar documentación técnica (modelos de datos, APIs/endpoints, flujos, diagramas de clases/C4) en `docs/specs/technical-docs/` como referencia de implementación |
-| [test-define](SKILLS.md#test-define) | Crear casos de prueba (TC-XXX) desde los criterios de aceptación de una US o WI (IEEE 29119-4) |
-| [work-plan](SKILLS.md#work-plan) | Planificar tareas técnicas (TK-XXX) o work items de mantenimiento (WI-XXX) |
-| [work-implement](SKILLS.md#work-implement) | Implementar tareas (TK-XXX) o work items (WI-XXX) a partir de specs en estado Ready |
-| [code-review](SKILLS.md#code-review) | Revisión de código pre-merge: verificaciones automatizadas según el stack + revisión cualitativa (arquitectura, diseño, SOLID), con veredicto apto/no apto/incompleto |
-| [trace-validate](SKILLS.md#trace-validate) | Reporte de trazabilidad: criterios de aceptación de US/WI ↔ casos y artefactos de prueba, con veredicto de cobertura |
-| [work-integrate](SKILLS.md#work-integrate) | Cerrar e integrar el trabajo de una US o WI (merge de la rama feature previa verificación en `progress.md`) |
-| [pr-create](SKILLS.md#pr-create) | Crear PR o MR desde la rama actual (GitHub, GitLab, Azure Repos, etc.) con puertas de calidad obligatorias: code-review, trace-validate y Definition of Done |
+| [work‑research](SKILLS.md#work-research) | Investigar y sintetizar en un informe (RS-XXX). Genérico con tres flujos: artefacto (US/TK/WI → lagunas y decisiones pendientes), migración (origen→destino → discovery y validación, con handoff a `work-define` o `work-plan`) e investigación libre (producto, arquitectura, técnica o cambio) |
+| [work‑define](SKILLS.md#work-define) | Crear o actualizar historias de usuario (US-XXX) |
+| [design‑define](SKILLS.md#design-define) | Crear o actualizar documentación técnica (modelos de datos, APIs/endpoints, flujos, diagramas de clases/C4) en `docs/specs/technical-docs/` como referencia de implementación |
+| [test‑define](SKILLS.md#test-define) | Crear casos de prueba (TC-XXX) desde los criterios de aceptación de una US o WI (IEEE 29119-4) |
+| [work‑plan](SKILLS.md#work-plan) | Planificar tareas técnicas (TK-XXX) o work items de mantenimiento (WI-XXX) |
+| [work‑implement](SKILLS.md#work-implement) | Implementar tareas (TK-XXX) o work items (WI-XXX) a partir de specs en estado Ready |
+| [code‑review](SKILLS.md#code-review) | Revisión de código pre-merge: verificaciones automatizadas según el stack + revisión cualitativa (arquitectura, diseño, SOLID), con veredicto apto/no apto/incompleto |
+| [trace‑validate](SKILLS.md#trace-validate) | Reporte de trazabilidad: criterios de aceptación de US/WI ↔ casos y artefactos de prueba, con veredicto de cobertura |
+| [work‑integrate](SKILLS.md#work-integrate) | Cerrar e integrar el trabajo de una US o WI (merge de la rama feature previa verificación en `progress.md`) |
+| [pr‑create](SKILLS.md#pr-create) | Crear PR o MR desde la rama actual (GitHub, GitLab, Azure Repos, etc.) con puertas de calidad obligatorias: code-review, trace-validate y Definition of Done |
 
 #### Flujo de implementación
 
