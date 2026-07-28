@@ -54,7 +54,7 @@ flowchart TD
     end
     S --> IMPL
     IMPL --> V1["Verificación de código<br/>**/code-review**"]
-    V1 --> V2["Validación de criterios de aceptación<br/>**/trace-validate**"]
+    V1 --> V2["Validación de trazabilidad<br/>**/trace-validate**"]
     V2 --> DONE(["Entregable"])
 
     classDef nestedFlow fill:#fff7ed,stroke:#ea580c,stroke-width:2px,stroke-dasharray:5 5,color:#9a3412
@@ -66,7 +66,7 @@ flowchart TD
 3. En paralelo (o a continuación), se configura la **compuerta de calidad** vía `arch-init`; el camino brownfield también converge ahí.
 4. Luego se definen o actualizan los ADRs/Estándares con `arch-manage`. Opcionalmente se audita el cumplimiento con `arch-audit`.
 5. Con la base arquitectónica lista, el trabajo entra a la implementación de requerimientos (otro flujo: historias → planificación → implementación → integración/PR).
-6. El código resultante pasa por verificación (`code-review`) y validación de criterios de aceptación (`trace-validate`).
+6. El código resultante pasa por verificación (`code-review`) y validación de trazabilidad (`trace-validate`).
 7. El flujo termina en un entregable: trabajo verificado, validado y listo para producción.
 
 ### Specs
@@ -137,19 +137,24 @@ flowchart TD
         S["Specs de terceros"]
     end
     B --> S
-    S --> I["Creación de PR<br/>**/pr-create**"]
-    I --> J(["Entregable"])
+    subgraph PR["Creación de PR · **/pr-create**"]
+        V1["Verificación de código<br/>**/code-review**"]
+        V2["Validación de trazabilidad<br/>**/trace-validate**"]
+        V1 --> V2
+    end
+    S --> V1
+    V2 --> J(["Entregable"])
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
     classDef nestedFlow fill:#fff7ed,stroke:#ea580c,stroke-width:2px,stroke-dasharray:5 5,color:#9a3412
-    class A,B,I,J main
+    class A,B,J,V1,V2 main
     class S nestedFlow
 ```
 
 1. **Inicio**: el requerimiento se convierte en historias de usuario con `work-define`.
 2. Opcionalmente, desde las historias se investiga (`work-research`), se definen casos de prueba (`test-define`) y/o diseño arquitectónico (`design-define`).
 3. Las historias alimentan **Specs de terceros** (la implementación la corre el framework elegido: Speckit, OpenSpec, AgentOS, etc.).
-4. El flujo cierra con **Creación de PR** (`pr-create`) y llega al entregable.
+4. El flujo cierra con el grupo **Creación de PR** (`pr-create`), que agrupa verificación de código (`code-review`) y validación de trazabilidad (`trace-validate`), y llega al entregable.
 
 ## Contribuir
 
