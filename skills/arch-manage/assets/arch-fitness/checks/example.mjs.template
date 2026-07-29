@@ -1,0 +1,59 @@
+#!/usr/bin/env node
+// =============================================================================
+// Fitness functions del estándar {{Nombre del estándar}} — checks/{{slug-estándar}}.mjs
+// -----------------------------------------------------------------------------
+// UN archivo por ESTÁNDAR (no por criterio): agrupa los chequeos de todos los
+// criterios de cumplimiento (CR) automatizables de este estándar de dominio
+// (docs/standards/{{slug-estándar}}.md). La trazabilidad al criterio se indica
+// en cada chequeo: su referencia CR-XXX (en el registro del chequeo y en la
+// línea de salida) y un comentario junto al chequeo con el detalle.
+//
+// PLANTILLA DE REFERENCIA EN NODE — en stacks no-Node se escribe el equivalente
+// (checks/<slug-estándar>.py, .php, …) respetando el mismo contrato:
+//   - Imprime una línea de protocolo por criterio evaluado:
+//       PASS|FAIL|WARN <slug-estándar>/CR-XXX — <detalle corto>
+//   - Enfoque `bloqueante`: si el chequeo falla → FAIL, y el script sale ≠ 0.
+//   - Enfoque `warning`: si el chequeo falla → WARN, sin cambiar el código de salida.
+//   - Sale con código 0 si ningún CR bloqueante falló.
+//
+// El runner (../verify.mjs) descubre este archivo por convención
+// (checks/<slug-estándar>.mjs) y lo ejecuta junto al resto; con
+// `node scripts/arch/verify.mjs {{slug-estándar}}` se ejecuta solo este estándar.
+// =============================================================================
+import { execSync } from 'node:child_process';
+
+const STANDARD = '{{slug-estándar}}';
+let blockingFailures = 0;
+
+// Registra y ejecuta el chequeo de UN criterio de cumplimiento.
+function check(cr, enfoque, descripcion, fn) {
+  try {
+    fn();
+    console.log(`PASS ${STANDARD}/${cr} — ${descripcion}`);
+  } catch (err) {
+    const status = enfoque === 'warning' ? 'WARN' : 'FAIL';
+    if (status === 'FAIL') blockingFailures += 1;
+    console.log(`${status} ${STANDARD}/${cr} — ${descripcion}`);
+    const detail = err?.stdout?.toString?.() || err?.message || '';
+    if (detail) console.log(detail.trim().split('\n').map((l) => `     ${l}`).join('\n'));
+  }
+}
+
+// Ejecuta un comando acotado; lanza si sale ≠ 0 (eso marca el criterio como violado).
+const run = (cmd) => execSync(cmd, { stdio: 'pipe', encoding: 'utf8' });
+
+// --- CR-{{XXX}} ({{Enfoque: bloqueante}}) ------------------------------------
+// {{Descripción del criterio, tal como aparece en la tabla del estándar.}}
+// Invoca la herramienta real de la fitness function (dependency-cruiser, ESLint,
+// runner del framework, etc.) — no reimplementar lo que la herramienta ya sabe hacer.
+check('CR-{{XXX}}', 'bloqueante', '{{descripción corta del criterio}}', () => {
+  run('{{comando acotado de la fitness function}}');
+});
+
+// --- CR-{{YYY}} ({{Enfoque: warning}}) ---------------------------------------
+// {{Otro criterio del mismo estándar, si aplica; borrar este bloque si no.}}
+// check('CR-{{YYY}}', 'warning', '{{descripción corta}}', () => {
+//   run('{{comando}}');
+// });
+
+process.exit(blockingFailures > 0 ? 1 : 0);

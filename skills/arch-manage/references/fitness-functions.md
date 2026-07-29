@@ -1,19 +1,26 @@
-# Fitness functions y agrupador de validaciones de arquitectura
+# Fitness functions y runner de validaciones de arquitectura
 
 Leer cuando un criterio de cumplimiento (CR) es **apto para automatizar** y hay que crear/registrar su
-fitness function, o cuando hay que crear/tocar el agrupador. Cubre dos cosas: (1) la fitness function
-del CR y (2) el agrupador que las orquesta.
+fitness function, o cuando hay que crear/tocar el runner. Cubre dos cosas: (1) la fitness function
+del CR y (2) el runner que las orquesta.
+
+**El modelo, en una línea:** los scripts de verificación se escriben en el **lenguaje del stack del
+repositorio** (Node en un proyecto Angular/React/Vue/Node, Python en uno Python, PHP en uno PHP…), hay
+**un archivo de checks por estándar** (no por criterio) en `scripts/arch/checks/<slug-estándar>.<ext>`,
+y un **runner** único (`scripts/arch/verify.<ext>`) que ejecuta todos los estándares por defecto o solo
+uno pasado por argumento.
 
 ## Fitness function del criterio (CR)
 
 Cada **criterio de cumplimiento** (`CR-XXX`) de un estándar es una regla **verificable**. Al crear (o
-actualizar) un CR, evaluar si es **apto** para una fitness function y completar las columnas `Automatable`,
+actualizar) un CR, evaluar si es **apto** para una fitness function y completar las columnas `Automatizable`,
 `Enfoque` y `Verificación` de esa fila. El **Enfoque** define cómo pesa el resultado en el gate:
-`bloqueante` (por defecto) hace fallar el agrupador si el CR se viola; `warning` solo lo reporta sin
-tumbar el gate.
+`bloqueante` (por defecto) hace fallar el runner si el CR se viola; `warning` solo lo reporta sin
+tumbar el gate — y se implementa **dentro** del script del estándar, por chequeo (no en el nombre del
+archivo).
 
 1. **Evaluar aptitud.** ¿El cumplimiento del CR es objetivo y automatizable con una prueba/regla determinista?
-   - **No apto** (depende de criterio humano o evidencia externa, p. ej. "el código debe ser legible", "TLS en producción"): `Automatable: no`, `Verificación: N/A` (o la evidencia externa: archivo, job CI…); explicar en el requisito cómo se verifica manualmente. **No** preguntar nada más. Fin.
+   - **No apto** (depende de criterio humano o evidencia externa, p. ej. "el código debe ser legible", "TLS en producción"): `Automatizable: no`, `Verificación: N/A` (o la evidencia externa: archivo, job CI…); explicar en el requisito cómo se verifica manualmente. **No** preguntar nada más. Fin.
    - **Apto**: continuar al paso 2.
 
 2. **Preguntar explícitamente al usuario** con la herramienta de preguntas estructuradas si quiere crear la fitness function ahora:
@@ -24,15 +31,16 @@ tumbar el gate.
    Una sola pregunta, opciones mutuamente excluyentes. No crear nada sin la aprobación explícita del usuario.
 
 3. **Según la respuesta:**
-   - **No** → `Automatable: yes`, `Verificación: TODO` (pendiente). `arch-audit` lo reportará como sugerencia.
-   - **Sí** → crear la fitness function (paso 4) y referenciarla en la fila del CR (paso 6).
+   - **No** → `Automatizable: yes`, `Verificación: TODO` (pendiente). `arch-audit` lo reportará como sugerencia.
+   - **Sí** → crear la fitness function (paso 4) y registrarla (pasos 6 y 7).
 
 4. **Crear la fitness function**, en tres sub-pasos. El objetivo es usar la forma **más común, robusta y
    de menor mantenimiento** de verificar ese criterio en ese stack — nunca improvisar un script propio
    cuando ya existe una manera establecida de hacerlo:
 
    4.1. **Investigar la forma idónea antes de elegir.** Detectar el stack (manifiestos: `package.json`,
-   `pom.xml`, `pyproject.toml`, `*.csproj`, `go.mod`, etc.).
+   `pom.xml`, `pyproject.toml`, `*.csproj`, `go.mod`, etc.). El stack detectado determina también el
+   **lenguaje** del runner y de los archivos de checks (ver "Runner de validaciones" más abajo).
       - **Si no hay ningún manifiesto de dependencias en el repo** (no hay ecosistema de paquetes que
         instalar — p. ej. un repo de scripts sueltos, de infraestructura pura, o de documentación): no
         hay gestor de paquetes con el que instalar una herramienta externa. En ese caso, el **script
@@ -84,96 +92,105 @@ tumbar el gate.
 5. **Confirmar con el usuario el comando acotado** para ejecutar el chequeo. No ejecutar build ni suites
    completas por iniciativa propia.
 
-6. **Registrar la fitness function en el agrupador** — engancharla al entrypoint único (ver más abajo),
-   creando el **par** de wrappers (`.sh` y `.ps1`) para que el criterio se verifique igual en
-   macOS/Linux y en Windows: `scripts/arch/checks/<slug-estándar>-CR-XXX.sh` **+**
-   `scripts/arch/checks/<slug-estándar>-CR-XXX.ps1` si el `Enfoque` es `bloqueante` (p. ej.
-   `testing-CR-001.sh` / `testing-CR-001.ps1`), o con sufijo `.warn.sh` / `.warn.ps1` si es `warning`
-   (p. ej. `testing-CR-002.warn.sh` / `testing-CR-002.warn.ps1`). Ambos wrappers invocan el **mismo
-   comando** del paso 4.3 — solo cambia la sintaxis del script; la lógica nunca diverge entre plataformas.
+6. **Registrar la fitness function en el archivo de checks de su estándar** —
+   `scripts/arch/checks/<slug-estándar>.<ext>` (p. ej. `checks/testing.mjs` en un repo Node), **un
+   archivo por estándar**, no por criterio:
+   - **Si el archivo del estándar ya existe**: añadir dentro el chequeo de este CR — un bloque
+     `check('CR-XXX', '<enfoque>', '<descripción corta>', …)` que invoca el comando acotado del paso
+     4.3, precedido de un **comentario de trazabilidad** con la referencia del criterio y su
+     descripción. No tocar los chequeos de los demás CR.
+   - **Si no existe** (primer CR automatizable del estándar): crearlo a partir de la plantilla de
+     referencia (`assets/arch-fitness/checks/example.mjs.template` si el stack es Node; en otro stack,
+     el equivalente con el mismo contrato) con el nombre `<slug-estándar>.<ext>`.
+   - El **Enfoque** del CR (`bloqueante`/`warning`) se implementa **dentro del chequeo**: un chequeo
+     `bloqueante` que falla imprime `FAIL` y hace que el script del estándar salga con código ≠ 0; uno
+     `warning` imprime `WARN` sin cambiar el código de salida.
+   - Asegurar el runner (`scripts/arch/verify.<ext>`) si aún no existe — ver "Runner de validaciones".
 
-7. **Referenciar en la fila del CR:** poner `Automatable: yes`, el `Enfoque` (`bloqueante`/`warning`) y
-   en `Verificación` la ruta del wrapper `.sh` como referencia canónica (`…-CR-XXX.sh` o
-   `…-CR-XXX.warn.sh` según el Enfoque — su par `.ps1` vive junto a él, mismo nombre, otra extensión; o
-   la ruta del test/script si el CR apunta directo a él). Así `arch-audit` lo descubre y lo ejecuta desde
-   la fila del criterio, y además queda incluido en ambos agrupadores.
+7. **Referenciar en la fila del CR:** poner `Automatizable: yes`, el `Enfoque` (`bloqueante`/`warning`) y
+   en `Verificación` la ruta del archivo de checks de su estándar
+   (`scripts/arch/checks/<slug-estándar>.<ext>`, p. ej. `scripts/arch/checks/testing.mjs`) — el mismo
+   archivo para todos los CR del estándar; dentro, el chequeo del CR se localiza por su referencia
+   `CR-XXX` (o la ruta del test/script real si el CR apunta directo a él). Así `arch-audit` lo descubre
+   y lo ejecuta desde la fila del criterio, y además queda incluido en el runner.
 
 > En invocación en lote (p. ej. desde `arch-discover`), hacer esta evaluación por cada CR apto, pero
 > agrupar para no abrumar: preguntar una vez si el usuario quiere crear fitness functions para todos los
 > CR aptos del lote, o elegir cuáles; y agrupar también, si aplica, la pregunta de instalar herramientas
-> de verificación ausentes (4.2) del lote completo. Cada una se registra con su par de wrappers
-> `checks/<slug-estándar>-CR-XXX.sh` / `.ps1` (o `.warn.sh` / `.warn.ps1`).
+> de verificación ausentes (4.2) del lote completo. Los chequeos del lote se registran cada uno en el
+> archivo de checks de su estándar (`checks/<slug-estándar>.<ext>`).
 
-## Agrupador de validaciones de arquitectura
+## Runner de validaciones de arquitectura
 
 Las fitness functions individuales tienden a quedar dispersas (una en `tests/arch/`, otra en un
 `.dependency-cruiser.js`, otra en un script suelto), y entonces no hay un único comando que las
-ejecute todas. Por eso el proyecto mantiene **un punto de entrada único por plataforma** que corre
-*todas* las validaciones de arquitectura registradas — uno para macOS/Linux (`verify.sh`) y uno para
-Windows (`verify.ps1`), con el mismo contrato y el mismo resultado, porque el equipo (o los agentes)
-pueden ejecutarlo indistintamente desde cualquiera de los dos sistemas. La fitness function individual
-puede seguir existiendo en su ubicación natural; el agrupador no la reemplaza, la **orquesta**.
+ejecute todas. Por eso el proyecto mantiene **un punto de entrada único** — el runner
+`scripts/arch/verify.<ext>` — que ejecuta las validaciones de arquitectura registradas: **todas por
+defecto**, o **solo las de un estándar** pasando su slug como argumento. La fitness function individual
+puede seguir existiendo en su ubicación natural; el runner no la reemplaza, la **orquesta**.
+
+**El runner y los checks se escriben en el lenguaje del stack del repositorio** — no en shell por
+defecto: Node (`verify.mjs`) en un proyecto Angular/React/Vue/Node, Python (`verify.py`) en uno Python,
+PHP (`verify.php`) en uno PHP, etc. Así el script es multiplataforma por naturaleza (el mismo archivo
+corre en macOS, Linux y Windows con el runtime que el equipo ya tiene instalado) y no hay que mantener
+pares por sistema operativo. Solo si el repo **no tiene ningún runtime de stack** (p. ej. documentación
+o infraestructura pura), usar POSIX shell (`verify.sh` + `checks/<slug>.sh`) como último recurso, con el
+mismo contrato.
 
 ### Convención
 
 ```
 scripts/arch/
-├── verify.sh                  # Agrupador macOS/Linux (también Git Bash en Windows): descubre y ejecuta checks/*.sh
-├── verify.ps1                 # Agrupador Windows/PowerShell: descubre y ejecuta checks/*.ps1
+├── verify.mjs             # Runner (ext. según stack: .mjs, .py, .php…): ejecuta los checks/<slug>.<ext>
 └── checks/
-    ├── testing-CR-001.sh        # CR bloqueante — par macOS/Linux (nombre = <slug-estándar>-CR-XXX)
-    ├── testing-CR-001.ps1       # CR bloqueante — par Windows, mismo comando que el .sh
-    ├── testing-CR-002.warn.sh   # CR warning (sufijo .warn.* → no tumba el gate)
-    ├── testing-CR-002.warn.ps1
-    └── testing-CR-003.sh / testing-CR-003.ps1
+    ├── testing.mjs        # UN archivo por ESTÁNDAR (nombre = slug del estándar en docs/standards/)
+    └── frontend.mjs       # Dentro, un chequeo por CR con su trazabilidad (CR-XXX en salida y comentarios)
 ```
 
-- **`scripts/arch/verify.sh`** y **`scripts/arch/verify.ps1`** — mismo contrato en las dos plataformas:
-  cada uno corre los checks de su propia extensión (`*.sh` / `*.ps1`), imprime `PASS`/`FAIL`/`WARN` por
-  criterio (CR) y un resumen, y sale con código `0` salvo que falle algún CR **bloqueante** (distinto de
-  `0` en ese caso; los CR `warning` que fallan se reportan como `WARN` pero no cambian el código de
-  salida). Aptos como gate de CI o local. **Un proyecto siempre tiene los dos** — no es opcional según
-  el stack: cualquiera puede desarrollar desde macOS, Linux o Windows. **Se descubren por convención: no
-  se editan al añadir validaciones.**
-- **`scripts/arch/checks/<slug-estándar>-CR-XXX.sh`** + **`…CR-XXX.ps1`** (bloqueante) o con sufijo
-  **`.warn.sh`** / **`.warn.ps1`** (warning) — el **par** de wrappers de un mismo criterio de
-  cumplimiento, uno por plataforma, que invocan el **mismo** comando real de la fitness function
-  (dependency-cruiser, ArchUnit, import-linter, NetArchTest, runner del framework o un script propio). El
-  nombre (la referencia global del CR con `/`→`-`) permite mapear cada resultado a su criterio, requisito
-  y estándar; el sufijo `.warn.*` marca su `Enfoque`. Si el chequeo real vive en otra herramienta, ambos
-  wrappers solo la invocan — la lógica nunca diverge entre los dos.
+- **`scripts/arch/verify.<ext>`** — el runner. Sin argumentos ejecuta **todos** los estándares
+  (`node scripts/arch/verify.mjs`); con argumento, **solo** el estándar indicado
+  (`node scripts/arch/verify.mjs testing`) — un slug sin check registrado es un error. Reenvía la
+  salida de cada check, imprime un resumen (criterios `PASS`/`WARN`/`FAIL`) y sale con código `0` salvo
+  que algún check salga `≠ 0` (es decir, salvo que algún CR **bloqueante** haya fallado; los `WARN` no
+  cambian el código de salida). Apto como gate de CI o local. **Descubre los checks por convención: no
+  se edita al añadir validaciones.**
+- **`scripts/arch/checks/<slug-estándar>.<ext>`** — las fitness functions de **un estándar** completo
+  (p. ej. `testing.mjs`), un chequeo por cada CR automatizable. Contrato del check: imprime una línea de
+  protocolo por criterio (`PASS|FAIL|WARN <slug-estándar>/CR-XXX — detalle`) y sale con código `0` si
+  ningún CR bloqueante falló, `≠ 0` si alguno falló. La **trazabilidad al criterio** va en el propio
+  chequeo: su referencia `CR-XXX` en la línea de salida y un comentario junto al chequeo. Cada chequeo
+  invoca la herramienta real de la fitness function (dependency-cruiser, ArchUnit, import-linter,
+  NetArchTest, runner del framework o un script propio) — si el chequeo real vive en otra herramienta,
+  el bloque solo la invoca, no duplica su lógica.
 
-Los archivos de referencia de esta convención están en `assets/arch-fitness/`
-(`verify.sh`, `verify.ps1`, `checks/example.sh.template`, `checks/example.ps1.template` y un
-`README.md`). **Leerlos antes de crear o modificar el agrupador** y copiarlos al repo respetando las
-rutas.
+Los archivos de referencia de esta convención están en `assets/arch-fitness/` (`verify.mjs`,
+`checks/example.mjs.template` y un `README.md` con el contrato) — son la **implementación de referencia
+en Node**. **Leerlos antes de crear o modificar el runner.** En un repo Node se copian tal cual
+(respetando las rutas); en otro stack se genera el equivalente en ese lenguaje respetando el mismo
+contrato, y se copia igualmente el `README.md` adaptando los comandos.
 
 ### Cómo registrar una fitness function
 
-Al crear una fitness function apta (paso 4 anterior), engancharla a ambos agrupadores:
+Al crear una fitness function apta (paso 4 anterior), registrarla:
 
-1. **Asegurar los dos agrupadores.** Si `scripts/arch/verify.sh` o `scripts/arch/verify.ps1` no existen,
-   crear los que falten copiando `assets/arch-fitness/verify.sh` y `assets/arch-fitness/verify.ps1` (y el
-   `README.md` de esa carpeta) tal cual — se crean **juntos**, aunque el proyecto hoy solo se desarrolle
-   desde una plataforma. Crear el directorio `scripts/arch/checks/` si falta. Si ya existen, no
-   tocarlos — descubren los checks solos.
-2. **Añadir el par de wrappers del criterio.** Crear `scripts/arch/checks/<slug-estándar>-CR-XXX.sh` y
-   `scripts/arch/checks/<slug-estándar>-CR-XXX.ps1` (Enfoque `bloqueante`; p. ej. `testing-CR-001.sh` /
-   `testing-CR-001.ps1`) o con sufijo `.warn.sh` / `.warn.ps1` (Enfoque `warning`; p. ej.
-   `testing-CR-002.warn.sh` / `testing-CR-002.warn.ps1`) a partir de
-   `assets/arch-fitness/checks/example.sh.template` y `assets/arch-fitness/checks/example.ps1.template`,
-   reemplazando el comando por el chequeo acotado del paso 4 en **ambos** — el mismo comando, solo cambia
-   la sintaxis del wrapper. Cada wrapper debe salir con código `0` si el criterio se cumple y distinto de
-   `0` si se viola; el sufijo `.warn.*` es lo que evita que su fallo tumbe el gate.
-3. **Cablear el atajo nativo (opcional, según stack).** Si el repo tiene un mecanismo natural, añadir
-   alias que llamen a cada agrupador sin duplicar lógica: scripts en `package.json`
-   (`"arch": "sh scripts/arch/verify.sh"`, `"arch:win": "powershell -File scripts/arch/verify.ps1"`), un
-   target de `Makefile`, o un job de CI que use el runner del sistema operativo correspondiente. No es
-   obligatorio: los dos agrupadores ya son, cada uno, el comando único de su plataforma.
-4. **No ejecutar** los agrupadores ni el check por iniciativa propia si requiere instalar dependencias o
+1. **Asegurar el runner.** Si `scripts/arch/verify.<ext>` no existe, crearlo: en un repo Node, copiar
+   `assets/arch-fitness/verify.mjs` (y el `README.md` de esa carpeta) tal cual; en otro stack, generar
+   el equivalente en el lenguaje del repo con el mismo contrato. Crear el directorio
+   `scripts/arch/checks/` si falta. Si ya existe, no tocarlo — descubre los checks solo.
+2. **Añadir el chequeo al archivo de su estándar.** Si `scripts/arch/checks/<slug-estándar>.<ext>` ya
+   existe, añadir dentro el bloque del CR (comentario de trazabilidad + `check('CR-XXX', …)` con el
+   comando acotado del paso 4). Si no, crearlo a partir de
+   `assets/arch-fitness/checks/example.mjs.template` (o el equivalente del stack), renombrándolo al slug
+   del estándar y reemplazando el chequeo de ejemplo por el real. El `Enfoque` del CR se pasa como
+   argumento del chequeo (`'bloqueante'` / `'warning'`), no en el nombre del archivo.
+3. **Cablear el atajo nativo (opcional, según stack).** Si el repo tiene un mecanismo natural, añadir un
+   alias que llame al runner sin duplicar lógica: un script en `package.json`
+   (`"arch": "node scripts/arch/verify.mjs"`), un target de `Makefile`, o un job de CI. No es
+   obligatorio: el runner ya es el comando único.
+4. **No ejecutar** el runner ni el check por iniciativa propia si requiere instalar dependencias o
    correr suites pesadas; ofrecer el comando acotado y dejar que el usuario decida.
 
-> **macOS y Windows, siempre.** El par `verify.sh` / `verify.ps1` (y el par de wrappers por CR) es cómo
-> este skill garantiza que la compuerta de arquitectura se pueda ejecutar igual sin importar el sistema
-> operativo desde el que la corra cada agente o desarrollador — no se omite ninguno de los dos por
-> conveniencia, ni siquiera si el proyecto hoy solo se desarrolla desde una plataforma.
+> **El stack manda.** El runner y los checks se ejecutan con el runtime que el proyecto ya usa — no se
+> introducen pares de scripts por sistema operativo ni un lenguaje ajeno al repo. Un solo archivo por
+> estándar y un solo runner: la trazabilidad fina (por criterio) vive dentro del archivo, en las líneas
+> de protocolo y los comentarios de cada chequeo.

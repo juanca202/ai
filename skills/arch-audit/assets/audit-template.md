@@ -26,7 +26,7 @@ fecha/hora que lo confirma. Cada revalidación posterior agrega además una entr
 **Fecha**: {{YYYY-MM-DD}}
 **Repositorio**: {{nombre/ruta del repo o subproyecto auditado}}
 **Alcance**: {{criterios auditados y estándares/requisitos de contexto cubiertos + fuentes AGENTS.md — p. ej. "14 criterios en 4 estándares (Testing, API, Persistence, Security) · 2 en Draft excluidos + AGENTS.md raíz"}}
-**Método**: {{descripción corta de lo que realmente se usó — herramientas de inspección y fitness functions ejecutadas, p. ej. "grep + lectura de package.json/composer.json; agrupador scripts/arch/verify.sh (o verify.ps1 en Windows) ejecutado". No se corre el build ni la suite completa.}}
+**Método**: {{descripción corta de lo que realmente se usó — herramientas de inspección y fitness functions ejecutadas, p. ej. "grep + lectura de package.json/composer.json; runner node scripts/arch/verify.mjs ejecutado". No se corre el build ni la suite completa.}}
 **Veredicto**: {{✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones}} {{si hubo alguna revalidación, agregar aquí mismo "(revalidado YYYY-MM-DD HH:MM)" con la fecha/hora de la última entrada de ## Revalidaciones; omitir si no hubo ninguna}}
 
 ## Resumen
@@ -124,8 +124,9 @@ Repetir el bloque siguiente por cada hallazgo. Si no hay hallazgos, escribir "Si
 Sección de arquitectura evolutiva. Reportar el estado de las fitness functions (chequeos automatizados
 que validan CRITERIOS, uno por CR). Dos partes: existentes (ejecutadas) y sugeridas (criterios aptos que
 aún no tienen una). Si un criterio no es apto para automatizar, no listarlo aquí. Indicar también, si
-existen, los agrupadores scripts/arch/verify.sh / verify.ps1 y su resultado conjunto (Total / PASS / WARN / FAIL);
-salen con código ≠ 0 solo si falla algún CR bloqueante (un CR warning que falla es WARN, no cambia el veredicto).
+existe, el runner scripts/arch/verify.<ext> (en el lenguaje del stack del repo) y su resultado conjunto
+(criterios PASS / WARN / FAIL); sale con código ≠ 0 solo si falla algún CR bloqueante (un CR warning
+que falla es WARN, no cambia el veredicto).
 -->
 
 ### Existentes
@@ -176,9 +177,10 @@ estándar de dominio que corresponda) para que la regla sea auditable. Si no hay
 <!--
 Opcional. Notas operativas que no son un hallazgo de incumplimiento (no van bajo 🔴/🟡/⚪) ni una
 decisión sin criterio, pero que la próxima auditoría o el mantenimiento del harness debería conocer.
-Ejemplos: una fitness function ejecutada individualmente porque no está registrada en el agrupador
-scripts/arch/verify.sh/.ps1; un wrapper que existe para una plataforma pero no tiene su par en la
-otra; un estándar o ADR en formato antiguo (sin "**Dominio:**" o sin "emits"); una dependencia que el
+Ejemplos: una fitness function ejecutada individualmente porque no está registrada en el archivo de
+checks de su estándar (scripts/arch/checks/<slug-estándar>.<ext>); un runner o checks escritos en un
+lenguaje ajeno al stack del repo; un estándar o ADR en formato antiguo (sin "**Dominio:**", sin "emits",
+o con los criterios en tablas por requisito en vez de la tabla única); una dependencia que el
 usuario rechazó instalar (Fase 3.5). Si no hay ninguna, omitir esta sección o escribir "Ninguna.".
 -->
 - {{criterio o archivo afectado}} — {{qué se observó y qué acción se sugiere, si aplica}}

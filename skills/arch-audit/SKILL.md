@@ -66,7 +66,7 @@ primaria del cumplimiento de ese criterio. No se corre el build ni la suite comp
 de arquitectura detectados. Si un criterio no puede confirmarse ni por inspección ni por una fitness
 function, se marca *No verificable* y se anota qué evidencia haría falta — nunca inventar un veredicto.
 Para cada criterio, el skill evalúa si es **apto** para una fitness function (cumplimiento objetivo y
-automatizable — normalmente ya declarado en su columna `Automatable: yes`), comprueba si ya existe y la
+automatizable — normalmente ya declarado en su columna `Automatizable: yes`), comprueba si ya existe y la
 ejecuta; si es apto pero no existe (`Verificación: TODO`), **sugiere crearla**.
 
 **Salida:** un único informe en `docs/audits/audit-YYYY-MM-DD.md`, agrupado por prioridad
@@ -177,13 +177,18 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
    convención), usar el nombre del archivo/carpeta como `domain` de facto y señalarlo como observación
    (formato de estándar desactualizado) — no bloquea la auditoría de sus criterios. Dentro del
    documento, cada **requisito** (`## <Nombre>` con `**ID:** <slug-requisito>`; referencia
-   `<slug-estándar>/<slug-requisito>`) es una **agrupación legible**: leer su tabla `### Criterios de
-   cumplimiento` y extraer **de cada fila `CR-XXX`** (la unidad auditable; referencia global
-   `<slug-estándar>/CR-XXX`): `ID` (`CR-XXX`), `Descripción` (medible, con su palabra clave RFC 2119 si
-   es normativa), `Origen` (ADR que fijó ese criterio), `Automatable` (yes/no), `Enfoque`
-   (`bloqueante` | `warning`; por defecto `bloqueante`) y `Verificación` (ruta del wrapper o evidencia;
-   `TODO` si apto pendiente; `N/A` si no aplica). **Cada criterio `CR-XXX` es una entrada en la lista de
-   reglas a auditar**, contextualizado por el requisito que lo agrupa.
+   `<slug-estándar>/<slug-requisito>`) es una **agrupación legible**; los criterios de todos los
+   requisitos viven juntos en la tabla única `## Criterios de cumplimiento`, al final del documento
+   (antes de `## Referencias`). Extraer **de cada fila `CR-XXX`** (la unidad auditable; referencia
+   global `<slug-estándar>/CR-XXX`): `ID` (`CR-XXX`), `Requisito` (slug del requisito al que
+   pertenece), `Descripción` (medible, con su palabra clave RFC 2119 si es normativa), `Origen` (ADR
+   que fijó ese criterio), `Automatizable` (yes/no), `Enfoque` (`bloqueante` | `warning`; por defecto
+   `bloqueante`) y `Verificación` (ruta del archivo de checks de su estándar o evidencia; `TODO` si
+   apto pendiente; `N/A` si no aplica). **Si el estándar trae el formato antiguo** (una tabla
+   `### Criterios de cumplimiento` dentro de cada requisito, sin columna `Requisito`), leer esas
+   tablas igual y señalarlo como observación (formato de estándar desactualizado) — no bloquea la
+   auditoría. **Cada criterio `CR-XXX` es una entrada en la lista de reglas a auditar**,
+   contextualizado por el requisito que lo agrupa.
 
 2. **ADRs — solo trazabilidad y huecos.** Listar `docs/adr/*.md`. Para cada criterio auditado, tener a
    mano su ADR de origen para citarlo (el ADR referencia en `emits` los criterios que fija, p. ej.
@@ -225,7 +230,7 @@ criterios abajo).
 
 Para cada criterio (y regla), marcar si es **apto** para una fitness function, es decir, si su
 cumplimiento es **objetivo y automatizable**. Normalmente el criterio ya lo declara en su columna
-`Automatable` (`yes`); usarla y, si falta o es un ADR sin criterio, evaluarlo:
+`Automatizable` (`yes`); usarla y, si falta o es un ADR sin criterio, evaluarlo:
 
 - **Apto** — se puede escribir un chequeo determinista que pase/falle sin juicio humano. Ejemplos: "las APIs son GraphQL, no REST", "la capa de dominio no importa infraestructura", "ningún módulo excede X dependencias", "cobertura ≥ 80%", "no se usa `any`".
 - **No apto** — depende de criterio humano o evidencia externa al repo. Ejemplos: "el código debe ser legible", "las decisiones se toman por consenso", "usar TLS en producción". Estos se auditan por inspección o se marcan *No verificable*; **no** se sugiere fitness function.
@@ -290,46 +295,46 @@ no la prioridad de un hallazgo real, que no existe en este caso. Lo mismo aplica
 Para cada criterio **apto** (marcado en la Fase 1), determinar si ya existe una fitness function y, si
 existe, ejecutarla para validar el cumplimiento. Las fitness functions son **por criterio** (`CR-XXX`).
 
-### 0. Preferir el agrupador de validaciones de arquitectura
+### 0. Preferir el runner de validaciones de arquitectura
 
-Antes de ejecutar chequeos uno por uno, comprobar si el proyecto tiene un **agrupador** que corre
-todas las validaciones de arquitectura de una vez (lo crea `arch-manage`, en su par macOS/Linux +
-Windows):
+Antes de ejecutar chequeos uno por uno, comprobar si el proyecto tiene un **runner** que corre
+todas las validaciones de arquitectura de una vez (lo crea `arch-manage`, escrito en el lenguaje del
+stack del repo — Node, Python, PHP…, o shell como último recurso):
 
 ```bash
-ls scripts/arch/verify.sh scripts/arch/verify.ps1 scripts/arch/checks/*.sh scripts/arch/checks/*.ps1 2>/dev/null
+ls scripts/arch/verify.* scripts/arch/checks/* 2>/dev/null
 ```
 
 - **Si existe**, es la vía preferida: una sola corrida acotada valida todos los criterios con fitness
-  function. Ejecutar el entrypoint de la plataforma desde la que se está auditando (`sh
-  scripts/arch/verify.sh` en macOS/Linux, `powershell -File scripts/arch/verify.ps1` en Windows, o el
-  alias nativo del repo — `npm run arch`, target de `Makefile`, etc.) aplicando las mismas cautelas del
-  paso 2 (no correr build/suite completa; si requiere instalar dependencias pesadas, preguntar antes).
-  El runner imprime, por cada check, un bloque `=== <nombre> (<enfoque>) ===` con `PASS` / `FAIL` /
-  `WARN`: **mapear cada bloque a su criterio por el nombre del wrapper**
-  (`checks/<estándar>-CR-XXX.sh`/`.ps1` si es `bloqueante`, o `checks/<estándar>-CR-XXX.warn.sh`/`.warn.ps1`
-  si es `warning` — el sufijo `.warn.*` marca el enfoque; p. ej. `testing-CR-001.sh`) y alimentar ese
-  resultado al estado del criterio en la Fase 2. El resumen final (Total / PASS / WARN / FAIL) y el
+  function. Ejecutar el runner con el runtime del stack (`node scripts/arch/verify.mjs`,
+  `python scripts/arch/verify.py`, etc., o el alias nativo del repo — `npm run arch`, target de
+  `Makefile`, etc.) aplicando las mismas cautelas del paso 2 (no correr build/suite completa; si
+  requiere instalar dependencias pesadas, preguntar antes). Cada archivo de `checks/` agrupa las
+  fitness functions de **un estándar** (`checks/<slug-estándar>.<ext>`, p. ej. `checks/testing.mjs`) e
+  imprime una línea de protocolo por criterio — `PASS|FAIL|WARN <estándar>/CR-XXX — detalle`:
+  **mapear cada línea a su criterio por esa referencia** y alimentar ese resultado al estado del
+  criterio en la Fase 2. Para auditar un solo estándar, el runner acepta su slug como argumento
+  (`node scripts/arch/verify.mjs testing`). El resumen final (criterios PASS / WARN / FAIL) y el
   código de salida agregado resumen la salud arquitectónica ejecutable: el runner sale con código ≠ 0
   **solo** si falla algún criterio `bloqueante`; un criterio `warning` que falla se reporta como `WARN`
   pero **no** cambia el código de salida ni el veredicto ejecutable.
-- Un criterio con la `Verificación` apuntando a un wrapper que **no** aparece en `checks/`, o que no
-  quedó cubierto por la corrida del agrupador, se ejecuta individualmente (pasos 1-2) y además se anota
-  como observación: la fitness function no está registrada en el agrupador (sugerir corregirlo vía `arch-manage`).
-  Si el wrapper de la plataforma actual existe pero falta su par (p. ej. hay `.sh` y no `.ps1`), anotarlo
-  también como observación: la compuerta no corre igual en ambas plataformas.
-- **Si no existe** el agrupador, continuar con la detección y ejecución individuales (pasos 1-2) y,
-  si hay dos o más fitness functions sueltas, **sugerir crear el agrupador** (`scripts/arch/verify.sh` +
-  `scripts/arch/verify.ps1`) vía `arch-manage`, para que en adelante todas se ejecuten con un solo
-  comando en cualquiera de las dos plataformas.
+- Un criterio con la `Verificación` apuntando a un archivo de checks que **no** existe, o cuya
+  referencia `CR-XXX` no aparece en la salida de la corrida, se ejecuta individualmente (pasos 1-2) y
+  además se anota como observación: la fitness function no está registrada en el archivo de checks de
+  su estándar (sugerir corregirlo vía `arch-manage`).
+- **Si no existe** el runner, continuar con la detección y ejecución individuales (pasos 1-2) y,
+  si hay dos o más fitness functions sueltas, **sugerir crear el runner** (`scripts/arch/verify.<ext>`
+  en el lenguaje del stack) vía `arch-manage`, para que en adelante todas se ejecuten con un solo
+  comando.
 
 ### 1. Detectar fitness functions existentes
 
-**Primero, leer la fila del criterio (`CR-XXX`) en su tabla `### Criterios de cumplimiento`** (lo escribe
-`arch-manage`). Es la fuente más fiable: si `Verificación` apunta a la ruta de un wrapper (p. ej.
-`scripts/arch/checks/testing-CR-001.sh`), usar ese comando directamente (salvo que el agrupador del paso 0
-ya lo haya cubierto). Si `Automatable: yes` pero `Verificación: TODO`, el criterio es apto pero aún no
-tiene fitness function → va a las sugerencias (paso 3). Si `Automatable: no` / `Verificación: N/A`, no
+**Primero, leer la fila del criterio (`CR-XXX`) en la tabla `## Criterios de cumplimiento` de su estándar** (lo escribe
+`arch-manage`). Es la fuente más fiable: si `Verificación` apunta al archivo de checks de su estándar
+(p. ej. `scripts/arch/checks/testing.mjs`), ejecutar ese estándar vía el runner con su slug
+(`node scripts/arch/verify.mjs testing`) y leer la línea del `CR-XXX` (salvo que la corrida del paso 0
+ya lo haya cubierto). Si `Automatizable: yes` pero `Verificación: TODO`, el criterio es apto pero aún no
+tiene fitness function → va a las sugerencias (paso 3). Si `Automatizable: no` / `Verificación: N/A`, no
 automatizarlo.
 
 Si la fila no existe o está incompleta (estándares antiguos, o ADR sin criterio), leer
@@ -341,7 +346,7 @@ Si la fila no existe o está incompleta (estándares antiguos, o ADR sin criteri
 
 Ejecutar **solo** el chequeo de arquitectura, no la suite completa, usando el comando más acotado disponible:
 
-- Preferir el agrupador de la plataforma actual (`sh scripts/arch/verify.sh` en macOS/Linux, `powershell -File scripts/arch/verify.ps1` en Windows; paso 0) cuando exista; si no, el comando de la ruta en `Verificación` del criterio, el `README`, `package.json` (script `arch`/`fitness`/`depcruise`) o `Makefile`.
+- Preferir el runner (`node scripts/arch/verify.mjs` o el equivalente del stack, con el slug del estándar para acotar; paso 0) cuando exista; si no, el comando de la ruta en `Verificación` del criterio, el `README`, `package.json` (script `arch`/`fitness`/`depcruise`) o `Makefile`.
 - Ejemplos: `npx depcruise --config .dependency-cruiser.js src`, `mvn -Dtest=*ArchTest test`, `lint-imports`, `pytest -k arch`.
 - Si el comando exacto es ambiguo o requiere instalar dependencias pesadas, **preguntar al usuario** con la herramienta de preguntas estructuradas antes de ejecutarlo, mostrando el comando propuesto. No ejecutar nada destructivo ni que modifique el repo.
 - Capturar: comando corrido, resultado (**PASS / FAIL / WARN**), y las líneas relevantes de la salida (violaciones concretas con sus rutas). Un criterio `warning` que falla se reporta como **WARN** (no cambia el veredicto ejecutable). Si falla por entorno (falta un runtime/dependencia), registrar **No ejecutable** con el motivo, no marcarlo como incumplimiento.
@@ -358,11 +363,11 @@ Si un criterio es **apto** pero no tiene fitness function (`Verificación: TODO`
 Esto no crea la fitness function (eso es otra tarea); solo la **recomienda** en el informe. Sugerir
 además dejar constancia en el criterio: mantener su columna `Verificación: TODO` con el esbozo (vía `arch-manage`),
 para que la próxima auditoría la descubra sin heurística. Al crearla, `arch-manage` investigará la forma
-más común/eficiente de verificarla, instalará lo necesario si hace falta, y escribirá en `Verificación`
-la ruta del wrapper (`scripts/arch/checks/<estándar>-CR-XXX.sh`, o `.warn.sh` si el enfoque es
-`warning`) junto a su par `.ps1` para Windows, registrando ambos en los dos agrupadores
-(`scripts/arch/verify.sh` y `scripts/arch/verify.ps1`) para que queden incluidos en la ejecución
-conjunta en cualquiera de las dos plataformas.
+más común/eficiente de verificarla, instalará lo necesario si hace falta, registrará el chequeo en el
+archivo de checks de su estándar (`scripts/arch/checks/<slug-estándar>.<ext>`, con la trazabilidad
+`CR-XXX` en comentarios y líneas de salida, y el enfoque `bloqueante`/`warning` implementado dentro del
+chequeo) y escribirá esa ruta en `Verificación`, quedando incluida en la ejecución del runner
+(`scripts/arch/verify.<ext>`).
 
 ---
 
@@ -382,10 +387,10 @@ flujo de `Comportamiento en Revalidación` descrito en la Fase 0 — no se reesc
      - **Método:** no es un texto fijo — describir en una frase corta qué se usó realmente en esta auditoría: las técnicas de inspección aplicadas (p. ej. `grep`, lectura de manifiestos) y las fitness functions ejecutadas. Aclarar que no se corre el build ni la suite completa.
    - **Resumen** con la tabla de conteos por prioridad y estado, seguida de 1-3 frases con la lectura global de la salud arquitectónica del repo.
    - Hallazgos **agrupados por prioridad** (alta → media → baja). Por cada hallazgo: el criterio (con su referencia `<estándar>/CR-XXX`, el requisito que lo agrupa, el nombre de su estándar de dominio, su ADR de origen y su `Enfoque` bloqueante/warning) o la regla de AGENTS.md incumplida, `Estado`, `Evidencias` (✔ a favor / ✖ en contra), `Incumplimientos` (rutas de archivos), y `Acción sugerida`. Si el criterio tiene fitness function, incluir en `Evidencias` el resultado de ejecutarla (PASS/FAIL/WARN + comando).
-   - **Fitness functions**: indicar si existen los **agrupadores** (`scripts/arch/verify.sh` y/o `scripts/arch/verify.ps1`, según qué plataformas tenga cubiertas el repo) y su resultado conjunto (Total / PASS / WARN / FAIL); una sub-tabla de las **existentes** (criterio `CR-XXX`, enfoque, herramienta, comando, si está registrada en el agrupador, resultado PASS/FAIL/WARN/No ejecutable) y una lista de las **sugeridas** (criterio apto sin fitness function → qué medir, herramienta y esbozo). Si hay dos o más fitness functions sueltas y no existe el agrupador, o si solo existe uno de los dos pares de plataforma, recomendarlo aquí.
+   - **Fitness functions**: indicar si existe el **runner** (`scripts/arch/verify.<ext>`, en el lenguaje del stack del repo) y su resultado conjunto (criterios PASS / WARN / FAIL); una sub-tabla de las **existentes** (criterio `CR-XXX`, enfoque, herramienta, comando, si está registrada en el archivo de checks de su estándar, resultado PASS/FAIL/WARN/No ejecutable) y una lista de las **sugeridas** (criterio apto sin fitness function → qué medir, herramienta y esbozo). Si hay dos o más fitness functions sueltas y no existe el runner, recomendarlo aquí.
    - Sección de reglas **No verificables**.
    - Sección de **Decisiones sin criterio** (opcional): ADR `Accepted` con regla enforceable que no fijó ningún criterio (`emits: []`) → sugerir emitirlo vía `arch-manage`.
-   - Sección de **Observaciones** (opcional): notas operativas que no son un hallazgo de incumplimiento (fitness function no registrada en el agrupador, wrapper sin su par de plataforma, estándar/ADR en formato antiguo, dependencia rechazada en la Fase 3.5, etc.) — es el destino de cualquier "señalar/anotar como observación" mencionado en las fases anteriores.
+   - Sección de **Observaciones** (opcional): notas operativas que no son un hallazgo de incumplimiento (fitness function no registrada en el archivo de checks de su estándar, runner o checks escritos en un lenguaje ajeno al stack del repo, estándar/ADR en formato antiguo, dependencia rechazada en la Fase 3.5, etc.) — es el destino de cualquier "señalar/anotar como observación" mencionado en las fases anteriores.
 4. **Nunca sobrescribir** un informe anterior: el nombre lleva la fecha para conservar el histórico. Si ya existe un `audit-<hoy>.md` del mismo día, actualizarlo (no duplicar).
 
 El formato exacto de cada hallazgo (qué campos lleva y en qué orden) es el que ya trae
