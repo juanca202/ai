@@ -20,7 +20,7 @@ tumbar el gate — y se implementa **dentro** del script del estándar, por cheq
 archivo).
 
 1. **Evaluar aptitud.** ¿El cumplimiento del CR es objetivo y automatizable con una prueba/regla determinista?
-   - **No apto** (depende de criterio humano o evidencia externa, p. ej. "el código debe ser legible", "TLS en producción"): `Automatizable: no`, `Verificación: N/A` (o la evidencia externa: archivo, job CI…); explicar en el requisito cómo se verifica manualmente. **No** preguntar nada más. Fin.
+   - **No apto** (depende de criterio humano o evidencia externa, p. ej. "el código debe ser legible", "TLS en producción"): `Automatizable: no`; `Verificación: yes` si hay evidencia externa registrada en el requisito (archivo, job CI…), `no` si no la hay; explicar en el requisito cómo se verifica manualmente. **No** preguntar nada más. Fin.
    - **Apto**: continuar al paso 2.
 
 2. **Preguntar explícitamente al usuario** con la herramienta de preguntas estructuradas si quiere crear la fitness function ahora:
@@ -31,7 +31,7 @@ archivo).
    Una sola pregunta, opciones mutuamente excluyentes. No crear nada sin la aprobación explícita del usuario.
 
 3. **Según la respuesta:**
-   - **No** → `Automatizable: yes`, `Verificación: TODO` (pendiente). `arch-audit` lo reportará como sugerencia.
+   - **No** → `Automatizable: yes`, `Verificación: no` (pendiente). `arch-audit` lo reportará como sugerencia.
    - **Sí** → crear la fitness function (paso 4) y registrarla (pasos 6 y 7).
 
 4. **Crear la fitness function**, en tres sub-pasos. El objetivo es usar la forma **más común, robusta y
@@ -79,7 +79,7 @@ archivo).
       criterio que [`references/dependencies.md`](references/dependencies.md), pero resuelto en este
       paso — no repetir la pregunta en el paso 8 para esta misma herramienta). Si rechaza instalar pero
       quiere seguir, volver al 4.1 con la alternativa que proponga; si no hay ninguna viable sin instalar
-      nada, tratar el criterio como no automatizable por ahora (`Verificación: TODO`, ver paso 3).
+      nada, tratar el criterio como no automatizable por ahora (`Verificación: no`, ver paso 3).
 
    4.3. **Escribir el chequeo.** Si ya existe configuración de la herramienta en el repo, **añadir la
    nueva regla** ahí en vez de duplicar setup; si no, crear el archivo mínimo (test/script + config) en
@@ -108,11 +108,10 @@ archivo).
    - Asegurar el runner (`scripts/arch/verify.<ext>`) si aún no existe — ver "Runner de validaciones".
 
 7. **Referenciar en la fila del CR:** poner `Automatizable: yes`, el `Enfoque` (`bloqueante`/`warning`) y
-   en `Verificación` la ruta del archivo de checks de su estándar
-   (`scripts/arch/checks/<slug-estándar>.<ext>`, p. ej. `scripts/arch/checks/testing.mjs`) — el mismo
-   archivo para todos los CR del estándar; dentro, el chequeo del CR se localiza por su referencia
-   `CR-XXX` (o la ruta del test/script real si el CR apunta directo a él). Así `arch-audit` lo descubre
-   y lo ejecuta desde la fila del criterio, y además queda incluido en el runner.
+   `Verificación: yes` — la columna solo indica **que la verificación existe**, no lleva la ruta: el
+   archivo de checks se localiza **por convención** (`scripts/arch/checks/<slug-estándar>.<ext>`, p. ej.
+   `checks/testing.mjs`) y dentro el chequeo del CR se identifica por su referencia `CR-XXX`. Así
+   `arch-audit` lo descubre y lo ejecuta, y además queda incluido en el runner.
 
 > En invocación en lote (p. ej. desde `arch-discover`), hacer esta evaluación por cada CR apto, pero
 > agrupar para no abrumar: preguntar una vez si el usuario quiere crear fitness functions para todos los

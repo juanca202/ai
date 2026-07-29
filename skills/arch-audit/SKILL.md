@@ -67,7 +67,7 @@ de arquitectura detectados. Si un criterio no puede confirmarse ni por inspecci�
 function, se marca *No verificable* y se anota qué evidencia haría falta — nunca inventar un veredicto.
 Para cada criterio, el skill evalúa si es **apto** para una fitness function (cumplimiento objetivo y
 automatizable — normalmente ya declarado en su columna `Automatizable: yes`), comprueba si ya existe y la
-ejecuta; si es apto pero no existe (`Verificación: TODO`), **sugiere crearla**.
+ejecuta; si es apto pero no existe (`Verificación: no`), **sugiere crearla**.
 
 **Salida:** un único informe en `docs/audits/audit-YYYY-MM-DD.md`, agrupado por prioridad
 (alta / media / baja), donde cada hallazgo referencia el criterio incumplido (`<estándar>/CR-XXX`, con
@@ -183,9 +183,11 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
    global `<slug-estándar>/CR-XXX`): `ID` (`CR-XXX`), `Requisito` (slug del requisito al que
    pertenece), `Descripción` (medible, con su palabra clave RFC 2119 si es normativa), `Origen` (ADR
    que fijó ese criterio), `Automatizable` (yes/no), `Enfoque` (`bloqueante` | `warning`; por defecto
-   `bloqueante`) y `Verificación` (ruta del archivo de checks de su estándar o evidencia; `TODO` si
-   apto pendiente; `N/A` si no aplica). **Si el estándar trae el formato antiguo** (una tabla
-   `### Criterios de cumplimiento` dentro de cada requisito, sin columna `Requisito`), leer esas
+   `bloqueante`) y `Verificación` (`yes` = la verificación existe — el chequeo vive en el archivo de
+   checks de su estándar, que se localiza por convención en `scripts/arch/checks/<slug-estándar>.<ext>`,
+   o hay evidencia externa registrada en el requisito; `no` = pendiente). **Si el estándar trae el
+   formato antiguo** (una tabla `### Criterios de cumplimiento` dentro de cada requisito, sin columna
+   `Requisito`, o con rutas/`TODO`/`N/A` en `Verificación` en vez de yes/no), leer esas
    tablas igual y señalarlo como observación (formato de estándar desactualizado) — no bloquea la
    auditoría. **Cada criterio `CR-XXX` es una entrada en la lista de reglas a auditar**,
    contextualizado por el requisito que lo agrupa.
@@ -318,10 +320,10 @@ ls scripts/arch/verify.* scripts/arch/checks/* 2>/dev/null
   código de salida agregado resumen la salud arquitectónica ejecutable: el runner sale con código ≠ 0
   **solo** si falla algún criterio `bloqueante`; un criterio `warning` que falla se reporta como `WARN`
   pero **no** cambia el código de salida ni el veredicto ejecutable.
-- Un criterio con la `Verificación` apuntando a un archivo de checks que **no** existe, o cuya
-  referencia `CR-XXX` no aparece en la salida de la corrida, se ejecuta individualmente (pasos 1-2) y
-  además se anota como observación: la fitness function no está registrada en el archivo de checks de
-  su estándar (sugerir corregirlo vía `arch-manage`).
+- Un criterio con `Verificación: yes` cuyo archivo de checks (`checks/<slug-estándar>.<ext>`) **no**
+  existe, o cuya referencia `CR-XXX` no aparece en la salida de la corrida, se ejecuta individualmente
+  (pasos 1-2) y además se anota como observación: la fitness function no está registrada en el archivo
+  de checks de su estándar (sugerir corregirlo vía `arch-manage`).
 - **Si no existe** el runner, continuar con la detección y ejecución individuales (pasos 1-2) y,
   si hay dos o más fitness functions sueltas, **sugerir crear el runner** (`scripts/arch/verify.<ext>`
   en el lenguaje del stack) vía `arch-manage`, para que en adelante todas se ejecuten con un solo
@@ -330,12 +332,13 @@ ls scripts/arch/verify.* scripts/arch/checks/* 2>/dev/null
 ### 1. Detectar fitness functions existentes
 
 **Primero, leer la fila del criterio (`CR-XXX`) en la tabla `## Criterios de cumplimiento` de su estándar** (lo escribe
-`arch-manage`). Es la fuente más fiable: si `Verificación` apunta al archivo de checks de su estándar
-(p. ej. `scripts/arch/checks/testing.mjs`), ejecutar ese estándar vía el runner con su slug
-(`node scripts/arch/verify.mjs testing`) y leer la línea del `CR-XXX` (salvo que la corrida del paso 0
-ya lo haya cubierto). Si `Automatizable: yes` pero `Verificación: TODO`, el criterio es apto pero aún no
-tiene fitness function → va a las sugerencias (paso 3). Si `Automatizable: no` / `Verificación: N/A`, no
-automatizarlo.
+`arch-manage`). Es la fuente más fiable: si `Verificación: yes`, localizar el archivo de checks de su
+estándar **por convención** (`scripts/arch/checks/<slug-estándar>.<ext>`, p. ej. `checks/testing.mjs`),
+ejecutar ese estándar vía el runner con su slug (`node scripts/arch/verify.mjs testing`) y leer la
+línea del `CR-XXX` (salvo que la corrida del paso 0 ya lo haya cubierto); si no hay archivo de checks,
+la verificación es evidencia externa — buscarla en el requisito. Si `Automatizable: yes` pero
+`Verificación: no`, el criterio es apto pero aún no tiene fitness function → va a las sugerencias
+(paso 3). Si `Automatizable: no`, no automatizarlo.
 
 Si la fila no existe o está incompleta (estándares antiguos, o ADR sin criterio), leer
 [`references/fitness-function-heuristics.md`](references/fitness-function-heuristics.md) para el
@@ -346,7 +349,7 @@ Si la fila no existe o está incompleta (estándares antiguos, o ADR sin criteri
 
 Ejecutar **solo** el chequeo de arquitectura, no la suite completa, usando el comando más acotado disponible:
 
-- Preferir el runner (`node scripts/arch/verify.mjs` o el equivalente del stack, con el slug del estándar para acotar; paso 0) cuando exista; si no, el comando de la ruta en `Verificación` del criterio, el `README`, `package.json` (script `arch`/`fitness`/`depcruise`) o `Makefile`.
+- Preferir el runner (`node scripts/arch/verify.mjs` o el equivalente del stack, con el slug del estándar para acotar; paso 0) cuando exista; si no, el archivo de checks del estándar localizado por convención (`scripts/arch/checks/<slug-estándar>.<ext>`), el `README`, `package.json` (script `arch`/`fitness`/`depcruise`) o `Makefile`.
 - Ejemplos: `npx depcruise --config .dependency-cruiser.js src`, `mvn -Dtest=*ArchTest test`, `lint-imports`, `pytest -k arch`.
 - Si el comando exacto es ambiguo o requiere instalar dependencias pesadas, **preguntar al usuario** con la herramienta de preguntas estructuradas antes de ejecutarlo, mostrando el comando propuesto. No ejecutar nada destructivo ni que modifique el repo.
 - Capturar: comando corrido, resultado (**PASS / FAIL / WARN**), y las líneas relevantes de la salida (violaciones concretas con sus rutas). Un criterio `warning` que falla se reporta como **WARN** (no cambia el veredicto ejecutable). Si falla por entorno (falta un runtime/dependencia), registrar **No ejecutable** con el motivo, no marcarlo como incumplimiento.
@@ -355,18 +358,18 @@ Alimentar el resultado al estado del criterio en la Fase 2 (PASS → refuerza �
 
 ### 3. Criterios aptos SIN fitness function
 
-Si un criterio es **apto** pero no tiene fitness function (`Verificación: TODO`), añadirlo a la lista de **sugerencias**. Para cada uno proponer:
+Si un criterio es **apto** pero no tiene fitness function (`Verificación: no`), añadirlo a la lista de **sugerencias**. Para cada uno proponer:
 - **Qué medir** — la característica arquitectónica a comprobar (la `Descripción` del criterio).
 - **Herramienta sugerida** — según el stack (tabla de [`references/fitness-function-heuristics.md`](references/fitness-function-heuristics.md)).
 - **Esbozo** — una frase de cómo sería el chequeo (p. ej. "regla dependency-cruiser: prohibir imports desde `src/api/**` que no sean del esquema GraphQL").
 
 Esto no crea la fitness function (eso es otra tarea); solo la **recomienda** en el informe. Sugerir
-además dejar constancia en el criterio: mantener su columna `Verificación: TODO` con el esbozo (vía `arch-manage`),
+además dejar constancia en el criterio: mantener su columna `Verificación: no` (vía `arch-manage`), con el esbozo en el informe,
 para que la próxima auditoría la descubra sin heurística. Al crearla, `arch-manage` investigará la forma
 más común/eficiente de verificarla, instalará lo necesario si hace falta, registrará el chequeo en el
 archivo de checks de su estándar (`scripts/arch/checks/<slug-estándar>.<ext>`, con la trazabilidad
 `CR-XXX` en comentarios y líneas de salida, y el enfoque `bloqueante`/`warning` implementado dentro del
-chequeo) y escribirá esa ruta en `Verificación`, quedando incluida en la ejecución del runner
+chequeo) y marcará `Verificación: yes`, quedando incluida en la ejecución del runner
 (`scripts/arch/verify.<ext>`).
 
 ---

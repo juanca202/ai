@@ -1,8 +1,8 @@
 # Rastreo heurístico de fitness functions existentes
 
 Leer en la Fase 2B, paso 1, **solo cuando** la fila del criterio (`CR-XXX`) no existe o está incompleta
-(estándares antiguos, o un ADR sin criterio) — si `Verificación` ya apunta al archivo de checks de su
-estándar, o el runner del paso 0 ya cubrió el criterio, no hace falta este rastreo.
+(estándares antiguos, o un ADR sin criterio) — si el criterio ya tiene `Verificación: yes`, o el
+runner del paso 0 ya lo cubrió, no hace falta este rastreo.
 
 ## Señales típicas por ecosistema
 

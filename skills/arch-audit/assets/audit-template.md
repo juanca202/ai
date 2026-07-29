@@ -140,7 +140,7 @@ que falla es WARN, no cambia el veredicto).
 ### Sugeridas
 
 <!--
-Por cada criterio apto que NO tiene fitness function (Verificación: TODO), sugerir crearla. Si todos los
+Por cada criterio apto que NO tiene fitness function (Verificación: no), sugerir crearla. Si todos los
 criterios aptos ya tienen una, escribir "Ninguna: todos los criterios aptos ya están cubiertos.".
 -->
 
