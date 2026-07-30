@@ -12,7 +12,7 @@ Ej.: "usar PHPUnit para unit tests" NO es un estándar — es el requisito «Uni
 MISMO estándar, no se crea uno nuevo.
 
 El estándar se identifica por su NOMBRE. Cada requisito describe qué es / cómo se usa /
-cómo se implementa, y su **Alcance** se redacta como un enunciado con palabra clave RFC 2119 / RFC 8174
+cómo se implementa, incluyendo el enunciado normativo con palabra clave RFC 2119 / RFC 8174
 en MAYÚSCULAS en el idioma de preferencia (MUST/DEBE, SHOULD/DEBERÍA, MAY/PUEDE…). La unidad
 verificable es el **criterio de cumplimiento** (`CR-XXX`): pertenece a un requisito, pero **no vive
 dentro de su bloque** — todos los criterios de cumplimiento del estándar, de todos sus requisitos, se
@@ -50,7 +50,7 @@ Un bloque `## <Requisito>` por cada requisito del dominio. Al documentar una dec
 dominio, se AÑADE otro bloque de requisito aquí (o se actualiza uno existente) — no se crea un
 estándar nuevo. Cada requisito tiene un slug estable (`ID`) único dentro de este estándar; agrupa
 uno o varios **criterios de cumplimiento** y sirve de referencia legible (`<slug-del-estándar>/<slug-del-requisito>`,
-p. ej. testing/unit-testing). El bloque del requisito solo trae `### Alcance` y `### Excepciones` — sus
+p. ej. testing/unit-testing). El bloque del requisito solo trae la descripción normativa y `### Excepciones` — sus
 criterios de cumplimiento se redactan más abajo, en la tabla única `## Criterios de cumplimiento`.
 
 La unidad verificable y trazable NO es el requisito, sino cada **criterio de cumplimiento** (`CR-XXX`).
@@ -73,24 +73,18 @@ Si un requisito necesita documentos de apoyo (guías, ejemplos, matrices), usar 
 (docs/standards/<slug>/) y enlazarlos con rutas relativas desde el requisito.
 -->
 
-## {{Título del estandar}}
+## {{Título del requisito}}
 **ID:** {{slug}}
 
-{{Cuál es el requisito, cómo se usa en el proyecto y cómo se implementa (herramientas, convenciones, ubicación típica).}}
-
-### Alcance
-{{Enunciado con palabra clave RFC 2119 en MAYÚSCULAS en el idioma de preferencia: dónde aplica, qué **MUST**/**DEBE**, **SHOULD**/**DEBERÍA**, **MAY**/**PUEDE** cumplirse y dónde no aplica. Ej.: "Las pruebas unitarias **DEBEN** implementarse con PHPUnit; no **DEBE** introducirse otro framework de unit testing en `tests/unit/`."}}
+{{Describe el requisito, su propósito, cuándo y dónde aplica, y cómo debe implementarse en el proyecto. Incluye las herramientas, convenciones, estructura o ubicación habitual cuando corresponda. La descripción PUEDE contener un enunciado normativo utilizando palabras clave RFC 2119 (MUST, SHOULD, MAY o sus equivalentes en el idioma del documento) para indicar las obligaciones, recomendaciones u opciones aplicables.}}
 
 ### Excepciones
-{{casos permitidos, o "Ninguna"}}
+{{Casos en los que el requisito no aplica o puede incumplirse justificadamente, o "Ninguna".}}
 
 ## {{E2E testing}}
 **ID:** {{slug}}
 
-{{Qué es, cómo se usa y cómo se implementa (p. ej. Playwright, convención de specs, flujos críticos).}}
-
-### Alcance
-{{Enunciado con palabra clave RFC 2119 en MAYÚSCULAS en el idioma de preferencia. Ej.: "Las pruebas end-to-end **DEBEN** implementarse con Playwright; los flujos críticos definidos por producto **DEBERÍAN** tener cobertura e2e."}}
+{{…}}
 
 ### Excepciones
 {{…}}

@@ -35,7 +35,7 @@ de esta versión: **el ADR es la decisión; el estándar es la norma de dominio 
 | Granularidad | Fino: una decisión | **Amplio: un dominio** entero, alimentado por muchas decisiones |
 | Pregunta que responde | *¿Por qué* elegimos X sobre Y? | *¿Qué* debe cumplir el proyecto hoy en este dominio, y *cómo* se verifica |
 | Naturaleza | Histórico, narrativo, **inmutable** una vez `Accepted` | **Vivo y prescriptivo**; crece y se actualiza a medida que llegan nuevas decisiones |
-| Contenido | Contexto, drivers, decisión, alternativas, consecuencias | Requisitos redactados con **RFC 2119 / RFC 8174** (MUST/SHOULD/MAY…), cada uno con su alcance y excepciones, y sus **criterios de cumplimiento** (`CR-XXX`) verificables, agrupados en una tabla única al final del documento |
+| Contenido | Contexto, drivers, decisión, alternativas, consecuencias | Requisitos redactados con **RFC 2119 / RFC 8174** (MUST/SHOULD/MAY…), cada uno con su descripción normativa y excepciones, y sus **criterios de cumplimiento** (`CR-XXX`) verificables, agrupados en una tabla única al final del documento |
 | Verificación | No se audita en sí mismo (es historia) | **Es lo que audita `arch-audit`**: cada **criterio de cumplimiento** (CR) con su fitness function |
 | Relación | **Emite/actualiza** criterios de cumplimiento (`emits`) dentro de un estándar de dominio | **Nace de** los ADR que aportaron sus criterios (`source_adrs`) |
 
@@ -122,8 +122,8 @@ El ADR y el estándar se enlazan **por referencia**, nunca duplicando contenido:
 - **El ADR contiene solo el *porqué*** — contexto, drivers, decisión, alternativas, consecuencias — y
   `emits` (las referencias `<estándar>/CR-XXX` que fija). **Nunca** aloja el enunciado normativo
   (MUST/SHOULD…) ni los criterios verificables: el ADR **emite** la regla, no la **contiene**.
-- **El estándar contiene solo el *qué hay que cumplir hoy*** — requisitos con su `Alcance` (RFC 2119) y
-  sus criterios de cumplimiento (`CR-XXX`) verificables — y `source_adrs`. **Nunca** aloja el porqué,
+- **El estándar contiene solo el *qué hay que cumplir hoy*** — requisitos con su descripción normativa
+  (RFC 2119) y sus criterios de cumplimiento (`CR-XXX`) verificables — y `source_adrs`. **Nunca** aloja el porqué,
   los drivers ni las alternativas: eso es historia y vive en el ADR.
 - **El enlace es cruzado, no copiado:** `emits` (ADR) ↔ `source_adrs` / columna `Origen` (estándar). Si
   te descubres copiando el enunciado normativo dentro del ADR, o el contexto/alternativas dentro del
@@ -200,7 +200,7 @@ Antes de redactar un ADR nuevo o de añadir un requisito:
      - **Forma simple:** `docs/standards/<slug>.md`.
      - **Forma con documentos adicionales:** si el estándar necesita archivos de apoyo (guías, ejemplos, matrices), crear la carpeta `docs/standards/<slug>/`, escribir el estándar en `docs/standards/<slug>/README.md` y colocar los documentos adicionales dentro de esa carpeta (enlazados con rutas relativas desde el estándar). Si un estándar simple pasa a necesitar extras, migrarlo de `<slug>.md` a `<slug>/README.md`.
 6. **Redactar el requisito y sus criterios de cumplimiento** dentro del estándar (campos exactos en [`references/conventions.md`](references/conventions.md)):
-   - Un bloque `## <Nombre del requisito>` con: `**ID:** <slug-requisito>`, el párrafo de qué es / cómo se usa / cómo se implementa (sin RFC 2119), `### Alcance` (**enunciado normativo con RFC 2119**, MUST/SHOULD/MAY… en mayúsculas) y `### Excepciones`. **No** incluir aquí los criterios de cumplimiento: van todos juntos en la tabla única `## Criterios de cumplimiento`, al final del documento (antes de `## Referencias`). El **origen y la verificación se registran por criterio (CR)**, no a nivel de requisito.
+   - Un bloque `## <Nombre del requisito>` con: `**ID:** <slug-requisito>`, el párrafo de qué es / cómo se usa / cómo se implementa, que **debe incluir el enunciado normativo con RFC 2119** (MUST/SHOULD/MAY… en mayúsculas), y `### Excepciones`. **No** incluir aquí los criterios de cumplimiento: van todos juntos en la tabla única `## Criterios de cumplimiento`, al final del documento (antes de `## Referencias`). El **origen y la verificación se registran por criterio (CR)**, no a nivel de requisito.
    - Añadir a la tabla única `## Criterios de cumplimiento` la fila (o filas) `CR-XXX` que esta decisión fija: `ID` (`CR-XXX`, correlativo único en el estándar), `Requisito` (el `ID` del requisito al que pertenece), `Descripción` (medible, con RFC 2119 si es normativa), `Origen` (`ADR-XXX`), `Automatizable` (yes/no), `Enfoque` (`bloqueante`/`warning`; por defecto `bloqueante`) y `Verificación` (yes/no: si la verificación ya existe; la ruta del chequeo no se escribe — se resuelve por convención).
    - **Enlazar en ambos sentidos:** añadir la referencia global de cada CR (`<slug-estándar>/CR-XXX`, p. ej. `testing/CR-001`) al `emits` del ADR, y el `ADR-XXX` a `source_adrs` del estándar (a nivel de documento) además de en la columna `Origen` del CR.
 7. **Evaluar y (opcionalmente) crear la fitness function de cada criterio (CR)** — flujo completo en [`references/fitness-functions.md`](references/fitness-functions.md): incluye **investigar** la forma más común y eficiente de verificarlo (nunca inventar un script propio si ya hay una herramienta/convención establecida), **instalar y configurar** esa herramienta si hace falta, y registrar el chequeo en el **archivo de checks de su estándar** (`scripts/arch/checks/<slug-estándar>.<ext>`, un archivo por estándar, con la trazabilidad `CR-XXX` en comentarios y líneas de salida), asegurando el **runner** `scripts/arch/verify.<ext>` — ambos escritos en el **lenguaje del stack del repo** (p. ej. Node en un proyecto Angular/React/Vue). La verificación cuelga de **cada criterio de cumplimiento**, no del requisito, del ADR ni del estándar entero.
@@ -244,7 +244,7 @@ excepción, añadir un requisito a un dominio existente). El estándar es **vivo
    prefiere no crearlo, permitir el CR dejando constancia de que su decisión de origen está
    pendiente de documentar (lo señalará `arch-audit`).
 2. Identificar el estándar de dominio (o crearlo, `docs/standards/<slug>.md` o `docs/standards/<slug>/README.md` si lleva documentos adicionales; dominio según [`references/functional-domains.md`](references/functional-domains.md)).
-3. Añadir o editar el bloque de requisito (`ID`, `Alcance` con RFC 2119, `Excepciones`) y sus filas `CR-XXX` en la tabla única `## Criterios de cumplimiento`, al final del documento (`Requisito`, `Descripción`, `Origen`, `Automatizable`, `Enfoque`, `Verificación`; ver [`references/conventions.md`](references/conventions.md)). Actualizar `last_update` a hoy.
+3. Añadir o editar el bloque de requisito (`ID`, descripción con el enunciado normativo en RFC 2119, `Excepciones`) y sus filas `CR-XXX` en la tabla única `## Criterios de cumplimiento`, al final del documento (`Requisito`, `Descripción`, `Origen`, `Automatizable`, `Enfoque`, `Verificación`; ver [`references/conventions.md`](references/conventions.md)). Actualizar `last_update` a hoy.
 4. Reevaluar la fitness function de cada CR afectado: si cambió su descripción, ajustar su chequeo en el archivo de checks de su estándar (`scripts/arch/checks/<slug-estándar>.<ext>`; ver [`references/fitness-functions.md`](references/fitness-functions.md)).
 5. Si el nuevo estado del estándar o de un requisito es `Deprecated`/`Superseded`, enlazar el reemplazo y actualizar `docs/standards/README.md`.
 6. **Confirmar** los cambios.

@@ -47,8 +47,7 @@ requisito o un criterio (CR). Leer al redactar/editar cualquiera de estos artefa
 | Campo | Regla |
 |-------|-------|
 | `ID` | Slug del requisito (p. ej. `unit-testing`), único en su estándar. Referencia legible: `<slug-estándar>/<slug-requisito>` (p. ej. `testing/unit-testing`) |
-| Descripción | Párrafo de qué es / cómo se usa / cómo se implementa. **Sin** RFC 2119 |
-| `Alcance` | Enunciado normativo redactado con RFC 2119 / RFC 8174, en MAYÚSCULAS y en el idioma de preferencia (MUST/DEBE, SHOULD/DEBERÍA, MAY/PUEDE… — ver "Resolución de idioma" en `SKILL.md`) |
+| Descripción | Párrafo de qué es / cómo se usa / cómo se implementa. **Debe** incluir el enunciado normativo redactado con RFC 2119 / RFC 8174, en MAYÚSCULAS y en el idioma de preferencia (MUST/DEBE, SHOULD/DEBERÍA, MAY/PUEDE… — ver "Resolución de idioma" en `SKILL.md`) |
 | `Excepciones` | Casos permitidos, o «Ninguna» |
 
 > Los criterios de cumplimiento (`CR-XXX`) del requisito **no** van dentro de este bloque: se listan,
