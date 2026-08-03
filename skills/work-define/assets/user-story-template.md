@@ -8,7 +8,7 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 **Estado:** {{Draft | Ready}}
 **Fecha de creación:** {{YYYY-MM-DD}}
 **Última actualización:** {{YYYY-MM-DD}}
-**ADO Work Item:** {{enlace markdown al work item de ADO — solo si se creó manualmente para esta historia; omitir línea si no aplica. A diferencia de TK-XXX/WI-XXX (que work-plan sí sincroniza automáticamente con ADO), ningún skill de esta suite crea o pobla este campo por su cuenta}}
+**Work Item ({{Sistema}}):** {{enlace markdown al work item del sistema de seguimiento externo — solo si se creó manualmente para esta historia; {{Sistema}} es el nombre corto del sistema (p. ej. "ADO"); omitir línea si no aplica. A diferencia de TK-XXX/WI-XXX/TC-XXX (que sí se sincronizan automáticamente cuando hay un tracker externo vinculado), ningún skill de esta suite crea o pobla este campo por su cuenta para la US — si alguien lo puebla manualmente, regla de fidelidad recomendada: la sección Criterios de aceptación va en el campo dedicado del sistema si lo expone (p. ej. Acceptance Criteria en ADO); el resto del documento (Descripción, Contexto, Fuera de alcance, Reglas de negocio, Referencias, Complejidad, Repositorios, Validación, Observaciones) va en la descripción del work item, serializado por secciones, para que la US pueda reconstruirse completa desde el work item si este .md se pierde — ninguna sección debería omitirse}}
 
 ## Descripción
 

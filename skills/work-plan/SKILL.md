@@ -74,13 +74,15 @@ Reglas de selección:
 
 ---
 
-## Integración con Azure DevOps (condicional)
+## Integración con un sistema de seguimiento externo (condicional)
 
-La sincronización con Azure DevOps (ADO) es transversal a los tipos de plan que crean work items, pero **solo aplica si el repositorio está vinculado a ADO**. Para no cargar contexto innecesario:
+La sincronización con un sistema de seguimiento de trabajo externo (Azure DevOps, Jira u otro) es transversal a los tipos de plan que crean work items, pero **solo aplica si el repositorio está vinculado a uno**. Este skill solo resuelve **si** hay vinculación y **qué** referencia cargar; todo el detalle propio de cada sistema (herramienta MCP, campos, tipos de work item, configuración de conexión, límites de formato) vive exclusivamente en su archivo de `references/` — nunca aquí ni en las referencias de tipo de plan.
 
-1. **Detectar** la vinculación leyendo `.agents/MEMORY.md` (raíz del repo) y buscando cualquiera de estas señales con valor no vacío: `azure_devops_org:` / `ado_org:`, `azure_devops_project:` / `ado_project:`, o `work_item_tracking: azure_devops`.
-2. **Si NO hay ninguna señal** → el repo no usa ADO. Continuar con el flujo del tipo de plan usando ID secuencial local; **no** leer la referencia de ADO.
-3. **Si hay alguna señal** → leer `references/azure-devops.md` y seguir sus pasos (verificación del MCP, creación del work item, uso del `id` como número de tarea) **antes** de crear cualquier archivo local.
+1. **Detectar** la vinculación leyendo `.agents/MEMORY.md` (raíz del repo): buscar la señal `work_item_tracking: <sistema>` con valor no vacío (p. ej. `azure_devops`).
+2. **Si NO hay señal** → el repo no usa un tracker externo. Continuar con el flujo del tipo de plan usando ID secuencial local; **no** leer ninguna referencia de tracker.
+3. **Si hay señal** → cargar `references/<sistema>.md` (p. ej. `references/azure-devops.md` para `work_item_tracking: azure_devops`) y seguir **únicamente** sus pasos antes de crear cualquier archivo local. Si no existe un archivo de referencia para el sistema indicado, informar al usuario y continuar con ID secuencial local.
+
+**Regla de fidelidad (transversal a cualquier sistema):** toda la información del documento local debe quedar representada en el work item externo — en un campo dedicado si el sistema lo expone (p. ej. un campo de criterios de aceptación), o dentro de la descripción si no lo expone. Ninguna sección del `.md` puede omitirse al sincronizar; el objetivo es poder reconstruir el documento completo a partir del work item si el archivo local se perdiera. Qué campo usa cada sistema para qué sección es detalle de su archivo de referencia.
 
 ---
 
@@ -96,6 +98,6 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 |---------|---------------|
 | `references/user-story-tasks.md` | Tipo de plan = tarea técnica de historia de usuario. Contiene modos de invocación, ubicaciones, flujos (stub, TK completa, actualizar, sugerir stubs desde US), checklist, ejemplos y anti-patrones. |
 | `references/maintenance-tasks.md` | Tipo de plan = tarea de mantenimiento. |
-| `references/azure-devops.md` | Solo si se detecta vinculación a ADO (ver sección anterior). |
+| `references/<sistema>.md` (p. ej. `azure-devops.md`) | Solo si se detecta vinculación a un tracker externo (ver [Integración con un sistema de seguimiento externo](#integración-con-un-sistema-de-seguimiento-externo-condicional)); el archivo concreto depende del valor de `work_item_tracking`. |
 | `assets/task-template.md` | Plantilla canónica de una tarea de historia de usuario (`TK-XXX`). Leer antes de redactar el documento. |
 | `assets/work-item-template.md` | Plantilla canónica de una tarea de mantenimiento (`WI-XXX`). Leer antes de redactar el documento. |

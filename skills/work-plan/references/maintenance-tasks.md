@@ -2,7 +2,7 @@
 
 Definición del tipo de plan **tarea de mantenimiento (`WI-XXX`)**: trabajo **sin historia de usuario asociada** — corrección de bugs, refactor, deuda técnica, actualización de dependencias, tareas operativas o de infraestructura. Esta referencia se carga desde `SKILL.md` cuando la selección de tipo de plan resuelve a este caso. Asume ya resueltos el subagente, el mecanismo de preguntas y el idioma (ver `SKILL.md`).
 
-> **Alcance de un WI:** documento **único y combinado** de especificación. A diferencia de una historia de usuario —donde el requerimiento (`README.md`) y la especificación técnica (`TK-XXX`) viven en archivos separados porque la historia es un artefacto con dueño y fase propios—, una tarea de mantenimiento no tiene fase funcional separada ni se descompone en sub-tareas: el requerimiento, los criterios de aceptación y la especificación técnica conviven en **un solo documento** (`WI-XXX-[kebab-case]/README.md`), que mapea 1:1 con un único work item de ADO (`Bug`/`Task`). No implementa código, no ejecuta pruebas, no crea ADRs. Lo no acordado va en **Observaciones** o se pregunta — nunca se inventa.
+> **Alcance de un WI:** documento **único y combinado** de especificación. A diferencia de una historia de usuario —donde el requerimiento (`README.md`) y la especificación técnica (`TK-XXX`) viven en archivos separados porque la historia es un artefacto con dueño y fase propios—, una tarea de mantenimiento no tiene fase funcional separada ni se descompone en sub-tareas: el requerimiento, los criterios de aceptación y la especificación técnica conviven en **un solo documento** (`WI-XXX-[kebab-case]/README.md`), que mapea 1:1 con un único work item del tracker externo cuando hay uno vinculado (su tipo exacto lo define el archivo de referencia del sistema). No implementa código, no ejecuta pruebas, no crea ADRs. Lo no acordado va en **Observaciones** o se pregunta — nunca se inventa.
 
 La plantilla canónica está en `assets/work-item-template.md` (léela antes de escribir cualquier WI).
 
@@ -50,10 +50,11 @@ No existe aquí el modo «stubs desde una historia»: no hay US que descomponer.
 ## Convenciones del nombre de archivo
 
 - Formato de carpeta: `WI-<número>-[nombre-descriptivo]/` con `WI-<número>` en mayúsculas. Dentro, siempre un `README.md` como documento principal del WI.
-- **Sin ADO**: `<número>` es un secuencial **global dentro de `docs/specs/work-items/`** (no hay historia padre que reinicie la cuenta); tres dígitos con cero a la izquierda → `WI-001`, `WI-002`, …
-- **Con ADO (MCP disponible)**: `<número>` es el **ID numérico del work item** creado en Azure DevOps → `WI-1847`, `WI-2031`, … Sin padding de ceros. Ver `references/azure-devops.md`.
+- **Sin tracker externo vinculado**: `<número>` es un secuencial **global dentro de `docs/specs/work-items/`** (no hay historia padre que reinicie la cuenta); tres dígitos con cero a la izquierda → `WI-001`, `WI-002`, …
+- **Con tracker externo vinculado**: `<número>` es el identificador que asigna ese sistema al work item creado; su formato exacto (numérico, con o sin padding, etc.) lo define el archivo de referencia del sistema — ver la sección «Integración con un sistema de seguimiento externo» en `SKILL.md`.
 - Nombre descriptivo: minúsculas, kebab-case, corto y descriptivo.
-- Ejemplos sin ADO: `WI-001-fix-timeout-login/README.md`, `WI-002-upgrade-spring-boot/README.md`.
+- El nombre completo de la carpeta (`WI-<número>-[nombre-descriptivo]/`) y, si hay un tracker externo vinculado, el título usado al crear el work item deben respetar cualquier límite de longitud propio de ese sistema (ver su archivo de referencia).
+- Ejemplos sin tracker: `WI-001-fix-timeout-login/README.md`, `WI-002-upgrade-spring-boot/README.md`.
 
 ---
 
@@ -70,8 +71,8 @@ Antes de crear o editar cualquier WI, tener clara esta información. **No invent
 | **Repositorio** | Nombre del repositorio git al que afecta el work item; inferir del repo (git remote / carpeta) o indicado por el usuario | Stub: puede quedar `Por definir`. WI completo: obligatorio; sin él el estado no puede ser `Ready` |
 | **Contexto técnico** (WI completo) | ADRs existentes, technical-docs, descripción del usuario | Si falta decisión técnica relevante: sugerir ADR al usuario, no crearlo. Si un modelo, API o flujo mencionado no tiene especificación en `technical-docs/` y el usuario pide detallarlo: delegar a `/design-define` vía subagente y enlazar la referencia devuelta |
 | **Referencia de UI** (solo si toca UI) | Figma, wireframe o imagen de alta fidelidad aportados por el usuario | Obligatoria para `Ready`; sin ella el WI de UI no puede salir de `Draft` |
-| **Tipo** | Del usuario o inferido del requerimiento (bug / refactor / deuda-técnica / dependencias / operativa) | Si es ambiguo, preguntar; condiciona el tipo de work item en ADO |
-| **Vinculación ADO** | Ver sección «Integración con Azure DevOps» de `SKILL.md` | Si se detecta vinculación, seguir `references/azure-devops.md` antes de crear archivos |
+| **Tipo** | Del usuario o inferido del requerimiento (bug / refactor / deuda-técnica / dependencias / operativa) | Si es ambiguo, preguntar; si hay un tracker externo vinculado, condiciona el tipo de work item que se crea allí (mapeo exacto en su archivo de referencia) |
+| **Vinculación con tracker externo** | Ver sección «Integración con un sistema de seguimiento externo» de `SKILL.md` | Si se detecta vinculación, seguir el archivo de referencia del sistema correspondiente antes de crear archivos |
 
 > Leer siempre **todos** los `WI-*.md` existentes en `docs/specs/work-items/` antes de crear o editar. Detectar solapamientos y resolverlos con el usuario antes de continuar.
 
@@ -82,7 +83,7 @@ Antes de crear o editar cualquier WI, tener clara esta información. **No invent
 Antes de crear archivos, verificar estas condiciones. Si alguna falla, **no crear** — informar al usuario y resolver primero.
 
 **¿Qué verificar?**
-- **ID disponible:** el número `WI-XXX` propuesto no existe ya como carpeta en `docs/specs/work-items/`. (Aplica también con IDs de ADO: verificar que no exista `WI-<ado_id>-*/`.)
+- **ID disponible:** el número `WI-XXX` propuesto no existe ya como carpeta en `docs/specs/work-items/`. (Aplica también con el identificador de un tracker externo: verificar que no exista ya un `WI-<id>-*/` con ese identificador — ver el archivo de referencia del sistema.)
 - **Solapamiento de alcance:** leer los `WI-*.md` existentes y comparar su requerimiento con el del nuevo. Si alguno ya cubre el mismo alcance: informar el conflicto y preguntar si prefiere actualizar el existente o ajustar el alcance del nuevo.
 - **Repositorio definido (solo WI completo):** si el repositorio sigue siendo `Por definir` tras preguntar, publicar como stub en Draft, no como WI completo.
 - **Rama de trabajo actual:** determinar la rama git activa (`git branch --show-current`). Si coincide con el patrón de rama de implementación de una US o WI (`feature/US-XXX-*`, `feature/WI-XXX-*`, `fix/WI-XXX-*`, `chore/WI-XXX-*`, `refactor/WI-XXX-*`), crear el work item nuevo ahí lo mezclaría con ese trabajo en curso. No bloquea automáticamente — ver manejo específico abajo.
@@ -109,13 +110,13 @@ Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **De
 
 Un stub reserva el ID. No requiere requerimiento detallado ni contexto técnico completo.
 
-1. **Resolver el ID:** si el repo usa ADO con MCP disponible, seguir `references/azure-devops.md` (crear el work item primero y usar su `id`). En cualquier otro caso, inferir el siguiente secuencial libre listando carpetas `WI-*/` en `docs/specs/work-items/`.
+1. **Resolver el ID:** si el repo tiene un tracker externo vinculado (ver `SKILL.md`), seguir su archivo de referencia (crea el work item primero y usa su identificador). En cualquier otro caso, inferir el siguiente secuencial libre listando carpetas `WI-*/` en `docs/specs/work-items/`.
 2. Crear la carpeta `WI-<número>-[nombre-descriptivo]/` y dentro el archivo `README.md` con:
    - `Estado: Draft`
    - `Tipo`: el conocido o el más probable (confirmar si hay duda).
    - `Repositorio`: el conocido o `Por definir`.
    - `Asignado a`: indicado por el usuario; si no, inferir con `git config user.name`; omitir si no aplica.
-   - `ADO Work Item`: `[#<ado_id>](<url>)` — solo si se creó en ADO; omitir si no aplica.
+   - `Work Item (<sistema>)`: enlace markdown al work item — solo si se creó vía el tracker vinculado (etiqueta y formato exactos en su archivo de referencia, p. ej. `Work Item (ADO)`); omitir si no aplica.
    - **Requerimiento**: objetivo breve acordado — el *qué*, sin el cómo.
    - **Criterios de aceptación / Plan de implementación**: vacíos o ausentes si aún no están definidos.
    - **Observaciones**: pendientes reales; no rellenar con texto genérico.
@@ -128,9 +129,9 @@ Un stub reserva el ID. No requiere requerimiento detallado ni contexto técnico 
 
 Un WI completo puede alcanzar `Estado: Ready` si cumple todas las condiciones del checklist.
 
-1. **Resolver el ID:** si el repo usa ADO con MCP disponible, seguir `references/azure-devops.md`. En cualquier otro caso, inferir el siguiente secuencial libre listando carpetas `WI-*/` en `docs/specs/work-items/`. Crear la carpeta `WI-<número>-[nombre-descriptivo]/` antes de escribir el `README.md`.
+1. **Resolver el ID:** si el repo tiene un tracker externo vinculado, seguir su archivo de referencia. En cualquier otro caso, inferir el siguiente secuencial libre listando carpetas `WI-*/` en `docs/specs/work-items/`. Crear la carpeta `WI-<número>-[nombre-descriptivo]/` antes de escribir el `README.md`.
 2. **Redactar el WI** siguiendo `assets/work-item-template.md`:
-   - **Metadatos**: `Tipo`; `Repositorio` con el nombre del repositorio git afectado; `Asignado a` indicado por el usuario, inferido con `git config user.name`, u omitido; `ADO Work Item: [#<ado_id>](<url>)` solo si se creó en ADO.
+   - **Metadatos**: `Tipo`; `Repositorio` con el nombre del repositorio git afectado; `Asignado a` indicado por el usuario, inferido con `git config user.name`, u omitido; `Work Item (<sistema>)` con el enlace al work item solo si se creó vía el tracker vinculado (etiqueta y formato en su archivo de referencia).
    - **Requerimiento**: qué problema/necesidad motiva el trabajo — claro y concreto; sin diseño técnico.
    - **Reglas de negocio** (opcional — incluir solo si el dominio impone restricciones, obligaciones o prohibiciones explícitas; omitir si no aplica): cada regla lleva id secuencial `BR-01`, `BR-02`, … con enunciado RFC 2119 en MAYÚSCULAS. **Cada `BR-XX` declarada debe quedar verificada por al menos un `AC-XXX`** de la sección Criterios de aceptación (anotar `→ verificado por AC-XXX` junto a la regla); si al redactar los criterios alguna `BR-XX` queda sin ningún `AC-XXX` que la verifique, es una laguna — cerrarla con una pregunta o registrarla en Observaciones, nunca dejarla sin verificar.
    - **Criterios de aceptación**: cómo se verifica que quedó hecho; lista verificable. Tono imperativo; sin «podría», «quizá».
@@ -186,7 +187,7 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 - [ ] Modo A: intención clara: stub vs WI completo
 - [ ] Modo B: propuesta presentada al usuario sin archivos creados; confirmación recibida antes del primer `WI-*.md`
 - [ ] Idioma de preferencia determinado (preferencia en contexto, idioma del mensaje, o preguntado al usuario)
-- [ ] **ADO**: vinculación verificada (ver `SKILL.md`); si está vinculado, seguido `references/azure-devops.md` y `ado_id` extraído antes de crear el archivo local
+- [ ] **Vinculación con tracker externo**: verificada (ver `SKILL.md`); si está vinculado, seguido su archivo de referencia y el identificador externo extraído antes de crear el archivo local
 
 **Validación:**
 - [ ] ID `WI-XXX` libre en `docs/specs/work-items/`
@@ -231,7 +232,7 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 - *Comportamiento — turno 1:* Activa el *Flujo: Proponer varios WI*. Presenta `WI-003` (API), `WI-004` (workers), `WI-005` (batch), cada uno con objetivo breve y repositorio. Pregunta con opciones: [Confirmar] / [Ajustar alcance] / [Cancelar]. **No crea archivos.**
 - *Comportamiento — turno 2:* Tras confirmación, crea los WI (stub o completo según claridad) y reporta rutas.
 
-**Ejemplo 5 — Repo vinculado a Azure DevOps** — ver `references/azure-devops.md` (el `Tipo` del WI determina el tipo de work item: `bug` → `Bug`, el resto → `Task`).
+**Ejemplo 5 — Repo vinculado a un tracker externo** — ver el archivo de referencia del sistema correspondiente (p. ej. `references/azure-devops.md`, donde el `Tipo` del WI determina el tipo de work item creado).
 
 ---
 

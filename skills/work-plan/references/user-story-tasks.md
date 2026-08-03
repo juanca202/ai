@@ -52,10 +52,11 @@ En caso de duda entre A y B: preguntar al usuario antes de continuar. No combina
 ## Convenciones del nombre de archivo
 
 - Formato: `TK-<número>-[nombre-descriptivo].md` con `TK-<número>` en mayúsculas.
-- **Sin ADO**: `<número>` es un secuencial **por historia** (no global); tres dígitos con cero a la izquierda → `TK-001`, `TK-002`, …
-- **Con ADO (MCP disponible)**: `<número>` es el **ID numérico del work item** creado en Azure DevOps → `TK-1847`, `TK-2031`, … Sin padding de ceros. Ver `references/azure-devops.md`.
+- **Sin tracker externo vinculado**: `<número>` es un secuencial **por historia** (no global); tres dígitos con cero a la izquierda → `TK-001`, `TK-002`, …
+- **Con tracker externo vinculado**: `<número>` es el identificador que asigna ese sistema al work item creado; su formato exacto (numérico, con o sin padding, etc.) lo define el archivo de referencia del sistema — ver la sección «Integración con un sistema de seguimiento externo» en `SKILL.md`.
 - Nombre descriptivo: minúsculas, kebab-case, corto y descriptivo.
-- Ejemplos sin ADO: `TK-001-modelo-dominio-receta.md`, `TK-002-endpoint-crear-receta.md`.
+- El nombre completo del archivo (`TK-<número>-[nombre-descriptivo].md`) y, si hay un tracker externo vinculado, el título usado al crear el work item deben respetar cualquier límite de longitud propio de ese sistema (ver su archivo de referencia).
+- Ejemplos sin tracker: `TK-001-modelo-dominio-receta.md`, `TK-002-endpoint-crear-receta.md`.
 
 ---
 
@@ -73,7 +74,7 @@ Antes de crear o editar cualquier TK, tener clara esta información. **No invent
 | **Repositorio** | Nombre del repositorio git al que afecta la tarea; inferir del repo (git remote / carpeta) o indicado por el usuario | Stub: puede quedar `Por definir`. TK completa: obligatorio; sin él el estado no puede ser `Ready` |
 | **Contexto técnico** (solo TK completa) | ADRs existentes, technical-docs, descripción del usuario | Si falta decisión técnica relevante: sugerir ADR al usuario, no crearlo. Si un modelo, API o flujo mencionado no tiene especificación en `technical-docs/` y el usuario pide detallarlo: delegar a `/design-define` vía subagente y enlazar la referencia devuelta |
 | **Referencia de UI** (solo TK de interfaz) | Figma, wireframe o imagen de alta fidelidad aportados por el usuario | Obligatoria para `Ready`; sin ella el TK de UI no puede salir de `Draft` |
-| **Vinculación ADO** | Ver sección «Integración con Azure DevOps» de `SKILL.md` | Si se detecta vinculación, seguir `references/azure-devops.md` antes de crear archivos |
+| **Vinculación con tracker externo** | Ver sección «Integración con un sistema de seguimiento externo» de `SKILL.md` | Si se detecta vinculación, seguir el archivo de referencia del sistema correspondiente antes de crear archivos |
 
 > Leer siempre el `README.md` de la US y **todas** las `TK-*.md` existentes en la carpeta antes de crear o editar. Detectar solapamientos y resolverlos con el usuario antes de continuar.
 
@@ -85,7 +86,7 @@ Antes de crear archivos, verificar estas condiciones. Si alguna falla, **no crea
 
 **¿Qué verificar?**
 - **US padre existe y está Ready:** la carpeta `US-XXX-[nombre-corto]/` tiene `README.md` con `Estado: Ready`. No se pueden crear TKs sobre una US en Draft.
-- **ID disponible:** el número `TK-XXX` propuesto no existe ya en la carpeta. (Aplica también con IDs de ADO: verificar que no exista `TK-<ado_id>-*.md`.)
+- **ID disponible:** el número `TK-XXX` propuesto no existe ya en la carpeta. (Aplica también con el identificador de un tracker externo: verificar que no exista ya un `TK-<id>-*.md` con ese identificador — ver el archivo de referencia del sistema.)
 - **Solapamiento de alcance:** leer todas las `TK-*.md` de la carpeta y comparar su objetivo con el de la nueva tarea. Si alguna ya cubre el mismo alcance: informar al usuario el conflicto y preguntar si prefiere actualizar la existente o ajustar el alcance de la nueva.
 - **Repositorio definido (solo TK completa):** si el repositorio sigue siendo `Por definir` tras preguntar, publicar como stub en Draft, no como TK completa.
 - **Rama de trabajo actual:** determinar la rama git activa (`git branch --show-current`). La rama de implementación de la TK es la de su **propia** US padre: `feature/US-XXX-[nombre-corto]` (ver `work-implement`). Si la rama activa es una rama de implementación (`feature/US-*`, `feature/WI-*`, `fix/WI-*`, `chore/WI-*`, `refactor/WI-*`) **distinta** de esa —por ejemplo la de otra US o de un WI—, la TK quedaría documentada en el contexto de otro trabajo. No bloquea automáticamente — ver manejo específico abajo.
@@ -112,13 +113,13 @@ Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **De
 
 Un stub reserva el ID y el vínculo a la US. No requiere contexto técnico completo.
 
-1. **Resolver el ID de la tarea:** si el repo usa ADO con MCP disponible, seguir `references/azure-devops.md` (crear el work item primero y usar su `id`). En cualquier otro caso, inferir el siguiente número secuencial libre listando archivos `TK-*.md` en la carpeta de la US.
+1. **Resolver el ID de la tarea:** si el repo tiene un tracker externo vinculado (ver `SKILL.md`), seguir su archivo de referencia (crea el work item primero y usa su identificador). En cualquier otro caso, inferir el siguiente número secuencial libre listando archivos `TK-*.md` en la carpeta de la US.
 2. Crear `TK-<número>-[nombre-descriptivo].md` con:
    - `Estado: Draft`
    - `Historia`: enlace a la US `[US-XXX](./README.md)`.
    - `Repositorio`: el conocido o `Por definir`.
    - `Asignado a`: indicado por el usuario; si no, inferir con `git config user.name`; omitir la línea si no aplica.
-   - `ADO Work Item`: `[#<ado_id>](<url>)` — solo si se creó en ADO; omitir la línea si no aplica.
+   - `Work Item (<sistema>)`: enlace markdown al work item — solo si se creó vía el tracker vinculado (etiqueta y formato exactos en su archivo de referencia, p. ej. `Work Item (ADO)`); omitir la línea si no aplica.
    - **Descripción**: objetivo breve acordado — el *qué*, sin el cómo.
    - **Plan de implementación**: vacío o ausente si no hay pasos definidos.
    - **Observaciones**: pendientes reales; no rellenar con texto genérico.
@@ -131,9 +132,9 @@ Un stub reserva el ID y el vínculo a la US. No requiere contexto técnico compl
 
 Una TK completa puede alcanzar `Estado: Ready` si cumple todas las condiciones del checklist.
 
-1. **Resolver el ID de la tarea:** si el repo usa ADO con MCP disponible, seguir `references/azure-devops.md`. En cualquier otro caso, inferir el siguiente secuencial libre en la carpeta de la US.
+1. **Resolver el ID de la tarea:** si el repo tiene un tracker externo vinculado, seguir su archivo de referencia. En cualquier otro caso, inferir el siguiente secuencial libre en la carpeta de la US.
 2. **Redactar el TK** siguiendo `assets/task-template.md`:
-   - **Metadatos**: `Historia` con enlace `[US-XXX](./README.md)`; `Repositorio` con el nombre del repositorio git afectado; `Asignado a` indicado por el usuario, inferido con `git config user.name`, u omitido; `ADO Work Item: [#<ado_id>](<url>)` solo si se creó en ADO.
+   - **Metadatos**: `Historia` con enlace `[US-XXX](./README.md)`; `Repositorio` con el nombre del repositorio git afectado; `Asignado a` indicado por el usuario, inferido con `git config user.name`, u omitido; `Work Item (<sistema>)` con el enlace al work item solo si se creó vía el tracker vinculado (etiqueta y formato en su archivo de referencia).
    - **Descripción**: qué lograr — objetivo claro, tono imperativo y verificable; sin «podría», «quizá», «tal vez».
    - **Dependencias**: solo piezas *dentro del alcance de la tarea* — componentes, servicios, modelos, librerías. ADRs, technical-docs, contratos y referencias de diseño van en **Referencias**.
    - **Referencias**: ADRs existentes, technical-docs (con ancla al elemento concreto, p. ej. `technical-docs/facturacion.md#api-01-crear-factura`), diseño. No crear ADRs; si falta una decisión, sugerirlo al usuario en Observaciones. Si la tarea depende de un modelo, API o flujo **sin especificación** en `technical-docs/`, registrarlo en Observaciones; si el usuario pide detallarlo, **delegar a `/design-define` vía subagente** y agregar aquí la referencia devuelta.
@@ -218,7 +219,7 @@ Aplica siempre que se planifiquen o secuencien **varias TK dentro de la misma US
 - [ ] Orden entre TKs de la misma US según [Orden y priorización de tareas](#orden-y-priorización-de-tareas): infraestructura compartida → sin dependencias → con dependencias; ninguna TK depende de otra posterior en la secuencia
 - [ ] Si hay escenario E2E: su TK queda secuenciada al final (tras las tareas que atraviesa) y su ejecución no se exige como condición de `Estado: Ready`, sino en el Quality Gate previo a integrar/liberar
 - [ ] Idioma de preferencia determinado (preferencia en contexto, idioma del mensaje, o preguntado al usuario)
-- [ ] **ADO**: vinculación verificada (ver `SKILL.md`); si está vinculado, seguido `references/azure-devops.md` y `ado_id` extraído antes de crear el archivo local
+- [ ] **Vinculación con tracker externo**: verificada (ver `SKILL.md`); si está vinculado, seguido su archivo de referencia y el identificador externo extraído antes de crear el archivo local
 
 **Validación:**
 - [ ] Carpeta de la US existe con `README.md`
@@ -267,7 +268,7 @@ Aplica siempre que se planifiquen o secuencien **varias TK dentro de la misma US
 - *Entrada:* «Tareas para US-009.» — pero `US-009/README.md` está en `Draft` o no tiene `AC-XXX` documentados.
 - *Comportamiento:* Bloquea, no crea ningún stub. Reporta qué falta (estado, criterios) y sugiere usar `work-define` para alinear la US antes de planificar.
 
-**Ejemplo 6 — Repo vinculado a Azure DevOps** — ver `references/azure-devops.md`.
+**Ejemplo 6 — Repo vinculado a un tracker externo** — ver el archivo de referencia del sistema correspondiente (p. ej. `references/azure-devops.md`).
 
 ---
 

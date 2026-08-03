@@ -49,6 +49,7 @@ El idioma de la US (criterios de aceptación, INVEST, DoR y texto natural) se de
 
 - Formato: `US-XXX-[nombre-corto]` con `US-XXX` en mayúsculas y número de 3 dígitos.
 - Nombre corto: minúsculas, kebab-case, sin artículos ni palabras vacías.
+- Si esta historia se vincula manualmente a un work item de un sistema de seguimiento externo (ver `Work Item (<sistema>)` en la plantilla), el nombre completo `US-XXX-[nombre-corto]` debe respetar el límite de longitud de título que imponga ese sistema; si el nombre corto propuesto lo supera, acortarlo antes de crear la carpeta.
 - Ejemplos: `US-001-seleccion-item-sdp-desde-receta`, `US-004-resumen-costos-receta`.
 - Archivos de apoyo en `assets/`; enlazarlos desde Referencias con rutas relativas, p. ej. `![Descripción](assets/nombre.png)`.
 

@@ -10,6 +10,15 @@ Genera **casos de prueba documentados** (`TC-XXX`) a partir de los criterios de 
 
 > **Solo documentación de prueba:** este skill produce archivos `TC-XXX-{slug}.md` más un índice `test-cases/README.md`. No implementa código de prueba ni ejecuta tests. La única modificación permitida sobre el artefacto origen (US/WI/FEAT) es agregar, bajo cada criterio de aceptación, la lista de casos de prueba que lo cubren (ver Paso 5); no altera ningún otro contenido del artefacto ni otros archivos existentes.
 
+## Mapa de referencias
+
+Carga el archivo correspondiente cuando vayas a ejecutar la tarea; el detalle íntegro vive en `references/`.
+
+| Necesitas… | Archivo |
+| ---------- | ------- |
+| Integración condicional con un sistema de seguimiento externo: detalle específico de cada sistema (creación de work items, campos, IDs, vinculación al artefacto padre) | `references/<sistema>.md` (p. ej. [`references/azure-devops.md`](references/azure-devops.md) para Azure DevOps) — leer solo si el repo está vinculado (ver [Integración con un sistema de seguimiento externo](#integración-con-un-sistema-de-seguimiento-externo-condicional)) |
+| Estructura del archivo de un caso de prueba | [`assets/test-case-template.md`](assets/test-case-template.md) |
+
 ---
 
 ## Cómo preguntar al usuario
@@ -25,6 +34,18 @@ Toda pregunta al usuario va por la **herramienta de preguntas estructuradas** (o
 ## Resolución de idioma
 
 Redactar los TCs y los mensajes al usuario en el idioma del artefacto origen. Si hay conflicto o ambigüedad, preguntar al usuario antes de generar.
+
+---
+
+## Integración con un sistema de seguimiento externo (condicional)
+
+La sincronización con un sistema de seguimiento de trabajo externo (Azure DevOps, Jira u otro) es transversal a la generación de TCs, pero **solo aplica si el repositorio está vinculado a uno**. Este skill solo resuelve **si** hay vinculación y **qué** referencia cargar; todo el detalle propio de cada sistema (herramienta MCP, campos, tipo de work item, configuración de conexión, límites de formato) vive exclusivamente en su archivo de `references/`. Para no cargar contexto innecesario:
+
+1. **Detectar** la vinculación leyendo `.agents/MEMORY.md` (raíz del repo): buscar la señal `work_item_tracking: <sistema>` con valor no vacío (p. ej. `azure_devops`).
+2. **Si NO hay señal** → el repo no usa un tracker externo. Continuar con la numeración local secuencial (ver [Numeración y nombres de archivo](#numeración-y-nombres-de-archivo)); **no** leer ninguna referencia de tracker.
+3. **Si hay señal** → cargar `references/<sistema>.md` (p. ej. `references/azure-devops.md` para `work_item_tracking: azure_devops`) y seguir **únicamente** sus pasos antes de guardar cualquier archivo local (Paso 4). Algunos sistemas exigen resolver una jerarquía propia (p. ej. un plan y una suite de pruebas) antes de crear el work item del caso de prueba; esos pasos, si aplican, viven íntegramente en el archivo de referencia del sistema. Si no existe un archivo de referencia para el sistema indicado, informar al usuario y continuar con numeración local secuencial.
+
+**Regla de fidelidad (transversal a cualquier sistema):** toda la información del TC debe quedar representada en el work item externo — los pasos de ejecución en un campo dedicado si el sistema lo expone, el resto en la descripción si no lo expone. Ninguna sección del `.md` puede omitirse al sincronizar; el objetivo es poder reconstruir el TC completo a partir del work item si el archivo local se perdiera. Qué campo usa cada sistema para qué sección es detalle de su archivo de referencia.
 
 ---
 
@@ -111,9 +132,11 @@ Si dentro de una perspectiva hay múltiples escenarios distintos que vale la pen
 
 ### Numeración y nombres de archivo
 
-- El secuencial `XXX` (tres dígitos: 001, 002, …) es por artefacto padre, siguiendo el orden criterio-a-criterio (happy → error → límite).
-- Si la carpeta `test-cases/` ya existe con TCs previos, leer los archivos presentes, determinar el número más alto y continuar desde el siguiente. No regenerar TCs ya existentes salvo instrucción explícita del usuario.
+- **Sin tracker externo vinculado**: el secuencial `XXX` (tres dígitos: 001, 002, …) es por artefacto padre, siguiendo el orden criterio-a-criterio (happy → error → límite). Si la carpeta `test-cases/` ya existe con TCs previos, leer los archivos presentes, determinar el número más alto y continuar desde el siguiente.
+- **Con tracker externo vinculado**: `XXX` es el identificador que asigna ese sistema al work item «Test Case» creado; su formato exacto (numérico, con o sin padding, etc.) lo define el archivo de referencia del sistema. Ver [Integración con un sistema de seguimiento externo](#integración-con-un-sistema-de-seguimiento-externo-condicional).
+- No regenerar TCs ya existentes salvo instrucción explícita del usuario.
 - Nombre de archivo: `TC-XXX-{slug}.md`, donde el slug sigue el patrón `{criterio-resumido}-{perspectiva}` (ver columna Ejemplo arriba). Un TC por archivo.
+- El nombre completo del archivo (`TC-XXX-{slug}.md`) y, si hay un tracker externo vinculado, el título usado al crear el work item deben respetar cualquier límite de longitud propio de ese sistema (ver su archivo de referencia); si el título GWT completo lo supera, usar una versión abreviada como título del work item y conservar el título completo en el encabezado del TC (`# TC-{{XXX}} — ...`).
 
 ### Estructura de cada TC
 
@@ -134,6 +157,7 @@ Usar `assets/test-case-template.md` para todos los campos. Reglas de llenado:
     | ¿Debe validar la experiencia completa del usuario de punta a punta? | E2E |
 
     El valor final del campo es la lista de tipos marcados como aplicables, escrita de menor a mayor nivel según el orden de la tabla (`Unit, Integration, API Test, Visual Test, E2E`). Si ninguna pregunta aplica, reconsiderar si el caso es en realidad `Manual`. Para los TC `Manual` no aplica ningún tipo (el campo queda solo en `Manual`).
+- **Work Item (<sistema>):** enlace markdown al work item creado — solo si el TC se creó vía el tracker vinculado (etiqueta y formato exactos en su archivo de referencia, p. ej. `Work Item (ADO)` en `references/azure-devops.md`); omitir la línea si no aplica.
 - **Prioridad:** derivar del impacto del criterio en el negocio: Alta si el criterio es bloqueante o afecta seguridad/datos; Media si es funcional importante; Baja si es edge case o cosmético. Si no hay suficiente contexto, preguntar al usuario.
 - **Creado por:** usar `git config user.name` del repositorio. Si no está disponible, dejar el campo vacío.
 - **Precondiciones:** ser específico — incluir estado del sistema, datos existentes y permisos requeridos.
@@ -145,7 +169,7 @@ Usar `assets/test-case-template.md` para todos los campos. Reglas de llenado:
 
 ## Paso 4 — Guardar y reportar
 
-1. Crear la carpeta `test-cases/` si no existe.
+1. Crear la carpeta `test-cases/` si no existe. Si el repo tiene un tracker externo vinculado (ver [Integración con un sistema de seguimiento externo](#integración-con-un-sistema-de-seguimiento-externo-condicional)), los work items ya deben estar creados y sus identificadores resueltos antes de este paso.
 2. Escribir cada `TC-XXX-{slug}.md` en la ruta correcta según la tabla de Selección del artefacto. Guardar cada TC con `Estado: Ready` salvo que el usuario indique lo contrario.
 3. Crear o actualizar el índice `test-cases/README.md` con una tabla que liste **todos** los TCs de la carpeta (los recién creados más los que ya existieran), ordenados por número de TC. La tabla lleva estas columnas:
 
@@ -214,3 +238,6 @@ La trazabilidad inversa (de un criterio a sus TCs) se obtiene buscando el identi
 - Continuar si el artefacto no está en `Estado: Ready` o no tiene criterios de aceptación.
 - Asignar códigos de criterio automáticamente; si faltan, parar y pedirle al usuario que los agregue en el artefacto.
 - Lanzar preguntas como prosa libre cuando el cliente expone herramienta de preguntas estructuradas.
+- Crear el archivo TC local con ID secuencial cuando el repo tiene un tracker externo vinculado y su herramienta MCP está disponible — siempre crear el work item en el tracker primero y usar su identificador (ver el archivo de referencia del sistema).
+- Omitir el campo `Work Item (<sistema>)` en el encabezado del TC cuando fue creado vía MCP.
+- Ignorar los límites de formato (p. ej. longitud de título) que imponga el sistema vinculado; ver su archivo de referencia.
