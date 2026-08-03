@@ -7,10 +7,12 @@ Vive junto al README.md del RS:
   docs/specs/research/RS-XXX-{slug}/discovery.md
 
 Reconstruye por ingeniería inversa, en cascada, lo que el código HACE:
-  Features → Casos de uso → Reglas de negocio → (mapa a FEAT-XXX propuestos)
+  Artefactos técnicos → Casos de uso → Objetivos de usuario → Capabilities →
+  Features (división + cohesión) → Reglas de negocio → (mapa a FEAT-XXX propuestos)
 Reglas:
   - Describir el comportamiento ACTUAL del código, no el deseado.
   - Cada hallazgo cita evidencia (archivo y símbolo). Sin evidencia → ⚠️ Sin evidencia.
+  - No proponer Features a ojo: deben pasar criterios de división y métricas de cohesión.
   - Los posibles bugs se marcan; no se convierten en criterio sin decisión del usuario.
 -->
 
@@ -22,58 +24,101 @@ Reglas:
 **Creado por:** {{git config user.name}}
 **Fecha:** {{YYYY-MM-DD}}
 
-## 1. Features descubiertas
+## 1. Artefactos técnicos
 
-{{Capacidades funcionales de alto nivel que ofrece el código.}}
+{{Inventario exhaustivo del código en alcance. Base de evidencia de todo lo demás.}}
 
-| Feature | Descripción (observada) | Ubicación en código | Evidencia |
-| ------- | ----------------------- | ------------------- | --------- |
-| {{Feature 1}} | {{qué hace, tal como está implementado}} | {{ruta/archivo · símbolo}} | {{endpoint / función / ruta UI}} |
+| Artefacto | Tipo | Descripción (observada) | Ubicación en código | Evidencia |
+| --------- | ---- | ----------------------- | ------------------- | --------- |
+| {{Artefacto 1}} | {{Entidad / Endpoint / Comando / Evento / Job / Pantalla / Servicio}} | {{qué es / qué hace}} | {{ruta/archivo · símbolo}} | {{ruta HTTP / nombre de job / vista / …}} |
 
-## 2. Casos de uso descubiertos
+> Tipos: Entidad · Endpoint · Comando · Evento · Job · Pantalla · Servicio.
+> Omite tipos ausentes en el alcance; no inventes. Todo ítem sin ancla → `⚠️ Sin evidencia`.
 
-{{Interacciones actor↔sistema con un objetivo. Cada caso de uso es candidato a una historia de usuario.}}
+## 2. Casos de uso reconstruidos
 
-| Caso de uso | Actor | Feature | Flujo observado (principal + alternos/errores) | Ubicación en código |
-| ----------- | ----- | ------- | ---------------------------------------------- | ------------------- |
-| {{CU 1}} | {{actor inferido}} | {{Feature}} | {{pasos que ejecuta el código, incluyendo ramas y validaciones}} | {{ruta/archivo · símbolo}} |
+{{Interacciones actor↔sistema derivadas de los artefactos. Cada CU cita artefactos del §1.}}
 
-## 3. Reglas de negocio descubiertas
+| Caso de uso | Actor | Artefactos involucrados | Flujo observado (principal + alternos/errores) | Ubicación en código |
+| ----------- | ----- | ----------------------- | ---------------------------------------------- | ------------------- |
+| {{CU 1}} | {{actor inferido}} | {{Artefacto 1, Artefacto 3}} | {{pasos que ejecuta el código, incluyendo ramas y validaciones}} | {{ruta/archivo · símbolo}} |
 
-{{Validaciones, cálculos, condiciones, límites, transiciones, defaults y efectos que el código aplica.}}
+## 3. Agrupación por objetivo del usuario
 
-| BR-XX | Regla (enunciado observado) | Tipo | Dónde se aplica | Confianza | ¿Posible bug? |
-| ----- | --------------------------- | ---- | --------------- | --------- | ------------- |
-| BR-01 | {{afirmación verificable}} | {{Validación / Cálculo / Flujo / Autorización / Persistencia}} | {{ruta/archivo · símbolo}} | {{Alta / Media / Baja}} | {{No / Sí — ver Notas}} |
+{{Casos de uso agrupados por el mismo "para qué" de negocio, no por módulo técnico.}}
+
+| Objetivo del usuario | Casos de uso incluidos | Justificación del agrupamiento |
+| -------------------- | ---------------------- | ------------------------------ |
+| {{Objetivo 1}} | {{CU 1, CU 2}} | {{por qué comparten el mismo propósito de usuario}} |
+
+## 4. Capabilities
+
+{{Capacidades de dominio derivadas de los objetivos. Nivel más amplio que un Feature.}}
+
+| Capability | Objetivo(s) de usuario | Casos de uso | Artefactos clave | Descripción (observada) |
+| ---------- | ---------------------- | ------------ | ---------------- | ----------------------- |
+| {{Capability 1}} | {{Objetivo 1}} | {{CU 1, CU 2}} | {{Artefacto 1, …}} | {{área de capacidad que el código implementa}} |
+
+## 5. Features candidatos (división desde Capabilities)
+
+{{Recortes de cada Capability. Dividir solo si aplica ≥1 criterio; si ninguno, la Capability es un único Feature.}}
+
+| Feature candidato | Capability padre | Criterio(s) de división | Casos de uso | Artefactos | Descripción (observada) |
+| ----------------- | ---------------- | ----------------------- | ------------ | ---------- | ----------------------- |
+| {{Feature 1}} | {{Capability 1}} | {{Reglas indep. / Evolución indep. / Prueba indep. / Feature flag}} | {{CU 1}} | {{…}} | {{qué hace este recorte}} |
+
+> Criterios de división (basta uno): reglas independientes · evolución independiente ·
+> prueba independiente · despliegue/habilitación por feature flag.
+> Si ningún criterio aplica → un Feature = la Capability entera. No fragmentar por carpeta.
+
+## 6. Validación de cohesión
+
+{{Un Feature solo se acepta si cumple las cinco métricas. Veredicto ≠ Aceptado → reagrupar/dividir antes del mapa FEAT.}}
+
+| Feature | Objetivo principal | Cohesión | Acoplamiento | Vocabulario | Límites | Veredicto |
+| ------- | ------------------ | -------- | ------------ | ----------- | ------- | --------- |
+| {{Feature 1}} | {{oración con el "para qué" único}} | {{Alta / Media / Baja}} | {{Bajo / Medio / Alto · Features acoplados}} | {{OK / Inconsistente}} | {{Claros / Difusos}} | {{Aceptado / Reagrupar / Dividir más}} |
+
+> Métricas obligatorias: (1) un objetivo principal, (2) alta cohesión funcional,
+> (3) bajo acoplamiento con otros Features, (4) vocabulario de negocio consistente,
+> (5) límites claros de responsabilidad.
+
+## 7. Reglas de negocio descubiertas
+
+{{Validaciones, cálculos, condiciones, límites, transiciones, defaults y efectos que el código aplica — solo sobre Features aceptados.}}
+
+| BR-XX | Feature | Regla (enunciado observado) | Tipo | Dónde se aplica | Confianza | ¿Posible bug? |
+| ----- | ------- | --------------------------- | ---- | --------------- | --------- | ------------- |
+| BR-01 | {{Feature 1}} | {{afirmación verificable}} | {{Validación / Cálculo / Flujo / Autorización / Persistencia}} | {{ruta/archivo · símbolo}} | {{Alta / Media / Baja}} | {{No / Sí — ver Notas}} |
 
 > Tipo: Validación · Cálculo · Flujo · Autorización · Persistencia.
 > Confianza: Alta (explícita en código) · Media · Baja (inferida indirectamente).
 > Toda regla con `¿Posible bug? = Sí` debe describirse en Notas y **consultarse con
 > el usuario** antes de convertirse en criterio de aceptación (preservar vs. corregir).
 
-## 4. Cobertura de pruebas existente
+## 8. Cobertura de pruebas existente
 
 {{Qué pruebas ya cubren el código en alcance; justifica dónde enfocar la regeneración.}}
 
-| Componente / Caso de uso | Pruebas existentes (tipo · ubicación) | Cobertura | Gap (qué falta cubrir) |
-| ------------------------ | ------------------------------------- | --------- | ---------------------- |
-| {{CU 1}} | {{unit/integración/e2e · ruta}} | {{Alta / Media / Baja / Nula}} | {{escenarios sin cubrir}} |
+| Componente / Feature | Pruebas existentes (tipo · ubicación) | Cobertura | Gap (qué falta cubrir) |
+| -------------------- | ------------------------------------- | --------- | ---------------------- |
+| {{Feature 1}} | {{unit/integración/e2e · ruta}} | {{Alta / Media / Baja / Nula}} | {{escenarios sin cubrir}} |
 
-## 5. Mapa Feature → FEAT-XXX propuesto
+## 9. Mapa Feature → FEAT-XXX propuesto
 
-{{Puente hacia la creación de features. Una fila por feature descubierto: se
-materializará como una carpeta `docs/specs/features/FEAT-XXX-{slug}/`. Los casos de uso
-alimentan sus criterios de aceptación y las reglas de negocio sus BR-XX.}}
+{{Puente hacia la creación de features. Solo Features con veredicto Aceptado.
+Cada fila se materializará como `docs/specs/features/FEAT-XXX-{slug}/`.}}
 
-| Feature | FEAT propuesto (slug) | Casos de uso incluidos | Reglas de negocio (BR-XX) | Prioridad (según gap de cobertura) |
-| ------- | --------------------- | ---------------------- | ------------------------- | ---------------------------------- |
-| {{Feature 1}} | {{feat-slug}} | {{CU 1, CU 2}} | {{BR-01, BR-03}} | {{Alta / Media / Baja}} |
+| Feature | Capability padre | FEAT propuesto (slug) | Casos de uso incluidos | Reglas de negocio (BR-XX) | Prioridad (según gap de cobertura) |
+| ------- | ---------------- | --------------------- | ---------------------- | ------------------------- | ---------------------------------- |
+| {{Feature 1}} | {{Capability 1}} | {{feat-slug}} | {{CU 1, CU 2}} | {{BR-01, BR-03}} | {{Alta / Media / Baja}} |
 
 ## Notas
 
 <!--
 Listar aquí TODO pendiente que mantenga el discovery en Draft:
   - Hallazgos ⚠️ Sin evidencia por resolver.
+  - Features con veredicto Reagrupar / Dividir más.
   - Reglas con ¿Posible bug? = Sí y la decisión del usuario (preservar / corregir) o su ausencia.
   - Actores no identificados, confianza Baja por confirmar, supuestos.
 Si no queda ningún pendiente, el discovery puede pasar a Ready.

@@ -30,19 +30,23 @@ Reglas de contenido:
 **Fecha de creación:** {{YYYY-MM-DD}}
 **Última actualización:** {{YYYY-MM-DD}}
 
-## Objetivo
+## Descripción funcional
 
-{{Qué capacidad ofrece este feature, descrita a partir de la funcionalidad ya
-implementada. Una o dos oraciones centradas en el comportamiento observable, no en la
-implementación interna.}}
+<!--
+Describe el comportamiento REAL ya implementado, centrado en lo observable (no en la
+implementación interna). Debe dejar claro el alcance: qué hace el feature y qué queda
+fuera. Incluir Capability padre y objetivo principal (validados en el discovery) cuando
+el feature nace del flujo D. Incluir actores o módulo solo si ayudan a delimitar ese
+alcance.
+-->
 
-## Contexto
+**Capability:** {{nombre de la capability padre, o «N/A» si no aplica}}
 
-<!-- Opcional. Incluir solo si hace falta para entender el alcance o el dominio del feature. Eliminar si no aplica. -->
+{{Qué hace este feature: capacidad y comportamientos observables que ofrece. Un
+objetivo principal enunciable en una oración.}}
 
-{{Módulo/subsistema al que pertenece, actores involucrados, casos de uso que agrupa y
-cualquier restricción de dominio de la funcionalidad existente (si nació de un análisis
-legacy, inferidos de roles/permisos/entrypoints del código).}}
+{{Qué no hace / fuera de alcance: comportamientos cercanos que no cubre, límites
+explícitos o responsabilidades de otros features/módulos.}}
 
 ## Reglas de negocio
 
