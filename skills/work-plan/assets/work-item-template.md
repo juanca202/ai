@@ -6,7 +6,21 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 # WI-XXX: {{título corto del work item}}
 
 **Estado:** {{Draft | Ready}}
-**Tipo:** {{bug | refactor | deuda-técnica | dependencias | operativa}}
+**Tipo:** {{bug-fix | refactor | dependency-update | optimization | security-update | test-improvement | documentation-update | operational-change}}
+<!--
+Tipos de work item:
+| Tipo | Incluye |
+|---|---|
+| bug-fix | Corrección de errores. |
+| refactor | Refactorización, limpieza de código y reducción de deuda técnica. |
+| dependency-update | Actualización de librerías, frameworks y SDKs. |
+| optimization | Rendimiento, escalabilidad y consumo de recursos. |
+| security-update | Vulnerabilidades y endurecimiento de seguridad. |
+| test-improvement | Nuevas pruebas o mejora de las existentes. |
+| documentation-update | Documentación técnica y funcional. |
+| operational-change | Configuración, CI/CD, infraestructura, despliegues y migraciones. |
+-->
+
 **Repositorio:** {{obligatorio para Ready: nombre del repositorio git al que afecta el work item; inferido del repo (git remote / carpeta) o indicado por el usuario}}
 **Asignado a:** {{opcional: priorizar lo indicado por el usuario; si no, inferir con `git config user.name`; omitir línea si no aplica}}
 **Work Item ({{Sistema}}):** {{enlace markdown al work item creado en el sistema de seguimiento vinculado — solo si se creó; {{Sistema}} es el nombre corto que define el archivo de referencia del sistema (p. ej. "ADO" para references/azure-devops.md); omitir línea si no aplica}}
@@ -98,6 +112,7 @@ Categorías no funcionales (ISO/IEC 25010): Idoneidad funcional · Eficiencia de
 <!--
 Pasos concretos acordados o derivados de fuentes citadas en Referencias. Si no se conocen aún, omitir esta subsección e indicar en Observaciones qué falta.
 Cada tarea lleva id secuencial IT-01, IT-02, … único en el ámbito del documento; renumerar si se reordenan o eliminan tareas.
+Estados del checkbox durante la implementación: `[ ]` pendiente · `[~]` en progreso (solo una a la vez) · `[x]` completada.
 Formato: `IT-XX` + una **descripción corta** de una línea (qué se implementa) — es lo único que se muestra en la herramienta de to-dos. El detalle amplía el **qué** (precisiones, referencias a recursos o código, notas) — nunca el cómo — y va en las líneas indentadas debajo; no se muestra en los to-dos.
 -->
 

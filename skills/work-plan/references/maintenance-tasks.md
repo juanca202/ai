@@ -71,7 +71,7 @@ Antes de crear o editar cualquier WI, tener clara esta información. **No invent
 | **Repositorio** | Nombre del repositorio git al que afecta el work item; inferir del repo (git remote / carpeta) o indicado por el usuario | Stub: puede quedar `Por definir`. WI completo: obligatorio; sin él el estado no puede ser `Ready` |
 | **Contexto técnico** (WI completo) | ADRs existentes, technical-docs, descripción del usuario | Si falta decisión técnica relevante: sugerir ADR al usuario, no crearlo. Si un modelo, API o flujo mencionado no tiene especificación en `technical-docs/` y el usuario pide detallarlo: delegar a `/design-define` vía subagente y enlazar la referencia devuelta |
 | **Referencia de UI** (solo si toca UI) | Figma, wireframe o imagen de alta fidelidad aportados por el usuario | Obligatoria para `Ready`; sin ella el WI de UI no puede salir de `Draft` |
-| **Tipo** | Del usuario o inferido del requerimiento (bug / refactor / deuda-técnica / dependencias / operativa) | Si es ambiguo, preguntar; si hay un tracker externo vinculado, condiciona el tipo de work item que se crea allí (mapeo exacto en su archivo de referencia) |
+| **Tipo** | Del usuario o inferido del requerimiento (bug-fix / refactor / dependency-update / optimization / security-update / test-improvement / documentation-update / operational-change) | Si es ambiguo, preguntar; si hay un tracker externo vinculado, condiciona el tipo de work item que se crea allí (mapeo exacto en su archivo de referencia) |
 | **Vinculación con tracker externo** | Ver sección «Integración con un sistema de seguimiento externo» de `SKILL.md` | Si se detecta vinculación, seguir el archivo de referencia del sistema correspondiente antes de crear archivos |
 
 > Leer siempre **todos** los `WI-*.md` existentes en `docs/specs/work-items/` antes de crear o editar. Detectar solapamientos y resolverlos con el usuario antes de continuar.
@@ -217,11 +217,11 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 
 **Ejemplo 1 — Stub**
 - *Entrada:* «Reserva un WI para el timeout intermitente del login, todavía no sé la causa.»
-- *Salida:* carpeta `WI-001-timeout-login/` con `README.md` en Draft, `Tipo: bug`, repositorio `Por definir`, Requerimiento breve, Criterios y Plan vacíos, Observaciones con los pendientes reales.
+- *Salida:* carpeta `WI-001-timeout-login/` con `README.md` en Draft, `Tipo: bug-fix`, repositorio `Por definir`, Requerimiento breve, Criterios y Plan vacíos, Observaciones con los pendientes reales.
 
 **Ejemplo 2 — WI completo**
 - *Entrada:* «Actualiza Spring Boot a 3.3; el ADR de versiones está en `docs/adr/`; la suite debe quedar verde y sin warnings de deprecación.»
-- *Salida:* carpeta `WI-002-upgrade-spring-boot/` con `README.md`, `Tipo: dependencias`, Requerimiento, Criterios de aceptación verificables, repositorio concreto en la cabecera, Plan con pasos, referencia al ADR con ruta relativa. `Estado: Ready` si Observaciones está limpia.
+- *Salida:* carpeta `WI-002-upgrade-spring-boot/` con `README.md`, `Tipo: dependency-update`, Requerimiento, Criterios de aceptación verificables, repositorio concreto en la cabecera, Plan con pasos, referencia al ADR con ruta relativa. `Estado: Ready` si Observaciones está limpia.
 
 **Ejemplo 3 — Información incompleta**
 - *Entrada:* «WI para limpiar el módulo de reportes.»

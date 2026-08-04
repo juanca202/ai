@@ -64,6 +64,7 @@ Esta tarea materializa parte de la migración investigada en el `RS-XXX`. Para n
 <!--
 Pasos concretos acordados o derivados de fuentes citadas en Referencias. Si no se conocen aún, omitir esta subsección e indicar en Observaciones qué falta.
 Cada tarea lleva id secuencial IT-01, IT-02, … único en el ámbito del documento; renumerar si se reordenan o eliminan tareas.
+Estados del checkbox durante la implementación: `[ ]` pendiente · `[~]` en progreso (solo una a la vez) · `[x]` completada.
 Formato: `IT-XX` + una **descripción corta** de una línea (qué se implementa) — es lo único que se muestra en la herramienta de to-dos. El detalle amplía el **qué** (precisiones, referencias a recursos o código, notas) — nunca el cómo — y va en las líneas indentadas debajo; no se muestra en los to-dos.
 -->
 
