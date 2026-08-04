@@ -106,7 +106,7 @@ Los candidatos se agrupan por **dominio técnico/funcional** (testing, api, secu
 
 **Cuándo:** comprobar si el repo cumple los criterios de cumplimiento de `docs/standards/` y las reglas de `AGENTS.md`.
 
-**Produce:** `docs/audits/audit-YYYY-MM-DD.md` con hallazgos priorizados y veredicto.
+**Produce:** `docs/audits/arch-audit-YYYY-MM-DD.md` con hallazgos priorizados y veredicto.
 
 **Opciones — si ya hay auditoría previa:**
 

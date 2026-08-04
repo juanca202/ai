@@ -3,7 +3,7 @@ name: arch-audit
 description: >
   Auditar el cumplimiento de los estándares de arquitectura (docs/standards/) y de las reglas de
   AGENTS.md contra el estado real del repositorio (Architecture Compliance Checking), citando el ADR
-  de origen de cada estándar, y generar un informe priorizado en docs/audits/audit-YYYY-MM-DD.md.
+  de origen de cada estándar, y generar un informe priorizado en docs/audits/arch-audit-YYYY-MM-DD.md.
   Activar siempre que el usuario quiera verificar, auditar o comprobar si el código respeta los
   estándares, las decisiones arquitectónicas o las reglas del proyecto — incluso si no dice
   "estándar", "ADR" o "auditoría".
@@ -69,7 +69,7 @@ Para cada criterio, el skill evalúa si es **apto** para una fitness function (c
 automatizable — normalmente ya declarado en su columna `Automatizable: yes`), comprueba si ya existe y la
 ejecuta; si es apto pero no existe (`Verificación: no`), **sugiere crearla**.
 
-**Salida:** un único informe en `docs/audits/audit-YYYY-MM-DD.md`, agrupado por prioridad
+**Salida:** un único informe en `docs/audits/arch-audit-YYYY-MM-DD.md`, agrupado por prioridad
 (alta / media / baja), donde cada hallazgo referencia el criterio incumplido (`<estándar>/CR-XXX`, con
 el requisito que lo agrupa, su estándar de dominio y su ADR de origen) o la regla de AGENTS.md, lista
 evidencias y archivos infractores, propone una acción y fija un estado. El informe incluye además una
@@ -103,18 +103,18 @@ Las rutas de archivo, identificadores (`ADR-XXX`, referencias de criterio `<est�
 Antes de auditar, comprobar si ya existen informes previos:
 
 ```bash
-ls docs/audits/audit-*.md 2>/dev/null
+ls docs/audits/arch-audit-*.md 2>/dev/null
 ```
 
 - **Si no hay ninguno:** proceder directamente con una **nueva auditoría desde cero** (Fase 1).
 - **Si hay uno o varios:** localizar el **más reciente por la fecha del nombre** del archivo
-  (`audit-YYYY-MM-DD.md`; ordenar por esa fecha, no por fecha de sistema) y usar la
+  (`arch-audit-YYYY-MM-DD.md`; ordenar por esa fecha, no por fecha de sistema) y usar la
   **herramienta de preguntas estructuradas** del cliente para preguntar cómo continuar,
   **mostrando el nombre del archivo detectado**:
 
-  > "Encontré una auditoría previa: **audit-2026-06-30.md**. ¿Cómo quieres continuar?"
+  > "Encontré una auditoría previa: **arch-audit-2026-06-30.md**. ¿Cómo quieres continuar?"
   > Opciones:
-  > - **Revalidar `audit-2026-06-30.md`** — vuelve a comprobar cada hallazgo previo contra el estado actual y agrega los cambios como una nueva entrada en `## Revalidaciones`, sin tocar el informe original.
+  > - **Revalidar `arch-audit-2026-06-30.md`** — vuelve a comprobar cada hallazgo previo contra el estado actual y agrega los cambios como una nueva entrada en `## Revalidaciones`, sin tocar el informe original.
   > - **Nueva auditoría desde cero** — audita todas las normas de nuevo, ignorando el informe anterior.
 
   Una sola pregunta; opciones cortas y mutuamente excluyentes. Si el cliente no expone la
@@ -160,7 +160,7 @@ reordena ni elimina ese contenido. Los cambios de cada revalidación se document
    revalidación. Es el único dato del contenido original que una revalidación sí actualiza.
 
 En una **Nueva auditoría desde cero** se ignora el histórico para el análisis, se crea un archivo
-**nuevo** `audit-<hoy>.md` y se parte de la Fase 1.
+**nuevo** `arch-audit-<hoy>.md` y se parte de la Fase 1.
 
 ---
 
@@ -384,7 +384,7 @@ flujo de `Comportamiento en Revalidación` descrito en la Fase 0 — no se reesc
    date +%F
    ```
 2. Asegurar el directorio: `docs/audits/` (crearlo si no existe).
-3. Leer `assets/audit-template.md` y redactar `docs/audits/audit-<hoy>.md` siguiendo su estructura:
+3. Leer `assets/audit-template.md` y redactar `docs/audits/arch-audit-<hoy>.md` siguiendo su estructura:
    - Encabezado con fecha, repositorio, alcance, método y **veredicto** (`✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones`, siguiendo el patrón de `trace-validate`).
      - **Alcance:** ser específico — indicar cuántos criterios se auditaron y sobre cuántos estándares/requisitos de contexto, el desglose por estado de los excluidos, más las fuentes de AGENTS.md consideradas. Ejemplo: `14 criterios en 4 estándares · 1 Draft, 1 Superseded excluidos + AGENTS.md raíz`.
      - **Método:** no es un texto fijo — describir en una frase corta qué se usó realmente en esta auditoría: las técnicas de inspección aplicadas (p. ej. `grep`, lectura de manifiestos) y las fitness functions ejecutadas. Aclarar que no se corre el build ni la suite completa.
@@ -394,7 +394,7 @@ flujo de `Comportamiento en Revalidación` descrito en la Fase 0 — no se reesc
    - Sección de reglas **No verificables**.
    - Sección de **Decisiones sin criterio** (opcional): ADR `Accepted` con regla enforceable que no fijó ningún criterio (`emits: []`) → sugerir emitirlo vía `arch-manage`.
    - Sección de **Observaciones** (opcional): notas operativas que no son un hallazgo de incumplimiento (fitness function no registrada en el archivo de checks de su estándar, runner o checks escritos en un lenguaje ajeno al stack del repo, estándar/ADR en formato antiguo, dependencia rechazada en la Fase 3.5, etc.) — es el destino de cualquier "señalar/anotar como observación" mencionado en las fases anteriores.
-4. **Nunca sobrescribir** un informe anterior: el nombre lleva la fecha para conservar el histórico. Si ya existe un `audit-<hoy>.md` del mismo día, actualizarlo (no duplicar).
+4. **Nunca sobrescribir** un informe anterior: el nombre lleva la fecha para conservar el histórico. Si ya existe un `arch-audit-<hoy>.md` del mismo día, actualizarlo (no duplicar).
 
 El formato exacto de cada hallazgo (qué campos lleva y en qué orden) es el que ya trae
 `assets/audit-template.md` — no se repite aquí; seguir esa plantilla al redactar.
@@ -422,7 +422,7 @@ qué hacer según acepte o rechace.
 ## Fase 4 — Confirmar
 
 Al terminar, mostrar al usuario:
-- Ruta del informe (nuevo `audit-<hoy>.md`, o el mismo archivo si fue revalidación).
+- Ruta del informe (nuevo `arch-audit-<hoy>.md`, o el mismo archivo si fue revalidación).
 - El veredicto vigente (con la fecha/hora de revalidación si aplica) y el conteo de hallazgos por prioridad (p. ej. "🔴 2 · 🟡 3 · ⚪ 1").
 - Resumen de fitness functions: cuántas se ejecutaron (PASS/FAIL/WARN) y cuántas se sugiere crear.
 - Resultado de la verificación de dependencias (Fase 3.5): cuáles faltaban, si se instalaron o quedaron señaladas en el informe.
