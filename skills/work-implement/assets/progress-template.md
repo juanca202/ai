@@ -31,16 +31,15 @@ La "unidad" depende del tipo: TK para historias de usuario, el WI completo para 
 **Finalizado:** {{YYYY-MM-DD HH:mm}}
 **Implementador:** {{inferido de git config user.name}}
 
+<!-- Archivos: lista de archivos tocados durante la implementación de esta unidad. Prefijar cada ruta con + (creado), ~ (modificado) o - (eliminado); el símbolo basta, no hace falta etiqueta. -->
 **Archivos:** 
 []
 
+<!-- Notas: observaciones surgidas durante la implementación de esta unidad; describirlas de forma específica y concisa. -->
 **Notas:** 
 []
 
-<!-- Opcional: incluir solo si existen test cases (carpeta test-cases/) para este trabajo. No es un detalle exhaustivo de cada TC: solo observaciones puntuales si no se automatizo o hubo algun inconveniente al implementarlo. Si la implementacion fue como se esperaba, no es necesario comentar nada. -->
-**Cobertura de test cases:** 
-[]
-
+<!-- Decisiones adicionales: toda decisión adicional surgida en la conversación con el agente, o decisión autónoma del agente relevante para el usuario, que haya surgido durante la implementación y no estaba en la especificación original. -->
 **Decisiones adicionales:** 
 []
 
@@ -51,12 +50,10 @@ La "unidad" depende del tipo: TK para historias de usuario, el WI completo para 
 **Implementador:** {{inferido de git config user.name}}
 
 **Archivos:**
-- {{src/ruta/al/archivo.ext}}
+- {{+ | ~ | -}} {{src/ruta/al/archivo.ext}}
 
-<!-- Opcional: incluir solo si existen test cases (carpeta test-cases/) para este trabajo. No es un detalle exhaustivo de cada TC: solo observaciones puntuales si no se automatizo o hubo algun inconveniente al implementarlo. Si la implementacion fue como se esperaba, no es necesario comentar nada. -->
-
-**Cobertura de test cases:**
-- {{TC-XXX => nota solo si no se automatizo (motivo) o hubo un inconveniente al implementarlo}}
+**Notas:** 
+- {{observación relevante encontrada al implementar}}
 
 **Decisiones adicionales:**
 - {{decision tomada en sesion de chat no documentada en la especificacion}}
