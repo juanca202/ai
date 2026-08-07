@@ -477,10 +477,11 @@ No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `code-r
 
 **Opciones — tipo:**
 
-| Tipo | Qué debe estar `Done` en `progress.md` |
-|------|----------------------------------------|
-| `US-XXX` | Todas las `TK-XXX` |
-| `WI-XXX` | Todas las unidades del WI |
+| Tipo | Rama | Qué debe estar `Done` en `progress.md` |
+|------|------|----------------------------------------|
+| `US-XXX` | `feature/US-XXX-…` | Todas las `TK-XXX` |
+| `WI-XXX` | `feature/`\|`fix/`\|`chore/`\|`refactor/`+`WI-XXX-…` | Todas las unidades del WI |
+| Automatización de pruebas (`TC-XXX`/`FT-XXX`) | `test/` + `FT-XXX-…`\|`US-XXX-…`\|`WI-XXX-…` | Todas las unidades `TC-XXX`/`FT-XXX` de esa ejecución (no las del trabajo funcional del mismo padre) |
 
 **Puertas (obligatorias):** `code-review` → `trace-validate`. Working tree sucio → invoca `git-commit` automáticamente.
 
@@ -490,12 +491,14 @@ No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `code-r
 /work-integrate
 /work-integrate US-006
 /work-integrate WI-002
+/work-integrate integra la rama test/FT-003
 ```
 
 - «Cierra e integra US-006»
 - «Haz merge de esta rama feature a la base»
 - «Finaliza el WI-002 e intégralo»
-- (Desde la rama `feature/US-…` o `feature/WI-…` el skill infiere el trabajo)
+- «Integra las pruebas automatizadas del FT-003» → rama `test/FT-003-…`
+- (Desde la rama `feature/US-…`, `feature/WI-…` o `test/…` el skill infiere el trabajo)
 
 ---
 

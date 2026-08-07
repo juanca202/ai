@@ -94,7 +94,7 @@ Skills del ciclo de vida de un requerimiento: de la historia de usuario al PR me
 | [work‑implement](SKILLS.md#work-implement) | Implementar en código specs en estado Ready: tareas técnicas (TK-XXX) o de mantenimiento (WI-XXX) → funcionalidad; casos de prueba (TC-XXX) o features ya implementados (FT-XXX) → pruebas automatizadas                                                                                          |
 | [code‑review](SKILLS.md#code-review)       | Revisión de código pre-merge: verificaciones automatizadas según el stack + revisión cualitativa (arquitectura, diseño, SOLID), con veredicto apto/no apto/incompleto                                                                                                                             |
 | [trace‑validate](SKILLS.md#trace-validate) | Reporte de trazabilidad: criterios de aceptación de US/WI/FT ↔ casos y artefactos de prueba, con veredicto de cobertura                                                                                                                                                                           |
-| [work‑integrate](SKILLS.md#work-integrate) | Cerrar e integrar el trabajo de una US o WI (merge de la rama feature previa verificación en `progress.md`)                                                                                                                                                                                       |
+| [work‑integrate](SKILLS.md#work-integrate) | Cerrar e integrar el trabajo de una US, un WI o una automatización de pruebas                                       |
 | [pr‑create](SKILLS.md#pr-create)           | Crear PR o MR desde la rama actual (GitHub, GitLab, Azure Repos, etc.) con puertas de calidad obligatorias: code-review, trace-validate y Definition of Done                                                                                                                                      |
 
 
@@ -121,6 +121,7 @@ flowchart TD
     E -.-> F["Investigación<br/>**/work-research**"]
     E -.-> D
     E --> G["Implementación<br/>**/work-implement**"]
+    C -.->|automatizar TCs| G
     G --> H["Integración a rama de desarrollo<br/>**/work-integrate**"]
     G --> I["Creación de PR<br/>**/pr-create**"]
     H --> J(["Entregable"])
@@ -136,7 +137,7 @@ flowchart TD
 2. Opcionalmente, desde las historias se definen casos de prueba (`test-define`) y/o diseño arquitectónico (`design-define`).
 3. **Planificación de tareas** (`work-plan`): desde una historia produce tareas técnicas (`TK-XXX`); sin historia, tareas de mantenimiento (`WI-XXX`).
 4. Durante la planificación, opcionalmente se investiga con `work-research` y/o se ajusta el diseño arquitectónico con `design-define`.
-5. Las tareas planificadas pasan a `work-implement` para su codificación.
+5. Las tareas planificadas pasan a `work-implement` para su codificación. Los casos de prueba (`TC-XXX`, incluidos los de un feature legacy `FT-XXX`) también pueden pasar por `work-implement` para automatizarse como pruebas.
 6. El flujo termina por uno de dos caminos, cada uno con puertas de calidad (`code-review`, `trace-validate`), y ambos llegan al mismo entregable — el trabajo listo para producción, ya sea integrado directo (`work-integrate`) o vía Pull/Merge Request (`pr-create`).
 
 
