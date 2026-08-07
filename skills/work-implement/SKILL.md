@@ -1,6 +1,6 @@
 ---
 name: work-implement
-description: 'Usar al pedir implementar, desarrollar o ejecutar en codigo trabajo ya especificado, de distintos tipos. Dos tipos de implementacion: (1) tareas tecnicas (TK-XXX) bajo una historia de usuario (US-XXX); (2) tareas de mantenimiento (WI-XXX) sin historia asociada — bugs, refactor, deuda tecnica, dependencias, operativas. Activar siempre que el usuario pida "implementar", "desarrollar", "ejecutar tareas", "codificar", "trabajar en el TK/WI" o cualquier variante que implique escribir codigo a partir de una especificacion ya redactada, aunque no nombre el tipo. Selecciona el tipo segun el artefacto referenciado y carga su flujo desde references/. Solo se implementa trabajo en estado Ready.'
+description: 'Usar al pedir implementar, desarrollar o ejecutar en codigo trabajo ya especificado, de distintos tipos. Cuatro tipos de implementacion: (1) tareas tecnicas (TK-XXX) bajo una historia de usuario (US-XXX); (2) tareas de mantenimiento (WI-XXX) sin historia asociada — bugs, refactor, deuda tecnica, dependencias, operativas; (3) casos de prueba (TC-XXX) — automatizar en codigo las pruebas ya documentadas por test-define; (4) features (FT-XXX) — automatizar todos los TC asociados a los AC del feature. Activar siempre que el usuario pida "implementar", "desarrollar", "ejecutar tareas", "codificar", "automatizar las pruebas", "implementar los test cases", "trabajar en el TK/WI/TC/FT" o cualquier variante que implique escribir codigo a partir de una especificacion ya redactada, aunque no nombre el tipo. Selecciona el tipo segun el artefacto referenciado y carga su flujo desde references/. Solo se implementa trabajo en estado Ready.'
 license: MIT
 ---
 
@@ -10,7 +10,7 @@ Guia general para **ejecutar en codigo** trabajo ya especificado, de **distintos
 
 > **Alcance (cualquier tipo):** consume especificaciones ya redactadas por los skills de planificacion (`work-define`, `work-plan`). **No reescribe ni reestructura** la especificacion - solo la implementa. Correcciones menores acordadas con el usuario son la unica excepcion.
 >
-> **Solo implementacion:** no modifica documentacion de producto (README de US, `TK-XXX`, `WI-XXX`, ADRs, technical-docs) - solo el `progress.md`. **Excepcion de checkboxes:** marcar `[ ]` como `[x]` en las subtareas del artefacto en ejecucion **a medida que se completan** es la unica modificacion permitida en archivos de especificacion; no se toca ninguna otra seccion del artefacto. El archivo a editar depende del tipo: `TK-XXX.md` para tareas de historia de usuario, el `README.md` del WI para tareas de mantenimiento. Si se detecta un conflicto en la documentacion que pueda afectar el resultado, **parar inmediatamente y notificar al usuario** antes de continuar.
+> **Solo implementacion:** no modifica documentacion de producto (README de US, `TK-XXX`, `WI-XXX`, `TC-XXX`, `FT-XXX`, ADRs, technical-docs) - solo el `progress.md`. **Excepcion de checkboxes:** marcar `[ ]` como `[x]` en las subtareas del artefacto en ejecucion **a medida que se completan** es la unica modificacion permitida en archivos de especificacion; no se toca ninguna otra seccion del artefacto. El archivo a editar depende del tipo: `TK-XXX.md` para tareas de historia de usuario, el `README.md` del WI para tareas de mantenimiento. **En los tipos de automatizacion de pruebas (`TC-XXX` / `FT-XXX`) no aplica**: los test cases no tienen subtareas y su especificacion no se toca en absoluto. Si se detecta un conflicto en la documentacion que pueda afectar el resultado, **parar inmediatamente y notificar al usuario** antes de continuar.
 >
 > **Ritmo obligatorio - una unidad por confirmacion (modo por defecto):** implementar una unidad, actualizar `progress.md` **y la lista de tareas (to-dos) del agente**, ejecutar lint/build, y **esperar confirmacion explicita del usuario antes de arrancar la siguiente**. La **unidad** depende del tipo (ver tabla de seleccion). **El commit de la unidad terminada no se hace al completarla:** queda pendiente durante la pausa de confirmacion, dejando una ventana para que el usuario revise el resultado, aplique correcciones manuales o le indique ajustes al agente antes de que el cambio quede commiteado. El commit se hace **al confirmar el avance**, como primer paso antes de arrancar la siguiente unidad (o, si el usuario detiene el flujo ahi, en el cierre — ver Paso 4 de cada referencia).
 >
@@ -51,16 +51,20 @@ El idioma resuelto aplica a los mensajes al usuario y a las notas de `progress.m
 
 La senal que distingue los tipos es **el artefacto que el usuario referencia**.
 
-| Tipo | Como se identifica | Unidad de confirmacion | Flujo a leer |
-|------|--------------------|------------------------|--------------|
-| **Tarea de historia de usuario** | El trabajo referencia una historia `US-XXX` o una tarea `TK-XXX` que cuelga de ella; el artefacto vive bajo `docs/specs/user-stories/`. | **Una `TK-XXX`** | `references/user-story-tasks.md` — **leer antes de implementar.** |
-| **Tarea de mantenimiento** | El trabajo referencia un `WI-XXX` (bug, refactor, deuda tecnica, dependencias, operativa) **sin historia asociada**; vive bajo `docs/specs/work-items/`. | **El `WI-XXX` completo** | `references/work-items.md` — **leer antes de implementar.** |
+| Tipo | Como se identifica | Que se implementa | Unidad de confirmacion | Flujo a leer |
+|------|--------------------|-------------------|------------------------|--------------|
+| **Tarea de historia de usuario** | El trabajo referencia una historia `US-XXX` o una tarea `TK-XXX` que cuelga de ella; el artefacto vive bajo `docs/specs/user-stories/`. | El plan tecnico de la TK (codigo de produccion + sus tests) | **Una `TK-XXX`** | `references/user-story-tasks.md` — **leer antes de implementar.** |
+| **Tarea de mantenimiento** | El trabajo referencia un `WI-XXX` (bug, refactor, deuda tecnica, dependencias, operativa) **sin historia asociada**; vive bajo `docs/specs/work-items/`. | El plan del WI (codigo de produccion + sus tests) | **El `WI-XXX` completo** | `references/work-items.md` — **leer antes de implementar.** |
+| **Caso de prueba** | El trabajo referencia uno o varios `TC-XXX`; viven en la carpeta `test-cases/` de un artefacto padre (`US-XXX`, `WI-XXX` o `FT-XXX`). | **Las pruebas automatizadas de esos `TC-XXX`** | **Un `TC-XXX`** | `references/test-cases.md` — **leer antes de implementar.** |
+| **Feature** | El trabajo referencia un `FT-XXX` — funcionalidad **ya implementada** registrada bajo `docs/specs/features/`. | **Las pruebas de todos los `TC-XXX` asociados a los `AC-XXX` que contiene el feature** — nunca funcionalidad nueva | **El `FT-XXX` completo** | `references/test-cases.md` — **leer antes de implementar.** |
 
 Reglas de seleccion:
 
 - **Identificar el artefacto -> leer su referencia -> seguir unicamente su flujo.**
 - Si la referencia del usuario es ambigua (p. ej. un numero sin prefijo, o no esta claro si hay historia asociada), **preguntar al usuario** antes de continuar; no asumir el tipo ni inventar artefactos.
-- Solo se implementa trabajo en **`Estado: Ready`** (la US/TK o el WI). Si esta en `Draft`, parar y devolver a planificacion.
+- Solo se implementa trabajo en **`Estado: Ready`** (la US/TK, el WI, el TC o el FT). Si esta en `Draft`, parar y devolver a la fase que lo produce (`work-plan` / `work-define` para US/TK/WI, `test-define` para un TC, el flujo «Analizar legado» de `work-research` para un FT).
+- **Codigo de produccion vs. pruebas.** Los tipos `TK-XXX` y `WI-XXX` implementan funcionalidad nueva con sus tests. Los tipos `TC-XXX` y `FT-XXX` **entregan pruebas**: el comportamiento ya existe, asi que las pruebas confirman lo documentado.
+- **Un `FT-XXX` no es un plan de implementacion.** Es el registro de funcionalidad **que ya existe en el codigo** — no tiene plan, ni subtareas, ni nada que desarrollar. De el solo salen **las pruebas que cubren sus `TC-XXX`**. En los tipos `TC-XXX` y `FT-XXX`, tocar codigo de produccion se admite **unicamente como correccion puntual** derivada de una prueba en rojo, con la evidencia presentada y la decision explicita del usuario; nunca para escribir funcionalidad nueva (ver `references/test-cases.md`). Si el usuario espera funcionalidad de un `FT-XXX`, **parar y avisar**: eso se especifica como `US-XXX` o `WI-XXX`.
 
 ---
 
@@ -68,10 +72,10 @@ Reglas de seleccion:
 
 Verificar estas condiciones antes de implementar, sea cual sea el tipo. Si alguna falla, **parar** - informar al usuario y resolver primero.
 
-- **No iniciar en la rama de otro trabajo (primera verificacion):** obtener la rama actual con `git branch --show-current`. Si ya tiene un prefijo de implementacion (`feature/`, `fix/`, `chore/`, `refactor/`) y **no** corresponde al artefacto que se va a implementar, **parar** e indicar al usuario que no se puede iniciar la implementacion desde la rama de otro trabajo; debe situarse en la rama base acordada (p. ej. `develop`/`main`) para que el skill cree o cambie a la rama del artefacto. **Excepcion - reanudar:** si la rama actual es precisamente la del artefacto pedido, continuar normalmente.
+- **No iniciar en la rama de otro trabajo (primera verificacion):** obtener la rama actual con `git branch --show-current`. Si ya tiene un prefijo de implementacion (`feature/`, `fix/`, `chore/`, `refactor/`, `test/`) y **no** corresponde al artefacto que se va a implementar, **parar** e indicar al usuario que no se puede iniciar la implementacion desde la rama de otro trabajo; debe situarse en la rama base acordada (p. ej. `develop`/`main`) para que el skill cree o cambie a la rama del artefacto. **Excepcion - reanudar:** si la rama actual es precisamente la del artefacto pedido, continuar normalmente.
 - **Working tree limpio:** `git status --porcelain` sin cambios pendientes no resueltos **al iniciar la sesion de implementacion** (o al reanudarla). No aplica durante la pausa de confirmacion entre unidades: los cambios de la unidad recien terminada quedan sin commitear ahi a proposito (ver *Ritmo obligatorio*), hasta que el usuario confirma avanzar.
 - **Rama correcta:** estar en (o crear) la rama de trabajo del artefacto. No implementar en `main` ni en ramas de otro trabajo sin instruccion explicita. El nombre de rama lo define cada referencia segun el tipo.
-- **Solo trabajo de la rama actual:** solo se implementan unidades (TK / WI) que pertenezcan a la historia o tarea de mantenimiento asociada a la rama de implementacion actual. No implementar tareas de otro artefacto o de otra rama: si la unidad pedida no corresponde a la rama actual, **parar** y cambiar a su rama correspondiente (o pedir al usuario que lo haga) antes de continuar; nunca mezclar trabajo de distintos artefactos en una misma rama.
+- **Solo trabajo de la rama actual:** solo se implementan unidades (TK / WI / TC / FT) que pertenezcan al artefacto asociado a la rama de implementacion actual. No implementar tareas de otro artefacto o de otra rama: si la unidad pedida no corresponde a la rama actual, **parar** y cambiar a su rama correspondiente (o pedir al usuario que lo haga) antes de continuar; nunca mezclar trabajo de distintos artefactos en una misma rama.
 - **Artefacto en `Ready`:** el artefacto a implementar existe y esta en `Estado: Ready` (lo verifica cada referencia con su regla propia).
 - **Solapamiento de progreso:** leer `progress.md` si existe; respetar unidades ya en `Done`; si hay alguna `In Progress`, revisar notas y estado real antes de continuar.
 
@@ -88,10 +92,10 @@ WARNING No es posible continuar:
 
 Cada tipo mantiene un `progress.md` como **unica bitacora** que este skill puede modificar (nunca la especificacion de producto). Estados validos por unidad: **`Pending`**, **`In Progress`**, **`Done`**. No usar `Skipped` ni otros valores.
 
-- Crear desde `assets/progress-template.md` si no existe, adaptando el encabezado y las unidades al tipo (TK / WI) segun indique la referencia.
+- Crear desde `assets/progress-template.md` si no existe, adaptando el encabezado y las unidades al tipo (TK / WI / TC / FT) segun indique la referencia.
 - Por cada unidad: `Pending` => `In Progress` => `Done`; anadir notas si quedan aspectos parciales.
 - Registrar en `Decisiones adicionales` **toda decision tomada durante la sesion de chat** que no este ya documentada en la especificacion. Si no hubo decisiones nuevas, omitir la seccion.
-- **Cobertura de test cases:** cuando el artefacto tiene test cases, el campo `Cobertura de test cases` de la unidad **no es un detalle exhaustivo de cada `TC-XXX`**: registrar solo observaciones puntuales -- **todo `TC-XXX` que no se pudo automatizar** (con el motivo) y **toda decision de crear un tipo de prueba distinto** al que sugiere el test case (p. ej. cubrir con integracion un TC pensado como unit). Si la implementacion fue como se esperaba (todos los `TC-XXX` se automatizaron tal cual), **no es necesario comentar nada** en el campo; si el artefacto no tiene test cases, omitirlo.
+- **Cobertura de test cases:** cuando el artefacto tiene test cases, el campo `Cobertura de test cases` de la unidad **no es un detalle exhaustivo de cada `TC-XXX`**: registrar solo observaciones puntuales -- **todo `TC-XXX` que no se pudo automatizar** (con el motivo) y **toda decision de crear un tipo de prueba distinto** al que sugiere el test case (p. ej. cubrir con integracion un TC pensado como unit). Si la implementacion fue como se esperaba (todos los `TC-XXX` se automatizaron tal cual), **no es necesario comentar nada** en el campo; si el artefacto no tiene test cases, omitirlo. En los tipos `TC-XXX` / `FT-XXX` este campo es **obligatorio** (los test cases son el objeto mismo de la unidad) y suma dos observaciones propias: **`AC-XXX` sin ningun TC que lo cubra** y **discrepancias entre el TC y el codigo** con la decision tomada.
 
 | Situacion | Que hacer |
 |-----------|-----------|
@@ -142,6 +146,8 @@ El ciclo obligatorio por cada unidad de comportamiento es **Red → Green → Re
 
 Los tests son parte del entregable de la unidad, no una fase posterior. Una unidad no esta `Done` si sus tests no existen o no pasan.
 
+> **Variante para los tipos `TC-XXX` / `FT-XXX`:** ahi el entregable **son** las pruebas y el comportamiento **ya esta implementado**, asi que **no hay paso Red por diseno**: lo esperado es que la prueba pase en verde a la primera y confirme el comportamiento documentado. Si la prueba falla, hay una discrepancia real entre el `TC-XXX` y el codigo: se para, se presenta la evidencia al usuario y se decide con el si se corrige produccion (y ahi el rojo si actua como paso Red), si se corrige la prueba, o si vuelve a `test-define`. Nunca se relaja una asercion para forzar el verde. Detalle en `references/test-cases.md`.
+
 ### Uso escalonado de pruebas (optimizacion)
 
 El ciclo TDD siempre **define** las pruebas de la unidad (unit / integracion / e2e segun corresponda),
@@ -181,17 +187,18 @@ Si el proyecto ya tiene una estructura establecida que se aparta de Clean Archit
 | Condicion | Agente / MCP requerido |
 | --------- | ---------------------- |
 | La unidad genera o modifica archivos de UI (HTML, CSS, componentes) | Ejecutar bajo el agente `ui-specialist` **si el proyecto lo define** |
+| La unidad consiste en automatizar test cases (tipos `TC-XXX` / `FT-XXX`) | Ejecutar la escritura de las pruebas bajo el agente `quality-specialist` **si el proyecto lo define**, delegando via la herramienta Task |
 | La referencia de diseno es un enlace o archivo de Figma | Usar el **MCP de Figma** para obtener el contexto del diseno antes y durante la implementacion |
 
-El subagente `ui-specialist` solo se usa **si el proyecto lo define**; si no existe, ejecutar el paso directamente. Si la unidad no involucra UI, implementar directamente sin delegar.
+Los subagentes `ui-specialist` y `quality-specialist` solo se usan **si el proyecto los define**; si no existen, ejecutar el paso directamente. Si la unidad no involucra UI ni automatizacion de pruebas, implementar directamente sin delegar.
 
 ---
 
 ## Ejecucion paralela con subagentes y worktrees (transversal)
 
-Modo alternativo al ritmo secuencial por defecto. Aplica a los dos tipos (`TK-XXX` y `WI-XXX`). **Se activa unicamente cuando se cumplen las dos condiciones a la vez:**
+Modo alternativo al ritmo secuencial por defecto. Aplica a los cuatro tipos (`TK-XXX`, `WI-XXX`, `TC-XXX` y `FT-XXX`). **Se activa unicamente cuando se cumplen las dos condiciones a la vez:**
 
-1. El alcance incluye **mas de una unidad** (varias `TK` o varios `WI`).
+1. El alcance incluye **mas de una unidad** (varias `TK`, varios `WI`, varios `TC` o varios `FT`).
 2. El usuario **pide explicitamente ejecutar sin confirmacion entre unidades** (p. ej. "sin preguntar", "de corrido", "todas a la vez", "sin pausas").
 
 Si falta cualquiera de las dos, se mantiene el **modo secuencial** con una unidad por confirmacion (comportamiento por defecto de cada referencia). El modo paralelo **no** cambia *como* se implementa cada unidad — ciclo TDD, Clean Architecture, lint/build, checkboxes del artefacto, cobertura de test cases, validacion por criterios de aceptacion siguen igual —: solo cambia **cuantas** unidades avanzan a la vez y como se integran.
@@ -200,7 +207,7 @@ Si falta cualquiera de las dos, se mantiene el **modo secuencial** con una unida
 
 Es el **primer paso** y condiciona todo lo demas. No lanzar ningun subagente antes de completarlo.
 
-1. Leer cada unidad del alcance y su relacion de dependencias: el campo **`Dependencias`** del artefacto (TK/WI) y las dependencias obvias descritas en el texto.
+1. Leer cada unidad del alcance y su relacion de dependencias: el campo **`Dependencias`** del artefacto (TK/WI), las **`Observaciones`** del `TC-XXX` (donde se declaran dependencias con otros TC) y las dependencias obvias descritas en el texto.
 2. Clasificar cada unidad:
    - **Independiente:** sin dependencias, o cuyas dependencias ya estan en `Done`.
    - **Dependiente dentro del alcance:** depende de otra unidad que **si** esta en esta ejecucion.
@@ -245,6 +252,8 @@ Todo paso a otra fase del ciclo se realiza **invocando el skill correspondiente*
 - **Para integrar/cerrar el trabajo** (merge a la rama base): **invocar `/work-integrate`**. Este skill no hace el `git merge` a la rama base ni borra ramas por iniciativa propia. (El merge secuencial de worktrees a la rama del artefacto dentro del *modo de ejecucion paralela* es interno a la implementacion, no el cierre del trabajo.)
 - **Para crear un PR/MR:** **invocar `/pr-create`**. Este skill no crea PRs directamente.
 - **Si el artefacto necesita replanificarse** (TK/WI fuera de alcance, ambiguedad tecnica, criterios faltantes): escalar a **`/work-plan`** (o **`/work-define`** si el conflicto es funcional de la US); no reescribir la especificacion aqui.
+- **Si un `TC-XXX` es ambiguo o erroneo, o un `AC-XXX` se quedo sin test cases:** escalar a **`/test-define`**; este skill no crea ni edita casos de prueba.
+- **Para validar la cobertura** de los criterios de aceptacion tras automatizar las pruebas (tipos `TC-XXX` / `FT-XXX`): **invocar `/trace-validate`**. Este skill no genera la matriz de trazabilidad.
 
 Las opciones de cierre se ofrecen con la herramienta de preguntas estructuradas (ver el Paso 4 de cada referencia) y cada una hace handoff **invocando** el skill dueño de esa fase.
 
@@ -262,6 +271,7 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 |---------|---------------|
 | `references/user-story-tasks.md` | Tipo = tarea de historia de usuario (`US-XXX` / `TK-XXX`). Ubicaciones, filtros, cola, ciclo TK-a-TK (con TDD), flujo "TK sin US", cierre, ejemplos y anti-patrones. |
 | `references/work-items.md` | Tipo = tarea de mantenimiento (`WI-XXX`). Documento unico combinado, validacion por criterios de aceptacion, ciclo por WI completo, cierre, ejemplos y anti-patrones. |
+| `references/test-cases.md` | Tipo = caso de prueba (`TC-XXX`) o feature (`FT-XXX`). Automatizacion de las pruebas documentadas por `test-define`: ubicaciones por artefacto padre, rama `test/`, matriz AC=>TC, traduccion del TC a codigo de prueba, que hacer ante una prueba en rojo, cierre con `trace-validate`, ejemplos y anti-patrones. |
 | `assets/progress-template.md` | Plantilla de `progress.md`. Adaptar encabezado y unidades al tipo. |
 
 ---
@@ -277,7 +287,10 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 - Codificar con working tree sucio sin avisar y pausar.
 - Implementar en `main` u otra rama que no sea la del artefacto sin instruccion explicita.
 - Tratar como ejecutable un artefacto que no esta en `Ready`.
-- Modificar la especificacion de producto (US/TK/WI, ADRs, technical-docs) durante la implementacion, salvo marcar checkboxes de subtareas completadas en el artefacto activo.
+- Modificar la especificacion de producto (US/TK/WI/TC/FT, ADRs, technical-docs) durante la implementacion, salvo marcar checkboxes de subtareas completadas en el artefacto activo.
+- En los tipos `TC-XXX` / `FT-XXX`: inventar casos de prueba que `test-define` no documento, automatizar un TC `Manual`, relajar una asercion para forzar el verde, o corregir codigo de produccion por iniciativa propia sin la decision explicita del usuario.
+- Leer un `FT-XXX` como plan de implementacion o tratarlo como funcionalidad por construir: documenta codigo **ya implementado**; lo unico que se implementa son sus pruebas.
+- Escribir funcionalidad nueva desde los tipos `TC-XXX` / `FT-XXX`: el codigo de produccion solo se toca como **correccion puntual** de un defecto revelado por una prueba; si crece hasta ser un desarrollo, escalar a `work-plan` como `WI-XXX` de tipo bug.
 - Diferir "para otro momento" la documentacion de codigo que un ADR vigente exige, o cerrar una unidad como `Done` sin esa documentacion.
 - Continuar cuando se detecta un conflicto en la documentacion sin notificar al usuario primero.
 - Diferir la escritura de tests para despues de la implementacion; el ciclo TDD es Red → Green → Refactor dentro de cada unidad.

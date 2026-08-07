@@ -6,6 +6,21 @@ Invocación típica: `/nombre-skill` o una frase que active la descripción del 
 
 ---
 
+## Convención: enlace al gestor de proyectos
+
+Cualquier artefacto que enlace a su work item en un sistema de seguimiento externo (Azure DevOps, Jira u otro) lo hace **en la cabecera de metadatos** con esta etiqueta única, sin variantes por tipo de artefacto:
+
+```markdown
+**Work Item ({{Sistema}}):** {{enlace markdown al work item — omitir la línea si no aplica}}
+```
+
+- `{{Sistema}}` es el nombre corto que define el archivo de referencia del sistema (p. ej. `Work Item (ADO):` para `references/azure-devops.md`).
+- Aplica a `US-XXX`, `TK-XXX`, `WI-XXX`, `TC-XXX`, `FT-XXX` y a los artefactos de investigación (`RS-XXX`, diagnóstico de bug, análisis de test case). **No** se usan etiquetas propias por tipo (`Bug (gestor de proyectos):`, `Test Case (ADO):`, etc.).
+- La línea se **omite** si el artefacto no tiene work item; nunca se deja con `N/A`.
+- Fuera de la cabecera —listas de referencias, tablas, prosa— el enlace se escribe como cualquier otro enlace markdown; esta convención rige solo la etiqueta de cabecera.
+
+---
+
 ## Harness
 
 ### arch-init
@@ -180,10 +195,14 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 
 | Flujo | Entrada | Salida / handoff |
 |-------|---------|------------------|
-| **A · Artefacto** | `US` / `TK` / `WI` en contexto | Lagunas y decisiones pendientes → dueño del artefacto (`work-define` / `work-plan`) |
-| **B · Migración** | Proyecto origen + destino | Discovery + validación → `work-define` (cambio grande) o `work-plan` / WI (pequeño) |
-| **C · Libre** | Tema sin artefacto | Hallazgos por dominio: Producto, Arquitectura, Técnica o Cambio |
-| **D · Legacy** | Código sin requisitos/pruebas suficientes | `FEAT-XXX` + TCs vía `test-define` → `trace-validate` (solo pruebas, no código funcional) |
+| **Investigación libre** | Tema sin artefacto | Hallazgos por dominio: Producto, Arquitectura, Técnica o Cambio |
+| **Analizar decisiones pendientes** | `US` / `TK` / `WI` en contexto | Lagunas y decisiones pendientes → dueño del artefacto (`work-define` / `work-plan`) |
+| **Analizar issue** | Descripción de un defecto o código de un bug | Reproducción, causa raíz y diagnóstico de pruebas → **WI tipo `bug-fix`** vía `work-plan` (ciclo 🔴 TEST FAIL → fix → 🟢 TEST PASS). No genera `RS` |
+| **Analizar test case** | `TC-XXX` | Veredicto de auditoría (TC correcto / incorrecto / incompleto / falso negativo…) → `test-define`, *Analizar issue*, `work-plan` o `trace-validate` |
+| **Analizar legado** | Código sin requisitos/pruebas suficientes | `FT-XXX` + TCs vía `test-define` → `trace-validate` → `work-implement` tipo feature (solo pruebas, no código funcional) |
+| **Analizar migración** | Proyecto origen + destino | Discovery + validación → `work-define` (cambio grande) o `work-plan` / WI (pequeño) |
+
+Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefacto que se pase por su código se lee vía MCP y enruta al flujo según su tipo (historia/tarea → decisiones pendientes; bug → issue; test case → test case).
 
 **Ejemplos de invocación:**
 
@@ -191,15 +210,19 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 /work-research
 /work-research US-004
 /work-research TK-012 ¿qué falta por decidir antes de implementar?
+/work-research el bug #4821
+/work-research revisa TC-001-user-login
 /work-research migrar ../legacy-app → este repo
 /work-research analiza el módulo src/billing (legacy)
 /work-research ¿monolito o microservicios para el catálogo?
 ```
 
-- «Investiga las lagunas de US-007» → flujo A
-- «Migración de proyecto-origen a proyecto-destino» → flujo B
-- «¿Es viable usar Temporal para orquestación?» → flujo C (técnica)
-- «Documenta features desde el código de `src/orders`» → flujo D
+- «¿Es viable usar Temporal para orquestación?» → investigación libre (técnica)
+- «Investiga las lagunas de US-007» → analizar decisiones pendientes
+- «El login falla con contraseñas de más de 64 caracteres» → analizar issue
+- «¿Este caso de prueba está bien planteado?» → analizar test case
+- «Documenta features desde el código de `src/orders`» → analizar legado
+- «Migración de proyecto-origen a proyecto-destino» → analizar migración
 
 ---
 
@@ -274,7 +297,7 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 |------|--------|
 | `US-XXX` | `…/US-XXX-…/test-cases/` |
 | `WI-XXX` | `…/WI-XXX-…/test-cases/` |
-| `FEAT-XXX` | `…/FEAT-XXX-…/test-cases/` |
+| `FT-XXX` | `…/FT-XXX-…/test-cases/` |
 
 **Perspectivas por criterio:** Happy path · Error · Límite (se omite la que no aplique).
 
@@ -286,13 +309,13 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 /test-define
 /test-define US-005
 /test-define WI-003
-/test-define FEAT-002
+/test-define FT-002
 /test-define US-005 solo criterios AC-001 y AC-003
 ```
 
 - «Crea casos de prueba para US-009»
 - «Genera TCs desde los AC de WI-014»
-- «Documenta pruebas para el feature FEAT-001 (legacy)»
+- «Documenta pruebas para el feature FT-001 (legacy)»
 
 ---
 
@@ -332,10 +355,16 @@ Solo se hace handoff a `work-implement` si el artefacto está en `Ready`. Si hay
 
 **Opciones — tipo:**
 
-| Tipo | Unidad de confirmación |
-|------|------------------------|
-| `TK-XXX` (bajo US) | Una TK por confirmación |
-| `WI-XXX` | El WI completo |
+| Tipo | Qué se implementa | Unidad de confirmación |
+|------|-------------------|------------------------|
+| `TK-XXX` (bajo US) | Plan técnico de la TK (código + tests) | Una TK por confirmación |
+| `WI-XXX` | Plan del WI (código + tests) | El WI completo |
+| `TC-XXX` | Las pruebas automatizadas de esos test cases | Un TC por confirmación |
+| `FT-XXX` | Las pruebas de todos los TC asociados a los AC del feature | El FT completo |
+
+Los dos primeros entregan **funcionalidad**; los dos últimos entregan **pruebas** sobre comportamiento ya implementado (rama `test/…`, subagente `quality-specialist`, cierre natural en `trace-validate`).
+
+> Un `FT-XXX` **no es un plan de implementación**: registra funcionalidad que ya existe en el código, así que de él solo salen las pruebas que cubren sus `TC-XXX`, nunca características nuevas. Desde `TC`/`FT` el código de producción se toca **solo como corrección puntual** ante una prueba en rojo, con la evidencia presentada y decisión explícita del usuario; si la corrección crece hasta ser un desarrollo, se escala a `work-plan` como `WI-XXX` de tipo bug.
 
 **Opciones — ritmo:**
 
@@ -344,7 +373,7 @@ Solo se hace handoff a `work-implement` si el artefacto está en `Ready`. Si hay
 | **Secuencial** (default) | Una unidad → lint/build → pausa → commit al confirmar → siguiente |
 | **Paralelo** | Solo si hay **más de una** unidad **y** el usuario pide explícitamente «sin preguntar» / «de corrido»; worktrees + subagentes tras análisis de dependencias |
 
-Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrate` o `pr-create`.
+Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrate` o `pr-create` (para `TC`/`FT`, además `trace-validate`).
 
 **Ejemplos de invocación:**
 
@@ -353,12 +382,16 @@ Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrat
 /work-implement TK-003
 /work-implement US-006
 /work-implement WI-002
+/work-implement TC-004
+/work-implement FT-003
 /work-implement US-006 de corrido (sin preguntar entre TKs)
 ```
 
 - «Implementa TK-011»
 - «Desarrolla las tareas Ready de US-006»
 - «Ejecuta WI-005»
+- «Automatiza TC-004 y TC-007 de la US-042»
+- «Implementa las pruebas del FT-003»
 - «Implementa todas las TK de US-008 sin pausas» → modo paralelo (si hay >1 unidad)
 
 ---
@@ -412,7 +445,7 @@ En prosa (el skill mapea al modificador en inglés):
 
 **Cuándo:** matriz de cobertura criterios ↔ casos/artefactos de prueba + veredicto.
 
-**Opciones — tipo de trabajo:** `US-XXX` · `WI-XXX` · `FEAT-XXX` (misma lógica de `AC-XXX`).
+**Opciones — tipo de trabajo:** `US-XXX` · `WI-XXX` · `FT-XXX` (misma lógica de `AC-XXX`).
 
 **Estados por criterio:** Cubierto · Parcial · No cubierto.
 
@@ -428,13 +461,13 @@ No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `code-r
 /trace-validate
 /trace-validate US-012
 /trace-validate WI-004
-/trace-validate FEAT-001
+/trace-validate FT-001
 /trace-validate US-012 solo AC-002 y AC-005
 ```
 
 - «Genera la matriz de trazabilidad de US-012»
 - «¿Los criterios de WI-004 están cubiertos por pruebas?»
-- «Valida cobertura del feature FEAT-003 (legacy)»
+- «Valida cobertura del feature FT-003 (legacy)»
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: work-integrate
-description: Cerrar e integrar el trabajo de una historia de usuario (US-XXX) o una tarea de mantenimiento (WI-XXX) haciendo merge de la rama feature hacia la rama desde la que se creó, previa verificación de que progress.md tenga todas las unidades del trabajo en Done y de que pasen las puertas de calidad de cierre (code-review y trace-validate). Activar cuando el usuario pida cerrar, entregar, mergear, integrar, finalizar o hacer submit del trabajo de una historia, un WI o de la rama actual.
+description: Cerrar e integrar el trabajo de una historia de usuario (US-XXX), una tarea de mantenimiento (WI-XXX) o una automatización de pruebas (rama test/ sobre un US-XXX, WI-XXX o FT-XXX) haciendo merge de la rama hacia la rama desde la que se creó, previa verificación de que progress.md tenga todas las unidades del trabajo en Done y de que pasen las puertas de calidad de cierre (code-review y trace-validate). Activar cuando el usuario pida cerrar, entregar, mergear, integrar, finalizar o hacer submit del trabajo de una historia, un WI, un feature o de la rama actual.
 license: MIT
 ---
 
@@ -46,8 +46,11 @@ El tipo se determina por el **identificador presente en el nombre de rama**. Cad
 |------|--------------------------|---------------|------------------------------|
 | **Historia de usuario** | `US-XXX` | `docs/specs/user-stories/US-XXX-[nombre-corto]/progress.md` (por carpeta de la US) | **todas** las `TK-XXX` de la US |
 | **Tarea de mantenimiento** | `WI-XXX` | `docs/specs/work-items/WI-XXX-[kebab-case]/progress.md` (por carpeta del WI) | **todas** las unidades del `WI-XXX` en su propio `progress.md` |
+| **Automatización de pruebas** | rama con prefijo `test/` + `FT-XXX`, `US-XXX` o `WI-XXX` | En la carpeta del artefacto padre: `docs/specs/features/FT-XXX-[slug]/progress.md`, o la de la US/WI correspondiente | **todas** las unidades de esa ejecución (el `FT-XXX` completo, o cada `TC-XXX` del alcance) |
 
-> **Una rama = un trabajo.** El skill cierra el trabajo asociado a la rama actual. Cada tipo tiene su `progress.md` **dentro de la carpeta del trabajo** (la US o el WI) y contiene únicamente ese trabajo; se verifican **todas** sus unidades.
+> **Una rama = un trabajo.** El skill cierra el trabajo asociado a la rama actual. Cada tipo tiene su `progress.md` **dentro de la carpeta del trabajo** (la US, el WI o el feature) y contiene únicamente ese trabajo; se verifican **todas** sus unidades.
+>
+> **Ramas `test/`:** el entregable son pruebas automatizadas de los `TC-XXX` documentados por `test-define` (ver `work-implement`, `references/test-cases.md`). El `progress.md` de la US o el WI puede contener unidades de otras ramas (`TK-XXX`, el propio `WI-XXX`): en ese caso se verifican en `Done` **solo las unidades `TC-XXX`/`FT-XXX` de esta ejecución**, no las del trabajo funcional.
 
 ---
 
@@ -55,9 +58,9 @@ El tipo se determina por el **identificador presente en el nombre de rama**. Cad
 
 | Artefacto | Ruta |
 |-----------|------|
-| Carpeta / documento del trabajo | US: `docs/specs/user-stories/US-XXX-[nombre-corto]/` · WI: `docs/specs/work-items/WI-XXX-[kebab-case]/` |
-| Progreso del trabajo | US: `…/US-XXX-[nombre-corto]/progress.md` · WI: `docs/specs/work-items/WI-XXX-[kebab-case]/progress.md` |
-| Unidades referenciadas | US: `…/US-XXX-[nombre-corto]/TK-XXX-[kebab-case].md` · WI: el propio `…/WI-XXX-[kebab-case]/README.md` |
+| Carpeta / documento del trabajo | US: `docs/specs/user-stories/US-XXX-[nombre-corto]/` · WI: `docs/specs/work-items/WI-XXX-[kebab-case]/` · FT: `docs/specs/features/FT-XXX-[slug]/` |
+| Progreso del trabajo | US: `…/US-XXX-[nombre-corto]/progress.md` · WI: `docs/specs/work-items/WI-XXX-[kebab-case]/progress.md` · FT: `docs/specs/features/FT-XXX-[slug]/progress.md` |
+| Unidades referenciadas | US: `…/US-XXX-[nombre-corto]/TK-XXX-[kebab-case].md` · WI: el propio `…/WI-XXX-[kebab-case]/README.md` · pruebas: `…/test-cases/TC-XXX-[slug].md` |
 
 ---
 
@@ -65,10 +68,11 @@ El tipo se determina por el **identificador presente en el nombre de rama**. Cad
 
 - **Historia de usuario:** `feature/US-XXX-[nombre-corto]` con prefijo **`feature/` obligatorio**.
 - **Work item:** `feature/WI-XXX-[kebab-case]` por defecto; se aceptan además los prefijos por tipo que usa `work-implement`: `fix/WI-XXX-...`, `chore/WI-XXX-...`, `refactor/WI-XXX-...`.
+- **Automatización de pruebas:** prefijo **`test/`** + el identificador del artefacto padre: `test/FT-XXX-[slug]`, `test/US-XXX-[nombre-corto]`, `test/WI-XXX-[kebab-case]`.
 - `XXX`: tres dígitos con cero a la izquierda (sin ADO); coincide con el identificador del trabajo.
-- La carpeta/documento del trabajo se deriva descontando el prefijo de rama y leyendo el identificador: `feature/US-042-exportacion-csv` → `docs/specs/user-stories/US-042-exportacion-csv/`; `fix/WI-007-cache-ttl` → `docs/specs/work-items/WI-007-cache-ttl/` (con su propio `progress.md`).
-- Una rama sin un prefijo válido para su tipo o sin un identificador `US-XXX` / `WI-XXX` reconocible **no** es submiteable por este skill.
-- Ejemplos: `feature/US-042-exportacion-csv`, `fix/WI-013-fuga-memoria`.
+- La carpeta/documento del trabajo se deriva descontando el prefijo de rama y leyendo el identificador: `feature/US-042-exportacion-csv` → `docs/specs/user-stories/US-042-exportacion-csv/`; `fix/WI-007-cache-ttl` → `docs/specs/work-items/WI-007-cache-ttl/`; `test/FT-003-carga-masiva` → `docs/specs/features/FT-003-carga-masiva/` (cada uno con su propio `progress.md`).
+- Una rama sin un prefijo válido para su tipo o sin un identificador `US-XXX` / `WI-XXX` / `FT-XXX` reconocible **no** es submiteable por este skill.
+- Ejemplos: `feature/US-042-exportacion-csv`, `fix/WI-013-fuga-memoria`, `test/FT-003-carga-masiva`.
 
 ---
 
@@ -78,7 +82,7 @@ Antes de tocar git, el agente debe tener clara la siguiente información. **No a
 
 | Dato | Cómo obtenerlo | Si no está disponible |
 |------|----------------|-----------------------|
-| **Rama actual y tipo** | `git branch --show-current`; el tipo se infiere del identificador (`US-`/`WI-`) | Si no encaja con un patrón válido: preguntar a qué trabajo corresponde antes de continuar |
+| **Rama actual y tipo** | `git branch --show-current`; el tipo se infiere del identificador (`US-`/`WI-`/`FT-`) y del prefijo (`test/` ⇒ automatización de pruebas) | Si no encaja con un patrón válido: preguntar a qué trabajo corresponde antes de continuar |
 | **Carpeta/documento del trabajo** | Derivar del nombre de rama según el tipo (ver [Tipos de trabajo](#tipos-de-trabajo)) | Si no existe: parar e informar; si hay varias coincidentes: preguntar cuál |
 | **Estado de `progress.md`** | Leer el archivo en la ubicación correspondiente al tipo | Si no existe: parar e informar; el merge requiere `progress.md` poblado |
 | **Working tree** | `git status --porcelain` | Si hay salida: invocar automáticamente el flujo del skill **`git-commit`** sobre los cambios pendientes (sin preguntar al usuario si conviene invocarlo — la decisión de invocar es automática; `git-commit` sí puede pausar con su propia propuesta y pedir confirmación antes de comitear, eso no lo decide `work-integrate`) y continuar una vez quede limpio; si `git-commit` no logra dejarlo limpio, parar e informar el motivo. Detalle operativo (fallback sin `git-commit`, working tree parcialmente limpio): ver [Validación antes de mergear](#validación-antes-de-mergear) |
@@ -94,7 +98,7 @@ Antes de tocar git, el agente debe tener clara la siguiente información. **No a
 Antes de cambiar de rama o ejecutar el merge, verificar las siguientes condiciones. Si alguna falla, **no mergear** — informar al usuario y resolver primero.
 
 **¿Qué verificar?**
-- **Rama actual con formato válido para su tipo:** `feature/US-XXX-...`, o `feature/`|`fix/`|`chore/`|`refactor/` + `WI-XXX-...`. Sin un identificador reconocible no se puede derivar la carpeta/documento del trabajo.
+- **Rama actual con formato válido para su tipo:** `feature/US-XXX-...`; `feature/`|`fix/`|`chore/`|`refactor/` + `WI-XXX-...`; o `test/` + `FT-XXX-...`|`US-XXX-...`|`WI-XXX-...`. Sin un identificador reconocible no se puede derivar la carpeta/documento del trabajo.
 - **Working tree limpio:** `git status --porcelain` sin salida. Si hay cambios sin commitear, **invocar automáticamente el flujo del skill `git-commit`** sobre ellos (sin preguntar al usuario si conviene invocarlo — la decisión de invocar es automática, no requiere permiso previo) y continuar una vez el working tree quede limpio. La invocación delega en `git-commit` todo su criterio operativo (agrupación por cambio lógico, inferencia de tipo/scope/mensaje, staging, detección de secretos, confirmación de la propuesta) — `work-integrate` no decide un mensaje de commit ni qué stagear por su cuenta. **`git-commit` no tiene modo silencioso**: normalmente pausa mostrando su propuesta y pidiendo confirmación al usuario antes de comitear (y puede detenerse del todo si detecta secretos); ese comportamiento no se suprime ni se evita al invocarlo desde aquí — «sin preguntar al usuario» se refiere solo a que `work-integrate` no pide permiso para *invocar* `git-commit`, no a que `git-commit` deje de confirmar su propio commit.
   - **Si `git-commit` no está disponible** (skill no instalado o no localizable en el entorno): parar y avisar, mostrando los archivos pendientes y sugiriendo al usuario commitear manualmente antes de reintentar — no ejecutar `git add`/`git commit` directos como sustituto.
   - **Si `git-commit` deja el working tree parcialmente limpio por una decisión de alcance suya** (p. ej. commiteó unos archivos pero dejó otros fuera deliberadamente): no es un error — volver a comprobar `git status --porcelain` e invocar `git-commit` de nuevo sobre el remanente (mismo criterio, sin preguntar) hasta que quede limpio o se detenga por un motivo real.

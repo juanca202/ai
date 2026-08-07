@@ -2,7 +2,7 @@
 Convención de placeholders: sustituir manualmente cada {{texto}}; no es un motor de plantillas.
 Eliminar este bloque y sustituir todos los {{…}} al publicar el documento final.
 
-Este es un ARCHIVO ADICIONAL del flujo B (migración), no el informe principal.
+Este es un ARCHIVO ADICIONAL del flujo «Analizar migración», no el informe principal.
 Vive junto al README.md dentro de la carpeta de la investigación:
   <destino>/docs/specs/research/RS-XXX-{slug}/discovery.md
 El informe principal (README.md) lo enlaza en su sección "Archivos adicionales".

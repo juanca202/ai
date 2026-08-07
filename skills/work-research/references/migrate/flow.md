@@ -1,6 +1,6 @@
-# Flujo B — Migración (origen → destino)
+# Flujo · Analizar migración (origen → destino)
 
-Procedimiento del **flujo B** de `work-research`: a partir de un **proyecto
+Procedimiento del flujo **Analizar migración** de `work-research`: a partir de un **proyecto
 origen** y uno **destino**, produce el **discovery** y la **preparación de
 validación**, dimensiona el cambio y hace *handoff* a `work-define` o `work-plan`.
 
@@ -11,9 +11,36 @@ validación**, dimensiona el cambio y hace *handoff* a `work-define` o `work-pla
 > cambio es grande) o `work-plan` (si es pequeño). La migración vive como una
 > investigación `RS-XXX`.
 
+**Entregable:** un `RS-XXX` en el **proyecto destino** con `README.md` (informe
+principal, [`assets/research-template.md`](../../assets/research-template.md)),
+`discovery.md` ([`assets/migrate/discovery-template.md`](../../assets/migrate/discovery-template.md))
+y `validation.md` ([`assets/migrate/validation-template.md`](../../assets/migrate/validation-template.md)),
+más la carpeta `validation/` si se almacenan recursos.
+
+**Pregunta de investigación:** el objetivo de la migración — qué se migra y de qué
+origen a qué destino. Confirmarlo con el usuario antes de investigar.
+
+> **Este flujo reserva su `RS-XXX` al empezar.** El `discovery.md` y el `validation.md`
+> se escriben durante la investigación, así que la carpeta `research/RS-XXX-{slug}/` se
+> crea antes del Paso 1 —no en el Paso 5 de `SKILL.md`—. Los estados (`Draft` /
+> `Ready`) se fijan al cerrar cada archivo.
+
 El flujo es **secuencial y con compuertas**: no se prepara la validación hasta que
 el discovery esté en `Ready`, y no se hace *handoff* hasta que discovery **y**
 validación estén en `Ready`.
+
+## Principios rectores
+
+1. **Verificar antes de mover.** Sin una estrategia de verificación del comportamiento
+   actual del origen, la migración no se puede validar: el discovery no llega a `Ready`.
+2. **El comportamiento observable manda.** Lo que se migra es el comportamiento, no la
+   estructura: los casos de Golden Master fijan la vara, no el parecido del código.
+3. **Nada se infiere de los nombres.** Stack, versiones y dependencias se leen de los
+   manifiestos de **ambos** proyectos, no del nombre del repo ni de la memoria.
+4. **Dimensionar es parte del trabajo.** El *handoff* correcto (varias US o un solo WI)
+   depende del dimensionamiento; entregarlo sin dimensionar deja la decisión huérfana.
+5. **Este flujo no planifica.** Produce discovery y validación; el plan lo crean
+   `work-define` o `work-plan`.
 
 ## Ubicación de la carpeta
 
@@ -225,3 +252,23 @@ Menciona el estado (`Draft`/`Ready`) del discovery y la validación y, en una l�
 por qué quedaron así. Si alguno quedó en `Draft`, recuerda que el handoff no se
 ofrece hasta resolver sus pendientes. Si el destino está fragmentado, lista la
 carpeta creada en **cada** proyecto destino con su estado y su handoff recomendado.
+
+---
+
+## Anti-patrones
+
+- Empezar el discovery sin haber identificado **ambos** proyectos (origen y destino), o
+  inventar rutas, stacks o versiones que no se leyeron de sus manifiestos.
+- Preparar la validación con el discovery aún en `Draft`, u ofrecer el *handoff* con
+  discovery o validación sin cerrar.
+- Guardar el `RS-XXX` en el proyecto **origen** en vez del destino.
+- Producir el plan de implementación aquí en lugar de hacer *handoff* a `work-define` o
+  `work-plan`.
+- Entregar el *handoff* sin dimensionar el cambio, o dimensionarlo sin justificar el
+  criterio aplicado.
+- Definir casos de Golden Master que comparan estructura interna en lugar de
+  comportamiento observable.
+- En destino fragmentado: crear un único `RS-XXX` para todos los destinos, o usar slugs
+  distintos entre ellos.
+- Mover código durante la investigación: este flujo no modifica ninguno de los dos
+  proyectos.

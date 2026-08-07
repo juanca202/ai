@@ -1,6 +1,6 @@
 ---
 name: trace-validate
-description: "Genera un reporte de trazabilidad que valida la cobertura de los criterios de aceptación de un trabajo —una historia de usuario (US-XXX), una tarea de mantenimiento (WI-XXX) o un feature de funcionalidad ya implementada (FEAT-XXX), cada uno con sus criterios de aceptación (AC-XXX)— contra los casos de prueba y los artefactos de prueba del repositorio (unit, integración, e2e). Para cada criterio indica los casos de prueba y artefactos que lo cubren, un estado (Cubierto / Parcial / No cubierto), observaciones cuando hace falta aclaración, si la prueba se pudo ejecutar automáticamente y su resultado, y finalmente un veredicto sobre si todos los criterios de aceptación quedan cubiertos. Activar siempre que el usuario pida validar cobertura, generar una matriz o reporte de trazabilidad, verificar que los criterios de aceptación están probados, comprobar que un trabajo o un feature está cubierto por pruebas, o mencione «trace-validate», «trazabilidad», «matriz de cobertura» o «validar criterios de aceptación», aunque no nombre el formato exacto."
+description: "Genera un reporte de trazabilidad que valida la cobertura de los criterios de aceptación de un trabajo —una historia de usuario (US-XXX), una tarea de mantenimiento (WI-XXX) o un feature de funcionalidad ya implementada (FT-XXX), cada uno con sus criterios de aceptación (AC-XXX)— contra los casos de prueba y los artefactos de prueba del repositorio (unit, integración, e2e). Para cada criterio indica los casos de prueba y artefactos que lo cubren, un estado (Cubierto / Parcial / No cubierto), observaciones cuando hace falta aclaración, si la prueba se pudo ejecutar automáticamente y su resultado, y finalmente un veredicto sobre si todos los criterios de aceptación quedan cubiertos. Activar siempre que el usuario pida validar cobertura, generar una matriz o reporte de trazabilidad, verificar que los criterios de aceptación están probados, comprobar que un trabajo o un feature está cubierto por pruebas, o mencione «trace-validate», «trazabilidad», «matriz de cobertura» o «validar criterios de aceptación», aunque no nombre el formato exacto."
 license: MIT
 ---
 
@@ -16,7 +16,7 @@ El trazado primario es para **historias de usuario** (`US-XXX`) con sus **criter
 >
 > **Reporte idempotente.** Si no hubo **cambios en los archivos** (código, criterios ni pruebas) desde la última vez que se generó el `trace-report.md`, **no se genera un documento nuevo**: se devuelven los mismos resultados del reporte existente. Ver [Reutilización del reporte (idempotencia)](#reutilización-del-reporte-idempotencia).
 >
-> **Qué NO hace:** no escribe ni modifica código de aplicación, no escribe nuevos tests (eso es de `quality-specialist` vía `work-implement`), no edita la especificación de producto (README de la US, `TK-XXX`, `WI-XXX`, `FEAT-XXX`, `validation.md`, ADRs), **ni corre la suite de pruebas directamente**. Lo único que produce es el **reporte de trazabilidad**. Lo que no se puede determinar de las fuentes va a **Observaciones** o se pregunta al usuario — nunca se inventa cobertura ni resultados.
+> **Qué NO hace:** no escribe ni modifica código de aplicación, no escribe nuevos tests (eso es de `quality-specialist` vía `work-implement`), no edita la especificación de producto (README de la US, `TK-XXX`, `WI-XXX`, `FT-XXX`, `validation.md`, ADRs), **ni corre la suite de pruebas directamente**. Lo único que produce es el **reporte de trazabilidad**. Lo que no se puede determinar de las fuentes va a **Observaciones** o se pregunta al usuario — nunca se inventa cobertura ni resultados.
 
 ---
 
@@ -34,17 +34,17 @@ El tipo se determina por el identificador que indique el usuario o por la ruta d
 |------|---------------|---------------------------|------------------|
 | **Historia de usuario** | `US-XXX` | Sección **Criterios de aceptación** del `README.md` de la US (lista plana `AC-XXX`) | `AC-XXX` en el orden en que aparecen |
 | **Tarea de mantenimiento** | `WI-XXX` | Sección **## Criterios de aceptación** del `README.md` del WI (`WI-XXX-[kebab]/README.md`) | `AC-XXX` en el orden en que aparecen |
-| **Feature (funcionalidad ya implementada)** | `FEAT-XXX` | Sección **## Criterios de aceptación** del `README.md` del feature (`docs/specs/features/FEAT-XXX-[slug]/README.md`) | `AC-XXX` en el orden en que aparecen |
-> En todo el flujo, «criterio» se refiere al código del tipo en curso: `AC-XXX` para US, WI y FEAT. Si el trabajo **no tiene criterios de aceptación**, no hay nada que trazar → **bloquear** (ver «Cuándo bloquear»).
+| **Feature (funcionalidad ya implementada)** | `FT-XXX` | Sección **## Criterios de aceptación** del `README.md` del feature (`docs/specs/features/FT-XXX-[slug]/README.md`) | `AC-XXX` en el orden en que aparecen |
+> En todo el flujo, «criterio» se refiere al código del tipo en curso: `AC-XXX` para US, WI y FT. Si el trabajo **no tiene criterios de aceptación**, no hay nada que trazar → **bloquear** (ver «Cuándo bloquear»).
 
-> **FEAT — validar cobertura de funcionalidad ya implementada.** Un `FEAT-XXX` es el
+> **FT — validar cobertura de funcionalidad ya implementada.** Un `FT-XXX` es el
 > registro de una funcionalidad **ya implementada** (inferida de código legacy por el
 > análisis de `work-research`, o simplemente el registro de funcionalidad existente),
 > no trabajo por construir. Validarlo responde: *¿esa funcionalidad ya existente está
 > cubierta por pruebas?* Un criterio **No cubierto** significa que ese comportamiento
 > **carece de pruebas** (un hueco a cerrar escribiendo tests), **no** que falte código
 > funcional. Sus casos de prueba documentados viven en
-> `docs/specs/features/FEAT-XXX-[slug]/test-cases/`, igual que en una US o un WI.
+> `docs/specs/features/FT-XXX-[slug]/test-cases/`, igual que en una US o un WI.
 
 ---
 
@@ -76,7 +76,7 @@ No inventar nada. Si un dato no es explícito, obtenerlo del repo o preguntar al
 
 | Dato | Cómo obtenerlo | Si no está disponible |
 |------|----------------|-----------------------|
-| **Trabajo a validar** | Indicado por el usuario o inferido de la ruta de trabajo; determinar el tipo (`US-XXX` / `WI-XXX` / `FEAT-XXX`) | Preguntar qué trabajo validar; sin él no se puede generar el reporte |
+| **Trabajo a validar** | Indicado por el usuario o inferido de la ruta de trabajo; determinar el tipo (`US-XXX` / `WI-XXX` / `FT-XXX`) | Preguntar qué trabajo validar; sin él no se puede generar el reporte |
 | **Criterios de aceptación** | Según el tipo (ver [Tipos de trabajo y criterios](#tipos-de-trabajo-y-criterios)) | Si el trabajo no tiene criterios de aceptación: **bloquear** y reportar — sin criterios no hay nada que trazar |
 | **Casos de prueba** | Casos de prueba documentados (si el proyecto los tiene) y/o los tests del repo | Si no hay casos documentados, derivar la cobertura desde los artefactos de prueba del repo |
 | **Artefactos de prueba** | Buscar en el repo archivos de test unit / integración / e2e relacionados con el trabajo (ver «Inventariar casos y artefactos» en `references/flow.md`) | Si no se encuentran, marcar criterios sin artefacto como `No cubierto` y dejar Observación |
@@ -92,7 +92,7 @@ No inventar nada. Si un dato no es explícito, obtenerlo del repo o preguntar al
 Resumen de los pasos. El detalle íntegro de cada paso está en **`references/flow.md`** (leerlo antes de ejecutar el flujo).
 
 0. **Comprobar frescura del reporte** — si ya existe `trace-report.md` con un fingerprint guardado y no hubo cambios en los archivos desde entonces, **devolver el reporte existente sin regenerarlo** (ver [Reutilización del reporte (idempotencia)](#reutilización-del-reporte-idempotencia)). Solo si hay cambios (o el usuario pide revalidar) continuar con los pasos siguientes.
-1. **Localizar y leer el trabajo** — resolver tipo y ubicación; extraer todos los criterios con sus códigos, normalizados a `AC-XXX` (US/WI/FEAT). Sin criterios → bloquear (ver «Cuándo bloquear»).
+1. **Localizar y leer el trabajo** — resolver tipo y ubicación; extraer todos los criterios con sus códigos, normalizados a `AC-XXX` (US/WI/FT). Sin criterios → bloquear (ver «Cuándo bloquear»).
 2. **Inventariar casos y artefactos** — recopilar casos documentados y clasificar tests por tipo (unit / integración / e2e), con ruta y criterio.
 3. **Mapear cobertura criterio a criterio** — casos, artefactos, estado (ver «Estados de cobertura») y observaciones. No forzar mapeos inciertos.
 4. **Obtener resultados de pruebas (delegando en `code-review`)** — reutilizar la caché `test-run.json` si está fresca, o invocar `code-review` en modo `tests-only`; mapear por suite a los criterios y registrar ejecución (`Sí`/`No`/`N/A`) y resultado (`Paso`/`Fallo`/`No ejecutado`). **No** correr pruebas directamente. Nunca fabricar resultados (ver [Resultados de pruebas: delegación en code-review](#resultados-de-pruebas-delegación-en-code-review) y `references/flow.md`).
@@ -201,8 +201,8 @@ reporta **No cubierto** con el fallo en Observaciones (ver «Estados de cobertur
 
 Parar y reportar (sin generar reporte parcial) cuando:
 
-- El trabajo no existe o no tiene su documento de criterios (README de la US / `WI-XXX` / `FEAT-XXX` / `validation.md`).
-- No hay sección de criterios de aceptación o no hay criterios explícitos del tipo (`AC-XXX` para US, WI y FEAT): no hay nada que trazar; sugerir alinear el trabajo con su skill de definición/planificación antes de validar (para un `FEAT-XXX`, completar su especificación con el flujo de análisis legacy de `work-research`).
+- El trabajo no existe o no tiene su documento de criterios (README de la US / `WI-XXX` / `FT-XXX` / `validation.md`).
+- No hay sección de criterios de aceptación o no hay criterios explícitos del tipo (`AC-XXX` para US, WI y FT): no hay nada que trazar; sugerir alinear el trabajo con su skill de definición/planificación antes de validar (para un `FT-XXX`, completar su especificación con el flujo «Analizar legado» de `work-research`).
 
 ```
 WARNING No es posible generar el reporte de trazabilidad:
@@ -218,9 +218,9 @@ WARNING No es posible generar el reporte de trazabilidad:
 |-----------|------|
 | Historia de usuario | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md` |
 | Work item | `docs/specs/work-items/WI-XXX-[kebab]/README.md` |
-| Feature (funcionalidad ya implementada) | `docs/specs/features/FEAT-XXX-[slug]/README.md` |
+| Feature (funcionalidad ya implementada) | `docs/specs/features/FT-XXX-[slug]/README.md` |
 | Caché de corrida de pruebas (entrada, la produce `code-review`) | `docs/specs/test-run.json` (ubicación fija, no por unidad) |
-| Reporte de trazabilidad (salida) | US: `…/US-XXX-[nombre-corto]/trace-report.md` · WI: `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` · FEAT: `docs/specs/features/FEAT-XXX-[slug]/trace-report.md` |
+| Reporte de trazabilidad (salida) | US: `…/US-XXX-[nombre-corto]/trace-report.md` · WI: `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` · FT: `docs/specs/features/FT-XXX-[slug]/trace-report.md` |
 
 ---
 
@@ -246,11 +246,11 @@ Posición: **validación / cierre de calidad** — después de `work-implement`.
 
 | | |
 |--|--|
-| **Entrada** | Trabajo (`US-XXX` / `WI-XXX`) con **criterios de aceptación** (`AC-XXX`); código implementado; idealmente tests escritos por `quality-specialist` en el cierre de `work-implement`. Resultados de pruebas **vía `code-review`** (caché `test-run.json` o delegación `tests-only`). **O** un `FEAT-XXX` (registro de funcionalidad ya implementada — inferida de código legacy o documentada como existente) para comprobar si está cubierta por pruebas. |
+| **Entrada** | Trabajo (`US-XXX` / `WI-XXX`) con **criterios de aceptación** (`AC-XXX`); código implementado; idealmente tests escritos por `quality-specialist` en el cierre de `work-implement`. Resultados de pruebas **vía `code-review`** (caché `test-run.json` o delegación `tests-only`). **O** un `FT-XXX` (registro de funcionalidad ya implementada — inferida de código legacy o documentada como existente) para comprobar si está cubierta por pruebas. |
 | **Salida** | `trace-report.md` en la ubicación del tipo + veredicto sobre la cobertura. |
 | **Veredicto ❌ Rechazado (US/WI)** | Volver a `work-implement` (fase de pruebas con `quality-specialist`) para cubrir los criterios faltantes; revalidar después. |
-| **Veredicto ❌ Rechazado (FEAT)** | Hay comportamiento ya implementado **sin pruebas**: escribir los tests faltantes sobre el código existente (no código funcional; el `FEAT` no pasa a `work-implement`) y revalidar. Formalizar ese trabajo como una tarea de mantenimiento (`WI-XXX`) es opcional y lo decide el usuario. |
-| **Falta funcional en el trabajo** | Si la matriz revela que un criterio no es testeable o está mal definido, escalar a la definición/planificación del trabajo — para un `FEAT`, a quien lo registró (el flujo de análisis legacy de `work-research` u otra fuente de la funcionalidad); no editar la especificación desde aquí. |
+| **Veredicto ❌ Rechazado (FT)** | Hay comportamiento ya implementado **sin pruebas**: escribir los tests faltantes sobre el código existente (no código funcional) con `work-implement` en su tipo **feature** —que automatiza los `TC-XXX` del `FT-XXX`— y revalidar. Formalizar ese trabajo como una tarea de mantenimiento (`WI-XXX`) es opcional y lo decide el usuario. |
+| **Falta funcional en el trabajo** | Si la matriz revela que un criterio no es testeable o está mal definido, escalar a la definición/planificación del trabajo — para un `FT`, a quien lo registró (el flujo «Analizar legado» de `work-research` u otra fuente de la funcionalidad); no editar la especificación desde aquí. |
 
 ---
 

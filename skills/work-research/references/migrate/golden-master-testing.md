@@ -46,7 +46,7 @@ Verificación Existente" del discovery.
 ### Paso 2. Solicitar información al usuario
 
 Cuando no existan mecanismos de validación suficientes, usa la herramienta de
-preguntas estructuradas (`ask_user_input_v0`) para solicitar al usuario: casos de
+preguntas estructuradas (la herramienta de preguntas estructuradas) para solicitar al usuario: casos de
 uso principales, escenarios críticos del negocio, ejemplos reales de entradas,
 ejemplos de salidas esperadas, casos límite conocidos y casos que históricamente
 hayan producido errores.

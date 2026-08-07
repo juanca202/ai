@@ -36,7 +36,7 @@ Antes de crear el Test Case, resolver los dos niveles superiores de la jerarquí
 1. **Test Plan**: su nombre es el del **proyecto de Azure DevOps** al que está vinculado el repo (`azure_devops_project:` / `ado_project:` en `.agents/MEMORY.md`).
    - Buscar vía MCP si ya existe un Test Plan con ese nombre en el proyecto.
    - **Si no existe, crearlo** antes de continuar.
-2. **Test Suite**: su nombre es el de la **historia de usuario o work item padre** del artefacto origen — el título completo tal como aparece en su `README.md` (p. ej. `US-003: Endpoint de autenticación`, o el título del `WI-XXX`/`FEAT-XXX` correspondiente).
+2. **Test Suite**: su nombre es el de la **historia de usuario o work item padre** del artefacto origen — el título completo tal como aparece en su `README.md` (p. ej. `US-003: Endpoint de autenticación`, o el título del `WI-XXX`/`FT-XXX` correspondiente).
    - Buscar vía MCP, dentro del Test Plan resuelto en el paso anterior, si ya existe un Test Suite con ese nombre.
    - **Si no existe, crearlo** dentro de ese Test Plan antes de continuar.
 
@@ -52,7 +52,7 @@ Antes de generar cada archivo local `TC-XXX-{slug}.md`, usar el MCP para crear e
 4. **Descripción / Resumen**: el resto del documento completo, serializado de forma estructurada con los mismos encabezados que el `.md` local: Perspectiva, Criterio de aceptación, Artefacto padre, Precondiciones, Datos de prueba, Resultado esperado final, Observaciones (y Pasos de ejecución si el punto 3 no tuvo campo dedicado). El objetivo es que el TC pueda **reconstruirse íntegro** a partir del work item si el archivo local se pierde: no omitir ninguna sección del `.md` en la sincronización.
 5. **Iteración / Area Path**: leer de `.agents/MEMORY.md` si está definido (`ado_area_path:`, `ado_iteration:`); si no, omitir (ADO usará los defaults del proyecto).
 6. **Test Suite**: agregar el Test Case al Test Suite resuelto en el Paso 2 (mecanismo que provea el MCP para asociar Test Cases a un Suite existente).
-7. **Padre** (trazabilidad adicional, best-effort): si el artefacto origen (US/WI/FEAT) tiene un `Work Item (ADO)` registrado en su propio encabezado, vincular además el Test Case a ese work item usando la relación que provea el MCP (p. ej. «Tests» / «Tested By»). Si no hay forma de resolverlo, omitir la vinculación sin bloquear.
+7. **Padre** (trazabilidad adicional, best-effort): si el artefacto origen (US/WI/FT) tiene un `Work Item (ADO)` registrado en su propio encabezado, vincular además el Test Case a ese work item usando la relación que provea el MCP (p. ej. «Tests» / «Tested By»). Si no hay forma de resolverlo, omitir la vinculación sin bloquear.
 
 Tras la llamada al MCP, **extraer el `id` numérico** del work item creado (campo `id` en la respuesta).
 
@@ -74,7 +74,7 @@ En lugar del número secuencial calculado de los archivos existentes en `test-ca
 - Crear el archivo TC local con ID secuencial cuando el repo está vinculado a ADO y el MCP está disponible — siempre crear el work item «Test Case» en ADO primero y usar su `id`.
 - Crear el Test Case como work item aislado sin resolver y asignarlo a su Test Plan y Test Suite correspondientes (Paso 2).
 - Crear un Test Plan o Test Suite nuevo cuando ya existe uno con el nombre correcto — siempre reutilizar el existente.
-- Nombrar el Test Suite con un texto distinto al título de la US/WI/FEAT padre (p. ej. una descripción libre), rompiendo la trazabilidad de la jerarquía.
+- Nombrar el Test Suite con un texto distinto al título de la US/WI/FT padre (p. ej. una descripción libre), rompiendo la trazabilidad de la jerarquía.
 - Omitir el campo `Work Item (ADO)` en el encabezado del TC cuando fue creado vía MCP.
 - Bloquear la creación porque no se pudo vincular el padre (relación «Tests»/«Tested By») — esa vinculación es best-effort; omitir sin bloquear. (La pertenencia al Test Suite, en cambio, no es opcional.)
 - Usar un Título de más de 255 caracteres al crear el work item en ADO en lugar de una versión abreviada.

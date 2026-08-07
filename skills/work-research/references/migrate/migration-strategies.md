@@ -4,7 +4,7 @@ Guía para elegir **cómo** ejecutar la migración de forma incremental y de baj
 riesgo, en lugar de un *big bang*. Se basa en patrones establecidos de
 modernización/desplazamiento de sistemas legacy (Martin Fowler; Cartwright, Horn
 y Lewis, *Patterns of Legacy Displacement*). En este skill, úsala para **recomendar
-el enfoque de migración** en el informe y el *handoff* (Paso 3 del flujo B): ayuda a
+el enfoque de migración** en el informe y el *handoff* (Paso 3 del flujo): ayuda a
 dimensionar el cambio y a describir cómo lo ejecutará luego `work-define` (varias US)
 o `work-plan` (un WI). El plan de implementación por fases se materializa en esas
 US/WI, no en este skill.

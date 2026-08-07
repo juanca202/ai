@@ -9,7 +9,7 @@ license: MIT
 
 Crear un PR o MR desde la **rama actual** hacia una **rama destino preguntada al usuario**, sobre cualquier repo git con remoto configurado.
 
-> **Origen = rama actual**, sin excepción, y debe ser una **rama de implementación** con prefijo reconocido (`feature/`, `fix/`, `chore/`, `refactor/`, u otro equivalente del repo). Si está en `main`, `master`, `develop`, `trunk`, o no tiene un prefijo de implementación reconocible: parar y avisar.
+> **Origen = rama actual**, sin excepción, y debe ser una **rama de implementación** con prefijo reconocido (`feature/`, `fix/`, `chore/`, `refactor/`, `test/`, u otro equivalente del repo). Si está en `main`, `master`, `develop`, `trunk`, o no tiene un prefijo de implementación reconocible: parar y avisar.
 >
 > **Working tree sucio no detiene el flujo:** si hay cambios sin commitear, el skill invoca automáticamente el flujo del skill **`git-commit`** (sin preguntar al usuario si desea commitear — la decisión de invocarlo es automática) y, una vez el working tree queda limpio, continúa con el resto del pre-flight. Nota: `git-commit` no tiene modo silencioso — normalmente pausa mostrando su propia propuesta y pidiendo confirmación antes de comitear (y puede detenerse del todo si detecta secretos); ese paso no se suprime al invocarlo desde aquí.
 >
@@ -53,7 +53,7 @@ Cuando el idioma resuelto obliga a traducir el título, el prefijo de ticket (`[
 
 1. `git rev-parse --is-inside-work-tree` — confirmar repo git.
 2. `git rev-parse --abbrev-ref HEAD` — obtener rama actual.
-3. Validar que la rama actual es una **rama de implementación**: debe comenzar con un prefijo reconocido (`feature/`, `fix/`, `chore/`, `refactor/`, u otro prefijo de implementación equivalente que use el repo) y no puede ser `main`, `master`, `develop` ni `trunk`. Si no cumple: **parar** y avisar indicando la convención de rama esperada.
+3. Validar que la rama actual es una **rama de implementación**: debe comenzar con un prefijo reconocido (`feature/`, `fix/`, `chore/`, `refactor/`, `test/`, u otro prefijo de implementación equivalente que use el repo) y no puede ser `main`, `master`, `develop` ni `trunk`. Si no cumple: **parar** y avisar indicando la convención de rama esperada.
 4. `git status --porcelain` — si no está vacío, **invocar automáticamente el flujo del skill `git-commit`** sobre los cambios pendientes (sin preguntar al usuario si desea commitear) y esperar a que termine. La invocación delega en `git-commit` **todo** su criterio operativo (agrupación por cambio lógico, inferencia de tipo/scope/mensaje, staging, detección de secretos, confirmación de la propuesta) — `pr-create` no decide un mensaje de commit ni qué stagear por su cuenta; solo dispara el flujo y espera su resultado. **`git-commit` no tiene modo silencioso**: normalmente pausa mostrando su propuesta y pidiendo confirmación al usuario antes de comitear. «Sin preguntar al usuario» se refiere solo a que `pr-create` no pide permiso para *invocar* `git-commit`, no a que `git-commit` deje de confirmar su propio commit.
    - **Si `git-commit` no está disponible** (skill no instalado o no localizable en el entorno): **parar** y avisar, mostrando los archivos pendientes y sugiriendo al usuario commitear manualmente antes de reintentar — no ejecutar `git add`/`git commit` directos como sustituto.
    - **Si `git-commit` deja el working tree completamente limpio**, continuar con el resto del pre-flight.
@@ -181,7 +181,7 @@ No existe `docs/policies/definition-of-done.md`. Esa puerta se omite; el PR se c
 Usuario en `main`: «crea un PR a develop.» Parar en pre-flight: «Estás en `main`. Cambia a una rama de feature antes de crear el PR.»
 
 **Ejemplo 7b — Rama sin prefijo de implementación**
-Usuario en `hotfix-cache` (no sigue ningún prefijo reconocido): «crea un PR a develop.» Parar en pre-flight: «La rama `hotfix-cache` no sigue una convención de rama de implementación (`feature/`, `fix/`, `chore/`, `refactor/`...). Renómbrala o cambia a la rama correcta antes de crear el PR.»
+Usuario en `hotfix-cache` (no sigue ningún prefijo reconocido): «crea un PR a develop.» Parar en pre-flight: «La rama `hotfix-cache` no sigue una convención de rama de implementación (`feature/`, `fix/`, `chore/`, `refactor/`, `test/`...). Renómbrala o cambia a la rama correcta antes de crear el PR.»
 
 **Ejemplo 8 — Working tree sucio**
 `git status --porcelain` devuelve dos archivos modificados sin commitear. El skill invoca automáticamente el flujo de `git-commit` sobre esos cambios (sin preguntar si conviene invocarlo) — `git-commit` sí muestra su propia propuesta y pausa a confirmarla con el usuario, como es su comportamiento normal — y, una vez el working tree queda limpio, continúa el pre-flight con normalidad.
@@ -203,7 +203,7 @@ La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con
 - Inventar el cumplimiento de un ítem de la DoD que no se puede determinar desde el repo o el diff.
 - Aplicar una corrección sin autorización explícita del usuario, o no re-ejecutar la puerta tras corregir.
 - Ejecutar `git add`/`git commit` directos (fuera del flujo de `git-commit`), o parar a preguntar al usuario si desea commitear los cambios pendientes: ante working tree sucio se invoca automáticamente el flujo de `git-commit` (aunque `git-commit` pueda a su vez pedir su propia confirmación antes de comitear), sin que `pr-create` pida permiso previo para invocarlo.
-- Crear el PR desde una rama sin prefijo de implementación reconocido (`feature/`, `fix/`, `chore/`, `refactor/`...), o solo validar contra la lista de ramas protegidas sin exigir un prefijo válido.
+- Crear el PR desde una rama sin prefijo de implementación reconocido (`feature/`, `fix/`, `chore/`, `refactor/`, `test/`...), o solo validar contra la lista de ramas protegidas sin exigir un prefijo válido.
 - Usar `git push --force` o `--force-with-lease`.
 - Asignar reviewers, labels o milestones por iniciativa propia.
 - Re-implementar la lógica de `code-review` o `trace-validate` en lugar de invocar el flujo existente.

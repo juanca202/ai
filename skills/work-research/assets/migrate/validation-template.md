@@ -2,7 +2,7 @@
 Convención de placeholders: sustituir manualmente cada {{texto}}; no es un motor de plantillas.
 Eliminar este bloque y sustituir todos los {{…}} al publicar el documento final.
 
-Este es un ARCHIVO ADICIONAL del flujo B (migración), no el informe principal.
+Este es un ARCHIVO ADICIONAL del flujo «Analizar migración», no el informe principal.
 Vive junto al README.md y el discovery.md dentro de la carpeta de la investigación:
   <destino>/docs/specs/research/RS-XXX-{slug}/validation.md
 El informe principal (README.md) lo enlaza en su sección "Archivos adicionales".
@@ -32,7 +32,7 @@ referencia). Estos casos servirán para implementar las pruebas durante el plan.
 | GM-003 | CustomerImport | Comparación DB State | Datos históricos | ./validation/gm-003/  | Pendiente |
 
 Detalle por cada caso (formato simple recomendado; para APIs o UI usa las
-variantes de `references/golden-master-testing.md`):
+variantes de `references/migrate/golden-master-testing.md`):
 
 ```yaml
 id: GM-001

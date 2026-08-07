@@ -54,7 +54,7 @@ Rutas permitidas: assets/ (recursos propios de esta historia) o docs/specs/techn
 ## Migración (origen → destino)
 
 <!--
-Sección opcional. Incluir solo si esta US es una de las historias en que se descompuso una migración grande entre proyectos, investigada por work-research (flujo B, `research/RS-XXX-{slug}/`) y dimensionada como cambio grande. Eliminar esta sección si no aplica.
+Sección opcional. Incluir solo si esta US es una de las historias en que se descompuso una migración grande entre proyectos, investigada por work-research (flujo «Analizar migración», `research/RS-XXX-{slug}/`) y dimensionada como cambio grande. Eliminar esta sección si no aplica.
 -->
 
 **Investigación:** {{enlace a la investigación, típ. `../../research/RS-XXX-{slug}/README.md`}}

@@ -2,13 +2,13 @@
 Convención de placeholders: sustituir manualmente cada {{texto}}; no es un motor de plantillas.
 Eliminar este bloque y sustituir todos los {{…}} al publicar el documento final.
 
-Este es el discovery.md del FLUJO D (análisis legacy) de work-research.
+Este es el discovery.md del flujo «Analizar legado» de work-research.
 Vive junto al README.md del RS:
   docs/specs/research/RS-XXX-{slug}/discovery.md
 
 Reconstruye por ingeniería inversa, en cascada, lo que el código HACE:
   Artefactos técnicos → Casos de uso → Objetivos de usuario → Capabilities →
-  Features (división + cohesión) → Reglas de negocio → (mapa a FEAT-XXX propuestos)
+  Features (división + cohesión) → Reglas de negocio → (mapa a FT-XXX propuestos)
 Reglas:
   - Describir el comportamiento ACTUAL del código, no el deseado.
   - Cada hallazgo cita evidencia (archivo y símbolo). Sin evidencia → ⚠️ Sin evidencia.
@@ -73,7 +73,7 @@ Reglas:
 
 ## 6. Validación de cohesión
 
-{{Un Feature solo se acepta si cumple las cinco métricas. Veredicto ≠ Aceptado → reagrupar/dividir antes del mapa FEAT.}}
+{{Un Feature solo se acepta si cumple las cinco métricas. Veredicto ≠ Aceptado → reagrupar/dividir antes del mapa FT.}}
 
 | Feature | Objetivo principal | Cohesión | Acoplamiento | Vocabulario | Límites | Veredicto |
 | ------- | ------------------ | -------- | ------------ | ----------- | ------- | --------- |
@@ -104,12 +104,12 @@ Reglas:
 | -------------------- | ------------------------------------- | --------- | ---------------------- |
 | {{Feature 1}} | {{unit/integración/e2e · ruta}} | {{Alta / Media / Baja / Nula}} | {{escenarios sin cubrir}} |
 
-## 9. Mapa Feature → FEAT-XXX propuesto
+## 9. Mapa Feature → FT-XXX propuesto
 
 {{Puente hacia la creación de features. Solo Features con veredicto Aceptado.
-Cada fila se materializará como `docs/specs/features/FEAT-XXX-{slug}/`.}}
+Cada fila se materializará como `docs/specs/features/FT-XXX-{slug}/`.}}
 
-| Feature | Capability padre | FEAT propuesto (slug) | Casos de uso incluidos | Reglas de negocio (BR-XX) | Prioridad (según gap de cobertura) |
+| Feature | Capability padre | FT propuesto (slug) | Casos de uso incluidos | Reglas de negocio (BR-XX) | Prioridad (según gap de cobertura) |
 | ------- | ---------------- | --------------------- | ---------------------- | ------------------------- | ---------------------------------- |
 | {{Feature 1}} | {{Capability 1}} | {{feat-slug}} | {{CU 1, CU 2}} | {{BR-01, BR-03}} | {{Alta / Media / Baja}} |
 

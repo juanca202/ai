@@ -2,15 +2,15 @@
 Convención de placeholders: sustituir manualmente cada {{texto}}; no es un motor de plantillas.
 Eliminar este bloque y sustituir todos los {{…}} al publicar el documento final.
 
-Este es el README.md de un FEATURE (FEAT-XXX): el registro de una funcionalidad
+Este es el README.md de un FEATURE (FT-XXX): el registro de una funcionalidad
 YA IMPLEMENTADA. No es trabajo por construir. Puede nacer de dos formas:
-  - inferido de código legacy por el flujo D (análisis legacy) de work-research; o
+  - inferido de código legado por el flujo «Analizar legado» de work-research; o
   - documentando funcionalidad existente que se quiere registrar (no necesariamente legacy).
 En ambos casos el contenido y el uso downstream son idénticos. Vive en:
-  docs/specs/features/FEAT-XXX-{slug}/README.md
+  docs/specs/features/FT-XXX-{slug}/README.md
 
 Sus casos de prueba se generan con test-define y viven en la MISMA carpeta:
-  docs/specs/features/FEAT-XXX-{slug}/test-cases/
+  docs/specs/features/FT-XXX-{slug}/test-cases/
 
 Reglas de contenido:
   - Describe el comportamiento REAL ya implementado, no el deseado.
@@ -23,10 +23,11 @@ Reglas de contenido:
     RFC 2119; test-define exige Ready + AC-XXX para generar los TCs.
 -->
 
-# FEAT-XXX: {{título corto del feature}}
+# FT-XXX: {{título corto del feature}}
 
 **Estado:** {{Draft | Ready}}
 **Procedencia:** {{Funcionalidad ya implementada. Origen: "inferido de código legacy (RS-XXX · commit/branch)" | "registro de funcionalidad existente"}}
+**Work Item ({{Sistema}}):** {{enlace markdown al work item del feature en el sistema de seguimiento vinculado — solo si se creó manualmente; {{Sistema}} es el nombre corto que define el archivo de referencia del sistema (p. ej. "ADO" para references/azure-devops.md); omitir línea si no aplica. Ningún skill de esta suite crea o pobla este campo por su cuenta para un FT; si existe, `test-define` lo usa para vincular sus TC al feature padre}}
 **Fecha de creación:** {{YYYY-MM-DD}}
 **Última actualización:** {{YYYY-MM-DD}}
 
@@ -36,7 +37,7 @@ Reglas de contenido:
 Describe el comportamiento REAL ya implementado, centrado en lo observable (no en la
 implementación interna). Debe dejar claro el alcance: qué hace el feature y qué queda
 fuera. Incluir Capability padre y objetivo principal (validados en el discovery) cuando
-el feature nace del flujo D. Incluir actores o módulo solo si ayudan a delimitar ese
+el feature nace del flujo «Analizar legado». Incluir actores o módulo solo si ayudan a delimitar ese
 alcance.
 -->
 

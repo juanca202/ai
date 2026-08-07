@@ -7,7 +7,7 @@ Eliminar este bloque al publicar el documento final.
 Ubicación por tipo de artefacto:
   US:   docs/specs/user-stories/US-XXX-{nombre}/test-cases/TC-XXX-{slug}.md
   WI:   docs/specs/work-items/WI-XXX-{kebab-case}/test-cases/TC-XXX-{slug}.md
-  FEAT: docs/specs/features/FEAT-XXX-{slug}/test-cases/TC-XXX-{slug}.md
+  FT: docs/specs/features/FT-XXX-{slug}/test-cases/TC-XXX-{slug}.md
 
 Nombre de archivo: TC-XXX-{slug}.md
   XXX  → secuencial de tres dígitos dentro del artefacto padre (001, 002, ...) sin tracker externo vinculado;
@@ -23,7 +23,7 @@ El nombre del archivo y, si hay un tracker externo vinculado, el título usado a
 **Tipo de prueba:** {{Manual | Tipo[, Tipo…]}}  <!-- intención de diseño. Tipo ∈ {Unit | Integration | E2E | API Test | Visual Test}; uno o varios separados por coma, ordenados del nivel más bajo al más alto (p. ej. Unit, E2E). Manual solo cuando el caso no se automatiza por diseño; no se combina con tipos. -->
 **Prioridad:** {{Alta | Media | Baja}}
 **Criterio de aceptación:** {{AC-XXX + título corto — debe existir en el artefacto origen}}
-**Artefacto padre:** {{US-XXX | WI-XXX | FEAT-XXX}}
+**Artefacto padre:** {{US-XXX | WI-XXX | FT-XXX}}
 **Work Item ({{Sistema}}):** {{enlace markdown al work item creado en el sistema vinculado — solo si se creó vía MCP; {{Sistema}} es el nombre corto que define el archivo de referencia del sistema (p. ej. "ADO" para references/azure-devops.md); omitir línea si no aplica}}
 **Estado:** {{Draft | Ready | Obsolete}}
 **Creado por:** {{nombre}}
