@@ -44,8 +44,8 @@ Antes de abrir uno nuevo, revisa que no exista ya un issue similar.
 |---------|-----------|
 | `skills/` | Skills del plugin SDD Devkit (Cursor y Claude Code). |
 | `agents/` | Agentes reutilizables invocables con la herramienta Task o referenciados desde reglas. |
-| `other-skills/` | Skills adicionales fuera del plugin principal. |
-| `.claude-plugin/` | Manifiesto (`plugin.json`) y marketplace (`marketplace.json`) del plugin. |
+| `others/utils/` | Plugin Claude Code **Utils** (`skills/` internos + `.claude-plugin/plugin.json`). |
+| `.claude-plugin/` | Marketplace (`marketplace.json`) y manifiesto del plugin SDD Devkit (`plugin.json`). |
 
 ## Preguntas
 

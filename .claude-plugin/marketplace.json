@@ -14,6 +14,16 @@
       "author": {
         "name": "juanca202"
       }
+    },
+    {
+      "name": "utils",
+      "displayName": "Utils",
+      "source": "./others/utils",
+      "description": "Skills de utilidad generales: instalacion de MCP ALM (Azure DevOps / Jira), creacion de proyectos desde plantilla y validacion de prompts.",
+      "version": "1.0.0",
+      "author": {
+        "name": "juanca202"
+      }
     }
   ]
 }
