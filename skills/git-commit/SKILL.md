@@ -42,6 +42,7 @@ Si en el contexto de la sesión de chat existe un **idioma de preferencia del us
 ## Convenciones del mensaje
 
 - **Tipo y scope:** en inglés (ver regla de idioma).
+- **Header:** la primera línea completa (`<type>[scope]: <description>`) **no puede exceder 100 caracteres**. Es un límite duro: si se supera, acortar la descripción antes de proponer el commit; nunca commitear un header más largo.
 - **Descripción:** verbo imperativo presente (`add`, `fix`, `remove`, `validate`), indica **qué** cambia y no **cómo**, máximo 72 caracteres, sin punto final, sin mayúscula inicial.
 - **Breaking change:** `!` tras tipo/scope (`feat!:`) o footer `BREAKING CHANGE: <detalle>`.
 - **Footer de issue:** `Closes #123` o `Refs #456`, solo si el usuario aporta el número.
@@ -177,7 +178,7 @@ Gate obligatorio antes de cada `git commit`. Detenerse si algún punto falla.
 - **Aislamiento:** un solo cambio lógico en el commit.
 - **Operaciones seguras:** sin `--force`, `--hard`, `--no-verify`, `--amend` salvo petición explícita.
 - **Rama:** segura, o el usuario confirmó commit directo en `main`/`master`/`develop`/`release/*`. **Una sola vez por invocación** (no por cada commit): la rama no cambia entre los commits de un mismo [flujo de múltiples cambios lógicos](#flujo-múltiples-cambios-lógicos), así que la confirmación obtenida para el primer commit del lote cubre a todos los siguientes — no volver a preguntar en cada iteración del paso 4 de ese flujo.
-- **Formato:** primera línea `<type>[scope]: <description>` válida según [convenciones](#convenciones-del-mensaje); breaking change y footer de issue marcados si aplican.
+- **Formato:** primera línea `<type>[scope]: <description>` válida según [convenciones](#convenciones-del-mensaje) y **de 100 caracteres o menos**; breaking change y footer de issue marcados si aplican.
 - **Confirmación:** [propuesta](#propuesta-de-commit) mostrada y confirmada.
 
 Si algo bloquea, informar sin pegar secretos:
@@ -210,6 +211,7 @@ BREAKING CHANGE: `/v1/users` removed; clients must migrate to `/v2/users`.
 
 - Mezclar features, fixes y refactors sin relación en un mismo commit.
 - Mensajes vagos: `update`, `fix stuff`, `changes`, `wip`.
+- Headers de más de 100 caracteres: partir el detalle al body en vez de alargar la primera línea.
 - Inventar tipo o scope cuando el diff no lo respalda.
 - Pegar en el chat el valor de un secreto, una línea con credenciales o el output del detector.
 - Confiar en inspección visual y saltar la detección de secretos.

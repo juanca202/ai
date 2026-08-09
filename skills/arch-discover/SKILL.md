@@ -13,7 +13,7 @@ nunca se documentaron formalmente.
 Cada hallazgo se traduce en artefactos de dos tipos (ver el skill `arch-manage` para la distinción completa):
 
 - Un **ADR** — la *decisión* histórica: por qué se eligió algo. Todo hallazgo relevante produce un ADR candidato.
-- Un **requisito** dentro de un **estándar de dominio** — la *regla viva* que el código sigue hoy (`docs/standards/`). El estándar es **amplio** (un **dominio técnico o funcional** entero: *Testing Standards*, *API Standards*…; un aspecto de arquitectura, no un dominio de negocio/DDD) y agrupa varios requisitos; cada requisito se redacta con RFC 2119/8174 (MUST/SHOULD/MAY…). Un hallazgo que es una norma continua y verificable propone **un requisito**, dentro del estándar de dominio que le corresponde (agrupándolo con otros del mismo dominio). La unidad verificable fina —el **criterio de cumplimiento** (`CR-XXX`) medible dentro del requisito— la formaliza `arch-manage` al crear el artefacto; en descubrimiento basta con proponer el requisito y su regla.
+- Un **requisito** dentro de un **estándar de dominio** — la *regla viva* que el código sigue hoy (`docs/standards/`). El estándar es **amplio** (un **dominio técnico o funcional** entero: *Testing Standards*, *API Standards*…; un aspecto de arquitectura, no un dominio de negocio/DDD) y agrupa varios requisitos; cada requisito se redacta con RFC 2119/8174 (MUST/SHOULD/MAY…). Un hallazgo que es una norma continua y verificable propone **un requisito**, dentro del estándar de dominio que le corresponde (agrupándolo con otros del mismo dominio). La unidad verificable fina —el **criterio de cumplimiento** (`CR-XXX`), que pertenece a un requisito pero vive en la tabla única del estándar— la propone `arch-manage` al crear el artefacto, para que el usuario elija cuáles crear; en descubrimiento basta con proponer el requisito y su regla.
 
 Ejemplo: detectar "unit tests con PHPUnit" y "e2e con Playwright" son **dos decisiones** (dos ADR),
 pero **un solo estándar de dominio** *Testing Standards* con **dos requisitos** («Unit testing»,
@@ -158,9 +158,11 @@ Por cada candidato aprobado por el usuario:
    - Las alternativas implícitas detectadas (si las hay)
    - Los **Decisores** y el **idioma**, acordados una sola vez para todo el lote, de modo que `arch-manage` no vuelva a preguntar lo mismo por cada artefacto
 
-2. Dejar que `arch-manage` ejecute su flujo completo: crea el ADR y, cuando corresponda, añade el requisito al estándar de dominio (creándolo o ampliándolo), formaliza sus **criterios de cumplimiento** (`CR-XXX`) con su `Enfoque` (bloqueante/warning), enlaza `emits` (a nivel de CR) / `source_adrs` y evalúa la fitness function de cada criterio.
+2. Dejar que `arch-manage` ejecute su flujo completo: crea el ADR y, cuando corresponda, añade el requisito al estándar de dominio (creándolo o ampliándolo), **propone los criterios de cumplimiento candidatos con su mecanismo de verificación para que el usuario elija cuáles crear**, escribe los seleccionados como `CR-XXX` con su `Enfoque` (bloqueante/warning), enlaza `emits` (a nivel de CR) / `source_adrs` y crea las fitness functions elegidas. En lote, esa propuesta y selección se presenta **una sola vez para todos los candidatos aprobados** (una tabla con columna `Estándar`), no una por artefacto.
 
 3. **Agrupar por dominio en el lote:** procesar juntos los candidatos del mismo dominio para que sus requisitos caigan en el **mismo** estándar (no crear un estándar por candidato).
+
+   **Propuesta de criterios, una sola vez para el lote.** Los ADR y los bloques de requisito se crean candidato a candidato, pero la **propuesta y selección de los criterios de cumplimiento** (con su mecanismo de verificación) se acumula y se presenta **al final del lote**, en una sola tabla con columna `Estándar`, con una única tanda de preguntas. No lanzar la selección por cada candidato.
 
 4. Una vez creado cada artefacto, continuar con el siguiente candidato aprobado.
 
