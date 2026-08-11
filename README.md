@@ -194,6 +194,16 @@ El humano define la intención, las restricciones y las decisiones importantes; 
 
 
 
+## Casos de uso
+
+Recorridos end-to-end concretos que combinan varios skills, con el flujo completo (incluida la rama de decisión) para una situación específica.
+
+| Caso de uso | Descripción |
+| ----------- | ----------- |
+| [Fix a bug](docs/use-cases/fix-a-bug.md) | Corrección de un defecto: diagnóstico (`work-research`) → según se localice o no la causa raíz, planificación (`work-plan`) e implementación (`work-implement`) o análisis humano → puertas de calidad → integración/PR |
+| [Refactorización de código](docs/use-cases/refactor.md) | Refactor de código existente: investigación de factibilidad e impacto (`work-research`) → según sea factible o no, resolución de prerequisitos opcionales (ADR/estándares, dependencias) y planificación/implementación del refactor (`work-plan`/`work-implement`), o análisis humano y reinicio de la investigación con alcance redefinido → puertas de calidad → integración/PR |
+| [Tarea de mantenimiento](docs/use-cases/maintenance-task.md) | Caso genérico sin historia de usuario (deuda técnica, dependencias, seguridad, operativa…): planificación (`work-plan`) directa desde el requerimiento, sin pasar por `work-define` → implementación (`work-implement`) → puertas de calidad → integración/PR |
+
 ## Contribuir
 
 Las contribuciones son bienvenidas. Antes de abrir un issue o un Pull Request, lee la [guía de contribución](CONTRIBUTING.md).

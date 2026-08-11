@@ -248,17 +248,17 @@ Añadir además:
 
 | Sección del dossier | Sección del `WI-XXX/README.md` |
 |---------------------|-------------------------------|
-| Reporte normalizado + comportamiento observado/esperado | **Descripción** (el requerimiento del WI) |
-| Reproducción, causa raíz, evidencia, regresión | **Contexto** |
-| Diagnóstico de pruebas (matriz) | **Contexto** (subsección «Situación de las pruebas») |
-| Comportamiento esperado por condición (`AC-XXX` propuestos) | **Criterios de aceptación** |
-| Reglas de negocio confirmadas durante el análisis | **Reglas de negocio** |
-| Archivo/símbolo de la corrección y de la prueba | **Archivos afectados** |
-| Dependencias del fix (servicio, versión, migración de datos) | **Dependencias** |
-| Ciclo 🔴 → fix → 🟢 | **Plan de implementación** (un `IT-XX` por paso, en ese orden) |
-| Cobertura pendiente / refactors detectados | **Fuera de alcance** |
-| Riesgos, hipótesis sin verificar, decisiones abiertas | **Observaciones** |
-| Work item del bug, artefacto relacionado, archivos citados | **Referencias** |
+| **Problema** (observado, esperado, disparador, entorno) | **Descripción** (el requerimiento del WI) |
+| **Reproducción** + **Causa raíz** (evidencia, regresión) | **Contexto** |
+| **Situación de las pruebas** | **Contexto** (subsección «Situación de las pruebas») |
+| **Corrección** (ciclo 🔴 → fix → 🟢) | **Plan de implementación** (un `IT-XX` por paso, en ese orden) |
+| **Criterios de aceptación** propuestos | **Criterios de aceptación** |
+| **Fuera de alcance** (cobertura pendiente, refactors detectados) | **Fuera de alcance** |
+| **Riesgos** (+ hipótesis sin verificar, decisiones abiertas) | **Observaciones** |
+| **Reglas de negocio** confirmadas durante el análisis | **Reglas de negocio** |
+| **Archivos afectados** (corrección y prueba) | **Archivos afectados** |
+| Dependencias del fix citadas en la corrección (servicio, versión, migración) | **Dependencias** |
+| **Referencias** (work item, artefacto, archivos citados) | **Referencias** |
 
 > **El formato de los `AC-XXX` lo impone `work-plan`, no el dossier.** El dossier los
 > propone en forma «Dado / cuando / entonces»; la plantilla del WI exige categoría y
