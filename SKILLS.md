@@ -456,6 +456,8 @@ Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrat
 
 **Produce:** informe de checks (`docs/specs/quality-check.md`) y la caché de pruebas `docs/specs/test-run.json`.
 
+**Alcance:** **todo el repositorio** en el estado actual de la rama (o todo el módulo elegido, en monorepo). No se acota al diff: una regresión en código que nadie tocó también debe salir.
+
 **Checks:** tipado → linter → unit → coverage → integración → build → e2e → sonar, con categoría por stack (Bloqueante / Condicional / Informativo).
 
 **Correcciones:** nunca por iniciativa propia. Ante hallazgos que impliquen tocar código pregunta primero: **dentro** de una implementación, si se corrigen; **fuera** de una implementación (rama suelta, auditoría), ofrece explícitamente [Corregir] / [Solo el informe]. Si se corrige y la rama es de un `US-XXX`/`WI-XXX`, delega el arreglo en `work-implement` (modo corrección); si no hay artefacto, corrige él mismo. Aplica igual a fallos de pruebas.
@@ -503,6 +505,8 @@ En prosa (el skill mapea al modificador en inglés):
 
 **Produce:** informe de hallazgos (`docs/specs/code-review.md`) sobre el diff: intención, arquitectura y diseño (ISO/IEC 25010) y feedback senior.
 
+**Alcance:** el diff de la rama contra su base, **incluidos los cambios sin commitear**. Con `working-tree` (solo lo sin commitear) o `scope` (rutas concretas) la revisión es acotada y **no** sobrescribe `docs/specs/code-review.md`: va al chat o a `save-report`.
+
 **Severidad:** `🔴` Crítico · `🟠` Mayor (bloquean) · `🟡` Menor · `💡` Sugerencia.
 
 **Veredicto:** `✅ Aprobado` · `❌ Rechazado` · `⚠️ Incompleto` — **independiente** del de `quality-check`.
@@ -512,8 +516,9 @@ En prosa (el skill mapea al modificador en inglés):
 
 | Modifier        | Efecto                                                           |
 | --------------- | ---------------------------------------------------------------- |
-| `default`       | Diff completo de la rama contra su base, en las tres dimensiones |
+| `default`       | Diff completo de la rama contra su base —**incluidos los cambios sin commitear**—, en las tres dimensiones |
 | `base <rama>`   | Fija la rama base del diff                                       |
+| `working-tree`  | Solo los cambios sin commitear (revisión durante el desarrollo)  |
 | `scope <ruta…>` | Limita la revisión a esas rutas                                  |
 | `blocking-only` | Solo hallazgos 🔴/🟠 en el informe                               |
 | `save-report`   | Guarda en `docs/code-review/<timestamp>.md`                      |
@@ -524,6 +529,7 @@ En prosa (el skill mapea al modificador en inglés):
 ```text
 /code-review
 /code-review base develop
+/code-review working-tree
 /code-review scope src/domain
 /code-review blocking-only save-report
 ```
@@ -533,6 +539,7 @@ En prosa:
 - «Revisa la arquitectura y el diseño del cambio» → `default`
 - «Revisa solo lo que bloquea el merge» → `blocking-only`
 - «Revisa solo la carpeta de dominio» → `scope src/domain`
+- «Revisa lo que llevo antes de commitear» → `working-tree`
 
 ---
 
@@ -549,6 +556,8 @@ En prosa:
 **Veredicto:** `✅ Aprobado` · `⚠️ Aprobado con observaciones` · `❌ Rechazado`.
 
 No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `quality-check` en `tests-only`. Idempotente: si el fingerprint no cambió, no regenera el reporte.
+
+**Alcance:** **un artefacto** y sus criterios de aceptación — ni el repo ni el diff. Si la rama abarca varios trabajos, se valida uno por corrida.
 
 **Reporte:** `trace-report.md` en la carpeta del artefacto.
 
@@ -616,7 +625,7 @@ No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `qualit
 **Puertas (obligatorias, sin draft ni skip):**
 
 1. `quality-check` sobre la rama (batería completa; produce `test-run.json`)
-2. `code-review` sobre `origin/<destino>..HEAD` (revisión cualitativa; veredicto propio)
+2. `code-review` sobre el diff contra `origin/<destino>` (revisión cualitativa; veredicto propio)
 3. `trace-validate` sobre el `US`/`WI` de la rama
 4. Definition of Done (`docs/policies/definition-of-done.md`) — **solo si existe**; si no, se omite
 

@@ -8,8 +8,8 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 **Fecha:** {{YYYY-MM-DD HH:MM}}
 **Rama:** {{rama}}
 **Commit:** {{sha-corto}}
-**Alcance del diff:** {{N archivos, +X/−Y líneas | rutas si se usó `scope`}}
-**Modo:** {{default | blocking-only | scope … | base … }}
+**Alcance del diff:** {{rama vs base, incluidos los cambios sin commitear | solo cambios sin commitear (`working-tree`) | rutas de `scope`}} — {{N archivos, +X/−Y líneas}}
+**Modo:** {{default | blocking-only | working-tree | scope … | base … }}
 **Veredicto:** {{✅ Aprobado | ❌ Rechazado | ⚠️ Incompleto}}
 
 ## Resumen

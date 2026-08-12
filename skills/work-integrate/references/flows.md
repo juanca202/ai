@@ -21,7 +21,7 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 
 1. **Listar los candidatos** detectados (p. ej. `main`, `develop`, ramas de release con commits ancestros del HEAD actual).
 2. **Preguntar al usuario** cuál es la rama base correcta. No proponer un default ni inferir por convención del proyecto sin confirmación.
-3. **Esperar respuesta** antes de continuar al paso 9 del flujo estándar (calcular delta). Sin respuesta clara, no hay merge.
+3. **Esperar respuesta** antes de continuar al paso 6 del flujo estándar (`quality-check`, la primera puerta). Sin respuesta clara, no hay merge: la rama base se necesita tanto para acotar el diff de `code-review` como para el merge final.
 
 ---
 
@@ -40,6 +40,7 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 - [ ] **`quality-check`** ejecutado con veredicto **✅ Aprobado**
 - [ ] **`code-review`** ejecutado con veredicto **✅ Aprobado**
 - [ ] **`trace-validate`** ejecutado (después de `quality-check`) con veredicto **✅ Aprobado** (o **⚠️ Aprobado con observaciones**)
+- [ ] **Working tree limpio de nuevo tras las puertas** (las correcciones aplicadas durante ellas ya commiteadas vía `git-commit`)
 - [ ] Sin commits sin commitear ni stash sin aplicar relevante al alcance
 
 **Ejecución:**

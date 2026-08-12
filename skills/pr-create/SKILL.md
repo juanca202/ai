@@ -80,7 +80,7 @@ Antes de cualquier push o creación de PR se ejecutan **las cuatro** puertas en 
 
 > Este es el punto de cierre donde `quality-check` ejecuta la batería completa de pruebas y persiste `test-run.json`. El orden importa: `4.1` antes de `4.3` permite que `trace-validate` **reutilice** esa corrida sin re-ejecutar las pruebas.
 
-**4.2 — `code-review` (siempre).** Invocar el flujo de `code-review` (revisión cualitativa: intención, arquitectura y diseño) sobre el diff `origin/<destino>..HEAD`. Emite un veredicto **propio e independiente** del de `4.1`; ninguno sustituye al otro.
+**4.2 — `code-review` (siempre).** Invocar el flujo de `code-review` (revisión cualitativa: intención, arquitectura y diseño) con `base origin/<destino>`, su alcance por defecto (todo lo que la rama difiere de esa base, incluidas las correcciones que `4.1` haya podido dejar sin commitear). Emite un veredicto **propio e independiente** del de `4.1`; ninguno sustituye al otro.
 - Aprobado = veredicto **`✅ Aprobado`** → continuar.
 - Rechazado = **`❌ Rechazado`** o **`⚠️ Incompleto`** → detener.
 
@@ -90,7 +90,7 @@ Antes de cualquier push o creación de PR se ejecutan **las cuatro** puertas en 
 
 **4.4 — Definition of Done (solo si existe el archivo).** Comprobar si existe `docs/policies/definition-of-done.md` en la raíz del repo (`test -f docs/policies/definition-of-done.md`).
 - Si **no** existe → omitir esta puerta (no afecta el resultado).
-- Si **existe** → leerla y verificar el código/cambio del rango `origin/<destino>..HEAD` contra cada política/ítem de esa Definition of Done. **Formato esperado de `docs/policies/definition-of-done.md`:** un documento de política con ítems/checklist verificables (cada ítem una condición concreta de cierre). El skill solo evalúa automáticamente los ítems comprobables desde el repo o el diff; para el resto, pregunta.
+- Si **existe** → leerla y verificar el código/cambio contra cada política/ítem de esa Definition of Done, sobre el **mismo alcance que `4.2`**: `origin/<destino>` contra el estado actual del árbol, de modo que incluya las correcciones que las puertas anteriores hayan podido dejar sin commitear. **Formato esperado de `docs/policies/definition-of-done.md`:** un documento de política con ítems/checklist verificables (cada ítem una condición concreta de cierre). El skill solo evalúa automáticamente los ítems comprobables desde el repo o el diff; para el resto, pregunta.
   - **Ítems comprobables desde el repo/diff** → evaluarlos directamente: cumplido / incumplido.
   - **Ítems no comprobables automáticamente** → **presentarlos al usuario y preguntarle** si se cumplen (no inventar su cumplimiento). Si el usuario **confirma** que se cumplen → cuentan como cumplidos. Si **no los confirma** o los marca incumplidos → cuentan como incumplidos.
   - Aprobado = todos los ítems aplicables se cumplen (los comprobables verificados + los no comprobables confirmados por el usuario) → continuar.
@@ -99,6 +99,8 @@ Antes de cualquier push o creación de PR se ejecutan **las cuatro** puertas en 
 Solo si **todas las puertas aplicables** quedan en aprobado se avanza al Paso 5.
 
 ### Paso 5 — Push de la rama actual
+
+**Antes del push, re-comprobar el working tree.** Las puertas del Paso 4 pueden haber dejado cambios sin commitear (correcciones aplicadas por `quality-check` o delegadas en `work-implement`). Ejecutar `git status --porcelain` y, si hay salida, **invocar de nuevo `git-commit`** con el mismo criterio del pre-flight: lo que se sube debe ser exactamente lo que las puertas verificaron.
 
 Si la rama no existe en `origin` o tiene commits no publicados (`git rev-list origin/<rama>..HEAD` no vacío): ejecutar `git push -u origin <rama-actual>`. Nunca `--force` ni `--force-with-lease`. Si el push falla por divergencia: parar y avisar — el usuario decide cómo resolver.
 
@@ -164,7 +166,7 @@ Notas:
 
 **Ejemplo 1 — Camino feliz (GitLab self-managed)**
 Usuario: «Crea el PR de esta rama.»
-Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`). Detecta GitLab (`ns.bayteq.com:3311`). Pregunta destino → `develop`. Puertas: `quality-check` → `✅ Aprobado`; `code-review` sobre `origin/develop..HEAD` → `✅ Aprobado`; resuelve `US-042`, `trace-validate` → `✅ Aprobado`; existe `docs/policies/definition-of-done.md` → todos los ítems cumplidos. Push. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min`. Ejecuta `glab mr create`. Devuelve URL.
+Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`). Detecta GitLab (`ns.bayteq.com:3311`). Pregunta destino → `develop`. Puertas: `quality-check` → `✅ Aprobado`; `code-review` con `base origin/develop` → `✅ Aprobado`; resuelve `US-042`, `trace-validate` → `✅ Aprobado`; existe `docs/policies/definition-of-done.md` → todos los ítems cumplidos. Push. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min`. Ejecuta `glab mr create`. Devuelve URL.
 
 **Ejemplo 2 — quality-check bloquea**
 `quality-check` devuelve `❌ Rechazado` (tests fallidos + eslint errors). El skill no crea el PR, no hace push, muestra el reporte, lista las acciones para reintentar y —al estar a su alcance— pregunta si aplica la corrección. Si el usuario no autoriza, termina.

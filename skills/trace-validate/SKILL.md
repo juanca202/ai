@@ -20,6 +20,19 @@ El trazado primario es para **historias de usuario** (`US-XXX`) con sus **criter
 
 ---
 
+## Alcance del informe
+
+El informe de este skill cubre **un artefacto concreto y sus criterios de aceptación**. La pregunta es «¿cada criterio de *este* trabajo está probado?», así que el universo lo definen los criterios del artefacto, no los archivos que cambiaron ni el repositorio completo.
+
+Consecuencias prácticas:
+
+- **Se validan todos los criterios del artefacto**, aunque en esta rama no se haya tocado el código de alguno de ellos: un criterio cuya prueba nunca se escribió sigue siendo un hueco.
+- **No se reportan pruebas ni código ajenos al artefacto.** Tests de otros trabajos, cobertura global o fallos en módulos que no mapean a ningún criterio de este artefacto no entran en la matriz — a lo sumo van a Observaciones.
+- **Si la rama abarca varios trabajos**, se valida uno por corrida, con su propio `trace-report.md` junto a su artefacto. Los resultados de pruebas sí son compartidos (vienen de la corrida de `quality-check`), pero el **mapeo** es por artefacto.
+- **La clave de frescura es de rama, no de artefacto.** El fingerprint de la idempotencia cubre todo el árbol, así que un cambio en *otro* trabajo de la misma rama invalida también este `trace-report.md` y fuerza a regenerarlo. Es conservador a propósito: prefiere revalidar de más antes que devolver un reporte que ya no corresponde al código.
+
+---
+
 ## Subagente
 
 **Si el proyecto define el subagente `quality-specialist`, ejecutar este skill bajo ese subagente** (es el mismo agente que escribe los tests en el cierre de `work-implement`, por lo que es el contexto natural para validarlos). Si no existe en el proyecto, ejecutar el flujo normalmente.

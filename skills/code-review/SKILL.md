@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: 'Revisión cualitativa de código estilo ingeniero senior sobre el diff de una rama: intención del cambio (¿resuelve el problema pedido?), arquitectura y diseño según ISO/IEC 25010 (SOLID, Clean Architecture, acoplamiento, duplicación, fiabilidad, seguridad, desempeño, compatibilidad) y feedback accionable que explica el PORQUÉ y propone cambios concretos. Devuelve hallazgos con severidad (🔴/🟠/🟡/💡), veredicto (aprobado/rechazado/incompleto) y próximas acciones. Usar SOLO cuando se invoca explícitamente: el usuario pide una revisión de código ("code review", "revisión de código", "revisa el diseño antes del PR/merge"), nombra el skill, o lo llama otro skill (p. ej. work-integrate, pr-create). Proceso posterior a la implementación: NO activarlo de forma proactiva ni durante el desarrollo. NO ejecuta pruebas, linter, build ni ningún check automatizado: eso es del skill `quality-check`. Nunca corrige por iniciativa propia: solo aplica cambios si el usuario lo autoriza.'
+description: 'Revisión cualitativa de código estilo ingeniero senior sobre el diff de una rama contra su base —o sobre los cambios sin commitear con el modificador working-tree—: intención del cambio (¿resuelve el problema pedido?), arquitectura y diseño según ISO/IEC 25010 (SOLID, Clean Architecture, acoplamiento, duplicación, fiabilidad, seguridad, desempeño, compatibilidad) y feedback accionable que explica el PORQUÉ y propone cambios concretos. Devuelve hallazgos con severidad (🔴/🟠/🟡/💡), veredicto (aprobado/rechazado/incompleto) y próximas acciones. Usar SOLO cuando se invoca explícitamente: el usuario pide una revisión de código ("code review", "revisión de código", "revisa el diseño antes del PR/merge"), nombra el skill, o lo llama otro skill (p. ej. work-integrate, pr-create). Proceso posterior a la implementación: NO activarlo de forma proactiva ni durante el desarrollo. NO ejecuta pruebas, linter, build ni ningún check automatizado: eso es del skill `quality-check`. Nunca corrige por iniciativa propia: solo aplica cambios si el usuario lo autoriza.'
 license: MIT
 ---
 
@@ -15,6 +15,20 @@ Revisar el **diff** de una implementación como lo haría un **ingeniero senior*
 > **Alcance:** analiza, razona y **propone**. **Nunca corrige por iniciativa propia**; aplica correcciones **solo si el usuario lo autoriza explícitamente**. No hace commit/push/merge sin instrucción explícita.
 >
 > **Entrada mínima:** un **diff** identificable (rama contra su base, o los archivos que el usuario indique) y la **intención** del cambio (US/WI/FT, rama, commits, descripción del PR). Sin diff no hay nada que revisar; sin intención inferible, preguntar al usuario.
+
+---
+
+## Alcance del informe
+
+El informe de este skill cubre **todo lo que la rama difiere de su base — commiteado o no**: el trabajo que se va a integrar o a abrir como PR, más cualquier cambio aún en el working tree. Nunca el repositorio completo.
+
+| Alcance | Cuándo | Cómo se resuelve |
+|---------|--------|------------------|
+| **Rama contra su base** (por defecto) | Cierre: `work-integrate`, `pr-create`, o revisión previa al PR | `git diff <base>` (base contra el working tree, así que **incluye lo sin commitear**) más los archivos sin trackear que sean código del proyecto. La base se infiere o se fija con `base <rama>`. |
+| **Solo cambios sin commitear** (`working-tree`) | Durante el desarrollo: «revisa lo que llevo antes de commitear» | `git diff HEAD` + archivos sin trackear relevantes. Deja fuera lo ya commiteado en la rama. |
+| **Rutas concretas** (`scope <ruta…>`) | Revisión acotada a un módulo o carpeta | Solo el diff de esas rutas; se combina con los anteriores. |
+
+> **Por qué el default incluye lo sin commitear.** Porque lo que hay que revisar es **el código que se va a integrar**, no el que ya está commiteado. En el cierre, la puerta anterior puede haber aplicado correcciones que aún no se han commiteado; y fuera del cierre, el usuario suele pedir la revisión con trabajo a medias en el árbol. En ambos casos, mirar solo los commits dejaría fuera parte de lo que se revisa. El modo `working-tree` existe para lo contrario: acotar deliberadamente a lo que aún no se ha commiteado.
 
 ---
 
@@ -86,7 +100,8 @@ Las **claves** de los modificadores son siempre en inglés (estándar). Si el us
 |----------|----------------|
 | `default` | Revisar el diff completo de la rama contra su base, en las tres dimensiones. |
 | `base <rama>` | Fijar la rama base del diff (p. ej. `base develop`). Sin este modificador, inferirla y confirmarla con el usuario si es ambigua. |
-| `scope <ruta…>` | Limitar la revisión a los archivos o directorios indicados en lugar del diff completo. |
+| `working-tree` | Revisar **solo los cambios sin commitear** (`git diff HEAD` más los archivos sin trackear que sean código del proyecto), en lugar del diff completo de la rama. Para revisar durante el desarrollo, antes de commitear. Si el working tree está limpio, decirlo y terminar — no caer al diff de la rama por su cuenta. Incompatible con `base <rama>`. **No sobrescribe `docs/specs/code-review.md`.** |
+| `scope <ruta…>` | Limitar la revisión a los archivos o directorios indicados en lugar del diff completo. Combinable con `working-tree`. **No sobrescribe `docs/specs/code-review.md`.** |
 | `blocking-only` | Reportar solo hallazgos 🔴/🟠; omitir 🟡/💡 del informe. Útil en revisiones de cierre donde solo interesa lo que bloquea. |
 | `save-report` | Persistir el informe en `docs/code-review/<YYYYMMDD-HHMMSS>.md`. |
 
@@ -104,7 +119,7 @@ Las **claves** de los modificadores son siempre en inglés (estándar). Si el us
 2. **Leer el contexto del sistema:** patrones del repo, capas, convenciones y, si existen, los criterios de aceptación del artefacto origen.
 3. **Evaluar las tres dimensiones** con [`references/qualitative-review.md`](references/qualitative-review.md) y emitir hallazgos con severidad, porqué, impacto y sugerencia concreta.
 4. **Puerta cualitativa e informe:** presentar los hallazgos bloqueantes, pedir corregir o justificar, y rellenar [`assets/code-review-template.md`](assets/code-review-template.md) con el veredicto.
-5. **Registro y salida:** en proyectos con `docs/specs/`, escribir `docs/specs/code-review.md`; si no, mostrar en chat (o `save-report`). **No** hacer commit/push/merge sin instrucción explícita.
+5. **Registro y salida:** en proyectos con `docs/specs/`, escribir `docs/specs/code-review.md`; si no, mostrar en chat (o `save-report`). **Excepción:** una revisión acotada (`working-tree` o `scope`) **no** sobrescribe ese archivo —no es el estado vigente de la rama—: va al chat o a `save-report`. **No** hacer commit/push/merge sin instrucción explícita.
 
 ---
 

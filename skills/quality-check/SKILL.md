@@ -18,6 +18,19 @@ Ejecuta la **batería de checks automatizados** que el stack exige (tipado, lint
 
 ---
 
+## Alcance del informe
+
+La corrida de este skill cubre **todo el repositorio** en el estado actual de la rama. Es inherente a lo que hace: `tsc`, el linter, la suite de pruebas y el build **operan sobre el proyecto completo**, y esa es justamente la señal que se busca. Una regresión provocada por el cambio en un archivo que nadie editó en esta rama solo aparece corriendo la batería entera.
+
+Consecuencias prácticas:
+
+- **Un FAIL puede no venir del trabajo en curso.** Un test que ya estaba roto antes de esta rama saldrá igual. **No atribuirlo automáticamente al cambio reciente.** Si la rama base es resoluble sin esfuerzo, se puede contrastar el archivo del fallo con `git diff --name-only <base>` (rango que incluye lo sin commitear) y anotar en el detalle del check que el fallo **parece preexistente**; si no lo es, no especular. En cualquier caso, la decisión de corregirlo aquí o sacarlo a un `WI-XXX` aparte es del usuario.
+- **No acotar la corrida a los archivos que cambiaron.** Filtrar los tests por archivos tocados falsearía el resultado y anularía el valor de la puerta. Los modificadores (`only <check>`, `no-tests`…) acotan **qué checks se ejecutan**, nunca sobre qué parte del código; no existe forma de acotar el universo de archivos, y es deliberado.
+- **Excepción monorepo:** si el repo tiene varios módulos, «todo el repositorio» significa **todo el módulo elegido** — la selección del módulo la resuelve el Paso 1 (ver [`references/stacks.md`](references/stacks.md#detección-de-ecosistema)), preguntando si hay ambigüedad. No se auditan todos los módulos salvo petición explícita.
+- **El informe vive en `docs/specs/`, no en la carpeta de una US/WI**, porque la corrida es de la rama consolidada y puede abarcar varios trabajos. (En modo `tests-only` no hay informe: el único artefacto es `test-run.json`.) Ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
+
+---
+
 ## Mapa de referencias
 
 Carga cada archivo **solo cuando lo necesites** (rutas relativas a la raíz del skill):
