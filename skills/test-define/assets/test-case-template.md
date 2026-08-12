@@ -8,6 +8,8 @@ Ubicación por tipo de artefacto:
   US:   docs/specs/user-stories/US-XXX-{nombre}/test-cases/TC-XXX-{slug}.md
   WI:   docs/specs/work-items/WI-XXX-{kebab-case}/test-cases/TC-XXX-{slug}.md
   FT: docs/specs/features/FT-XXX-{slug}/test-cases/TC-XXX-{slug}.md
+  Otro artefacto de especificación (cualquier origen o formato):
+        {carpeta-del-artefacto}/test-cases/TC-XXX-{slug}.md
 
 Nombre de archivo: TC-XXX-{slug}.md
   XXX  → secuencial de tres dígitos dentro del artefacto padre (001, 002, ...) sin tracker externo vinculado;
@@ -20,10 +22,10 @@ El nombre del archivo y, si hay un tracker externo vinculado, el título usado a
 # TC-{{XXX}} — Dado {{contexto/precondición}}, Cuando {{acción/evento}}, Entonces {{resultado esperado}}
 
 **Perspectiva:** {{Happy Path | Error | Límite}}
-**Tipo de prueba:** {{Manual | Tipo[, Tipo…]}}  <!-- intención de diseño. Tipo ∈ {Unit | Integration | E2E | API Test | Visual Test}; uno o varios separados por coma, ordenados del nivel más bajo al más alto (p. ej. Unit, E2E). Manual solo cuando el caso no se automatiza por diseño; no se combina con tipos. -->
+**Tipo de prueba:** {{Manual | Tipo[, Tipo…]}}  <!-- intención de diseño. Tipo ∈ {Unit | Integration | API Test | Visual Test | E2E}; uno o varios separados por coma, en ESE orden (de menor a mayor nivel; p. ej. Unit, E2E). Manual solo cuando el caso no se automatiza por diseño; no se combina con tipos. -->
 **Prioridad:** {{Alta | Media | Baja}}
-**Criterio de aceptación:** {{AC-XXX + título corto — debe existir en el artefacto origen}}
-**Artefacto padre:** {{US-XXX | WI-XXX | FT-XXX}}
+**Criterio de aceptación:** {{identificador del criterio tal como aparece en el artefacto origen (AC-XXX, 1.1, R-3, …) + título corto — no normalizar el formato; debe existir literalmente en el artefacto}}
+**Artefacto padre:** {{US-XXX | WI-XXX | FT-XXX | identificador o ruta del artefacto externo}}
 **Work Item ({{Sistema}}):** {{enlace markdown al work item creado en el sistema vinculado — solo si se creó vía MCP; {{Sistema}} es el nombre corto que define el archivo de referencia del sistema (p. ej. "ADO" para references/azure-devops.md); omitir línea si no aplica}}
 **Estado:** {{Draft | Ready | Obsolete}}
 **Creado por:** {{nombre}}

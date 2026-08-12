@@ -1,6 +1,8 @@
 # Referencia: Revisión cualitativa estilo senior
 
-Esta referencia detalla **cómo** ejecutar las tres dimensiones de la [revisión cualitativa](../SKILL.md#revisión-cualitativa-análisis-senior). Se carga desde `SKILL.md` en el Paso 3. Asume ya resueltos el stack, el diff bajo revisión y la intención del cambio.
+Esta referencia detalla **cómo** evaluar las [tres dimensiones](../SKILL.md#las-tres-dimensiones) de la revisión cualitativa. Se carga desde `SKILL.md` en el Paso 3. Asume ya resueltos el diff bajo revisión, el contexto del sistema (patrones del repo, límites de capas) y la intención del cambio.
+
+> **Sin ejecución de herramientas.** Las tres dimensiones se evalúan **leyendo** el diff y su contexto. No se corren pruebas, linter ni build: ese plano es del skill [`quality-check`](../../quality-check/SKILL.md).
 
 > **Mentalidad:** eres un ingeniero senior revisando el PR de un compañero al que aprecias. Quieres que el código entre, pero bien. No eres un linter: razonas sobre intención, diseño e impacto en el sistema, y cuando algo está bien, lo dices.
 
@@ -15,7 +17,7 @@ Las características relevantes para code review son:
 | Característica | Sub-características clave | Qué buscar en el diff |
 |----------------|--------------------------|----------------------|
 | **Adecuación funcional** | Completitud, corrección, adecuación | El código hace exactamente lo pedido, ni más ni menos. Cubre todos los criterios. |
-| **Mantenibilidad** | Modularidad, reusabilidad, analizabilidad, modificabilidad, testabilidad | SOLID, Clean Architecture, acoplamiento, duplicación, legibilidad, cobertura de tests. |
+| **Mantenibilidad** | Modularidad, reusabilidad, analizabilidad, modificabilidad, testabilidad | SOLID, Clean Architecture, acoplamiento, duplicación, legibilidad, calidad y pertinencia de las pruebas incluidas en el diff (no su ejecución). |
 | **Fiabilidad** | Madurez, tolerancia a fallos, recuperabilidad | Manejo de errores, casos borde, reintentos, estados inconsistentes. |
 | **Seguridad** | Confidencialidad, integridad, autenticidad, no repudio | Inyección, exposición de datos sensibles, autenticación/autorización, validación de entradas. |
 | **Eficiencia en el desempeño** | Comportamiento temporal, uso de recursos, capacidad | Complejidad algorítmica innecesaria, N+1, falta de paginación, recursos no liberados. |
@@ -37,7 +39,7 @@ Sugerencia: ...
 ## Contenido
 
 1. [Dimensión 1 — Análisis semántico (intención)](#dimensión-1--análisis-semántico-intención)
-2. [Dimensión 2 — Arquitectura y diseño](#dimensión-2--arquitectura-y-diseño)
+2. [Dimensión 2 — Arquitectura, diseño y calidad del producto](#dimensión-2--arquitectura-diseño-y-calidad-del-producto)
 3. [Dimensión 3 — Feedback estilo senior](#dimensión-3--feedback-estilo-senior)
 4. [Calibración de severidad](#calibración-de-severidad)
 5. [Ejemplos de feedback (bueno vs malo)](#ejemplos-de-feedback-bueno-vs-malo)

@@ -147,7 +147,7 @@ Por cada `TC-XXX` automatizable de la unidad, en el orden del indice:
 
 ### Paso 4 - Cierre
 
-1. Si la ultima unidad quedo sin commitear, **invocar `/git-commit` sobre sus cambios ahora**. Verificar que las pruebas **de los archivos afectados** pasen limpias (unitarias y las de integracion que apliquen) y, **una sola vez sobre el codigo consolidado, correr las pruebas e2e** escritas en esta ejecucion si el repo las soporta. **La bateria completa no se corre aqui:** la ejecuta `code-review` al integrar (`work-integrate`) o crear el PR (`pr-create`).
+1. Si la ultima unidad quedo sin commitear, **invocar `/git-commit` sobre sus cambios ahora**. Verificar que las pruebas **de los archivos afectados** pasen limpias (unitarias y las de integracion que apliquen) y, **una sola vez sobre el codigo consolidado, correr las pruebas e2e** escritas en esta ejecucion si el repo las soporta. **La bateria completa no se corre aqui:** la ejecuta `quality-check` al integrar (`work-integrate`) o crear el PR (`pr-create`).
 2. **Validar cobertura:** con las pruebas ya escritas, **ofrecer handoff a `/trace-validate`** sobre el artefacto padre para generar la matriz de trazabilidad `AC-XXX` => `TC-XXX` => artefacto de prueba y obtener el veredicto de cobertura. Es el cierre natural de este tipo de implementacion.
 3. **Handoff:** preguntar al usuario (herramienta estructurada) como continuar:
 
@@ -249,6 +249,6 @@ Posicion: **implementacion de pruebas** - entre `test-define` y `trace-validate`
 |--|--|
 | **Entrada** | Artefacto padre (`FT-XXX`, `US-XXX` o `WI-XXX`) en `Estado: Ready` con `AC-XXX`, y su carpeta `test-cases/` poblada por `test-define` con TC en `Ready`. |
 | **Salida** | Pruebas automatizadas commiteadas y en verde; `progress.md` con cada unidad en `Done` y su `Cobertura de test cases`; working tree limpio. |
-| **Siguiente paso** | `trace-validate` sobre el artefacto padre (matriz de cobertura y veredicto) => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara `code-review` y exigira veredicto Aprobado antes de integrar. |
+| **Siguiente paso** | `trace-validate` sobre el artefacto padre (matriz de cobertura y veredicto) => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara `quality-check` y `code-review`, y exigira veredicto Aprobado en ambos antes de integrar. |
 | **Regreso a definicion** | TC ambiguo, erroneo o AC sin cobertura => volver a `test-define`. Si el hueco es del propio artefacto (criterio no testeable o mal definido), volver a quien lo registro: `work-define`/`work-plan` para US/WI, el flujo «Analizar legado» de `work-research` para un `FT-XXX`. |
 | **Bug detectado** | Discrepancia real entre TC y codigo que el usuario no quiere corregir en el momento => flujo «Analizar issue» de `work-research` y, desde ahi, un `WI-XXX` de tipo bug via `work-plan`. |

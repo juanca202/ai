@@ -96,7 +96,7 @@ Por cada WI aprobado:
 
 ### Paso 4 - Cierre
 
-1. Si el ultimo WI completado quedo sin commitear (el usuario detuvo el flujo en el Paso 3 antes de confirmar el siguiente), **invocar `/git-commit` sobre sus cambios ahora**. Verificar que las pruebas **de los archivos afectados** pasen limpias (unitarias y las de integracion que apliquen) y, **una sola vez sobre el codigo consolidado, correr las pruebas e2e** del alcance si el repo las tiene (ver [Uso escalonado de pruebas](../SKILL.md) en `SKILL.md`); el working tree limpio y con todos los commits hechos. **La bateria completa de pruebas no se corre aqui:** la ejecuta `code-review` al integrar (`work-integrate`) o crear el PR (`pr-create`).
+1. Si el ultimo WI completado quedo sin commitear (el usuario detuvo el flujo en el Paso 3 antes de confirmar el siguiente), **invocar `/git-commit` sobre sus cambios ahora**. Verificar que las pruebas **de los archivos afectados** pasen limpias (unitarias y las de integracion que apliquen) y, **una sola vez sobre el codigo consolidado, correr las pruebas e2e** del alcance si el repo las tiene (ver [Uso escalonado de pruebas](../SKILL.md) en `SKILL.md`); el working tree limpio y con todos los commits hechos. **La bateria completa de pruebas no se corre aqui:** la ejecuta `quality-check` al integrar (`work-integrate`) o crear el PR (`pr-create`).
 2. **Handoff:** si el alcance esta en `Done`, **preguntar al usuario** (herramienta estructurada) como continuar:
 
    > "Implementacion completada. ¿Que quieres hacer ahora?"
@@ -118,7 +118,7 @@ Por cada WI aprobado:
 
 **Por cada WI:** `Ready` con criterios de aceptacion; no `Done`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; test cases automatizables del `test-cases/README.md` cubiertos; UI bajo `ui-specialist`; Figma via MCP; plan completo implementado; criterios de aceptacion cubiertos por tests; lint/typecheck/build/tests en verde; `progress.md` a `Done` con `Cobertura de test cases` (TC no automatizados o con otro tipo de prueba documentados); decisiones de sesion registradas; **confirmacion explicita antes del siguiente WI**; `/git-commit` invocado recien al confirmar el avance (no antes) — o en el cierre, si el usuario detiene ahi.
 
-**Cierre:** pruebas unitarias (e integracion aplicable) de los archivos afectados en verde y e2e del alcance corridas una vez sobre el codigo consolidado (la bateria completa la corre `code-review`, no este skill); working tree limpio; handoff a `pr-create` o `work-integrate`.
+**Cierre:** pruebas unitarias (e integracion aplicable) de los archivos afectados en verde y e2e del alcance corridas una vez sobre el codigo consolidado (la bateria completa la corre `quality-check`, no este skill); working tree limpio; handoff a `pr-create` o `work-integrate`.
 
 ---
 
@@ -167,5 +167,5 @@ Posicion: **implementacion** - un WI es autocontenido (no proviene de `work-defi
 |--|--|
 | **Entrada** | `WI-XXX` en `Estado: Ready` (Requerimiento, Criterios de aceptacion, Dependencias, Referencias y Plan). Stubs en `Draft` **no** habilitan la implementacion. |
 | **Salida** | Codigo commiteado; `progress.md` con el WI en `Done`; working tree limpio. |
-| **Siguiente paso** | El WI ya comiteado via `/git-commit` durante la implementacion => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara `code-review` y exigira veredicto Aprobado antes de integrar. |
+| **Siguiente paso** | El WI ya comiteado via `/git-commit` durante la implementacion => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara `quality-check` y `code-review`, y exigira veredicto Aprobado en ambos antes de integrar. |
 | **Regreso desde plan** | Ambiguedad tecnica, criterios faltantes o alcance incorrecto => volver a `work-plan` para ajustar el WI. |

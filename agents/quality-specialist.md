@@ -130,7 +130,7 @@ Si el usuario repite la instrucción de «solo código», aplica el modo generac
 ## Comprobaciones finales
 
 - Verifica que el archivo compile y no rompa lint/format del repo.
-- Si altera comportamiento público o cierra una US, sugiere ejecutar las pruebas **de los archivos/paquete afectados** y, antes de merge, el skill **`code-review`** —que es quien corre la batería completa— (no lo ejecutes tú salvo petición explícita). No propongas correr la suite completa como paso de esta fase.
+- Si altera comportamiento público o cierra una US, sugiere ejecutar las pruebas **de los archivos/paquete afectados** y, antes de merge, el skill **`quality-check`** —que es quien corre la batería completa— (no lo ejecutes tú salvo petición explícita). No propongas correr la suite completa como paso de esta fase.
 - En rama `feature/US-*`, antes de dar por cerrada la fase de pruebas, confirma que cada **SC-XX** del alcance tiene al menos un test demostrable o una brecha documentada.
 
 ## Relación con otros flujos
@@ -139,7 +139,8 @@ Si el usuario repite la instrucción de «solo código», aplica el modo generac
 |-------|-------------------|
 | **`work-implement` (cierre)** | Delegación obligatoria para la fase de pruebas vía **Task**: escribe tests desde SC/BR del `README.md` de la US + TK ejecutados. |
 | **`work-implement` (tipos `TC-XXX` / `FT-XXX`)** | Delegación de la escritura de las pruebas vía **Task**: los insumos son los `TC-XXX-{slug}.md` y el índice `test-cases/README.md` del artefacto padre, no el código. Traducción 1:1, sin inventar casos; ver la sección de rama `test/`. |
-| **`code-review`** | Valida que la suite pase; este agente **escribe** tests, no ejecuta la batería completa de merge. |
+| **`quality-check`** | Ejecuta la batería completa en el cierre; este agente **escribe** tests, no los ejecuta como puerta de merge. |
+| **`code-review`** | Revisión cualitativa del diff; puede señalar brechas o pruebas mal planteadas que este agente luego escribe o corrige. |
 | **`work-integrate`** | No escribir tests nuevos salvo petición; la US debe llegar con pruebas alineadas a criterios de aceptación. |
 
 ## Invocación desde el agente padre
@@ -147,5 +148,5 @@ Si el usuario repite la instrucción de «solo código», aplica el modo generac
 Al delegar desde `work-implement`, `ui-specialist` u otro flujo, el invocador debe:
 
 1. Lanzar **Task** con este subagente y un prompt que incluya: rama actual, artefacto (US/TK/WI/TC/FT), archivos bajo prueba, modo (generación / planificación / revisión) y criterios de aceptación relevantes. Para los tipos `TC-XXX` / `FT-XXX`, pasar además las rutas de los `TC-XXX-{slug}.md` del alcance y del índice `test-cases/README.md`.
-2. Esperar el resultado del hilo aislado antes de continuar el flujo principal (p. ej. merge o `code-review`).
+2. Esperar el resultado del hilo aislado antes de continuar el flujo principal (p. ej. merge, `quality-check` o `code-review`).
 3. **No** escribir tests en el hilo principal si ya se delegó aquí.

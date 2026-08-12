@@ -9,18 +9,18 @@ Antes de sugerir nada, buscar configuración de pruebas ya presente: archivos de
 - **No existe nada** → se **crea** la compuerta desde cero (§ 2 en adelante).
 - **Ya existe algo** → se **amplía**: diagnosticar qué capas cubre hoy (unit / integración / E2E / API) y ofrecer solo las capas que falten y que aporten valor real.
 
-## 2. Qué se suele validar por stack (consultar `code-review`)
+## 2. Qué se suele validar por stack (consultar `quality-check`)
 
-`arch-init` no mantiene su propio catálogo de qué validar por stack — ese catálogo ya existe en el skill `code-review`, en su `references/stacks.md`, tabla "Aplicabilidad por stack" (Tipado / Linter / Unit tests / Coverage / Build / E2E / Sonar × Node+TS / Node JS / Java-Kotlin / Python / Go / Rust / .NET), con cada check marcado **Bloqueante**, **Condicional**, **N/A** o **Informativo**. Leer esa tabla para la fila del stack de este proyecto:
+`arch-init` no mantiene su propio catálogo de qué validar por stack — ese catálogo ya existe en el skill `quality-check`, en su `references/stacks.md`, tabla "Aplicabilidad por stack" (Tipado / Linter / Unit tests / Coverage / Build / E2E / Sonar × Node+TS / Node JS / Java-Kotlin / Python / Go / Rust / .NET), con cada check marcado **Bloqueante**, **Condicional**, **N/A** o **Informativo**. Leer esa tabla para la fila del stack de este proyecto:
 
 - **Bloqueante** → falta configurarlo es un hueco real de la compuerta; se ofrece siempre (§ 4).
-- **Condicional** → aplica solo bajo ciertas condiciones (tipo de proyecto, si tiene UI, si expone API, etc.); usar § 3 de esta referencia para decidir si aplica aquí — la tabla de `code-review` no distingue por tipo de proyecto, `arch-init` sí.
+- **Condicional** → aplica solo bajo ciertas condiciones (tipo de proyecto, si tiene UI, si expone API, etc.); usar § 3 de esta referencia para decidir si aplica aquí — la tabla de `quality-check` no distingue por tipo de proyecto, `arch-init` sí.
 - **N/A** → no aplica a este stack; no ofrecerlo.
 - **Informativo** → no bloquea ni condiciona nada; puede mencionarse pero no forma parte de la compuerta mínima.
 
-Esta consulta es de lectura — `arch-init` no ejecuta el review de `code-review` (ese corre sobre un diff de código para juzgar cambios; en una inicialización todavía no hay diff que revisar), solo usa su tabla como checklist de qué le falta a la compuerta.
+Esta consulta es de lectura — `arch-init` no ejecuta los checks de `quality-check` (esos corren sobre código ya implementado; en una inicialización todavía no hay nada que verificar), solo usa su tabla como checklist de qué le falta a la compuerta.
 
-Toda compuerta de calidad incluye pruebas unitarias, sin excepción (es Bloqueante en la tabla de `code-review` para todo stack con tests). Framework por defecto según el stack detectado/seleccionado — `code-review/references/stacks.md` marca que el check aplica, pero no prescribe cuál usar; esta tabla lo completa:
+Toda compuerta de calidad incluye pruebas unitarias, sin excepción (es Bloqueante en la tabla de `quality-check` para todo stack con tests). Framework por defecto según el stack detectado/seleccionado — `quality-check/references/stacks.md` marca que el check aplica, pero no prescribe cuál usar; esta tabla lo completa:
 
 | Stack | Framework de unit testing por defecto |
 | ----- | -------------------------------------- |
@@ -38,7 +38,7 @@ Si el usuario ya tiene preferencia declarada (en `.agents/MEMORY.md`, en el mani
 
 ## 3. Cuándo sugerir capas adicionales (matiz por tipo de proyecto)
 
-La tabla de `code-review` marca E2E como Condicional para la mayoría de stacks sin decir cuándo — esta sección es el matiz que le falta: no ofrecer todas las capas siempre, solo las que un proyecto de ese tipo realmente necesita para validar sus implementaciones.
+La tabla de `quality-check` marca E2E como Condicional para la mayoría de stacks sin decir cuándo — esta sección es el matiz que le falta: no ofrecer todas las capas siempre, solo las que un proyecto de ese tipo realmente necesita para validar sus implementaciones.
 
 | Tipo de proyecto | Capas adicionales a sugerir | Herramientas típicas |
 | ----------------- | ---------------------------- | --------------------- |
@@ -48,7 +48,7 @@ La tabla de `code-review` marca E2E como Condicional para la mayoría de stacks 
 | CLI / librería / paquete | Normalmente solo unit (+ integración si orquesta procesos o I/O externo) | — |
 | Servicio con integraciones externas (DB, cola, cache) | Integración con dependencias reales o contenedores efímeros | Testcontainers, contenedores docker-compose para test |
 
-No sugerir E2E a una librería sin UI ni endpoints, ni sugerir API testing a un proyecto sin API, aunque `code-review` marque esos checks como Condicional para el stack. Ante duda sobre si una capa aporta valor, preguntar al usuario en vez de asumir.
+No sugerir E2E a una librería sin UI ni endpoints, ni sugerir API testing a un proyecto sin API, aunque `quality-check` marque esos checks como Condicional para el stack. Ante duda sobre si una capa aporta valor, preguntar al usuario en vez de asumir.
 
 ## 4. Cómo preguntar
 

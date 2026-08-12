@@ -1,6 +1,6 @@
 # Referencia: detección, aplicabilidad, comandos y parseo por stack
 
-Detalle por ecosistema del skill `code-review`. Se carga **solo cuando ya se identificó el stack** (Paso 1 del flujo). Una vez sepas el ecosistema, usa **solo** la columna/sección de ese stack: su categoría por check, su comando y su parseo.
+Detalle por ecosistema del skill `quality-check`. Se carga **solo cuando ya se identificó el stack** (Paso 1 del flujo). Una vez sepas el ecosistema, usa **solo** la columna/sección de ese stack: su categoría por check, su comando y su parseo.
 
 ## Contenido
 
@@ -44,6 +44,7 @@ Define la **categoría** de cada check según el stack (Bloqueante / Condicional
 | Linter | **Bloqueante** (`eslint`) | **Bloqueante** | Condicional (Checkstyle/SpotBugs/PMD) | Condicional (`ruff`/`flake8`) | Condicional (`golangci-lint`) | Condicional (`clippy`) | Condicional (`dotnet format`/analyzers) |
 | Unit tests | **Bloqueante** | **Bloqueante** | **Bloqueante** | **Bloqueante** | **Bloqueante** | **Bloqueante** | **Bloqueante** |
 | Coverage | **Bloqueante** | **Bloqueante** | **Bloqueante** (JaCoCo) | **Bloqueante** | **Bloqueante** | **Bloqueante** | **Bloqueante** |
+| Integración | Condicional⁴ | Condicional⁴ | Condicional⁴ | Condicional⁴ | Condicional⁴ | Condicional⁴ | Condicional⁴ |
 | Build | **Bloqueante** | **Bloqueante** | **Bloqueante** | Condicional³ | **Bloqueante** | **Bloqueante** | **Bloqueante** |
 | E2E | Condicional | Condicional | Condicional | Condicional | Condicional | Condicional | Condicional |
 | Sonar | Informativo | Informativo | Informativo | Informativo | Informativo | Informativo | Informativo |
@@ -51,8 +52,11 @@ Define la **categoría** de cada check según el stack (Bloqueante / Condicional
 ¹ En Java/Kotlin la compilación estática ocurre en **build** (`mvn compile`, `gradle build`). No ejecutar un check de tipado separado.
 ² Go valida tipos en `go build` / `go test`; no añadir paso de tipado duplicado.
 ³ Python: si hay script/tarea de build → ejecutar (FAIL si exit ≠ 0). Si no hay ninguno → `N/A`.
+⁴ Integración: solo si el repo **distingue** una suite separada de la unitaria — script `test:it`/`test:integration`, perfil Failsafe (Maven), tarea Gradle dedicada, marcador `pytest -m integration`, tag `//go:build integration`, carpeta `tests/integration/`, etc. Si el repo corre todo en una sola suite, → `N/A`: no partir la suite unitaria ni inventar un comando.
 
-> **Consecuencia clave del modelo:** un check **Condicional** sin config ni herramienta es `N/A`, **no** `⚠️ Incompleto`. Ej.: Python sin `mypy` → tipado `N/A`; proyecto sin nada de e2e → e2e `N/A`. Solo es `SKIPPED` (Incompleto) cuando la config existe pero la ejecución no es posible.
+> **Consecuencia clave del modelo:** un check **Condicional** sin config ni herramienta es `N/A`, **no** `⚠️ Incompleto`. Ej.: Python sin `mypy` → tipado `N/A`; proyecto sin nada de e2e → e2e `N/A`; repo con una sola suite de tests → integración `N/A`. Solo es `SKIPPED` (Incompleto) cuando la config existe pero la ejecución no es posible.
+>
+> **Excepción de Coverage:** aunque la tabla lo marca Bloqueante en todos los stacks, un repo **sin ninguna herramienta ni configuración** de cobertura lo reporta `N/A` (con recomendación en Próximas acciones), no `SKIPPED` — ver el catálogo de checks en `SKILL.md`. En cuanto exista config o herramienta, vuelve a ser Bloqueante.
 
 (PHP no está tabulado: tratar linter/tests/coverage de forma análoga — `phpstan`/`php-cs-fixer` como Condicional, `phpunit` como Bloqueante — y preguntar si algo no es claro.)
 
@@ -68,8 +72,10 @@ Resolver el comando concreto leyendo scripts/tareas del manifiesto; *fallback* a
 | Linter | script `lint` → `eslint` | `mvn checkstyle:check` / plugin | `gradle checkstyleMain` / `lint` | `ruff check` / script `lint` | `golangci-lint run` | `cargo clippy` | `dotnet format --verify-no-changes` |
 | Unit | script `test` | `mvn test` | `gradle test` | `pytest` / script `test` | `go test ./...` | `cargo test` | `dotnet test` |
 | Coverage | `test:coverage` → `coverage` → *(sin script)* ver nota¹ | JaCoCo en `mvn verify` / `jacoco:report` | `gradle jacocoTestReport` | `pytest --cov` | `go test -coverprofile=...` | `cargo llvm-cov` / tarpaulin | `dotnet test /p:CollectCoverage=true` |
+| Integración | script `test:it` / `test:integration` | `mvn verify` (Failsafe) | tarea `integrationTest` | `pytest -m integration` / script | `go test -tags=integration ./...` | `cargo test --test '*'` | `dotnet test --filter Category=Integration` |
 | Build | script `build` → *(sin script)* ver nota² | `mvn package -DskipTests` | `gradle build -x test` | script `build` si existe | `go build ./...` | `cargo build` | `dotnet build` |
 | E2E | `test:e2e` → `e2e` | `mvn verify` (Failsafe) / perfil e2e | `gradle e2e` / task custom | script e2e / Playwright | script e2e | script e2e | script e2e |
+| Sonar | `sonar-scanner` | `mvn sonar:sonar` | `gradle sonarqube` | `sonar-scanner` | `sonar-scanner` | `sonar-scanner` | `dotnet sonarscanner` |
 
 **Node:** detectar runner por lockfile (`package-lock.json` → npm, `yarn.lock` → yarn, `pnpm-lock.yaml` → pnpm). Leer `package.json.scripts` **antes** de invocar `npx`.
 

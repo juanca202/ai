@@ -92,7 +92,7 @@ Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto
 
 ### Paso 4 - Cierre
 
-1. Si la ultima TK completada quedo sin commitear (el usuario detuvo el flujo en el Paso 3 antes de confirmar la siguiente), **invocar `/git-commit` sobre sus cambios ahora**. Cuando no queden tareas pendientes (o el usuario detenga), verificar que las pruebas **de los archivos afectados** pasen limpias (unitarias y las de integracion que apliquen) y, **una sola vez sobre el codigo consolidado, correr las pruebas e2e** del alcance si el repo las tiene (ver [Uso escalonado de pruebas](../SKILL.md) en `SKILL.md`); el working tree limpio y con todos los commits hechos. **La bateria completa de pruebas no se corre aqui:** la ejecuta `code-review` al integrar (`work-integrate`) o crear el PR (`pr-create`).
+1. Si la ultima TK completada quedo sin commitear (el usuario detuvo el flujo en el Paso 3 antes de confirmar la siguiente), **invocar `/git-commit` sobre sus cambios ahora**. Cuando no queden tareas pendientes (o el usuario detenga), verificar que las pruebas **de los archivos afectados** pasen limpias (unitarias y las de integracion que apliquen) y, **una sola vez sobre el codigo consolidado, correr las pruebas e2e** del alcance si el repo las tiene (ver [Uso escalonado de pruebas](../SKILL.md) en `SKILL.md`); el working tree limpio y con todos los commits hechos. **La bateria completa de pruebas no se corre aqui:** la ejecuta `quality-check` al integrar (`work-integrate`) o crear el PR (`pr-create`).
 2. **Handoff:** si todo el alcance esta en `Done`, **preguntar al usuario** (herramienta estructurada) como continuar:
 
    > "Implementacion completada. ¿Que quieres hacer ahora?"
@@ -132,7 +132,7 @@ WARNING No es posible continuar con la implementacion:
 
 **Por cada tarea:** TK `Ready`; no `Done` en `progress.md`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; test cases automatizables del `test-cases/README.md` cubiertos; UI bajo `ui-specialist`; Figma via MCP; lint/typecheck/build/tests ejecutados y en verde; `progress.md` a `Done` con `Cobertura de test cases` (TC no automatizados o con otro tipo de prueba documentados); decisiones de sesion registradas; **confirmacion explicita antes de la siguiente TK**; `/git-commit` invocado recien al confirmar el avance (no antes) — o en el cierre, si el usuario detiene ahi.
 
-**Cierre:** pruebas unitarias (e integracion aplicable) de los archivos afectados en verde y e2e del alcance corridas una vez sobre el codigo consolidado (la bateria completa la corre `code-review`, no este skill); working tree limpio; handoff a `pr-create` o `work-integrate`.
+**Cierre:** pruebas unitarias (e integracion aplicable) de los archivos afectados en verde y e2e del alcance corridas una vez sobre el codigo consolidado (la bateria completa la corre `quality-check`, no este skill); working tree limpio; handoff a `pr-create` o `work-integrate`.
 
 ---
 
@@ -176,5 +176,5 @@ Posicion: **implementacion** - entre `work-plan` e `work-integrate`.
 |--|--|
 | **Entrada** | US `Ready`; TK del alcance `Ready`; rama `feature/US-XXX-*` activa o creada desde la rama base. |
 | **Salida** | Codigo commiteado; `progress.md` con cada TK del alcance en `Done`; working tree limpio. |
-| **Siguiente paso** | Cada TK ya comiteada via `/git-commit` durante la implementacion => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara `code-review` y exigira veredicto Aprobado antes de integrar. |
+| **Siguiente paso** | Cada TK ya comiteada via `/git-commit` durante la implementacion => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara `quality-check` y `code-review`, y exigira veredicto Aprobado en ambos antes de integrar. |
 | **Regreso desde plan** | TK en Draft o conflicto tecnico => volver a `work-plan`. |

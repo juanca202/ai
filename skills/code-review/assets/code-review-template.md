@@ -3,78 +3,72 @@ Convención de placeholders: sustituir manualmente cada {{texto}}; no es un moto
 Eliminar este bloque y sustituir todos los {{…}} al publicar el documento final.
 -->
 
-# Code Review — {{US-XXX-nombre-corto | repositorio · rama}}
+# Code Review — {{US-XXX-nombre-corto | WI-XXX-nombre | FT-XXX-slug | nombre del artefacto}}
 
 **Fecha:** {{YYYY-MM-DD HH:MM}}
-**Repositorio:** {{nombre o ruta}}
 **Rama:** {{rama}}
 **Commit:** {{sha-corto}}
-**Working tree:** {{limpio | sucio (N archivos modificados)}}
-**Modo:** {{default | checks-only | qualitative-only | only nombre-del-check | …}}
+**Alcance del diff:** {{N archivos, +X/−Y líneas | rutas si se usó `scope`}}
+**Modo:** {{default | blocking-only | scope … | base … }}
 **Veredicto:** {{✅ Aprobado | ❌ Rechazado | ⚠️ Incompleto}}
 
 ## Resumen
 
 {{2-3 frases: qué se revisó, el resultado global y, si algo bloquea, qué falta para llegar a Aprobado. Sin listar aún el detalle.}}
 
-## 1. Verificaciones automatizadas
+## Intención detectada
 
-Símbolos de estado: `✅` PASS · `❌` FAIL · `⏭️` SKIPPED · `—` N/A · `ℹ️` informativo (Sonar).
+{{Qué problema resuelve el cambio, inferido de US/WI/FT · rama · commits · descripción del PR. Si el usuario la aportó a mano, indicarlo.}}
 
-| # | Check      | Comando            | Categoría     | Estado | Detalle               | Duración |
-| - | ---------- | ------------------ | ------------- | ------ | --------------------- | -------- |
-| 1 | tipado     | {{comando}}          | {{Bloqueante}}  | {{✅}}    | {{0 errores}}           | {{4.1s}}   |
-| 2 | linter     | {{comando}}          | {{Bloqueante}}  | {{❌}}    | {{3 errors, 5 warnings}}| {{2.3s}}   |
-| 3 | unit tests | {{comando}}          | {{Bloqueante}}  | {{✅}}    | {{142 passed, 0 failed}}| {{18.7s}}  |
-| 4 | coverage   | {{comando}}          | {{Bloqueante}}  | {{✅}}    | {{87% (umbral 80%)}}    | {{19.0s}}  |
-| 5 | build      | {{comando}}          | {{Bloqueante}}  | {{✅}}    | {{OK}}                  | {{12.4s}}  |
-| 6 | e2e        | {{comando}}          | {{Condicional}} | {{⏭️}}    | {{config rota}}         | {{—}}      |
-| 7 | sonar      | {{comando}}          | {{Informativo}} | {{—}}    | {{N/A (sin config)}}    | {{—}}      |
-
-{{Incluir solo las filas de checks que aplican al stack. Los `N/A` por modificador del usuario o por no aplicar al stack pueden omitirse o marcarse `—`.}}
-
-### Detalle de checks fallidos
-
-{{Solo para FAIL o SKIPPED. Truncar a 10 errores por check con `… y N más`. Si no hay ninguno: «Sin checks fallidos».}}
-
-- **{{check}}** — {{mensajes de error relevantes, parseados según la herramienta}}
-
-## 2. Revisión cualitativa
-
-{{Si la etapa automatizada no se superó (quedó algún FAIL sin corregir): escribir «No ejecutada — la etapa automatizada no se superó.» y omitir el resto de esta sección.}}
-{{Si se omitió por modificador `checks-only`: escribir «No ejecutada — omitida por modificador `checks-only`.» (motivo distinto al fallo automatizado) y omitir el resto. Con `only nombre-del-check`: «No ejecutada — omitida por modificador `only nombre-del-check`.»}}
+## Hallazgos
 
 Símbolos de severidad: `🔴` Crítico · `🟠` Mayor · `🟡` Menor · `💡` Sugerencia · `✅` dimensión conforme.
+Formato de cada hallazgo: `[ISO-25010: <Característica>]` + severidad + qué (ubicado) + por qué + impacto + sugerencia concreta.
 
-**Intención detectada:** {{qué problema resuelve el cambio, inferido de US/TK/WI · rama · commits}}
+### Análisis semántico (intención)
 
-### Análisis semántico
+{{`✅ conforme` con una frase que explique por qué, o lista de hallazgos.}}
 
-{{`✅ conforme` o lista de hallazgos. Cada hallazgo: severidad + qué + por qué + impacto + sugerencia concreta.}}
-
-- {{🔴 | 🟠 | 🟡 | 💡}} {{hallazgo}} — **Por qué:** {{qué se rompe o encarece}} **Impacto:** {{alcance en el sistema}} **Sugerencia concreta:** {{cómo quedaría mejor}}
+- {{🔴 | 🟠 | 🟡 | 💡}} `[ISO-25010: Adecuación funcional]` {{título del hallazgo}} — **Qué:** {{problema, en archivo/símbolo}} **Por qué:** {{qué se rompe o encarece}} **Impacto:** {{alcance en el sistema}} **Sugerencia:** {{cómo quedaría mejor}}
 
 ### Arquitectura y diseño
 
-{{`✅ conforme` o lista de hallazgos (SOLID, límites de capas, acoplamiento, duplicación, abstracción innecesaria, patrones del proyecto).}}
+{{`✅ conforme` con una frase que explique por qué, o lista de hallazgos (SOLID, límites de capas, acoplamiento, duplicación, abstracción innecesaria, patrones del proyecto, fiabilidad, seguridad, desempeño, compatibilidad).}}
 
-- {{🔴 | 🟠 | 🟡 | 💡}} {{hallazgo}} — **Por qué:** {{…}} **Impacto:** {{…}} **Sugerencia concreta:** {{…}}
+- {{🔴 | 🟠 | 🟡 | 💡}} `[ISO-25010: {{Característica}}]` {{título}} — **Qué:** {{…}} **Por qué:** {{…}} **Impacto:** {{…}} **Sugerencia:** {{…}}
+
+### Dimensiones no evaluadas
+
+{{«Ninguna» si las tres se evaluaron. Si alguna no pudo evaluarse (intención no determinable, diff inaccesible o generado), listarla con su motivo — es lo que produce el veredicto ⚠️ Incompleto.}}
 
 ### Feedback adicional
 
-{{Comentarios contextuales: lo que está bien hecho y nitpicks `🟡`/`💡`. No abrumar; priorizar por impacto.}}
+{{Comentarios contextuales: lo que está bien hecho y nitpicks `🟡`/`💡`. No abrumar; priorizar por impacto. Con `blocking-only`, omitir esta sección y decirlo en el Resumen.}}
+
+## Veredicto
+
+**{{✅ Aprobado | ❌ Rechazado | ⚠️ Incompleto}}** — {{justificación en una línea: qué hallazgo o qué dimensión sin evaluar lo determina}}
 
 ## Próximas acciones
 
-{{Orden de prioridad: hallazgos 🔴/🟠 sin resolver → FAIL Bloqueantes/Condicionales → warnings de linter → Sonar → SKIPPED por config ausente/rota → hallazgos 🟡/💡. Si el veredicto es Aprobado y no hay pendientes: «Sin acciones pendientes».}}
+{{Orden de prioridad: hallazgos 🔴/🟠 sin resolver → dimensiones sin evaluar → hallazgos 🟡/💡. Si el veredicto es Aprobado y no hay pendientes: «Sin acciones pendientes».}}
 
 1. {{acción concreta}}
 2. {{…}}
 
 ## Justificaciones aceptadas
 
-{{Solo si el usuario justificó hallazgos bloqueantes (🔴/🟠) de cualquiera de las tres dimensiones. Si no hubo: «Ninguna».}}
+{{Solo si el usuario justificó hallazgos bloqueantes (🔴/🟠). Si no hubo: «Ninguna».}}
 
 | Hallazgo | Severidad | Dimensión | Justificación | Aceptada por |
 | -------- | --------- | --------- | ------------- | ------------ |
 | {{hallazgo}} | {{🔴 | 🟠}} | {{Semántica | Arquitectura | Feedback}} | {{motivo aceptado para conservar el estado actual}} | {{usuario / rol}} |
+
+## Otras puertas del cierre
+
+{{Este informe cubre solo el plano cualitativo. Indicar el estado de las otras dos puertas, o que están pendientes.}}
+
+| Puerta | Artefacto | Veredicto |
+| ------ | --------- | --------- |
+| Verificaciones automatizadas (`quality-check`) | `docs/specs/quality-check.md` | {{✅ / ❌ / ⚠️ / pendiente}} |
+| Trazabilidad (`trace-validate`) | `trace-report.md` del trabajo | {{✅ / ❌ / ⚠️ / pendiente}} |

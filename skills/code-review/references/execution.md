@@ -1,162 +1,85 @@
 # Referencia: Flujo de ejecución y manejo de errores
 
-Detalla **cómo** ejecutar el code review paso a paso y cómo actuar ante cada situación. Se carga desde `SKILL.md` al iniciar la ejecución. La semántica de categorías, veredicto y modificadores vive en `SKILL.md`; el detalle por stack en [`stacks.md`](stacks.md); la revisión cualitativa en [`qualitative-review.md`](qualitative-review.md).
+Detalla **cómo** ejecutar la revisión cualitativa paso a paso y cómo actuar ante cada situación. Se carga desde `SKILL.md` al iniciar la ejecución. La semántica de severidad, veredicto y modificadores vive en `SKILL.md`; las rúbricas de las tres dimensiones en [`qualitative-review.md`](qualitative-review.md).
 
 ## Contenido
 
 1. [Flujo de ejecución](#flujo-de-ejecución)
-2. [Manejo de errores](#manejo-de-errores)
-3. [Anti-patterns](#anti-patterns)
+2. [Formato del informe](#formato-del-informe)
+3. [Manejo de errores](#manejo-de-errores)
+4. [Anti-patterns](#anti-patterns)
 
 ---
 
 ## Flujo de ejecución
 
-> **Principio rector:** dos etapas con puertas. (A) Etapa automatizada → debe quedar **sin FAIL** para avanzar. (B) Revisión cualitativa. **Ninguna corrección se aplica sin autorización explícita del usuario.** Tras aplicar una corrección, primero **verifica que el arreglo funciona** re-ejecutando solo el check o la prueba que fallaba; **únicamente si ese check puntual pasa**, dispara el **reinicio** (de la etapa o del review completo) para re-evaluar sobre el código ya corregido. Si el arreglo no resuelve el fallo, sigue iterando la corrección — no reinicies con algo que aún no funciona. Para ahorrar vueltas, si el usuario autoriza varias correcciones, aplícalas juntas, verifícalas y reinicia **una sola vez**.
+> **Principio rector:** revisar el **diff**, no el repo. **Ninguna corrección se aplica sin autorización explícita del usuario.** Tras aplicar una corrección autorizada (o cuando el usuario indique que corrigió manualmente), **reinicia la revisión desde el Paso 1** sobre el código ya corregido: los hallazgos anteriores pueden haber cambiado de forma o de severidad. Para ahorrar vueltas, si el usuario autoriza varias correcciones, aplícalas juntas y reinicia **una sola vez**.
+>
+> **Este skill no ejecuta checks.** No corre pruebas, linter, tipado ni build; si la corrección de un hallazgo toca lógica cubierta por pruebas, **sugiere** re-ejecutar `quality-check` y sigue con la revisión.
 
-### Paso 1 — Detectar entorno
+### Paso 1 — Delimitar la revisión
 
-1. Identificar el ecosistema y cargar lo relativo a ese stack desde [`stacks.md`](stacks.md) (categoría por check, comando, parseo). Si no se detecta stack o el monorepo es ambiguo, parar y preguntar.
-2. Resolver el comando concreto de cada check (scripts del manifiesto + *fallback* canónico).
-3. Capturar metadata: stack detectado, rama (`git rev-parse --abbrev-ref HEAD`), commit corto (`git rev-parse --short HEAD`), working tree (`git status --porcelain`), y la **intención** del cambio (US/TK, rama, commits) para el Paso 3.
-4. Calcular el **fingerprint canónico del estado del código** (recipe exacto en [`SKILL.md` → Caché de corrida de pruebas](../SKILL.md); es el mismo que usa `trace-validate`). Clave de frescura de la caché de pruebas (ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas)).
+1. **Resolver el diff bajo revisión:**
+   - Con `scope <ruta…>`, limitarse a esas rutas.
+   - Con `base <rama>`, usar `git diff <rama>...HEAD`.
+   - Sin modificadores, inferir la rama base (rama de integración configurada del repo, `origin/HEAD`, o la base del PR si existe) y **confirmarla con el usuario si es ambigua**. No revisar todo el repo.
+2. Capturar metadata: rama (`git rev-parse --abbrev-ref HEAD`), commit corto (`git rev-parse --short HEAD`), working tree (`git status --porcelain`) y volumen del diff (`git diff --stat`).
+3. **Reconstruir la intención** del cambio desde, en este orden: criterios de aceptación del artefacto origen (US/WI/FT) si existe; descripción de la tarea; nombre de la rama; mensajes de commit del rango; descripción del PR. Si no se puede inferir, **pedir al usuario una frase con el objetivo del cambio**; no inventarla.
+4. Si el diff está **vacío** o no contiene cambios de código, reportarlo y terminar: no hay nada que revisar.
 
-### Paso 2 — Etapa automatizada (puerta dura)
+### Paso 2 — Leer el contexto del sistema
 
-Con `qualitative-only`, saltar este paso.
+Antes de juzgar el diff, entender contra qué se juzga:
 
-**Con `tests-only`** (objetivo de delegación de `trace-validate`): ejecutar únicamente los checks de
-**pruebas** (unit, coverage, integración y e2e; build solo si es prerrequisito de e2e), omitiendo
-tipado, linter y sonar. Antes de ejecutar, comprobar la **caché**: si existe `docs/specs/test-run.json`
-con `git.fingerprint` == `FINGERPRINT` (Paso 1), **reutilizar** esos resultados sin
-re-ejecutar y saltar a la salida. Si no hay caché o está obsoleta, ejecutar las suites, **escribir/
-actualizar `test-run.json`** (ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas)) y devolver
-los resultados por suite. En `tests-only` no hay Paso 3 ni veredicto de review.
+1. **Patrones del repo:** estructura de carpetas, convenciones de naming, manejo de errores, inyección de dependencias, librerías ya adoptadas. Leer los vecinos de los archivos tocados, no solo el diff.
+2. **Límites arquitectónicos declarados:** si el repo documenta su arquitectura (`docs/architecture/`, ADRs, `.agents/MEMORY.md`), leer lo relevante para saber qué dependencias están permitidas entre capas.
+3. **Criterios de aceptación** del artefacto origen, si el trabajo viene de una US/WI/FT: son la vara de la dimensión semántica.
 
-En otro caso, ejecutar **secuencialmente** (no en paralelo) los checks Bloqueantes y Condicionales-con-config-presente, midiendo la duración:
+Un hallazgo que ignora el patrón vigente del repo o una decisión ya tomada en un ADR es ruido; este paso lo evita.
 
-1. **tipado** — solo si Bloqueante (TS) o Condicional con config. Si **FAIL** → **fail-fast**: marcar el resto `— (no ejecutado)` y pasar a la evaluación de la etapa.
-2. **linter** — parsear `error` vs `warning` según la herramienta.
-3. **unit tests** — comando del stack; *fallback* canónico.
-4. **coverage** — PASS/FAIL según la regla del catálogo de checks (`SKILL.md`).
-5. **build** — en Java/Go/Rust/.NET cubre la compilación.
-6. **e2e** — solo si hay script/tarea/perfil e2e o config Playwright/Cypress.
-7. **sonar** — si falta `sonar-project.properties` → `N/A`. Si hay config y red falla → FAIL informativo.
+### Paso 3 — Evaluar las tres dimensiones
 
-> Al **ejecutar** un check, nunca uses `--fix`, `--write`, `--force` ni equivalentes: falsearían el resultado. La corrección autorizada (abajo) es un paso aparte y deliberado.
+1. Leer [`qualitative-review.md`](qualitative-review.md) y recorrer las tres dimensiones (semántica, arquitectura/diseño según ISO/IEC 25010, feedback senior).
+2. Emitir hallazgos con severidad (🔴/🟠/🟡/💡). Para cada uno: **qué** (ubicado en archivo/símbolo), **por qué**, **impacto** y **sugerencia concreta**, con la característica ISO/IEC 25010 correspondiente.
+3. Si una dimensión no arroja hallazgos, **decirlo explícitamente** (`✅ conforme`) y explicar brevemente por qué el cambio está bien en ese plano. El silencio no es feedback.
+4. Si una dimensión **no se pudo evaluar** (intención no determinable y el usuario no la aportó, parte del diff inaccesible o generada), marcarla como *No evaluada* con el motivo: es lo que produce el veredicto `⚠️ Incompleto` del Paso 4. No confundir *No evaluada* con `✅ conforme`.
+5. No inflar ni minimizar severidades; ante la duda, decidir por el **impacto en el sistema** (ver la calibración en `qualitative-review.md`).
 
-**Por qué este orden** — pirámide de tests, criterio *rápido → lento*, *dependencias antes que consumidores*:
+### Paso 4 — Puerta cualitativa e informe
 
-1. **Estático** (tipado, linter): barato; el fail-fast del tipado evita ruido en cascada.
-2. **Unit + coverage**: mismo estrato; coverage justo después de unit.
-3. **Build**: artefacto de integración; en Java/Go/Rust/.NET valida también la compilación.
-4. **E2E**: el más lento; suele requerir build previo.
-5. **Sonar**: informativo, al final.
-
-**Por qué fail-fast solo en tipado:** en TypeScript, si los tipos no compilan, linter, tests y build fallan masivamente y el ruido no aporta señal. En stacks sin check de tipado separado (Java, Go, .NET), no hay fail-fast: tipado y compilación se validan en **build**.
-
-**Puerta de la etapa automatizada** — evaluar el conjunto de resultados:
-
-- **Hay al menos un FAIL** (Bloqueante o Condicional-presente): **mostrar el reporte de la etapa al usuario** y **preguntar si quiere que se corrijan** los errores. **No corregir sin autorización.**
-  - Si **autoriza la corrección automática** → aplicar los cambios mínimos para resolver los FAIL (sin tocar más de lo necesario), **re-ejecutar el check/prueba que fallaba para confirmar que ya pasa**, y solo entonces **re-ejecutar TODO el set automatizado** (reiniciar el Paso 2). Si el check puntual sigue en FAIL, iterar la corrección antes de reiniciar.
-  - Si **corrige manualmente** e indica que ya está → **re-ejecutar el check/prueba que fallaba**; si pasa, **re-ejecutar TODO el set automatizado**; si no, avisar y volver a la corrección.
-  - Si **no desea corregir ahora** → continuar de todos modos al Paso 3 (revisión cualitativa) sobre el diff tal cual está, para que el usuario vea en una sola pasada tanto el FAIL automatizado como los hallazgos de diseño — así puede decidir y corregir todo junto en vez de descubrir los cualitativos en una segunda invocación. Al construir el informe (Paso 4), el veredicto es `❌ Rechazado` por el FAIL automatizado sin resolver, sin importar el resultado de la cualitativa.
-  - Repetir el ciclo de corrección hasta que la etapa quede sin FAIL o el usuario detenga (en cuyo caso se sigue igual al Paso 3, como arriba).
-- **Solo SKIPPED, sin FAIL** (`⚠️ Incompleto`): reportar el motivo y **preguntar** si resolver el tooling primero o continuar a la cualitativa asumiendo el Incompleto. No avanzar en silencio.
-- **Sin FAIL ni SKIPPED**: etapa superada → continuar al Paso 3.
-
-> Con `checks-only`, terminar aquí (no hay Paso 3): construir informe y veredicto solo con la etapa automatizada. Es la única forma de omitir la revisión cualitativa por un resultado de la etapa automatizada — un FAIL o un `❌ Rechazado` en la etapa automatizada, por sí solos, **ya no** la omiten (ver Paso 2 arriba).
-
-### Paso 3 — Revisión cualitativa senior
-
-Se ejecuta **siempre** tras el Paso 2 (con FAIL resuelto, sin resolver, o sin FAIL) salvo modificador `checks-only`/`only <check>` (que la omiten explícitamente), o si el modo es `qualitative-only` (que salta directo aquí sin Paso 2). Ver la sección "Revisión cualitativa (análisis senior)" en `SKILL.md` y el detalle en [`qualitative-review.md`](qualitative-review.md):
-
-1. Obtener el diff bajo revisión (`git diff` contra la rama base acordada, o los archivos que el usuario indique). No revisar todo el repo.
-2. Recuperar la **intención** capturada en el Paso 1.
-3. Leer [`qualitative-review.md`](qualitative-review.md) y evaluar las tres dimensiones (semántica, arquitectura/diseño, feedback senior).
-4. Emitir hallazgos con severidad (🔴/🟠/🟡/💡). Para cada uno: el porqué, el impacto y una mejora concreta.
-5. **Puerta cualitativa** — si hay hallazgos bloqueantes (🔴/🟠), **pausar y pedir** al usuario, por cada uno, **corregir** o **justificar** (ver "Severidad y puerta de aceptación" en `SKILL.md`):
-   - **Justificar** → registrar la justificación; el hallazgo deja de bloquear.
-   - **Corregir con autorización expresa de corrección automática** → aplicar el cambio, **verificar que funciona** re-ejecutando el check/prueba directamente afectado, y solo si pasa **reiniciar TODO el code review desde el Paso 1**.
-   - **Corregir manualmente** (el usuario indica que ya lo hizo) → **verificar** re-ejecutando el check/prueba afectado y, si pasa, **reiniciar TODO el code review desde el Paso 1**.
+1. **Puerta** — si hay hallazgos bloqueantes (🔴/🟠), **pausar y pedir** al usuario, por cada uno, **corregir** o **justificar**:
+   - **Justificar** → registrar la justificación en el informe; el hallazgo deja de bloquear.
+   - **Corregir con autorización expresa** → aplicar el cambio y **reiniciar la revisión desde el Paso 1**.
+   - **Corregir manualmente** (el usuario indica que ya lo hizo) → **reiniciar la revisión desde el Paso 1**.
    - Repetir hasta que no queden bloqueantes sin resolver o el usuario detenga. Aplica la **cota de 3 reinicios** (ver [Manejo de errores](#manejo-de-errores)): tras 3 reinicios sin llegar a `✅`, resumir lo pendiente y preguntar al usuario cómo proceder.
-
-### Paso 4 — Construir informe
-
-Rellenar la plantilla [`../assets/code-review-template.md`](../assets/code-review-template.md) (ver [Formato del informe](#formato-del-informe)):
-
-1. Calcular el veredicto unificado con la tabla de Veredicto (`SKILL.md`): considera Bloqueantes/Condicionales-presentes (las filas `N/A` no cuentan) **y** los hallazgos cualitativos bloqueantes sin resolver.
-2. Tabla resumen de checks: una fila por check ejecutado, `SKIPPED` o `N/A`.
-3. Sección de revisión cualitativa: hallazgos por dimensión y severidad, con porqué + sugerencia concreta; si no hay hallazgos en una dimensión, decir explícitamente que está conforme.
-4. Detalle de checks **solo** para FAIL o `SKIPPED`; truncar a 10 errores por check (`… y N más`).
-5. "Próximas acciones": hallazgos cualitativos 🔴/🟠 sin resolver → FAIL Bloqueantes/Condicionales en orden de ejecución → warnings de linter → Sonar → `SKIPPED` por config ausente/rota → hallazgos 🟡/💡.
+2. **Dimensiones no evaluadas** (Paso 3.4): si queda alguna y no hay bloqueantes pendientes, el veredicto es `⚠️ Incompleto`; listarlas en el informe con su motivo y en Próximas acciones con qué haría falta para evaluarlas.
+3. Rellenar la plantilla [`../assets/code-review-template.md`](../assets/code-review-template.md) (ver [Formato del informe](#formato-del-informe)) con el veredicto de la tabla de `SKILL.md`, los hallazgos por dimensión, las próximas acciones y las justificaciones aceptadas.
 
 ### Paso 5 — Registro y salida
 
-Decidir **dónde** queda el informe según el contexto. El review es una **corrida completa** de la rama,
-no de una unidad, así que su informe reside en una **ubicación fija**, no en la carpeta de la US/WI:
+La revisión cubre la **rama completa**, no una unidad, así que su informe reside en una **ubicación fija**, no en la carpeta de la US/WI:
 
-- **Proyecto spec-driven** (existe `docs/specs/`): **escribir** `docs/specs/code-review.md` rellenando la plantilla [`../assets/code-review-template.md`](../assets/code-review-template.md) (checks + revisión cualitativa + veredicto), sin importar desde qué `US`/`WI` se invocó. Si el usuario dio **justificaciones** para hallazgos de las tres dimensiones, completarlas en la sección "Justificaciones aceptadas". Sobrescribir el archivo en re-ejecuciones (es el estado vigente de la rama). Mostrar también un resumen en el chat.
+- **Proyecto spec-driven** (existe `docs/specs/`): **escribir** `docs/specs/code-review.md` rellenando la plantilla, sin importar desde qué `US`/`WI` se invocó. Sobrescribir el archivo en re-ejecuciones (es el estado vigente de la rama). Mostrar también un resumen en el chat.
 - **Proyecto sin `docs/specs/`:** **no** escribir archivo; mostrar el informe completo en el chat. (Salvo que el usuario pase `save-report`, que lo persiste en `docs/code-review/<YYYYMMDD-HHMMSS>.md`.)
 
-**Escribir la caché de corrida de pruebas.** Si en esta corrida **se ejecutaron los checks de pruebas**
-(unit/coverage/integración/e2e — es decir, cualquier modo salvo `qualitative-only`, `no-tests` u `only <no-test>`)
-**y** el proyecto usa `docs/specs/`, escribir/actualizar `docs/specs/test-run.json` (junto a
-`docs/specs/code-review.md`) con el `FINGERPRINT` del Paso 1 y el resultado por suite. Ver
-[Caché de corrida de pruebas](#caché-de-corrida-de-pruebas). En modo `tests-only` este es el artefacto de salida.
-
-### Paso 6 — Presentar resultado
-
-Devolver el informe completo (y la ruta del `code-review.md` si se escribió). **No** continuar con `git commit`, push ni merge aunque el veredicto sea `✅ Aprobado` — salvo instrucción explícita del usuario.
+Devolver el informe completo (y la ruta del `code-review.md` si se escribió). **No** continuar con `git commit`, push ni merge aunque el veredicto sea `✅ Aprobado` — salvo instrucción explícita del usuario. Si el cierre requiere también las verificaciones automatizadas, **sugerir** invocar `quality-check`; no ejecutarlo desde aquí.
 
 ---
 
 ## Formato del informe
 
-La estructura canónica del informe está en la plantilla [`../assets/code-review-template.md`](../assets/code-review-template.md). **Rellénala** (no la reescribas desde cero) para todo informe, tanto el que se muestra en chat como el `docs/specs/code-review.md` que se escribe en proyectos spec-driven.
+La estructura canónica está en la plantilla [`../assets/code-review-template.md`](../assets/code-review-template.md). **Rellénala** (no la reescribas desde cero) para todo informe, tanto el que se muestra en chat como el `docs/specs/code-review.md` que se escribe en proyectos spec-driven.
 
-La plantilla incluye: encabezado con metadata y veredicto, **Resumen**, **1. Verificaciones automatizadas** (tabla + detalle de fallidos), **2. Revisión cualitativa (senior)** (intención + las tres dimensiones), **Veredicto** con su justificación de una línea, **Próximas acciones** y **Justificaciones aceptadas**.
+La plantilla incluye: encabezado con metadata y veredicto, **Resumen**, **Intención detectada**, las tres dimensiones (**Análisis semántico**, **Arquitectura y diseño**, **Feedback adicional**), **Dimensiones no evaluadas**, **Veredicto** con su justificación de una línea, **Próximas acciones** y **Justificaciones aceptadas**.
 
-Símbolos a usar (exactamente estos):
-- Estado de checks: `✅` PASS · `❌` FAIL · `⏭️` SKIPPED · `—` N/A · `ℹ️` informativo (Sonar).
-- Severidad cualitativa: `🔴` Crítico · `🟠` Mayor · `🟡` Menor · `💡` Sugerencia · `✅` dimensión conforme.
+Símbolos de severidad (exactamente estos): `🔴` Crítico · `🟠` Mayor · `🟡` Menor · `💡` Sugerencia · `✅` dimensión conforme.
 
 Reglas al rellenar:
 - Sustituir cada `{{…}}` de la plantilla por el valor real; el informe publicado no debe conservar placeholders ni el bloque de comentario inicial.
-- Incluir solo las filas de checks que aplican; el detalle de checks va **solo** para FAIL o SKIPPED (truncar a 10 errores por check con `… y N más`).
-- La revisión cualitativa se ejecuta y se reporta sin importar el resultado de la etapa automatizada (ver Paso 3); la sección 2 solo dice *"No ejecutada"* cuando se omitió por modificador.
-- Si la revisión cualitativa se omitió por modificador (`checks-only` u `only nombre-del-check`), la sección 2 dice *"No ejecutada — omitida por modificador `checks-only`"* (o *"… `only nombre-del-check`"*).
+- Cada hallazgo lleva su característica ISO/IEC 25010, el porqué, el impacto y una sugerencia concreta.
+- Con `blocking-only`, omitir los hallazgos 🟡/💡 y decirlo en el Resumen.
 - Si no hubo justificaciones, la sección final dice «Ninguna».
-
----
-
-## Caché de corrida de pruebas
-
-Artefacto reutilizable que evita que `trace-validate` vuelva a ejecutar las pruebas. La semántica y el
-esquema están en `SKILL.md` ([Caché de corrida de pruebas](../SKILL.md)); aquí, lo operativo.
-
-**Cuándo se escribe.** Al final de una corrida que ejecutó los checks de pruebas (Paso 5), si el proyecto
-usa `docs/specs/`. Ruta **fija**: `docs/specs/test-run.json` (junto a `docs/specs/code-review.md`), no por
-unidad. Se **sobrescribe** en cada corrida (es el estado vigente de la rama). Sin `docs/specs/` no se
-escribe (no hay consumidor).
-
-**Qué se guarda.** El `FINGERPRINT` del Paso 1 en `git.fingerprint`, más una entrada por suite de prueba
-ejecutada (`unit`, `coverage`, `integration`, `e2e`) con su `command`, `result` (`PASS`/`FAIL`/`SKIPPED`/`N/A`)
-y un `summary` corto. Mapear los resultados de los checks de la etapa automatizada a estas suites:
-`unit tests` → `unit`, `coverage` → `coverage`, `e2e` → `e2e`; una suite de integración separada, si el
-stack la distingue, → `integration` (si no existe, `result: "N/A"`). No inventar suites que el repo no tiene.
-
-**Cómo se reutiliza (`tests-only`).** Recalcular el `FINGERPRINT` (Paso 1) y compararlo con
-`git.fingerprint` del `test-run.json` existente:
-- **Coincide** → caché **fresca**: devolver esos resultados sin ejecutar nada. Es el camino que hace que,
-  si no hubo cambios desde la última corrida de pruebas, no se repita el trabajo.
-- **Diferente o no existe** → caché **obsoleta/ausente**: ejecutar las suites, sobrescribir `test-run.json`
-  y devolver los nuevos resultados.
-
-**Validez.** El fingerprint canónico (recipe en `SKILL.md`) cubre código, specs y tests, y excluye los
-tres artefactos generados; no detecta la edición de **contenido** de un archivo que permanezca sin
-trackear — si el resultado pudiera depender de eso, tratar la caché como no concluyente. Si el árbol
-estaba sucio, `workingTreeClean: false` queda registrado como señal para el consumidor.
+- No incluir tablas de checks, comandos ni resultados de pruebas: eso pertenece al informe de `quality-check`.
 
 ---
 
@@ -164,64 +87,41 @@ estaba sucio, `workingTreeClean: false` queda registrado como señal para el con
 
 | Situación | Cómo actuar |
 |-----------|-------------|
-| Stack no detectable | Parar antes de ejecutar nada; preguntar al usuario. |
-| Monorepo ambiguo | Parar y preguntar qué módulo auditar. |
-| Tipado **Bloqueante** (TS) pero falta `tsconfig.json` | `SKIPPED` → `⚠️ Incompleto`. |
-| Tipado **Condicional** (Python/Rust) sin config ni herramienta | `N/A`. No afecta veredicto. |
-| Tipado **N/A** para el stack (Java, Go, JS, .NET) | No ejecutar; no listar como `SKIPPED`. |
-| Tipado **FAIL** (cuando aplica) | **STOP fail-fast.** Resto `— (no ejecutado)`. |
-| Runner/build tool ausente del PATH | Parar y preguntar al usuario. |
-| Script/tarea definida pero binario inexistente (config rota) | `❌ FAIL` si el comando se intentó y rompió; `⏭️ SKIPPED` si no se pudo ni invocar. Nunca `N/A`. |
-| Unit tests sin script ni comando canónico | `SKIPPED` → `⚠️ Incompleto` (unit es Bloqueante). |
-| Coverage sin herramienta configurada | `SKIPPED` → `⚠️ Incompleto` (coverage es Bloqueante). |
-| Coverage bajo umbral configurado | `❌ FAIL`. |
-| Coverage sin umbrales configurados y exit 0 | `✅ PASS`. |
-| E2E **Condicional** con config presente pero tool ausente/rota | `SKIPPED` → `⚠️ Incompleto`. |
-| E2E sin config ni script de e2e | `N/A`. No afecta veredicto. |
-| Build **N/A** (Python sin empaquetado) | Omitir fila; no afecta veredicto. |
-| `sonar-scanner` no disponible o falta `sonar-project.properties` | `N/A`. No afecta veredicto. |
-| Sonar con config presente y error de red | FAIL informativo. No bloquea veredicto. |
-| Ejecución > 10 min en un check | Continuar; avisar al usuario. |
-| Working tree sucio | No bloquear; nota en encabezado. |
-| No se puede inferir la intención (sin US/TK, rama genérica, commits opacos) | Pedir al usuario una frase con el objetivo del cambio; no inventar intención. |
-| Usuario justifica un hallazgo 🔴/🟠 | Registrar la justificación; el hallazgo deja de bloquear. En una US, incluirla en `code-review.md`. |
-| Diff vacío o sin cambios de código | No hay nada que revisar cualitativamente; reportarlo y ejecutar solo los checks aplicables. |
-| FAIL en la etapa automatizada | Mostrar reporte y **preguntar** si corregir. Nunca corregir sin autorización. Tras corregir (auto autorizada o manual), **re-ejecutar el check que fallaba**; si pasa, **re-ejecutar todo el set automatizado**. |
-| Usuario no quiere corregir los FAIL automatizados | Ejecutar igual la revisión cualitativa (Paso 3) sobre el diff, para mostrar todos los hallazgos en una sola pasada; terminar en `❌ Rechazado` por el FAIL sin resolver, sin importar el resultado cualitativo. |
-| Corrección de un hallazgo cualitativo 🔴/🟠 (auto autorizada o manual) | Verificar que funciona (re-ejecutar el check/prueba afectado); solo si pasa, reiniciar **todo el code review desde el Paso 1**. |
-| Corrección aplicada que **no** resuelve el fallo (el check puntual sigue en FAIL) | **No reiniciar.** Iterar la corrección hasta que el check puntual pase; recién entonces disparar el reinicio. |
-| Usuario pide "corrige tú" sin más contexto | Confirmar el alcance exacto a corregir antes de tocar nada; aplicar solo lo mínimo; luego re-ejecutar. |
-| Varias correcciones autorizadas a la vez | Aplicarlas juntas y reiniciar **una sola vez** para no encadenar pasadas innecesarias. |
+| Rama base ambigua o no inferible | Parar y preguntar contra qué rama comparar. No adivinar. |
+| Diff vacío o sin cambios de código | Reportarlo y terminar: no hay nada que revisar. |
+| Diff enorme (cientos de archivos) | Avisar del volumen y proponer acotar con `scope`; si el usuario prefiere seguir, priorizar por impacto y decirlo en el Resumen. |
+| Archivos generados o vendorizados en el diff | Excluirlos de la revisión y dejar constancia; no reportar hallazgos sobre código generado. |
+| No se puede inferir la intención (sin US/WI/FT, rama genérica, commits opacos) | Pedir al usuario una frase con el objetivo del cambio; no inventar intención. Si no la aporta, la dimensión semántica queda sin evaluar → `⚠️ Incompleto`. |
+| El repo no documenta arquitectura ni patrones claros | Revisar contra el estilo predominante en el código vecino; no imponer un patrón ajeno al repo como si fuera regla. |
+| Usuario justifica un hallazgo 🔴/🟠 | Registrar la justificación; el hallazgo deja de bloquear. Incluirla en `code-review.md`. |
+| Corrección de un hallazgo (auto autorizada o manual) | Reiniciar **toda la revisión desde el Paso 1**. Si tocó lógica cubierta por pruebas, sugerir re-ejecutar `quality-check`. |
+| Usuario pide "corrige tú" sin más contexto | Confirmar el alcance exacto a corregir antes de tocar nada; aplicar solo lo mínimo. |
+| Varias correcciones autorizadas a la vez | Aplicarlas juntas y reiniciar **una sola vez**. |
 | Bucle de correcciones que no converge | Tras 3 reinicios sin llegar a `✅`, resumir lo pendiente y preguntar al usuario cómo proceder. |
+| El usuario pide correr pruebas, linter o build | Fuera de alcance: redirigir a `quality-check`. No ejecutar checks desde aquí. |
+| El usuario pasa un modificador de la etapa automatizada (`tests-only`, `no-e2e`, `only build`…) | Explicar que esos modificadores viven en `quality-check` y ofrecer invocarlo. |
+| El usuario señala que a un criterio de aceptación le falta prueba | Es competencia de `trace-validate`, no de este skill: anotarlo como observación y remitir a esa puerta. Aquí solo se juzga la **calidad** de las pruebas presentes en el diff. |
 
 ---
 
 ## Anti-patterns
 
-- Asumir TypeScript/Node si el repo es Java, Python u otro stack.
-- Ejecutar `tsc --noEmit` en un proyecto Java — la compilación va en **build**.
-- Marcar `⚠️ Incompleto` un check Condicional que simplemente **no aplica** (debe ser `N/A`).
-- Marcar `N/A` un check cuya config **sí existe** pero falló al ejecutarse (debe ser `SKIPPED` o `FAIL`).
-- **Corregir código sin autorización explícita** del usuario — por defecto solo se audita y propone.
-- Usar `--fix` / `--write` / `--force` **al ejecutar un check** (falsea el resultado); la corrección autorizada es un paso aparte y deliberado.
-- Modificar manifiestos para añadir scripts faltantes.
-- Declarar `✅ Aprobado` con algún Bloqueante o Condicional-presente en `SKIPPED` — es `⚠️ Incompleto`.
-- **Dejar que hallazgos cualitativos, por bien resueltos que estén, cambien un veredicto `❌ Rechazado` causado por un FAIL automatizado sin resolver** — el plano automatizado es la puerta dura del **veredicto** (no de si la revisión cualitativa se ejecuta: esa corre siempre a continuación, salvo `checks-only`/`only <check>`, para mostrar todos los hallazgos en una sola pasada).
-- **Corregir y no volver a ejecutar** las pruebas, o no reiniciar el review tras una corrección cualitativa.
-- **Reiniciar el review con un arreglo sin verificar** — primero confirma que el check/prueba que fallaba ya pasa, y solo entonces reinicia.
-- Aplicar una corrección **automáticamente sin que el usuario la pida expresamente**.
-- Cargar `stacks.md` antes de detectar el ecosistema, o arrastrar a contexto columnas de stacks que no aplican.
-- Continuar tras FAIL de tipado cuando aplica fail-fast.
-- Contar filas `N/A` para el veredicto.
-- Truncar errores sin `… y N más`.
-- Ejecutar checks en paralelo salvo petición explícita.
-- Instalar dependencias — reportar `SKIPPED` y dejar al usuario.
-- Continuar a commit/push/merge tras `✅ Aprobado` sin instrucción explícita.
-- **Comportarse como una herramienta de CI:** entregar solo la tabla de checks y omitir la revisión cualitativa.
+- **Comportarse como una herramienta de CI:** ejecutar checks, listar exit codes o pegar salidas de herramientas. Eso es `quality-check`.
+- Invocar `quality-check` desde aquí o unificar ambos veredictos en un solo informe — son skills independientes.
+- Condicionar el veredicto cualitativo al resultado de las pruebas (o al revés): cada skill responde por su plano.
+- **Reportar como hallazgo la falta de pruebas de un criterio de aceptación** — esa es la pregunta de `trace-validate`. Aquí se juzga la calidad de las pruebas que el diff sí incluye.
+- Cerrar en `✅ Aprobado` con una dimensión sin evaluar: eso es `⚠️ Incompleto`.
 - **Solo reportar violaciones de reglas** sin razonar sobre la intención del diseño ni el impacto en el sistema.
 - Dar un hallazgo sin explicar el **porqué** o sin **sugerencia concreta** (un "esto está mal" pelado no es feedback senior).
 - Marcar 🔴/🟠 algo que es 🟡/💡 (inflar severidad) o al revés (minimizar un defecto real de diseño).
+- Reportar hallazgos sin ubicarlos (archivo/símbolo) — un hallazgo que el autor no puede localizar no es accionable.
+- Juzgar el diff contra un patrón ajeno al repo, o contradecir una decisión ya documentada en un ADR sin siquiera mencionarla.
+- Revisar todo el repo en lugar del diff bajo revisión, o reportar hallazgos sobre código que el diff no tocó (salvo que sea el impacto directo del cambio, y diciéndolo).
+- Reportar hallazgos sobre archivos generados o vendorizados.
 - Declarar `✅ Aprobado` con un hallazgo bloqueante sin corregir **ni** justificar.
-- Aceptar una justificación y **no registrarla** en el `code-review.md` de la US.
+- Aceptar una justificación y **no registrarla** en el `code-review.md`.
+- Aplicar una corrección **automáticamente sin que el usuario la pida expresamente**.
+- Corregir un hallazgo y **no reiniciar** la revisión.
+- No decir nada cuando una dimensión está conforme (el silencio no es feedback).
 - Escribir `code-review.md` en la carpeta de una US/WI en vez de en `docs/specs/`, o no escribirlo en un proyecto spec-driven.
-- Revisar todo el repo en lugar del diff bajo revisión.
+- Continuar a commit/push/merge tras `✅ Aprobado` sin instrucción explícita.

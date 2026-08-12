@@ -1,7 +1,7 @@
 ---
 name: pr-create
 description: >-
-  Crear Pull Request (PR) o Merge Request (MR) desde la rama actual hacia una rama destino preguntada al usuario, con puertas de calidad obligatorias y bloqueantes antes de crearlo: ejecuta code-review y trace-validate (ambos deben dar veredicto aprobado) y, si existe docs/policies/definition-of-done.md, verifica el código contra esa Definition of Done. Funciona sobre cualquier repositorio git con remoto: auto-detecta la plataforma (GitHub, GitLab, Bitbucket, Gitea, Azure Repos, etc.) desde el remoto y usa el CLI disponible. Auto-genera título y descripción a partir de los commits y crea el PR en una sola pasada. Usar siempre que el usuario pida crear, abrir, generar, levantar o subir un PR, MR, pull request o merge request, incluso si solo dice "crea el PR" o "súbelo a develop" sin nombrar la plataforma.
+  Crear Pull Request (PR) o Merge Request (MR) desde la rama actual hacia una rama destino preguntada al usuario, con puertas de calidad obligatorias y bloqueantes antes de crearlo: ejecuta quality-check, code-review y trace-validate (los tres deben dar veredicto aprobado) y, si existe docs/policies/definition-of-done.md, verifica el código contra esa Definition of Done. Funciona sobre cualquier repositorio git con remoto: auto-detecta la plataforma (GitHub, GitLab, Bitbucket, Gitea, Azure Repos, etc.) desde el remoto y usa el CLI disponible. Auto-genera título y descripción a partir de los commits y crea el PR en una sola pasada. Usar siempre que el usuario pida crear, abrir, generar, levantar o subir un PR, MR, pull request o merge request, incluso si solo dice "crea el PR" o "súbelo a develop" sin nombrar la plataforma.
 license: MIT
 ---
 
@@ -15,7 +15,7 @@ Crear un PR o MR desde la **rama actual** hacia una **rama destino preguntada al
 >
 > **Plataforma se auto-detecta** del remoto `origin`. No preguntar.
 >
-> **Puertas de calidad obligatorias y bloqueantes:** antes de crear el PR se ejecutan **siempre** `code-review` y `trace-validate`, y —si existe— se verifica la **Definition of Done** (`docs/policies/definition-of-done.md`). Las tres deben quedar en **aprobado**; si alguna no lo está, **no** se crea el PR. No hay flujo "crear como draft" ni "ignorar y continuar".
+> **Puertas de calidad obligatorias y bloqueantes:** antes de crear el PR se ejecutan **siempre** `quality-check`, `code-review` y `trace-validate`, y —si existe— se verifica la **Definition of Done** (`docs/policies/definition-of-done.md`). Todas las que apliquen deben quedar en **aprobado** (la Definition of Done solo cuenta si el archivo existe); si alguna no lo está, **no** se crea el PR. No hay flujo "crear como draft" ni "ignorar y continuar".
 >
 > **No incluye:** modificar código por iniciativa propia, merges, rebases, resolver conflictos, asignar reviewers/labels/milestones, editar PRs existentes. (Las correcciones solo se aplican si el usuario las autoriza explícitamente — ver [Manejo de fallos en las puertas](#manejo-de-fallos-en-las-puertas-de-calidad).)
 
@@ -43,7 +43,7 @@ Verificar que el CLI elegido está instalado (`<cli> --version`); si falta, para
 
 Si en el contexto de la sesión de chat existe un **idioma de preferencia del usuario**, redactar el título y la descripción en ese idioma. Si no consta, usar el **idioma de la conversación**; y si tampoco es determinable, el idioma predominante de los commits del rango `origin/<destino>..HEAD`. Un título/descripción explícitos del usuario en su mensaje **siempre** tienen prioridad y se respetan literalmente.
 
-Cuando el idioma resuelto obliga a traducir el título, el prefijo de ticket (`[US-042]`, `[TK-007]`) se mantiene intacto. Los subjects de commits en la lista de la descripción **no** se traducen — se citan literales para preservar trazabilidad. Los reportes de `code-review` y `trace-validate` siguen su propia resolución de idioma.
+Cuando el idioma resuelto obliga a traducir el título, el prefijo de ticket (`[US-042]`, `[TK-007]`) se mantiene intacto. Los subjects de commits en la lista de la descripción **no** se traducen — se citan literales para preservar trazabilidad. Los reportes de `quality-check`, `code-review` y `trace-validate` siguen su propia resolución de idioma.
 
 ---
 
@@ -68,23 +68,27 @@ Aplicar la tabla de detección. Si ya existe un PR para `<rama-actual> → <dest
 
 - **Rama destino** (pregunta única): validar que existe en `origin` (`git ls-remote --heads origin <destino>`) y que no coincide con la rama actual.
 
-`code-review` y `trace-validate` **no se preguntan**: son obligatorios (ver Paso 4). No hay opción de saltarlos.
+`quality-check`, `code-review` y `trace-validate` **no se preguntan**: son obligatorios (ver Paso 4). No hay opción de saltarlos.
 
 ### Paso 4 — Puertas de calidad (obligatorias, bloqueantes)
 
-Antes de cualquier push o creación de PR se ejecutan **las tres** puertas en este orden. Una puerta que no quede en **aprobado** detiene el flujo: **no** se hace push ni se crea el PR. Ver [Manejo de fallos en las puertas](#manejo-de-fallos-en-las-puertas-de-calidad) para qué hacer ante un fallo.
+Antes de cualquier push o creación de PR se ejecutan **las cuatro** puertas en este orden (la cuarta solo si existe el archivo de Definition of Done). Una puerta que no quede en **aprobado** detiene el flujo: **no** se hace push ni se crea el PR. Ver [Manejo de fallos en las puertas](#manejo-de-fallos-en-las-puertas-de-calidad) para qué hacer ante un fallo.
 
-**4.1 — `code-review` (siempre).** Invocar el flujo de `code-review` sobre el diff `origin/<destino>..HEAD`.
-- Aprobado = veredicto **`✅ Aprobado`** → continuar (aunque haya warnings o recomendaciones informativas).
+**4.1 — `quality-check` (siempre).** Invocar el flujo de `quality-check` (verificaciones automatizadas: tipado, linter, unit, coverage, integración, build, e2e, sonar) sobre la rama.
+- Aprobado = veredicto **`✅ Aprobado`** → continuar (aunque haya warnings o resultados informativos).
 - Rechazado = **`❌ Rechazado`** o **`⚠️ Incompleto`** → detener.
 
-> Este es el punto de cierre donde `code-review` ejecuta la batería completa de pruebas y persiste `test-run.json`. El orden importa: `4.1` antes de `4.2` permite que `trace-validate` **reutilice** esa corrida sin re-ejecutar las pruebas.
+> Este es el punto de cierre donde `quality-check` ejecuta la batería completa de pruebas y persiste `test-run.json`. El orden importa: `4.1` antes de `4.3` permite que `trace-validate` **reutilice** esa corrida sin re-ejecutar las pruebas.
 
-**4.2 — `trace-validate` (siempre).** Resolver el **trabajo** a validar (`US-XXX` o `WI-XXX`) del patrón de la rama, del prefijo de los commits, o de la ruta de trabajo. `trace-validate` traza los **criterios de aceptación** `AC-XXX` del trabajo (mismo formato en US y WI). Si no se puede determinar el trabajo, preguntar al usuario cuál validar; si no lo provee, la puerta **no** puede quedar aprobada → detener. Invocar `trace-validate` sobre ese trabajo. Reutiliza el `test-run.json` recién producido por `4.1` (misma rama, sin cambios) y, si el `trace-report.md` ya estaba fresco, lo devuelve sin regenerarlo.
+**4.2 — `code-review` (siempre).** Invocar el flujo de `code-review` (revisión cualitativa: intención, arquitectura y diseño) sobre el diff `origin/<destino>..HEAD`. Emite un veredicto **propio e independiente** del de `4.1`; ninguno sustituye al otro.
+- Aprobado = veredicto **`✅ Aprobado`** → continuar.
+- Rechazado = **`❌ Rechazado`** o **`⚠️ Incompleto`** → detener.
+
+**4.3 — `trace-validate` (siempre).** Resolver el **trabajo** a validar (`US-XXX` o `WI-XXX`) del patrón de la rama, del prefijo de los commits, o de la ruta de trabajo. `trace-validate` traza los **criterios de aceptación** `AC-XXX` del trabajo (mismo formato en US y WI). Si no se puede determinar el trabajo, preguntar al usuario cuál validar; si no lo provee, la puerta **no** puede quedar aprobada → detener. Invocar `trace-validate` sobre ese trabajo. Reutiliza el `test-run.json` producido por `4.1` (misma rama, sin cambios) y, si el `trace-report.md` ya estaba fresco, lo devuelve sin regenerarlo.
 - Aprobado = **`✅ Aprobado`** → continuar. **`⚠️ Aprobado con observaciones`** también se considera aprobado, pero se **muestran las observaciones al usuario** antes de seguir.
 - Rechazado = **`❌ Rechazado`** → detener.
 
-**4.3 — Definition of Done (solo si existe el archivo).** Comprobar si existe `docs/policies/definition-of-done.md` en la raíz del repo (`test -f docs/policies/definition-of-done.md`).
+**4.4 — Definition of Done (solo si existe el archivo).** Comprobar si existe `docs/policies/definition-of-done.md` en la raíz del repo (`test -f docs/policies/definition-of-done.md`).
 - Si **no** existe → omitir esta puerta (no afecta el resultado).
 - Si **existe** → leerla y verificar el código/cambio del rango `origin/<destino>..HEAD` contra cada política/ítem de esa Definition of Done. **Formato esperado de `docs/policies/definition-of-done.md`:** un documento de política con ítems/checklist verificables (cada ítem una condición concreta de cierre). El skill solo evalúa automáticamente los ítems comprobables desde el repo o el diff; para el resto, pregunta.
   - **Ítems comprobables desde el repo/diff** → evaluarlos directamente: cumplido / incumplido.
@@ -92,7 +96,7 @@ Antes de cualquier push o creación de PR se ejecutan **las tres** puertas en es
   - Aprobado = todos los ítems aplicables se cumplen (los comprobables verificados + los no comprobables confirmados por el usuario) → continuar.
   - Rechazado = al menos un ítem incumplido, o algún ítem no comprobable que el usuario no confirma → la puerta **no** queda aprobada → detener, listando qué ítem(s) de la DoD no se cumplen o quedan sin confirmar.
 
-Solo si **las tres** puertas quedan en aprobado se avanza al Paso 5.
+Solo si **todas las puertas aplicables** quedan en aprobado se avanza al Paso 5.
 
 ### Paso 5 — Push de la rama actual
 
@@ -130,8 +134,8 @@ Si el CLI indica que ya existe un PR: capturar y devolver la URL existente.
 
 Bloqueo por una puerta de calidad:
 ```
-✗ PR NO creado: la puerta <code-review | trace-validate | definition-of-done> no quedó en aprobado.
-  Veredicto: <❌ Rechazado (code-review) | ⚠️ Incompleto (code-review) | ❌ Rechazado (trace-validate) | DoD incumplida>
+✗ PR NO creado: la puerta <quality-check | code-review | trace-validate | definition-of-done> no quedó en aprobado.
+  Veredicto: <❌ Rechazado (quality-check) | ⚠️ Incompleto (quality-check) | ❌ Rechazado (code-review) | ⚠️ Incompleto (code-review) | ❌ Rechazado (trace-validate) | DoD incumplida>
 
 <reporte literal del skill, o lista de ítems de la DoD incumplidos>
 
@@ -144,14 +148,14 @@ Si la corrección está al alcance de este skill, ofrecer aplicarla antes de ped
 
 ## Manejo de fallos en las puertas de calidad
 
-Cuando una de las tres puertas del Paso 4 no queda en aprobado, **detener** el flujo (sin push ni PR) y, en este orden:
+Cuando una de las puertas del Paso 4 no queda en aprobado, **detener** el flujo (sin push ni PR) y, en este orden:
 
 1. **Informar** al usuario qué puerta falló, con su veredicto/motivo y el reporte literal del skill (o la lista de ítems de DoD incumplidos).
 2. **Indicar las acciones concretas** que debe tomar para dejar la puerta en aprobado y poder reintentar la creación del PR (p. ej. «corregir los tests fallidos de `X`», «cubrir el criterio `AC-003` con un test», «cumplir el ítem "changelog actualizado" de la DoD»).
 3. **Si la corrección está al alcance de este skill**, no aplicarla en automático: **preguntar al usuario** si desea que se aplique. Solo con su autorización explícita, aplicar la corrección mínima y **reintentar** la puerta que falló; si esa puerta vuelve a quedar aprobada, continuar con el resto del flujo (re-ejecutando las puertas posteriores que correspondan). Si el usuario no autoriza, terminar dejando las acciones indicadas.
 
 Notas:
-- Las correcciones dentro de `code-review` y `trace-validate` se gobiernan por el flujo propio de cada skill (que también exige autorización del usuario). No re-implementar esa lógica aquí.
+- Las correcciones dentro de `quality-check`, `code-review` y `trace-validate` se gobiernan por el flujo propio de cada skill (que también exige autorización del usuario). No re-implementar esa lógica aquí.
 - Tras cualquier corrección autorizada, **re-ejecutar** la puerta afectada antes de avanzar; no asumir que quedó aprobada.
 
 ---
@@ -160,19 +164,19 @@ Notas:
 
 **Ejemplo 1 — Camino feliz (GitLab self-managed)**
 Usuario: «Crea el PR de esta rama.»
-Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`). Detecta GitLab (`ns.bayteq.com:3311`). Pregunta destino → `develop`. Puertas: `code-review` sobre `origin/develop..HEAD` → `✅ Aprobado`; resuelve `US-042`, `trace-validate` → `✅ Aprobado`; existe `docs/policies/definition-of-done.md` → todos los ítems cumplidos. Push. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min`. Ejecuta `glab mr create`. Devuelve URL.
+Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`). Detecta GitLab (`ns.bayteq.com:3311`). Pregunta destino → `develop`. Puertas: `quality-check` → `✅ Aprobado`; `code-review` sobre `origin/develop..HEAD` → `✅ Aprobado`; resuelve `US-042`, `trace-validate` → `✅ Aprobado`; existe `docs/policies/definition-of-done.md` → todos los ítems cumplidos. Push. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min`. Ejecuta `glab mr create`. Devuelve URL.
 
-**Ejemplo 2 — code-review bloquea**
-`code-review` devuelve `❌ Rechazado` (tests fallidos + eslint errors). El skill no crea el PR, no hace push, muestra el reporte, lista las acciones para reintentar y —al estar a su alcance— pregunta si aplica la corrección. Si el usuario no autoriza, termina.
+**Ejemplo 2 — quality-check bloquea**
+`quality-check` devuelve `❌ Rechazado` (tests fallidos + eslint errors). El skill no crea el PR, no hace push, muestra el reporte, lista las acciones para reintentar y —al estar a su alcance— pregunta si aplica la corrección. Si el usuario no autoriza, termina.
 
 **Ejemplo 3 — trace-validate bloquea**
-`code-review` → `✅ Aprobado`, pero `trace-validate` de `US-042` devuelve `RECHAZADO` (criterio `AC-003` sin test). El skill no crea el PR; informa que falta cubrir `AC-003` y pregunta si desea que se intente la corrección (delegando al flujo correspondiente). Sin autorización, termina con las acciones indicadas.
+`quality-check` y `code-review` → `✅ Aprobado`, pero `trace-validate` de `US-042` devuelve `RECHAZADO` (criterio `AC-003` sin test). El skill no crea el PR; informa que falta cubrir `AC-003` y pregunta si desea que se intente la corrección (delegando al flujo correspondiente). Sin autorización, termina con las acciones indicadas.
 
 **Ejemplo 4 — Definition of Done incumplida**
-Ambos skills en aprobado, pero `docs/policies/definition-of-done.md` exige «CHANGELOG.md actualizado» y el diff no lo toca. El skill detiene la creación, lista ese ítem como incumplido e indica la acción; si el usuario autoriza y la corrección está a su alcance, la aplica y reintenta la puerta.
+Las tres primeras puertas en aprobado, pero `docs/policies/definition-of-done.md` exige «CHANGELOG.md actualizado» y el diff no lo toca. El skill detiene la creación, lista ese ítem como incumplido e indica la acción; si el usuario autoriza y la corrección está a su alcance, la aplica y reintenta la puerta.
 
 **Ejemplo 5 — Sin Definition of Done**
-No existe `docs/policies/definition-of-done.md`. Esa puerta se omite; el PR se crea si `code-review` y `trace-validate` quedaron en aprobado.
+No existe `docs/policies/definition-of-done.md`. Esa puerta se omite; el PR se crea si `quality-check`, `code-review` y `trace-validate` quedaron en aprobado.
 
 **Ejemplo 6 — Azure Repos**
 `origin` apunta a `https://dev.azure.com/<org>/<proyecto>/_git/<repo>`. Detecta Azure Repos, verifica `az repos`, pregunta destino, ejecuta las puertas, push, crea PR con `az repos pr create`.
@@ -195,9 +199,10 @@ La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con
 
 - Preguntar la rama origen (siempre es la actual) o asumir la destino.
 - Preguntar la plataforma (se detecta del remoto).
-- Preguntar si correr `code-review` o `trace-validate`, u ofrecer saltarlos: son obligatorios.
+- Preguntar si correr `quality-check`, `code-review` o `trace-validate`, u ofrecer saltarlos: son obligatorios.
+- Dar por cumplida una puerta a partir del veredicto de otra (p. ej. asumir `code-review` aprobado porque `quality-check` lo está): son skills independientes con veredictos propios.
 - Pedir confirmación de título o descripción (flujo no interactivo).
-- Crear el PR con `code-review` en `❌ Rechazado`/`⚠️ Incompleto`, con `trace-validate` en `RECHAZADO`, o con la Definition of Done incumplida.
+- Crear el PR con `quality-check` o `code-review` en `❌ Rechazado`/`⚠️ Incompleto`, con `trace-validate` en `RECHAZADO`, o con la Definition of Done incumplida.
 - Saltarse `trace-validate` por no encontrar el trabajo (US/WI) en lugar de preguntarlo al usuario.
 - Tratar la ausencia de `docs/policies/definition-of-done.md` como un fallo: si no existe, esa puerta simplemente se omite.
 - Inventar el cumplimiento de un ítem de la DoD que no se puede determinar desde el repo o el diff.
@@ -206,6 +211,6 @@ La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con
 - Crear el PR desde una rama sin prefijo de implementación reconocido (`feature/`, `fix/`, `chore/`, `refactor/`, `test/`...), o solo validar contra la lista de ramas protegidas sin exigir un prefijo válido.
 - Usar `git push --force` o `--force-with-lease`.
 - Asignar reviewers, labels o milestones por iniciativa propia.
-- Re-implementar la lógica de `code-review` o `trace-validate` en lugar de invocar el flujo existente.
+- Re-implementar la lógica de `quality-check`, `code-review` o `trace-validate` en lugar de invocar el flujo existente.
 - Referenciar `.agents/MEMORY.md` directamente para el idioma (usar el contexto de la sesión).
 - Crear un segundo PR cuando ya existe uno para `<rama-actual> → <destino>`.

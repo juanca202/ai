@@ -13,10 +13,10 @@ flowchart TD
     P --> F["Planificación del refactor<br/>**/work-plan** (WI `Tipo: refactor`)"]
     F --> G["Implementación<br/>**/work-implement** (refactor)"]
     G -.->|"si aplica"| DEP["Actualización/instalación<br/>de dependencias"]
-    G --> Q1["Verificación de código<br/>**/code-review**"]
-    G --> Q2["Validación de trazabilidad<br/>**/trace-validate**"]
-    Q1 --> I["Creación de PR<br/>**/pr-create**"]
-    Q2 --> I
+    G --> Q0["Verificaciones automatizadas<br/>**/quality-check**"]
+    Q0 --> Q1["Revisión de código<br/>**/code-review**"]
+    Q1 --> Q2["Validación de trazabilidad<br/>**/trace-validate**"]
+    Q2 --> I["Creación de PR<br/>**/pr-create**"]
     I --> J(["Entregable"])
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
@@ -35,7 +35,7 @@ flowchart TD
 4. **Resolver prerequisitos** — rama **opcional**, que solo se resuelve si la investigación la señaló y no queda encadenada al resto del diagrama: **actualización/definición de ADR y estándares** (`arch-manage`), si el nuevo diseño formaliza una decisión arquitectónica o cambia un criterio de cumplimiento vigente.
 5. **Planificación del refactor** (`work-plan`): WI `Tipo: refactor` con el cambio estructural en sí.
 6. **Implementación** (`work-implement`): cambio estructural sin alterar comportamiento observable; suite en verde. Incluye, como tarea **opcional** dentro de la misma implementación (no encadenada al resto del diagrama), la **actualización/instalación de dependencias** (`work-plan` con WI `Tipo: dependency-update`) cuando el refactor solo es viable con versiones más nuevas de una o más dependencias (API removida, vulnerabilidad, incompatibilidad).
-7. **Puertas de calidad**: `code-review` (verificaciones automatizadas + revisión cualitativa: SOLID, acoplamiento, duplicación) y `trace-validate` (cobertura de los criterios de aceptación del WI).
+7. **Puertas de calidad**: `quality-check` (verificaciones automatizadas), `code-review` (revisión cualitativa: SOLID, acoplamiento, duplicación) y `trace-validate` (cobertura de los criterios de aceptación del WI).
 8. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable.
 
 ## Cuándo no aplica este caso

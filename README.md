@@ -59,7 +59,8 @@ flowchart TD
         IMPL["Flujo de implementación"]
     end
     S --> IMPL
-    IMPL --> V1["Verificación de código<br/>**/code-review**"]
+    IMPL --> V0["Verificaciones automatizadas<br/>**/quality-check**"]
+    V0 --> V1["Revisión de código<br/>**/code-review**"]
     V1 --> V2["Validación de trazabilidad<br/>**/trace-validate**"]
     V2 --> DONE(["Entregable"])
 
@@ -74,7 +75,7 @@ flowchart TD
 3. En paralelo (o a continuación), se configura la **compuerta de calidad** vía `arch-init`; el camino brownfield también converge ahí.
 4. Luego se definen o actualizan los ADRs/Estándares con `arch-manage`. Opcionalmente se audita el cumplimiento con `arch-audit`.
 5. Con la base arquitectónica lista, el trabajo entra a la implementación de requerimientos (otro flujo: historias → planificación → implementación → integración/PR).
-6. El código resultante pasa por verificación (`code-review`) y validación de trazabilidad (`trace-validate`).
+6. El código resultante pasa por las verificaciones automatizadas (`quality-check`), la revisión cualitativa (`code-review`) y la validación de trazabilidad (`trace-validate`).
 7. El flujo termina en un entregable: trabajo verificado, validado y listo para producción.
 
 
@@ -92,10 +93,11 @@ Skills del ciclo de vida de un requerimiento: de la historia de usuario al PR me
 | [test‑define](SKILLS.md#test-define)       | Crear casos de prueba (TC-XXX) desde los criterios de aceptación de una US, un WI o un feature ya implementado (FT-XXX) (IEEE 29119-4)                                                                                                                                                            |
 | [work‑plan](SKILLS.md#work-plan)           | Planificar tareas técnicas (TK-XXX) o tareas de mantenimiento (WI-XXX)                                                                                                                                                                                                                            |
 | [work‑implement](SKILLS.md#work-implement) | Implementar en código specs en estado Ready: tareas técnicas (TK-XXX) o de mantenimiento (WI-XXX) → funcionalidad; casos de prueba (TC-XXX) o features ya implementados (FT-XXX) → pruebas automatizadas                                                                                          |
-| [code‑review](SKILLS.md#code-review)       | Revisión de código pre-merge: verificaciones automatizadas según el stack + revisión cualitativa (arquitectura, diseño, SOLID), con veredicto apto/no apto/incompleto                                                                                                                             |
+| [quality‑check](SKILLS.md#quality-check)   | Verificaciones automatizadas pre-merge según el stack (tipado, linter, unit, coverage, integración, build, e2e, sonar), con veredicto apto/no apto/incompleto                                                                                                                                                  |
+| [code‑review](SKILLS.md#code-review)       | Revisión cualitativa pre-merge del diff: intención, arquitectura y diseño (ISO/IEC 25010, SOLID) con feedback accionable y veredicto apto/no apto/incompleto                                                                                                                                      |
 | [trace‑validate](SKILLS.md#trace-validate) | Reporte de trazabilidad: criterios de aceptación de US/WI/FT ↔ casos y artefactos de prueba, con veredicto de cobertura                                                                                                                                                                           |
 | [work‑integrate](SKILLS.md#work-integrate) | Cerrar e integrar el trabajo de una US, un WI o una automatización de pruebas                                       |
-| [pr‑create](SKILLS.md#pr-create)           | Crear PR o MR desde la rama actual (GitHub, GitLab, Azure Repos, etc.) con puertas de calidad obligatorias: code-review, trace-validate y Definition of Done                                                                                                                                      |
+| [pr‑create](SKILLS.md#pr-create)           | Crear PR o MR desde la rama actual (GitHub, GitLab, Azure Repos, etc.) con puertas de calidad obligatorias: quality-check, code-review, trace-validate y Definition of Done                                                                                                                                      |
 
 
 
@@ -105,7 +107,7 @@ Skills del ciclo de vida de un requerimiento: de la historia de usuario al PR me
 **Ventajas de seguir este flujo:**
 
 - **Trazabilidad de punta a punta**: cada línea de código puede rastrearse hasta la historia de usuario y el criterio de aceptación que la originó.
-- **Calidad consistente**: toda entrega pasa por las mismas puertas (`code-review`, `trace-validate`) sin importar quién la implemente.
+- **Calidad consistente**: toda entrega pasa por las mismas puertas (`quality-check`, `code-review`, `trace-validate`) sin importar quién la implemente.
 - **Menos retrabajo**: los pasos opcionales (casos de prueba, diseño técnico, investigación) se activan solo cuando aportan valor, evitando documentación innecesaria pero sin perder cobertura cuando sí se necesita.
 - **Handoffs claros**: cada skill tiene una entrada y salida bien definidas, así que el trabajo se puede pausar y retomar (o pasar a otra persona) sin perder contexto.
 
@@ -138,7 +140,7 @@ flowchart TD
 3. **Planificación de tareas** (`work-plan`): desde una historia produce tareas técnicas (`TK-XXX`); sin historia, tareas de mantenimiento (`WI-XXX`).
 4. Durante la planificación, opcionalmente se investiga con `work-research` y/o se ajusta el diseño arquitectónico con `design-define`.
 5. Las tareas planificadas pasan a `work-implement` para su codificación. Los casos de prueba (`TC-XXX`, incluidos los de un feature legacy `FT-XXX`) también pueden pasar por `work-implement` para automatizarse como pruebas.
-6. El flujo termina por uno de dos caminos, cada uno con puertas de calidad (`code-review`, `trace-validate`), y ambos llegan al mismo entregable — el trabajo listo para producción, ya sea integrado directo (`work-integrate`) o vía Pull/Merge Request (`pr-create`).
+6. El flujo termina por uno de dos caminos, cada uno con puertas de calidad (`quality-check`, `code-review`, `trace-validate`), y ambos llegan al mismo entregable — el trabajo listo para producción, ya sea integrado directo (`work-integrate`) o vía Pull/Merge Request (`pr-create`).
 
 
 
@@ -172,7 +174,7 @@ flowchart TD
 1. **Inicio**: el requerimiento se convierte en historias de usuario con `work-define`.
 2. Opcionalmente, desde las historias se investiga (`work-research`), se definen casos de prueba (`test-define`) y/o diseño arquitectónico (`design-define`).
 3. Las historias alimentan **Specs de terceros** (la implementación la corre el framework elegido: Speckit, OpenSpec, AgentOS, etc.).
-4. El flujo termina por uno de dos caminos, igual que en Specs: integración directa (`work-integrate`) o vía Pull/Merge Request (`pr-create`), cada uno con puertas de calidad (`code-review`, `trace-validate`); ambos llegan al entregable.
+4. El flujo termina por uno de dos caminos, igual que en Specs: integración directa (`work-integrate`) o vía Pull/Merge Request (`pr-create`), cada uno con puertas de calidad (`quality-check`, `code-review`, `trace-validate`); ambos llegan al entregable.
 
 
 

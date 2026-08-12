@@ -11,10 +11,10 @@ flowchart TD
     E -.-> C["Casos de prueba<br/>**/test-define**"]
     E --> G["Implementación<br/>**/work-implement**"]
     C -.->|"automatizar TCs"| G
-    G --> Q1["Verificación de código<br/>**/code-review**"]
-    G --> Q2["Validación de trazabilidad<br/>**/trace-validate**"]
-    Q1 --> I["Creación de PR<br/>**/pr-create**"]
-    Q2 --> I
+    G --> Q0["Verificaciones automatizadas<br/>**/quality-check**"]
+    Q0 --> Q1["Revisión de código<br/>**/code-review**"]
+    Q1 --> Q2["Validación de trazabilidad<br/>**/trace-validate**"]
+    Q2 --> I["Creación de PR<br/>**/pr-create**"]
     I --> J(["Entregable"])
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
@@ -25,7 +25,7 @@ flowchart TD
 2. **Planificación** (`work-plan`): crea el `WI-XXX` eligiendo el `Tipo` según el requerimiento (`dependency-update` / `optimization` / `security-update` / `test-improvement` / `documentation-update` / `operational-change`).
 3. Opcionalmente, durante la planificación se ajusta el diseño arquitectónico (`design-define`) y/o se definen casos de prueba (`test-define`) — igual que en el flujo con historia de usuario.
 4. El `WI` en `Ready` pasa a **Implementación** (`work-implement`). Los casos de prueba definidos en el paso anterior también pueden automatizarse ahí.
-5. **Puertas de calidad**: `code-review` (verificaciones automatizadas + revisión cualitativa) y `trace-validate` (cobertura de los criterios de aceptación del `WI`).
+5. **Puertas de calidad**: `quality-check` (verificaciones automatizadas), `code-review` (revisión cualitativa) y `trace-validate` (cobertura de los criterios de aceptación del `WI`).
 6. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable.
 
 ## Cuándo no aplica este caso

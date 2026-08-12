@@ -37,7 +37,7 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 | **Con código base** | Stack detectable; sin lógica de negocio propia aún. |
 | **Con implementación** | Invoca `arch-discover` completo para candidatos de ADR/estándares. |
 
-**Handoffs:** `arch-discover` (brownfield), `arch-manage` (candidatos aceptados), consulta a `code-review` (qué validar por stack). Reejecutable: solo completa lo que falte.
+**Handoffs:** `arch-discover` (brownfield), `arch-manage` (candidatos aceptados), consulta a `quality-check` (qué validar por stack). Reejecutable: solo completa lo que falte.
 
 **Ejemplos de invocación:**
 
@@ -351,7 +351,7 @@ Solo se hace handoff a `work-implement` si el artefacto está en `Ready`. Si hay
 
 ### work-implement
 
-**Cuándo:** codificar trabajo ya especificado en `Estado: Ready`.
+**Cuándo:** codificar trabajo ya especificado en `Estado: Ready`. También recibe el **modo corrección** delegado por `quality-check` en el cierre (arreglar un check o una prueba en rojo sobre un `US-XXX`/`WI-XXX` ya implementado; ahí no aplica `Ready` ni working tree limpio).
 
 **Opciones — tipo:**
 
@@ -396,11 +396,15 @@ Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrat
 
 ---
 
-### code-review
+### quality-check
 
-**Cuándo:** revisión pre-merge (usuario u otro skill: `work-integrate`, `pr-create`). No proactivo durante el desarrollo.
+**Cuándo:** verificaciones automatizadas pre-merge (usuario u otro skill: `work-integrate`, `pr-create`, `trace-validate`). No proactivo durante el desarrollo.
 
-**Produce:** informe con checks automatizados + revisión cualitativa y veredicto unificado.
+**Produce:** informe de checks (`docs/specs/quality-check.md`) y la caché de pruebas `docs/specs/test-run.json`.
+
+**Checks:** tipado → linter → unit → coverage → integración → build → e2e → sonar, con categoría por stack (Bloqueante / Condicional / Informativo).
+
+**Correcciones:** nunca por iniciativa propia. Ante hallazgos que impliquen tocar código pregunta primero: **dentro** de una implementación, si se corrigen; **fuera** de una implementación (rama suelta, auditoría), ofrece explícitamente [Corregir] / [Solo el informe]. Si se corrige y la rama es de un `US-XXX`/`WI-XXX`, delega el arreglo en `work-implement` (modo corrección); si no hay artefacto, corrige él mismo. Aplica igual a fallos de pruebas.
 
 **Veredicto:** `✅ Aprobado` · `❌ Rechazado` · `⚠️ Incompleto`.
 
@@ -408,36 +412,67 @@ Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrat
 
 | Modifier | Efecto |
 |----------|--------|
-| `default` | Bloqueantes + condicionales presentes + Sonar si hay config + cualitativa |
+| `default` | Bloqueantes + condicionales presentes + Sonar si hay config |
 | `blocking-only` / `no-sonar` | Omite informativos (Sonar) |
 | `include-linter-warnings` | Warnings del linter como error |
-| `no-tests` / `no-unit-tests` / `no-e2e` / `no-coverage` / `no-typecheck` | Omite ese check (`N/A`) |
-| `only <check>` | Solo ese check; sin cualitativa |
-| `checks-only` | Solo plano automatizado |
-| `qualitative-only` | Solo cualitativa |
+| `no-tests` / `no-unit-tests` / `no-integration` / `no-e2e` / `no-coverage` / `no-typecheck` | Omite ese check (`N/A`) |
+| `only <check>` | Solo ese check |
 | `tests-only` | Solo suites de prueba (caché `test-run.json`; lo usa `trace-validate`) |
+| `save-report` | Guarda en `docs/quality-check/<timestamp>.md` |
+
+**Ejemplos de invocación:**
+
+```text
+/quality-check
+/quality-check only build
+/quality-check no-tests
+/quality-check no-e2e include-linter-warnings
+/quality-check blocking-only save-report
+/quality-check tests-only
+```
+
+En prosa (el skill mapea al modificador en inglés):
+
+- «Corre solo el build antes del merge» → `only build`
+- «Ejecuta los checks sin Sonar y guarda el informe» → `no-sonar` + `save-report`
+- «Valida cobertura de US-012» (vía `trace-validate`) → dispara `quality-check` en `tests-only` si no hay caché fresca
+
+---
+
+### code-review
+
+**Cuándo:** revisión **cualitativa** pre-merge (usuario u otro skill: `work-integrate`, `pr-create`). No proactivo durante el desarrollo. **No ejecuta pruebas ni checks** — eso es `quality-check`.
+
+**Produce:** informe de hallazgos (`docs/specs/code-review.md`) sobre el diff: intención, arquitectura y diseño (ISO/IEC 25010) y feedback senior.
+
+**Severidad:** `🔴` Crítico · `🟠` Mayor (bloquean) · `🟡` Menor · `💡` Sugerencia.
+
+**Veredicto:** `✅ Aprobado` · `❌ Rechazado` · `⚠️ Incompleto` — **independiente** del de `quality-check`.
+
+**Modificadores de invocación** (opcionales; claves en inglés). Sin ninguno se asume `default`.
+
+| Modifier | Efecto |
+|----------|--------|
+| `default` | Diff completo de la rama contra su base, en las tres dimensiones |
+| `base <rama>` | Fija la rama base del diff |
+| `scope <ruta…>` | Limita la revisión a esas rutas |
+| `blocking-only` | Solo hallazgos 🔴/🟠 en el informe |
 | `save-report` | Guarda en `docs/code-review/<timestamp>.md` |
 
 **Ejemplos de invocación:**
 
 ```text
 /code-review
-/code-review checks-only
-/code-review qualitative-only
-/code-review only build
-/code-review no-tests
-/code-review no-e2e include-linter-warnings
+/code-review base develop
+/code-review scope src/domain
 /code-review blocking-only save-report
-/code-review tests-only
 ```
 
-En prosa (el skill mapea al modificador en inglés):
+En prosa:
 
-- «Haz un code review solo con los checks automatizados» → `checks-only`
-- «Revisa solo la arquitectura y el diseño, sin correr tests» → `qualitative-only`
-- «Corre solo el build antes del merge» → `only build`
-- «Code review sin Sonar y guarda el informe» → `no-sonar` + `save-report`
-- «Valida cobertura de US-012» (vía `trace-validate`) → dispara `code-review` en `tests-only` si no hay caché fresca
+- «Revisa la arquitectura y el diseño del cambio» → `default`
+- «Revisa solo lo que bloquea el merge» → `blocking-only`
+- «Revisa solo la carpeta de dominio» → `scope src/domain`
 
 ---
 
@@ -451,7 +486,7 @@ En prosa (el skill mapea al modificador en inglés):
 
 **Veredicto:** `✅ Aprobado` · `⚠️ Aprobado con observaciones` · `❌ Rechazado`.
 
-No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `code-review` en `tests-only`. Idempotente: si el fingerprint no cambió, no regenera el reporte.
+No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `quality-check` en `tests-only`. Idempotente: si el fingerprint no cambió, no regenera el reporte.
 
 **Reporte:** `trace-report.md` en la carpeta del artefacto.
 
@@ -483,7 +518,7 @@ No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `code-r
 | `WI-XXX` | `feature/`\|`fix/`\|`chore/`\|`refactor/`+`WI-XXX-…` | Todas las unidades del WI |
 | Automatización de pruebas (`TC-XXX`/`FT-XXX`) | `test/` + `FT-XXX-…`\|`US-XXX-…`\|`WI-XXX-…` | Todas las unidades `TC-XXX`/`FT-XXX` de esa ejecución (no las del trabajo funcional del mismo padre) |
 
-**Puertas (obligatorias):** `code-review` → `trace-validate`. Working tree sucio → invoca `git-commit` automáticamente.
+**Puertas (obligatorias):** `quality-check` → `code-review` → `trace-validate`. Working tree sucio → invoca `git-commit` automáticamente.
 
 **Ejemplos de invocación:**
 
@@ -510,9 +545,10 @@ No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `code-r
 
 **Puertas (obligatorias, sin draft ni skip):**
 
-1. `code-review` sobre `origin/<destino>..HEAD`
-2. `trace-validate` sobre el `US`/`WI` de la rama
-3. Definition of Done (`docs/policies/definition-of-done.md`) — **solo si existe**; si no, se omite
+1. `quality-check` sobre la rama (batería completa; produce `test-run.json`)
+2. `code-review` sobre `origin/<destino>..HEAD` (revisión cualitativa; veredicto propio)
+3. `trace-validate` sobre el `US`/`WI` de la rama
+4. Definition of Done (`docs/policies/definition-of-done.md`) — **solo si existe**; si no, se omite
 
 Working tree sucio → `git-commit` automático. Título/descripción se generan sin pedir confirmación. Ante fallo de puerta: informa, propone acciones y solo corrige con autorización explícita.
 

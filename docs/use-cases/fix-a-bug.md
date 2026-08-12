@@ -10,10 +10,10 @@ flowchart TD
     C -->|"Sí, con evidencia"| D["Dossier de bug<br/>(reproducción + causa raíz + diagnóstico de pruebas)"]
     D --> E["Planificación del fix<br/>**/work-plan** (WI tipo bug-fix)"]
     E --> F["Implementación<br/>**/work-implement** (🔴 test fail → fix → 🟢 test pass)"]
-    F --> G1["Verificación de código<br/>**/code-review**"]
-    F --> G2["Validación de trazabilidad<br/>**/trace-validate**"]
-    G1 --> I["Creación de PR<br/>**/pr-create**"]
-    G2 --> I
+    F --> G0["Verificaciones automatizadas<br/>**/quality-check**"]
+    G0 --> G1["Revisión de código<br/>**/code-review**"]
+    G1 --> G2["Validación de trazabilidad<br/>**/trace-validate**"]
+    G2 --> I["Creación de PR<br/>**/pr-create**"]
     I --> J(["Entregable"])
     H -.->|"con más información"| B
 
@@ -29,8 +29,8 @@ flowchart TD
    - **No** (bug no reproducible o sin causa raíz confirmada): el flujo no avanza a la remediación. Se entrega el diagnóstico parcial y pasa a **análisis humano**, que reúne lo que falta (datos, entorno, logs, versión, pasos exactos). Con esa información nueva, se puede reintentar el diagnóstico.
    - **Sí**: se produce el **dossier de bug** (reproducción, causa raíz, diagnóstico de pruebas y plan rojo→verde propuesto).
 4. **Planificación** (`work-plan`): a partir del dossier, crea un `WI` de tipo `bug-fix` con el plan de implementación (un `IT-XX` por paso del ciclo rojo→verde) y sus criterios de aceptación.
-5. **Implementación** (`work-implement`): ejecuta el ciclo en orden — 🔴 prueba que falla demostrando el bug, corrección mínima de la causa raíz, 🟢 prueba y suite completa en verde.
-6. **Puertas de calidad**: `code-review` (verificaciones automatizadas + revisión cualitativa) y `trace-validate` (cobertura de los criterios de aceptación del WI).
+5. **Implementación** (`work-implement`): ejecuta el ciclo en orden — 🔴 prueba que falla demostrando el bug, corrección mínima de la causa raíz, 🟢 prueba en verde (la batería completa la corre `quality-check` en la puerta de calidad).
+6. **Puertas de calidad**: `quality-check` (verificaciones automatizadas), `code-review` (revisión cualitativa) y `trace-validate` (cobertura de los criterios de aceptación del WI).
 7. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable.
 
 ## Cuándo no aplica este caso
