@@ -237,7 +237,7 @@ existente. Esto evita rehacer el mapeo y volver a delegar la ejecución de prueb
 > devuelve sin regenerarlo.
 
 **Clave de frescura — el fingerprint canónico de la tubería** (idéntico al de `quality-check`; excluye los
-artefactos generados —`trace-report.md`, `quality-check.md`, `code-review.md`, `test-run.json`— para que escribirlos no
+artefactos generados —todo `docs/audits/`, todo `.sdd-devkit/` y los `trace-report.md`— para que escribirlos no
 invalide la caché). Recipe exacto en `quality-check` → [Caché de corrida de pruebas](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
 Cubre el README de criterios de la US/WI, los tests y el código fuente: si no cambia, el reporte sería
 idéntico → se reutiliza.
@@ -258,7 +258,7 @@ idéntico → se reutiliza.
 3. La marca de pie con el fingerprint **se conserva** en el documento publicado (no se elimina como el
    bloque de instrucciones de la plantilla).
 
-> Un cambio solo en el `trace-report.md`, `quality-check.md`, `code-review.md` o `test-run.json` **no** cuenta como cambio de
+> Un cambio solo en `docs/audits/`, en `.sdd-devkit/` o en un `trace-report.md` **no** cuenta como cambio de
 > archivos (están excluidos): el reporte depende del código, los criterios y las pruebas, no de los
 > artefactos que él mismo o `quality-check` generan.
 
@@ -269,7 +269,7 @@ idéntico → se reutiliza.
 `trace-validate` **no ejecuta la suite de pruebas**. La ejecución es responsabilidad de `quality-check`,
 que la persiste en un artefacto reutilizable `test-run.json` (esquema `test-run/v1`). Como el review es
 una **corrida completa** de la rama, este artefacto vive en una **ubicación fija**, no por unidad:
-**`docs/specs/test-run.json`** (junto a `docs/specs/quality-check.md`).
+**`.sdd-devkit/test-run.json`**, en la raíz del repositorio.
 
 **Cómo obtener los resultados (Paso 4 del flujo):**
 
@@ -350,7 +350,7 @@ WARNING No es posible generar el reporte de trazabilidad:
 | Feature (funcionalidad ya implementada) | `docs/specs/features/FT-XXX-[slug]/README.md` |
 | Cualquier otro artefacto | La ruta que indique el usuario |
 | Casos de prueba documentados (entrada, los produce `test-define`) | `test-cases/` **dentro de la carpeta del artefacto**, con su índice `test-cases/README.md` |
-| Caché de corrida de pruebas (entrada, la produce `quality-check`) | `docs/specs/test-run.json` (ubicación fija, no por unidad) |
+| Caché de corrida de pruebas (entrada, la produce `quality-check`) | `.sdd-devkit/test-run.json` (ubicación fija, no por unidad) |
 | Reporte de trazabilidad (salida) | US: `…/US-XXX-[nombre-corto]/trace-report.md` · WI: `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` · FT: `docs/specs/features/FT-XXX-[slug]/trace-report.md` · otro artefacto: `trace-report.md` **junto al artefacto** (confirmar la ruta con el usuario antes de escribir) |
 
 ---

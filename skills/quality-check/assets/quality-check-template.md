@@ -30,7 +30,7 @@ Símbolos de estado: `✅` PASS · `❌` FAIL · `⏭️` SKIPPED · `⏸️` no
 | 7 | e2e        | {{comando}}          | {{Condicional}} | {{⏭️}}    | {{config rota}}         | {{—}}      |
 | 8 | sonar      | {{comando}}          | {{Informativo}} | {{—}}    | {{N/A (sin config)}}    | {{—}}      |
 
-{{Incluir solo las filas de checks que aplican al stack. Los `N/A` por modificador del usuario o por no aplicar al stack pueden omitirse o marcarse `—`.}}
+<!-- Incluir solo las filas de checks que aplican al stack. Los `N/A` por modificador del usuario o por no aplicar al stack pueden omitirse o marcarse `—`. -->
 
 ### Detalle de checks fallidos
 
@@ -38,13 +38,9 @@ Símbolos de estado: `✅` PASS · `❌` FAIL · `⏭️` SKIPPED · `⏸️` no
 
 - **{{check}}** — {{mensajes de error relevantes, parseados según la herramienta}}
 
-## Veredicto
-
-**{{✅ Aprobado | ❌ Rechazado | ⚠️ Incompleto}}** — {{justificación en una línea: qué check lo determina}}
-
 ## Próximas acciones
 
-{{Orden de prioridad: FAIL Bloqueantes/Condicionales en orden de ejecución → warnings de linter → Sonar → SKIPPED por config ausente/rota. Si el veredicto es Aprobado y no hay pendientes: «Sin acciones pendientes». Si el usuario pidió solo el informe, aquí queda todo lo que habría que corregir, con el detalle suficiente para retomarlo después.}}
+<!-- Esta sección solo aparece si hay acciones pendientes. Orden de prioridad: FAIL Bloqueantes/Condicionales en orden de ejecución → warnings de linter → Sonar → SKIPPED por config ausente/rota. Si el veredicto es Aprobado y no hay pendientes: «Sin acciones pendientes». Si el usuario pidió solo el informe, aquí queda todo lo que habría que corregir, con el detalle suficiente para retomarlo después. -->
 
 1. {{acción concreta}}
 2. {{…}}

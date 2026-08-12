@@ -123,10 +123,10 @@ Las **claves** de los modificadores son siempre en inglés (estándar). Si el us
 |----------|----------------|
 | `default` | Revisar el diff completo de la rama contra su base, en las tres dimensiones. |
 | `base <rama>` | Fijar la rama base del diff (p. ej. `base develop`). Sin este modificador, inferirla y confirmarla con el usuario si es ambigua. |
-| `working-tree` | Revisar **solo los cambios sin commitear** (`git diff HEAD` más los archivos sin trackear que sean código del proyecto), en lugar del diff completo de la rama. Para revisar durante el desarrollo, antes de commitear. Si el working tree está limpio, decirlo y terminar — no caer al diff de la rama por su cuenta. Incompatible con `base <rama>`. **No sobrescribe `docs/specs/code-review.md`.** |
-| `scope <ruta…>` | Limitar la revisión a los archivos o directorios indicados en lugar del diff completo. Combinable con `working-tree`. **No sobrescribe `docs/specs/code-review.md`.** |
+| `working-tree` | Revisar **solo los cambios sin commitear** (`git diff HEAD` más los archivos sin trackear que sean código del proyecto), en lugar del diff completo de la rama. Para revisar durante el desarrollo, antes de commitear. Si el working tree está limpio, decirlo y terminar — no caer al diff de la rama por su cuenta. Incompatible con `base <rama>`. **No sobrescribe `docs/audits/code-review.md`.** |
+| `scope <ruta…>` | Limitar la revisión a los archivos o directorios indicados en lugar del diff completo. Combinable con `working-tree`. **No sobrescribe `docs/audits/code-review.md`.** |
 | `blocking-only` | Reportar solo hallazgos 🔴/🟠; omitir 🟡/💡 del informe. Útil en revisiones de cierre donde solo interesa lo que bloquea. |
-| `save-report` | Persistir el informe en `docs/code-review/<YYYYMMDD-HHMMSS>.md`. |
+| `save-report` | **Además** del informe vigente `docs/audits/code-review.md`, guardar una copia con marca de tiempo en `docs/audits/code-review-<YYYYMMDD-HHMMSS>.md`. En una revisión acotada (`working-tree`/`scope`) es el **único** destino en disco: ahí no se escribe el informe vigente. |
 
 > Los modificadores de la etapa automatizada (`no-tests`, `no-e2e`, `only <check>`, `tests-only`, `include-linter-warnings`…) **no pertenecen a este skill**: viven en [`quality-check`](../quality-check/SKILL.md). Si el usuario los pide aquí, redirigirlo a ese skill.
 >
@@ -142,7 +142,7 @@ Las **claves** de los modificadores son siempre en inglés (estándar). Si el us
 2. **Leer el contexto del sistema:** patrones del repo, capas, convenciones y, si existen, los criterios de aceptación del artefacto origen.
 3. **Evaluar las tres dimensiones** con [`references/qualitative-review.md`](references/qualitative-review.md) y emitir hallazgos con severidad, porqué, impacto y sugerencia concreta.
 4. **Puerta cualitativa e informe:** presentar los hallazgos bloqueantes, pedir corregir o justificar, y rellenar [`assets/code-review-template.md`](assets/code-review-template.md) con el veredicto.
-5. **Registro y salida:** en proyectos con `docs/specs/`, escribir `docs/specs/code-review.md`; si no, mostrar en chat (o `save-report`). **Excepción:** una revisión acotada (`working-tree` o `scope`) **no** sobrescribe ese archivo —no es el estado vigente de la rama—: va al chat o a `save-report`. **No** hacer commit/push/merge sin instrucción explícita.
+5. **Registro y salida:** escribir siempre `docs/audits/code-review.md` (creando el directorio si no existe), más un resumen en el chat. **Excepción:** una revisión acotada (`working-tree` o `scope`) **no** sobrescribe ese archivo —no es el estado vigente de la rama—: va al chat o a `save-report`. **No** hacer commit/push/merge sin instrucción explícita.
 
 ---
 
@@ -161,7 +161,7 @@ Usar este skill **solo cuando se le invoca explícitamente** (ni de forma proact
 |---|---|---|---|
 | Pregunta que responde | ¿El código corre y cumple las reglas? | ¿Resuelve el problema correcto y está bien diseñado? | ¿Cada criterio de aceptación está probado? |
 | Qué hace | Ejecuta tipado, linter, unit, coverage, integración, build, e2e, sonar | Analiza el diff en intención, arquitectura/diseño y feedback | Cruza criterios ↔ casos de prueba ↔ artefactos |
-| Artefactos | `docs/specs/quality-check.md`, `docs/specs/test-run.json` | `docs/specs/code-review.md` | `trace-report.md` del trabajo |
+| Artefactos | `docs/audits/quality-check.md`, `.sdd-devkit/test-run.json` | `docs/audits/code-review.md` | `trace-report.md` del trabajo |
 | Veredicto | Propio, solo del plano automatizado | Propio, solo del plano cualitativo | Propio, solo de la cobertura funcional |
 
 Este skill **no ejecuta pruebas ni checks** y **no consume** `test-run.json`: si el usuario pide correr algo, redirigirlo a `quality-check`. El orden recomendado en el cierre es `quality-check` → `code-review` → `trace-validate` (revisar diseño sobre un código que ni compila suele ser trabajo perdido; y `trace-validate` va tras `quality-check` para reutilizar su corrida de pruebas), pero es una recomendación del orquestador, no una dependencia dura.
@@ -172,7 +172,7 @@ Es un proceso **posterior a la implementación**: no forma parte de `work-implem
 
 ### Fingerprint canónico de la tubería
 
-Cuando este skill escribe `docs/specs/code-review.md`, ese archivo forma parte de los **artefactos generados** que el fingerprint canónico de la tubería excluye (`trace-report.md`, `quality-check.md`, `code-review.md`, `test-run.json`), para que escribirlos no desplace la clave de frescura compartida con `quality-check` y `trace-validate`. La receta exacta vive en [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
+Cuando este skill escribe `docs/audits/code-review.md`, ese archivo forma parte de los **artefactos generados** que el fingerprint canónico de la tubería excluye —todo `docs/audits/`, todo `.sdd-devkit/` y los `trace-report.md`—, para que escribirlos no desplace la clave de frescura compartida con `quality-check` y `trace-validate`. La receta exacta vive en [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
 
 ### Resolución de idioma
 

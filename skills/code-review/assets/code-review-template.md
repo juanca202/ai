@@ -45,10 +45,6 @@ Formato de cada hallazgo: `[ISO-25010: <Característica>]` + severidad + qué (u
 
 {{Comentarios contextuales: lo que está bien hecho y nitpicks `🟡`/`💡`. No abrumar; priorizar por impacto. Con `blocking-only`, omitir esta sección y decirlo en el Resumen.}}
 
-## Veredicto
-
-**{{✅ Aprobado | ❌ Rechazado | ⚠️ Incompleto}}** — {{justificación en una línea: qué hallazgo o qué dimensión sin evaluar lo determina}}
-
 ## Próximas acciones
 
 {{Orden de prioridad: hallazgos 🔴/🟠 sin resolver → dimensiones sin evaluar → hallazgos 🟡/💡. Si el veredicto es Aprobado y no hay pendientes: «Sin acciones pendientes».}}
@@ -70,5 +66,5 @@ Formato de cada hallazgo: `[ISO-25010: <Característica>]` + severidad + qué (u
 
 | Puerta | Artefacto | Veredicto |
 | ------ | --------- | --------- |
-| Verificaciones automatizadas (`quality-check`) | `docs/specs/quality-check.md` | {{✅ / ❌ / ⚠️ / pendiente}} |
+| Verificaciones automatizadas (`quality-check`) | `docs/audits/quality-check.md` | {{✅ / ❌ / ⚠️ / pendiente}} |
 | Trazabilidad (`trace-validate`) | `trace-report.md` del trabajo | {{✅ / ❌ / ⚠️ / pendiente}} |

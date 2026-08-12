@@ -27,7 +27,7 @@ Detalla **cómo** ejecutar las verificaciones automatizadas paso a paso y cómo 
 
 **Con `tests-only`** (objetivo de delegación de `trace-validate`): ejecutar únicamente los checks de
 **pruebas** (unit, coverage, integración y e2e; build solo si es prerrequisito de e2e), omitiendo
-tipado, linter y sonar. Antes de ejecutar, comprobar la **caché**: si existe `docs/specs/test-run.json`
+tipado, linter y sonar. Antes de ejecutar, comprobar la **caché**: si existe `.sdd-devkit/test-run.json`
 con `git.fingerprint` == `FINGERPRINT` (Paso 1), **reutilizar** esos resultados sin
 re-ejecutar y saltar a la salida. Si no hay caché o está obsoleta, ejecutar las suites, **escribir/
 actualizar `test-run.json`** (ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas)) y devolver
@@ -85,24 +85,23 @@ Rellenar la plantilla [`../assets/quality-check-template.md`](../assets/quality-
 Decidir **dónde** queda el informe según el contexto. La corrida es **completa** sobre la rama,
 no de una unidad, así que su informe reside en una **ubicación fija**, no en la carpeta de la US/WI:
 
-- **Proyecto spec-driven** (existe `docs/specs/`): **escribir** `docs/specs/quality-check.md` rellenando la plantilla [`../assets/quality-check-template.md`](../assets/quality-check-template.md), sin importar desde qué `US`/`WI` se invocó. Sobrescribir el archivo en re-ejecuciones (es el estado vigente de la rama). Mostrar también un resumen en el chat.
-- **Proyecto sin `docs/specs/`:** **no** escribir archivo; mostrar el informe completo en el chat. (Salvo que el usuario pase `save-report`, que lo persiste en `docs/quality-check/<YYYYMMDD-HHMMSS>.md`.)
+- **Informe vigente de la rama:** **escribir siempre** `docs/audits/quality-check.md` rellenando la plantilla [`../assets/quality-check-template.md`](../assets/quality-check-template.md), sin importar desde qué `US`/`WI` se invocó ni si el repo es spec-driven. Crear `docs/audits/` si no existe. **Sobrescribir** en re-ejecuciones: representa el estado vigente de la rama, no un histórico. Mostrar también un resumen en el chat.
+- **`save-report`:** además del informe vigente, guardar una copia con marca de tiempo en `docs/audits/quality-check-<YYYYMMDD-HHMMSS>.md`. Es el modo para conservar histórico puntual; **no** sustituye ni omite el `quality-check.md` vigente.
 
 **Escribir la caché de corrida de pruebas.** Si en esta corrida **se ejecutaron los checks de pruebas**
-(unit/coverage/integración/e2e — es decir, cualquier modo salvo `no-tests` o un `only <check>` que no sea de pruebas)
-**y** el proyecto usa `docs/specs/` —**o** la corrida viene invocada por `trace-validate`, que sí consume la caché aunque el repo no sea spec-driven—, escribir/actualizar `docs/specs/test-run.json` (junto a
-`docs/specs/quality-check.md`) con el `FINGERPRINT` **vigente** (el del Paso 1 si no hubo correcciones; el recalculado tras la última corrección si las hubo) y el resultado por suite. Ver
+(unit/coverage/integración/e2e — es decir, cualquier modo salvo `no-tests` o un `only <check>` que no sea de pruebas),
+escribir/actualizar `.sdd-devkit/test-run.json` en la **raíz del repo** con el `FINGERPRINT` **vigente** (el del Paso 1 si no hubo correcciones; el recalculado tras la última corrección si las hubo) y el resultado por suite. Crear `.sdd-devkit/` si no existe. Ver
 [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas). En modo `tests-only` este es el artefacto de salida.
 
-Devolver el informe completo (y la ruta del `quality-check.md` si se escribió). **No** continuar con `git commit`, push ni merge aunque el veredicto sea `✅ Aprobado` — salvo instrucción explícita del usuario. Si el cierre requiere también la revisión cualitativa, **sugerir** invocar `code-review`; no ejecutarlo desde aquí.
+Devolver el informe completo y la ruta del `quality-check.md` escrito (en `tests-only` no hay informe: devolver los resultados por suite y la ruta de `test-run.json`). **No** continuar con `git commit`, push ni merge aunque el veredicto sea `✅ Aprobado` — salvo instrucción explícita del usuario. Si el cierre requiere también la revisión cualitativa, **sugerir** invocar `code-review`; no ejecutarlo desde aquí.
 
 ---
 
 ## Formato del informe
 
-La estructura canónica del informe está en la plantilla [`../assets/quality-check-template.md`](../assets/quality-check-template.md). **Rellénala** (no la reescribas desde cero) para todo informe, tanto el que se muestra en chat como el `docs/specs/quality-check.md` que se escribe en proyectos spec-driven.
+La estructura canónica del informe está en la plantilla [`../assets/quality-check-template.md`](../assets/quality-check-template.md). **Rellénala** (no la reescribas desde cero) para todo informe, tanto el resumen que se muestra en chat como el `docs/audits/quality-check.md` que se escribe siempre.
 
-La plantilla incluye: encabezado con metadata y veredicto, **Resumen**, **Verificaciones** (tabla + detalle de fallidos), **Veredicto** con su justificación de una línea y **Próximas acciones**.
+La plantilla incluye: encabezado con metadata (donde vive el **Veredicto**, con su justificación de una línea; no hay sección propia), **Resumen**, **Verificaciones** (tabla + detalle de fallidos) y **Próximas acciones**.
 
 Símbolos a usar (exactamente estos): `✅` PASS · `❌` FAIL · `⏭️` SKIPPED · `⏸️` no ejecutado por fail-fast · `—` N/A · `ℹ️` informativo (Sonar).
 
@@ -117,13 +116,13 @@ Reglas al rellenar:
 Artefacto reutilizable que evita que `trace-validate` vuelva a ejecutar las pruebas. La semántica y el
 esquema están en `SKILL.md` ([Caché de corrida de pruebas](../SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate)); aquí, lo operativo.
 
-**Cuándo se escribe.** Al final de una corrida que ejecutó los checks de pruebas (Paso 5), si el proyecto
-usa `docs/specs/`. Ruta **fija**: `docs/specs/test-run.json` (junto a `docs/specs/quality-check.md`), no por
-unidad. Se **sobrescribe** en cada corrida (es el estado vigente de la rama). Sin `docs/specs/` no se
-escribe por defecto (no hay consumidor). **Excepción:** si la corrida la invocó `trace-validate`
-(típicamente en modo `tests-only`), sí hay consumidor — crear `docs/specs/` y escribir la caché
-igualmente; si el usuario no quiere ese directorio, devolver los resultados en la respuesta y advertir
-que no habrá reutilización entre corridas. Ver [Caché de corrida de pruebas](../SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
+**Cuándo se escribe.** Al final de toda corrida que ejecutó los checks de pruebas (Paso 5), sea o no
+spec-driven el repo. Ruta **fija**: `.sdd-devkit/test-run.json` en la **raíz del repositorio**, no por
+unidad y fuera de `docs/` (es un artefacto de máquina, no documentación). Se **sobrescribe** en cada
+corrida (es el estado vigente de la rama) y **se versiona**, para que viaje en el PR. Crear `.sdd-devkit/`
+si no existe; comprobar de paso que el `.gitignore` del repo no lo excluya (si lo hace, avisar: la caché no
+viajaría en el PR). Solo si el usuario pide explícitamente no crear el directorio, devolver los resultados
+en la respuesta y advertir que no habrá reutilización entre corridas. Ver [Caché de corrida de pruebas](../SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
 
 **Qué se guarda.** El `FINGERPRINT` vigente en `git.fingerprint`, más **las cuatro** entradas de suite
 (`unit`, `coverage`, `integration`, `e2e`) con su `command`, `result` (`PASS`/`FAIL`/`SKIPPED`/`N/A`) y un
@@ -214,6 +213,7 @@ estaba sucio, `workingTreeClean: false` queda registrado como señal para el con
 - **Invadir el terreno de `code-review`:** emitir juicios sobre arquitectura, SOLID, acoplamiento o intención del cambio. Este skill reporta resultados de herramientas; la revisión cualitativa es otro skill.
 - **Invadir el terreno de `trace-validate`:** concluir que un criterio de aceptación está o no cubierto a partir del porcentaje de cobertura. La cobertura de este skill es cuantitativa (líneas/ramas); la funcional (criterio ↔ prueba) la juzga `trace-validate`.
 - Invocar `code-review` desde aquí, o unificar ambos veredictos en un solo informe — son skills independientes.
-- Escribir `quality-check.md` en la carpeta de una US/WI en vez de en `docs/specs/`, o no escribirlo en un proyecto spec-driven.
+- Escribir `quality-check.md` en la carpeta de una US/WI, o en `docs/specs/`, en vez de en `docs/audits/`; o no escribirlo porque el repo no sea spec-driven.
+- Dejar `test-run.json` en `docs/` (o dentro de una US/WI) en vez de en `.sdd-devkit/` de la raíz.
 - Escribir `quality-check.md` o emitir veredicto en modo `tests-only` — ahí el único artefacto es `test-run.json`.
 - Emitir menos de las cuatro entradas de `suites[]`: las que no aplican van con `result: "N/A"`, no se omiten.

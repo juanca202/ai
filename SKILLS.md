@@ -454,7 +454,7 @@ Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrat
 
 **Cuándo:** verificaciones automatizadas pre-merge (usuario u otro skill: `work-integrate`, `pr-create`, `trace-validate`). No proactivo durante el desarrollo.
 
-**Produce:** informe de checks (`docs/specs/quality-check.md`) y la caché de pruebas `docs/specs/test-run.json`.
+**Produce:** informe de checks (`docs/audits/quality-check.md`) y la caché de pruebas `.sdd-devkit/test-run.json`.
 
 **Alcance:** **todo el repositorio** en el estado actual de la rama (o todo el módulo elegido, en monorepo). No se acota al diff: una regresión en código que nadie tocó también debe salir.
 
@@ -475,7 +475,7 @@ Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrat
 | `no-tests` / `no-unit-tests` / `no-integration` / `no-e2e` / `no-coverage` / `no-typecheck` | Omite ese check (`N/A`)                                                |
 | `only <check>`                                                                              | Solo ese check                                                         |
 | `tests-only`                                                                                | Solo suites de prueba (caché `test-run.json`; lo usa `trace-validate`) |
-| `save-report`                                                                               | Guarda en `docs/quality-check/<timestamp>.md`                          |
+| `save-report`                                                                               | Copia con marca de tiempo en `docs/audits/quality-check-<timestamp>.md`, además del informe vigente |
 
 
 **Ejemplos de invocación:**
@@ -503,9 +503,9 @@ En prosa (el skill mapea al modificador en inglés):
 
 **Cuándo:** revisión **cualitativa** pre-merge (usuario u otro skill: `work-integrate`, `pr-create`). No proactivo durante el desarrollo. **No ejecuta pruebas ni checks** — eso es `quality-check`.
 
-**Produce:** informe de hallazgos (`docs/specs/code-review.md`) sobre el diff: intención, arquitectura y diseño (ISO/IEC 25010) y feedback senior.
+**Produce:** informe de hallazgos (`docs/audits/code-review.md`) sobre el diff: intención, arquitectura y diseño (ISO/IEC 25010) y feedback senior.
 
-**Alcance:** el diff de la rama contra su base, **incluidos los cambios sin commitear**. Con `working-tree` (solo lo sin commitear) o `scope` (rutas concretas) la revisión es acotada y **no** sobrescribe `docs/specs/code-review.md`: va al chat o a `save-report`.
+**Alcance:** el diff de la rama contra su base, **incluidos los cambios sin commitear**. Con `working-tree` (solo lo sin commitear) o `scope` (rutas concretas) la revisión es acotada y **no** sobrescribe `docs/audits/code-review.md`: va al chat o a `save-report`.
 
 **Severidad:** `🔴` Crítico · `🟠` Mayor (bloquean) · `🟡` Menor · `💡` Sugerencia.
 
@@ -521,7 +521,7 @@ En prosa (el skill mapea al modificador en inglés):
 | `working-tree`  | Solo los cambios sin commitear (revisión durante el desarrollo)  |
 | `scope <ruta…>` | Limita la revisión a esas rutas                                  |
 | `blocking-only` | Solo hallazgos 🔴/🟠 en el informe                               |
-| `save-report`   | Guarda en `docs/code-review/<timestamp>.md`                      |
+| `save-report`   | Copia con marca de tiempo en `docs/audits/code-review-<timestamp>.md`, además del informe vigente |
 
 
 **Ejemplos de invocación:**
@@ -555,7 +555,7 @@ En prosa:
 
 **Veredicto:** `✅ Aprobado` · `⚠️ Aprobado con observaciones` · `❌ Rechazado`.
 
-No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `quality-check` en `tests-only`. Idempotente: si el fingerprint no cambió, no regenera el reporte.
+No ejecuta pruebas: reutiliza `.sdd-devkit/test-run.json` fresco o invoca `quality-check` en `tests-only`. Idempotente: si el fingerprint no cambió, no regenera el reporte.
 
 **Alcance:** **un artefacto** y sus criterios de aceptación — ni el repo ni el diff. Si la rama abarca varios trabajos, se valida uno por corrida.
 
@@ -591,8 +591,8 @@ No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `qualit
 | Tipo                                          | Rama                                              | Qué debe estar `Done` en `progress.md`                                                               |
 | --------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `US-XXX`                                      | `feature/US-XXX-…`                                | Todas las `TK-XXX`                                                                                   |
-| `WI-XXX`                                      | `feature/`|`fix/`|`chore/`|`refactor/`+`WI-XXX-…` | Todas las unidades del WI                                                                            |
-| Automatización de pruebas (`TC-XXX`/`FT-XXX`) | `test/` + `FT-XXX-…`|`US-XXX-…`|`WI-XXX-…`        | Todas las unidades `TC-XXX`/`FT-XXX` de esa ejecución (no las del trabajo funcional del mismo padre) |
+| `WI-XXX`                                      | `feature/`\|`fix/`\|`chore/`\|`refactor/`+`WI-XXX-…` | Todas las unidades del WI                                                                            |
+| Automatización de pruebas (`TC-XXX`/`FT-XXX`) | `test/` + `FT-XXX-…`\|`US-XXX-…`\|`WI-XXX-…`        | Todas las unidades `TC-XXX`/`FT-XXX` de esa ejecución (no las del trabajo funcional del mismo padre) |
 
 
 **Puertas (obligatorias):** `quality-check` → `code-review` → `trace-validate`. Working tree sucio → invoca `git-commit` automáticamente.

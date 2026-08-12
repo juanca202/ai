@@ -28,7 +28,7 @@ Consecuencias prácticas:
 - **Un FAIL puede no venir del trabajo en curso.** Un test que ya estaba roto antes de esta rama saldrá igual. **No atribuirlo automáticamente al cambio reciente.** Si la rama base es resoluble sin esfuerzo, se puede contrastar el archivo del fallo con `git diff --name-only <base>` (rango que incluye lo sin commitear) y anotar en el detalle del check que el fallo **parece preexistente**; si no lo es, no especular. En cualquier caso, la decisión de corregirlo aquí o sacarlo a un `WI-XXX` aparte es del usuario.
 - **No acotar la corrida a los archivos que cambiaron.** Filtrar los tests por archivos tocados falsearía el resultado y anularía el valor de la puerta. Los modificadores (`only <check>`, `no-tests`…) acotan **qué checks se ejecutan**, nunca sobre qué parte del código; no existe forma de acotar el universo de archivos, y es deliberado.
 - **Excepción monorepo:** si el repo tiene varios módulos, «todo el repositorio» significa **todo el módulo elegido** — la selección del módulo la resuelve el Paso 1 (ver [`references/stacks.md`](references/stacks.md#detección-de-ecosistema)), preguntando si hay ambigüedad. No se auditan todos los módulos salvo petición explícita.
-- **El informe vive en `docs/specs/`, no en la carpeta de una US/WI**, porque la corrida es de la rama consolidada y puede abarcar varios trabajos. (En modo `tests-only` no hay informe: el único artefacto es `test-run.json`.) Ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
+- **El informe vive en `docs/audits/`, no en la carpeta de una US/WI**, porque la corrida es de la rama consolidada y puede abarcar varios trabajos. (En modo `tests-only` no hay informe: el único artefacto es `test-run.json`.) Ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
 
 ---
 
@@ -137,7 +137,7 @@ Las **claves** de los modificadores son siempre en inglés (estándar). Si el us
 | `no-tests` | Omitir **los cuatro checks de pruebas**: unit, coverage, integración y e2e (→ `N/A`, no `SKIPPED`: lo pidió el usuario). |
 | `no-unit-tests` / `no-integration` / `no-e2e` / `no-coverage` / `no-typecheck` | Omitir solo ese check (→ `N/A`). |
 | `only <check>` | Ejecutar ÚNICAMENTE ese check (p. ej. `only build`); el resto → `N/A`. |
-| `save-report` | Persistir el informe en `docs/quality-check/<YYYYMMDD-HHMMSS>.md`. |
+| `save-report` | **Además** del informe vigente `docs/audits/quality-check.md` (que siempre se escribe), guardar una copia con marca de tiempo en `docs/audits/quality-check-<YYYYMMDD-HHMMSS>.md` para conservar histórico. |
 | `tests-only` | Ejecutar **solo los checks de ejecución de pruebas** (unit, coverage, integración y e2e; build solo si es prerrequisito de e2e); omitir tipado/linter/sonar. Pensado como **objetivo de delegación de `trace-validate`**: honra la caché de corrida de pruebas — si existe un `test-run.json` **fresco** (fingerprint coincide, ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate)) **reutiliza** ese resultado sin re-ejecutar; si no, ejecuta y escribe/actualiza la caché. **Modo no interactivo:** devuelve los resultados por suite y la ruta de `test-run.json` **sin** entrar al ciclo de corrección, **sin** emitir veredicto y **sin** escribir `quality-check.md` — su único artefacto es `test-run.json`. Si hay suites en FAIL, se reportan como tales; corregirlas es decisión del flujo que invocó, no de esta corrida. |
 
 > Todo check omitido **por modificador del usuario** es `N/A`, nunca `SKIPPED`: una omisión solicitada no convierte el veredicto en Incompleto.
@@ -152,7 +152,7 @@ Las **claves** de los modificadores son siempre en inglés (estándar). Si el us
 2. **Ejecutar los checks** secuencialmente según el catálogo.
 3. **Evaluar el resultado y el veredicto** con la tabla de [Veredicto](#veredicto). Si hay FAIL, mostrar el reporte y **preguntar** qué hacer; nunca corregir sin autorización. Dentro de una implementación, la pregunta es si se corrige; **fuera de una implementación**, ofrecer además la salida **«solo el informe»**. Si el usuario autoriza corregir y la rama tiene un artefacto identificable (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin), la corrección se **delega en `work-implement`**; solo si no hay artefacto de ningún tipo se aplica aquí — ver [Corrección de fallos](#corrección-de-fallos).
 4. **Construir informe:** rellenar [`assets/quality-check-template.md`](assets/quality-check-template.md).
-5. **Registro y salida:** en proyectos con `docs/specs/`, escribir `docs/specs/quality-check.md` y la caché `docs/specs/test-run.json`; si no, mostrar en chat (o `save-report`). **Excepción `tests-only`:** no hay informe ni veredicto; el único artefacto es `test-run.json`. **No** hacer commit/push/merge sin instrucción explícita.
+5. **Registro y salida:** escribir siempre el informe en `docs/audits/quality-check.md` y la caché en `.sdd-devkit/test-run.json` (creando los directorios si no existen), más un resumen en el chat. **Excepción `tests-only`:** no hay informe ni veredicto; el único artefacto es `test-run.json`. **No** hacer commit/push/merge sin instrucción explícita.
 
 > **Tras cualquier corrección, el código cambió: recalcular el fingerprint** (Paso 1) antes de escribir la caché. Escribir un `test-run.json` con el fingerprint previo lo vuelve falso — afirmaría corresponder a un estado del código que ya no existe.
 
@@ -245,25 +245,28 @@ nuevo en este skill.
 > este `test-run.json` ni sirven como caché. La **corrida completa y autoritativa** de la batería de
 > pruebas ocurre aquí, en el cierre; este skill es el único productor de `test-run.json`.
 
-**Ubicación fija — `docs/specs/test-run.json`** (junto a `docs/specs/quality-check.md`), **no** por unidad:
-como la corrida es siempre **completa** sobre la rama consolidada, sus artefactos residen
-directamente en `docs/specs/`, sin importar desde qué `US`/`WI` se invocó. Se **sobrescribe** en cada
-corrida (es el estado vigente de la rama).
+**Ubicación fija — `.sdd-devkit/test-run.json`**, en la **raíz del repositorio**, **no** por unidad: como la
+corrida es siempre **completa** sobre la rama consolidada, su caché no pertenece a ninguna `US`/`WI`. Vive
+separada de `docs/` porque no es documentación sino un artefacto de máquina que consume `trace-validate`.
+Se **sobrescribe** en cada corrida (es el estado vigente de la rama) y **se versiona** con el repo, para que
+viaje en el PR y una corrida posterior pueda reutilizarla.
 
-Si el proyecto **no** usa `docs/specs/` (repo no spec-driven), no se escribe caché por defecto: no hay consumidor.
-
-> **Excepción — invocación desde `trace-validate`.** `trace-validate` sí puede operar en un repo no spec-driven, validando un **artefacto externo al plugin** (ver [Artefactos externos al plugin](#artefactos-externos-al-plugin)); en ese caso **sí hay consumidor**. Cuando la corrida venga invocada por `trace-validate` (típicamente en modo `tests-only`), **crear `docs/specs/` y escribir la caché igualmente** — de lo contrario `trace-validate` volvería a delegar la suite completa en cada corrida. Si el usuario no quiere ese directorio, entregar los resultados en la respuesta y advertir que no habrá reutilización entre corridas.
+Se escribe **siempre**, exista o no `docs/specs/`: el consumidor es `trace-validate`, que también opera
+sobre artefactos externos al plugin (ver [Artefactos externos al plugin](#artefactos-externos-al-plugin)).
+Crear `.sdd-devkit/` si no existe. Solo si el usuario pide explícitamente no crear ese directorio (o el repo
+lo tiene ignorado en `.gitignore`, en cuyo caso no viajaría en el PR), entregar los resultados en la
+respuesta y advertir que no habrá reutilización entre corridas. La misma excepción aplica a `docs/audits/`.
 
 **Fingerprint canónico del estado del código** — clave de frescura compartida entre los **dos skills que
 cachean**: este y `trace-validate`. (`code-review` no calcula fingerprint ni tiene caché: siempre revisa
 el diff de nuevo; solo aparece porque su informe está en la lista de exclusiones.) Hash reproducible del commit + working tree + cambios
-sin commitear, **excluyendo los artefactos generados** (`trace-report.md`, `quality-check.md`,
-`code-review.md`, `test-run.json`) para que escribirlos no desplace la clave:
+sin commitear, **excluyendo los artefactos generados** —todo `docs/audits/`, todo `.sdd-devkit/` y los
+`trace-report.md` de cada trabajo— para que escribirlos no desplace la clave:
 
 ```bash
 FINGERPRINT=$( { git rev-parse HEAD; \
-  git status --porcelain -- ':(exclude,glob)**/trace-report.md' ':(exclude,glob)**/quality-check.md' ':(exclude,glob)**/code-review.md' ':(exclude,glob)**/test-run.json'; \
-  git diff HEAD          -- ':(exclude,glob)**/trace-report.md' ':(exclude,glob)**/quality-check.md' ':(exclude,glob)**/code-review.md' ':(exclude,glob)**/test-run.json'; \
+  git status --porcelain -- ':(top,exclude)docs/audits' ':(top,exclude).sdd-devkit' ':(exclude,glob)**/trace-report.md'; \
+  git diff HEAD          -- ':(top,exclude)docs/audits' ':(top,exclude).sdd-devkit' ':(exclude,glob)**/trace-report.md'; \
 } | git hash-object --stdin )
 ```
 
@@ -276,10 +279,19 @@ recalculado ahora; si difiere, hubo cambios y es **obsoleta** (re-ejecutar).
 > es `git.fingerprint`. No usar alias (`FP`, `HASH`) en ningún skill: el mismo valor debe ser reconocible
 > a simple vista cuando un skill delega en otro.
 >
-> **Los informes con marca de tiempo no se excluyen.** `save-report` escribe en `docs/quality-check/<timestamp>.md`
-> (y `code-review` en `docs/code-review/<timestamp>.md`), rutas que **no** están en la lista de exclusión:
-> generarlos desplaza el fingerprint. Es aceptable porque `save-report` es un modo explícito del usuario,
-> no parte del cierre estándar — pero conviene saberlo antes de encadenarlo con `trace-validate`.
+> **La exclusión es por directorio, no por nombre de archivo.** `docs/audits` cubre el informe vigente
+> (`quality-check.md`, `code-review.md`), las copias con marca de tiempo de `save-report` y **también los
+> informes de `arch-audit`**; `.sdd-devkit` cubre `test-run.json`. Así ningún artefacto que produce la propia
+> tubería puede desplazar la clave de frescura — correr `arch-audit` ya no invalida un `trace-report.md`. El
+> único generado fuera de esos directorios es el `trace-report.md` de cada trabajo, que vive junto a su
+> artefacto y por eso lleva su propio patrón.
+>
+> **La magia `top` no es opcional.** `:(top,exclude)` ancla el pathspec a la **raíz del repositorio**. Sin
+> ella, git lo resolvería relativo al directorio de trabajo y, en un monorepo donde la corrida se lanza desde
+> el módulo elegido, `docs/audits` se leería como `<módulo>/docs/audits` — el de la raíz dejaría de excluirse
+> y escribir el informe invalidaría la caché en cada corrida. Excluir el directorio **sin** `glob` (`docs/audits`,
+> no `docs/audits/**`) es igual de deliberado: cubre tanto los archivos de dentro como la entrada del propio
+> directorio cuando aún no está trackeado, que es el caso en la primera corrida de un repo.
 
 **Esquema `test-run.json`** (`schema: test-run/v1`) — **esta es la definición canónica y única**; los
 consumidores la referencian, no la copian:

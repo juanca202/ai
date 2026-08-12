@@ -75,6 +75,17 @@ el requisito que lo agrupa, su estándar de dominio y su ADR de origen) o la reg
 evidencias y archivos infractores, propone una acción y fija un estado. El informe incluye además una
 sección de **fitness functions**: cuáles existen y su resultado al ejecutarlas, y cuáles faltan
 (criterios aptos sin fitness function) con la sugerencia de crearlas.
+
+> **`docs/audits/` es compartido y mezcla dos semánticas.** Ahí conviven los informes **históricos** de este
+> skill (`arch-audit-YYYY-MM-DD.md`, nunca sobrescritos) con los informes de **estado vigente** de
+> `quality-check` y `code-review` (`quality-check.md`, `code-review.md`, sobrescritos en cada corrida) y sus
+> copias `<skill>-<YYYYMMDD-HHMMSS>.md` de `save-report`. Los espacios de nombres son disjuntos: al buscar
+> auditorías previas usar siempre el glob `arch-audit-*.md`, nunca listar el directorio entero.
+>
+> Todo `docs/audits/` está **excluido del fingerprint canónico** de la tubería de cierre (ver
+> [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate)):
+> generar un informe de auditoría **no** invalida la caché de pruebas ni fuerza a regenerar un
+> `trace-report.md`.
 Este contenido se escribe una sola vez, al crear el informe, y permanece inalterado; cada revalidación
 posterior agrega una entrada nueva en la sección `## Revalidaciones` al final del **mismo** archivo
 (nunca se crea un archivo por revalidación), con la fecha/hora, el veredicto resultante y solo los

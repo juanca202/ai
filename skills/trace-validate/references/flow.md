@@ -15,8 +15,8 @@ Antes de trabajar, evitar regenerar si nada cambió (ver [Reutilización del rep
 3. Si **existe**, leer su marca de pie `<!-- trace-validate:fingerprint=<hash> · generado=YYYY-MM-DD -->` y calcular el **fingerprint canónico** de la tubería (excluye los artefactos generados; es el mismo de `quality-check`):
    ```bash
    FINGERPRINT=$( { git rev-parse HEAD; \
-           git status --porcelain -- ':(exclude,glob)**/trace-report.md' ':(exclude,glob)**/quality-check.md' ':(exclude,glob)**/code-review.md' ':(exclude,glob)**/test-run.json'; \
-           git diff HEAD        -- ':(exclude,glob)**/trace-report.md' ':(exclude,glob)**/quality-check.md' ':(exclude,glob)**/code-review.md' ':(exclude,glob)**/test-run.json'; \
+           git status --porcelain -- ':(top,exclude)docs/audits' ':(top,exclude).sdd-devkit' ':(exclude,glob)**/trace-report.md'; \
+           git diff HEAD        -- ':(top,exclude)docs/audits' ':(top,exclude).sdd-devkit' ':(exclude,glob)**/trace-report.md'; \
          } | git hash-object --stdin )
    ```
    - **`FINGERPRINT` == fingerprint guardado** y el usuario **no** pidió revalidar/forzar → **no regenerar**: devolver el veredicto y el resumen del reporte existente, indicando que no hubo cambios desde `{{generado}}`. No reescribir el archivo ni delegar en `quality-check`. Fin.
@@ -84,7 +84,7 @@ El mapeo se hace **por fila de la matriz**, no por criterio: la unidad es la com
 ejecución) y los mapea a los criterios.
 
 1. **Reusar el `FINGERPRINT` canónico** ya calculado en el Paso 0 (mismo valor; la delegación `tests-only` no altera el código, así que no hay que recalcularlo).
-2. **Buscar la caché** en la ubicación fija `docs/specs/test-run.json` (no por unidad; es la corrida completa de la rama):
+2. **Buscar la caché** en la ubicación fija `.sdd-devkit/test-run.json` (no por unidad; es la corrida completa de la rama):
    - **Existe y `git.fingerprint` coincide** → caché **fresca** (sin cambios desde la corrida de
      `quality-check`): **reutilizar** sus `suites[]` sin ejecutar. Registrar la procedencia en la prosa del Resumen.
    - **No existe o el fingerprint difiere** → **delegar en `quality-check` modo `tests-only`**, que ejecuta
@@ -187,7 +187,7 @@ Aplicar la tabla de «Veredicto» (en `SKILL.md`) sobre el conjunto de criterios
 ## Ejecución de pruebas: delegación en quality-check
 
 `trace-validate` **no detecta runners ni ejecuta pruebas**. La ejecución la realiza `quality-check`, que
-persiste el resultado en `docs/specs/test-run.json` (esquema `test-run/v1`; ubicación fija, no por unidad).
+persiste el resultado en `.sdd-devkit/test-run.json` (esquema `test-run/v1`; ubicación fija, no por unidad).
 `trace-validate` solo **consume** ese artefacto.
 
 **Fuente de resultados (orden):**

@@ -102,6 +102,8 @@ Solo si **todas las puertas aplicables** quedan en aprobado se avanza al Paso 5.
 
 **Antes del push, re-comprobar el working tree.** Las puertas del Paso 4 pueden haber dejado cambios sin commitear (correcciones aplicadas por `quality-check` o delegadas en `work-implement`). Ejecutar `git status --porcelain` y, si hay salida, **invocar de nuevo `git-commit`** con el mismo criterio del pre-flight: lo que se sube debe ser exactamente lo que las puertas verificaron.
 
+> **Los artefactos de las puertas viajan en el PR.** Las puertas escriben siempre `docs/audits/quality-check.md`, `docs/audits/code-review.md`, `.sdd-devkit/test-run.json` y el `trace-report.md` del trabajo. Ese commit los incluye a propósito: el revisor ve el veredicto junto al cambio, y `test-run.json` permite que una corrida posterior reutilice la caché sin re-ejecutar pruebas. Son artefactos generados, así que **no** desplazan el fingerprint de frescura (están excluidos).
+
 Si la rama no existe en `origin` o tiene commits no publicados (`git rev-list origin/<rama>..HEAD` no vacío): ejecutar `git push -u origin <rama-actual>`. Nunca `--force` ni `--force-with-lease`. Si el push falla por divergencia: parar y avisar — el usuario decide cómo resolver.
 
 ### Paso 6 — Generar título y descripción

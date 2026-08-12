@@ -60,10 +60,10 @@ Un hallazgo que ignora el patrón vigente del repo o una decisión ya tomada en 
 
 La revisión cubre **la rama contra su base** (incluidos los cambios sin commitear), no una unidad, así que su informe reside en una **ubicación fija**, no en la carpeta de la US/WI:
 
-> **Excepción `working-tree`:** una revisión acotada a los cambios sin commitear **no** es el estado vigente de la rama, así que **no sobrescribe** `docs/specs/code-review.md`. Mostrar el informe en el chat (o persistirlo con `save-report` en `docs/code-review/<YYYYMMDD-HHMMSS>.md`) y decirlo en el Resumen. Lo mismo aplica a `scope`: si la revisión no cubrió la rama entera, no publicar como si lo hubiera hecho.
+> **Excepción `working-tree`:** una revisión acotada a los cambios sin commitear **no** es el estado vigente de la rama, así que **no sobrescribe** `docs/audits/code-review.md`. Mostrar el informe en el chat (o persistirlo con `save-report` en `docs/audits/code-review-<YYYYMMDD-HHMMSS>.md`) y decirlo en el Resumen. Lo mismo aplica a `scope`: si la revisión no cubrió la rama entera, no publicar como si lo hubiera hecho.
 
-- **Proyecto spec-driven** (existe `docs/specs/`): **escribir** `docs/specs/code-review.md` rellenando la plantilla, sin importar desde qué `US`/`WI` se invocó. Sobrescribir el archivo en re-ejecuciones (es el estado vigente de la rama). Mostrar también un resumen en el chat.
-- **Proyecto sin `docs/specs/`:** **no** escribir archivo; mostrar el informe completo en el chat. (Salvo que el usuario pase `save-report`, que lo persiste en `docs/code-review/<YYYYMMDD-HHMMSS>.md`.)
+- **Revisión de la rama completa:** **escribir siempre** `docs/audits/code-review.md` rellenando la plantilla, sin importar desde qué `US`/`WI` se invocó ni si el repo es spec-driven. Crear `docs/audits/` si no existe. **Sobrescribir** en re-ejecuciones: representa el estado vigente de la rama, no un histórico. Mostrar también un resumen en el chat.
+- **`save-report`:** guardar además una copia con marca de tiempo en `docs/audits/code-review-<YYYYMMDD-HHMMSS>.md`. Es el modo para conservar histórico puntual, y **el único destino en disco de una revisión acotada** (`working-tree` o `scope`), que nunca toca el `code-review.md` vigente.
 
 Devolver el informe completo (y la ruta del `code-review.md` si se escribió). **No** continuar con `git commit`, push ni merge aunque el veredicto sea `✅ Aprobado` — salvo instrucción explícita del usuario. Si el cierre requiere también las verificaciones automatizadas, **sugerir** invocar `quality-check`; no ejecutarlo desde aquí.
 
@@ -71,9 +71,9 @@ Devolver el informe completo (y la ruta del `code-review.md` si se escribió). *
 
 ## Formato del informe
 
-La estructura canónica está en la plantilla [`../assets/code-review-template.md`](../assets/code-review-template.md). **Rellénala** (no la reescribas desde cero) para todo informe, tanto el que se muestra en chat como el `docs/specs/code-review.md` que se escribe en proyectos spec-driven.
+La estructura canónica está en la plantilla [`../assets/code-review-template.md`](../assets/code-review-template.md). **Rellénala** (no la reescribas desde cero) para todo informe, tanto el resumen que se muestra en chat como el `docs/audits/code-review.md` que se escribe siempre.
 
-La plantilla incluye: encabezado con metadata y veredicto, **Resumen**, **Intención detectada**, las tres dimensiones (**Análisis semántico**, **Arquitectura y diseño**, **Feedback adicional**), **Dimensiones no evaluadas**, **Veredicto** con su justificación de una línea, **Próximas acciones** y **Justificaciones aceptadas**.
+La plantilla incluye: encabezado con metadata (donde vive el **Veredicto**, con su justificación de una línea; no hay sección propia), **Resumen**, **Intención detectada**, **Hallazgos** por dimensión, **Próximas acciones**, **Justificaciones aceptadas** y **Otras puertas del cierre**.
 
 Símbolos de severidad (exactamente estos): `🔴` Crítico · `🟠` Mayor · `🟡` Menor · `💡` Sugerencia · `✅` dimensión conforme.
 
@@ -129,6 +129,6 @@ Reglas al rellenar:
 - Aplicar una corrección **automáticamente sin que el usuario la pida expresamente**.
 - Corregir un hallazgo y **no reiniciar** la revisión.
 - No decir nada cuando una dimensión está conforme (el silencio no es feedback).
-- Escribir `code-review.md` en la carpeta de una US/WI en vez de en `docs/specs/`, o no escribirlo en un proyecto spec-driven **cuando la revisión cubrió la rama completa**.
-- A la inversa: **sobrescribir `docs/specs/code-review.md` con una revisión acotada** (`working-tree` o `scope`) — ese archivo representa el estado vigente de la rama entera.
+- Escribir `code-review.md` en la carpeta de una US/WI, o en `docs/specs/`, en vez de en `docs/audits/`; o no escribirlo porque el repo no sea spec-driven **cuando la revisión cubrió la rama completa**.
+- A la inversa: **sobrescribir `docs/audits/code-review.md` con una revisión acotada** (`working-tree` o `scope`) — ese archivo representa el estado vigente de la rama entera.
 - Continuar a commit/push/merge tras `✅ Aprobado` sin instrucción explícita.
