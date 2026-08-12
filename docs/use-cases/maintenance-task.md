@@ -11,26 +11,26 @@ flowchart TD
     E -.-> C["Casos de prueba<br/>**/test-define**"]
     E --> G["Implementación<br/>**/work-implement**"]
     C -.->|"automatizar TCs"| G
-    G --> Q0["Verificaciones automatizadas<br/>**/quality-check**"]
-    Q0 --> Q1["Revisión de código<br/>**/code-review**"]
-    Q1 --> Q2["Validación de trazabilidad<br/>**/trace-validate**"]
-    Q2 --> I["Creación de PR<br/>**/pr-create**"]
+    G --> I["Creación de PR<br/>**/pr-create**"]
     I --> J(["Entregable"])
+    NOTE["ℹ️ pr-create ejecuta internamente<br/>quality-check + code-review + trace-validate"]
+    I -.-> NOTE
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
     classDef entryPoint fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d
     classDef exitPoint fill:#fee2e2,stroke:#b91c1c,stroke-width:3px,color:#7f1d1d
+    classDef note fill:#f8fafc,stroke:#94a3b8,stroke-width:1px,stroke-dasharray:3 3,color:#334155
     class E,G,I main
     class A entryPoint
     class J exitPoint
+    class NOTE note
 ```
 
 1. **Inicio**: un requerimiento de mantenimiento **que no es un bug ni un refactor** entra **directo a Planificación de tareas** (`work-plan`) — a diferencia del flujo con historia de usuario, no pasa por `work-define` porque no hay `US` asociada.
 2. **Planificación** (`work-plan`): crea el `WI-XXX` eligiendo el `Tipo` según el requerimiento (`dependency-update` / `optimization` / `security-update` / `test-improvement` / `documentation-update` / `operational-change`).
 3. Opcionalmente, durante la planificación se ajusta el diseño arquitectónico (`design-define`) y/o se definen casos de prueba (`test-define`) — igual que en el flujo con historia de usuario.
 4. El `WI` en `Ready` pasa a **Implementación** (`work-implement`). Los casos de prueba definidos en el paso anterior también pueden automatizarse ahí.
-5. **Puertas de calidad**: `quality-check` (verificaciones automatizadas), `code-review` (revisión cualitativa) y `trace-validate` (cobertura de los criterios de aceptación del `WI`).
-6. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable.
+5. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable. `pr-create` ejecuta **internamente** las puertas de calidad (`quality-check`, `code-review`, `trace-validate`) antes de crear el PR — no son pasos aparte de este flujo.
 
 ## Cuándo no aplica este caso
 

@@ -59,17 +59,18 @@ flowchart TD
         IMPL["Flujo de implementación"]
     end
     S --> IMPL
-    IMPL --> V0["Verificaciones automatizadas<br/>**/quality-check**"]
-    V0 --> V1["Revisión de código<br/>**/code-review**"]
-    V1 --> V2["Validación de trazabilidad<br/>**/trace-validate**"]
-    V2 --> DONE(["Entregable"])
+    IMPL --> DONE(["Entregable"])
+    NOTE["ℹ️ Puertas de calidad al cierre<br/>(quality-check + code-review + trace-validate)<br/>corren dentro de work-integrate / pr-create"]
+    IMPL -.-> NOTE
 
     classDef nestedFlow fill:#fff7ed,stroke:#ea580c,stroke-width:2px,stroke-dasharray:5 5,color:#9a3412
     classDef entryPoint fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d
     classDef exitPoint fill:#fee2e2,stroke:#b91c1c,stroke-width:3px,color:#7f1d1d
+    classDef note fill:#f8fafc,stroke:#94a3b8,stroke-width:1px,stroke-dasharray:3 3,color:#334155
     class IMPL nestedFlow
     class INIT entryPoint
     class DONE exitPoint
+    class NOTE note
 ```
 
 
@@ -79,7 +80,7 @@ flowchart TD
 3. En paralelo (o a continuación), se configura la **compuerta de calidad** vía `arch-init`; el camino brownfield también converge ahí.
 4. Luego se definen o actualizan los ADRs/Estándares con `arch-manage`. Opcionalmente se audita el cumplimiento con `arch-audit`.
 5. Con la base arquitectónica lista, el trabajo entra a la implementación de requerimientos (otro flujo: historias → planificación → implementación → integración/PR).
-6. El código resultante pasa por las verificaciones automatizadas (`quality-check`), la revisión cualitativa (`code-review`) y la validación de trazabilidad (`trace-validate`).
+6. Ese flujo de implementación **ya cierra** con `work-integrate` o `pr-create`, que ejecutan internamente las puertas de calidad (`quality-check`, `code-review`, `trace-validate`) — no son pasos aparte de este flujo de alto nivel.
 7. El flujo termina en un entregable: trabajo verificado, validado y listo para producción.
 
 
@@ -132,13 +133,18 @@ flowchart TD
     G --> I["Creación de PR<br/>**/pr-create**"]
     H --> J(["Entregable"])
     I --> J
+    NOTE["ℹ️ Ambos ejecutan internamente<br/>quality-check + code-review + trace-validate"]
+    H -.-> NOTE
+    I -.-> NOTE
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
     classDef entryPoint fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d
     classDef exitPoint fill:#fee2e2,stroke:#b91c1c,stroke-width:3px,color:#7f1d1d
+    classDef note fill:#f8fafc,stroke:#94a3b8,stroke-width:1px,stroke-dasharray:3 3,color:#334155
     class B,E,G,I main
     class A entryPoint
     class J exitPoint
+    class NOTE note
 ```
 
 
@@ -148,7 +154,7 @@ flowchart TD
 3. **Planificación de tareas** (`work-plan`): desde una historia produce tareas técnicas (`TK-XXX`); sin historia, tareas de mantenimiento (`WI-XXX`).
 4. Durante la planificación, opcionalmente se investiga con `work-research` y/o se ajusta el diseño arquitectónico con `design-define`.
 5. Las tareas planificadas pasan a `work-implement` para su codificación. Los casos de prueba (`TC-XXX`, incluidos los de un feature legacy `FT-XXX`) también pueden pasar por `work-implement` para automatizarse como pruebas.
-6. El flujo termina por uno de dos caminos, cada uno con puertas de calidad (`quality-check`, `code-review`, `trace-validate`), y ambos llegan al mismo entregable — el trabajo listo para producción, ya sea integrado directo (`work-integrate`) o vía Pull/Merge Request (`pr-create`).
+6. El flujo termina por uno de dos caminos, y ambos llegan al mismo entregable — el trabajo listo para producción, ya sea integrado directo (`work-integrate`) o vía Pull/Merge Request (`pr-create`). Cada uno ejecuta **internamente** las mismas puertas de calidad (`quality-check`, `code-review`, `trace-validate`); no son pasos aparte de este flujo.
 
 
 
@@ -170,15 +176,20 @@ flowchart TD
     S --> I["Creación de PR<br/>**/pr-create**"]
     H --> J(["Entregable"])
     I --> J
+    NOTE["ℹ️ Ambos ejecutan internamente<br/>quality-check + code-review + trace-validate"]
+    H -.-> NOTE
+    I -.-> NOTE
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
     classDef nestedFlow fill:#fff7ed,stroke:#ea580c,stroke-width:2px,stroke-dasharray:5 5,color:#9a3412
     classDef entryPoint fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d
     classDef exitPoint fill:#fee2e2,stroke:#b91c1c,stroke-width:3px,color:#7f1d1d
+    classDef note fill:#f8fafc,stroke:#94a3b8,stroke-width:1px,stroke-dasharray:3 3,color:#334155
     class B,H,I main
     class S nestedFlow
     class A entryPoint
     class J exitPoint
+    class NOTE note
 ```
 
 
@@ -186,7 +197,7 @@ flowchart TD
 1. **Inicio**: el requerimiento se convierte en historias de usuario con `work-define`.
 2. Opcionalmente, desde las historias se investiga (`work-research`), se definen casos de prueba (`test-define`) y/o diseño arquitectónico (`design-define`).
 3. Las historias alimentan **Specs de terceros** (la implementación la corre el framework elegido: Speckit, OpenSpec, AgentOS, etc.).
-4. El flujo termina por uno de dos caminos, igual que en Specs: integración directa (`work-integrate`) o vía Pull/Merge Request (`pr-create`), cada uno con puertas de calidad (`quality-check`, `code-review`, `trace-validate`); ambos llegan al entregable.
+4. El flujo termina por uno de dos caminos, igual que en Specs: integración directa (`work-integrate`) o vía Pull/Merge Request (`pr-create`); ambos llegan al entregable y ejecutan **internamente** las mismas puertas de calidad (`quality-check`, `code-review`, `trace-validate`), sin ser pasos aparte de este flujo.
 
 
 

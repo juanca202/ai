@@ -14,19 +14,21 @@ flowchart TD
     Q0 --> Q1{"¿Veredicto<br/>aprobado?"}
     Q1 -->|"No: TCs sin automatizar / fallos"| G["Automatización de pruebas<br/>**/work-implement** (tipo feature, FT-XXX/TC-XXX)"]
     G -.->|"reintenta la corrida"| Q0
-    Q1 -->|"Sí"| Q2["Revisión de código<br/>**/code-review**"]
-    Q2 --> Q3["Validación de trazabilidad<br/>**/trace-validate**"]
-    Q3 --> I["Creación de PR<br/>**/pr-create**"]
+    Q1 -->|"Sí"| I["Creación de PR<br/>**/pr-create**"]
     I --> J(["Entregable"])
+    NOTE["ℹ️ pr-create ejecuta internamente<br/>code-review + trace-validate<br/>(y una corrida final de quality-check)"]
+    I -.-> NOTE
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
     classDef human fill:#fef2f2,stroke:#dc2626,color:#7f1d1d
     classDef entryPoint fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d
     classDef exitPoint fill:#fee2e2,stroke:#b91c1c,stroke-width:3px,color:#7f1d1d
+    classDef note fill:#f8fafc,stroke:#94a3b8,stroke-width:1px,stroke-dasharray:3 3,color:#334155
     class B,D,E,G,I main
     class H human
     class A entryPoint
     class J exitPoint
+    class NOTE note
 ```
 
 1. **Inicio**: un módulo, carpeta o repo con código ya implementado, sin requisitos escritos o con cobertura de pruebas inadecuada.
@@ -38,9 +40,8 @@ flowchart TD
 5. **Verificaciones automatizadas** (`quality-check`): corre la batería sobre la rama. Como los `TC-XXX` recién documentados todavía no tienen código de prueba, el veredicto típicamente no queda aprobado en la primera corrida.
 6. **Condición — ¿veredicto aprobado?**
    - **No**: `quality-check` delega la corrección en `work-implement` (tipo **feature**, sobre el `FT-XXX`/`TC-XXX` de su rama `test/`), que **automatiza las pruebas documentadas** — nunca escribe funcionalidad nueva, el código de producción solo se toca de forma correctiva y con decisión explícita del usuario. Tras el arreglo, `quality-check` recalcula el fingerprint y **reinicia la corrida completa**. Si `work-implement` devuelve «corrección no aplicada» (p. ej. una discrepancia real entre el `TC-XXX` y el código, un posible bug), la iteración se detiene, el veredicto queda `❌ Rechazado` y se escala al motivo señalado (`test-define` o el diagnóstico de bug vía `work-research`).
-   - **Sí**: continúa a las demás puertas de calidad.
-7. **Puertas de calidad restantes**: `code-review` (calidad de las pruebas escritas, no su ejecución) y `trace-validate` (cobertura funcional: cada `AC-XXX` del feature ↔ sus `TC-XXX` ↔ artefactos de prueba).
-8. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable.
+   - **Sí**: continúa al cierre.
+7. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable. `pr-create` ejecuta **internamente** `code-review` (calidad de las pruebas escritas, no su ejecución), `trace-validate` (cobertura funcional: cada `AC-XXX` del feature ↔ sus `TC-XXX` ↔ artefactos de prueba) y una corrida final de `quality-check` — no son pasos aparte de este flujo.
 
 ## Cuándo no aplica este caso
 

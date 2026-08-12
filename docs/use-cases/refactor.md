@@ -13,22 +13,23 @@ flowchart TD
     P --> F["Planificación del refactor<br/>**/work-plan** (WI `Tipo: refactor`)"]
     F --> G["Implementación<br/>**/work-implement** (refactor)"]
     G -.->|"si aplica"| DEP["Actualización/instalación<br/>de dependencias"]
-    G --> Q0["Verificaciones automatizadas<br/>**/quality-check**"]
-    Q0 --> Q1["Revisión de código<br/>**/code-review**"]
-    Q1 --> Q2["Validación de trazabilidad<br/>**/trace-validate**"]
-    Q2 --> I["Creación de PR<br/>**/pr-create**"]
+    G --> I["Creación de PR<br/>**/pr-create**"]
     I --> J(["Entregable"])
+    NOTE["ℹ️ pr-create ejecuta internamente<br/>quality-check + code-review + trace-validate"]
+    I -.-> NOTE
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
     classDef human fill:#fef2f2,stroke:#dc2626,color:#7f1d1d
     classDef optional fill:#f0fdf4,stroke:#16a34a,stroke-dasharray:5 5,color:#14532d
     classDef entryPoint fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d
     classDef exitPoint fill:#fee2e2,stroke:#b91c1c,stroke-width:3px,color:#7f1d1d
+    classDef note fill:#f8fafc,stroke:#94a3b8,stroke-width:1px,stroke-dasharray:3 3,color:#334155
     class B,P,F,G,I main
     class H human
     class ADR,DEP optional
     class A entryPoint
     class J exitPoint
+    class NOTE note
 ```
 
 1. **Inicio**: un requerimiento de refactor (deuda técnica, acoplamiento, duplicación, patrón obsoleto) entra al flujo.
@@ -39,8 +40,7 @@ flowchart TD
 4. **Resolver prerequisitos** — rama **opcional**, que solo se resuelve si la investigación la señaló y no queda encadenada al resto del diagrama: **actualización/definición de ADR y estándares** (`arch-manage`), si el nuevo diseño formaliza una decisión arquitectónica o cambia un criterio de cumplimiento vigente.
 5. **Planificación del refactor** (`work-plan`): WI `Tipo: refactor` con el cambio estructural en sí.
 6. **Implementación** (`work-implement`): cambio estructural sin alterar comportamiento observable; suite en verde. Incluye, como tarea **opcional** dentro de la misma implementación (no encadenada al resto del diagrama), la **actualización/instalación de dependencias** (`work-plan` con WI `Tipo: dependency-update`) cuando el refactor solo es viable con versiones más nuevas de una o más dependencias (API removida, vulnerabilidad, incompatibilidad).
-7. **Puertas de calidad**: `quality-check` (verificaciones automatizadas), `code-review` (revisión cualitativa: SOLID, acoplamiento, duplicación) y `trace-validate` (cobertura de los criterios de aceptación del WI).
-8. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable.
+7. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable. `pr-create` ejecuta **internamente** las puertas de calidad (`quality-check`, `code-review` — SOLID, acoplamiento, duplicación — y `trace-validate`) antes de crear el PR — no son pasos aparte de este flujo.
 
 ## Cuándo no aplica este caso
 
