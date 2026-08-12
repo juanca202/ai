@@ -542,7 +542,7 @@ En prosa:
 
 **Cuándo:** matriz de cobertura criterios ↔ casos/artefactos de prueba + veredicto.
 
-**Opciones — tipo de trabajo:** `US-XXX` · `WI-XXX` · `FT-XXX` (misma lógica de `AC-XXX`).
+**Opciones — tipo de trabajo:** `US-XXX` · `WI-XXX` · `FT-XXX` · cualquier otro spec con criterios de aceptación codificados (`AC-001`, `1.1`, `R-3`…).
 
 **Estados por criterio:** Cubierto · Parcial · No cubierto.
 
@@ -560,11 +560,13 @@ No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `qualit
 /trace-validate WI-004
 /trace-validate FT-001
 /trace-validate US-012 solo AC-002 y AC-005
+/trace-validate docs/specs/api-pagos.md
 ```
 
 - «Genera la matriz de trazabilidad de US-012»
 - «¿Los criterios de WI-004 están cubiertos por pruebas?»
 - «Valida cobertura del feature FT-003 (legacy)»
+- «Valida cobertura de docs/specs/api-pagos.md contra las pruebas del repo»
 
 ---
 
