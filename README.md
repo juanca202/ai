@@ -61,7 +61,7 @@ flowchart TD
     S --> IMPL
     IMPL --> DONE(["Entregable"])
     NOTE["ℹ️ Puertas de calidad al cierre<br/>(quality-check + code-review + trace-validate)<br/>corren dentro de work-integrate / pr-create"]
-    IMPL -.-> NOTE
+    DONE -.-> NOTE
 
     classDef nestedFlow fill:#fff7ed,stroke:#ea580c,stroke-width:2px,stroke-dasharray:5 5,color:#9a3412
     classDef entryPoint fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d
