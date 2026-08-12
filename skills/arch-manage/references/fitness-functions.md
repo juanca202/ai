@@ -135,9 +135,15 @@ No crear, escribir ni instalar nada sin esta aprobación explícita.
 
 ### 5. Registrar el resultado de la selección
 
-- **Candidato no seleccionado** → no se escribe: no entra en el estándar y no deja rastro. Si el usuario
-  lo descartó por desacuerdo de fondo (no por prioridad), vale la pena mencionarlo en `### Excepciones`
-  del requisito.
+> **Regla dura:** **solo los CR que el usuario selecciona se crean y se registran** como filas en la
+> tabla `## Criterios de cumplimiento` del estándar. Un candidato no elegido no se escribe en ninguna
+> parte: ni fila, ni CR-XXX asignado, ni mención en el ADR, ni chequeo, ni nota de «pendiente». La
+> tabla de propuesta es conversación, no borrador del documento — si el usuario selecciona 2 de 6
+> candidatos, en el estándar aparecen exactamente 2 filas nuevas.
+
+- **Candidato no seleccionado** → no se escribe: no entra en la tabla del estándar y no deja rastro. Si
+  el usuario lo descartó por desacuerdo de fondo (no por prioridad), vale la pena mencionarlo en
+  `### Excepciones` del requisito.
 - **Seleccionado, no automatizable** → fila del CR con `Automatizable: no`; `Verificación: yes` si hay
   evidencia externa registrada en el requisito (archivo, job CI…), `no` si no la hay; explicar en el
   requisito cómo se verifica manualmente.
