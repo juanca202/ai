@@ -21,7 +21,11 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 
 ---
 
+
+
 ## Harness
+
+
 
 ### arch-init
 
@@ -31,11 +35,13 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 
 **Opciones — punto de partida** (decide el camino, no el resultado final):
 
-| Situación | Qué implica |
-|-----------|-------------|
-| **Sin código** | Obliga a definir stack (Paso 2); no hay descubrimiento desde código. |
-| **Con código base** | Stack detectable; sin lógica de negocio propia aún. |
-| **Con implementación** | Invoca `arch-discover` completo para candidatos de ADR/estándares. |
+
+| Situación              | Qué implica                                                          |
+| ---------------------- | -------------------------------------------------------------------- |
+| **Sin código**         | Obliga a definir stack (Paso 2); no hay descubrimiento desde código. |
+| **Con código base**    | Stack detectable; sin lógica de negocio propia aún.                  |
+| **Con implementación** | Invoca `arch-discover` completo para candidatos de ADR/estándares.   |
+
 
 **Handoffs:** `arch-discover` (brownfield), `arch-manage` (candidatos aceptados), consulta a `quality-check` (qué validar por stack). Reejecutable: solo completa lo que falte.
 
@@ -52,6 +58,8 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 
 ---
 
+
+
 ### arch-manage
 
 **Cuándo:** documentar o cambiar una decisión arquitectónica (ADR) o una norma de dominio (estándar / criterio de cumplimiento).
@@ -60,11 +68,13 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 
 **Opciones — qué se produce:**
 
-| Caso | Input | Resultado |
-|------|-------|-----------|
-| **A. Solo ADR** | Decisión puntual/histórica sin regla continua | ADR con `emits: []`; no toca estándares |
-| **B. ADR + estándar** | Decisión que fija una regla verificable | ADR + criterio(s) de cumplimiento en el estándar del dominio |
-| **C. Solo estándar** | Regla sin decisión nueva | Criterio(s) de cumplimiento en un estándar existente (o nuevo) |
+
+| Caso                  | Input                                         | Resultado                                                      |
+| --------------------- | --------------------------------------------- | -------------------------------------------------------------- |
+| **A. Solo ADR**       | Decisión puntual/histórica sin regla continua | ADR con `emits: []`; no toca estándares                        |
+| **B. ADR + estándar** | Decisión que fija una regla verificable       | ADR + criterio(s) de cumplimiento en el estándar del dominio   |
+| **C. Solo estándar**  | Regla sin decisión nueva                      | Criterio(s) de cumplimiento en un estándar existente (o nuevo) |
+
 
 **Estados habituales:** ADR `Draft` / `Proposed` / `Accepted` / `Superseded` / `Deprecated`; estándar `Draft` / `Active` / `Deprecated` / `Superseded`. Un ADR `Accepted` no se reescribe: se supersede.
 
@@ -86,6 +96,8 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 
 ---
 
+
+
 ### arch-discover
 
 **Cuándo:** hay código existente y se quieren sacar a la luz decisiones/normas implícitas.
@@ -94,10 +106,12 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 
 **Opciones — clasificación de cada candidato:**
 
-| Tipo | Qué proponer |
-|------|----------------|
-| **Solo ADR** | Elección histórica/puntual sin regla continua |
+
+| Tipo                               | Qué proponer                                                 |
+| ---------------------------------- | ------------------------------------------------------------ |
+| **Solo ADR**                       | Elección histórica/puntual sin regla continua                |
 | **ADR + criterio de cumplimiento** | Decisión que además fija una norma verificable en un dominio |
+
 
 Los candidatos se agrupan por **dominio técnico/funcional** (testing, api, security, etc.; ver catálogo en el skill). No hay modo que se detenga antes de la Fase 5: tras aprobar, se crean los artefactos en la misma ejecución.
 
@@ -117,6 +131,8 @@ Los candidatos se agrupan por **dominio técnico/funcional** (testing, api, secu
 
 ---
 
+
+
 ### arch-audit
 
 **Cuándo:** comprobar si el repo cumple los criterios de cumplimiento de `docs/standards/` y las reglas de `AGENTS.md`.
@@ -125,10 +141,12 @@ Los candidatos se agrupan por **dominio técnico/funcional** (testing, api, secu
 
 **Opciones — si ya hay auditoría previa:**
 
-| Opción | Efecto |
-|--------|--------|
-| **Revalidar** | Revisa hallazgos previos; añade entrada en `## Revalidaciones` sin reescribir el informe original |
-| **Nueva auditoría desde cero** | Audita todas las normas de nuevo |
+
+| Opción                         | Efecto                                                                                            |
+| ------------------------------ | ------------------------------------------------------------------------------------------------- |
+| **Revalidar**                  | Revisa hallazgos previos; añade entrada en `## Revalidaciones` sin reescribir el informe original |
+| **Nueva auditoría desde cero** | Audita todas las normas de nuevo                                                                  |
+
 
 **Veredicto:** `✅ Conforme` · `❌ No conforme` · `⚠️ Conforme con observaciones`.
 
@@ -150,6 +168,8 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 
 ---
 
+
+
 ### git-commit
 
 **Cuándo:** hacer commit(s) con Conventional Commits a partir del diff real.
@@ -158,12 +178,14 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 
 **Opciones — flujo:**
 
-| Condición | Flujo |
-|-----------|-------|
-| Sin cambios | Informa y no commitea |
-| Un solo tema lógico | Commit estándar (propuesta → confirmación → commit) |
-| Varios temas mezclados | Propone varios commits y ejecuta en secuencia |
+
+| Condición                | Flujo                                                                                           |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| Sin cambios              | Informa y no commitea                                                                           |
+| Un solo tema lógico      | Commit estándar (propuesta → confirmación → commit)                                             |
+| Varios temas mezclados   | Propone varios commits y ejecuta en secuencia                                                   |
 | Falló un pre-commit hook | Corrige, re-stagea y **nuevo** commit (sin `--amend` ni `--no-verify` salvo petición explícita) |
+
 
 **Tipos de mensaje:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert` (tipo/scope en inglés). Detiene el commit ante secretos o archivos sensibles salvo confirmación explícita sobre ese archivo.
 
@@ -183,7 +205,11 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 
 ---
 
+
+
 ## Specs
+
+
 
 ### work-research
 
@@ -193,14 +219,16 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 
 **Opciones — flujo según entrada:**
 
-| Flujo | Entrada | Salida / handoff |
-|-------|---------|------------------|
-| **Investigación libre** | Tema sin artefacto | Hallazgos por dominio: Producto, Arquitectura, Técnica o Cambio |
-| **Analizar decisiones pendientes** | `US` / `TK` / `WI` en contexto | Lagunas y decisiones pendientes → dueño del artefacto (`work-define` / `work-plan`) |
-| **Analizar issue** | Descripción de un defecto o código de un bug | Reproducción, causa raíz y diagnóstico de pruebas → **WI tipo `bug-fix`** vía `work-plan` (ciclo 🔴 TEST FAIL → fix → 🟢 TEST PASS). No genera `RS` |
-| **Analizar test case** | `TC-XXX` | Veredicto de auditoría (TC correcto / incorrecto / incompleto / falso negativo…) → `test-define`, *Analizar issue*, `work-plan` o `trace-validate` |
-| **Analizar legado** | Código sin requisitos/pruebas suficientes | `FT-XXX` + TCs vía `test-define` → `trace-validate` → `work-implement` tipo feature (solo pruebas, no código funcional) |
-| **Analizar migración** | Proyecto origen + destino | Discovery + validación → `work-define` (cambio grande) o `work-plan` / WI (pequeño) |
+
+| Flujo                              | Entrada                                      | Salida / handoff                                                                                                                                    |
+| ---------------------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Investigación libre**            | Tema sin artefacto                           | Hallazgos por dominio: Producto, Arquitectura, Técnica o Cambio                                                                                     |
+| **Analizar decisiones pendientes** | `US` / `TK` / `WI` en contexto               | Lagunas y decisiones pendientes → dueño del artefacto (`work-define` / `work-plan`)                                                                 |
+| **Analizar issue**                 | Descripción de un defecto o código de un bug | Reproducción, causa raíz y diagnóstico de pruebas → **WI tipo** `bug-fix` vía `work-plan` (ciclo 🔴 TEST FAIL → fix → 🟢 TEST PASS). No genera `RS` |
+| **Analizar test case**             | `TC-XXX`                                     | Veredicto de auditoría (TC correcto / incorrecto / incompleto / falso negativo…) → `test-define`, *Analizar issue*, `work-plan` o `trace-validate`  |
+| **Analizar legado**                | Código sin requisitos/pruebas suficientes    | `FT-XXX` + TCs vía `test-define` → `trace-validate` → `work-implement` tipo feature (solo pruebas, no código funcional)                             |
+| **Analizar migración**             | Proyecto origen + destino                    | Discovery + validación → `work-define` (cambio grande) o `work-plan` / WI (pequeño)                                                                 |
+
 
 Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefacto que se pase por su código se lee vía MCP y enruta al flujo según su tipo (historia/tarea → decisiones pendientes; bug → issue; test case → test case).
 
@@ -226,6 +254,8 @@ Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefa
 
 ---
 
+
+
 ### work-define
 
 **Cuándo:** crear o actualizar una historia de usuario (`US-XXX`).
@@ -234,10 +264,12 @@ Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefa
 
 **Opciones:**
 
-| Acción | Notas |
-|--------|--------|
-| **Crear** | ID, carpeta, plantilla, AC-XXX, INVEST, DoR |
+
+| Acción         | Notas                                                          |
+| -------------- | -------------------------------------------------------------- |
+| **Crear**      | ID, carpeta, plantilla, AC-XXX, INVEST, DoR                    |
 | **Actualizar** | Conserva ids `AC-XXX`; ante conflicto TK ↔ US, prevalece la US |
+
 
 **Estados:** `Draft` (lagunas en Observaciones) · `Ready` (DoR + INVEST + repos + AC completos). En Ready sugiere `test-define` y `work-plan`.
 
@@ -256,6 +288,8 @@ Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefa
 
 ---
 
+
+
 ### design-define
 
 **Cuándo:** documentar modelos, APIs, flujos o diagramas como referencia de implementación.
@@ -264,10 +298,12 @@ Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefa
 
 **Opciones — modo de invocación:**
 
-| Modo | Quién | Salida |
-|------|-------|--------|
-| **Directo** | Usuario | Documento + resumen; ofrece enlazar desde US/TK/WI |
+
+| Modo         | Quién                                     | Salida                                                           |
+| ------------ | ----------------------------------------- | ---------------------------------------------------------------- |
+| **Directo**  | Usuario                                   | Documento + resumen; ofrece enlazar desde US/TK/WI               |
 | **Delegado** | `work-define` / `work-plan` vía subagente | Documento + lista de referencias (ruta + ancla) para el llamador |
+
 
 **Tipos de elemento:** modelo de datos, API/endpoint, flujo/proceso, diagrama (clases / C4).
 
@@ -287,17 +323,22 @@ Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefa
 
 ---
 
+
+
 ### test-define
 
 **Cuándo:** documentar casos de prueba (`TC-XXX`) desde criterios `AC-XXX` (IEEE 29119-4). No implementa ni ejecuta tests.
 
 **Opciones — artefacto origen:**
 
-| Tipo | TCs en |
-|------|--------|
-| `US-XXX` | `…/US-XXX-…/test-cases/` |
-| `WI-XXX` | `…/WI-XXX-…/test-cases/` |
-| `FT-XXX` | `…/FT-XXX-…/test-cases/` |
+
+| Tipo                                                                                   | TCs en                                                            |
+| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `US-XXX`                                                                               | `…/US-XXX-…/test-cases/`                                          |
+| `WI-XXX`                                                                               | `…/WI-XXX-…/test-cases/`                                          |
+| `FT-XXX`                                                                               | `…/FT-XXX-…/test-cases/`                                          |
+| Cualquier otro spec con criterios de aceptación codificados (`AC-001`, `1.1`, `R-3`…) | `test-cases/` junto al documento (confirmar ruta con el usuario) |
+
 
 **Perspectivas por criterio:** Happy path · Error · Límite (se omite la que no aplique).
 
@@ -311,7 +352,7 @@ Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefa
 /test-define WI-003
 /test-define FT-002
 /test-define US-005 solo criterios AC-001 y AC-003
-/test-define docs/specs/technical-docs/api-pagos.md
+/test-define docs/specs/api-pagos.md
 ```
 
 - «Crea casos de prueba para US-009»
@@ -320,16 +361,20 @@ Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefa
 
 ---
 
+
+
 ### work-plan
 
 **Cuándo:** planificar sin escribir código ni pruebas.
 
 **Opciones — tipo de plan:**
 
-| Tipo | Señal | Artefacto |
-|------|-------|-----------|
-| **Tarea de historia** | Hay `US-XXX` asociada | `TK-XXX` bajo la carpeta de la US |
-| **Mantenimiento** | Sin US (bug, refactor, deuda, deps, operativa) | `WI-XXX` en `docs/specs/work-items/` |
+
+| Tipo                  | Señal                                          | Artefacto                            |
+| --------------------- | ---------------------------------------------- | ------------------------------------ |
+| **Tarea de historia** | Hay `US-XXX` asociada                          | `TK-XXX` bajo la carpeta de la US    |
+| **Mantenimiento**     | Sin US (bug, refactor, deuda, deps, operativa) | `WI-XXX` en `docs/specs/work-items/` |
+
 
 Solo se hace handoff a `work-implement` si el artefacto está en `Ready`. Si hay vinculación ADO en `.agents/MEMORY.md`, sincroniza work items antes de crear archivos locales. Puede delegar detalle técnico a `design-define`.
 
@@ -350,18 +395,22 @@ Solo se hace handoff a `work-implement` si el artefacto está en `Ready`. Si hay
 
 ---
 
+
+
 ### work-implement
 
 **Cuándo:** codificar trabajo ya especificado en `Estado: Ready`. También recibe el **modo corrección** delegado por `quality-check` en el cierre (arreglar un check o una prueba en rojo sobre un `US-XXX`/`WI-XXX` ya implementado; ahí no aplica `Ready` ni working tree limpio).
 
 **Opciones — tipo:**
 
-| Tipo | Qué se implementa | Unidad de confirmación |
-|------|-------------------|------------------------|
-| `TK-XXX` (bajo US) | Plan técnico de la TK (código + tests) | Una TK por confirmación |
-| `WI-XXX` | Plan del WI (código + tests) | El WI completo |
-| `TC-XXX` | Las pruebas automatizadas de esos test cases | Un TC por confirmación |
-| `FT-XXX` | Las pruebas de todos los TC asociados a los AC del feature | El FT completo |
+
+| Tipo               | Qué se implementa                                          | Unidad de confirmación  |
+| ------------------ | ---------------------------------------------------------- | ----------------------- |
+| `TK-XXX` (bajo US) | Plan técnico de la TK (código + tests)                     | Una TK por confirmación |
+| `WI-XXX`           | Plan del WI (código + tests)                               | El WI completo          |
+| `TC-XXX`           | Las pruebas automatizadas de esos test cases               | Un TC por confirmación  |
+| `FT-XXX`           | Las pruebas de todos los TC asociados a los AC del feature | El FT completo          |
+
 
 Los dos primeros entregan **funcionalidad**; los dos últimos entregan **pruebas** sobre comportamiento ya implementado (rama `test/…`, subagente `quality-specialist`, cierre natural en `trace-validate`).
 
@@ -369,10 +418,12 @@ Los dos primeros entregan **funcionalidad**; los dos últimos entregan **pruebas
 
 **Opciones — ritmo:**
 
-| Modo | Cuándo |
-|------|--------|
-| **Secuencial** (default) | Una unidad → lint/build → pausa → commit al confirmar → siguiente |
-| **Paralelo** | Solo si hay **más de una** unidad **y** el usuario pide explícitamente «sin preguntar» / «de corrido»; worktrees + subagentes tras análisis de dependencias |
+
+| Modo                     | Cuándo                                                                                                                                                      |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Secuencial** (default) | Una unidad → lint/build → pausa → commit al confirmar → siguiente                                                                                           |
+| **Paralelo**             | Solo si hay **más de una** unidad **y** el usuario pide explícitamente «sin preguntar» / «de corrido»; worktrees + subagentes tras análisis de dependencias |
+
 
 Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrate` o `pr-create` (para `TC`/`FT`, además `trace-validate`).
 
@@ -397,6 +448,8 @@ Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrat
 
 ---
 
+
+
 ### quality-check
 
 **Cuándo:** verificaciones automatizadas pre-merge (usuario u otro skill: `work-integrate`, `pr-create`, `trace-validate`). No proactivo durante el desarrollo.
@@ -411,15 +464,17 @@ Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrat
 
 **Modificadores de invocación** (opcionales; claves en inglés; se pueden combinar cuando no se contradicen). Sin ninguno se asume `default`.
 
-| Modifier | Efecto |
-|----------|--------|
-| `default` | Bloqueantes + condicionales presentes + Sonar si hay config |
-| `blocking-only` / `no-sonar` | Omite informativos (Sonar) |
-| `include-linter-warnings` | Warnings del linter como error |
-| `no-tests` / `no-unit-tests` / `no-integration` / `no-e2e` / `no-coverage` / `no-typecheck` | Omite ese check (`N/A`) |
-| `only <check>` | Solo ese check |
-| `tests-only` | Solo suites de prueba (caché `test-run.json`; lo usa `trace-validate`) |
-| `save-report` | Guarda en `docs/quality-check/<timestamp>.md` |
+
+| Modifier                                                                                    | Efecto                                                                 |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `default`                                                                                   | Bloqueantes + condicionales presentes + Sonar si hay config            |
+| `blocking-only` / `no-sonar`                                                                | Omite informativos (Sonar)                                             |
+| `include-linter-warnings`                                                                   | Warnings del linter como error                                         |
+| `no-tests` / `no-unit-tests` / `no-integration` / `no-e2e` / `no-coverage` / `no-typecheck` | Omite ese check (`N/A`)                                                |
+| `only <check>`                                                                              | Solo ese check                                                         |
+| `tests-only`                                                                                | Solo suites de prueba (caché `test-run.json`; lo usa `trace-validate`) |
+| `save-report`                                                                               | Guarda en `docs/quality-check/<timestamp>.md`                          |
+
 
 **Ejemplos de invocación:**
 
@@ -440,6 +495,8 @@ En prosa (el skill mapea al modificador en inglés):
 
 ---
 
+
+
 ### code-review
 
 **Cuándo:** revisión **cualitativa** pre-merge (usuario u otro skill: `work-integrate`, `pr-create`). No proactivo durante el desarrollo. **No ejecuta pruebas ni checks** — eso es `quality-check`.
@@ -452,13 +509,15 @@ En prosa (el skill mapea al modificador en inglés):
 
 **Modificadores de invocación** (opcionales; claves en inglés). Sin ninguno se asume `default`.
 
-| Modifier | Efecto |
-|----------|--------|
-| `default` | Diff completo de la rama contra su base, en las tres dimensiones |
-| `base <rama>` | Fija la rama base del diff |
-| `scope <ruta…>` | Limita la revisión a esas rutas |
-| `blocking-only` | Solo hallazgos 🔴/🟠 en el informe |
-| `save-report` | Guarda en `docs/code-review/<timestamp>.md` |
+
+| Modifier        | Efecto                                                           |
+| --------------- | ---------------------------------------------------------------- |
+| `default`       | Diff completo de la rama contra su base, en las tres dimensiones |
+| `base <rama>`   | Fija la rama base del diff                                       |
+| `scope <ruta…>` | Limita la revisión a esas rutas                                  |
+| `blocking-only` | Solo hallazgos 🔴/🟠 en el informe                               |
+| `save-report`   | Guarda en `docs/code-review/<timestamp>.md`                      |
+
 
 **Ejemplos de invocación:**
 
@@ -476,6 +535,8 @@ En prosa:
 - «Revisa solo la carpeta de dominio» → `scope src/domain`
 
 ---
+
+
 
 ### trace-validate
 
@@ -507,17 +568,21 @@ No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `qualit
 
 ---
 
+
+
 ### work-integrate
 
 **Cuándo:** cerrar e integrar localmente (merge `--no-ff` a la rama base). No push, no PR.
 
 **Opciones — tipo:**
 
-| Tipo | Rama | Qué debe estar `Done` en `progress.md` |
-|------|------|----------------------------------------|
-| `US-XXX` | `feature/US-XXX-…` | Todas las `TK-XXX` |
-| `WI-XXX` | `feature/`\|`fix/`\|`chore/`\|`refactor/`+`WI-XXX-…` | Todas las unidades del WI |
-| Automatización de pruebas (`TC-XXX`/`FT-XXX`) | `test/` + `FT-XXX-…`\|`US-XXX-…`\|`WI-XXX-…` | Todas las unidades `TC-XXX`/`FT-XXX` de esa ejecución (no las del trabajo funcional del mismo padre) |
+
+| Tipo                                          | Rama                                              | Qué debe estar `Done` en `progress.md`                                                               |
+| --------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `US-XXX`                                      | `feature/US-XXX-…`                                | Todas las `TK-XXX`                                                                                   |
+| `WI-XXX`                                      | `feature/`|`fix/`|`chore/`|`refactor/`+`WI-XXX-…` | Todas las unidades del WI                                                                            |
+| Automatización de pruebas (`TC-XXX`/`FT-XXX`) | `test/` + `FT-XXX-…`|`US-XXX-…`|`WI-XXX-…`        | Todas las unidades `TC-XXX`/`FT-XXX` de esa ejecución (no las del trabajo funcional del mismo padre) |
+
 
 **Puertas (obligatorias):** `quality-check` → `code-review` → `trace-validate`. Working tree sucio → invoca `git-commit` automáticamente.
 
@@ -537,6 +602,8 @@ No ejecuta pruebas: reutiliza `docs/specs/test-run.json` fresco o invoca `qualit
 - (Desde la rama `feature/US-…`, `feature/WI-…` o `test/…` el skill infiere el trabajo)
 
 ---
+
+
 
 ### pr-create
 
@@ -564,3 +631,4 @@ Working tree sucio → `git-commit` automático. Título/descripción se generan
 - «Crea el PR»
 - «Abre un MR a develop»
 - «Súbelo a main» (el destino se confirma; las puertas no se pueden saltar)
+
