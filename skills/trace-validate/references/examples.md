@@ -32,7 +32,7 @@ Referencia del skill `trace-validate`. Casos de uso y errores a evitar.
 
   | Criterio | TC | Tipo | Evidencia | Ejecución | Resultado |
   |----------|-----|------|-----------|-----------|-----------|
-  | AC-2.1 | TC-001 | Unit | `tests/unit/notify.test.ts` | quality-check (suite `unit`) | Paso |
+  | AC-2.1 | TC-001 | Unit | `tests/unit/notify.test.ts` | quality-check | Paso |
   | AC-2.1 | TC-001 | E2E | — | — | No cubierto |
 
   El criterio queda en **Parcial** (no `Cubierto`: la intención E2E no está materializada), con la Observación «E2E declarado en TC-001 sin automatizar» y veredicto **⚠️ Aprobado con observaciones** si no hay ningún criterio en `No cubierto`.
@@ -48,7 +48,9 @@ Referencia del skill `trace-validate`. Casos de uso y errores a evitar.
 - Modificar la especificación de producto (README de la US, `TK-XXX`, `WI-XXX`, `validation.md`, ADRs) durante la validación.
 - Generar un reporte parcial cuando el trabajo no tiene criterios de aceptación; debe bloquear.
 - Ejecutar la suite directamente desde este skill, o asumir un runner: la ejecución se delega **siempre** en `quality-check`.
-- Forzar el mapeo de un test a un criterio cuando el vínculo es incierto, en lugar de dejarlo en Observaciones.
+- Forzar el mapeo de un test a un criterio cuando el vínculo es incierto, en lugar de dejarlo en «Observaciones y pendientes».
+- **Confundir los dos destinos de observación:** lo atribuible a un criterio va en la columna `Observaciones` de «Cobertura por criterio»; lo que es de la corrida (suite `coverage` en `FAIL`, árbol sucio, ejecución no delegable, tests no vinculables) va en la sección «Observaciones y pendientes».
+- Inventar un resultado global agregado de la corrida: `test-run.json` da `result` **por suite**, no un total.
 - **Normalizar o renombrar el identificador de un criterio** (p. ej. escribir `AC-001` donde el artefacto dice `1.1`): rompe el vínculo con los TCs que produjo `test-define`.
 - **Bloquear porque el artefacto no sigue las convenciones del plugin** (formato del identificador, ubicación, campo `Estado:` del **artefacto**). El único requisito es que los criterios tengan identificador. El `Estado:` del **TC** sí se lee: filtra la cobertura (ver «Estados de cobertura»).
 - Ignorar la carpeta `test-cases/` del artefacto y su índice, reconstruyendo el mapeo solo por heurística de nombres de test.

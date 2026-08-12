@@ -1,4 +1,4 @@
-# Flujo paso a paso, ejecución automática y checklist
+# Flujo paso a paso, delegación de la ejecución y checklist
 
 Referencia detallada del skill `trace-validate`. El `SKILL.md` mantiene el resumen; aquí está el flujo íntegro.
 
@@ -65,7 +65,7 @@ Antes de trabajar, evitar regenerar si nada cambió (ver [Reutilización del rep
 
 5. Para cada artefacto, registrar su **ruta** y a qué criterio apunta (por vínculo declarado en el TC o, en su defecto, por nombre del test, describe/it o comentarios).
 
-> **Orden de precedencia del mapeo:** (1) la línea `Casos de prueba:` del artefacto; (2) el campo `Criterio de aceptación` de cada TC; (3) el índice `test-cases/README.md`; (4) inferencia desde el contenido y los nombres de los tests. Los tres primeros son declarados; el cuarto se infiere y **no se inventa**: si un test no puede vincularse con certeza a un criterio, dejarlo en Observaciones en lugar de forzar el mapeo.
+> **Orden de precedencia del mapeo:** (1) la línea `Casos de prueba:` del artefacto; (2) el campo `Criterio de aceptación` de cada TC; (3) el índice `test-cases/README.md`; (4) inferencia desde el contenido y los nombres de los tests. Los tres primeros son declarados; el cuarto se infiere y **no se inventa**: si un test no puede vincularse con certeza a un criterio, dejarlo en «Observaciones y pendientes» en lugar de forzar el mapeo.
 
 ### Paso 3 — Mapear cobertura criterio a criterio
 
@@ -76,7 +76,7 @@ El mapeo se hace **por fila de la matriz**, no por criterio: la unidad es la com
 3. **Derivar el `Estado` del criterio** para la tabla de cobertura, a partir del conjunto de sus filas, según «Estados de cobertura» y la tabla de derivación en `SKILL.md`. Regla clave: **basta una fila en `No cubierto` para que el criterio deje de ser `Cubierto`** — un TC con `Unit, E2E` del que solo existe el unitario deja el criterio en `Parcial`.
 4. **Observaciones** si hace falta aclaración (tipo declarado sin automatizar, ambigüedad, supuesto a confirmar, TC en `Draft`/`Obsolete`, suite efectiva distinta de la esperada, etc.). Las Observaciones viven en la tabla de **cobertura por criterio**, no en la matriz — así la matriz se mantiene legible.
 
-> No forzar filas: si un test no puede vincularse con certeza a un criterio, no inventar la fila; dejarlo en Observaciones (ver el orden de precedencia del Paso 2).
+> No forzar filas: si un test no puede vincularse con certeza a un criterio, no inventar la fila; dejarlo en «Observaciones y pendientes» (ver el orden de precedencia del Paso 2).
 
 ### Paso 4 — Obtener resultados de pruebas (delegando en quality-check)
 
@@ -86,41 +86,53 @@ ejecución) y los mapea a los criterios.
 1. **Reusar el `FINGERPRINT` canónico** ya calculado en el Paso 0 (mismo valor; la delegación `tests-only` no altera el código, así que no hay que recalcularlo).
 2. **Buscar la caché** en la ubicación fija `docs/specs/test-run.json` (no por unidad; es la corrida completa de la rama):
    - **Existe y `git.fingerprint` coincide** → caché **fresca** (sin cambios desde la corrida de
-     `quality-check`): **reutilizar** sus `suites[]` sin ejecutar. Registrar la procedencia en Observaciones.
+     `quality-check`): **reutilizar** sus `suites[]` sin ejecutar. Registrar la procedencia en la prosa del Resumen.
    - **No existe o el fingerprint difiere** → **delegar en `quality-check` modo `tests-only`**, que ejecuta
      solo los checks de pruebas, escribe/actualiza `test-run.json` y devuelve los resultados; luego
      consumir esa caché fresca.
 3. **Rellenar `Ejecución` y `Resultado` en cada fila** de la matriz construida en el Paso 3. El resultado
    viene de las `suites[]` de `test-run.json` (`PASS`→`Paso`, `FAIL`→`Fallo`, `SKIPPED`→`No ejecutado`,
-   `N/A` (el repo no tiene esa suite)→`No ejecutado` con Observación):
+   `N/A` (el repo no tiene esa suite)→`No ejecutado`, con la constancia en «Observaciones y pendientes»):
 
    | Situación de la fila | Evidencia | Ejecución | Resultado |
    |----------------------|-----------|-----------|-----------|
    | Fila `Manual` (manual por diseño) | ruta del TC | `Manual` | `N/A` |
    | Tipo declarado **sin** artefacto (pendiente de automatizar) | `—` | `—` | `No cubierto` |
-   | Artefacto hallado y su suite dio `PASS` | ruta | `quality-check (suite X)` | `Paso` |
-   | Artefacto hallado y su test dio `FAIL` (aislable) | ruta | `quality-check (suite X)` | `Fallo` |
-   | Artefacto hallado, suite en `FAIL` **sin** poder aislar el test | ruta | `quality-check (suite X)` | `Fallo` (Observación «no aislable» → criterio `Parcial`) |
-   | Artefacto hallado, suite `SKIPPED`/ausente/no ejecutable | ruta | `—` | `No ejecutado` (razón en Observaciones) |
+   | Artefacto hallado y su suite dio `PASS` | ruta | `quality-check` | `Paso` |
+   | Artefacto hallado y su test dio `FAIL` (aislable) | ruta | `quality-check` | `Fallo` |
+   | Artefacto hallado, suite en `FAIL` **sin** poder aislar el test | ruta | `quality-check` | `Fallo` (Observación «no aislable» → criterio `Parcial`) |
+   | Artefacto hallado, suite `SKIPPED`/ausente/no ejecutable | ruta | `—` | `No ejecutado` (razón en «Observaciones y pendientes») |
 
-   En `Ejecución` anotar la **suite efectiva** que corrió el test (dónde vive realmente en el repo), no la
-   que sugiere el tipo declarado; si difieren, dejarlo en Observaciones.
+   `Ejecución` identifica **quién** produjo el resultado (`quality-check` / `Manual` / `—`), no la clase de
+   prueba: eso ya lo dicen `Tipo` y `Evidencia`. **No** anotar la suite entre paréntesis. Si la suite efectiva
+   que corrió el test no coincide con el tipo declarado (un `API Test` que vive en `unit`), decirlo en
+   Observaciones.
 
    - **Granularidad suite vs. criterio:** `result` es por **suite completa** (p. ej. toda la suite `unit`), no por test individual. Cuando **varios criterios** mapean a tests dentro de la **misma suite** y esa suite da `FAIL`, no propagar automáticamente `Fallo`/`No cubierto` a todos ellos por igual: revisar si el `summary` (u otro detalle que `quality-check` haya incluido) identifica qué test(s) específico(s) fallaron y cotejarlo contra el archivo/nombre de test que el Paso 2 vinculó a cada criterio. Si se puede aislar, marcar `Fallo`/`No cubierto` solo en el/los criterio(s) cuyo test efectivamente falló; el resto de la suite se reporta `Paso`. Si el `summary` **no** trae detalle por test (solo un conteo agregado, p. ej. `"47 passed, 1 failed"` sin decir cuál), no asumir cuál criterio es el afectado: marcar esos criterios como `Parcial` (no `No cubierto`) con una Observación explicando que la suite falló pero no se pudo aislar el test específico, y sugerir revisar el log completo de `quality-check` o re-ejecutar el test de forma aislada.
 4. **Si `quality-check` no puede ejecutarlas** (stack no detectable, entorno sin poder correr, dependencias
    faltantes, `quality-check` no disponible en la sesión, o el usuario declina la delegación), dejar las filas con
-   artefacto en `Ejecución = —` y `Resultado = No ejecutado`, con la razón en Observaciones, y entregar
+   artefacto en `Ejecución = —` y `Resultado = No ejecutado`, con la razón en «Observaciones y pendientes», y entregar
    igualmente la cobertura estática (las filas sin artefacto siguen siendo `No cubierto`: ese hueco no
    depende de la ejecución). **No** fabricar resultados ni reintroducir un runner propio en `trace-validate`.
 
 > Nunca reportar `Paso`/`Fallo` sin que la prueba se haya ejecutado realmente (en la corrida de
 > `quality-check` reflejada en `test-run.json`). Si no se ejecutó, el resultado es `No ejecutado`.
 
-### Paso 5 — Construir las tablas del reporte
+### Paso 5 — Redactar el reporte
 
-Usar la plantilla `assets/trace-report-template.md` (leerla antes de redactar). Sustituir cada `{{…}}` por datos verificables; el reporte publicado no debe conservar placeholders ni el bloque de comentario inicial (pero **sí** conserva la marca de pie con el fingerprint, ver Paso 7).
+Usar la plantilla `assets/trace-report-template.md` (leerla antes de redactar). Sustituir cada `{{…}}` por datos verificables; el reporte publicado no debe conservar placeholders ni **ninguno** de los bloques de comentario de instrucciones (pero **sí** conserva la marca de pie con el fingerprint, ver Paso 7).
 
-El reporte lleva **dos tablas** (definición completa en [Vistas del reporte](../SKILL.md#vistas-del-reporte-cobertura-por-criterio-y-matriz)):
+La plantilla tiene cinco partes más la marca de pie del fingerprint (Paso 7). Ninguna es opcional salvo «Observaciones y pendientes»:
+
+| Parte | Contenido |
+|-------|-----------|
+| **Cabecera** | `Fecha` (fecha y hora de la corrida), `Rama` y `Commit` (los del `FINGERPRINT` del Paso 0: `git rev-parse --abbrev-ref HEAD` y `git rev-parse --short HEAD`), `Trabajo` (enlace relativo al artefacto) y `Veredicto` (Paso 6) |
+| **Resumen** | 1-3 frases de estado + la línea **Pruebas**: procedencia (caché fresca de `quality-check` del commit X, corrida `tests-only` disparada ahora, o el motivo de no haberlos podido ejecutar) y el `result` **por suite** tomado de `test-run.json` + la tabla de indicadores |
+| **Cobertura por criterio** | Tabla 1 |
+| **Matriz de trazabilidad** | Tabla 2 |
+| **Observaciones y pendientes** | Caveats **globales** de la corrida (ver abajo). **Omitir la sección entera** si no hay ninguno |
+
+Las **dos tablas** (definición completa en [Vistas del reporte](../SKILL.md#vistas-del-reporte-cobertura-por-criterio-y-matriz)):
 
 1. **Cobertura por criterio** — una fila por criterio: `Criterio · Descripción · Estado · Observaciones`. Es la vista de veredicto.
 2. **Matriz de trazabilidad** — una fila por criterio × TC × tipo declarado: `Criterio · TC · Tipo · Evidencia · Ejecución · Resultado`. Es la vista auditable; sin Observaciones, para que se lea de un vistazo.
@@ -132,7 +144,27 @@ Reglas de redacción de la matriz:
 - Las rutas de `Evidencia` van en `código` y son relativas a la raíz del repo.
 - Nunca omitir una fila `No cubierto`: **es la información más valiosa de la tabla**.
 
-Incluir además el resumen de artefactos de prueba automatizada disponibles (unit / integración / e2e).
+**Tabla de indicadores del Resumen** — exactamente **cuatro** filas, todas de criterios:
+
+| Indicador | Qué cuenta |
+|-----------|------------|
+| Criterios de aceptación | Total de criterios del artefacto (**M**) |
+| Criterios cubiertos | Criterios con `Estado = Cubierto` |
+| Criterios parciales | Criterios con `Estado = Parcial` |
+| Criterios no cubiertos | Criterios con `Estado = No cubierto` |
+
+Cifras siempre numéricas (`0`, no `—`). Los tres últimos **deben sumar M**: comprobarlo antes de publicar; si no cuadra, hay filas mal derivadas. No añadir indicadores de pruebas (fallidas, no ejecutadas): esa granularidad ya está en la matriz, y mezclarla aquí confunde los dos ejes.
+
+**Dónde va cada observación.** Hay dos destinos y no son intercambiables:
+
+La prueba para elegir: *¿se puede atribuir a un criterio concreto?*
+
+| Destino | Qué recibe |
+|---------|------------|
+| **Columna `Observaciones`** de «Cobertura por criterio» | Todo lo **de un criterio**: tipo declarado sin automatizar · TC en `Draft`/`Obsolete` · `Fallo` no aislable · suite efectiva distinta del tipo declarado · mapeo inferido en vez de declarado · **cobertura apoyada en TCs `Manual`** (aunque sea por diseño: justifica el `⚠️`) · límite de la cobertura |
+| **Sección «Observaciones y pendientes»** | Todo lo **de la corrida**: suite `coverage` en `FAIL` · `workingTreeClean: false` (árbol sucio) · clases de prueba que el repo no tiene · ejecución no delegable y su motivo · tests no vinculables con certeza a ningún criterio · tests o fallos ajenos al artefacto |
+
+La matriz **no lleva** columna de observaciones, para que se lea de un vistazo. Cuando un paso diga «dejar Observación» sin especificar destino, aplicar la prueba de atribución.
 
 ### Paso 6 — Emitir el veredicto
 
@@ -179,11 +211,14 @@ persiste el resultado en `docs/specs/test-run.json` (esquema `test-run/v1`; ubic
 
 Reglas:
 
-- Registrar en el reporte el **comando** y el **resultado global** tomados de `test-run.json` (no volver a
-  ejecutar), y la **procedencia** (caché fresca del commit X, o corrida `tests-only` disparada ahora).
-- `result` por suite → `Resultado` **de la fila** (no del criterio; el `Estado` del criterio se deriva después de todas sus filas): `PASS`→`Paso`, `FAIL`→`Fallo`, `SKIPPED`→`No ejecutado`, `N/A` (el repo no tiene esa suite)→`No ejecutado` con Observación. **Excepción:** cuando varios criterios comparten suite y esta da `FAIL`, no basta con propagar `Fallo` a todos — ver «Granularidad suite vs. criterio» en el Paso 4 más arriba; si no se puede aislar el test que falló, la fila queda en `Fallo` con la Observación «no aislable» y el **`Estado` del criterio** es `Parcial`, no `No cubierto`.
+- Registrar en la línea **Pruebas** del Resumen la **procedencia** (caché fresca del commit X, o corrida
+  `tests-only` disparada ahora) y el `result` **por suite** tomado de `test-run.json`, sin volver a ejecutar.
+  `test-run.json` **no trae un agregado global**: no inventarlo. La suite `coverage` no se lista ahí; si dio
+  `FAIL`, va a «Observaciones y pendientes». Si no hubo corrida, la línea dice «no ejecutable» y el motivo.
+- `result` por suite → `Resultado` **de la fila** (no del criterio; el `Estado` del criterio se deriva después de todas sus filas): `PASS`→`Paso`, `FAIL`→`Fallo`, `SKIPPED`→`No ejecutado`, `N/A` (el repo no tiene esa suite)→`No ejecutado`, con la constancia en «Observaciones y pendientes». **Excepción:** cuando varios criterios comparten suite y esta da `FAIL`, no basta con propagar `Fallo` a todos — ver «Granularidad suite vs. criterio» en el Paso 4 más arriba; si no se puede aislar el test que falló, la fila queda en `Fallo` con la Observación «no aislable» y el **`Estado` del criterio** es `Parcial`, no `No cubierto`.
 - Filas de TCs marcados `Manual` (manual por diseño): `Ejecución = Manual`, `Resultado = N/A`. No confundir con filas de tipos automatizables (`Unit`/`Integration`/`API Test`/`Visual Test`/`E2E`) aún sin artefacto, que van `Evidencia = —`, `Ejecución = —`, `Resultado = No cubierto` (pendiente de automatizar).
-- Si `workingTreeClean` es `false` en la caché, anotarlo como caveat (resultado sobre un árbol sucio).
+- Si `workingTreeClean` es `false` en la caché, anotarlo como caveat en **«Observaciones y pendientes»**
+  (resultado sobre un árbol sucio).
 
 ---
 
@@ -195,9 +230,10 @@ Reglas:
 - [ ] Casos de prueba y artefactos (unit / integración / e2e) inventariados con su ruta y criterio
 - [ ] Cada criterio con estado (Cubierto / Parcial / No cubierto) y observaciones cuando aplica
 - [ ] Matriz expandida a una fila por criterio × TC × **tipo declarado** (un TC con `Unit, E2E` ocupa dos filas), sin omitir las filas `No cubierto`
-- [ ] Resultados de pruebas obtenidos de `quality-check` (caché fresca `test-run.json` o delegación `tests-only`); comando, resultado y procedencia registrados; sin ejecutar la suite en `trace-validate` ni inventar resultados
-- [ ] `Ejecución` y `Resultado` rellenados fila a fila, con la suite efectiva anotada; ninguna fila con `Evidencia = —` reporta `Paso`/`Fallo`
-- [ ] Las dos tablas (cobertura por criterio + matriz) construidas desde `assets/trace-report-template.md`
-- [ ] Resumen de artefactos de prueba automatizada incluido
+- [ ] Resultados de pruebas obtenidos de `quality-check` (caché fresca `test-run.json` o delegación `tests-only`); sin ejecutar la suite en `trace-validate` ni inventar resultados
+- [ ] `Ejecución` y `Resultado` rellenados fila a fila (`Ejecución` sin la suite entre paréntesis); ninguna fila con `Evidencia = —` reporta `Paso`/`Fallo`
+- [ ] Cabecera completa (Fecha · Rama · Commit · Trabajo · Veredicto) y las dos tablas construidas desde `assets/trace-report-template.md`
+- [ ] Resumen con la tabla de indicadores (4 filas) cuadrada —cubiertos + parciales + no cubiertos = total de criterios— y la línea **Pruebas** con la procedencia y el resultado por suite (sin agregado inventado)
+- [ ] Caveats globales (suite `coverage` en `FAIL`, árbol sucio, suites ausentes, ejecución no delegable) en «Observaciones y pendientes»; sección omitida si no hay ninguno
 - [ ] Veredicto emitido respondiendo si **todos** los criterios quedan cubiertos
-- [ ] `trace-report.md` guardado en la ubicación del tipo con la marca de pie del fingerprint; ningún otro artefacto modificado
+- [ ] `trace-report.md` guardado en la ubicación del tipo, sin bloques de comentario de la plantilla y con la marca de pie del fingerprint; ningún otro artefacto modificado
