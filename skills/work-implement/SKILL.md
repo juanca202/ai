@@ -1,6 +1,7 @@
 ---
 name: work-implement
-description: 'Usar al pedir implementar, desarrollar o ejecutar en codigo trabajo ya especificado, de distintos tipos. Cuatro tipos de implementacion: (1) tareas tecnicas (TK-XXX) bajo una historia de usuario (US-XXX); (2) tareas de mantenimiento (WI-XXX) sin historia asociada — bugs, refactor, deuda tecnica, dependencias, operativas; (3) casos de prueba (TC-XXX) — automatizar en codigo las pruebas ya documentadas por test-define; (4) features (FT-XXX) — automatizar todos los TC asociados a los AC del feature. Activar siempre que el usuario pida "implementar", "desarrollar", "ejecutar tareas", "codificar", "automatizar las pruebas", "implementar los test cases", "trabajar en el TK/WI/TC/FT" o cualquier variante que implique escribir codigo a partir de una especificacion ya redactada, aunque no nombre el tipo. Selecciona el tipo segun el artefacto referenciado y carga su flujo desde references/. Solo se implementa trabajo en estado Ready. Ademas acepta un modo correccion acotado, delegado por quality-check en el cierre, para arreglar un check o una prueba que falla sobre un US-XXX/WI-XXX ya implementado.'
+description: >-
+  Implementar en código trabajo ya especificado, de cuatro tipos: (1) tareas técnicas (TK-XXX) bajo una historia de usuario; (2) tareas de mantenimiento (WI-XXX) sin historia — bugs, refactor, deuda técnica, dependencias, operativas; (3) casos de prueba (TC-XXX) — automatizar las pruebas ya documentadas por test-define; (4) features (FT-XXX) — automatizar los TC de sus criterios. Selecciona el tipo según el artefacto referenciado y carga su flujo desde references/. Solo implementa trabajo en Estado: Ready; acepta además un modo corrección acotado, delegado por quality-check en el cierre sobre cualquier artefacto de la rama (US-XXX, WI-XXX, FT-XXX o TC-XXX en rama test/, o un artefacto externo al plugin), para arreglar un check o una prueba en rojo. Activar siempre que el usuario pida "implementar", "desarrollar", "ejecutar tareas", "codificar", "automatizar las pruebas", "implementa los test cases", "trabaja en el TK/WI/TC/FT" o cualquier variante que implique escribir código a partir de una especificación ya redactada, aunque no nombre el tipo.
 license: MIT
 ---
 
@@ -58,7 +59,7 @@ La senal que distingue los tipos es **el artefacto que el usuario referencia** (
 | **Caso de prueba** | El trabajo referencia uno o varios `TC-XXX`; viven en la carpeta `test-cases/` de un artefacto padre (`US-XXX`, `WI-XXX` o `FT-XXX`). | **Las pruebas automatizadas de esos `TC-XXX`** | **Un `TC-XXX`** | `references/test-cases.md` — **leer antes de implementar.** |
 | **Feature** | El trabajo referencia un `FT-XXX` — funcionalidad **ya implementada** registrada bajo `docs/specs/features/`. | **Las pruebas de todos los `TC-XXX` asociados a los `AC-XXX` que contiene el feature** — nunca funcionalidad nueva | **El `FT-XXX` completo** | `references/test-cases.md` — **leer antes de implementar.** |
 
-> **Modo correccion (entrada delegada desde [`quality-check`](../quality-check/SKILL.md#corrección-de-fallos)).** Ademas de los cuatro tipos, este skill acepta una **correccion puntual delegada** por `quality-check` cuando un check falla en el cierre y el usuario autoriza el arreglo. No es un tipo nuevo: es un modo acotado sobre el artefacto **`US-XXX` o `WI-XXX` que ya se implemento en esta rama**. Ver [Modo correccion](#modo-correccion-delegado-desde-quality-check).
+> **Modo correccion (entrada delegada desde [`quality-check`](../quality-check/SKILL.md#corrección-de-fallos)).** Ademas de los cuatro tipos, este skill acepta una **correccion puntual delegada** por `quality-check` cuando un check falla en el cierre y el usuario autoriza el arreglo. No es un tipo nuevo: es un modo acotado sobre el **artefacto que ya se implemento en esta rama** — `US-XXX`, `WI-XXX`, una automatizacion de pruebas (`FT-XXX` / `TC-XXX` en rama `test/`), o un artefacto externo al plugin. Ver [Modo correccion](#modo-correccion-delegado-desde-quality-check).
 
 Reglas de seleccion:
 
@@ -144,34 +145,48 @@ El ciclo obligatorio por cada unidad de comportamiento es **Red → Green → Re
 
 1. **Red:** escribir el test que falla antes de escribir el codigo de produccion. El test debe describir el comportamiento esperado segun los **insumos de comportamiento** del artefacto: los criterios de aceptacion (`AC-XXX`) y —cuando existan— las reglas de negocio (`BR-XX`) y los casos de prueba (`TC-XXX`). **Nota:** si el artefacto (US o WI) referencia una investigacion de migracion con casos de Golden Master en su `validation.md`, esos casos forman parte de las pruebas de la unidad.
 
-> **Test cases como insumo de las pruebas automatizadas:** si el artefacto tiene test cases (carpeta `test-cases/` en la US o el WI), **leer su `README.md` antes de escribir codigo** para identificar que `TC-XXX` describen y cuales pueden convertirse en pruebas automatizadas (unit, integracion, e2e) dentro del ciclo TDD. Cada `TC-XXX` que sea automatizable se cubre con su prueba en la unidad correspondiente. Cuando un `TC-XXX` **no se pueda automatizar** (p. ej. es manual o exploratorio) o se **decida crear otro tipo de prueba** distinto al que sugiere el test case, **registrarlo en `progress.md`** (ver seccion `progress.md`). Escribir la prueba en el ciclo TDD es una cosa; **ejecutarla** sigue el [Uso escalonado de pruebas](#uso-escalonado-de-pruebas-optimizacion) (unit siempre, integracion cuando aplica, e2e en el cierre).
+> **Test cases como insumo de las pruebas automatizadas:** si el artefacto tiene test cases (carpeta `test-cases/` en la US o el WI), **leer su `README.md` antes de escribir codigo** para identificar que `TC-XXX` describen y cuales pueden convertirse en pruebas automatizadas (unit, integracion, e2e) dentro del ciclo TDD. Cada `TC-XXX` que sea automatizable se cubre con su prueba en la unidad correspondiente. Cuando un `TC-XXX` **no se pueda automatizar** (p. ej. es manual o exploratorio) o se **decida crear otro tipo de prueba** distinto al que sugiere el test case, **registrarlo en `progress.md`** (ver seccion `progress.md`). Escribir la prueba en el ciclo TDD es una cosa; **ejecutarla** sigue el [Uso escalonado de pruebas](#uso-escalonado-de-pruebas-optimizacion) (unit e integracion en cada iteracion y acotadas al cambio, e2e solo al final de la implementacion).
 2. **Green:** escribir el minimo codigo necesario para que el test pase.
 3. **Refactor:** limpiar el codigo (produccion y test) sin romper los tests.
 
-Los tests son parte del entregable de la unidad, no una fase posterior. Una unidad no esta `Done` si sus tests no existen o no pasan.
+> **El paso Red no aplica a las pruebas e2e.** Se **escriben** dentro del ciclo TDD como cualquier otra
+> prueba, pero **no se ejecutan durante las iteraciones** (ver [Uso escalonado de pruebas](#uso-escalonado-de-pruebas-optimizacion)),
+> asi que no hay rojo que observar. Su primer y unico rojo/verde en este skill ocurre en el cierre de la
+> implementacion. Unitarias e integracion si cumplen Red→Green→Refactor completo en cada iteracion.
+
+Los tests son parte del entregable de la unidad, no una fase posterior. Una unidad no esta `Done` si sus tests **no existen**, o si los que **corresponde ejecutar en la iteracion** (unitarias e integracion) no pasan. Las pruebas **e2e escritas pero diferidas al cierre** —y, en modo paralelo, las de integracion diferidas por infra no aislable— **no bloquean el `Done` de la unidad**, siempre que esten escritas y su diferimiento quede registrado en `progress.md`; su verificacion es condicion del **cierre de la implementacion**, no de la unidad.
 
 > **Variante para los tipos `TC-XXX` / `FT-XXX`:** ahi el entregable **son** las pruebas y el comportamiento **ya esta implementado**, asi que **no hay paso Red por diseno**: lo esperado es que la prueba pase en verde a la primera y confirme el comportamiento documentado. Si la prueba falla, hay una discrepancia real entre el `TC-XXX` y el codigo: se para, se presenta la evidencia al usuario y se decide con el si se corrige produccion (y ahi el rojo si actua como paso Red), si se corrige la prueba, o si vuelve a `test-define`. Nunca se relaja una asercion para forzar el verde. Detalle en `references/test-cases.md`.
 
 ### Uso escalonado de pruebas (optimizacion)
 
 El ciclo TDD siempre **define** las pruebas de la unidad (unit / integracion / e2e segun corresponda),
-pero **ejecutarlas todas en cada iteracion es caro**. Escalonar la *ejecucion* por nivel — esto cambia
+pero **ejecutarlas todas y completas en cada iteracion es caro**. Escalonar la *ejecucion* — esto cambia
 *cuando y cuantas veces* se corren, no *que* se escribe ni la definicion de `Done`:
 
-- **Unitarias — siempre.** Las pruebas unitarias del codigo implementado se corren en **cada** ciclo
-  Red→Green→Refactor y en cada iteracion de la unidad. Son rapidas y son la red de seguridad primaria;
-  nunca se difieren.
-- **Integracion — solo cuando se considere necesario.** Ejecutarlas cuando la unidad realmente cruza un
-  limite que las unitarias (con dobles/mocks) no cubren: acceso a base de datos, integracion entre
-  modulos, contrato con un servicio externo, wiring de infraestructura. Si el cambio no toca esas
-  fronteras, no re-correr integracion en cada iteracion; basta al consolidar la unidad.
-- **E2E — solo en el cierre de la implementacion.** No correr e2e por unidad ni en cada ciclo TDD (son
-  lentas y fragiles). Diferirlas al **cierre de la implementacion** (Paso 4 de la referencia del tipo, o
-  el paso de Integracion en modo paralelo), una sola vez sobre el codigo consolidado. La corrida
-  exhaustiva de e2e como **puerta formal** la realiza `quality-check` en `work-integrate` / `pr-create`.
+- **Unitarias e integracion — ambas en cada iteracion, al mismo nivel.** Las dos son la red de seguridad
+  primaria del ciclo Red→Green→Refactor y se corren en **cada** iteracion de la unidad. No hay juicio
+  previo sobre si el cambio "cruza una frontera": si la unidad tiene pruebas de integracion, se ejecutan.
+- **Siempre acotadas exclusivamente al cambio.** Lo que abarata la corrida no es saltarse un nivel, es el
+  **alcance**: ejecutar unicamente el archivo, la suite o el paquete de lo que se acaba de tocar —
+  **nunca la suite completa del nivel** ni la del repositorio. Usar los filtros del runner (patron de
+  ruta, nombre de test, proyecto/paquete). La corrida completa es tarea exclusiva de `quality-check`.
+- **E2E — se escriben durante, se ejecutan solo al final.** Se definen dentro del ciclo TDD como
+  cualquier otra prueba, pero **no se ejecutan en las iteraciones** (son lentas y fragiles). Su unica
+  corrida en este skill es en el **cierre de la implementacion** (Paso 4 de la referencia del tipo, o el
+  paso de Integracion en modo paralelo), una sola vez sobre el codigo consolidado. La corrida exhaustiva
+  como **puerta formal** la realiza `quality-check` en `work-integrate` / `pr-create`.
 
-Registrar en `progress.md` cuando una prueba de integracion o e2e se **difiera** o se **decida no
-ejecutar** en una iteracion, para que la decision quede trazada.
+**En modo paralelo (worktrees):** el subagente ejecuta la integracion de su unidad **cuando puede aislar
+la infraestructura** (base de datos por worktree, contenedor efimero, testcontainers, esquema o namespace
+propio). Si la infra es compartida y no aislable —hasta 3 worktrees concurrentes colisionarian en
+migraciones, fixtures o estado—, **difiere esas pruebas**, lo registra en `progress.md` y lo reporta al
+orquestador, que las ejecuta en el paso de Integracion tras el merge de la unidad. Un fallo por colision
+de infra no es un defecto del codigo: no se corrige, se aisla o se difiere.
+
+Registrar en `progress.md` cuando una prueba se **difiera** o se **decida no ejecutar** en una iteracion
+(e2e por diseno; integracion solo por infra no aislable en modo paralelo), para que la decision quede
+trazada y el cierre sepa que debe ejecutarla.
 
 ### Clean Architecture
 
@@ -240,7 +255,7 @@ La hace **el orquestador, una unidad a la vez** (nunca merges concurrentes), a m
 
 1. Sobre la rama del artefacto, hacer merge de la rama de la unidad: `git merge wt/<unidad>`.
 2. **Resolver conflictos** si los hay; si el conflicto no es trivial o el resultado queda ambiguo, **parar e informar al usuario** antes de continuar con el resto.
-3. Ejecutar **lint/typecheck/build y las pruebas unitarias (mas las de integracion si el merge tocó una frontera relevante)** de los archivos/paquete afectados por las unidades integradas, en la rama del artefacto tras el merge (no la bateria completa; esa la corre `quality-check`). **E2E no se corre por merge:** se difiere al cierre (paso 6). Ver [Uso escalonado de pruebas](#uso-escalonado-de-pruebas-optimizacion). Si algo falla, **intentar corregirlo**; solo si el error **persiste tras varios intentos** (p. ej. 2-3), **parar** y avisar. No seguir integrando sobre una base rota.
+3. Ejecutar **lint/typecheck/build y las pruebas unitarias y de integracion** de los archivos/paquete afectados por las unidades integradas, en la rama del artefacto tras el merge (acotadas al cambio, no la bateria completa; esa la corre `quality-check`). **Incluir aqui las pruebas de integracion que el subagente difirio por infra no aislable** (las registradas en `progress.md`): en la rama del artefacto ya no hay concurrencia entre worktrees, asi que este es su punto de ejecucion. **E2E no se corre por merge:** se difiere al cierre (paso 6). Ver [Uso escalonado de pruebas](#uso-escalonado-de-pruebas-optimizacion). Si algo falla, **intentar corregirlo**; solo si el error **persiste tras varios intentos** (p. ej. 2-3), **parar** y avisar. No seguir integrando sobre una base rota.
 4. Marcar `progress.md` de esa unidad a `Done` (y su `Cobertura de test cases`) solo **despues** de un merge y una validacion en verde.
 5. Al integrar todas las unidades, **limpiar los worktrees y ramas temporales** (`git worktree remove <ruta-temporal>` y borrar la rama `wt/<unidad>`).
 6. **Cierre de la implementacion:** con todas las unidades integradas, correr **una sola vez** las pruebas **e2e** que apliquen al alcance sobre el codigo consolidado (si el repo las tiene). La corrida exhaustiva como puerta formal la hara luego `quality-check`.
@@ -254,11 +269,30 @@ La hace **el orquestador, una unidad a la vez** (nunca merges concurrentes), a m
 [`quality-check`](../quality-check/SKILL.md#corrección-de-fallos) corre la bateria completa en el cierre (`work-integrate` / `pr-create`). Cuando un check
 falla —tipado, linter, build o **pruebas**— y el usuario **autoriza** la correccion, `quality-check`
 **delega en este skill** la escritura del arreglo, porque es el skill que escribe codigo. La delegacion
-solo ocurre si la rama corresponde a un `US-XXX` o `WI-XXX` identificable; si no hay artefacto,
-`quality-check` corrige por su cuenta y este skill no interviene.
+ocurre si la rama corresponde a un **artefacto de trabajo identificable** — `US-XXX`, `WI-XXX`, una
+**automatizacion de pruebas** (`FT-XXX` / `TC-XXX` sobre rama `test/`), **o un artefacto externo al
+plugin** (ticket de un tracker, spec suelto, documento de otra herramienta) —; solo cuando no hay
+artefacto de ningun tipo, `quality-check` corrige por su cuenta y este skill no interviene.
 
-**Que llega en la delegacion:** el artefacto en curso (`US-XXX` / `WI-XXX`), el check que fallo, el
-comando exacto, la salida de error relevante y los archivos implicados.
+**Que llega en la delegacion:** el artefacto en curso (`US-XXX` / `WI-XXX` / `FT-XXX` / `TC-XXX`, o la
+**ruta o referencia** del artefacto externo), el check que fallo, el comando exacto, la salida de error
+relevante y los archivos implicados.
+
+> **Artefacto externo al plugin.** El modo correccion **no exige** que el trabajo este especificado con
+> los artefactos de este plugin. Si lo que llega es la ruta de un spec, un ID de tracker o solo la
+> descripcion del trabajo, se corrige igual: leer lo que exista como referencia de comportamiento y
+> aplicar el mismo alcance minimo. **No inventar la carpeta `docs/specs/` ni un `progress.md`** para poder
+> anotar el retrabajo: si no hay `progress.md`, la nota de la correccion **se devuelve en la respuesta** a
+> `quality-check`, que la recoge en su informe. Todo lo demas del modo es identico.
+
+> **Correccion sobre una rama `test/`.** La rama `test/` la crea este mismo skill (Paso 1 de
+> [`references/test-cases.md`](references/test-cases.md)) y siempre cuelga de un artefacto padre con su
+> `progress.md`: no es una rama suelta. Si lo que falla es una **prueba** que este skill escribio, aplica
+> el criterio de los tipos `TC-XXX` / `FT-XXX`: **no se asume que el error esta en la prueba**. Puede ser
+> una discrepancia real entre el `TC-XXX` y el codigo — parar, presentar la evidencia al usuario y decidir
+> con el si se corrige produccion, si se corrige la prueba, o si vuelve a `test-define`. **Nunca relajar
+> una asercion para forzar el verde.** Si la decision es escalar a `test-define`, la correccion no se
+> aplica: devolver el control a `quality-check` informando el motivo (ver [Cuando la correccion no se aplica](#cuando-la-correccion-no-se-aplica)).
 
 **Como se ejecuta — es un modo acotado, no una implementacion normal:**
 
@@ -278,10 +312,26 @@ comando exacto, la salida de error relevante y los archivos implicados.
 - **Registro en `progress.md`:** anotar la correccion como **nota** de la unidad afectada (o del artefacto,
   si no se puede atribuir a una unidad), indicando el check que fallo y que fue retrabajo de cierre. **No**
   se inventan estados: los validos siguen siendo `Pending`, `In Progress`, `Done`, y una unidad ya en
-  `Done` permanece en `Done`.
+  `Done` permanece en `Done`. **Si el artefacto es externo y no hay `progress.md`**, no crearlo: devolver
+  esa misma nota en la respuesta a `quality-check`.
 - **Sin commit automatico ni handoff:** al terminar, devolver el control a `quality-check`, que verifica el
   arreglo re-ejecutando el check, recalcula el fingerprint y reinicia su corrida. Este skill no re-ejecuta
   la bateria completa ni decide si el cierre continua.
+
+### Cuando la correccion no se aplica
+
+La delegacion puede terminar **sin arreglo**, y eso es un desenlace valido — no un fallo del modo. Ocurre
+cuando el arreglo **excede el alcance acotado** (crece hasta ser un desarrollo => escalar a `work-plan`
+como `WI-XXX`), cuando el fallo revela una **discrepancia entre el `TC-XXX` y el codigo** que el usuario
+decide resolver en la especificacion (=> escalar a `test-define`), o cuando el fallo es **preexistente** y
+ajeno al trabajo de la rama.
+
+En esos casos, **no seguir intentando ni improvisar un arreglo parcial**. Devolver el control a
+`quality-check` con un resultado explicito de **correccion no aplicada**, indicando: el check que seguia
+fallando, **el motivo** (fuera de alcance / discrepancia de especificacion / preexistente) y **a que skill
+se escalo**. `quality-check` no debe reintentar la delegacion sobre ese mismo fallo: le corresponde
+reportarlo al usuario en su informe y emitir el veredicto que aplique (`❌ Rechazado`), dejando el cierre
+bloqueado hasta que el escalado se resuelva. Anotar tambien la decision como **nota** en `progress.md`.
 
 ---
 
@@ -336,7 +386,9 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 - Continuar cuando se detecta un conflicto en la documentacion sin notificar al usuario primero.
 - Diferir la escritura de tests para despues de la implementacion; el ciclo TDD es Red → Green → Refactor dentro de cada unidad.
 - Correr la **bateria completa de pruebas** del repositorio desde este skill: solo se ejecutan las pruebas de los archivos/paquete afectados; la bateria completa es tarea exclusiva de `quality-check` (en `work-integrate` / `pr-create`).
-- Correr **e2e en cada ciclo TDD o por cada merge**, o **integracion en cada iteracion** cuando el cambio no cruza esa frontera: unitarias siempre, integracion solo cuando aplica, e2e solo en el cierre (ver [Uso escalonado de pruebas](#uso-escalonado-de-pruebas-optimizacion)).
+- Correr **la suite completa de un nivel** (todas las unitarias o todas las de integracion del repo) cuando solo cambio una unidad: la ejecucion se acota **exclusivamente al cambio** con los filtros del runner (ver [Uso escalonado de pruebas](#uso-escalonado-de-pruebas-optimizacion)).
+- Correr **e2e en cada ciclo TDD o por cada merge**: se escriben durante la implementacion pero se ejecutan **solo al final**, una vez sobre el codigo consolidado.
+- **Saltarse las pruebas de integracion de la unidad** por considerar que "el cambio no cruza esa frontera": unitarias e integracion estan al mismo nivel y se ejecutan ambas en cada iteracion. La unica excepcion es la infra no aislable en modo paralelo, que se **difiere y se registra** — nunca se omite en silencio.
 - Escribir un estado no definido en `progress.md`; estados validos: `Pending`, `In Progress`, `Done`. En el modo correccion, la correccion se anota como **nota**, sin inventar un estado de retrabajo ni reabrir una unidad ya en `Done`.
 - En el modo correccion: abrir unidades nuevas, exigir arbol limpio, pedir confirmacion entre archivos, o dejar que el arreglo crezca hasta ser un desarrollo en vez de escalar a `work-plan`.
 - En el modo correccion: re-ejecutar la bateria completa o decidir si el cierre continua — eso vuelve a `quality-check`.

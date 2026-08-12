@@ -60,12 +60,12 @@ En otro caso, ejecutar **secuencialmente** (no en paralelo) los checks Bloqueant
 ### Paso 3 — Evaluar el resultado
 
 - **Hay al menos un FAIL** (Bloqueante o Condicional-presente): **mostrar el reporte completo al usuario** y **preguntar qué hacer**. **No corregir sin autorización**, y **no dar por hecho que hay que corregir**.
-  - **Cómo preguntar** (ver [Corrección de fallos](../SKILL.md#corrección-de-fallos)): si la corrida está **dentro de una implementación** (rama con `US-XXX`/`WI-XXX` en curso), preguntar si se corrigen los fallos. Si está **fuera de una implementación** (rama suelta, auditoría, revisión puntual), ofrecer explícitamente las dos salidas: **[Corregir los hallazgos]** / **[Solo el informe, detener aquí]**.
+  - **Cómo preguntar** (ver [Corrección de fallos](../SKILL.md#corrección-de-fallos)): si la corrida está **dentro de una implementación** (hay un trabajo en curso al que atribuir la rama: `US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin (ticket, spec suelto, doc de otra herramienta)), preguntar si se corrigen los fallos. Si está **fuera de una implementación** (rama suelta sin artefacto de ningún tipo, auditoría, revisión puntual), ofrecer explícitamente las dos salidas: **[Corregir los hallazgos]** / **[Solo el informe, detener aquí]**.
   - Si el usuario elige **solo el informe** → ir al Paso 4 con el veredicto que corresponda y **terminar**: no tocar código, no reiniciar la corrida, no volver a ofrecer la corrección. Dejar lo pendiente en Próximas acciones.
-  - Si **autoriza la corrección** → resolver **quién la aplica** según [Corrección de fallos](../SKILL.md#corrección-de-fallos): si la rama corresponde a un `US-XXX` o `WI-XXX` identificable, **delegar en `work-implement`** sobre ese artefacto, pasándole el check fallido, el comando, la salida de error y los archivos implicados; si no hay artefacto, aplicar aquí los cambios mínimos (sin tocar más de lo necesario). En ambos casos: **re-ejecutar el check/prueba que fallaba para confirmar que ya pasa**, **recalcular el `FINGERPRINT`** y solo entonces **re-ejecutar TODA la corrida** (reiniciar el Paso 2). Si el check puntual sigue en FAIL, iterar la corrección antes de reiniciar.
+  - Si **autoriza la corrección** → resolver **quién la aplica** según [Corrección de fallos](../SKILL.md#corrección-de-fallos): si la rama tiene un artefacto identificable (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin — ticket, spec suelto, doc de otra herramienta), **delegar en `work-implement`** sobre ese artefacto, pasándole el check fallido, el comando, la salida de error y los archivos implicados; solo si no hay artefacto de ningún tipo, aplicar aquí los cambios mínimos (sin tocar más de lo necesario). En ambos casos: **re-ejecutar el check/prueba que fallaba para confirmar que ya pasa**, **recalcular el `FINGERPRINT`** y solo entonces **re-ejecutar TODA la corrida** (reiniciar el Paso 2). Si el check puntual sigue en FAIL, iterar la corrección antes de reiniciar. **Excepción — si `work-implement` devuelve «corrección no aplicada»** (escalado a `work-plan`/`test-define`, o fallo preexistente): no reintentar ni corregir aquí, no reiniciar la corrida — pasar al informe con el motivo y emitir `❌ Rechazado`.
   - Si **corrige manualmente** e indica que ya está → **re-ejecutar el check/prueba que fallaba**; si pasa, **recalcular el `FINGERPRINT`** y **re-ejecutar TODA la corrida**; si no, avisar y volver a la corrección.
   - Si **no desea corregir ahora** → continuar al informe con veredicto `❌ Rechazado`, dejando registrado qué falló y qué falta para llegar a Aprobado.
-  - Repetir el ciclo de corrección hasta quedar sin FAIL o hasta que el usuario detenga.
+  - Repetir el ciclo de corrección hasta quedar sin FAIL, hasta que el usuario detenga, o hasta que `work-implement` devuelva **«corrección no aplicada»** — ese resultado cierra el ciclo, no lo reinicia.
 - **Solo SKIPPED, sin FAIL** (`⚠️ Incompleto`): reportar el motivo y **preguntar** si resolver el tooling primero o cerrar asumiendo el Incompleto. No avanzar en silencio. **En `tests-only` no se pregunta:** devolver las suites con su `result` (incluidos los `SKIPPED`) y terminar.
 - **Sin FAIL ni SKIPPED**: `✅ Aprobado`.
 
@@ -90,7 +90,7 @@ no de una unidad, así que su informe reside en una **ubicación fija**, no en l
 
 **Escribir la caché de corrida de pruebas.** Si en esta corrida **se ejecutaron los checks de pruebas**
 (unit/coverage/integración/e2e — es decir, cualquier modo salvo `no-tests` o un `only <check>` que no sea de pruebas)
-**y** el proyecto usa `docs/specs/`, escribir/actualizar `docs/specs/test-run.json` (junto a
+**y** el proyecto usa `docs/specs/` —**o** la corrida viene invocada por `trace-validate`, que sí consume la caché aunque el repo no sea spec-driven—, escribir/actualizar `docs/specs/test-run.json` (junto a
 `docs/specs/quality-check.md`) con el `FINGERPRINT` **vigente** (el del Paso 1 si no hubo correcciones; el recalculado tras la última corrección si las hubo) y el resultado por suite. Ver
 [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas). En modo `tests-only` este es el artefacto de salida.
 
@@ -120,7 +120,10 @@ esquema están en `SKILL.md` ([Caché de corrida de pruebas](../SKILL.md#caché-
 **Cuándo se escribe.** Al final de una corrida que ejecutó los checks de pruebas (Paso 5), si el proyecto
 usa `docs/specs/`. Ruta **fija**: `docs/specs/test-run.json` (junto a `docs/specs/quality-check.md`), no por
 unidad. Se **sobrescribe** en cada corrida (es el estado vigente de la rama). Sin `docs/specs/` no se
-escribe (no hay consumidor).
+escribe por defecto (no hay consumidor). **Excepción:** si la corrida la invocó `trace-validate`
+(típicamente en modo `tests-only`), sí hay consumidor — crear `docs/specs/` y escribir la caché
+igualmente; si el usuario no quiere ese directorio, devolver los resultados en la respuesta y advertir
+que no habrá reutilización entre corridas. Ver [Caché de corrida de pruebas](../SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
 
 **Qué se guarda.** El `FINGERPRINT` vigente en `git.fingerprint`, más **las cuatro** entradas de suite
 (`unit`, `coverage`, `integration`, `e2e`) con su `command`, `result` (`PASS`/`FAIL`/`SKIPPED`/`N/A`) y un
@@ -169,13 +172,14 @@ estaba sucio, `workingTreeClean: false` queda registrado como señal para el con
 | Sonar con config presente y error de red | FAIL informativo. No bloquea veredicto. |
 | Ejecución > 10 min en un check | Continuar; avisar al usuario. |
 | Working tree sucio | No bloquear; nota en encabezado. |
-| FAIL en algún check | Mostrar reporte y **preguntar** si corregir. Nunca corregir sin autorización. Con autorización, delegar en `work-implement` si hay un `US-XXX`/`WI-XXX` en curso; si no, corregir aquí. Tras corregir, **re-ejecutar el check que fallaba**; si pasa, **recalcular el fingerprint** y **re-ejecutar toda la corrida**. |
+| FAIL en algún check | Mostrar reporte y **preguntar** si corregir. Nunca corregir sin autorización. Con autorización, delegar en `work-implement` si hay un artefacto en curso (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin); si no hay ninguno, corregir aquí. Tras corregir, **re-ejecutar el check que fallaba**; si pasa, **recalcular el fingerprint** y **re-ejecutar toda la corrida**. |
 | Autorización de corrección pero el artefacto de trabajo es ambiguo (varios candidatos) | Preguntar cuál antes de delegar; no delegar sobre un artefacto adivinado. |
 | FAIL o SKIPPED durante una corrida `tests-only` | **No preguntar nada** — el modo es no interactivo: devolver los resultados por suite (con su `result`) y la ruta de `test-run.json`. Corregir o resolver el tooling es decisión del flujo que invocó. |
 | Usuario no quiere corregir los FAIL, o pide solo el informe | Cerrar en `❌ Rechazado` con el detalle de lo pendiente en Próximas acciones; no maquillar el veredicto ni volver a insistir con la corrección. |
-| Corrida **fuera de una implementación** (rama sin `US-XXX`/`WI-XXX`) con hallazgos que exigen tocar código | Preguntar explícitamente **[Corregir]** / **[Solo el informe]** antes de nada. Entregar solo el informe es un resultado legítimo, no un flujo incompleto. |
+| Corrida **fuera de una implementación** (rama sin artefacto derivable) con hallazgos que exigen tocar código | Preguntar explícitamente **[Corregir]** / **[Solo el informe]** antes de nada. Entregar solo el informe es un resultado legítimo, no un flujo incompleto. |
 | El usuario acota qué corregir («el linter sí, el test no») | Respetarlo: corregir solo lo autorizado y tratar el resto como *solo informe*, dejándolo en Próximas acciones. |
 | Corrección aplicada que **no** resuelve el fallo (el check puntual sigue en FAIL) | **No reiniciar.** Iterar la corrección hasta que el check puntual pase; recién entonces disparar el reinicio. |
+| `work-implement` devuelve **«corrección no aplicada»** (fuera de alcance → `work-plan`; discrepancia `TC-XXX`↔código → `test-define`; fallo preexistente) | **Detener el ciclo.** No reintentar la delegación sobre ese fallo ni corregirlo aquí. Recoger el motivo y el skill escalado en **Próximas acciones**, emitir `❌ Rechazado` y terminar. Ver [Corrección de fallos](../SKILL.md#corrección-de-fallos). |
 | Usuario pide "corrige tú" sin más contexto | Confirmar el alcance exacto a corregir antes de tocar nada; resolver quién corrige según [Corrección de fallos](../SKILL.md#corrección-de-fallos); aplicar solo lo mínimo; luego re-ejecutar. |
 | Varias correcciones autorizadas a la vez | Aplicarlas juntas y reiniciar **una sola vez** para no encadenar pasadas innecesarias. |
 | Bucle de correcciones que no converge | Tras 3 reinicios sin llegar a `✅`, resumir lo pendiente y preguntar al usuario cómo proceder. |
@@ -203,7 +207,7 @@ estaba sucio, `workingTreeClean: false` queda registrado como señal para el con
 - Truncar errores sin `… y N más`.
 - Ejecutar checks en paralelo salvo petición explícita.
 - Instalar dependencias — reportar `SKIPPED` y dejar al usuario.
-- **Corregir código directamente cuando hay un `US-XXX`/`WI-XXX` en curso**: esa corrección se delega en `work-implement` (ver `SKILL.md`). A la inversa, **delegar cuando no hay artefacto identificable** — ahí se corrige aquí, sin inventar un artefacto al que atribuir el cambio.
+- **Corregir código directamente cuando hay un artefacto en curso** (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin (ticket, spec suelto, doc de otra herramienta)): esa corrección se delega en `work-implement` (ver `SKILL.md`). A la inversa, **delegar cuando no hay artefacto de ningún tipo** (rama suelta, sin ID ni documento derivable) — ahí se corrige aquí, sin inventar un artefacto al que atribuir el cambio.
 - Delegar una corrección **sin autorización explícita** del usuario: delegar es *cómo* se corrige, no *si* se corrige.
 - **Escribir `test-run.json` con el fingerprint anterior a una corrección** — el artefacto afirmaría corresponder a un código que ya no existe.
 - Continuar a commit/push/merge tras `✅ Aprobado` sin instrucción explícita.

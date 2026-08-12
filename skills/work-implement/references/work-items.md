@@ -80,11 +80,11 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 Por cada WI aprobado:
 
 1. Aplicar el ciclo **TDD (Red → Green → Refactor)** por cada comportamiento del plan del WI:
-   - **Red:** escribir el test que describe el comportamiento esperado, basandose en los insumos de comportamiento del WI: sus criterios de aceptacion (`AC-XXX`) y —cuando existan— las reglas de negocio (`BR-XX`) o los casos de prueba (`TC-XXX`) disponibles. Cuando el WI tenga test cases, tomar del `test-cases/README.md` los `TC-XXX` automatizables que apliquen y crear su prueba correspondiente. El test debe fallar antes de escribir codigo de produccion.
+   - **Red:** escribir el test que describe el comportamiento esperado, basandose en los insumos de comportamiento del WI: sus criterios de aceptacion (`AC-XXX`) y —cuando existan— las reglas de negocio (`BR-XX`) o los casos de prueba (`TC-XXX`) disponibles. Cuando el WI tenga test cases, tomar del `test-cases/README.md` los `TC-XXX` automatizables que apliquen y crear su prueba correspondiente. El test debe fallar antes de escribir codigo de produccion. **Excepcion — e2e:** se escriben aqui igual que las demas, pero **no se ejecutan en las iteraciones**, asi que no tienen paso Red (ver [Uso escalonado de pruebas](../SKILL.md#uso-escalonado-de-pruebas-optimizacion)).
    - **Green:** escribir el minimo codigo de produccion para que el test pase.
    - **Refactor:** limpiar codigo de produccion y test sin romper los tests. Aplicar principios de Clean Architecture (ver `SKILL.md`).
 2. Si genera o modifica UI: ejecutar bajo `ui-specialist`. Si la referencia de diseno es Figma: usar el MCP de Figma.
-3. Al terminar todos los comportamientos del WI, ejecutar lint/typecheck/build y las **pruebas unitarias** del paquete/archivos afectados — nunca la bateria completa del repo. Correr **integracion solo si el WI cruza esa frontera** (BD, modulos, servicio externo, wiring) y **diferir e2e al cierre** (Paso 4). Ver [Uso escalonado de pruebas](../SKILL.md) en `SKILL.md`. Si algo falla, corregir antes de continuar.
+3. Al terminar todos los comportamientos del WI, ejecutar lint/typecheck/build y las **pruebas unitarias y de integracion** del paquete/archivos afectados, **acotadas exclusivamente al cambio** — nunca la suite completa de un nivel ni la bateria del repo. **Unit e integracion estan al mismo nivel:** no se decide caso por caso si el cambio «cruza una frontera». **E2E se difiere al cierre** (Paso 4). Ver [Uso escalonado de pruebas](../SKILL.md#uso-escalonado-de-pruebas-optimizacion) en `SKILL.md`. Si algo falla, corregir antes de continuar.
 4. **Verificar los criterios de aceptacion** del WI contra los tests; si algun criterio no tiene cobertura, completar el ciclo TDD para ese criterio antes de marcar `Done`.
 5. Actualizar el artefacto y el progreso:
    - **Al iniciar el WI:** cambiar su estado en `progress.md` a `In Progress` y **poblar la lista de to-dos del agente**: la **primera entrada es el titulo del WI** (`WI-XXX` + titulo), para tener siempre presente el artefacto en ejecucion, seguida de **las tareas del `Plan de implementacion` del `README.md` del WI** (una entrada por tarea `IT-XX`, en el orden del plan). Cada entrada de tarea muestra solo la descripcion corta (`IT-XX` + linea corta), no el detalle completo.
@@ -96,7 +96,7 @@ Por cada WI aprobado:
 
 ### Paso 4 - Cierre
 
-1. Si el ultimo WI completado quedo sin commitear (el usuario detuvo el flujo en el Paso 3 antes de confirmar el siguiente), **invocar `/git-commit` sobre sus cambios ahora**. Verificar que las pruebas **de los archivos afectados** pasen limpias (unitarias y las de integracion que apliquen) y, **una sola vez sobre el codigo consolidado, correr las pruebas e2e** del alcance si el repo las tiene (ver [Uso escalonado de pruebas](../SKILL.md) en `SKILL.md`); el working tree limpio y con todos los commits hechos. **La bateria completa de pruebas no se corre aqui:** la ejecuta `quality-check` al integrar (`work-integrate`) o crear el PR (`pr-create`).
+1. Si el ultimo WI completado quedo sin commitear (el usuario detuvo el flujo en el Paso 3 antes de confirmar el siguiente), **invocar `/git-commit` sobre sus cambios ahora**. Verificar que las pruebas **de los archivos afectados** pasen limpias (unitarias e integracion, acotadas al cambio) y, **una sola vez sobre el codigo consolidado, correr las pruebas e2e** del alcance si el repo las tiene (ver [Uso escalonado de pruebas](../SKILL.md#uso-escalonado-de-pruebas-optimizacion) en `SKILL.md`); el working tree limpio y con todos los commits hechos. **La bateria completa de pruebas no se corre aqui:** la ejecuta `quality-check` al integrar (`work-integrate`) o crear el PR (`pr-create`).
 2. **Handoff:** si el alcance esta en `Done`, **preguntar al usuario** (herramienta estructurada) como continuar:
 
    > "Implementacion completada. ¿Que quieres hacer ahora?"
@@ -116,9 +116,9 @@ Por cada WI aprobado:
 
 **Alcance:** cada `WI-*.md` leido completo; listas presentadas; confirmacion recibida antes del primer cambio de codigo.
 
-**Por cada WI:** `Ready` con criterios de aceptacion; no `Done`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; test cases automatizables del `test-cases/README.md` cubiertos; UI bajo `ui-specialist`; Figma via MCP; plan completo implementado; criterios de aceptacion cubiertos por tests; lint/typecheck/build/tests en verde; `progress.md` a `Done` con `Cobertura de test cases` (TC no automatizados o con otro tipo de prueba documentados); decisiones de sesion registradas; **confirmacion explicita antes del siguiente WI**; `/git-commit` invocado recien al confirmar el avance (no antes) — o en el cierre, si el usuario detiene ahi.
+**Por cada WI:** `Ready` con criterios de aceptacion; no `Done`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; test cases automatizables del `test-cases/README.md` cubiertos; UI bajo `ui-specialist`; Figma via MCP; plan completo implementado; criterios de aceptacion cubiertos por tests; lint/typecheck/build y tests **unitarios y de integracion** del cambio en verde (las e2e escritas se difieren al cierre y no bloquean el `Done` del WI si quedan registradas); `progress.md` a `Done` con `Cobertura de test cases` (TC no automatizados o con otro tipo de prueba documentados); decisiones de sesion registradas; **confirmacion explicita antes del siguiente WI**; `/git-commit` invocado recien al confirmar el avance (no antes) — o en el cierre, si el usuario detiene ahi.
 
-**Cierre:** pruebas unitarias (e integracion aplicable) de los archivos afectados en verde y e2e del alcance corridas una vez sobre el codigo consolidado (la bateria completa la corre `quality-check`, no este skill); working tree limpio; handoff a `pr-create` o `work-integrate`.
+**Cierre:** pruebas unitarias e integracion de los archivos afectados en verde (acotadas al cambio) y e2e del alcance corridas una vez sobre el codigo consolidado (la bateria completa la corre `quality-check`, no este skill); working tree limpio; handoff a `pr-create` o `work-integrate`.
 
 ---
 
@@ -151,7 +151,7 @@ Por cada WI aprobado:
 - Descomponer un WI en sub-tareas o tratarlo como si tuviera `TK-XXX`; el WI es un documento plano.
 - Implementar parte del plan del WI y pasar al siguiente sin completarlo ni verificar criterios.
 - Comitear los cambios de un WI inmediatamente al terminarlo, antes de la pausa de confirmacion; el commit se hace al confirmar el avance al siguiente WI (o en el cierre, si el usuario detiene ahi).
-- Marcar `Done` sin que los tests de los criterios de aceptacion existan y pasen en verde.
+- Marcar `Done` sin que los tests de los criterios de aceptacion **existan**. Deben **pasar en verde** los que corresponde ejecutar en la iteracion (unitarios y de integracion); las **e2e escritas y diferidas al cierre** —y, en modo paralelo, la integracion diferida por infra no aislable— no bloquean el `Done` si estan registradas en `progress.md` (ver [Uso escalonado de pruebas](../SKILL.md#uso-escalonado-de-pruebas-optimizacion)).
 - Buscar los insumos de comportamiento en una US padre: el WI no proviene de una US; los tests se basan en los insumos del propio WI (`AC-XXX` y, si existen, `BR-XX` / `TC-XXX`).
 - Implementar un WI en `Draft` (stub) como si estuviera listo.
 - Escribir codigo de produccion antes del test (romper el ciclo Red→Green→Refactor).

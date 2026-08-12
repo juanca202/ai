@@ -1,6 +1,7 @@
 ---
 name: quality-check
-description: 'Ejecutar las verificaciones automatizadas de calidad que exige el stack del repositorio —tipado, linter, pruebas unitarias, cobertura, pruebas de integración, compilación, e2e y análisis estático (Sonar)— con categoría por check (Bloqueante/Condicional/Informativo), veredicto (aprobado/rechazado/incompleto) e informe con estado, detalle de fallos y próximas acciones. Produce además la caché de corrida de pruebas `test-run.json` que consume `trace-validate`. Usar SOLO cuando se invoca explícitamente: el usuario pide correr las pruebas o las verificaciones ("ejecuta los checks", "corre las pruebas", "quality check", "valida antes de PR/merge"), nombra el skill, o lo llama otro skill (p. ej. work-integrate, pr-create, trace-validate). Proceso posterior a la implementación: NO activarlo de forma proactiva ni durante el desarrollo. Nunca corrige por iniciativa propia: ante hallazgos que impliquen tocar código pregunta al usuario si corregir o entregar solo el informe —fuera de un ciclo de implementación, quedarse en el informe es un resultado válido—, y tras corregir vuelve a ejecutar. Para la revisión cualitativa de diseño y arquitectura, el skill es `code-review`.'
+description: >-
+  Ejecutar sobre todo el repositorio las verificaciones automatizadas de calidad que exige el stack —tipado, linter, pruebas unitarias, cobertura, integración, compilación, e2e y análisis estático (Sonar)— y emitir un veredicto (aprobado/rechazado/incompleto) con informe de estado por check, detalle de fallos y próximas acciones. Produce además la caché de corrida de pruebas test-run.json que consume trace-validate. No exige artefactos de este plugin: corre igual sobre cualquier repositorio, sin docs/specs/ ni convención de ramas, y delega las correcciones en work-implement tanto si el trabajo está descrito por una US-XXX/WI-XXX/FT-XXX como por un ticket o spec externo. Activar cuando el usuario pida correr las pruebas o las verificaciones: "ejecuta los checks", "corre los tests", "quality check", "pasa el linter y el build", "valida antes del PR/merge", "¿está verde el repo?", o cuando lo invoque otro skill (work-integrate, pr-create, trace-validate). Es un proceso de cierre, posterior a la implementación: no activarlo de forma proactiva durante el desarrollo. Nunca corrige por iniciativa propia — ante fallos pregunta si corregir o entregar solo el informe. La revisión cualitativa de diseño y arquitectura es del skill code-review.
 license: MIT
 ---
 
@@ -14,7 +15,7 @@ Ejecuta la **batería de checks automatizados** que el stack exige (tipado, lint
 >
 > **Proceso iterativo:** toda corrección reinicia la corrida completa hasta un veredicto estable.
 >
-> **Entrada mínima:** la raíz de un repositorio reconocible (ver [`references/stacks.md`](references/stacks.md)). Si no se detecta stack, parar y avisar.
+> **Entrada mínima:** la raíz de un repositorio reconocible (ver [`references/stacks.md`](references/stacks.md)). Si no se detecta stack, parar y avisar. **No se exige ningún artefacto del plugin**: el repo puede no tener `docs/specs/`, ni `US-XXX`, ni convención de ramas — la corrida y el veredicto son idénticos. Ver [Artefactos externos al plugin](#artefactos-externos-al-plugin).
 
 ---
 
@@ -149,7 +150,7 @@ Las **claves** de los modificadores son siempre en inglés (estándar). Si el us
 
 1. **Detectar entorno:** identificar stack, cargar `references/stacks.md`, resolver comandos, capturar metadata y calcular el fingerprint.
 2. **Ejecutar los checks** secuencialmente según el catálogo.
-3. **Evaluar el resultado y el veredicto** con la tabla de [Veredicto](#veredicto). Si hay FAIL, mostrar el reporte y **preguntar** qué hacer; nunca corregir sin autorización. Dentro de una implementación, la pregunta es si se corrige; **fuera de una implementación**, ofrecer además la salida **«solo el informe»**. Si el usuario autoriza corregir y la rama es de un `US-XXX`/`WI-XXX`, la corrección se **delega en `work-implement`**; si no hay artefacto, se aplica aquí — ver [Corrección de fallos](#corrección-de-fallos).
+3. **Evaluar el resultado y el veredicto** con la tabla de [Veredicto](#veredicto). Si hay FAIL, mostrar el reporte y **preguntar** qué hacer; nunca corregir sin autorización. Dentro de una implementación, la pregunta es si se corrige; **fuera de una implementación**, ofrecer además la salida **«solo el informe»**. Si el usuario autoriza corregir y la rama tiene un artefacto identificable (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin), la corrección se **delega en `work-implement`**; solo si no hay artefacto de ningún tipo se aplica aquí — ver [Corrección de fallos](#corrección-de-fallos).
 4. **Construir informe:** rellenar [`assets/quality-check-template.md`](assets/quality-check-template.md).
 5. **Registro y salida:** en proyectos con `docs/specs/`, escribir `docs/specs/quality-check.md` y la caché `docs/specs/test-run.json`; si no, mostrar en chat (o `save-report`). **Excepción `tests-only`:** no hay informe ni veredicto; el único artefacto es `test-run.json`. **No** hacer commit/push/merge sin instrucción explícita.
 
@@ -167,8 +168,8 @@ Depende del **contexto de ejecución**:
 
 | Contexto | Qué hacer |
 |----------|-----------|
-| **Dentro de una implementación** — la rama corresponde a un `US-XXX` o `WI-XXX` en curso (cierre vía `work-integrate` / `pr-create`) | Mostrar el reporte y **preguntar si se corrige**. Es el flujo normal del cierre: corregir es lo esperado, pero sigue requiriendo autorización. |
-| **Fuera de una implementación** — corrida suelta sobre un repo, rama sin artefacto, auditoría puntual, revisión exploratoria | **Preguntar explícitamente qué quiere el usuario**, con dos opciones: **[Corregir los hallazgos]** o **[Solo el informe, detener aquí]**. **No asumir que hay que corregir.** Quien pide una verificación fuera de un ciclo de implementación muchas veces solo quiere el diagnóstico. |
+| **Dentro de una implementación** — hay un **trabajo en curso** al que atribuir la rama: un artefacto del plugin (`US-XXX`, `WI-XXX`, o `FT-XXX`/`TC-XXX` sobre rama `test/`) **o un artefacto externo** (ticket, spec suelto) que el usuario o la rama señalen. **No se exige carpeta ni `progress.md`** (cierre vía `work-integrate` / `pr-create`) | Mostrar el reporte y **preguntar si se corrige**. Es el flujo normal del cierre: corregir es lo esperado, pero sigue requiriendo autorización. |
+| **Fuera de una implementación** — corrida suelta sobre un repo, rama sin artefacto derivable, auditoría puntual, revisión exploratoria | **Preguntar explícitamente qué quiere el usuario**, con dos opciones: **[Corregir los hallazgos]** o **[Solo el informe, detener aquí]**. **No asumir que hay que corregir.** Quien pide una verificación fuera de un ciclo de implementación muchas veces solo quiere el diagnóstico. |
 
 La pregunta va por la **herramienta de preguntas estructuradas** del cliente (opciones tappables); si el cliente no la expone, formularla en prosa con las opciones enumeradas. Reglas:
 
@@ -183,18 +184,50 @@ Solo si el usuario autorizó corregir. Depende de si hay un **artefacto de traba
 
 | Situación | Quién corrige |
 |-----------|---------------|
-| La rama corresponde a una **historia de usuario (`US-XXX`)** o a un **work item (`WI-XXX`)** identificable | **Delegar en `work-implement`** sobre ese mismo artefacto: es el skill que escribe código y ya conoce el contexto, las convenciones y el `progress.md` del trabajo. |
-| No hay artefacto identificable (rama suelta, `test/`, repo sin `docs/specs/`, o el artefacto no se resuelve con certeza) | **No delegar.** Aplicar aquí la corrección mínima autorizada. |
+| La rama corresponde a un **artefacto de trabajo identificable**: una **historia de usuario (`US-XXX`)**, un **work item (`WI-XXX`)** o una **automatización de pruebas** (`FT-XXX` / `TC-XXX` sobre rama `test/`) | **Delegar en `work-implement`** sobre ese mismo artefacto: es el skill que escribe código y ya conoce el contexto, las convenciones y el `progress.md` del trabajo. |
+| El trabajo de la rama está descrito por un **artefacto externo al plugin**: un ticket de un tracker, un spec suelto, un documento de otra herramienta o formato | **Delegar igual en `work-implement`**, pasándole la **ruta o referencia** del artefacto en vez de un ID del plugin. Ver [Artefactos externos al plugin](#artefactos-externos-al-plugin). |
+| No hay artefacto de ningún tipo (rama suelta sin prefijo ni ID, sin documento de referencia, o el artefacto no se resuelve con certeza) | **No delegar.** Aplicar aquí la corrección mínima autorizada. |
 
-**Cómo resolver el artefacto:** del nombre de rama (`feature/US-042-…`, `fix/WI-007-…`) y de la existencia de su carpeta con `progress.md`. Si el identificador no aparece o la carpeta no existe, **no hay artefacto**: no delegar ni inventarlo. Si hay ambigüedad (varios candidatos), preguntar al usuario antes de delegar. Esta es también la señal que distingue los dos contextos del punto 1.
+**Cómo resolver el artefacto:** del **prefijo de rama + identificador** y de la existencia de su carpeta con `progress.md`:
 
-**Qué se le pasa a `work-implement`** al delegar: el artefacto en curso (`US-XXX` / `WI-XXX`), el check que falló, el comando exacto, la salida de error relevante y los archivos implicados. La corrección se atribuye a ese artefacto y se anota en su `progress.md` como nota de retrabajo; `work-implement` aplica su propio criterio en su [Modo corrección](../work-implement/SKILL.md#modo-correccion-delegado-desde-quality-check) — un modo acotado, sin ritmo por unidad y sin exigir `Estado: Ready` ni working tree limpio.
+| Rama | Artefacto | Carpeta |
+|------|-----------|---------|
+| `feature/US-042-…` | `US-042` | `docs/specs/user-stories/US-042-…/` |
+| `fix/`\|`chore/`\|`refactor/` + `WI-007-…` | `WI-007` | `docs/specs/work-items/WI-007-…/` |
+| `test/FT-003-…` | `FT-003` | `docs/specs/features/FT-003-…/` |
+| `test/US-042-…` \| `test/WI-018-…` | los `TC-XXX` de ese padre | la carpeta de la US o el WI |
+| Otro prefijo o convención (`PROJ-1234`, `ticket/…`, ruta a un spec) | el artefacto externo | la que indique el usuario, o ninguna |
+
+> **Una rama `test/` NO es una rama suelta.** Nace en `work-implement` (`references/test-cases.md`, Paso 1) siempre asociada a un artefacto padre y con su `progress.md`, y `work-integrate` la trata como trabajo integrable de pleno derecho. Se resuelve con el mismo mecanismo que `feature/` o `fix/`. Ahí el fallo típico es **una prueba en rojo**, y el skill que sabe escribir esa prueba es `work-implement` (tipos `TC-XXX` / `FT-XXX`) — delegar es especialmente importante en este caso, no la excepción.
+
+Si no se resuelve un artefacto del plugin, **comprobar antes si hay uno externo** (ver [Artefactos externos al plugin](#artefactos-externos-al-plugin)); solo si tampoco lo hay, **no hay artefacto**: no delegar ni inventarlo. Si hay ambigüedad (varios candidatos), preguntar al usuario antes de delegar. Esta es también la señal que distingue los dos contextos del punto 1.
+
+**Qué se le pasa a `work-implement`** al delegar: el artefacto en curso (`US-XXX` / `WI-XXX` / `FT-XXX` / `TC-XXX`), el check que falló, el comando exacto, la salida de error relevante y los archivos implicados. La corrección se atribuye a ese artefacto y se anota en su `progress.md` como nota de retrabajo; `work-implement` aplica su propio criterio en su [Modo corrección](../work-implement/SKILL.md#modo-correccion-delegado-desde-quality-check) — un modo acotado, sin ritmo por unidad y sin exigir `Estado: Ready` ni working tree limpio.
 
 **Aplica igual a fallos de pruebas** (unit, integración, e2e) que a fallos de tipado, linter o build: en ambos casos hay que escribir o ajustar código, que es justo lo que hace `work-implement`.
 
+> **En ramas `test/`, no presuponer que el fallo está en la prueba.** Una prueba en rojo ahí puede significar que la prueba está mal **o** que hay una discrepancia real entre el `TC-XXX` y el comportamiento del código. Esa decisión no la toma este skill: se delega en `work-implement`, que aplica su criterio para los tipos `TC-XXX` / `FT-XXX` (parar, presentar la evidencia y decidir con el usuario si se corrige producción, si se corrige la prueba, o si vuelve a `test-define`). **Nunca relajar una aserción para forzar el verde.**
+
 **Tras la delegación**, este skill retoma el control: **verifica que el arreglo funciona** re-ejecutando el check o la prueba que fallaba y, solo si pasa, **recalcula el fingerprint** y **reinicia la corrida completa** (Paso 2). Si el arreglo no resuelve el fallo, seguir iterando antes de reiniciar.
 
+**Si `work-implement` devuelve «corrección no aplicada»**, la iteración **se detiene ahí**. Ese resultado significa que el arreglo excedía su alcance acotado, que hay una discrepancia de especificación, o que el fallo es preexistente — y viene con el motivo y el skill al que se escaló (`work-plan` / `test-define`). En ese caso: **no reintentar la delegación sobre ese mismo fallo** ni corregirlo aquí como sustituto. Construir el informe (Paso 4) recogiendo el motivo y el escalado en **Próximas acciones**, emitir **`❌ Rechazado`** y terminar. El cierre queda bloqueado hasta que el escalado se resuelva — que es el resultado correcto, no un flujo incompleto.
+
 > **Límites.** La delegación **no** convierte a este skill en implementador: no decide el diseño de la corrección ni escribe código por su cuenta cuando delega. Y **nunca** delega sin autorización explícita del usuario — la delegación es *cómo* se corrige, no *si* se corrige.
+
+### Artefactos externos al plugin
+
+**Este skill no exige que el trabajo esté especificado con los artefactos del plugin.** Su entrada mínima es la raíz de un repositorio reconocible: la batería de checks corre igual sobre un repo sin `docs/specs/`, sin `US-XXX`, sin `progress.md` y sin convención de ramas. La ausencia de artefacto **no degrada el veredicto ni el informe** — solo cambia a quién se atribuye una corrección.
+
+Es el mismo contrato que ya aplican [`test-define`](../test-define/SKILL.md) y [`trace-validate`](../trace-validate/SKILL.md): el artefacto puede ser una US/WI/FT del repo **o cualquier otro documento de especificación**, sea cual sea su origen, herramienta o formato — un ticket de un tracker (`PROJ-1234`), un spec suelto en el repo, un documento externo cuya ruta indique el usuario.
+
+Cuando el trabajo está descrito por un artefacto externo y el usuario autoriza corregir:
+
+- **Se delega igual en `work-implement`.** La regla «quien escribe código es `work-implement`» no tiene excepción por el origen del artefacto.
+- **Se le pasa la referencia que exista** —ruta del documento, ID del ticket, o la descripción del trabajo si es lo único disponible— en lugar de un identificador del plugin, junto con el check que falló, el comando, la salida de error y los archivos implicados.
+- **Sin `progress.md` no hay nota de retrabajo.** `work-implement` no inventa la carpeta ni el archivo: aplica la corrección acotada y **devuelve el resultado por respuesta**. Este skill recoge esa nota en el informe, en el detalle del check corregido.
+- **El resto del contrato es idéntico:** alcance mínimo, autorización previa, verificación del arreglo, recálculo del fingerprint y reinicio de la corrida. Y sigue vigente el desenlace de [corrección no aplicada](../work-implement/SKILL.md#cuando-la-correccion-no-se-aplica).
+
+> **Cuándo sí se corrige aquí:** solo cuando **no hay artefacto de ningún tipo** — ni del plugin ni externo — al que atribuir el cambio. No inventar un artefacto para poder delegar, ni tratar como «sin artefacto» un trabajo que el usuario sí puede señalar.
 
 ---
 
@@ -217,7 +250,9 @@ como la corrida es siempre **completa** sobre la rama consolidada, sus artefacto
 directamente en `docs/specs/`, sin importar desde qué `US`/`WI` se invocó. Se **sobrescribe** en cada
 corrida (es el estado vigente de la rama).
 
-Si el proyecto **no** usa `docs/specs/` (repo no spec-driven), no se escribe caché (no hay consumidor).
+Si el proyecto **no** usa `docs/specs/` (repo no spec-driven), no se escribe caché por defecto: no hay consumidor.
+
+> **Excepción — invocación desde `trace-validate`.** `trace-validate` sí puede operar en un repo no spec-driven, validando un **artefacto externo al plugin** (ver [Artefactos externos al plugin](#artefactos-externos-al-plugin)); en ese caso **sí hay consumidor**. Cuando la corrida venga invocada por `trace-validate` (típicamente en modo `tests-only`), **crear `docs/specs/` y escribir la caché igualmente** — de lo contrario `trace-validate` volvería a delegar la suite completa en cada corrida. Si el usuario no quiere ese directorio, entregar los resultados en la respuesta y advertir que no habrá reutilización entre corridas.
 
 **Fingerprint canónico del estado del código** — clave de frescura compartida entre los **dos skills que
 cachean**: este y `trace-validate`. (`code-review` no calcula fingerprint ni tiene caché: siempre revisa
@@ -289,7 +324,7 @@ Usar este skill **solo cuando se le invoca explícitamente** (ni de forma proact
 - **El usuario lo pide explícitamente** — solicita correr las verificaciones o las pruebas, validar antes de PR/merge, o nombra este skill.
 - **Otro skill lo invoca explícitamente**, p. ej. `work-integrate` o `pr-create`, que exigen `✅ Aprobado` **aquí y** en `code-review` antes de integrar o crear el PR.
 - **`trace-validate` delega en este skill la ejecución de pruebas.** `trace-validate` no corre pruebas por sí mismo: reutiliza el `test-run.json` fresco de una corrida previa de este skill o, si no hay una fresca, invoca este skill en modo `tests-only` para producirlo. Este skill es la **única** autoridad que ejecuta la batería de pruebas del trabajo. Ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
-- **`work-implement` recibe la delegación de las correcciones** cuando hay un `US-XXX` o `WI-XXX` en curso y el usuario las autoriza. Ver [Corrección de fallos](#corrección-de-fallos).
+- **`work-implement` recibe la delegación de las correcciones** cuando hay un artefacto de trabajo en curso (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin) y el usuario las autoriza. Ver [Corrección de fallos](#corrección-de-fallos).
 
 **Las tres puertas del cierre.** `quality-check`, `code-review` y `trace-validate` son **hermanos e independientes**: ninguno invoca a otro para decidir su veredicto (la única invocación entre ellos es instrumental: `trace-validate` pide una corrida de pruebas a este skill). Cada uno responde una pregunta distinta y emite su propio veredicto:
 

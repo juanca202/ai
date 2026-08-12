@@ -1,6 +1,7 @@
 ---
 name: code-review
-description: 'Revisión cualitativa de código estilo ingeniero senior sobre el diff de una rama contra su base —o sobre los cambios sin commitear con el modificador working-tree—: intención del cambio (¿resuelve el problema pedido?), arquitectura y diseño según ISO/IEC 25010 (SOLID, Clean Architecture, acoplamiento, duplicación, fiabilidad, seguridad, desempeño, compatibilidad) y feedback accionable que explica el PORQUÉ y propone cambios concretos. Devuelve hallazgos con severidad (🔴/🟠/🟡/💡), veredicto (aprobado/rechazado/incompleto) y próximas acciones. Usar SOLO cuando se invoca explícitamente: el usuario pide una revisión de código ("code review", "revisión de código", "revisa el diseño antes del PR/merge"), nombra el skill, o lo llama otro skill (p. ej. work-integrate, pr-create). Proceso posterior a la implementación: NO activarlo de forma proactiva ni durante el desarrollo. NO ejecuta pruebas, linter, build ni ningún check automatizado: eso es del skill `quality-check`. Nunca corrige por iniciativa propia: solo aplica cambios si el usuario lo autoriza.'
+description: >-
+  Revisión cualitativa de código estilo ingeniero senior sobre el diff de una rama contra su base, incluidos los cambios sin commitear: intención del cambio (¿resuelve el problema pedido?), arquitectura y diseño según ISO/IEC 25010 (SOLID, Clean Architecture, acoplamiento, duplicación, fiabilidad, seguridad, desempeño) y feedback accionable que explica el PORQUÉ y propone cambios concretos. Devuelve hallazgos con severidad, veredicto (aprobado/rechazado/incompleto) y próximas acciones. No exige artefactos de este plugin: la intención puede venir de una US-XXX/WI-XXX/FT-XXX, de cualquier otro documento de especificación o ticket externo, o de la rama y los commits. Activar cuando el usuario pida "revisa este código", "code review", "revisión de código", "¿está bien resuelto esto?", "revisa el diseño antes del PR/merge", "revisa lo que llevo antes de commitear", o cuando lo invoque otro skill (work-integrate, pr-create). Es un proceso de cierre, posterior a la implementación: no activarlo de forma proactiva durante el desarrollo. NO ejecuta pruebas, linter ni build — eso es del skill quality-check. Nunca corrige sin autorización del usuario.
 license: MIT
 ---
 
@@ -14,7 +15,7 @@ Revisar el **diff** de una implementación como lo haría un **ingeniero senior*
 >
 > **Alcance:** analiza, razona y **propone**. **Nunca corrige por iniciativa propia**; aplica correcciones **solo si el usuario lo autoriza explícitamente**. No hace commit/push/merge sin instrucción explícita.
 >
-> **Entrada mínima:** un **diff** identificable (rama contra su base, o los archivos que el usuario indique) y la **intención** del cambio (US/WI/FT, rama, commits, descripción del PR). Sin diff no hay nada que revisar; sin intención inferible, preguntar al usuario.
+> **Entrada mínima:** un **diff** identificable (rama contra su base, o los archivos que el usuario indique) y la **intención** del cambio. Sin diff no hay nada que revisar; sin intención inferible, preguntar al usuario. **No se exige ningún artefacto del plugin:** la intención puede venir de un `US-XXX`/`WI-XXX`/`FT-XXX`, de cualquier otro documento de especificación, o de la rama, los commits y la descripción del PR. Ver [Origen de la intención](#origen-de-la-intención).
 
 ---
 
@@ -48,11 +49,33 @@ Carga cada archivo **solo cuando lo necesites** (rutas relativas a la raíz del 
 
 Evalúa el **diff** (no todo el repo) contra estas tres dimensiones. El detalle de cada rúbrica, la calibración de severidad y los ejemplos de buen/mal feedback están en **[`references/qualitative-review.md`](references/qualitative-review.md)** — léelo antes de redactar los hallazgos.
 
-**1. Análisis semántico (intención).** Entender *qué* intenta lograr el cambio y *qué problema* resuelve, y detectar desajustes entre la intención declarada (US/WI/FT, rama, commit, descripción) y lo que el código realmente hace. Banderas: código que resuelve un problema distinto al pedido, criterios de aceptación sin cubrir, efectos colaterales no buscados, lógica que contradice su propio nombre.
+**1. Análisis semántico (intención).** Entender *qué* intenta lograr el cambio y *qué problema* resuelve, y detectar desajustes entre la **intención declarada** y lo que el código realmente hace. La intención puede venir de un artefacto del plugin (`US-XXX` / `WI-XXX` / `FT-XXX`), de **cualquier otro documento de especificación** (ticket de un tracker, spec suelto, doc externo — ver [Origen de la intención](#origen-de-la-intención)), o —si no hay documento— de la rama, los commits y la descripción del PR. Banderas: código que resuelve un problema distinto al pedido, criterios de aceptación sin cubrir, efectos colaterales no buscados, lógica que contradice su propio nombre.
 
 **2. Arquitectura, diseño y calidad del producto.** Evaluar el diff contra las características de calidad de **ISO/IEC 25010** que el cambio toca: **Mantenibilidad** (SOLID, Clean Architecture, acoplamiento, duplicación, abstracción innecesaria, patrones del proyecto y **calidad de las pruebas incluidas en el diff** — si prueban lo que importa, si son legibles y mantenibles, si dependen de detalles frágiles; su **ejecución** es de `quality-check`); **Fiabilidad** (manejo de errores, casos borde, estados inconsistentes); **Seguridad** (validación de entradas, exposición de datos, autenticación/autorización, secretos en código); **Eficiencia en el desempeño** (N+1, complejidad algorítmica, recursos no liberados); **Compatibilidad** (contratos de API/eventos que rompen consumidores). Cada hallazgo se etiqueta con su característica ISO/IEC 25010.
 
 **3. Feedback estilo senior.** Cada hallazgo debe ser **accionable y contextual**: explicar el **PORQUÉ** (qué se rompe o encarece a futuro), proponer una **mejora concreta** (idealmente con un esbozo) y mantener el tono de un par que ayuda, no de un linter que regaña. Prioriza por impacto; no abrumes con nitpicks. Si el cambio está bien, dilo y explica por qué — el silencio no es feedback.
+
+---
+
+## Origen de la intención
+
+La dimensión 1 necesita saber **qué se pidió** para juzgar si el código lo resuelve. Ese contrato **no depende de los artefactos de este plugin**: es el mismo criterio abierto que aplican [`test-define`](../test-define/SKILL.md) y [`trace-validate`](../trace-validate/SKILL.md).
+
+Resolver la intención por este orden, quedándose con la primera fuente disponible:
+
+| Fuente | Cómo obtenerla |
+|--------|----------------|
+| **Artefacto del plugin** | `US-XXX` / `WI-XXX` / `FT-XXX` derivado del prefijo de rama + ID (`feature/US-042-…`, `fix/WI-007-…`, `test/FT-003-…`); leer su `README.md` y sus criterios de aceptación. |
+| **Cualquier otro documento de especificación** | La ruta o nombre que indique el usuario, o el que la rama/PR referencie: un spec suelto en el repo, un documento de otra herramienta o formato. Leerlo completo antes de revisar. |
+| **Ticket de un tracker externo** | El ID en la rama, el commit o el título del PR (`PROJ-1234`). Si el contenido no es accesible desde aquí, **pedírselo al usuario**; no inventarlo. |
+| **Sin documento** | Deducirla de la rama, los mensajes de commit y la descripción del PR. Es una base más débil: decirlo en el informe. |
+
+Reglas:
+
+- **La ausencia de artefacto no bloquea la revisión.** Las dimensiones 2 y 3 (arquitectura/diseño y feedback) se evalúan igual sobre cualquier diff, en cualquier repo, sin `docs/specs/` ni convención de ramas.
+- **Sí condiciona la dimensión 1.** Si la intención no es determinable y el usuario no la aporta, no inventarla ni inferirla del propio código —eso es circular, el código siempre "cumple" consigo mismo—: marcar esa dimensión como no evaluada y emitir **`⚠️ Incompleto`**.
+- **Los criterios se citan verbatim.** Sea cual sea el formato del identificador (`AC-012`, `1.3`, `R-3`, `CA-07`), se usa **tal como está escrito** en el artefacto, sin normalizar — mismo contrato que `test-define` y `trace-validate`.
+- **Qué está probado no es asunto de este skill.** La cobertura criterio a criterio la valida `trace-validate`; aquí los criterios sirven solo para juzgar si el cambio resuelve el problema pedido.
 
 ---
 
