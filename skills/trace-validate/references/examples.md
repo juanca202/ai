@@ -20,11 +20,22 @@ Referencia del skill `trace-validate`. Casos de uso y errores a evitar.
 
 **Ejemplo 4 — No se puede ejecutar**
 - *Entrada:* «Valida US-015» en un entorno sin runner instalado / sin red, donde `quality-check` no puede correr las suites.
-- *Comportamiento:* genera la matriz de cobertura con los artefactos hallados, marca ejecución automática = `No` con la razón, resultados como `No ejecutado`, y emite el veredicto según la cobertura documentada (típicamente ⚠️ Aprobado con observaciones o ❌ Rechazado si falta cobertura).
+- *Comportamiento:* genera las dos tablas con los artefactos hallados; las filas con artefacto van `Ejecución = —` / `Resultado = No ejecutado` con la razón, y las filas sin artefacto siguen en `No cubierto`. Emite el veredicto según la cobertura documentada (típicamente ⚠️ Aprobado con observaciones o ❌ Rechazado si falta cobertura).
 
 **Ejemplo 5 — Criterio sin prueba**
 - *Entrada:* «Valida US-031.»
-- *Comportamiento:* un `AC-003` no tiene ningún test asociado -> estado `No cubierto`, Observación indicando el hueco -> veredicto **❌ Rechazado** listando `AC-003`.
+- *Comportamiento:* un `AC-003` no tiene ningún test asociado -> fila única `AC-003 | — | — | — | — | No cubierto`, estado del criterio `No cubierto`, Observación indicando el hueco -> veredicto **❌ Rechazado** listando `AC-003`.
+
+**Ejemplo 6 — TC con dos tipos declarados y solo uno automatizado**
+- *Entrada:* «Valida US-058», donde `TC-001` declara `Tipo de prueba: Unit, E2E` y en el repo solo existe el test unitario.
+- *Comportamiento:* la matriz produce **dos filas** para el mismo TC:
+
+  | Criterio | TC | Tipo | Evidencia | Ejecución | Resultado |
+  |----------|-----|------|-----------|-----------|-----------|
+  | AC-2.1 | TC-001 | Unit | `tests/unit/notify.test.ts` | quality-check (suite `unit`) | Paso |
+  | AC-2.1 | TC-001 | E2E | — | — | No cubierto |
+
+  El criterio queda en **Parcial** (no `Cubierto`: la intención E2E no está materializada), con la Observación «E2E declarado en TC-001 sin automatizar» y veredicto **⚠️ Aprobado con observaciones** si no hay ningún criterio en `No cubierto`.
 
 ---
 
@@ -42,5 +53,9 @@ Referencia del skill `trace-validate`. Casos de uso y errores a evitar.
 - **Bloquear porque el artefacto no sigue las convenciones del plugin** (formato del identificador, ubicación, campo `Estado:` del **artefacto**). El único requisito es que los criterios tengan identificador. El `Estado:` del **TC** sí se lee: filtra la cobertura (ver «Estados de cobertura»).
 - Ignorar la carpeta `test-cases/` del artefacto y su índice, reconstruyendo el mapeo solo por heurística de nombres de test.
 - Mapear la suite `coverage` a un criterio: es cobertura de líneas, no funcional.
+- **Colapsar en una sola fila un TC que declara varios tipos de prueba** (p. ej. `Unit, E2E`): esconde el tipo no automatizado tras el que sí existe. Una fila por tipo declarado.
+- **Omitir las filas `No cubierto`** de la matriz porque «no aportan»: son precisamente el hueco que el reporte existe para hacer visible.
+- Reportar `Paso`/`Fallo` en una fila cuya `Evidencia` es `—`: sin artefacto no hay nada que ejecutar.
+- Dejar el identificador del criterio en blanco en las filas 2..N del mismo criterio para «agrupar» visualmente: rompe la búsqueda literal y la lectura en diffs.
 - Narrar el trabajo realizado al usuario; solo reportar veredicto, cobertura y pendientes.
 - Lanzar preguntas como prosa libre cuando el cliente expone herramienta de preguntas estructuradas.

@@ -45,7 +45,7 @@ Antes de trabajar, evitar regenerar si nada cambió (ver [Reutilización del rep
 
 2. **Filtrar por `Estado` del TC** según la regla de «Estados de cobertura» en `SKILL.md`: `Obsolete` no cuenta como cobertura, `Draft` cuenta como **Parcial**, `Ready` (o sin campo) cuenta pleno. Dejar Observación en los dos primeros casos.
 
-3. **Leer el `Tipo de prueba` de cada TC.** Para cada TC leer su campo **`Tipo de prueba`** del encabezado: declara la **intención de diseño** del caso (el TC se escribe antes de implementar, por eso no existe un valor "Automatizada"). El valor es `Manual` (no se automatiza, requiere ejecución humana por diseño) **o** uno o varios de `Unit` / `Integration` / `API Test` / `Visual Test` / `E2E`, separados por coma. Esa intención es la fuente para decidir la columna `Automática` de la matriz (ver Paso 4): el **estado real** —si ya está automatizada y con qué resultado— lo determina este skill al validar, no el TC. Si el TC no trae el campo, inferir la naturaleza desde los artefactos hallados y dejar constancia en Observaciones. Cuando el campo liste uno o varios tipos concretos (`Unit`, `Integration`, etc.), usarlos como pista del tipo de artefacto esperado al buscar y clasificar; si el artefacto hallado no coincide con ninguno de los tipos listados, anotarlo en Observaciones sin forzar el mapeo.
+3. **Leer el `Tipo de prueba` de cada TC.** Para cada TC leer su campo **`Tipo de prueba`** del encabezado: declara la **intención de diseño** del caso (el TC se escribe antes de implementar, por eso no existe un valor "Automatizada"). El valor es `Manual` (no se automatiza, requiere ejecución humana por diseño) **o** uno o varios de `Unit` / `Integration` / `API Test` / `Visual Test` / `E2E`, separados por coma. **Cada tipo declarado genera una fila de la matriz** (columna `Tipo`, ver Paso 3): la declaración fija *qué debería existir*; el **estado real** —si ya está automatizada (`Evidencia`) y con qué resultado (`Ejecución`/`Resultado`, Paso 4)— lo determina este skill al validar, no el TC. Si el TC no trae el campo, inferir la naturaleza desde los artefactos hallados y dejar constancia en Observaciones. Cuando el campo liste uno o varios tipos concretos (`Unit`, `Integration`, etc.), usarlos como pista del tipo de artefacto esperado al buscar y clasificar; si el artefacto hallado no coincide con ninguno de los tipos listados, anotarlo en Observaciones sin forzar el mapeo.
 4. Buscar en el repo los **artefactos de prueba** relacionados y clasificarlos por **tipo**:
    - **unit** — pruebas unitarias (p. ej. `*.test.*`, `*.spec.*`, `*_test.*`, carpetas `__tests__/`, `tests/unit/`).
    - **integración** — pruebas de integración (carpetas/sufijos `integration`, `it`, `*.integration.*`).
@@ -69,12 +69,14 @@ Antes de trabajar, evitar regenerar si nada cambió (ver [Reutilización del rep
 
 ### Paso 3 — Mapear cobertura criterio a criterio
 
-Para **cada** criterio del trabajo, determinar:
+El mapeo se hace **por fila de la matriz**, no por criterio: la unidad es la combinación **criterio × TC × tipo de prueba declarado** (ver [Vistas del reporte](../SKILL.md#vistas-del-reporte-cobertura-por-criterio-y-matriz)).
 
-- **Caso(s) de prueba** que lo validan (documentados o derivados de los tests).
-- **Artefacto(s)** de prueba que lo cubren, con su tipo (unit / integración / e2e / manual). Un TC `API Test` o `Visual Test` se registra con el tipo del artefacto que realmente lo implementa (ver la tabla de correspondencia del Paso 2), anotando el tipo declarado en Observaciones.
-- **Estado de cobertura** según la tabla de «Estados de cobertura» en `SKILL.md`.
-- **Observaciones** si hace falta aclaración (cobertura parcial, ambigüedad, supuesto a confirmar, solo manual, etc.).
+1. **Expandir cada criterio en sus filas.** Para cada criterio, listar sus TCs; para cada TC, **una fila por cada tipo declarado** en su campo `Tipo de prueba`. Un TC que declara `Unit, E2E` produce dos filas. Si el criterio **no tiene TC documentado** pero el fallback del Paso 2 halló un test que lo cubre, la fila se escribe con `TC = —` y el **tipo del artefacto hallado** (Observación: mapeo inferido). Solo el criterio sin TC **y** sin artefacto produce la fila vacía `— | — | — | — | No cubierto`.
+2. **Rellenar `Evidencia` fila a fila.** Buscar el artefacto que materializa *ese tipo concreto* para *ese TC*: ruta del test automatizado, o la ruta del propio `TC-XXX-{slug}.md` en las filas `Manual`. Si ese tipo declarado no tiene artefacto en el repo, `Evidencia = —` (y la fila irá a `No cubierto` en el Paso 4). Un TC `API Test` o `Visual Test` se registra con la ruta del artefacto que realmente lo implementa (ver la tabla de correspondencia del Paso 2), anotando el tipo declarado en Observaciones.
+3. **Derivar el `Estado` del criterio** para la tabla de cobertura, a partir del conjunto de sus filas, según «Estados de cobertura» y la tabla de derivación en `SKILL.md`. Regla clave: **basta una fila en `No cubierto` para que el criterio deje de ser `Cubierto`** — un TC con `Unit, E2E` del que solo existe el unitario deja el criterio en `Parcial`.
+4. **Observaciones** si hace falta aclaración (tipo declarado sin automatizar, ambigüedad, supuesto a confirmar, TC en `Draft`/`Obsolete`, suite efectiva distinta de la esperada, etc.). Las Observaciones viven en la tabla de **cobertura por criterio**, no en la matriz — así la matriz se mantiene legible.
+
+> No forzar filas: si un test no puede vincularse con certeza a un criterio, no inventar la fila; dejarlo en Observaciones (ver el orden de precedencia del Paso 2).
 
 ### Paso 4 — Obtener resultados de pruebas (delegando en quality-check)
 
@@ -88,24 +90,49 @@ ejecución) y los mapea a los criterios.
    - **No existe o el fingerprint difiere** → **delegar en `quality-check` modo `tests-only`**, que ejecuta
      solo los checks de pruebas, escribe/actualiza `test-run.json` y devuelve los resultados; luego
      consumir esa caché fresca.
-3. **Mapear a la matriz.** La columna `Automática` combina la intención del TC (Paso 2) con lo hallado; el
-   **resultado** viene de las `suites[]` de `test-run.json` (`PASS`→`Paso`, `FAIL`→`Fallo`,
-   `SKIPPED`→`No ejecutado`, `N/A` (el repo no tiene esa suite)→`No ejecutado` con Observación):
-   - TC `Manual` → `Automática = N/A` (manual por diseño; no se espera artefacto automatizado).
-   - TC con uno o varios tipos (`Unit`/`Integration`/`API Test`/`Visual Test`/`E2E`) **sin** artefacto todavía → `Automática = No` (pendiente de automatizar; distinguirlo del manual en Observaciones).
-   - TC con uno o varios tipos **con** artefacto automatizado → `Automática = Sí` si `quality-check` lo ejecutó (registrar `Resultado` de la suite correspondiente); `No` si existe pero no se pudo ejecutar (con la razón en Observaciones).
+3. **Rellenar `Ejecución` y `Resultado` en cada fila** de la matriz construida en el Paso 3. El resultado
+   viene de las `suites[]` de `test-run.json` (`PASS`→`Paso`, `FAIL`→`Fallo`, `SKIPPED`→`No ejecutado`,
+   `N/A` (el repo no tiene esa suite)→`No ejecutado` con Observación):
+
+   | Situación de la fila | Evidencia | Ejecución | Resultado |
+   |----------------------|-----------|-----------|-----------|
+   | Fila `Manual` (manual por diseño) | ruta del TC | `Manual` | `N/A` |
+   | Tipo declarado **sin** artefacto (pendiente de automatizar) | `—` | `—` | `No cubierto` |
+   | Artefacto hallado y su suite dio `PASS` | ruta | `quality-check (suite X)` | `Paso` |
+   | Artefacto hallado y su test dio `FAIL` (aislable) | ruta | `quality-check (suite X)` | `Fallo` |
+   | Artefacto hallado, suite en `FAIL` **sin** poder aislar el test | ruta | `quality-check (suite X)` | `Fallo` (Observación «no aislable» → criterio `Parcial`) |
+   | Artefacto hallado, suite `SKIPPED`/ausente/no ejecutable | ruta | `—` | `No ejecutado` (razón en Observaciones) |
+
+   En `Ejecución` anotar la **suite efectiva** que corrió el test (dónde vive realmente en el repo), no la
+   que sugiere el tipo declarado; si difieren, dejarlo en Observaciones.
+
    - **Granularidad suite vs. criterio:** `result` es por **suite completa** (p. ej. toda la suite `unit`), no por test individual. Cuando **varios criterios** mapean a tests dentro de la **misma suite** y esa suite da `FAIL`, no propagar automáticamente `Fallo`/`No cubierto` a todos ellos por igual: revisar si el `summary` (u otro detalle que `quality-check` haya incluido) identifica qué test(s) específico(s) fallaron y cotejarlo contra el archivo/nombre de test que el Paso 2 vinculó a cada criterio. Si se puede aislar, marcar `Fallo`/`No cubierto` solo en el/los criterio(s) cuyo test efectivamente falló; el resto de la suite se reporta `Paso`. Si el `summary` **no** trae detalle por test (solo un conteo agregado, p. ej. `"47 passed, 1 failed"` sin decir cuál), no asumir cuál criterio es el afectado: marcar esos criterios como `Parcial` (no `No cubierto`) con una Observación explicando que la suite falló pero no se pudo aislar el test específico, y sugerir revisar el log completo de `quality-check` o re-ejecutar el test de forma aislada.
 4. **Si `quality-check` no puede ejecutarlas** (stack no detectable, entorno sin poder correr, dependencias
-   faltantes, `quality-check` no disponible en la sesión, o el usuario declina la delegación), registrar ejecución automática
-   = `No` con la razón en Observaciones y entregar igualmente la cobertura estática. **No** fabricar
-   resultados ni reintroducir un runner propio en `trace-validate`.
+   faltantes, `quality-check` no disponible en la sesión, o el usuario declina la delegación), dejar las filas con
+   artefacto en `Ejecución = —` y `Resultado = No ejecutado`, con la razón en Observaciones, y entregar
+   igualmente la cobertura estática (las filas sin artefacto siguen siendo `No cubierto`: ese hueco no
+   depende de la ejecución). **No** fabricar resultados ni reintroducir un runner propio en `trace-validate`.
 
 > Nunca reportar `Paso`/`Fallo` sin que la prueba se haya ejecutado realmente (en la corrida de
 > `quality-check` reflejada en `test-run.json`). Si no se ejecutó, el resultado es `No ejecutado`.
 
-### Paso 5 — Construir la matriz de trazabilidad
+### Paso 5 — Construir las tablas del reporte
 
-Usar la plantilla `assets/trace-report-template.md` (leerla antes de redactar). Sustituir cada `{{…}}` por datos verificables; el reporte publicado no debe conservar placeholders ni el bloque de comentario inicial (pero **sí** conserva la marca de pie con el fingerprint, ver Paso 7). La matriz tiene una fila por cada criterio del trabajo con: criterio, descripción, casos de prueba, artefactos (con tipo), estado, ejecución automática, resultado y observaciones. Incluir además el resumen de artefactos de prueba automatizada disponibles (unit / integración / e2e).
+Usar la plantilla `assets/trace-report-template.md` (leerla antes de redactar). Sustituir cada `{{…}}` por datos verificables; el reporte publicado no debe conservar placeholders ni el bloque de comentario inicial (pero **sí** conserva la marca de pie con el fingerprint, ver Paso 7).
+
+El reporte lleva **dos tablas** (definición completa en [Vistas del reporte](../SKILL.md#vistas-del-reporte-cobertura-por-criterio-y-matriz)):
+
+1. **Cobertura por criterio** — una fila por criterio: `Criterio · Descripción · Estado · Observaciones`. Es la vista de veredicto.
+2. **Matriz de trazabilidad** — una fila por criterio × TC × tipo declarado: `Criterio · TC · Tipo · Evidencia · Ejecución · Resultado`. Es la vista auditable; sin Observaciones, para que se lea de un vistazo.
+
+Reglas de redacción de la matriz:
+
+- El identificador del criterio **se repite** en cada fila suya (no dejar celdas vacías por agrupación visual: rompe el grep y la lectura en diffs).
+- Ordenar por criterio y, dentro de cada criterio, por TC y luego por tipo.
+- Las rutas de `Evidencia` van en `código` y son relativas a la raíz del repo.
+- Nunca omitir una fila `No cubierto`: **es la información más valiosa de la tabla**.
+
+Incluir además el resumen de artefactos de prueba automatizada disponibles (unit / integración / e2e).
 
 ### Paso 6 — Emitir el veredicto
 
@@ -138,8 +165,8 @@ persiste el resultado en `docs/specs/test-run.json` (esquema `test-run/v1`; ubic
 2. **Delegación `tests-only`** — si no hay caché o está obsoleta, invocar `quality-check` en modo
    `tests-only`; genera/actualiza `test-run.json` y trace-validate lo consume.
 3. **No ejecutable** — si `quality-check` no puede correr (sin stack, entorno sin red/dependencias, skill no
-   disponible) o el usuario declina la delegación: ejecución automática = `No` con la razón; entregar la
-   cobertura estática.
+   disponible) o el usuario declina la delegación: filas con artefacto en `Ejecución = —` /
+   `Resultado = No ejecutado` con la razón; entregar la cobertura estática.
 
 **Esquema `test-run.json`.** La definición canónica —campos, semántica y valores permitidos— vive en
 [`quality-check` → Caché de corrida de pruebas](../../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
@@ -154,8 +181,8 @@ Reglas:
 
 - Registrar en el reporte el **comando** y el **resultado global** tomados de `test-run.json` (no volver a
   ejecutar), y la **procedencia** (caché fresca del commit X, o corrida `tests-only` disparada ahora).
-- `result` por suite → resultado del criterio: `PASS`→`Paso`, `FAIL`→`Fallo`, `SKIPPED`/no ejecutado→`No ejecutado`. **Excepción:** cuando varios criterios comparten suite y esta da `FAIL`, no basta con propagar `Fallo` a todos — ver «Granularidad suite vs. criterio» en el Paso 4 más arriba; si no se puede aislar el test que falló, el criterio va como `Parcial`, no `Fallo`/`No cubierto`.
-- Para criterios cubiertos por TCs marcados `Manual` (manual por diseño), ejecución automática = `N/A`. No confundir con TCs con `Tipo de prueba` (`Unit`/`Integration`/`API Test`/`Visual Test`/`E2E`) aún sin artefacto, que van como `No` (pendiente de automatizar).
+- `result` por suite → `Resultado` **de la fila** (no del criterio; el `Estado` del criterio se deriva después de todas sus filas): `PASS`→`Paso`, `FAIL`→`Fallo`, `SKIPPED`→`No ejecutado`, `N/A` (el repo no tiene esa suite)→`No ejecutado` con Observación. **Excepción:** cuando varios criterios comparten suite y esta da `FAIL`, no basta con propagar `Fallo` a todos — ver «Granularidad suite vs. criterio» en el Paso 4 más arriba; si no se puede aislar el test que falló, la fila queda en `Fallo` con la Observación «no aislable» y el **`Estado` del criterio** es `Parcial`, no `No cubierto`.
+- Filas de TCs marcados `Manual` (manual por diseño): `Ejecución = Manual`, `Resultado = N/A`. No confundir con filas de tipos automatizables (`Unit`/`Integration`/`API Test`/`Visual Test`/`E2E`) aún sin artefacto, que van `Evidencia = —`, `Ejecución = —`, `Resultado = No cubierto` (pendiente de automatizar).
 - Si `workingTreeClean` es `false` en la caché, anotarlo como caveat (resultado sobre un árbol sucio).
 
 ---
@@ -167,8 +194,10 @@ Reglas:
 - [ ] Tipo de trabajo determinado y documento de criterios leído; criterios extraídos con su identificador **verbatim**, sin normalizar
 - [ ] Casos de prueba y artefactos (unit / integración / e2e) inventariados con su ruta y criterio
 - [ ] Cada criterio con estado (Cubierto / Parcial / No cubierto) y observaciones cuando aplica
+- [ ] Matriz expandida a una fila por criterio × TC × **tipo declarado** (un TC con `Unit, E2E` ocupa dos filas), sin omitir las filas `No cubierto`
 - [ ] Resultados de pruebas obtenidos de `quality-check` (caché fresca `test-run.json` o delegación `tests-only`); comando, resultado y procedencia registrados; sin ejecutar la suite en `trace-validate` ni inventar resultados
-- [ ] Matriz construida desde `assets/trace-report-template.md`
+- [ ] `Ejecución` y `Resultado` rellenados fila a fila, con la suite efectiva anotada; ninguna fila con `Evidencia = —` reporta `Paso`/`Fallo`
+- [ ] Las dos tablas (cobertura por criterio + matriz) construidas desde `assets/trace-report-template.md`
 - [ ] Resumen de artefactos de prueba automatizada incluido
 - [ ] Veredicto emitido respondiendo si **todos** los criterios quedan cubiertos
 - [ ] `trace-report.md` guardado en la ubicación del tipo con la marca de pie del fingerprint; ningún otro artefacto modificado
