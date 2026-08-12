@@ -24,7 +24,7 @@ Inicializa, en un proyecto **en cualquier punto de partida**, las primeras instr
 | `arch-manage` | Crea/actualiza ADRs y estándares de dominio. `arch-init` lo invoca en el Paso 5 con los candidatos que se aceptaron en el Paso 4 — nunca redacta un ADR/estándar por su cuenta. |
 | `arch-discover` | Infiere ADR/estándares candidatos **del código ya existente** y los crea por su cuenta (su Fase 5 invoca `arch-manage`). `arch-init` lo invoca **completo** en el Paso 4.1 cuando el punto de partida es "con implementación" — no reimplementa esa inspección ni repite su creación de artefactos. |
 | `arch-audit` | Audita `docs/standards/` y `AGENTS.md` contra el repo — de `AGENTS.md` toma también el contexto de stack (`## Stack tecnológico`) — y lee `.agents/MEMORY.md` para el idioma. `arch-init` es lo que le da a `arch-audit` algo que auditar la primera vez. |
-| `quality-check` | Sabe qué se suele validar por stack — tipado, linter, unit tests, coverage, integración, build, e2e, sonar (`references/stacks.md` de ese skill). `arch-init` lo **consulta** en el Paso 4 para saber qué le falta a la compuerta de calidad; no ejecuta la corrida completa (esa corre sobre código ya implementado, no aplica en una inicialización). |
+| `quality-check` | Sabe qué se suele validar por stack — tipado, linter, unit tests, coverage, integración, build, e2e, sonar (`quality-check/references/stacks.md`). `arch-init` lo **consulta** en el Paso 4 para saber qué le falta a la compuerta de calidad; no ejecuta la corrida completa (esa corre sobre código ya implementado, no aplica en una inicialización). |
 | `work-define` / `work-plan` | Reciben el handoff que `arch-init` ofrece al cerrar (Paso 5). |
 
 ---
