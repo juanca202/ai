@@ -311,6 +311,7 @@ Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefa
 /test-define WI-003
 /test-define FT-002
 /test-define US-005 solo criterios AC-001 y AC-003
+/test-define docs/specs/technical-docs/api-pagos.md
 ```
 
 - «Crea casos de prueba para US-009»
