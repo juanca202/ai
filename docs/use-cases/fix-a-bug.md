@@ -38,7 +38,7 @@ flowchart TD
 | Situación | Camino correcto |
 |-----------|------------------|
 | El código hace lo especificado y lo especificado está mal | `work-define` (corregir la US/criterios), no un bug-fix |
-| No hay comportamiento defectuoso, sino código legado sin documentar ni probar | `work-research`, flujo *Analizar legado* |
+| No hay comportamiento defectuoso, sino código legado sin documentar ni probar | [Cobertura de pruebas en código existente](test-coverage-legacy-code.md) |
 | El «bug» es en realidad una carencia funcional | `work-define` (nueva US) o `work-plan` (WI de otro tipo) |
 | Incidente en producción que requiere mitigación inmediata | Respuesta a incidentes; este caso entra después, para el fix definitivo |
 

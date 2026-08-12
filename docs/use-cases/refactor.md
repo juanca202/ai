@@ -44,7 +44,7 @@ flowchart TD
 |-----------|------------------|
 | El refactor es consecuencia de corregir un defecto concreto | [Fix a bug](fix-a-bug.md) — el refactor oportunista no se mezcla con el fix |
 | No hay código que cambiar de forma, sino una capacidad nueva | `work-define` (nueva US) |
-| El código no tiene requisitos ni pruebas documentados | `work-research`, flujo *Analizar legado*, antes de refactorizar a ciegas |
+| El código no tiene requisitos ni pruebas documentados | [Cobertura de pruebas en código existente](test-coverage-legacy-code.md), antes de refactorizar a ciegas |
 | Es solo una decisión estructural a registrar, sin refactor de código asociado | `arch-manage` (ADR) directamente, alimentado por la investigación de impacto — sin pasar por este flujo |
 | Otras tareas de mantenimiento sin necesidad de validar factibilidad primero | [Tarea de mantenimiento](maintenance-task.md) |
 
