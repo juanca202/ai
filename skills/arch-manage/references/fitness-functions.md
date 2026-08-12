@@ -88,27 +88,33 @@ su incumplimiento no debería frenar un merge (p. ej. umbrales en adopción prog
 
 ### 3. Presentar la tabla de propuesta
 
-Mostrar **todos** los candidatos en una tabla, antes de preguntar nada, para que el usuario vea criterio
-y mecanismo juntos:
+Mostrar **todos** los candidatos en una tabla **simplificada**, antes de preguntar nada. La tabla se lee
+en el chat: su único propósito es que el usuario identifique y seleccione opciones, no documentar la
+implementación. Solo tres columnas:
 
-| # | Requisito | Criterio propuesto | Automatizable | Enfoque | Mecanismo de verificación |
-|---|-----------|--------------------|---------------|---------|---------------------------|
-| C1 | `unit-testing` | La cobertura de líneas **DEBE** ser ≥ 80% | yes | bloqueante | Vitest `--coverage` con umbral en `vitest.config.ts` → `npx vitest run --coverage` *(ya instalado)* |
-| C2 | `unit-testing` | Las pruebas unitarias **DEBEN** implementarse con Vitest | yes | bloqueante | dependency-cruiser: prohibir imports de otros frameworks de test → `npx depcruise src` *(requiere instalar `dependency-cruiser`)* |
-| C3 | `unit-testing` | Cada módulo público **DEBERÍA** tener su archivo de test junto al fuente | yes | warning | Script propio en `checks/testing.mjs` (glob `src/**/*.ts` sin `*.spec.ts` hermano) — no hay herramienta establecida |
-| C4 | `unit-testing` | Los tests **DEBEN** ser legibles y describir comportamiento, no implementación | no | — | Manual: revisión en pull request (queda como evidencia del requisito) |
-
-Las columnas `Automatizable` y `Enfoque` van en el mismo orden que en la tabla real del estándar, para
-que la fila propuesta se pueda trasladar tal cual.
+| # | Criterio propuesto | Enfoque | Verificación |
+|---|--------------------|---------|--------------|
+| 1 | La cobertura de líneas **DEBE** ser ≥ 80% | bloqueante | Vitest *(ya instalado)* |
+| 2 | Las pruebas unitarias **DEBEN** implementarse con Vitest | bloqueante | dependency-cruiser *(requiere instalar)* |
+| 3 | Cada módulo público **DEBERÍA** tener su archivo de test junto al fuente | warning | Script propio *(no hay herramienta establecida)* |
+| 4 | Los tests **DEBEN** ser legibles y describir comportamiento, no implementación | — | Manual: revisión en pull request |
 
 Reglas de la tabla:
 
 - **Una fila por candidato**, redactada ya con RFC 2119 en el idioma del estándar — es el texto que
   acabará en la columna `Descripción` del CR.
-- La columna **Mecanismo** nombra la **herramienta concreta y el comando acotado**, e indica entre
-  paréntesis si ya está disponible o habría que instalarla. Si el mecanismo es un script propio,
-  decir por qué (no hay herramienta establecida). Si no es automatizable, describir la verificación
-  manual.
+- **Sin columnas `Requisito` ni `Automatizable`.** El requisito es el mismo para toda la tanda (ya
+  quedó claro en la conversación) y la aptitud para automatizar se deduce de la columna
+  `Verificación`: si dice `Manual`, no es automatizable. La clasificación del paso 2a se sigue
+  haciendo y se usa internamente para la ronda 2 de preguntas y para las filas del estándar, pero
+  **no se muestra** en esta tabla.
+- La columna **Verificación** nombra **solo la herramienta** (o `Manual` / `Script propio`), con una
+  nota entre paréntesis de si ya está instalada, hay que instalarla, o por qué es script propio.
+  **Nada de comandos, rutas de archivos, configuración ni fragmentos de código**: todavía no existe
+  nada de eso y mostrarlo satura la tabla. El detalle del mecanismo investigado en el paso 2b se
+  reserva para cuando se cree la fitness function (o para explicarlo si el usuario pregunta por una
+  fila concreta).
+- **Enfoque** va en `bloqueante` / `warning`, y `—` para los criterios de verificación manual.
 - Si algún candidato es **dudoso** (solape con un CR existente, umbral sin acordar), señalarlo en la
   fila en vez de omitirlo — el usuario decide.
 
