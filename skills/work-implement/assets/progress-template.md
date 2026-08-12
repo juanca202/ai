@@ -31,7 +31,7 @@ La "unidad" depende del tipo: TK para historias de usuario, el WI completo para 
 **Estado:** {{Pending | In Progress | Done}}
 **Iniciado:** {{YYYY-MM-DD HH:mm}}
 **Finalizado:** {{YYYY-MM-DD HH:mm}}
-**Implementador:** {{inferido de git config user.name}}
+**Implementador:** {{inferido de git config user.name}} / {{agente que implementa: Claude | Cursor | Codex | …}}
 
 <!-- Archivos: lista de archivos tocados durante la implementación de esta unidad. Prefijar cada ruta con + (creado), ~ (modificado) o - (eliminado); el símbolo basta, no hace falta etiqueta. -->
 **Archivos:** 
@@ -53,7 +53,7 @@ La "unidad" depende del tipo: TK para historias de usuario, el WI completo para 
 **Estado:** {{Pending | In Progress | Done}}
 **Iniciado:** {{YYYY-MM-DD HH:mm}}
 **Finalizado:** {{YYYY-MM-DD HH:mm}}
-**Implementador:** {{inferido de git config user.name}}
+**Implementador:** juanca202 / Claude
 
 **Archivos:**
 - {{+ | ~ | -}} {{src/ruta/al/archivo.ext}}
