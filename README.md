@@ -214,6 +214,7 @@ El humano define la intención, las restricciones y las decisiones importantes; 
 | UX/UI (cómo debe verse)   | Humano / Diseñador     | —                                  |
 | Modelo de dominio / datos | Humano / Arquitecto    | `/design-define`                   |
 | Arquitectura              | Humano / Arquitecto    | `/adr-manage`                      |
+| Validación de criterios de aceptación | Humano / QA | `/trace-validate`                  |
 | Implementación detallada  | Agente                 | `/work-implement` o Spec Framework |
 
 
