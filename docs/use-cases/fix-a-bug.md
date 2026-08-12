@@ -19,8 +19,12 @@ flowchart TD
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
     classDef human fill:#fef2f2,stroke:#dc2626,color:#7f1d1d
-    class A,B,D,E,F,I,J main
+    classDef entryPoint fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d
+    classDef exitPoint fill:#fee2e2,stroke:#b91c1c,stroke-width:3px,color:#7f1d1d
+    class B,D,E,F,I main
     class H human
+    class A entryPoint
+    class J exitPoint
 ```
 
 1. **Inicio**: alguien reporta un bug (descripción en texto o un work item en el gestor de proyectos).

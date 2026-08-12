@@ -18,7 +18,11 @@ flowchart TD
     I --> J(["Entregable"])
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
-    class A,E,G,I,J main
+    classDef entryPoint fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d
+    classDef exitPoint fill:#fee2e2,stroke:#b91c1c,stroke-width:3px,color:#7f1d1d
+    class E,G,I main
+    class A entryPoint
+    class J exitPoint
 ```
 
 1. **Inicio**: un requerimiento de mantenimiento **que no es un bug ni un refactor** entra **directo a Planificación de tareas** (`work-plan`) — a diferencia del flujo con historia de usuario, no pasa por `work-define` porque no hay `US` asociada.

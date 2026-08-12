@@ -65,7 +65,11 @@ flowchart TD
     V2 --> DONE(["Entregable"])
 
     classDef nestedFlow fill:#fff7ed,stroke:#ea580c,stroke-width:2px,stroke-dasharray:5 5,color:#9a3412
+    classDef entryPoint fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d
+    classDef exitPoint fill:#fee2e2,stroke:#b91c1c,stroke-width:3px,color:#7f1d1d
     class IMPL nestedFlow
+    class INIT entryPoint
+    class DONE exitPoint
 ```
 
 
@@ -130,7 +134,11 @@ flowchart TD
     I --> J
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
-    class A,B,E,G,I,J main
+    classDef entryPoint fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d
+    classDef exitPoint fill:#fee2e2,stroke:#b91c1c,stroke-width:3px,color:#7f1d1d
+    class B,E,G,I main
+    class A entryPoint
+    class J exitPoint
 ```
 
 
@@ -165,8 +173,12 @@ flowchart TD
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
     classDef nestedFlow fill:#fff7ed,stroke:#ea580c,stroke-width:2px,stroke-dasharray:5 5,color:#9a3412
-    class A,B,H,I,J main
+    classDef entryPoint fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d
+    classDef exitPoint fill:#fee2e2,stroke:#b91c1c,stroke-width:3px,color:#7f1d1d
+    class B,H,I main
     class S nestedFlow
+    class A entryPoint
+    class J exitPoint
 ```
 
 

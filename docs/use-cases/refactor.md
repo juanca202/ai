@@ -22,9 +22,13 @@ flowchart TD
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
     classDef human fill:#fef2f2,stroke:#dc2626,color:#7f1d1d
     classDef optional fill:#f0fdf4,stroke:#16a34a,stroke-dasharray:5 5,color:#14532d
-    class A,B,P,F,G,I,J main
+    classDef entryPoint fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d
+    classDef exitPoint fill:#fee2e2,stroke:#b91c1c,stroke-width:3px,color:#7f1d1d
+    class B,P,F,G,I main
     class H human
     class ADR,DEP optional
+    class A entryPoint
+    class J exitPoint
 ```
 
 1. **Inicio**: un requerimiento de refactor (deuda técnica, acoplamiento, duplicación, patrón obsoleto) entra al flujo.
