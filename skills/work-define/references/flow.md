@@ -29,7 +29,7 @@ Antes de crear archivos, verificar las siguientes condiciones. Si alguna falla, 
 - **Duplicado de ID:** si el usuario proporciona `US-XXX`, confirmar que esa carpeta no existe en `docs/specs/user-stories/`.
 - **Solapamiento de alcance:** revisar los títulos y descripciones de otras US para detectar si el actor + valor + alcance ya está cubierto por una historia existente.
 - **INVEST parcialmente valorable:** si la información recibida no permite valorar todas las dimensiones, la historia **sí puede crearse** pero con `Estado: Draft` y las lagunas documentadas en Observaciones. Solo es un bloqueante si el actor o el valor de negocio son completamente desconocidos.
-- **Rama de trabajo actual:** determinar la rama git activa (`git branch --show-current`). Si coincide con el patrón de rama de implementación de una US o WI (`feature/US-XXX-*`, `feature/WI-XXX-*`, `fix/WI-XXX-*`, `chore/WI-XXX-*`, `refactor/WI-XXX-*`), crear la historia nueva ahí la mezclaría con ese trabajo en curso. No bloquea automáticamente — ver manejo específico abajo.
+- **Rama de trabajo actual:** determinar la rama git activa (`git branch --show-current`). Si coincide con el patrón de rama de implementación de una US, un WI o una automatización de pruebas (`feature/US-XXX-*`, `feature/WI-XXX-*`, `fix/WI-XXX-*`, `chore/WI-XXX-*`, `refactor/WI-XXX-*`, `test/*`), crear la historia nueva ahí la mezclaría con ese trabajo en curso. No bloquea automáticamente — ver manejo específico abajo.
 
 **Si hay conflicto de ID o solapamiento de alcance:**
 
@@ -68,7 +68,7 @@ Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **De
   - **Migración** (sección opcional — incluir solo si esta US materializa (total o parcialmente) una migración entre proyectos investigada por `work-research` y dimensionada como cambio grande; omitir si no aplica): enlazar la investigación (`research/RS-XXX-{slug}/README.md`), origen y destino. La sección completa —incluida la referencia a `discovery.md`/`validation.md`— vive en la plantilla; el mapeo `AC-XXX` → `GM-XXX` (Golden Master) se detalla a nivel de `TK-XXX` en `work-plan`, no aquí.
   - **Referencias:** enlaces de diseño y archivos en `assets/`; los archivos aportados no deben quedar solo en el chat. Si el requerimiento trae imágenes, enlaces a Figma o archivos `.md` con diagramas, wireframes o prototipos, **leerlos primero** para incorporarlos al contexto; ante lagunas, conflictos o falta de claridad detectados en ellos, trasladar esas dudas a la tanda de preguntas estructuradas antes de redactar (ver [Checklist antes de redactar](#checklist-antes-de-redactar)).
   - **Criterios de aceptación** (lista plana con ids `AC-XXX`):
-    - Cada criterio usa id secuencial **AC-001**, **AC-002**, … único en el ámbito de la US; renumerar si se reordenan o eliminan criterios.
+    - Cada criterio usa id secuencial **AC-001**, **AC-002**, … único en el ámbito de la US. **El id es inmutable una vez publicado:** no se renumera al reordenar ni al eliminar criterios — se asigna el siguiente libre a los nuevos y se marca el eliminado como obsoleto en su propio enunciado. El id es un **contrato de enlace**: `test-define` lo cita verbatim en cada `TC-XXX`, la línea `Casos de prueba:` cuelga de él y todos los `trace-report.md` lo cruzan literalmente; renumerar rompe esas tres cosas en silencio. Es la misma doctrina que aplica `design-define` a los ids de sus elementos.
     - La categoría va entre paréntesis inmediatamente después del id (ver [Categorías de criterios de aceptación](quality-criteria.md#categorías-de-criterios-de-aceptación)): categorías funcionales (Reglas de negocio, Casos de uso, Flujos de proceso, Procesamiento de datos, Integraciones, Interacción de usuario, Salidas del sistema) o una característica ISO/IEC 25010 para criterios no funcionales.
     - El enunciado usa palabra clave normativa RFC 2119 en MAYÚSCULAS en el idioma de preferencia (**DEBE**, **NO DEBE**, **DEBERÍA**, etc.). Ver [RFC 2119](quality-criteria.md#rfc-2119).
   - **Repositorios:** nombre(s) del/los repositorio(s) git al/los que afecta la historia (p. ej. `frontend-web`, `api-catalogo`, o `micro-autenticacion`, `micro-catalogo`). Es la referencia de dónde se materializará el trabajo; `work-plan` la usa para agrupar las tareas por repositorio. Aquí solo se nombran; no se detalla el alcance de cada uno.
@@ -101,7 +101,8 @@ Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **De
 1. **Identificar el archivo** — por ID, nombre-corto o título.
 2. **Leer el** `README.md` **actual** completo antes de editar.
 3. **Aplicar los cambios** solicitados por el usuario. Reglas invariantes:
-  - Si el cambio afecta criterios de aceptación: mantener los ids `AC-XXX` existentes; renumerar solo si se reordenan o eliminan criterios; conservar o corregir la categoría entre paréntesis.
+  - Si el cambio afecta criterios de aceptación: **mantener siempre los ids `AC-XXX` existentes**, también al reordenar o eliminar (ver la regla de inmutabilidad arriba); los nuevos toman el siguiente secuencial libre. Conservar o corregir la categoría entre paréntesis.
+  - **Si se modifica el enunciado de un criterio que ya tiene TCs** (tiene una línea `Casos de prueba:` debajo), avisar al usuario de que esos TCs quedan desalineados y sugerir pasar por `test-define` en su [flujo de actualización](../../test-define/SKILL.md#flujo-actualizar-tcs-existentes). No editar los TCs desde aquí.
   - Si hay conflicto entre el texto de un `TK-XXX` y el `README.md` de la US: **la US prevalece**. Corregir las tareas, no la historia.
   - Si el usuario cambia el estado a **Ready**: verificar todas las condiciones del checklist de Ready antes de guardar.
 4. **Criterios de aceptación:** si se añaden o modifican, aplicar las mismas reglas de formato del flujo de creación (paso 2).
@@ -196,7 +197,7 @@ Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **De
 - Crear o editar documentos en `docs/specs/technical-docs/` directamente desde este skill; la documentación técnica siempre se delega a `/design-define` vía subagente, y aquí solo se enlazan las referencias devueltas.
 - Redactar la US sin delegar a `/design-define` cuando el requerimiento define flujos, modelos o APIs; la US quedaría sin su referencia técnica de implementación.
 - Copiar `assets/user-story-template.md` al repo del producto como artefacto en lugar de usarlo como molde.
-- Lanzar preguntas al usuario como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas; o ir descubriendo huecos turno a turno en lugar de agrupar todas las preguntas pendientes en una sola tanda al inicio.
+- Lanzar preguntas al usuario como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas; o ir descubriendo huecos turno a turno en lugar de agruparlos en tandas al inicio. (Encadenar **varias** tandas sí es correcto cuando hay más de tres lagunas — el límite es por bloque, no un tope al total.)
 - Crear una historia nueva estando en la rama de implementación de otra US o WI sin advertir al usuario y preguntar `Continuar` / `Detenerme aquí` primero.
 
 ---

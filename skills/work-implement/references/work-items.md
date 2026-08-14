@@ -2,7 +2,7 @@
 
 Flujo para **ejecutar en codigo** una tarea de mantenimiento `WI-XXX` bajo `docs/specs/work-items/`: bugs, refactor, deuda tecnica, actualizacion de dependencias, tareas operativas o de infraestructura. Esta referencia se carga desde `SKILL.md` cuando la seleccion de tipo resuelve a este caso. Asume ya resueltos el mecanismo de preguntas, el idioma, la validacion de repositorio y el ritmo de confirmacion (ver `SKILL.md`).
 
-> **Naturaleza del WI:** documento **unico y combinado** - el requerimiento, los criterios de aceptacion y el plan de implementacion conviven en `WI-XXX-[kebab-case]/README.md`, que mapea 1:1 con un work item de ADO. **No se descompone en sub-tareas** (modelo plano). Un esfuerzo grande son varios `WI-` hermanos, nunca un WI con hijos.
+> **Naturaleza del WI:** documento **unico y combinado** - el requerimiento, los criterios de aceptacion y el plan de implementacion conviven en `WI-XXX-[kebab-case]/README.md`, que mapea 1:1 con un work item del tracker externo, si el repo usa uno. **No se descompone en sub-tareas** (modelo plano). Un esfuerzo grande son varios `WI-` hermanos, nunca un WI con hijos.
 >
 > **Unidad de confirmacion:** **el `WI-XXX` completo.** Se implementa el plan del WI como una unidad; al terminarlo se actualiza `progress.md` y se pide confirmacion antes de pasar al siguiente WI (si el alcance incluye varios). **Excepcion:** si el alcance tiene varios WI y el usuario pide ejecutar **sin confirmacion**, se activa el **modo de ejecucion paralela** del `SKILL.md` (analisis de dependencias, subagentes con worktree — max 3 — y merge secuencial), que omite estas pausas.
 
@@ -18,9 +18,24 @@ Flujo para **ejecutar en codigo** una tarea de mantenimiento `WI-XXX` bajo `docs
 | Documentacion tecnica | `docs/specs/technical-docs/` |
 | Glosario | `docs/specs/glossary.md` |
 
-**Rama de trabajo:** `feature/WI-XXX-[kebab-case]` por defecto. Si el equipo usa prefijos por tipo, el prefijo puede seguir el `Tipo` del WI (`bug` => `fix/`, refactor/deuda/dependencias/operativa => `chore/` o `refactor/`). No asumir la rama base; acordarla con el usuario.
+**Rama de trabajo:** `feature/WI-XXX-[kebab-case]` por defecto. Si el equipo usa prefijos por tipo, derivarlo del campo `Tipo` del WI segun esta tabla — son los ocho valores canonicos de la plantilla (`work-plan/assets/work-item-template.md`), sin abreviar ni traducir:
 
-> Con ADO, el numero del WI es el ID del work item (`WI-1847`); sin ADO es un secuencial local (`WI-001`). Respetar el numero tal cual aparece en el archivo.
+| `Tipo` del WI | Prefijo de rama |
+| ------------- | --------------- |
+| `bug-fix` | `fix/` |
+| `refactor` | `refactor/` |
+| `optimization` | `refactor/` |
+| `dependency-update` | `chore/` |
+| `security-update` | `fix/` |
+| `test-improvement` | `chore/` |
+| `documentation-update` | `chore/` |
+| `operational-change` | `chore/` |
+
+No asumir la rama base; acordarla con el usuario.
+
+> **Por que `test-improvement` va a `chore/` y no a `test/`.** El prefijo `test/` esta reservado para la **automatizacion de `TC-XXX`/`FT-XXX`**: `work-integrate` lo usa para inferir el tipo de trabajo y, a partir de ahi, exige en `Done` unicamente las unidades `TC-XXX`/`FT-XXX` de esa ejecucion. Un WI de mejora de pruebas no tiene esas unidades —su `progress.md` tiene una sola entrada, la del propio `WI-XXX`—, asi que con `test/` el cierre no encontraria nada que verificar y el WI se integraria sin comprobar su estado. Los cuatro prefijos de la tabla (`feature/`, `fix/`, `chore/`, `refactor/`) son exactamente los que `work-integrate` acepta para un WI.
+
+> Si el repo esta vinculado a un tracker externo (`work_item_tracking:` en `.agents/MEMORY.md`), el numero del WI es el ID del work item en ese sistema (`WI-1847`); si no lo esta, es un secuencial local (`WI-001`). Respetar el numero tal cual aparece en el archivo.
 
 ---
 
@@ -30,7 +45,7 @@ Flujo para **ejecutar en codigo** una tarea de mantenimiento `WI-XXX` bajo `docs
 | ---- | -------------- | --------------------- |
 | **WI a implementar** | Indicado por el usuario (numero o nombre) | Preguntar cual; no asumir |
 | **Alcance** | Un WI concreto o una lista de `WI-` hermanos | Preguntar si hay ambiguedad |
-| **Tipo** | Campo `Tipo` del WI (bug / refactor / deuda-tecnica / dependencias / operativa) | Leer del archivo; condiciona la rama y el cierre |
+| **Tipo** | Campo `Tipo` del WI — uno de los ocho canonicos: `bug-fix`, `refactor`, `dependency-update`, `optimization`, `security-update`, `test-improvement`, `documentation-update`, `operational-change` | Leer del archivo; condiciona la rama (ver la tabla de prefijos) y el cierre |
 | **Repositorio** | Campo `Repositorio` del WI (nombre del repositorio git al que afecta) | Leer del archivo; para `Ready` es obligatorio |
 | **Rama** | Derivada del WI segun convencion del equipo | Crear desde la rama base acordada |
 
@@ -66,7 +81,7 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 
 ### Paso 2 - Presentar alcance
 
-1. Leer **completo** cada `WI-*.md` del alcance: Requerimiento, Criterios de aceptacion, Dependencias, Referencias y Plan de implementacion.
+1. Leer **completo** cada `WI-*/README.md` del alcance: Descripcion, Criterios de aceptacion, Dependencias, Referencias y Plan de implementacion.
 2. Construir dos listas:
    - **Implementables:** WI `Ready` con criterios de aceptacion, no marcados como `Done`.
    - **Excluidos:** el resto, con su estado entre parentesis - p. ej. `WI-007 - Limpieza de reportes (Draft)`.
@@ -90,7 +105,7 @@ Por cada WI aprobado:
    - **Al iniciar el WI:** cambiar su estado en `progress.md` a `In Progress` y **poblar la lista de to-dos del agente**: la **primera entrada es el titulo del WI** (`WI-XXX` + titulo), para tener siempre presente el artefacto en ejecucion, seguida de **las tareas del `Plan de implementacion` del `README.md` del WI** (una entrada por tarea `IT-XX`, en el orden del plan). Cada entrada de tarea muestra solo la descripcion corta (`IT-XX` + linea corta), no el detalle completo.
    - **Al iniciar cada tarea del plan:** marcar `[ ]` => `[~]` (en progreso) en la seccion del plan de implementacion del `README.md` del WI y marcar su entrada en la lista de to-dos del agente como `in_progress`. Solo una tarea puede estar `[~]` a la vez.
    - **Por cada tarea del plan completada:** marcar `[~]` => `[x]` en la seccion del plan de implementacion del `README.md` del WI y marcar su entrada en la lista de to-dos del agente como `completed`.
-   - **Al cerrar el WI:** cambiar su estado en `progress.md` a `Done`, con todas las tareas de su plan ya `completed` en la lista de to-dos del agente; marcar tambien la **primera entrada (titulo del WI) como `completed`** una vez que todas las tareas del plan hayan finalizado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion. Si el WI tenia test cases, completar el campo `Cobertura de test cases` del WI solo con observaciones puntuales: **cuales `TC-XXX` no se pudieron crear** (con motivo) o **para cuales se decidio otro tipo de prueba** distinto al del test case. Si todos se automatizaron como se esperaba, dejar el campo sin comentarios.
+   - **Al cerrar el WI:** cambiar su estado en `progress.md` a `Done` y rellenar el campo **Archivos** (rutas tocadas, una por linea, sin vineta, prefijadas `+`/`~`/`-`), con todas las tareas de su plan ya `completed` en la lista de to-dos del agente; marcar tambien la **primera entrada (titulo del WI) como `completed`** una vez que todas las tareas del plan hayan finalizado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion. Si el WI tenia test cases, completar el campo `Cobertura de test cases` del WI solo con observaciones puntuales: **cuales `TC-XXX` no se pudieron crear** (con motivo) o **para cuales se decidio otro tipo de prueba** distinto al del test case. Si todos se automatizaron como se esperaba, dejar el campo sin comentarios.
 6. **Detenerse y preguntar** (herramienta estructurada), **sin commitear todavia los cambios del WI**: "WI-XXX completado. Continuo con WI-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui]. Si el alcance es un unico WI, igualmente confirmar antes de pasar al cierre. Esta pausa, con el working tree aun sin commitear, es la ventana para que el usuario revise el resultado, aplique correcciones manuales o le indique ajustes al agente antes de que el cambio quede commiteado.
 7. Solo si confirma: **invocar `/git-commit`** sobre los cambios de WI-XXX, delegando en ese skill la agrupacion, el mensaje, el staging y la deteccion de secretos — este skill no decide un mensaje ni stagea por cuenta propia. `git-commit` puede a su vez mostrar su propia propuesta y pedir confirmacion antes de comitear: es una confirmacion distinta a la del paso anterior (esa es sobre continuar al siguiente WI; esta es sobre el commit en si) y no la sustituye. Recien despues, pasar al siguiente WI. Si detiene, registrar nota y pasar al Paso 4 — la invocacion a `/git-commit` para este WI se hace ahi, en el cierre.
 
@@ -114,7 +129,7 @@ Por cada WI aprobado:
 
 **Repositorio:** working tree limpio; rama del WI activa o creada; `progress.md` leido o creado.
 
-**Alcance:** cada `WI-*.md` leido completo; listas presentadas; confirmacion recibida antes del primer cambio de codigo.
+**Alcance:** cada `WI-*/README.md` leido completo; listas presentadas; confirmacion recibida antes del primer cambio de codigo.
 
 **Por cada WI:** `Ready` con criterios de aceptacion; no `Done`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; test cases automatizables del `test-cases/README.md` cubiertos; UI bajo `ui-specialist`; Figma via MCP; plan completo implementado; criterios de aceptacion cubiertos por tests; lint/typecheck/build y tests **unitarios y de integracion** del cambio en verde (las e2e escritas se difieren al cierre y no bloquean el `Done` del WI si quedan registradas); `progress.md` a `Done` con `Cobertura de test cases` (TC no automatizados o con otro tipo de prueba documentados); decisiones de sesion registradas; **confirmacion explicita antes del siguiente WI**; `/git-commit` invocado recien al confirmar el avance (no antes) — o en el cierre, si el usuario detiene ahi.
 
@@ -165,7 +180,7 @@ Posicion: **implementacion** - un WI es autocontenido (no proviene de `work-defi
 
 | | |
 |--|--|
-| **Entrada** | `WI-XXX` en `Estado: Ready` (Requerimiento, Criterios de aceptacion, Dependencias, Referencias y Plan). Stubs en `Draft` **no** habilitan la implementacion. |
+| **Entrada** | `WI-XXX` en `Estado: Ready` (Descripcion, Criterios de aceptacion, Dependencias, Referencias y Plan). Stubs en `Draft` **no** habilitan la implementacion. |
 | **Salida** | Codigo commiteado; `progress.md` con el WI en `Done`; working tree limpio. |
-| **Siguiente paso** | El WI ya comiteado via `/git-commit` durante la implementacion => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara `quality-check` y `code-review`, y exigira veredicto Aprobado en ambos antes de integrar. |
+| **Siguiente paso** | El WI ya comiteado via `/git-commit` durante la implementacion => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara las tres puertas de cierre (`quality-check`, `code-review` y `trace-validate`) y exigira veredicto Aprobado en las tres antes de integrar. |
 | **Regreso desde plan** | Ambiguedad tecnica, criterios faltantes o alcance incorrecto => volver a `work-plan` para ajustar el WI. |
