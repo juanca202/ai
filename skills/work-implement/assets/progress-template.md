@@ -20,7 +20,7 @@ Ubicacion y alcance por tipo (cada trabajo tiene su propio `progress.md` dentro 
 - Casos de prueba (`TC-XXX`) sueltos: el `progress.md` vive en la carpeta del **artefacto padre** que los contiene (US, WI o FT); el encabezado lleva el ID de ese padre y hay **una unidad por cada `TC-XXX`** del alcance.
 -->
 
-### Unidades
+## Unidades
 
 <!--
 La "unidad" depende del tipo: TK para historias de usuario, el WI completo para tareas de mantenimiento, el FT completo para un feature, y cada TC para casos de prueba sueltos.
@@ -33,7 +33,7 @@ La "unidad" depende del tipo: TK para historias de usuario, el WI completo para 
 **Finalizado:** {{YYYY-MM-DD HH:mm}}
 **Implementador:** {{inferido de git config user.name}} / {{agente que implementa: Claude | Cursor | Codex | …}}
 
-<!-- Archivos: lista de archivos tocados durante la implementación de esta unidad. Prefijar cada ruta con + (creado), ~ (modificado) o - (eliminado); el símbolo basta, no hace falta etiqueta. -->
+<!-- Archivos: los archivos tocados durante la implementación de esta unidad, uno por línea y SIN viñeta (a diferencia de Notas, Decisiones adicionales y Cobertura de test cases, que sí la llevan): el prefijo - de un archivo eliminado se confundiría con el guion de la viñeta. Prefijar cada ruta con + (creado), ~ (modificado) o - (eliminado); el símbolo basta, no hace falta etiqueta. -->
 **Archivos:** 
 []
 
@@ -53,10 +53,10 @@ La "unidad" depende del tipo: TK para historias de usuario, el WI completo para 
 **Estado:** {{Pending | In Progress | Done}}
 **Iniciado:** {{YYYY-MM-DD HH:mm}}
 **Finalizado:** {{YYYY-MM-DD HH:mm}}
-**Implementador:** juanca202 / Claude
+**Implementador:** {{usuario}} / {{agente}}
 
 **Archivos:**
-- {{+ | ~ | -}} {{src/ruta/al/archivo.ext}}
+{{+ / ~ / -}} {{src/ruta/al/archivo.ext}}
 
 **Notas:** 
 - {{observación relevante encontrada al implementar}}

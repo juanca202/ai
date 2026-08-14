@@ -76,8 +76,8 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 
   A diferencia de los tipos `TK`/`WI`, aqui **no existe la opcion «continuar sin test cases»**: sin TC no hay unidad que implementar.
 
-- **Indice de test cases:** leer `test-cases/README.md` (columnas `TC · Perspectiva · Tipo de prueba · Prioridad · Criterio de aceptacion`). Es la fuente para construir el alcance. Si el indice no existe pero hay archivos `TC-XXX-*.md`, leer los propios test cases.
-- **Estado de cada TC:** solo se automatizan los TC en `Estado: Ready`. Los `Draft` se excluyen (devolver a `test-define`); los `Obsolete` se excluyen sin mas.
+- **Indice de test cases:** leer `test-cases/README.md` (columnas `TC · Perspectiva · Tipo de prueba · Estado · Prioridad · Criterio de aceptacion`). Es la fuente para construir el alcance. Si el indice no existe pero hay archivos `TC-XXX-*.md`, leer los propios test cases.
+- **Estado de cada TC:** tomarlo de la columna `Estado` del indice; solo abrir el `TC-XXX-*.md` si el indice no la trae (formato anterior a esa convencion). Solo se automatizan los TC en `Estado: Ready`. Los `Draft` se excluyen (devolver a `test-define`); los `Obsolete` se excluyen sin mas.
 - **`Tipo de prueba` del TC:** un TC con `Tipo de prueba: Manual` **no es automatizable por diseno** — se excluye del alcance y se registra en `Cobertura de test cases` del `progress.md`. Para el resto, el campo (`Unit`, `Integration`, `API Test`, `Visual Test`, `E2E`, o una combinacion) determina **que nivel de prueba escribir**.
 - **AC sin TC:** si algun `AC-XXX` del padre no tiene ningun `TC-XXX` que lo cubra, **avisar al usuario** antes de continuar y ofrecer handoff a `test-define` para completar la cobertura, o continuar dejando constancia del hueco en `progress.md`. Este skill **no inventa** casos de prueba que `test-define` no documento.
 
@@ -138,7 +138,7 @@ Por cada `TC-XXX` automatizable de la unidad, en el orden del indice:
    - **Al iniciar la unidad:** cambiar su estado en `progress.md` a `In Progress` y **poblar la lista de to-dos del agente**: la **primera entrada es el titulo de la unidad** (`FT-XXX` o `TC-XXX` + su titulo), seguida de **una entrada por cada `TC-XXX` automatizable**, en el orden del indice. Cada entrada muestra solo `TC-XXX` + su titulo corto, no el detalle del caso.
    - **Al iniciar cada TC:** marcar su entrada de to-do como `in_progress`. Solo un TC en curso a la vez.
    - **Por cada TC cubierto:** marcar su entrada de to-do como `completed`.
-   - **Al cerrar la unidad:** estado `Done` en `progress.md`, con todos los TC `completed` y la primera entrada tambien `completed`; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion. Completar `Cobertura de test cases` **solo con observaciones puntuales**: TC no automatizados (con motivo: `Manual`, `Draft`, TC erroneo, hallazgo abierto), TC cubiertos con un nivel de prueba distinto al del campo `Tipo de prueba`, y AC sin TC. Si todo se automatizo como se esperaba, dejar el campo sin comentarios.
+   - **Al cerrar la unidad:** estado `Done` en `progress.md`, con el campo **Archivos** relleno (rutas tocadas, una por linea, sin vineta, prefijadas `+`/`~`/`-`), con todos los TC `completed` y la primera entrada tambien `completed`; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion. Completar `Cobertura de test cases` **solo con observaciones puntuales**: TC no automatizados (con motivo: `Manual`, `Draft`, TC erroneo, hallazgo abierto), TC cubiertos con un nivel de prueba distinto al del campo `Tipo de prueba`, y AC sin TC. Si todo se automatizo como se esperaba, dejar el campo sin comentarios.
 
    > **No se marcan checkboxes:** un `TC-XXX` no tiene subtareas. La *excepcion de checkboxes* del `SKILL.md` no aplica a este tipo; el `TC-XXX-*.md`, el indice `test-cases/README.md` y el `README.md` del padre **no se modifican** desde aqui.
 
@@ -249,6 +249,6 @@ Posicion: **implementacion de pruebas** - entre `test-define` y `trace-validate`
 |--|--|
 | **Entrada** | Artefacto padre (`FT-XXX`, `US-XXX` o `WI-XXX`) en `Estado: Ready` con `AC-XXX`, y su carpeta `test-cases/` poblada por `test-define` con TC en `Ready`. |
 | **Salida** | Pruebas automatizadas commiteadas y en verde; `progress.md` con cada unidad en `Done` y su `Cobertura de test cases`; working tree limpio. |
-| **Siguiente paso** | `trace-validate` sobre el artefacto padre (matriz de cobertura y veredicto) => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara `quality-check` y `code-review`, y exigira veredicto Aprobado en ambos antes de integrar. |
+| **Siguiente paso** | `trace-validate` sobre el artefacto padre (matriz de cobertura y veredicto) => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara las tres puertas de cierre (`quality-check`, `code-review` y `trace-validate`) y exigira veredicto Aprobado en las tres antes de integrar. |
 | **Regreso a definicion** | TC ambiguo, erroneo o AC sin cobertura => volver a `test-define`. Si el hueco es del propio artefacto (criterio no testeable o mal definido), volver a quien lo registro: `work-define`/`work-plan` para US/WI, el flujo «Analizar legado» de `work-research` para un `FT-XXX`. |
 | **Bug detectado** | Discrepancia real entre TC y codigo que el usuario no quiere corregir en el momento => flujo «Analizar issue» de `work-research` y, desde ahi, un `WI-XXX` de tipo bug via `work-plan`. |
