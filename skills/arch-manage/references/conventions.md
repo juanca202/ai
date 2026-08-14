@@ -37,7 +37,7 @@ requisito o un criterio (CR). Leer al redactar/editar cualquiera de estos artefa
 |-------|-------|
 | `name` | Nombre del estándar, p. ej. `Testing Standards`. **El estándar se identifica por su nombre, no lleva código.** |
 | `domain` | Slug del dominio **técnico o funcional**, del catálogo canónico (`functional-domains.md`, en esta misma carpeta): `testing`, `architecture`, `api`, `security`, `coding-style`, `frontend`, `persistence`, `devops`, `observability`; otro solo si no encaja = nombre del archivo `<slug>.md` o de la carpeta `<slug>/`. Un aspecto de arquitectura, no un dominio de negocio/DDD ni de internet |
-| `status` | `Draft` · `Active` · `Deprecated` |
+| `status` | `Draft` · `Active` · `Deprecated` · `Superseded` (con `superseded_by: <slug>`) |
 | `last_update` | Fecha de hoy en cada escritura |
 | `source_adrs` | Lista de **todos** los ADR que aportaron ≥ 1 criterio de cumplimiento (recíproco de `emits`) |
 | `tags` | Lista de palabras clave |
@@ -47,6 +47,7 @@ requisito o un criterio (CR). Leer al redactar/editar cualquiera de estos artefa
 | Campo | Regla |
 |-------|-------|
 | `ID` | Slug del requisito (p. ej. `unit-testing`), único en su estándar. Referencia legible: `<slug-estándar>/<slug-requisito>` (p. ej. `testing/unit-testing`) |
+| `Estado` | `Active` · `Deprecated` · `Superseded`. Es lo que permite retirar **un requisito suelto** sin tumbar el estándar entero — el caso habitual cuando un ADR queda superseded. Un requisito que no está `Active` **no** se audita (`arch-audit` lo lista y no lo cuenta para el veredicto), pero se conserva en el documento por trazabilidad. Si falta el campo, tratarlo como `Active` |
 | Descripción | Párrafo de qué es / cómo se usa / cómo se implementa. **Debe** incluir el enunciado normativo redactado con RFC 2119 / RFC 8174, en MAYÚSCULAS y en el idioma de preferencia (MUST/DEBE, SHOULD/DEBERÍA, MAY/PUEDE… — ver "Resolución de idioma" en `SKILL.md`) |
 | `Excepciones` | Casos permitidos, o «Ninguna» |
 

@@ -31,13 +31,19 @@ Ubicación (dos formas):
 <slug>.md o de la carpeta <slug>/.
 `source_adrs`: contiene todos los ADR que originan al menos un criterio de cumplimiento
 de este estándar (recíproco de `emits`).
+`status`: `Superseded` cuando otro estándar lo reemplaza por completo; en ese caso añadir
+`superseded_by: <slug>`. Un estándar entero rara vez muere: lo habitual es que muera un
+requisito suelto, y para eso está el `**Estado:**` de cada bloque `## <Requisito>` — un
+requisito `Deprecated` o `Superseded` deja de contar en la auditoría, pero se conserva en el
+documento para no perder el rastro de por qué existió.
 -->
 ---
 name: {{Título del estandar}}
 domain: {{slug}}
-status: {{Draft | Active | Deprecated}}
+status: {{Draft | Active | Deprecated | Superseded}}
 last_update: {{YYYY-MM-DD}}
 source_adrs: [{{ADR-XXX}}]
+superseded_by: {{slug del estándar que lo reemplaza — omitir la clave salvo status: Superseded}}
 tags: [{{testing}}]
 ---
 
@@ -75,6 +81,7 @@ Si un requisito necesita documentos de apoyo (guías, ejemplos, matrices), usar 
 
 ## {{Título del requisito}}
 **ID:** {{slug}}
+**Estado:** {{Active | Deprecated | Superseded}}
 
 {{Describe el requisito, su propósito, cuándo y dónde aplica, y cómo debe implementarse en el proyecto. Incluye las herramientas, convenciones, estructura o ubicación habitual cuando corresponda. La descripción PUEDE contener un enunciado normativo utilizando palabras clave RFC 2119 (MUST, SHOULD, MAY o sus equivalentes en el idioma del documento) para indicar las obligaciones, recomendaciones u opciones aplicables.}}
 
