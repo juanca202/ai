@@ -82,10 +82,24 @@ sección de **fitness functions**: cuáles existen y su resultado al ejecutarlas
 > copias `<skill>-<YYYYMMDD-HHMMSS>.md` de `save-report`. Los espacios de nombres son disjuntos: al buscar
 > auditorías previas usar siempre el glob `arch-audit-*.md`, nunca listar el directorio entero.
 >
-> Todo `docs/audits/` está **excluido del fingerprint canónico** de la tubería de cierre (ver
-> [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate)):
-> generar un informe de auditoría **no** invalida la caché de pruebas ni fuerza a regenerar un
-> `trace-report.md`.
+> **Y tienen ciclos de vida distintos.** Los informes de este skill son del **repositorio** y pertenecen a la
+> rama base; `quality-check.md` y `code-review.md` son fotos **de una rama** y `work-integrate` los retira
+> dentro del commit de merge para que no lleguen a la base (ver
+> [`work-integrate`](../work-integrate/SKILL.md#los-informes-de-las-puertas-no-se-integran)). Esa limpieza
+> nombra esos dos archivos uno a uno, así que **no toca los `arch-audit-*.md`**: sobreviven a los merges, que
+> es lo que la Fase 0 de este skill da por hecho al buscar la auditoría previa.
+>
+> Todo `docs/` —y por tanto `docs/audits/`— está **excluido del fingerprint canónico** de la tubería de
+> cierre (ver [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate)):
+> **escribir el informe** de auditoría no invalida la caché de pruebas, ni el `trace-report.md`, ni el
+> `code-review.md`.
+>
+> **Pero verificar dependencias sí las invalida.** La Fase 3.5 puede **instalar dependencias** y tocar el
+> manifiesto o el lockfile, que están dentro de la clave (`quality-check` la describe como «código fuente,
+> tests y **manifiestos**»). Si esta auditoría llega a modificarlos, avisar al usuario de que las tres
+> puertas de cierre tendrán que volver a ejecutarse: la exclusión cubre lo que este skill **escribe**, no
+> todo lo que hace.
+
 Este contenido se escribe una sola vez, al crear el informe, y permanece inalterado; cada revalidación
 posterior agrega una entrada nueva en la sección `## Revalidaciones` al final del **mismo** archivo
 (nunca se crea un archivo por revalidación), con la fecha/hora, el veredicto resultante y solo los
@@ -100,10 +114,10 @@ cualquier informe y respetar su estructura.
 
 Decidir el idioma del informe y de los mensajes al usuario en este orden; detenerse en el primer paso que aplique:
 
-1. Si en el contexto de la sesión existe una preferencia de idioma del usuario, usarla.
-2. Si hay una preferencia registrada en la memoria del proyecto, usarla.
-3. Si no, usar el idioma del mensaje del usuario y preguntar si desea persistir esa preferencia en la memoria del proyecto.
-4. Si no se puede inferir, preguntar qué idioma prefiere; no decidir por cuenta propia.
+1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>`. Es la clave canónica que escribe `arch-init`; si existe, manda.
+2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesión.
+3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md` con `preferred language: <código>`.
+4. Si no se puede inferir, **preguntar** qué idioma prefiere; no decidir por cuenta propia.
 
 Las rutas de archivo, identificadores (`ADR-XXX`, referencias de criterio `<estándar>/CR-XXX`, referencias de requisito `<estándar>/<slug-requisito>`) y salidas de comandos no se traducen.
 
@@ -118,7 +132,7 @@ ls docs/audits/arch-audit-*.md 2>/dev/null
 ```
 
 - **Si no hay ninguno:** proceder directamente con una **nueva auditoría desde cero** (Fase 1).
-- **Si hay uno o varios:** localizar el **más reciente por la fecha del nombre** del archivo
+- **Si hay uno o varios:** localizar el **más reciente**: por la fecha del nombre y, entre los del mismo día, por el sufijo horario `-<HHMM>` (los que no lo llevan son los más antiguos de ese día)
   (`arch-audit-YYYY-MM-DD.md`; ordenar por esa fecha, no por fecha de sistema) y usar la
   **herramienta de preguntas estructuradas** del cliente para preguntar cómo continuar,
   **mostrando el nombre del archivo detectado**:
@@ -171,7 +185,7 @@ reordena ni elimina ese contenido. Los cambios de cada revalidación se document
    revalidación. Es el único dato del contenido original que una revalidación sí actualiza.
 
 En una **Nueva auditoría desde cero** se ignora el histórico para el análisis, se crea un archivo
-**nuevo** `arch-audit-<hoy>.md` y se parte de la Fase 1.
+**nuevo** `arch-audit-<hoy>.md` —o `arch-audit-<hoy>-<HHMM>.md` si ya existe uno de hoy— y se parte de la Fase 1.
 
 ---
 
@@ -181,14 +195,19 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
    ```bash
    ls docs/standards/*.md 2>/dev/null || echo "No hay estándares"
    ```
-   De cada estándar de dominio técnico o funcional (identificado por su **nombre**, sin código; su línea
-   visible bajo el título es `**Dominio:** <slug>`; archivo `docs/standards/<slug>.md` o carpeta
-   `docs/standards/<slug>/README.md`) extraer su `name`, `domain`, `status` y `source_adrs`. **Si el
-   estándar no trae la línea `**Dominio:** <slug>`** (formato antiguo o más simple, previo a esta
-   convención), usar el nombre del archivo/carpeta como `domain` de facto y señalarlo como observación
-   (formato de estándar desactualizado) — no bloquea la auditoría de sus criterios. Dentro del
-   documento, cada **requisito** (`## <Nombre>` con `**ID:** <slug-requisito>`; referencia
-   `<slug-estándar>/<slug-requisito>`) es una **agrupación legible**; los criterios de todos los
+   De cada estándar de dominio técnico o funcional (identificado por su **nombre**, sin código; archivo
+   `docs/standards/<slug>.md` o carpeta `docs/standards/<slug>/README.md`) extraer del **frontmatter YAML**
+   su `name`, `domain`, `status` y `source_adrs` — es ahí donde `arch-manage` los escribe
+   (`assets/standard-template.md`), no en una línea del cuerpo. **Si falta el frontmatter o la clave
+   `domain`** (estándar previo a esta convención, o escrito a mano), usar el nombre del archivo/carpeta como
+   `domain` de facto y señalarlo como observación (formato de estándar desactualizado) — no bloquea la
+   auditoría de sus criterios. Dentro del
+   documento, cada **requisito** (`## <Nombre>` con `**ID:** <slug-requisito>` y `**Estado:**`;
+   referencia `<slug-estándar>/<slug-requisito>`) es una **agrupación legible**. **Leer ese estado**
+   (si falta el campo, tratarlo como `Active`): los criterios de un requisito `Deprecated` o
+   `Superseded` se **listan pero no generan hallazgo con prioridad ni afectan el veredicto** —igual
+   que los de un estándar `Draft`—, salvo que el código siga dependiendo de ellos. Es lo que permite
+   retirar una norma suelta sin tumbar el estándar entero. los criterios de todos los
    requisitos viven juntos en la tabla única `## Criterios de cumplimiento`, al final del documento
    (antes de `## Referencias`). Extraer **de cada fila `CR-XXX`** (la unidad auditable; referencia
    global `<slug-estándar>/CR-XXX`): `ID` (`CR-XXX`), `Requisito` (slug del requisito al que
@@ -405,7 +424,7 @@ flujo de `Comportamiento en Revalidación` descrito en la Fase 0 — no se reesc
    - Sección de reglas **No verificables**.
    - Sección de **Decisiones sin criterio** (opcional): ADR `Accepted` con regla enforceable que no fijó ningún criterio (`emits: []`) → sugerir emitirlo vía `arch-manage`.
    - Sección de **Observaciones** (opcional): notas operativas que no son un hallazgo de incumplimiento (fitness function no registrada en el archivo de checks de su estándar, runner o checks escritos en un lenguaje ajeno al stack del repo, estándar/ADR en formato antiguo, dependencia rechazada en la Fase 3.5, etc.) — es el destino de cualquier "señalar/anotar como observación" mencionado en las fases anteriores.
-4. **Nunca sobrescribir** un informe anterior: el nombre lleva la fecha para conservar el histórico. Si ya existe un `arch-audit-<hoy>.md` del mismo día, actualizarlo (no duplicar).
+4. **Nunca sobrescribir** un informe anterior: el nombre lleva la fecha para conservar el histórico. Si ya existe un `arch-audit-<hoy>.md`, **no se sobrescribe**: una auditoría nueva del mismo día se guarda como `arch-audit-<hoy>-<HHMM>.md`, y una revalidación añade su entrada en `## Revalidaciones` del informe existente. Al buscar la auditoría previa, desempatar por el sufijo horario y, si no lo hay, por la fecha de modificación.
 
 El formato exacto de cada hallazgo (qué campos lleva y en qué orden) es el que ya trae
 `assets/audit-template.md` — no se repite aquí; seguir esa plantilla al redactar.
@@ -433,7 +452,7 @@ qué hacer según acepte o rechace.
 ## Fase 4 — Confirmar
 
 Al terminar, mostrar al usuario:
-- Ruta del informe (nuevo `arch-audit-<hoy>.md`, o el mismo archivo si fue revalidación).
+- Ruta del informe (el `arch-audit-<hoy>[-<HHMM>].md` nuevo, o el mismo archivo si fue revalidación).
 - El veredicto vigente (con la fecha/hora de revalidación si aplica) y el conteo de hallazgos por prioridad (p. ej. "🔴 2 · 🟡 3 · ⚪ 1").
 - Resumen de fitness functions: cuántas se ejecutaron (PASS/FAIL/WARN) y cuántas se sugiere crear.
 - Resultado de la verificación de dependencias (Fase 3.5): cuáles faltaban, si se instalaron o quedaron señaladas en el informe.

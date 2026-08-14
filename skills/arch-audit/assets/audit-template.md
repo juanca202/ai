@@ -10,7 +10,7 @@ agrupado por su requisito (`<estándar>/<slug-requisito>`, una agrupación legib
 redactado de forma medible, con RFC 2119 cuando es normativa. Se audita el cumplimiento de esos
 criterios y de AGENTS.md contra el estado real del repo, citando el ADR de origen de cada criterio.
 Mantener la estructura: resumen → hallazgos agrupados por prioridad → fitness functions → reglas no
-verificables → decisiones sin criterio → revalidaciones (si las hay).
+verificables → decisiones sin criterio → observaciones → revalidaciones (si las hay).
 Un hallazgo = un criterio incumplido (`<estándar>/CR-XXX`) o una regla de AGENTS.md.
 
 Todo el contenido hasta "## Reglas no verificables por inspección estática" (incluida la cabecera)
@@ -131,9 +131,17 @@ que falla es WARN, no cambia el veredicto).
 
 ### Existentes
 
-| Criterio (CR) | Enfoque | Fitness function / herramienta | Comando ejecutado | Resultado |
-|---------------|---------|-------------------------------|-------------------|-----------|
-| {{api/CR-001}} | {{bloqueante \| warning}} | {{dependency-cruiser: no-rest-endpoints}} | {{npx depcruise --config .dependency-cruiser.js src}} | {{❌ FAIL (2 violaciones) \| ✅ PASS \| ⚠️ WARN \| ⚠️ No ejecutable: falta runtime}} |
+| Criterio (CR) | Enfoque | Fitness function / herramienta | Comando ejecutado | ¿Registrada? | Resultado |
+|---------------|---------|-------------------------------|-------------------|--------------|-----------|
+| {{api/CR-001}} | {{bloqueante / warning}} | {{dependency-cruiser: no-rest-endpoints}} | {{npx depcruise --config .dependency-cruiser.js src}} | {{sí / no}} | {{❌ FAIL (2 violaciones) / ✅ PASS / ⚠️ WARN / ⚠️ No ejecutable: falta runtime}} |
+
+<!--
+«¿Registrada?» = si la fitness function está declarada en el archivo de checks de su estándar
+(`checks/<slug>.<ext>`) o solo existe suelta en el repo. Una que corre pero nadie declaró es una
+observación: el estándar no la conoce, así que nada garantiza que siga corriendo mañana.
+En una tabla, las opciones de un placeholder se separan con / en vez de con | (un pipe sin escapar
+partiría la celda).
+-->
 
 {{Si hay violaciones, detallarlas bajo el hallazgo del criterio correspondiente. Si no hay fitness functions existentes, escribir "Ninguna detectada.".}}
 
@@ -179,7 +187,7 @@ Opcional. Notas operativas que no son un hallazgo de incumplimiento (no van bajo
 decisión sin criterio, pero que la próxima auditoría o el mantenimiento del harness debería conocer.
 Ejemplos: una fitness function ejecutada individualmente porque no está registrada en el archivo de
 checks de su estándar (scripts/arch/checks/<slug-estándar>.<ext>); un runner o checks escritos en un
-lenguaje ajeno al stack del repo; un estándar o ADR en formato antiguo (sin "**Dominio:**", sin "emits",
+lenguaje ajeno al stack del repo; un estándar o ADR en formato antiguo (sin frontmatter o sin la clave "domain", sin "emits",
 o con los criterios en tablas por requisito en vez de la tabla única); una dependencia que el
 usuario rechazó instalar (Fase 3.5). Si no hay ninguna, omitir esta sección o escribir "Ninguna.".
 -->
