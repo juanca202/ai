@@ -34,9 +34,9 @@ aprobados — nadie más los vuelve a crear después.
 Decidir el idioma de los mensajes al usuario y de lo que se le pasa a `arch-manage` en este orden;
 detenerse en el primer paso que aplique:
 
-1. Si en el contexto de la sesión existe una preferencia de idioma del usuario, usarla.
-2. Si hay una preferencia registrada en `.agents/MEMORY.md` (línea `preferred language: <código>`), usarla.
-3. Si no, usar el idioma del mensaje del usuario y preguntar si desea persistir esa preferencia en `.agents/MEMORY.md`.
+1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>`. Es la clave canónica que escribe `arch-init`; si existe, manda.
+2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesión.
+3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md`.
 4. Si no se puede inferir, **preguntar** qué idioma prefiere; no decidir el idioma por cuenta propia.
 
 ---
