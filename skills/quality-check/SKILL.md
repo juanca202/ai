@@ -11,7 +11,7 @@ Ejecuta la **batería de checks automatizados** que el stack exige (tipado, lint
 
 > **Alcance: solo el plano automatizado.** Este skill responde a «¿el código corre y cumple las reglas?». La pregunta «¿resuelve el problema correcto y está bien diseñado?» es del skill **[`code-review`](../code-review/SKILL.md)** (revisión cualitativa). Y «¿cada criterio de aceptación está probado?» es de **`trace-validate`**. Son **tres skills independientes**, cada uno con su veredicto e informe; quien los encadena es el orquestador de cierre (`work-integrate`, `pr-create`). Ver [Relación con otros skills](#relación-con-otros-skills).
 >
-> **Audita, no arregla.** **Nunca corrige por iniciativa propia**; aplica correcciones **solo si el usuario lo autoriza explícitamente** y, tras corregir, **vuelve a ejecutar**. Fuera de un ciclo de implementación, **entregar solo el informe es un resultado válido y frecuente**: se pregunta antes de tocar código (ver [Corrección de fallos](#corrección-de-fallos)). No edita configuración, no instala dependencias ni hace commit/push/merge sin instrucción explícita.
+> **Audita, no arregla.** **Nunca corrige por iniciativa propia**; aplica correcciones **solo si el usuario lo autoriza explícitamente** y, tras corregir, **vuelve a ejecutar**. Fuera de un ciclo de implementación, **entregar solo el informe es un resultado válido y frecuente**: se pregunta antes de tocar código (ver [Corrección de fallos](#corrección-de-fallos)). No edita configuración, no instala dependencias ni hace commit/push/merge sin instrucción explícita. (**Única excepción:** dejar su propia caché ignorada en el `.gitignore` —añadiendo esa línea, y creando el archivo si no existiera—, ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate).)
 >
 > **Proceso iterativo:** toda corrección reinicia la corrida completa hasta un veredicto estable.
 >
@@ -38,7 +38,7 @@ Carga cada archivo **solo cuando lo necesites** (rutas relativas a la raíz del 
 
 | Archivo | Qué contiene | Cuándo leerlo |
 |---------|--------------|---------------|
-| [`references/execution.md`](references/execution.md) | Flujo de ejecución paso a paso (Pasos 1–5), formato del informe, caché de pruebas, manejo de errores y anti-patterns. | Al **iniciar** la ejecución y ante cualquier situación atípica. |
+| [`references/execution.md`](references/execution.md) | Flujo de ejecución paso a paso (Pasos 1–5), formato del informe y correspondencia de etiquetas, caché de pruebas, manejo de errores y anti-patterns. | Al **iniciar** la ejecución y ante cualquier situación atípica. |
 | [`references/stacks.md`](references/stacks.md) | Detección de ecosistema, categoría de cada check por stack, comandos y parseo por herramienta. | En el Paso 1, **una vez identificado** el stack (no antes). |
 | [`assets/quality-check-template.md`](assets/quality-check-template.md) | Plantilla canónica del informe. | En el Paso 4, para rellenar el informe. |
 
@@ -82,9 +82,11 @@ Todo check pertenece a **una** de estas tres categorías (sin solape).
 
 Precedencia: `❌ Rechazado` > `⚠️ Incompleto` > `✅ Aprobado`.
 
-Además de los estados de check, el informe usa `⏸️ No ejecutado` para los checks que **sí correspondían** pero quedaron sin correr por el **fail-fast** del tipado. No es `N/A` (sí correspondían) ni `SKIPPED` (no hay problema de tooling): el veredicto ya está determinado por el FAIL que disparó el fail-fast, así que `⏸️` no lo altera.
+Además de los estados de check, el informe usa `⏸️ Pendiente` para los checks que **sí correspondían** pero quedaron sin correr por el **fail-fast** del tipado. No es `N/A` (sí correspondían) ni `SKIPPED` (no hay problema de tooling): el veredicto ya está determinado por el FAIL que disparó el fail-fast, así que `⏸️` no lo altera.
 
-> **Este veredicto cubre solo el plano automatizado.** No lo mezcles con el de `code-review` ni con el de `trace-validate`: cada skill emite el suyo y el orquestador (`work-integrate`, `pr-create`) exige **las tres** puertas en aprobado antes de integrar o crear el PR.
+> **Los estados de check se nombran en inglés aquí y en español en el informe.** `PASS`/`FAIL`/`SKIPPED`/`N/A` son el vocabulario canónico de este documento, de `stacks.md` y del `result` de `test-run.json`; el informe que lee el usuario los muestra como **Pasó** / **Falló** / **Omitido** / **No aplica** (más **Pendiente** para el `⏸️`). La correspondencia exacta está en [`references/execution.md` → Formato del informe](references/execution.md#formato-del-informe). Ojo con el solape: `✅` como **estado de un check** significa «Pasó», mientras que `✅ Aprobado` es el **veredicto** del informe entero.
+
+> **Este veredicto cubre solo el plano automatizado.** No lo mezcles con el de `code-review` ni con el de `trace-validate`: cada skill emite el suyo y el orquestador (`work-integrate`, `pr-create`) exige **las tres** puertas en aprobado antes de integrar o crear el PR. (Única salvedad: en un **PR de promoción** —`develop → master`—, `pr-create` solo exige esta puerta, porque cada trabajo ya pasó las tres al integrarse; ver [`pr-create`](../pr-create/SKILL.md#puertas-en-un-pr-de-promoción).)
 >
 > **Ojo con el símbolo `⚠️` en el cierre:** aquí (y en `code-review`) `⚠️ Incompleto` **bloquea**; en `trace-validate`, `⚠️ Aprobado con observaciones` **no bloquea** (se muestran las observaciones y se continúa). Mismo símbolo, efecto de compuerta opuesto — no asumir equivalencia al leer los tres informes juntos.
 
@@ -152,7 +154,7 @@ Las **claves** de los modificadores son siempre en inglés (estándar). Si el us
 2. **Ejecutar los checks** secuencialmente según el catálogo.
 3. **Evaluar el resultado y el veredicto** con la tabla de [Veredicto](#veredicto). Si hay FAIL, mostrar el reporte y **preguntar** qué hacer; nunca corregir sin autorización. Dentro de una implementación, la pregunta es si se corrige; **fuera de una implementación**, ofrecer además la salida **«solo el informe»**. Si el usuario autoriza corregir y la rama tiene un artefacto identificable (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin), la corrección se **delega en `work-implement`**; solo si no hay artefacto de ningún tipo se aplica aquí — ver [Corrección de fallos](#corrección-de-fallos).
 4. **Construir informe:** rellenar [`assets/quality-check-template.md`](assets/quality-check-template.md).
-5. **Registro y salida:** escribir siempre el informe en `docs/audits/quality-check.md` y la caché en `.sdd-devkit/test-run.json` (creando los directorios si no existen), más un resumen en el chat. **Excepción `tests-only`:** no hay informe ni veredicto; el único artefacto es `test-run.json`. **No** hacer commit/push/merge sin instrucción explícita.
+5. **Registro y salida:** escribir siempre el informe en `docs/audits/quality-check.md` y —**solo si la corrida ejecutó las cuatro suites de pruebas**— la caché en `.sdd-devkit/test-run.json` (creando los directorios si no existen), más un resumen en el chat. **Excepción `tests-only`:** no hay informe ni veredicto; el único artefacto es `test-run.json`. **No** hacer commit/push/merge sin instrucción explícita.
 
 > **Tras cualquier corrección, el código cambió: recalcular el fingerprint** (Paso 1) antes de escribir la caché. Escribir un `test-run.json` con el fingerprint previo lo vuelve falso — afirmaría corresponder a un estado del código que ya no existe.
 
@@ -248,50 +250,109 @@ nuevo en este skill.
 **Ubicación fija — `.sdd-devkit/test-run.json`**, en la **raíz del repositorio**, **no** por unidad: como la
 corrida es siempre **completa** sobre la rama consolidada, su caché no pertenece a ninguna `US`/`WI`. Vive
 separada de `docs/` porque no es documentación sino un artefacto de máquina que consume `trace-validate`.
-Se **sobrescribe** en cada corrida (es el estado vigente de la rama) y **se versiona** con el repo, para que
-viaje en el PR y una corrida posterior pueda reutilizarla.
+Se **sobrescribe** en cada corrida: es el estado vigente de la rama, no un histórico.
 
-Se escribe **siempre**, exista o no `docs/specs/`: el consumidor es `trace-validate`, que también opera
+> **No se versiona: es una caché local y desechable.** El repositorio destino debe ignorarla con la línea
+> `.sdd-devkit/test-run.json` en su `.gitignore` — solo ese archivo, no el directorio, por si el plugin
+> llegara a escribir ahí algo que sí convenga versionar. Comprobarlo con `git check-ignore -q` (no con un
+> grep de la línea: un repo que ya ignore `.sdd-devkit/` entero ya cumple) y, si no lo está, **añadir esa
+> línea es la única edición de configuración que este skill hace sin preguntar**, y no se reporta al
+> usuario: es infraestructura del propio artefacto, no una decisión suya.
+>
+> **Se hace en el Paso 1, antes de calcular el fingerprint.** El `.gitignore` es un archivo oculto de la
+> raíz y la receta **no** excluye esos: tocarlo mueve la clave. Normalizarlo después de calcularla dejaría
+> un `test-run.json` sellado con un hash que ya no corresponde al árbol, y la caché no volvería a darse por
+> fresca nunca.
+>
+> **Consecuencias que sí importan:** la caché **no viaja en el PR** ni entre máquinas, así que un clon
+> limpio, un runner de CI o un compañero que retome la rama **siempre re-ejecutan** las pruebas la primera
+> vez. Es el comportamiento correcto: un resultado producido en otra máquina, con otras dependencias
+> instaladas, no es evidencia de nada aquí. Y como el fingerprint ya excluye las carpetas ocultas, que el
+> archivo esté ignorado no cambia la clave de frescura.
+>
+> **Presencia y ausencia son ambas normales.** Si existe y está fresco, se reutiliza; si no existe, se
+> genera. Ninguno de los dos casos merece un aviso al usuario.
+
+Se escribe en **toda corrida completa de pruebas**, exista o no `docs/specs/` (lo que la condiciona es que se hayan ejecutado las cuatro suites, no que el repo sea spec-driven): el consumidor es `trace-validate`, que también opera
 sobre artefactos externos al plugin (ver [Artefactos externos al plugin](#artefactos-externos-al-plugin)).
-Crear `.sdd-devkit/` si no existe. Solo si el usuario pide explícitamente no crear ese directorio (o el repo
-lo tiene ignorado en `.gitignore`, en cuyo caso no viajaría en el PR), entregar los resultados en la
-respuesta y advertir que no habrá reutilización entre corridas. La misma excepción aplica a `docs/audits/`.
+Crear `.sdd-devkit/` si no existe. Solo si el usuario pide explícitamente no crear ese directorio, entregar
+los resultados en la respuesta y advertir que no habrá reutilización entre corridas. La misma excepción
+aplica a `docs/audits/` — que, ese sí, **se versiona**: el informe es la evidencia que el revisor lee en el PR.
 
-**Fingerprint canónico del estado del código** — clave de frescura compartida entre los **dos skills que
-cachean**: este y `trace-validate`. (`code-review` no calcula fingerprint ni tiene caché: siempre revisa
-el diff de nuevo; solo aparece porque su informe está en la lista de exclusiones.) Hash reproducible del commit + working tree + cambios
-sin commitear, **excluyendo los artefactos generados** —todo `docs/audits/`, todo `.sdd-devkit/` y los
-`trace-report.md` de cada trabajo— para que escribirlos no desplace la clave:
+**Fingerprint canónico del estado del código** — clave de frescura compartida entre las **tres puertas del
+cierre**, cada una sobre su propio artefacto: `test-run.json` aquí, el `trace-report.md` de
+[`trace-validate`](../trace-validate/SKILL.md#reutilización-del-reporte-idempotencia) y el
+`docs/audits/code-review.md` de [`code-review`](../code-review/SKILL.md#reutilización-del-informe-idempotencia).
+(`code-review` le añade además el commit de la rama base, porque su unidad es un diff con dos lados; el
+`FINGERPRINT` en sí es idéntico en las tres.) Hash reproducible del commit + working tree + cambios
+sin commitear **del código y de la configuración visible**, excluyendo tres cosas para que escribirlas no
+desplace la clave: **toda carpeta oculta** (empieza por `.`, en la raíz o anidada), **todo `docs/`** y los
+**`trace-report.md`** que vivan fuera de `docs/`:
 
 ```bash
-FINGERPRINT=$( { git rev-parse HEAD; \
-  git status --porcelain -- ':(top,exclude)docs/audits' ':(top,exclude).sdd-devkit' ':(exclude,glob)**/trace-report.md'; \
-  git diff HEAD          -- ':(top,exclude)docs/audits' ':(top,exclude).sdd-devkit' ':(exclude,glob)**/trace-report.md'; \
+ROOT=$( git rev-parse --show-toplevel )
+EXC=( ':(top,exclude,glob)**/.*/**' ':(top,exclude,glob)**/docs/**' ':(top,exclude,glob)**/trace-report.md' )
+FINGERPRINT=$( { git -C "$ROOT" ls-files -s              -- "${EXC[@]}"; \
+                 git -C "$ROOT" status --porcelain -uall -- "${EXC[@]}"; \
+                 git -C "$ROOT" diff                     -- "${EXC[@]}"; \
 } | git hash-object --stdin )
 ```
 
-Cubre todo lo relevante (código fuente, specs/criterios, tests); no cubre el **contenido** de un archivo
-que permanezca sin trackear, ni cambios de **entorno** (dependencias instaladas, red, servicios) que no
-tocan el árbol. La caché es **fresca** si el `fingerprint` guardado coincide con el
-recalculado ahora; si difiere, hubo cambios y es **obsoleta** (re-ejecutar).
+Las tres piezas se reparten el estado: `ls-files -s` da el contenido **trackeado** (el SHA de cada blob del índice), `diff` los cambios **sin stagear** del árbol, y `status -uall` las rutas **sin trackear**. Juntas cubren el estado del código sin referenciar `HEAD` ni una sola vez, que es lo que hace la clave utilizable (ver la nota de abajo).
+
+Cubre **código fuente, tests y manifiestos** — todo aquello de lo que dependen los resultados de las
+herramientas. La caché es **fresca** si el `fingerprint` guardado coincide con el recalculado ahora; si
+difiere, hubo cambios y es **obsoleta** (re-ejecutar).
+
+> **Qué queda deliberadamente fuera, y qué implica.** La exclusión de `docs/` mantiene la clave estable
+> frente a la documentación, pero también deja fuera **los criterios de aceptación** (`docs/specs/**/README.md`).
+> Para este skill da igual —una prueba no cambia de resultado porque se reescriba un criterio—, pero **sí
+> importa en `trace-validate` y en `code-review`**, cuyo veredicto depende de esos criterios: si se editan
+> sin tocar el código, el informe se dará por fresco y hay que **revalidar a mano** (ver la nota de cada uno).
+> Tampoco se cubren los cambios de **entorno** (dependencias instaladas, red, servicios) que no tocan el árbol.
 
 > **Nombre único de la clave.** En todo el repo esta variable se llama `FINGERPRINT` y su valor persistido
 > es `git.fingerprint`. No usar alias (`FP`, `HASH`) en ningún skill: el mismo valor debe ser reconocible
 > a simple vista cuando un skill delega en otro.
 >
-> **La exclusión es por directorio, no por nombre de archivo.** `docs/audits` cubre el informe vigente
-> (`quality-check.md`, `code-review.md`), las copias con marca de tiempo de `save-report` y **también los
-> informes de `arch-audit`**; `.sdd-devkit` cubre `test-run.json`. Así ningún artefacto que produce la propia
-> tubería puede desplazar la clave de frescura — correr `arch-audit` ya no invalida un `trace-report.md`. El
-> único generado fuera de esos directorios es el `trace-report.md` de cada trabajo, que vive junto a su
-> artefacto y por eso lleva su propio patrón.
+> **La exclusión es por directorio, no por nombre de archivo.** Los tres pathspecs, uno a uno:
 >
-> **La magia `top` no es opcional.** `:(top,exclude)` ancla el pathspec a la **raíz del repositorio**. Sin
-> ella, git lo resolvería relativo al directorio de trabajo y, en un monorepo donde la corrida se lanza desde
-> el módulo elegido, `docs/audits` se leería como `<módulo>/docs/audits` — el de la raíz dejaría de excluirse
-> y escribir el informe invalidaría la caché en cada corrida. Excluir el directorio **sin** `glob` (`docs/audits`,
-> no `docs/audits/**`) es igual de deliberado: cubre tanto los archivos de dentro como la entrada del propio
-> directorio cuando aún no está trackeado, que es el caso en la primera corrida de un repo.
+> | Pathspec | Qué saca de la clave |
+> |----------|----------------------|
+> | `':(top,exclude,glob)**/.*/**'` | El contenido de **cualquier carpeta oculta**, en la raíz o anidada: `.sdd-devkit/` (donde vive `test-run.json`), y de paso `.git/`, `.github/`, `.venv/`, `.cache/`, `.idea/`… El `**/` inicial cubre los dos niveles con un solo patrón. **Los archivos ocultos de la raíz (`.gitignore`, `.eslintrc.json`, `.env`) NO se excluyen**: son configuración que sí puede cambiar el resultado de un check. |
+> | `':(top,exclude,glob)**/docs/**'` | **Cualquier `docs/`, en la raíz o dentro de un módulo**: el informe vigente (`quality-check.md`, `code-review.md`), las copias con marca de tiempo de `save-report`, los informes de `arch-audit`, los `trace-report.md` que viven junto a su artefacto y el resto de documentación. El `**/` inicial es lo que cubre el caso monorepo: `:(top,exclude)docs` a secas excluiría **solo** el `docs/` de la raíz, y en una corrida lanzada desde `packages/api/` el informe se escribe en `packages/api/docs/audits/` — que seguiría dentro de la clave y la desplazaría en cada corrida. |
+> | `':(top,exclude,glob)**/trace-report.md'` | Los `trace-report.md` de artefactos que viven **fuera** de `docs/` — `trace-validate` acepta artefactos externos al plugin y escribe el reporte junto a ellos. Sin este patrón, ese caso quedaría dentro de la clave. |
+>
+> Así ningún artefacto que produce la propia tubería puede desplazar la clave de frescura: correr
+> `arch-audit` no invalida un `trace-report.md`, ni escribir un informe invalida el `test-run.json`.
+>
+> **Nada de `HEAD` — y es deliberado.** La receta **no** referencia `HEAD` en ningún punto, porque `HEAD` no
+> admite pathspec: cualquier commit lo mueve, incluidos los que solo tocan rutas excluidas. Con `git rev-parse HEAD`
+> en la receta, el commit de los propios artefactos que hace el cierre (`work-integrate` paso 9, `pr-create`
+> paso 5) caducaba **las tres claves a la vez** y obligaba a re-ejecutar toda la batería de pruebas — la
+> idempotencia no sobrevivía al flujo que la usa. `ls-files -s` da la misma señal (el SHA de cada blob
+> trackeado) **respetando los pathspecs**, y de paso funciona en un repo **sin ningún commit**, donde
+> `git rev-parse HEAD` aborta con `fatal: bad revision`.
+>
+> **`git -C "$ROOT"` no es cosmético.** `status` y `diff` imprimen rutas **relativas al directorio de trabajo**:
+> el mismo árbol da hashes distintos según desde dónde se lance la corrida. Anclando los tres comandos a la raíz,
+> el `FINGERPRINT` es idéntico desde la raíz o desde `packages/api/`, que es lo que permite compararlo entre
+> corridas y entre skills.
+>
+> **La magia `top` tampoco es opcional.** `:(top,…)` ancla el pathspec a la **raíz del repositorio**; sin ella,
+> git lo resolvería relativo al directorio de trabajo y las exclusiones se desplazarían con el cwd.
+>
+> **`-uall` tampoco es opcional.** Sin él, `git status --porcelain` **colapsa** los directorios sin trackear a
+> una sola entrada (`?? docs/`) y las exclusiones de dentro no llegan a aplicarse — el caso típico es la
+> primera corrida en un repo, donde nada de esto está aún versionado. Con `-uall` git lista archivo por
+> archivo y los pathspecs filtran de verdad. Aun así, el contenido de un archivo que **permanezca** sin
+> trackear no entra en la clave: solo su ruta. Si el resultado pudiera depender de un archivo nuevo aún sin
+> añadir a git, tratar la caché como no concluyente.
+>
+> **La clave es conservadora, nunca laxa.** Commitear cambios de **código** sí la mueve, aunque el árbol
+> resultante sea idéntico al que se probó: `status` distingue un cambio stageado de uno ya commiteado. Eso
+> provoca alguna revalidación de más, que es el error barato; el caro —dar por fresca una caché que ya no
+> corresponde— no puede ocurrir por esta vía.
 
 **Esquema `test-run.json`** (`schema: test-run/v1`) — **esta es la definición canónica y única**; los
 consumidores la referencian, no la copian:
@@ -334,7 +395,7 @@ El detalle operativo (cuándo escribirla, cómo reutilizarla en `tests-only`) es
 Usar este skill **solo cuando se le invoca explícitamente** (ni de forma proactiva, ni "por si acaso", ni al detectar que se terminó código):
 
 - **El usuario lo pide explícitamente** — solicita correr las verificaciones o las pruebas, validar antes de PR/merge, o nombra este skill.
-- **Otro skill lo invoca explícitamente**, p. ej. `work-integrate` o `pr-create`, que exigen `✅ Aprobado` **aquí y** en `code-review` antes de integrar o crear el PR.
+- **Otro skill lo invoca explícitamente**, p. ej. `work-integrate` o `pr-create`, que exigen `✅ Aprobado` **aquí y** en `code-review` antes de integrar o crear el PR. En un **PR de promoción**, `pr-create` invoca solo esta puerta: es la única que sigue teniendo algo que demostrar sobre la rama consolidada.
 - **`trace-validate` delega en este skill la ejecución de pruebas.** `trace-validate` no corre pruebas por sí mismo: reutiliza el `test-run.json` fresco de una corrida previa de este skill o, si no hay una fresca, invoca este skill en modo `tests-only` para producirlo. Este skill es la **única** autoridad que ejecuta la batería de pruebas del trabajo. Ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
 - **`work-implement` recibe la delegación de las correcciones** cuando hay un artefacto de trabajo en curso (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin) y el usuario las autoriza. Ver [Corrección de fallos](#corrección-de-fallos).
 
@@ -356,8 +417,9 @@ Es un proceso **posterior a la implementación**: no forma parte del desarrollo 
 
 El idioma del informe se decide en este orden; detenerse en el primer paso que aplique:
 
-1. Si en el contexto de la sesión existe una preferencia de idioma del usuario, usarla.
-2. Si no, usar el idioma del mensaje del usuario y **preguntar al usuario si desea persistir su preferencia de idioma en la memoria**.
-3. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta, **preguntar si desea persistir su preferencia de idioma en la memoria**; no decidir el idioma por cuenta propia.
+1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>`. Es la clave canónica que escribe `arch-init`; si existe, manda.
+2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesión.
+3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md` con `preferred language: <código>`.
+4. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta, **preguntar si desea persistirlo** en `.agents/MEMORY.md`; no decidir el idioma por cuenta propia.
 
 Los mensajes de error de las herramientas no se traducen.

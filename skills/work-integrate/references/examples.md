@@ -9,12 +9,12 @@ Referencias del skill **work-integrate**. Cubren los dos tipos de trabajo (`US-X
 **Ejemplo 1 — Historia de usuario (camino feliz)**
 
 - *Entrada:* Rama `feature/US-042-exportacion-csv`, working tree limpio, `progress.md` con tres TK todas en `Done`, reflog indica `Created from develop`.
-- *Salida:* `quality-check` → **✅ Aprobado** (persiste `.sdd-devkit/test-run.json`); `code-review` → **✅ Aprobado**; `trace-validate` → **✅ Aprobado** (reutiliza ese `test-run.json`, sin re-ejecutar pruebas); `git checkout develop` → `git merge --no-ff feature/US-042-exportacion-csv -m "Merge US-042: exportacion-csv"` → reporte: «Merged 7 commits de `feature/US-042-exportacion-csv` → `develop`. Commit de merge: `a1b2c3d`. HEAD en `develop`, working tree limpio. La rama no fue borrada ni se hizo push.»
+- *Salida:* `quality-check` → **✅ Aprobado** (persiste `.sdd-devkit/test-run.json`); `code-review` → **✅ Aprobado**; `trace-validate` → **✅ Aprobado** (reutiliza ese `test-run.json`, sin re-ejecutar pruebas); `git checkout develop` → `git merge --no-ff --no-commit feature/US-042-exportacion-csv` → `git rm` de `docs/audits/quality-check.md` y `docs/audits/code-review.md` → `git commit -m "Merge US-042: exportacion-csv"` → reporte: «Merged 7 commits de `feature/US-042-exportacion-csv` → `develop`. Commit de merge: `a1b2c3d`. HEAD en `develop`, working tree limpio. Los informes de las puertas quedaron en la rama del trabajo, no se integraron. La rama no fue borrada ni se hizo push.»
 
 **Ejemplo 2 — Work item (progress.md por carpeta del WI)**
 
 - *Entrada:* Rama `fix/WI-007-fuga-memoria`, working tree limpio, `docs/specs/work-items/WI-007-fuga-memoria/progress.md` con todas las unidades del WI en `Done`, reflog indica `Created from main`.
-- *Salida:* `git checkout main` → `git merge --no-ff fix/WI-007-fuga-memoria -m "Merge WI-007: fuga-memoria"` → reporte con commits integrados y hash de merge.
+- *Salida:* `git checkout main` → `git merge --no-ff --no-commit fix/WI-007-fuga-memoria` → `git rm` de los dos informes de `docs/audits/` → `git commit -m "Merge WI-007: fuga-memoria"` → reporte con commits integrados y hash de merge.
 
 **Ejemplo 3 — Unidad pendiente**
 
@@ -40,7 +40,7 @@ Referencias del skill **work-integrate**. Cubren los dos tipos de trabajo (`US-X
 
 **Ejemplo 6 — Conflicto en el merge**
 
-- *Entrada:* Verificaciones OK, rama base `main`, `git merge --no-ff` produce conflictos en `src/app/Module.java`.
+- *Entrada:* Verificaciones OK, rama base `main`, `git merge --no-ff --no-commit` produce conflictos en `src/app/Module.java`.
 - *Comportamiento:* El agente ejecuta `git merge --abort`, deja el repo en el estado previo, lista los archivos en conflicto y pide al usuario resolverlos manualmente. No reintenta.
 
 **Ejemplo 7 — Rama con prefijo inválido**
@@ -57,6 +57,8 @@ Referencias del skill **work-integrate**. Cubren los dos tipos de trabajo (`US-X
 
 ## Anti-patterns
 
+- **Correr este skill sobre una rama que ya se integró por un PR en la plataforma.** El delta contra la base es `0`, git responde *Already up to date*, y seguir adelante crea un commit que no es un merge y que solo borra los dos informes. El paso 10 lo corta antes.
+- Encadenar `pr-create` (PR de implementación) **y** este skill sobre el mismo trabajo: son rutas de integración alternativas, no fases sucesivas.
 - Hacer merge sin verificar `progress.md` o ignorando unidades no `Done`.
 - Buscar el `progress.md` de un WI en un archivo compartido `docs/specs/work-items/progress.md`; cada WI tiene su propio `progress.md` dentro de su carpeta `WI-XXX-[kebab-case]/`.
 - Hacer merge sin haber ejecutado las **tres** puertas de cierre (`quality-check`, `code-review`, `trace-validate`). En particular, `quality-check` y `code-review` son independientes: un **❌ Rechazado** o **⚠️ Incompleto** en cualquiera de los dos bloquea el merge, que solo procede con **✅ Aprobado** en ambos.
@@ -66,6 +68,9 @@ Referencias del skill **work-integrate**. Cubren los dos tipos de trabajo (`US-X
 - Aceptar ramas sin un identificador de trabajo reconocible o con prefijos no válidos para su tipo (p. ej. `bugfix/`, `hotfix/`, o `fix/` aplicado a una US).
 - Asumir `main`, `master` o `develop` como rama base sin confirmarlo por reflog, config o usuario.
 - Resolver conflictos automáticamente o usar `--strategy=ours` / `--strategy=theirs` para **hacerlo pasar**.
+- **Dejar que `docs/audits/quality-check.md` y `docs/audits/code-review.md` entren en la rama base**: son fotos de la rama del trabajo, y en la base quedarían afirmando un veredicto que nadie corrió allí. Se retiran del índice entre el `--no-commit` y el `git commit` del merge.
+- Pasarse de celoso y borrar **todo** `docs/audits/`: los `arch-audit-*.md` y las copias de `save-report` sí pertenecen a la rama base.
+- Borrar esos informes **en la rama del trabajo** para «limpiar antes de mergear»: la rama debe conservarlos: son la evidencia junto a los commits que verifican.
 - Usar merge fast-forward por defecto cuando el historial de la rama se perdería; preservar con `--no-ff` salvo petición explícita del usuario.
 - Hacer push de la rama base o borrar la rama del trabajo sin que el usuario lo pida explícitamente fuera del skill.
 - Mergear desde una rama que no encaja con el patrón de su tipo.
@@ -86,9 +91,10 @@ Posición: **cierre local** — último paso de los pipelines de trabajo (sin pu
 | | |
 |--|--|
 | **Entrada** | Rama del trabajo (`feature/US-XXX-...`, o `feature/`\|`fix/`\|`chore/`\|`refactor/` + `WI-XXX-...`); working tree con cambios pendientes se resuelve automáticamente invocando **`git-commit`** (sin preguntar si conviene invocarlo — `git-commit` sí puede pedir su propia confirmación antes de comitear); `progress.md` con cada unidad del trabajo en `Done`; puertas de cierre en aprobado: `quality-check` **✅ Aprobado**, `code-review` **✅ Aprobado** y `trace-validate` **✅ Aprobado**. |
-| **Salida** | Merge `--no-ff` a la rama base local; reporte con hash de merge. Sin push ni borrado de rama. |
+| **Salida** | Merge `--no-ff` a la rama base local, **sin los informes de las puertas** (`docs/audits/quality-check.md` y `code-review.md` se retiran antes de cerrar el commit de merge); reporte con hash de merge. Sin push ni borrado de rama. |
 | **Siguiente paso (fuera del skill)** | Push de la rama base y CI — decisión del usuario. |
-| **PR/MR (`pr-create`)** | Abrir **antes** de este skill, estando en la rama del trabajo (o con la feature ya publicada en remoto). Tras el merge local, la rama activa es la **base**; `pr-create` bloquea en `main`/`master`/`develop`/`trunk`. |
+| **PR/MR de implementación (`pr-create`)** | **Ruta alternativa a este skill, no complementaria.** Son las dos formas de integrar el mismo trabajo: el PR lo cierra con un merge **en la plataforma**, este skill con un merge **local**. Elegir una. Hacer las dos integra dos veces y, además, el merge de la plataforma propaga a la base los informes que este skill retira. Si se opta por el PR, abrirlo estando en la rama del trabajo, sin correr `work-integrate`. |
+| **PR/MR de promoción (`pr-create`)** | **Después** de este skill, y este sí encadena: con HEAD ya en la base, `pr-create` en modo promoción abre el PR de `develop` a la rama de despliegue con los trabajos acumulados. Estar en una rama protegida **no** bloquea; el skill confirma la intención antes de seguir. |
 | **Regreso a implement** | Unidad no `Done` o `progress.md` incompleto → completar en **`work-implement`** y actualizar `progress.md` antes de reintentar. |
 | **Regreso a define / plan** | Alcance reducido o unidad fuera de entrega → alinear con **`work-define`** / **`work-plan`** (US/WI), corregir `progress.md` y reintentar. |
 

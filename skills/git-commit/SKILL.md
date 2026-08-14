@@ -1,6 +1,6 @@
 ---
 name: git-commit
-description: Preparar y ejecutar git commit con mensajes Conventional Commits inferidos del diff (tipo, scope, descripción, staging). Activar cuando el usuario pida hacer commit, generar el mensaje, separar cambios en varios commits, o use invocaciones tipo `/commit`.
+description: Preparar y ejecutar git commit con mensajes Conventional Commits inferidos del diff (tipo, scope, descripción, staging). No hace push, no mergea, no toca la configuración global de git ni aplica operaciones destructivas. Activar cuando el usuario pida hacer commit, generar el mensaje, separar cambios en varios commits, o use invocaciones tipo `/commit`; también lo invocan automáticamente work-integrate y pr-create ante un working tree sucio.
 license: MIT
 ---
 
@@ -8,7 +8,7 @@ license: MIT
 
 Preparar y ejecutar commits estandarizados según [Conventional Commits](https://www.conventionalcommits.org), inferidos del diff real del repositorio.
 
-**Alcance:** captura un único cambio lógico con mensaje semántico. No hace push, no toca la configuración global de git, no aplica operaciones destructivas. Preguntar lo que no esté claro; no inventar tipo, scope ni descripción.
+**Alcance:** cada commit captura un único cambio lógico con mensaje semántico; una invocación puede producir varios (ver [Selección de flujo](#selección-de-flujo)). No hace push, no toca la configuración global de git, no aplica operaciones destructivas. Preguntar lo que no esté claro; no inventar tipo, scope ni descripción.
 
 Formato canónico:
 ```
@@ -104,6 +104,18 @@ Antes de aceptar el staging, seguir [references/secret-detection.md](references/
 | Diff cubre un único tema lógico | [Commit estándar](#flujo-commit-estándar) |
 | Diff mezcla temas sin relación (docs + feature, fix + refactor, módulos distintos) | [Múltiples cambios lógicos](#flujo-múltiples-cambios-lógicos) |
 | `git commit` falló por un pre-commit hook | [Recuperación tras fallo de hook](#flujo-recuperación-tras-fallo-de-hook) |
+| Invocado por otro skill, no por el usuario | Mismos flujos, más el [contrato de invocación](#invocación-desde-otro-skill) |
+
+## Invocación desde otro skill
+
+`work-integrate` y `pr-create` invocan este flujo **automáticamente** cuando encuentran el working tree sucio, y siguen adelante con su propio proceso según el resultado. No cambia lo que hace este skill —sigue proponiendo y confirmando con el usuario, y sigue deteniéndose ante secretos—, pero sí fija cuatro cosas:
+
+- **El objetivo es dejar el árbol limpio, no un único commit.** El alcance habitual («un cambio lógico») se refiere a cada commit, no a la invocación: si lo pendiente mezcla temas, se resuelve con el [flujo de múltiples cambios lógicos](#flujo-múltiples-cambios-lógicos) hasta que no quede nada. El invocador re-comprueba `git status` y vuelve a llamar sobre el remanente, así que dejarlo a medias solo alarga el ciclo.
+- **Contrato de salida.** Al terminar, reportar en cuál de estos tres estados se queda, porque el invocador decide con eso: **(a) limpio** — todo commiteado; **(b) parcialmente limpio por decisión de alcance** — se commiteó parte y el resto se dejó fuera a propósito (el invocador volverá a llamar sobre el remanente); **(c) detenido, con el motivo** — secretos detectados, rama protegida sin confirmar, hook que no pasa, o una decisión que el usuario no resolvió. Solo (c) bloquea al invocador, y necesita el motivo literal para reportarlo.
+- **No ejecutar `git reset` si el staging ya trae algo deliberado.** El paso 4 del flujo múltiple vacía el staging antes de cada grupo, y eso está bien cuando se parte de cero — pero un invocador puede haber preparado el índice a propósito (p. ej. `pr-create` en modo promoción hace `git rm` de los informes de las puertas antes de llamar). Antes del primer `git reset`, comprobar `git diff --cached --name-only`: si hay algo stageado que no viene de este flujo, **conservarlo** e incorporarlo como su propio grupo en vez de descartarlo.
+- **Los artefactos generados de las puertas son commiteables como cualquier otro cambio.** `docs/audits/*.md` y los `trace-report.md` van con tipo `docs`; su **borrado** también (ver la tabla de tipos).
+
+**Los borrados tienen tipo propio.** Un commit que solo elimina archivos se clasifica por lo que eran: `docs` si eran documentación o informes, `chore` si eran artefactos auxiliares, `refactor` si era código cuya funcionalidad se movió, `feat`/`fix` si el borrado es el cambio de comportamiento. No usar `chore` por defecto para todo borrado.
 
 ## Flujo: Commit estándar
 
@@ -141,7 +153,7 @@ Antes de aceptar el staging, seguir [references/secret-detection.md](references/
 1. Agrupar archivos por afinidad desde el diff (área, tipo de cambio, intención). Al agrupar, ya se puede aplicar la parte de la [detección de secretos](#detección-de-secretos-en-el-diff) que **no** requiere staging (nombre de archivo sensible: `.env*`, `*.pem`, `*.key`, `id_rsa*`, `*.p12`, `*.pfx`, contra `git status --porcelain`) — no hace falta esperar al paso 4 para eso.
 2. Proponer la lista ordenada de commits: tipo/scope, archivos y descripción tentativa de cada uno. **Marcar ya aquí** cualquier archivo sensible por nombre detectado en el paso 1 (`⚠️ <ruta> — archivo sensible, se excluirá salvo confirmación`), para que el usuario lo vea en la propuesta inicial y no se entere recién al intentar stagearlo.
 3. Esperar confirmación o ajustes antes de tocar el staging.
-4. Por cada grupo confirmado, en orden: `git reset` para vaciar staging (preserva el working tree) → `git add <archivos>` del grupo → [Validación](#validación-antes-de-ejecutar) — incluida la detección **por contenido** (`grep` sobre el diff staged), que sí necesita el staging hecho → [Propuesta](#propuesta-de-commit) y confirmación → `git commit` y registrar el SHA.
+4. Por cada grupo confirmado, en orden: `git reset` para vaciar staging (preserva el working tree; **salvo** que el índice traiga cambios preparados por el skill invocador — ver [Invocación desde otro skill](#invocación-desde-otro-skill)) → `git add <archivos>` del grupo → [Validación](#validación-antes-de-ejecutar) — incluida la detección **por contenido** (`grep` sobre el diff staged), que sí necesita el staging hecho → [Propuesta](#propuesta-de-commit) y confirmación → `git commit` y registrar el SHA.
 5. Reportar la secuencia final de SHAs y mensajes en el orden ejecutado.
 
 ## Flujo: Recuperación tras fallo de hook
@@ -177,7 +189,7 @@ Gate obligatorio antes de cada `git commit`. Detenerse si algún punto falla.
 - **Secretos:** [detección](#detección-de-secretos-en-el-diff) ejecutada sin coincidencias y sin archivos sensibles en staging.
 - **Aislamiento:** un solo cambio lógico en el commit.
 - **Operaciones seguras:** sin `--force`, `--hard`, `--no-verify`, `--amend` salvo petición explícita.
-- **Rama:** segura, o el usuario confirmó commit directo en `main`/`master`/`develop`/`release/*`. **Una sola vez por invocación** (no por cada commit): la rama no cambia entre los commits de un mismo [flujo de múltiples cambios lógicos](#flujo-múltiples-cambios-lógicos), así que la confirmación obtenida para el primer commit del lote cubre a todos los siguientes — no volver a preguntar en cada iteración del paso 4 de ese flujo.
+- **Rama:** segura, o el usuario confirmó commit directo en una rama de integración o despliegue — `main`, `master`, `develop`, `trunk`, `release/*`, y cualquier otra que el repo use como tal (`staging`, `uat`, `qa`, `produccion`). **Una sola vez por invocación** (no por cada commit): la rama no cambia entre los commits de un mismo [flujo de múltiples cambios lógicos](#flujo-múltiples-cambios-lógicos), así que la confirmación obtenida para el primer commit del lote cubre a todos los siguientes — no volver a preguntar en cada iteración del paso 4 de ese flujo.
 - **Formato:** primera línea `<type>[scope]: <description>` válida según [convenciones](#convenciones-del-mensaje) y **de 100 caracteres o menos**; breaking change y footer de issue marcados si aplican.
 - **Confirmación:** [propuesta](#propuesta-de-commit) mostrada y confirmada.
 

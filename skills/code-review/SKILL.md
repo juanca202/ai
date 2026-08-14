@@ -15,6 +15,8 @@ Revisar el **diff** de una implementación como lo haría un **ingeniero senior*
 >
 > **Alcance:** analiza, razona y **propone**. **Nunca corrige por iniciativa propia**; aplica correcciones **solo si el usuario lo autoriza explícitamente**. No hace commit/push/merge sin instrucción explícita.
 >
+> **Informe idempotente.** Si no hubo **cambios en los archivos** (ni en el código de la rama ni en su base) desde la última vez que se generó `docs/audits/code-review.md`, **no se vuelve a revisar**: se devuelven el veredicto y el resumen del informe existente. Ver [Reutilización del informe (idempotencia)](#reutilización-del-informe-idempotencia).
+>
 > **Entrada mínima:** un **diff** identificable (rama contra su base, o los archivos que el usuario indique) y la **intención** del cambio. Sin diff no hay nada que revisar; sin intención inferible, preguntar al usuario. **No se exige ningún artefacto del plugin:** la intención puede venir de un `US-XXX`/`WI-XXX`/`FT-XXX`, de cualquier otro documento de especificación, o de la rama, los commits y la descripción del PR. Ver [Origen de la intención](#origen-de-la-intención).
 
 ---
@@ -39,7 +41,7 @@ Carga cada archivo **solo cuando lo necesites** (rutas relativas a la raíz del 
 
 | Archivo | Qué contiene | Cuándo leerlo |
 |---------|--------------|---------------|
-| [`references/execution.md`](references/execution.md) | Flujo de ejecución paso a paso (Pasos 1–5), formato del informe, manejo de errores y anti-patterns. | Al **iniciar** la ejecución de la revisión y ante cualquier situación atípica. |
+| [`references/execution.md`](references/execution.md) | Flujo de ejecución paso a paso (Pasos 0–5, incluida la comprobación de frescura), formato del informe, manejo de errores y anti-patterns. | Al **iniciar** la ejecución de la revisión y ante cualquier situación atípica. |
 | [`references/qualitative-review.md`](references/qualitative-review.md) | Detalle de las tres dimensiones, modelo ISO/IEC 25010, calibración de severidad y ejemplos de buen/mal feedback. | En el Paso 3, antes de redactar hallazgos. |
 | [`assets/code-review-template.md`](assets/code-review-template.md) | Plantilla canónica del informe. | En el Paso 4, para rellenar el informe. |
 
@@ -100,7 +102,7 @@ Clasifica cada hallazgo. Solo los dos primeros niveles **bloquean**.
 
 Precedencia: `❌ Rechazado` > `⚠️ Incompleto` > `✅ Aprobado`.
 
-> **Este veredicto cubre solo el plano cualitativo.** El del plano automatizado lo emite `quality-check` y el de la cobertura funcional `trace-validate`, cada uno por separado: el cierre exige **las tres** puertas en aprobado. Un `✅ Aprobado` aquí **no** dice nada sobre si las pruebas pasan ni sobre si cada criterio está cubierto.
+> **Este veredicto cubre solo el plano cualitativo.** El del plano automatizado lo emite `quality-check` y el de la cobertura funcional `trace-validate`, cada uno por separado: el cierre de un trabajo exige **las tres** puertas en aprobado. Un `✅ Aprobado` aquí **no** dice nada sobre si las pruebas pasan ni sobre si cada criterio está cubierto. (En un **PR de promoción** —`develop → master`— esta puerta no corre: su unidad es un diff sin revisar, y ahí todo el diff ya se revisó PR a PR. Ver [`pr-create`](../pr-create/SKILL.md#puertas-en-un-pr-de-promoción).)
 >
 > **Ojo con el símbolo `⚠️` en el cierre:** aquí (y en `quality-check`) `⚠️ Incompleto` **bloquea**; en `trace-validate`, `⚠️ Aprobado con observaciones` **no bloquea**. Mismo símbolo, efecto de compuerta opuesto.
 
@@ -126,6 +128,7 @@ Las **claves** de los modificadores son siempre en inglés (estándar). Si el us
 | `working-tree` | Revisar **solo los cambios sin commitear** (`git diff HEAD` más los archivos sin trackear que sean código del proyecto), en lugar del diff completo de la rama. Para revisar durante el desarrollo, antes de commitear. Si el working tree está limpio, decirlo y terminar — no caer al diff de la rama por su cuenta. Incompatible con `base <rama>`. **No sobrescribe `docs/audits/code-review.md`.** |
 | `scope <ruta…>` | Limitar la revisión a los archivos o directorios indicados en lugar del diff completo. Combinable con `working-tree`. **No sobrescribe `docs/audits/code-review.md`.** |
 | `blocking-only` | Reportar solo hallazgos 🔴/🟠; omitir 🟡/💡 del informe. Útil en revisiones de cierre donde solo interesa lo que bloquea. |
+| `revalidate` | **Forzar la revisión** aunque el informe existente esté fresco: ignorar la comprobación de frescura del Paso 0 y ejecutar el flujo completo. Sinónimos aceptados del usuario: «revalidar», «forzar», «revisa de nuevo». Ver [Reutilización del informe (idempotencia)](#reutilización-del-informe-idempotencia). |
 | `save-report` | **Además** del informe vigente `docs/audits/code-review.md`, guardar una copia con marca de tiempo en `docs/audits/code-review-<YYYYMMDD-HHMMSS>.md`. En una revisión acotada (`working-tree`/`scope`) es el **único** destino en disco: ahí no se escribe el informe vigente. |
 
 > Los modificadores de la etapa automatizada (`no-tests`, `no-e2e`, `only <check>`, `tests-only`, `include-linter-warnings`…) **no pertenecen a este skill**: viven en [`quality-check`](../quality-check/SKILL.md). Si el usuario los pide aquí, redirigirlo a ese skill.
@@ -134,15 +137,50 @@ Las **claves** de los modificadores son siempre en inglés (estándar). Si el us
 
 ---
 
+## Reutilización del informe (idempotencia)
+
+Mismo principio de caché que [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate) y `trace-validate`: **si no hubo cambios en los archivos desde la última revisión, no se vuelve a revisar** — se devuelven el veredicto y el resumen del `docs/audits/code-review.md` existente. Revisar de nuevo un diff idéntico produciría el mismo informe y gasta el tiempo del usuario (y el contexto) sin aportar señal nueva.
+
+> **Contexto de ejecución.** Como las otras dos puertas, este skill es una **compuerta de cierre** (al integrar o antes del PR), no corre por tarea ni durante la implementación. La frescura se evalúa sobre la rama **consolidada** del cierre. Si `work-integrate` o `pr-create` invocan las puertas del cierre y el código no cambió desde la corrida anterior, esta devuelve su informe sin rehacer el análisis.
+
+**Clave de frescura — el fingerprint canónico de la tubería + el commit de la base.** Dos datos, porque el diff bajo revisión tiene **dos lados**:
+
+| Componente | Qué cubre | Cómo se obtiene |
+|------------|-----------|-----------------|
+| `FINGERPRINT` | El lado de la rama: contenido trackeado, cambios sin stagear y rutas sin trackear, **excluyendo toda carpeta oculta, cualquier `docs/` y los `trace-report.md` sueltos**. Es **el mismo valor** que calculan `quality-check` y `trace-validate`; receta exacta en [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate). | `git hash-object` sobre `ls-files -s` + `status` + `diff` (ver receta) |
+| `BASE_COMMIT` | El otro lado: el commit de la **rama base** contra la que se diffea. Un `git fetch` que mueva la base cambia el diff sin tocar el árbol local, así que el `FINGERPRINT` solo no lo detectaría. Compara **commits**, no nombres de ref: `base develop` y `base origin/develop` apuntando al mismo commit son el mismo valor. | `git rev-parse --short <base>` con la base ya resuelta (Paso 0.1) |
+
+La exclusión de `docs/` es la que hace que **escribir el propio `code-review.md` no invalide su caché**.
+
+**Comportamiento (Paso 0 del flujo):**
+
+1. Resolver la rama base y calcular `FINGERPRINT` y `BASE_COMMIT`. **Siempre**, haya caché o no: el Paso 5 los necesita para grabar la marca de pie, también en la primera corrida de un repo.
+2. Buscar `docs/audits/code-review.md`. Si no existe → no hay caché; ejecutar el flujo completo.
+3. Si existe, leer su **marca de pie** (`<!-- code-review:fingerprint=<hash> · base=<sha-corto> · generado=YYYY-MM-DD -->`) y reutilizarlo **solo si se cumple todo**: coinciden fingerprint y base, el **modo** es el mismo, el veredicto registrado es **`✅ Aprobado`**, y el usuario no pasó `revalidate`. Entonces → **no revisar**: devolver el veredicto y el resumen del informe existente, indicando que no hubo cambios desde `{{generado}}`. No reescribir el archivo, no releer el diff.
+4. Si falla cualquiera de esas condiciones, o no hay marca de pie (informes antiguos) → ejecutar el flujo completo (Pasos 1-5) y **regrabar** la marca de pie al guardar.
+5. La marca de pie **se conserva** en el documento publicado (no se elimina como el bloque de instrucciones de la plantilla).
+
+> **Solo se cachea el `✅ Aprobado`.** `❌ Rechazado` y `⚠️ Incompleto` describen una puerta abierta, y las dos formas de cerrarla —**justificar** un hallazgo bloqueante o **aportar** la intención que faltaba— no tocan el código. Si se sirvieran desde caché, la clave nunca se movería, el veredicto quedaría congelado y, como los orquestadores tienen prohibido forzar `revalidate`, el usuario que justifica en vez de corregir no podría integrar jamás. Ante un veredicto no aprobado se revisa de nuevo, arrastrando del informe anterior las justificaciones ya aceptadas.
+
+**Lo que la caché no cubre:**
+
+- **Revisiones acotadas (`working-tree`, `scope`) no se cachean ni consumen caché.** No escriben `docs/audits/code-review.md`, así que no hay dónde guardar la marca ni informe vigente que devolver: se revisan siempre. Un informe de rama fresco **tampoco** sustituye a una revisión acotada — son alcances distintos.
+- **Un cambio de intención sin cambio de código.** La dimensión semántica juzga el diff contra lo que se pidió, y esa fuente **no está en la clave**: `docs/` entero queda excluido, así que reescribir los criterios de aceptación de una `US-XXX` no mueve el fingerprint; tampoco lo hace un ticket editado en un tracker, ni que el usuario aporte a mano una intención que antes no era determinable. En todos esos casos hay que pasar `revalidate`.
+- **Un cambio de modificadores.** Un informe generado con `blocking-only` no responde lo mismo que uno `default`. Si el modo pedido difiere del que registra el encabezado del informe existente, tratar la caché como **no aplicable** y revisar de nuevo. **«Modo» son solo los modificadores que cambian el contenido del informe** —hoy únicamente `blocking-only`—: `base`, `save-report` y `revalidate` no cuentan, porque no alteran lo que el informe dice.
+- **El contenido de un archivo sin trackear.** El alcance por defecto incluye los archivos nuevos que aún no están en git, pero de esos la clave solo captura la **ruta**, no el contenido: editar un archivo recién creado y no añadido no mueve el fingerprint. Si la revisión depende de uno, pasar `revalidate`.
+
+---
+
 ## Flujo de ejecución (resumen)
 
 **Ninguna corrección se aplica sin autorización explícita del usuario**; tras corregir, se reinicia la revisión. El detalle paso a paso, el formato del informe, el manejo de errores y los anti-patterns están en **[`references/execution.md`](references/execution.md)** — léelo al iniciar la ejecución.
 
+0. **Resolver la base, calcular la clave y comprobar frescura:** si ya existe `docs/audits/code-review.md` con su marca de pie, no hubo cambios (mismo `FINGERPRINT`, misma base y mismo modo) **y su veredicto es `✅ Aprobado`**, **devolver ese informe sin volver a revisar** — ver [Reutilización del informe (idempotencia)](#reutilización-del-informe-idempotencia). Solo si hay cambios, la revisión es acotada, o el usuario pasa `revalidate`, continuar con los pasos siguientes.
 1. **Delimitar la revisión:** resolver el diff (rama base o `scope`), capturar metadata (rama, commit, working tree) y la **intención** del cambio.
 2. **Leer el contexto del sistema:** patrones del repo, capas, convenciones y, si existen, los criterios de aceptación del artefacto origen.
 3. **Evaluar las tres dimensiones** con [`references/qualitative-review.md`](references/qualitative-review.md) y emitir hallazgos con severidad, porqué, impacto y sugerencia concreta.
 4. **Puerta cualitativa e informe:** presentar los hallazgos bloqueantes, pedir corregir o justificar, y rellenar [`assets/code-review-template.md`](assets/code-review-template.md) con el veredicto.
-5. **Registro y salida:** escribir siempre `docs/audits/code-review.md` (creando el directorio si no existe), más un resumen en el chat. **Excepción:** una revisión acotada (`working-tree` o `scope`) **no** sobrescribe ese archivo —no es el estado vigente de la rama—: va al chat o a `save-report`. **No** hacer commit/push/merge sin instrucción explícita.
+5. **Registro y salida:** escribir siempre `docs/audits/code-review.md` (creando el directorio si no existe) **con la marca de pie del fingerprint y la base** para la próxima comprobación de frescura, más un resumen en el chat. **Excepción:** una revisión acotada (`working-tree` o `scope`) **no** sobrescribe ese archivo —no es el estado vigente de la rama—: va al chat o a `save-report`. **No** hacer commit/push/merge sin instrucción explícita.
 
 ---
 
@@ -172,14 +210,17 @@ Es un proceso **posterior a la implementación**: no forma parte de `work-implem
 
 ### Fingerprint canónico de la tubería
 
-Cuando este skill escribe `docs/audits/code-review.md`, ese archivo forma parte de los **artefactos generados** que el fingerprint canónico de la tubería excluye —todo `docs/audits/`, todo `.sdd-devkit/` y los `trace-report.md`—, para que escribirlos no desplace la clave de frescura compartida con `quality-check` y `trace-validate`. La receta exacta vive en [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
+Las **tres** puertas del cierre usan el **mismo** fingerprint canónico como clave de frescura, con el mismo nombre de variable (`FINGERPRINT`) y la misma receta —que vive en [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate)—, cada una sobre su propio artefacto: `test-run.json` en `quality-check`, `trace-report.md` en `trace-validate` y `docs/audits/code-review.md` aquí. Este skill le añade un segundo componente, el commit de la **rama base**, porque su unidad de trabajo es un diff con dos lados (ver [Reutilización del informe (idempotencia)](#reutilización-del-informe-idempotencia)); el `FINGERPRINT` en sí **no** cambia de definición.
+
+Que la receta excluya **toda carpeta oculta, todo `docs/` y los `trace-report.md` sueltos** es lo que permite que escribir `code-review.md` no desplace la clave de frescura de ninguna de las tres. La contrapartida —que los criterios de aceptación de `docs/specs/` tampoco cuenten— está en [Reutilización del informe (idempotencia)](#reutilización-del-informe-idempotencia).
 
 ### Resolución de idioma
 
 El idioma del informe se decide en este orden; detenerse en el primer paso que aplique:
 
-1. Si en el contexto de la sesión existe una preferencia de idioma del usuario, usarla.
-2. Si no, usar el idioma del mensaje del usuario y **preguntar al usuario si desea persistir su preferencia de idioma en la memoria**.
-3. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta, **preguntar si desea persistir su preferencia de idioma en la memoria**; no decidir el idioma por cuenta propia.
+1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>`. Es la clave canónica que escribe `arch-init`; si existe, manda.
+2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesión.
+3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md` con `preferred language: <código>`.
+4. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta, **preguntar si desea persistirlo** en `.agents/MEMORY.md`; no decidir el idioma por cuenta propia.
 
 Los mensajes de error de las herramientas no se traducen.

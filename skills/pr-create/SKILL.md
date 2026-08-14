@@ -1,7 +1,7 @@
 ---
 name: pr-create
 description: >-
-  Crear Pull Request (PR) o Merge Request (MR) desde la rama actual hacia una rama destino preguntada al usuario, con puertas de calidad obligatorias y bloqueantes antes de crearlo: ejecuta quality-check, code-review y trace-validate (los tres deben dar veredicto aprobado) y, si existe docs/policies/definition-of-done.md, verifica el código contra esa Definition of Done. Funciona sobre cualquier repositorio git con remoto: auto-detecta la plataforma (GitHub, GitLab, Bitbucket, Gitea, Azure Repos, etc.) desde el remoto y usa el CLI disponible. Auto-genera título y descripción a partir de los commits y crea el PR en una sola pasada. Usar siempre que el usuario pida crear, abrir, generar, levantar o subir un PR, MR, pull request o merge request, incluso si solo dice "crea el PR" o "súbelo a develop" sin nombrar la plataforma.
+  Crear Pull Request (PR) o Merge Request (MR) desde la rama actual hacia una rama destino preguntada al usuario, en dos modos: implementación (feature/fix/chore/refactor/test hacia su rama de integración) y promoción (develop hacia master/main/release, consolidando trabajos ya integrados). Puertas obligatorias y bloqueantes antes de crearlo: en implementación, quality-check, code-review y trace-validate; en promoción solo quality-check, porque cada trabajo ya pasó las tres al integrarse. En ambos, si existe docs/policies/definition-of-done.md, se verifica esa Definition of Done. Funciona sobre cualquier repositorio git con remoto: auto-detecta la plataforma (GitHub, GitLab, Bitbucket, Gitea, Azure Repos) y usa el CLI disponible. Auto-genera título y descripción y crea el PR en una pasada. Usar siempre que el usuario pida crear, abrir, generar, levantar o subir un PR, MR, pull request o merge request, o promover develop a master, incluso si solo dice "crea el PR" o "súbelo a develop".
 license: MIT
 ---
 
@@ -9,15 +9,58 @@ license: MIT
 
 Crear un PR o MR desde la **rama actual** hacia una **rama destino preguntada al usuario**, sobre cualquier repo git con remoto configurado.
 
-> **Origen = rama actual**, sin excepción, y debe ser una **rama de implementación** con prefijo reconocido (`feature/`, `fix/`, `chore/`, `refactor/`, `test/`, u otro equivalente del repo). Si está en `main`, `master`, `develop`, `trunk`, o no tiene un prefijo de implementación reconocible: parar y avisar.
+> **Origen = rama actual**, sin excepción. Hay **dos modos válidos**, que el skill deduce del par origen→destino (ver [Modos: implementación y promoción](#modos-implementación-y-promoción)):
+>
+> - **PR de implementación** — de una rama de trabajo (`feature/`, `fix/`, `chore/`, `refactor/`, `test/`, `hotfix/`…) a su rama de integración o despliegue. Es el caso por defecto.
+> - **PR de promoción** — de una rama de integración a una de despliegue (`develop → master`, `develop → release/x`, `release/x → main`). No trae código nuevo: consolida trabajos que ya pasaron sus puertas al integrarse.
+>
+> El modo lo decide **una sola tabla de decisión**, evaluada en el Paso 3 con el destino ya conocido; ver [Modos: implementación y promoción](#modos-implementación-y-promoción). Ahí se define también cuándo se para y cuándo se pregunta.
 >
 > **Working tree sucio no detiene el flujo:** si hay cambios sin commitear, el skill invoca automáticamente el flujo del skill **`git-commit`** (sin preguntar al usuario si desea commitear — la decisión de invocarlo es automática) y, una vez el working tree queda limpio, continúa con el resto del pre-flight. Nota: `git-commit` no tiene modo silencioso — normalmente pausa mostrando su propia propuesta y pidiendo confirmación antes de comitear (y puede detenerse del todo si detecta secretos); ese paso no se suprime al invocarlo desde aquí.
 >
 > **Plataforma se auto-detecta** del remoto `origin`. No preguntar.
 >
-> **Puertas de calidad obligatorias y bloqueantes:** antes de crear el PR se ejecutan **siempre** `quality-check`, `code-review` y `trace-validate`, y —si existe— se verifica la **Definition of Done** (`docs/policies/definition-of-done.md`). Todas las que apliquen deben quedar en **aprobado** (la Definition of Done solo cuenta si el archivo existe); si alguna no lo está, **no** se crea el PR. No hay flujo "crear como draft" ni "ignorar y continuar".
+> **Puertas de calidad obligatorias y bloqueantes:** en un PR de **implementación** se ejecutan **siempre** `quality-check`, `code-review` y `trace-validate`; en uno de **promoción**, solo `quality-check`. En ambos modos, si existe la **Definition of Done** (`docs/policies/definition-of-done.md`), se verifica. Todas las que apliquen deben quedar en **aprobado**; si alguna no lo está, **no** se crea el PR. No hay flujo "crear como draft" ni "ignorar y continuar", ni forma de saltarse una puerta que aplica.
 >
 > **No incluye:** modificar código por iniciativa propia, merges, rebases, resolver conflictos, asignar reviewers/labels/milestones, editar PRs existentes. (Las correcciones solo se aplican si el usuario las autoriza explícitamente — ver [Manejo de fallos en las puertas](#manejo-de-fallos-en-las-puertas-de-calidad).)
+
+---
+
+## Modos: implementación y promoción
+
+El ciclo normal tiene **dos saltos**, no uno: el trabajo se implementa en una rama, se integra en una rama de integración (`develop`), y desde ahí varios trabajos se promueven juntos a una rama de despliegue (`master`, `main`, `release/*`). Este skill cubre los dos.
+
+| | **PR de implementación** | **PR de promoción** |
+|---|---|---|
+| Origen | Rama de trabajo: prefijo `feature/`, `fix/`, `chore/`, `refactor/`, `test/`, `hotfix/`, o el equivalente del repo | Rama de integración o de despliegue: `develop`, `release/*`, `main`, `master`, `trunk` |
+| Destino | Su rama de integración | **Otra** rama de integración/despliegue, aguas abajo |
+| Qué aporta | Código nuevo, aún sin revisar | Nada nuevo: consolida trabajos ya integrados |
+| Puertas | `quality-check` + `code-review` + `trace-validate` (+ DoD) | `quality-check` (+ DoD). Ver [Puertas en un PR de promoción](#puertas-en-un-pr-de-promoción) |
+| Descripción | Commits del rango + ticket | Trabajos que se promueven (`US-XXX`/`WI-XXX`) + delta de commits |
+
+**Tabla de decisión.** Es la **única** regla de clasificación del skill; se evalúa en el Paso 3, con el destino ya conocido. El Paso 1 no clasifica ni para: solo detecta si el origen tiene prefijo de implementación.
+
+| # | Origen | Destino | Resultado |
+|---|--------|---------|-----------|
+| 1 | Prefijo de implementación (`feature/`, `fix/`, `chore/`, `refactor/`, `test/`, `hotfix/`, o el equivalente del repo) | Rama de integración/despliegue | **PR de implementación.** Camino por defecto, sin confirmación. |
+| 2 | Rama de integración/despliegue | **Otra**, aguas abajo | **PR de promoción**, previa confirmación (ver abajo). |
+| 3 | Rama de integración/despliegue | Aguas **arriba**, o la misma | **Parar.** No es una promoción. |
+| 4 | Cualquiera | Rama de implementación | **Parar.** Este skill no abre PRs *hacia* una rama de trabajo. |
+| 5 | Sin prefijo reconocible **y** que no es rama de integración | Cualquiera | **Preguntar** a qué categoría pertenece la rama (`hotfix-cache`, `PROJ-1234`…). Si el usuario la sitúa, aplicar la fila que corresponda; si no, parar. **No** clasificarla como promoción por descarte. |
+
+**La confirmación de la fila 2 no se omite nunca.** Estar parado en `develop` también es lo que ocurre cuando alguien olvidó cambiar de rama —lo típico justo después de `work-integrate`, que deja HEAD en la base—, y ahí el PR correcto es otro. Es la única defensa contra ese error.
+
+> **Qué cuenta como rama de integración o despliegue.** Por defecto `main`, `master`, `develop`, `trunk` y `release/*`. Si el repo usa otros nombres (`staging`, `uat`, `qa`, `produccion`) y el usuario indica uno como destino, tratarlo como tal: **el destino manda**. No inventar una jerarquía propia ni exigir que el repo siga git-flow.
+
+**Qué es «aguas abajo».** El orden canónico del ciclo es:
+
+```
+rama de implementación  →  develop  →  release/*  →  main | master
+```
+
+El destino está **aguas abajo** si aparece a la derecha del origen en ese orden. `develop → master` lo está; `master → develop` no, y por eso la fila 3 lo corta. **No usar «la rama de la que nace» como criterio:** en git-flow `develop` nace de `master`, así que esa lectura clasificaría la promoción canónica como marcha atrás y desactivaría el modo entero. Si el repo usa otros nombres, el orden lo fija el usuario al indicar el destino; ante duda sobre la dirección, preguntar en vez de asumir.
+
+Sincronizar una rama hacia atrás (traer `master` a `develop` tras un hotfix) es un merge o un rebase, no un PR de este skill.
 
 ---
 
@@ -53,7 +96,10 @@ Cuando el idioma resuelto obliga a traducir el título, el prefijo de ticket (`[
 
 1. `git rev-parse --is-inside-work-tree` — confirmar repo git.
 2. `git rev-parse --abbrev-ref HEAD` — obtener rama actual.
-3. Validar que la rama actual es una **rama de implementación**: debe comenzar con un prefijo reconocido (`feature/`, `fix/`, `chore/`, `refactor/`, `test/`, u otro prefijo de implementación equivalente que use el repo) y no puede ser `main`, `master`, `develop` ni `trunk`. Si no cumple: **parar** y avisar indicando la convención de rama esperada.
+3. **Caracterizar la rama actual** — sin clasificar el modo ni parar: eso es del Paso 3, que ya conoce el destino. Anotar simplemente en cuál de las tres categorías cae:
+   - **de implementación** (prefijo `feature/`, `fix/`, `chore/`, `refactor/`, `test/`, `hotfix/`, o el equivalente del repo),
+   - **de integración o despliegue** (`develop`, `release/*`, `main`, `master`, `trunk`, o la que el repo use),
+   - **ninguna de las dos** (rama suelta como `hotfix-cache` o `PROJ-1234`) → se resolverá preguntando al usuario en el Paso 3, no parando aquí.
 4. `git status --porcelain` — si no está vacío, **invocar automáticamente el flujo del skill `git-commit`** sobre los cambios pendientes (sin preguntar al usuario si desea commitear) y esperar a que termine. La invocación delega en `git-commit` **todo** su criterio operativo (agrupación por cambio lógico, inferencia de tipo/scope/mensaje, staging, detección de secretos, confirmación de la propuesta) — `pr-create` no decide un mensaje de commit ni qué stagear por su cuenta; solo dispara el flujo y espera su resultado. **`git-commit` no tiene modo silencioso**: normalmente pausa mostrando su propuesta y pidiendo confirmación al usuario antes de comitear. «Sin preguntar al usuario» se refiere solo a que `pr-create` no pide permiso para *invocar* `git-commit`, no a que `git-commit` deje de confirmar su propio commit.
    - **Si `git-commit` no está disponible** (skill no instalado o no localizable en el entorno): **parar** y avisar, mostrando los archivos pendientes y sugiriendo al usuario commitear manualmente antes de reintentar — no ejecutar `git add`/`git commit` directos como sustituto.
    - **Si `git-commit` deja el working tree completamente limpio**, continuar con el resto del pre-flight.
@@ -62,17 +108,29 @@ Cuando el idioma resuelto obliga a traducir el título, el prefijo de ticket (`[
 
 ### Paso 2 — Detectar plataforma y CLI
 
-Aplicar la tabla de detección. Si ya existe un PR para `<rama-actual> → <destino>`, capturar su URL y devolvérsela al usuario sin crear uno nuevo.
+Aplicar la tabla de detección. (La comprobación de «PR ya existente» necesita el destino, así que se hace al final del Paso 3, no aquí.)
 
-### Paso 3 — Preguntar destino
+### Paso 3 — Preguntar destino y cerrar el modo
 
-- **Rama destino** (pregunta única): validar que existe en `origin` (`git ls-remote --heads origin <destino>`) y que no coincide con la rama actual.
+1. **Rama destino** (pregunta única): validar que existe en `origin` (`git ls-remote --heads origin <destino>`) y que no coincide con la rama actual.
+2. **Verificar que hay algo que integrar:** `git rev-list --count origin/<destino>..HEAD`. Si es `0`, parar y avisar — el PR saldría vacío. Aplica a los dos modos.
+3. **Extraer los trabajos del rango** (ver Paso 6 para el orden de degradación). Hace falta **aquí**, no solo en el Paso 6: el mensaje de confirmación del punto 5 los enumera.
+4. **Clasificar el modo** aplicando la tabla de decisión de [Modos: implementación y promoción](#modos-implementación-y-promoción) sobre el par origen→destino. Si la rama actual no encajaba en ninguna categoría (fila 5), preguntar ahora al usuario a cuál pertenece.
+5. **Si el resultado es promoción, confirmar la intención** antes de continuar: «Vas a crear un PR de promoción de `<origen>` a `<destino>`: N commits, trabajos X, Y, Z. ¿Es lo que quieres, o te olvidaste de cambiar a tu rama de trabajo?». Sin confirmación no se sigue.
+6. **PR ya existente:** con origen y destino resueltos, comprobar si hay un PR abierto para `<rama-actual> → <destino>`; si lo hay, capturar su URL y devolvérsela al usuario sin crear uno nuevo.
 
-`quality-check`, `code-review` y `trace-validate` **no se preguntan**: son obligatorios (ver Paso 4). No hay opción de saltarlos.
+Las puertas **que aplican al modo** no se preguntan: son obligatorias (ver Paso 4) y no hay opción de saltarlas. Que en una promoción no corran `code-review` ni `trace-validate` **no** es una excepción concedida al usuario: es que su unidad de análisis no existe en ese modo.
 
 ### Paso 4 — Puertas de calidad (obligatorias, bloqueantes)
 
-Antes de cualquier push o creación de PR se ejecutan **las cuatro** puertas en este orden (la cuarta solo si existe el archivo de Definition of Done). Una puerta que no quede en **aprobado** detiene el flujo: **no** se hace push ni se crea el PR. Ver [Manejo de fallos en las puertas](#manejo-de-fallos-en-las-puertas-de-calidad) para qué hacer ante un fallo.
+Antes de cualquier push o creación de PR se ejecutan las puertas **que aplican al modo**, en este orden. Una puerta que aplica y no queda en **aprobado** detiene el flujo: **no** se hace push ni se crea el PR. Ver [Manejo de fallos en las puertas](#manejo-de-fallos-en-las-puertas-de-calidad) para qué hacer ante un fallo.
+
+| Puerta | PR de implementación | PR de promoción |
+|--------|----------------------|-----------------|
+| 4.1 `quality-check` | Obligatoria | **Obligatoria** |
+| 4.2 `code-review` | Obligatoria | No aplica |
+| 4.3 `trace-validate` | Obligatoria | No aplica |
+| 4.4 Definition of Done | Si existe el archivo | Si existe el archivo |
 
 **4.1 — `quality-check` (siempre).** Invocar el flujo de `quality-check` (verificaciones automatizadas: tipado, linter, unit, coverage, integración, build, e2e, sonar) sobre la rama.
 - Aprobado = veredicto **`✅ Aprobado`** → continuar (aunque haya warnings o resultados informativos).
@@ -80,17 +138,19 @@ Antes de cualquier push o creación de PR se ejecutan **las cuatro** puertas en 
 
 > Este es el punto de cierre donde `quality-check` ejecuta la batería completa de pruebas y persiste `test-run.json`. El orden importa: `4.1` antes de `4.3` permite que `trace-validate` **reutilice** esa corrida sin re-ejecutar las pruebas.
 
-**4.2 — `code-review` (siempre).** Invocar el flujo de `code-review` (revisión cualitativa: intención, arquitectura y diseño) con `base origin/<destino>`, su alcance por defecto (todo lo que la rama difiere de esa base, incluidas las correcciones que `4.1` haya podido dejar sin commitear). Emite un veredicto **propio e independiente** del de `4.1`; ninguno sustituye al otro.
+**4.2 — `code-review` (solo en PR de implementación).** Invocar el flujo de `code-review` (revisión cualitativa: intención, arquitectura y diseño) con `base origin/<destino>`, su alcance por defecto (todo lo que la rama difiere de esa base, incluidas las correcciones que `4.1` haya podido dejar sin commitear). Emite un veredicto **propio e independiente** del de `4.1`; ninguno sustituye al otro. Si el `docs/audits/code-review.md` existente ya estaba fresco **y aprobado** (mismo fingerprint, misma base y mismo modo, y `4.1` no aplicó correcciones), lo devuelve sin volver a revisar — **no** forzar `revalidate` desde aquí. Un informe previo en `❌`/`⚠️` nunca se sirve desde caché: `code-review` lo revisa de nuevo por su cuenta.
 - Aprobado = veredicto **`✅ Aprobado`** → continuar.
 - Rechazado = **`❌ Rechazado`** o **`⚠️ Incompleto`** → detener.
 
-**4.3 — `trace-validate` (siempre).** Resolver el **trabajo** a validar (`US-XXX` o `WI-XXX`) del patrón de la rama, del prefijo de los commits, o de la ruta de trabajo. `trace-validate` traza los **criterios de aceptación** `AC-XXX` del trabajo (mismo formato en US y WI). Si no se puede determinar el trabajo, preguntar al usuario cuál validar; si no lo provee, la puerta **no** puede quedar aprobada → detener. Invocar `trace-validate` sobre ese trabajo. Reutiliza el `test-run.json` producido por `4.1` (misma rama, sin cambios) y, si el `trace-report.md` ya estaba fresco, lo devuelve sin regenerarlo.
+**4.3 — `trace-validate` (solo en PR de implementación).** Resolver el **trabajo** a validar (`US-XXX` o `WI-XXX`) del patrón de la rama, del prefijo de los commits, o de la ruta de trabajo. `trace-validate` traza los **criterios de aceptación** `AC-XXX` del trabajo (mismo formato en US y WI). Si no se puede determinar el trabajo, preguntar al usuario cuál validar; si no lo provee, la puerta **no** puede quedar aprobada → detener. Invocar `trace-validate` sobre ese trabajo. Reutiliza el `test-run.json` producido por `4.1` (misma rama, sin cambios) y, si el `trace-report.md` ya estaba fresco, lo devuelve sin regenerarlo.
 - Aprobado = **`✅ Aprobado`** → continuar. **`⚠️ Aprobado con observaciones`** también se considera aprobado, pero se **muestran las observaciones al usuario** antes de seguir.
 - Rechazado = **`❌ Rechazado`** → detener.
 
 **4.4 — Definition of Done (solo si existe el archivo).** Comprobar si existe `docs/policies/definition-of-done.md` en la raíz del repo (`test -f docs/policies/definition-of-done.md`).
+
+> **Ningún skill del plugin genera ese archivo: lo escribe y lo mantiene el equipo.** Es deliberado —una Definition of Done es un acuerdo del equipo, no un artefacto derivable— y por eso la puerta es condicional: en un repo que no lo tenga, simplemente no aplica. Si el usuario pregunta cómo tenerla, indicarle que basta con crear ese archivo con una checklist de condiciones de cierre verificables; no ofrecer generarla por él.
 - Si **no** existe → omitir esta puerta (no afecta el resultado).
-- Si **existe** → leerla y verificar el código/cambio contra cada política/ítem de esa Definition of Done, sobre el **mismo alcance que `4.2`**: `origin/<destino>` contra el estado actual del árbol, de modo que incluya las correcciones que las puertas anteriores hayan podido dejar sin commitear. **Formato esperado de `docs/policies/definition-of-done.md`:** un documento de política con ítems/checklist verificables (cada ítem una condición concreta de cierre). El skill solo evalúa automáticamente los ítems comprobables desde el repo o el diff; para el resto, pregunta.
+- Si **existe** → leerla y verificar el código/cambio contra cada política/ítem de esa Definition of Done, sobre el rango `origin/<destino>` contra el estado actual del árbol, de modo que incluya las correcciones que las puertas anteriores hayan podido dejar sin commitear (el mismo alcance que `4.2` en un PR de implementación; en una promoción, donde `4.2` no corre, el rango sigue siendo ese). **Formato esperado de `docs/policies/definition-of-done.md`:** un documento de política con ítems/checklist verificables (cada ítem una condición concreta de cierre). El skill solo evalúa automáticamente los ítems comprobables desde el repo o el diff; para el resto, pregunta.
   - **Ítems comprobables desde el repo/diff** → evaluarlos directamente: cumplido / incumplido.
   - **Ítems no comprobables automáticamente** → **presentarlos al usuario y preguntarle** si se cumplen (no inventar su cumplimiento). Si el usuario **confirma** que se cumplen → cuentan como cumplidos. Si **no los confirma** o los marca incumplidos → cuentan como incumplidos.
   - Aprobado = todos los ítems aplicables se cumplen (los comprobables verificados + los no comprobables confirmados por el usuario) → continuar.
@@ -98,20 +158,68 @@ Antes de cualquier push o creación de PR se ejecutan **las cuatro** puertas en 
 
 Solo si **todas las puertas aplicables** quedan en aprobado se avanza al Paso 5.
 
+#### Puertas en un PR de promoción
+
+Una promoción **no introduce código nuevo**: cada trabajo que viaja en ella ya pasó las tres puertas cuando se integró en la rama de integración. Repetirlas aquí no descubre nada y sale caro. Lo que sí queda por demostrar —y nadie verificó feature por feature— es que la **rama consolidada** está verde: eso es exactamente `quality-check`.
+
+| Puerta | Por qué no aplica |
+|--------|-------------------|
+| `code-review` | Su unidad es un diff sin revisar. En una promoción, todo el diff `origin/<destino>..HEAD` ya fue revisado y aprobado PR a PR; volver a pasarlo sería revisar diez diffs ya cerrados y produciría hallazgos sobre código que ya se justificó en su momento. |
+| `trace-validate` | Valida **un** artefacto contra sus criterios de aceptación. Una promoción abarca varios trabajos, así que no hay un artefacto que validar; y cada uno ya trae su `trace-report.md` aprobado. |
+
+Reglas al reportar:
+
+- En el resumen al usuario y en la descripción del PR, esas dos puertas se listan como **`— No aplica (PR de promoción)`**. **No** se omiten en silencio ni se marcan como aprobadas: quien lea el PR debe ver que no corrieron y por qué.
+- **La Definition of Done sí aplica**, si el archivo existe: sus ítems suelen ser condiciones de despliegue (changelog, versión, migraciones revisadas) que es justo aquí donde toca comprobar. Su alcance es el mismo rango `origin/<destino>..HEAD`.
+- Si el usuario **pide expresamente** una revisión adicional, se puede invocar `code-review` o `trace-validate` a mano; no es parte del flujo ni condiciona la creación del PR.
+
 ### Paso 5 — Push de la rama actual
 
-**Antes del push, re-comprobar el working tree.** Las puertas del Paso 4 pueden haber dejado cambios sin commitear (correcciones aplicadas por `quality-check` o delegadas en `work-implement`). Ejecutar `git status --porcelain` y, si hay salida, **invocar de nuevo `git-commit`** con el mismo criterio del pre-flight: lo que se sube debe ser exactamente lo que las puertas verificaron.
+**Antes del push, re-comprobar el working tree.** Las puertas del Paso 4 pueden haber dejado cambios sin commitear (correcciones aplicadas por `quality-check` o delegadas en `work-implement`). Ejecutar `git status --porcelain` y, si hay salida, **invocar de nuevo `git-commit`** con el mismo criterio del pre-flight: lo que se sube debe ser exactamente lo que las puertas verificaron. **En modo promoción, borrar antes `docs/audits/quality-check.md` del árbol** y, si `develop` lo traía trackeado, retirarlo del índice — ver la nota siguiente. Solo entonces re-comprobar el estado e invocar `git-commit`.
 
-> **Los artefactos de las puertas viajan en el PR.** Las puertas escriben siempre `docs/audits/quality-check.md`, `docs/audits/code-review.md`, `.sdd-devkit/test-run.json` y el `trace-report.md` del trabajo. Ese commit los incluye a propósito: el revisor ve el veredicto junto al cambio, y `test-run.json` permite que una corrida posterior reutilice la caché sin re-ejecutar pruebas. Son artefactos generados, así que **no** desplazan el fingerprint de frescura (están excluidos).
+> **`.sdd-devkit/test-run.json` nunca se commitea**, en ninguno de los dos modos: está en el `.gitignore` porque es una caché local y desechable, y un resultado de pruebas producido en otra máquina no es evidencia aquí. Nada de lo que sigue desplaza el fingerprint de frescura: `.sdd-devkit/` cae bajo la exclusión de **carpetas ocultas** y `docs/` bajo la suya.
+>
+> **En un PR de implementación, los informes viajan en el PR.** Las puertas escriben `docs/audits/quality-check.md`, `docs/audits/code-review.md` y el `trace-report.md` del trabajo; ese commit los incluye a propósito, para que el revisor vea los tres veredictos junto al cambio. **Pero los dos de `docs/audits/` son fotos de esta rama y no deben quedarse en la de destino:** su encabezado lleva la rama y el commit sobre los que se corrieron las puertas, en `develop` afirmarían un veredicto que nadie ejecutó allí, y como viven en una ruta fija, cada rama que se integre los pisaría. `work-integrate` los retira dentro del propio merge, pero **aquí el merge lo hace la plataforma y este skill no lo controla**. De ahí dos cosas:
+>
+> - **Decirlo en el cuerpo del PR.** La descripción que compone el Paso 6 cierra con esta línea: «`docs/audits/quality-check.md` y `docs/audits/code-review.md` son artefactos de esta rama — eliminarlos al integrar.»
+> - **Al reportar al usuario**, recordar que tras el merge en la plataforma conviene borrarlos en la rama de destino (`git rm docs/audits/quality-check.md docs/audits/code-review.md`), o integrar con `work-integrate`, que ya lo hace solo. **Solo esos dos**: los `arch-audit-*.md`, las copias de `save-report` y el `trace-report.md` del trabajo sí pertenecen a la rama base.
+>
+> **En un PR de promoción, el informe no llega a disco.** Aquí la rama de origen **ya es** una rama de integración: commitear `docs/audits/quality-check.md` lo dejaría plantado en `develop` y de ahí viajaría a `master` con la promoción — el problema anterior, pero sin nadie que pueda limpiarlo después. El manejo, en el orden exacto en que ocurre:
+>
+> 1. Tras leer el veredicto de `4.1`, **borrar el informe del árbol de trabajo** con `rm -f docs/audits/quality-check.md` (`rm`, no `git rm`: en la mayoría de repos ni siquiera está trackeado).
+> 2. **Si `develop` ya lo traía trackeado** —lo habitual si antes se integraron PRs de implementación que sí lo commiteaban—, retirarlo también del índice: `git rm -q -f --ignore-unmatch ':(top)docs/audits/quality-check.md' ':(top)docs/audits/code-review.md'`. Ese borrado **sí** se commitea: limpia la rama de integración de informes que nunca debieron llegar ahí.
+> 3. El **veredicto y el resumen** van en la descripción del PR, que es donde el revisor de una promoción los necesita y que muere con el PR.
+>
+> **Por qué borrar y no «dejarlo sin commitear».** Este skill no puede excluir un archivo del commit: delega en `git-commit`, que no acepta alcance, y el propio flujo manda reinvocarlo hasta que el árbol quede limpio — el remanente sería justo ese informe, así que o entra en bucle o se commitea lo que se quería evitar. Borrarlo deja el árbol limpio, que es la precondición que asumen tanto el push de este flujo como cualquier cambio de rama posterior — un archivo modificado sin commitear haría fallar un `git checkout`.
+>
+> Si el usuario quiere constancia en disco de esa corrida, `save-report` deja una copia con marca de tiempo que él puede commitear a mano.
 
 Si la rama no existe en `origin` o tiene commits no publicados (`git rev-list origin/<rama>..HEAD` no vacío): ejecutar `git push -u origin <rama-actual>`. Nunca `--force` ni `--force-with-lease`. Si el push falla por divergencia: parar y avisar — el usuario decide cómo resolver.
+
+> **En modo promoción, el push es a una rama protegida: confirmarlo.** La rama actual es `develop`, que tras uno o varios `work-integrate` acumula **merges locales** que nadie ha publicado — y `work-integrate` deja ese push explícitamente como decisión del usuario, fuera de su alcance. Antes de empujar, listar los commits que se van a publicar y pedir confirmación. Es la única operación de todo el flujo que escribe en una rama protegida del remoto; en modo implementación no aplica, porque ahí se empuja la rama de trabajo.
 
 ### Paso 6 — Generar título y descripción
 
 Sin pedir confirmación (salvo override explícito del usuario):
 
+**En un PR de implementación:**
+
 - **Título:** un único commit en el rango → su subject (`git log -1 --pretty=%s`). Varios commits → subject del más antiguo. Si la rama sigue patrón `<prefix>/<TICKET>-<desc>` o `US-XXX-...`, anteponer `[<TICKET>]`. Traducir al idioma resuelto manteniendo el prefijo de ticket intacto.
 - **Descripción:** lista de commits (`git log origin/<destino>..HEAD --pretty="- %s"`), resumen de cambios (`git diff --stat origin/<destino>..HEAD`) y referencia a issue/ticket si el nombre de la rama lo contiene (patrón `US-XXX`, `TK-XXX`, `JIRA-XXX`, `#NNN`).
+
+**En un PR de promoción**, el rango son commits de merge de varios trabajos y una lista plana de subjects no dice nada útil:
+
+- **Cómo se extraen los trabajos** (también lo usa la confirmación del Paso 3). Probar en este orden y quedarse con el primero que dé resultado:
+  1. Commits de merge: `git log origin/<destino>..HEAD --merges --pretty="- %s"`, buscando `US-XXX`/`WI-XXX`.
+  2. Identificadores en los subjects de **todos** los commits del rango — necesario cuando la plataforma integró con **squash merge**, que no deja commits de merge.
+  3. Nombres de rama presentes en el rango.
+
+  Si ninguno da nada, **no inventar**: el título va sin lista y la confirmación del Paso 3 se formula por delta («N commits») en lugar de enumerar trabajos.
+- **Título:** `Promoción <origen> → <destino>`, más los identificadores si se obtuvieron (p. ej. `Promoción develop → master (US-042, US-047, WI-007)`) o `(N commits)` si no. Sin prefijo de ticket: no hay uno solo.
+- **Descripción:** los **trabajos que se promueven**, el **delta** (`git rev-list --count origin/<destino>..HEAD` commits) y el resumen de cambios (`git diff --stat origin/<destino>..HEAD`). Si algún commit del rango no mapea a ningún trabajo, listarlo aparte como «commits sueltos»: es información que el revisor de una promoción quiere ver.
+- **Veredictos de las puertas:** el de `quality-check` con su resumen —aquí va **el contenido**, no un enlace: el informe no se commitea en este modo— y las otras dos como `— No aplica (PR de promoción)`, con el motivo en una línea.
+
+**Solo en implementación**, si el commit de las puertas incluyó informes en `docs/audits/`, añadir como última línea: «`docs/audits/quality-check.md` y `docs/audits/code-review.md` son artefactos de esta rama — eliminarlos al integrar.» Ver la nota del Paso 5.
 
 ### Paso 7 — Crear PR/MR
 
@@ -139,6 +247,7 @@ Si el CLI indica que ya existe un PR: capturar y devolver la URL existente.
 Bloqueo por una puerta de calidad:
 ```
 ✗ PR NO creado: la puerta <quality-check | code-review | trace-validate | definition-of-done> no quedó en aprobado.
+  (En un PR de promoción solo pueden aparecer aquí quality-check y definition-of-done.)
   Veredicto: <❌ Rechazado (quality-check) | ⚠️ Incompleto (quality-check) | ❌ Rechazado (code-review) | ⚠️ Incompleto (code-review) | ❌ Rechazado (trace-validate) | DoD incumplida>
 
 <reporte literal del skill, o lista de ítems de la DoD incumplidos>
@@ -180,16 +289,22 @@ Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`). Detecta GitLab 
 Las tres primeras puertas en aprobado, pero `docs/policies/definition-of-done.md` exige «CHANGELOG.md actualizado» y el diff no lo toca. El skill detiene la creación, lista ese ítem como incumplido e indica la acción; si el usuario autoriza y la corrección está a su alcance, la aplica y reintenta la puerta.
 
 **Ejemplo 5 — Sin Definition of Done**
-No existe `docs/policies/definition-of-done.md`. Esa puerta se omite; el PR se crea si `quality-check`, `code-review` y `trace-validate` quedaron en aprobado.
+No existe `docs/policies/definition-of-done.md`. Esa puerta se omite; el PR se crea si las puertas del modo quedaron en aprobado — las tres en implementación, solo `quality-check` en promoción.
 
 **Ejemplo 6 — Azure Repos**
 `origin` apunta a `https://dev.azure.com/<org>/<proyecto>/_git/<repo>`. Detecta Azure Repos, verifica `az repos`, pregunta destino, ejecuta las puertas, push, crea PR con `az repos pr create`.
 
-**Ejemplo 7 — Rama protegida**
-Usuario en `main`: «crea un PR a develop.» Parar en pre-flight: «Estás en `main`. Cambia a una rama de feature antes de crear el PR.»
+**Ejemplo 7 — PR de promoción**
+Usuario en `develop`: «crea un PR a master.» El Paso 1 no bloquea: `develop` es rama de integración, así que el modo queda abierto. El Paso 3 ve que el destino es una rama de despliegue y **confirma**: «Vas a crear un PR de promoción de `develop` a `master`: 23 commits, trabajos US-042, US-047 y WI-007. ¿Es lo que quieres, o te olvidaste de cambiar a tu rama de trabajo?». Confirmado, corre `quality-check` (+ DoD si existe), marca `code-review` y `trace-validate` como `— No aplica (PR de promoción)`, y crea el PR titulado `Promoción develop → master (US-042, US-047, WI-007)`.
 
-**Ejemplo 7b — Rama sin prefijo de implementación**
-Usuario en `hotfix-cache` (no sigue ningún prefijo reconocido): «crea un PR a develop.» Parar en pre-flight: «La rama `hotfix-cache` no sigue una convención de rama de implementación (`feature/`, `fix/`, `chore/`, `refactor/`, `test/`...). Renómbrala o cambia a la rama correcta antes de crear el PR.»
+**Ejemplo 7b — Promoción hacia atrás**
+Usuario en `master`: «crea un PR a develop.» Fila 3 de la tabla de decisión: `develop` está **aguas arriba** de `master` en el orden del ciclo, así que no es una promoción. Parar: «Traer `master` a `develop` es sincronizar, no promover: hazlo con un merge — no con este skill.»
+
+**Ejemplo 7c — Rama sin prefijo ni rol reconocible**
+Usuario en `hotfix-cache` (no sigue ningún prefijo reconocido y no es rama de integración): «crea un PR a develop.» Fila 5: **preguntar** a qué categoría pertenece. Si el usuario responde que es una rama de trabajo, se trata como PR de implementación (fila 1); si no lo aclara, parar indicando la convención esperada. **No** se clasifica como promoción por descarte.
+
+**Ejemplo 7d — Olvido de cambiar de rama**
+Usuario acaba de correr `work-integrate` (que deja HEAD en `develop`) y pide «crea el PR de mi feature». El Paso 3 pregunta por el destino y detecta el par `develop → develop`: parar y avisar de que el trabajo ya está integrado localmente y que, si quiere el PR de la feature, debe volver a su rama; si quiere promover `develop`, indicar una rama de despliegue como destino.
 
 **Ejemplo 8 — Working tree sucio**
 `git status --porcelain` devuelve dos archivos modificados sin commitear. El skill invoca automáticamente el flujo de `git-commit` sobre esos cambios (sin preguntar si conviene invocarlo) — `git-commit` sí muestra su propia propuesta y pausa a confirmarla con el usuario, como es su comportamiento normal — y, una vez el working tree queda limpio, continúa el pre-flight con normalidad.
@@ -203,16 +318,27 @@ La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con
 
 - Preguntar la rama origen (siempre es la actual) o asumir la destino.
 - Preguntar la plataforma (se detecta del remoto).
-- Preguntar si correr `quality-check`, `code-review` o `trace-validate`, u ofrecer saltarlos: son obligatorios.
+- Preguntar si correr una puerta que **aplica al modo**, u ofrecer saltarla: las que aplican son obligatorias.
+- **Tratar toda rama protegida como un error de pre-flight.** Estar en `develop` con destino `master` es una promoción legítima, no un despiste; lo que resuelve la ambigüedad es la confirmación del Paso 3, no un bloqueo.
+- **Clasificar el modo en el Paso 1**, antes de conocer el destino: el modo depende del **par** origen→destino, y decidirlo a medias produce reglas que se contradicen entre sí.
+- Usar «la rama de la que nace el origen» para detectar una promoción hacia atrás: en git-flow `develop` nace de `master`, así que ese criterio clasificaría `develop → master` como marcha atrás y desactivaría el modo. La dirección la fija el **orden aguas abajo**.
+- **Clasificar como promoción una rama que no encaja en nada** (`hotfix-cache`, `PROJ-1234`) por descarte, en lugar de preguntar (fila 5).
+- A la inversa: **dar por hecho que es una promoción sin confirmarlo**. El mismo estado se da cuando alguien olvidó cambiar de rama —típicamente justo después de `work-integrate`, que deja HEAD en la base—, y ahí el PR correcto es otro.
+- **Marcar `code-review` o `trace-validate` como aprobadas en una promoción**, u omitirlas en silencio: se reportan como `— No aplica (PR de promoción)`, con el motivo visible en el PR.
+- Saltarse `code-review` o `trace-validate` en un PR de **implementación** con el argumento de que «ya se revisó»: ahí sí aplican, sin excepción.
 - Dar por cumplida una puerta a partir del veredicto de otra (p. ej. asumir `code-review` aprobado porque `quality-check` lo está): son skills independientes con veredictos propios.
 - Pedir confirmación de título o descripción (flujo no interactivo).
 - Crear el PR con `quality-check` o `code-review` en `❌ Rechazado`/`⚠️ Incompleto`, con `trace-validate` en `RECHAZADO`, o con la Definition of Done incumplida.
-- Saltarse `trace-validate` por no encontrar el trabajo (US/WI) en lugar de preguntarlo al usuario.
+- En un PR de implementación, saltarse `trace-validate` por no encontrar el trabajo (US/WI) en lugar de preguntarlo al usuario — o declararlo «promoción» para esquivar la puerta.
+- Commitear `docs/audits/quality-check.md` en un PR de promoción: el origen ya es una rama de integración y ese informe acabaría en la de despliegue sin nadie que lo limpie. Se borra del árbol antes del commit; si la rama ya lo traía trackeado, se retira del índice y ese borrado sí se commitea.
+- Intentar «excluir un archivo» del commit delegando en `git-commit`: no acepta alcance. O se borra antes, o entra.
+- Empujar `develop` a `origin` en modo promoción sin confirmarlo: son merges locales que el usuario aún no había publicado.
+- Dar por hecho que el rango trae commits de merge con `US-XXX`: con squash merge no los hay. Degradar a los subjects y a los nombres de rama, y si no sale nada, no inventar la lista.
 - Tratar la ausencia de `docs/policies/definition-of-done.md` como un fallo: si no existe, esa puerta simplemente se omite.
 - Inventar el cumplimiento de un ítem de la DoD que no se puede determinar desde el repo o el diff.
 - Aplicar una corrección sin autorización explícita del usuario, o no re-ejecutar la puerta tras corregir.
 - Ejecutar `git add`/`git commit` directos (fuera del flujo de `git-commit`), o parar a preguntar al usuario si desea commitear los cambios pendientes: ante working tree sucio se invoca automáticamente el flujo de `git-commit` (aunque `git-commit` pueda a su vez pedir su propia confirmación antes de comitear), sin que `pr-create` pida permiso previo para invocarlo.
-- Crear el PR desde una rama sin prefijo de implementación reconocido (`feature/`, `fix/`, `chore/`, `refactor/`, `test/`...), o solo validar contra la lista de ramas protegidas sin exigir un prefijo válido.
+- Crear el PR desde una rama que no es ni de implementación (prefijo reconocido) ni de integración/despliegue.
 - Usar `git push --force` o `--force-with-lease`.
 - Asignar reviewers, labels o milestones por iniciativa propia.
 - Re-implementar la lógica de `quality-check`, `code-review` o `trace-validate` en lugar de invocar el flujo existente.

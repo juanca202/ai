@@ -31,15 +31,14 @@ Plantilla canónica del reporte de trazabilidad (trace-validate).
 
 **Pruebas:** {{procedencia — caché fresca de `quality-check` (commit abc1234, YYYY-MM-DD) | corrida `tests-only` disparada ahora | no ejecutable y por qué}}. {{Resultado por suite: unit `PASS` · integration `FAIL` · e2e `N/A` — o «no ejecutado» si no hubo corrida}}.
 
-| Indicador                | Resultado |
-| ------------------------ | --------- |
-| Criterios de aceptación  | {{M}}     |
-| Criterios cubiertos      | {{N}}     |
-| Criterios parciales      | {{P}}     |
-| Criterios no cubiertos   | {{Q}}     |
+**Cobertura de criterios de aceptación**
+
+| Total | Cubiertos | Parciales | No Cubiertos |
+| ----- | --------- | --------- | ------------ |
+| {{M}} | {{N}}     | {{P}}     | {{Q}}         |
 
 <!--
-- «Criterios de aceptación» = M, el total del artefacto. Cubiertos + Parciales + No cubiertos DEBE sumar M.
+- «Total» = M, el total de criterios de aceptación del artefacto. Cubiertos + Parciales + No cubiertos DEBE sumar M.
 - Cifras siempre numéricas: 0, no «—».
 - La línea «Pruebas» se copia de test-run.json: `result` viene por suite (unit/coverage/integration/e2e),
   no hay agregado global — no inventar uno. Si no hubo corrida, decir «no ejecutable» y el motivo, sin suites.
@@ -81,4 +80,10 @@ Observaciones de «Cobertura por criterio»): suite `coverage` en FAIL, árbol d
 -->
 
 
-<!-- trace-validate:fingerprint={{hash}} · generado={{YYYY-MM-DD}} -->
+<!--
+Marca de frescura: NO eliminar al publicar. `fingerprint` es el canónico de la tubería (código y tests);
+`spec` cubre la carpeta del artefacto (criterios y test-cases). El Paso 0 de la próxima corrida exige que
+coincidan LOS DOS para reutilizar el reporte.
+-->
+
+<!-- trace-validate:fingerprint={{hash}} · spec={{hash}} · generado={{YYYY-MM-DD}} -->

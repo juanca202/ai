@@ -17,20 +17,28 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 
 ## Verificaciones
 
-Símbolos de estado: `✅` PASS · `❌` FAIL · `⏭️` SKIPPED · `⏸️` no ejecutado (fail-fast) · `—` N/A · `ℹ️` informativo (Sonar).
+Símbolos de estado: `✅` Pasó · `❌` Falló · `⏭️` Omitido · `⏸️` Pendiente · `—` No aplica · `ℹ️` Informativo.
 
-| # | Check      | Comando            | Categoría     | Estado | Detalle               | Duración |
-| - | ---------- | ------------------ | ------------- | ------ | --------------------- | -------- |
-| 1 | tipado     | {{comando}}          | {{Bloqueante}}  | {{✅}}    | {{0 errores}}           | {{4.1s}}   |
-| 2 | linter     | {{comando}}          | {{Bloqueante}}  | {{❌}}    | {{3 errors, 5 warnings}}| {{2.3s}}   |
-| 3 | unit tests | {{comando}}          | {{Bloqueante}}  | {{✅}}    | {{142 passed, 0 failed}}| {{18.7s}}  |
-| 4 | coverage   | {{comando}}          | {{Bloqueante}}  | {{✅}}    | {{87% (umbral 80%)}}    | {{19.0s}}  |
-| 5 | integración| {{comando}}          | {{Condicional}} | {{—}}    | {{N/A (sin suite propia)}} | {{—}}   |
-| 6 | build      | {{comando}}          | {{Bloqueante}}  | {{✅}}    | {{OK}}                  | {{12.4s}}  |
-| 7 | e2e        | {{comando}}          | {{Condicional}} | {{⏭️}}    | {{config rota}}         | {{—}}      |
-| 8 | sonar      | {{comando}}          | {{Informativo}} | {{—}}    | {{N/A (sin config)}}    | {{—}}      |
+| # | Check      | Comando            | Categoría     | Estado         | Detalle               | Duración |
+| - | ---------- | ------------------ | ------------- | -------------- | --------------------- | -------- |
+| 1 | tipado     | {{comando}}          | {{Bloqueante}}  | {{✅ Pasó}}       | {{0 errores}}           | {{4.1s}}   |
+| 2 | linter     | {{comando}}          | {{Bloqueante}}  | {{❌ Falló}}      | {{3 errors, 5 warnings}}| {{2.3s}}   |
+| 3 | unit tests | {{comando}}          | {{Bloqueante}}  | {{✅ Pasó}}       | {{142 passed, 0 failed}}| {{18.7s}}  |
+| 4 | coverage   | {{comando}}          | {{Bloqueante}}  | {{✅ Pasó}}       | {{87% (umbral 80%)}}    | {{19.0s}}  |
+| 5 | integración| {{comando}}          | {{Condicional}} | {{— No aplica}}  | {{sin suite propia}}    | {{—}}      |
+| 6 | build      | {{comando}}          | {{Bloqueante}}  | {{✅ Pasó}}       | {{OK}}                  | {{12.4s}}  |
+| 7 | e2e        | {{comando}}          | {{Condicional}} | {{⏭️ Omitido}}    | {{config rota}}         | {{—}}      |
+| 8 | sonar      | {{comando}}          | {{Informativo}} | {{— No aplica}}  | {{sin config}}          | {{—}}      |
 
-<!-- Incluir solo las filas de checks que aplican al stack. Los `N/A` por modificador del usuario o por no aplicar al stack pueden omitirse o marcarse `—`. -->
+<!--
+Incluir solo las filas de checks que aplican al stack. Los `N/A` por modificador del usuario o por no
+aplicar al stack pueden omitirse o marcarse `— No aplica`.
+La columna Estado lleva SÍMBOLO + ETIQUETA EN ESPAÑOL, siempre de la leyenda de arriba. Los nombres
+canónicos en inglés (PASS/FAIL/SKIPPED/N/A) son vocabulario interno y del test-run.json: no aparecen
+en el informe, tampoco en la columna Detalle.
+Un check informativo (Sonar) que falla se reporta con el estado normal `❌ Falló`; lo que lo hace
+informativo es su Categoría, no su Estado. El símbolo `ℹ️` solo aparece en la leyenda y en Categoría.
+-->
 
 ### Detalle de checks fallidos
 

@@ -10,19 +10,27 @@ Referencia detallada del skill `trace-validate`. El `SKILL.md` mantiene el resum
 
 Antes de trabajar, evitar regenerar si nada cambió (ver [Reutilización del reporte](../SKILL.md#reutilización-del-reporte-idempotencia)).
 
-1. Resolver la ubicación del trabajo y su `trace-report.md` (`…/US-XXX-*/trace-report.md`, `…/WI-XXX-*/trace-report.md`, `docs/specs/features/FT-XXX-*/trace-report.md` o, para cualquier otro artefacto, `trace-report.md` junto al artefacto).
-2. Si **no existe** → no hay caché; continuar en el Paso 1.
-3. Si **existe**, leer su marca de pie `<!-- trace-validate:fingerprint=<hash> · generado=YYYY-MM-DD -->` y calcular el **fingerprint canónico** de la tubería (excluye los artefactos generados; es el mismo de `quality-check`):
+1. Resolver la ubicación del trabajo, su carpeta (`$ARTEFACTO`) y su `trace-report.md` (`…/US-XXX-*/trace-report.md`, `…/WI-XXX-*/trace-report.md`, `docs/specs/features/FT-XXX-*/trace-report.md` o, para cualquier otro artefacto, `trace-report.md` junto al artefacto).
+2. **Calcular las dos claves. Siempre**, exista o no reporte previo: el Paso 7 las necesita para grabar la marca de pie, también en la primera validación.
    ```bash
-   FINGERPRINT=$( { git rev-parse HEAD; \
-           git status --porcelain -- ':(top,exclude)docs/audits' ':(top,exclude).sdd-devkit' ':(exclude,glob)**/trace-report.md'; \
-           git diff HEAD        -- ':(top,exclude)docs/audits' ':(top,exclude).sdd-devkit' ':(exclude,glob)**/trace-report.md'; \
-         } | git hash-object --stdin )
+   ROOT=$( git rev-parse --show-toplevel )
+   EXC=( ':(top,exclude,glob)**/.*/**' ':(top,exclude,glob)**/docs/**' ':(top,exclude,glob)**/trace-report.md' )
+   FINGERPRINT=$( { git -C "$ROOT" ls-files -s              -- "${EXC[@]}"; \
+                    git -C "$ROOT" status --porcelain -uall -- "${EXC[@]}"; \
+                    git -C "$ROOT" diff                     -- "${EXC[@]}"; \
+                  } | git hash-object --stdin )
+   SPEC_FINGERPRINT=$( { git -C "$ROOT" ls-files -s              -- "$ARTEFACTO"; \
+                         git -C "$ROOT" status --porcelain -uall -- "$ARTEFACTO"; \
+                         git -C "$ROOT" diff                     -- "$ARTEFACTO"; \
+                       } | git hash-object --stdin )
    ```
-   - **`FINGERPRINT` == fingerprint guardado** y el usuario **no** pidió revalidar/forzar → **no regenerar**: devolver el veredicto y el resumen del reporte existente, indicando que no hubo cambios desde `{{generado}}`. No reescribir el archivo ni delegar en `quality-check`. Fin.
-   - **Difieren**, no hay fingerprint guardado (reporte antiguo), o el usuario pide revalidar/forzar → continuar el flujo completo (Pasos 1-7).
+   El primero cubre **código y tests** (excluye toda carpeta oculta, cualquier `docs/` y los `trace-report.md`; es el mismo de `quality-check` y `code-review`). El segundo cubre **los criterios y los `TC-XXX`** de este artefacto, que el primero deja fuera por vivir bajo `docs/specs/`.
+3. Si el `trace-report.md` **no existe** → no hay caché; continuar en el Paso 1.
+4. Si **existe**, leer su marca de pie `<!-- trace-validate:fingerprint=<hash> · spec=<hash> · generado=YYYY-MM-DD -->` y decidir:
+   - **Coinciden los dos hashes**, el reporte **no** registra ejecución fallida, y el usuario **no** pasó `revalidate` → **no regenerar**: devolver el veredicto y el resumen del reporte existente, indicando que no hubo cambios desde `{{generado}}`. No reescribir el archivo ni delegar en `quality-check`. Fin.
+   - **Difiere alguno**, falta la marca o el campo `spec=` (reporte anterior a esta convención), el reporte trae filas en `No ejecutado` por una delegación que no se pudo hacer, o el usuario pide `revalidate` → continuar el flujo completo (Pasos 1-7).
 
-> Computar el `FINGERPRINT` **una sola vez** y reutilizarlo en el Paso 4 (delegación) y en el Paso 7 (guardado). La delegación en modo `tests-only` **no** modifica código (es no interactiva y no abre ciclo de corrección), así que el valor sigue siendo válido al guardar. Si el código cambiara por cualquier otra vía durante la corrida, recalcularlo antes de guardar.
+> Computar ambos hashes **una sola vez**: el `FINGERPRINT` se reutiliza en el Paso 4 (delegación) y los dos en el Paso 7 (guardado). La delegación en modo `tests-only` no abre ciclo de corrección, pero **sí** puede normalizar el `.gitignore` la primera vez que corre en un repo (ver `quality-check`, Paso 1), y eso mueve el `FINGERPRINT`. Por eso: **si se delegó, recalcularlo antes de guardar**; el `SPEC_FINGERPRINT` no se ve afectado.
 
 ### Paso 1 — Localizar y leer el trabajo
 
@@ -38,12 +46,12 @@ Antes de trabajar, evitar regenerar si nada cambió (ver [Reutilización del rep
 
 1. **Fuente primaria de casos de prueba — la carpeta del artefacto.** `test-define` deja los TCs en `test-cases/` **dentro de la carpeta del artefacto**, con tres insumos que hay que aprovechar antes de recurrir a heurística:
    - **La línea `Casos de prueba:`** que `test-define` añade bajo cada criterio en el propio artefacto: da el mapeo criterio → TCs **ya resuelto por quien escribió los casos**. Tomarla como vínculo autoritativo.
-   - **El índice `test-cases/README.md`**: tabla con TC · Perspectiva · Tipo de prueba · Prioridad · Criterio de aceptación. Permite construir el esqueleto de la matriz sin abrir cada TC.
+   - **El índice `test-cases/README.md`**: tabla con TC · Perspectiva · Tipo de prueba · **Estado** · Prioridad · Criterio de aceptación. Permite construir el esqueleto de la matriz sin abrir cada TC.
    - **Cada `TC-XXX-{slug}.md`** para el detalle (campo `Criterio de aceptación`, `Tipo de prueba`, `Estado`, `Perspectiva`).
 
    Si no existe `test-cases/`, o el artefacto no trae la línea `Casos de prueba:`, recurrir a la inferencia desde los tests del repo (ítems 4-5 de este paso) y dejar constancia en Observaciones de que el mapeo es inferido, no declarado.
 
-2. **Filtrar por `Estado` del TC** según la regla de «Estados de cobertura» en `SKILL.md`: `Obsolete` no cuenta como cobertura, `Draft` cuenta como **Parcial**, `Ready` (o sin campo) cuenta pleno. Dejar Observación en los dos primeros casos.
+2. **Filtrar por `Estado` del TC** —leyéndolo de la columna `Estado` del índice; solo abrir cada `TC-XXX-*.md` si el índice no la trae— según la regla de «Estados de cobertura» en `SKILL.md`: `Obsolete` no cuenta como cobertura, `Draft` cuenta como **Parcial**, `Ready` (o sin campo) cuenta pleno. Dejar Observación en los dos primeros casos.
 
 3. **Leer el `Tipo de prueba` de cada TC.** Para cada TC leer su campo **`Tipo de prueba`** del encabezado: declara la **intención de diseño** del caso (el TC se escribe antes de implementar, por eso no existe un valor "Automatizada"). El valor es `Manual` (no se automatiza, requiere ejecución humana por diseño) **o** uno o varios de `Unit` / `Integration` / `API Test` / `Visual Test` / `E2E`, separados por coma. **Cada tipo declarado genera una fila de la matriz** (columna `Tipo`, ver Paso 3): la declaración fija *qué debería existir*; el **estado real** —si ya está automatizada (`Evidencia`) y con qué resultado (`Ejecución`/`Resultado`, Paso 4)— lo determina este skill al validar, no el TC. Si el TC no trae el campo, inferir la naturaleza desde los artefactos hallados y dejar constancia en Observaciones. Cuando el campo liste uno o varios tipos concretos (`Unit`, `Integration`, etc.), usarlos como pista del tipo de artefacto esperado al buscar y clasificar; si el artefacto hallado no coincide con ninguno de los tipos listados, anotarlo en Observaciones sin forzar el mapeo.
 4. Buscar en el repo los **artefactos de prueba** relacionados y clasificarlos por **tipo**:
@@ -83,7 +91,7 @@ El mapeo se hace **por fila de la matriz**, no por criterio: la unidad es la com
 `trace-validate` **no ejecuta la suite**. Obtiene los resultados de `quality-check` (única autoridad de
 ejecución) y los mapea a los criterios.
 
-1. **Reusar el `FINGERPRINT` canónico** ya calculado en el Paso 0 (mismo valor; la delegación `tests-only` no altera el código, así que no hay que recalcularlo).
+1. **Reusar el `FINGERPRINT` canónico** ya calculado en el Paso 0.
 2. **Buscar la caché** en la ubicación fija `.sdd-devkit/test-run.json` (no por unidad; es la corrida completa de la rama):
    - **Existe y `git.fingerprint` coincide** → caché **fresca** (sin cambios desde la corrida de
      `quality-check`): **reutilizar** sus `suites[]` sin ejecutar. Registrar la procedencia en la prosa del Resumen.
@@ -126,7 +134,7 @@ La plantilla tiene cinco partes más la marca de pie del fingerprint (Paso 7). N
 
 | Parte | Contenido |
 |-------|-----------|
-| **Cabecera** | `Fecha` (fecha y hora de la corrida), `Rama` y `Commit` (los del `FINGERPRINT` del Paso 0: `git rev-parse --abbrev-ref HEAD` y `git rev-parse --short HEAD`), `Trabajo` (enlace relativo al artefacto) y `Veredicto` (Paso 6) |
+| **Cabecera** | `Fecha` (fecha y hora de la corrida), `Rama` y `Commit` (`git rev-parse --abbrev-ref HEAD` y `git rev-parse --short HEAD`, capturados al redactar; son metadata del reporte y **no** entran en ninguna de las dos claves), `Trabajo` (enlace relativo al artefacto) y `Veredicto` (Paso 6) |
 | **Resumen** | 1-3 frases de estado + la línea **Pruebas**: procedencia (caché fresca de `quality-check` del commit X, corrida `tests-only` disparada ahora, o el motivo de no haberlos podido ejecutar) y el `result` **por suite** tomado de `test-run.json` + la tabla de indicadores |
 | **Cobertura por criterio** | Tabla 1 |
 | **Matriz de trazabilidad** | Tabla 2 |
@@ -144,16 +152,16 @@ Reglas de redacción de la matriz:
 - Las rutas de `Evidencia` van en `código` y son relativas a la raíz del repo.
 - Nunca omitir una fila `No cubierto`: **es la información más valiosa de la tabla**.
 
-**Tabla de indicadores del Resumen** — exactamente **cuatro** filas, todas de criterios:
+**Tabla de indicadores del Resumen** — un título («Cobertura de criterios de aceptación») seguido de una tabla horizontal de **exactamente cuatro columnas y una sola fila de cifras**, todas de criterios (`Total | Cubiertos | Parciales | No Cubiertos` sobre una fila `M | N | P | Q`); copiarla de la plantilla, no reconstruirla en vertical:
 
-| Indicador | Qué cuenta |
+| Columna | Qué cuenta |
 |-----------|------------|
-| Criterios de aceptación | Total de criterios del artefacto (**M**) |
-| Criterios cubiertos | Criterios con `Estado = Cubierto` |
-| Criterios parciales | Criterios con `Estado = Parcial` |
-| Criterios no cubiertos | Criterios con `Estado = No cubierto` |
+| Total | Total de criterios del artefacto (**M**) |
+| Cubiertos | Criterios con `Estado = Cubierto` |
+| Parciales | Criterios con `Estado = Parcial` |
+| No Cubiertos | Criterios con `Estado = No cubierto` |
 
-Cifras siempre numéricas (`0`, no `—`). Los tres últimos **deben sumar M**: comprobarlo antes de publicar; si no cuadra, hay filas mal derivadas. No añadir indicadores de pruebas (fallidas, no ejecutadas): esa granularidad ya está en la matriz, y mezclarla aquí confunde los dos ejes.
+Cifras siempre numéricas (`0`, no `—`). Las tres últimas **deben sumar M**: comprobarlo antes de publicar; si no cuadra, hay filas mal derivadas. No añadir indicadores de pruebas (fallidas, no ejecutadas): esa granularidad ya está en la matriz, y mezclarla aquí confunde los dos ejes.
 
 **Dónde va cada observación.** Hay dos destinos y no son intercambiables:
 
@@ -177,9 +185,10 @@ Aplicar la tabla de «Veredicto» (en `SKILL.md`) sobre el conjunto de criterios
    - **WI:** `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` (dentro de la carpeta del WI).
    - **FT:** `docs/specs/features/FT-XXX-[slug]/trace-report.md` (dentro de la carpeta del feature).
    - **Cualquier otro artefacto:** `trace-report.md` **junto al artefacto** (en su carpeta, o al lado del archivo si es suelto). Confirmar la ruta con el usuario antes de escribir; si el artefacto es de solo lectura o externo al repo, no escribir y entregar el reporte en el chat.
-2. **Grabar el fingerprint** para la próxima comprobación de frescura (Paso 0): escribir al pie del reporte
-   la marca `<!-- trace-validate:fingerprint=<FINGERPRINT> · generado=YYYY-MM-DD -->` con el `FINGERPRINT` vigente
-   (Paso 0 / Paso 4). Esta marca se **conserva** en el documento publicado.
+2. **Grabar las dos claves** para la próxima comprobación de frescura (Paso 0): escribir al pie del reporte
+   la marca `<!-- trace-validate:fingerprint=<FINGERPRINT> · spec=<SPEC_FINGERPRINT> · generado=YYYY-MM-DD -->`
+   con los valores vigentes (los del Paso 0; el `FINGERPRINT` recalculado si hubo delegación). Esta marca se
+   **conserva** en el documento publicado.
 3. Presentar al usuario el **veredicto** y el reporte. No modificar ningún otro artefacto del repo.
 
 ---
@@ -224,7 +233,7 @@ Reglas:
 
 ## Checklist
 
-- [ ] Frescura comprobada (Paso 0): si el fingerprint coincide con el del `trace-report.md` existente y no se fuerza revalidación, se devolvió el reporte sin regenerar
+- [ ] Frescura comprobada (Paso 0): `FINGERPRINT` y `SPEC_FINGERPRINT` calculados; si ambos coinciden con los del `trace-report.md` existente, el reporte no traía filas `No ejecutado` y no se pidió `revalidate`, se devolvió sin regenerar
 - [ ] Idioma resuelto (preferencia del usuario en la sesión, o idioma de la conversación)
 - [ ] Tipo de trabajo determinado y documento de criterios leído; criterios extraídos con su identificador **verbatim**, sin normalizar
 - [ ] Casos de prueba y artefactos (unit / integración / e2e) inventariados con su ruta y criterio
@@ -233,7 +242,7 @@ Reglas:
 - [ ] Resultados de pruebas obtenidos de `quality-check` (caché fresca `test-run.json` o delegación `tests-only`); sin ejecutar la suite en `trace-validate` ni inventar resultados
 - [ ] `Ejecución` y `Resultado` rellenados fila a fila (`Ejecución` sin la suite entre paréntesis); ninguna fila con `Evidencia = —` reporta `Paso`/`Fallo`
 - [ ] Cabecera completa (Fecha · Rama · Commit · Trabajo · Veredicto) y las dos tablas construidas desde `assets/trace-report-template.md`
-- [ ] Resumen con la tabla de indicadores (4 filas) cuadrada —cubiertos + parciales + no cubiertos = total de criterios— y la línea **Pruebas** con la procedencia y el resultado por suite (sin agregado inventado)
+- [ ] Resumen con la tabla de indicadores (4 columnas, 1 fila de cifras) cuadrada —cubiertos + parciales + no cubiertos = total de criterios— y la línea **Pruebas** con la procedencia y el resultado por suite (sin agregado inventado)
 - [ ] Caveats globales (suite `coverage` en `FAIL`, árbol sucio, suites ausentes, ejecución no delegable) en «Observaciones y pendientes»; sección omitida si no hay ninguno
 - [ ] Veredicto emitido respondiendo si **todos** los criterios quedan cubiertos
-- [ ] `trace-report.md` guardado en la ubicación del tipo, sin bloques de comentario de la plantilla y con la marca de pie del fingerprint; ningún otro artefacto modificado
+- [ ] `trace-report.md` guardado en la ubicación del tipo, sin bloques de comentario de la plantilla y con la marca de pie de **ambas** claves; ningún otro artefacto modificado

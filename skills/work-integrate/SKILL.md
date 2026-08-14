@@ -109,7 +109,7 @@ Antes de cambiar de rama o ejecutar el merge, verificar las siguientes condicion
 - **Verificaciones automatizadas con veredicto Aprobado:** ejecutar **`quality-check`** (modificador `default`) antes del merge — es la **compuerta de cierre** que corre la batería completa de pruebas sobre la rama consolidada y persiste `.sdd-devkit/test-run.json`. Solo un veredicto **✅ Aprobado** permite continuar. **❌ Rechazado** e **⚠️ Incompleto** bloquean el merge hasta que el usuario corrija los problemas y la corrida se repita con resultado Aprobado.
 - **Code review con veredicto Aprobado:** ejecutar **`code-review`** después de `quality-check`, pasándole la **rama base ya resuelta** (`base <rama>`) — es la revisión cualitativa (intención, arquitectura y diseño) sobre el diff de la rama contra esa base, **incluidos los cambios sin commitear** que `quality-check` haya podido dejar al corregir. Emite su **propio** veredicto, independiente del anterior: solo **✅ Aprobado** permite continuar; **❌ Rechazado** e **⚠️ Incompleto** bloquean el merge hasta que los hallazgos se corrijan o se justifiquen y la revisión se repita con resultado Aprobado.
 - **Trazabilidad con veredicto aprobado:** ejecutar **`trace-validate`** sobre el trabajo de la rama (`US-XXX`/`WI-XXX`), **después** de `quality-check` para que reutilice su `test-run.json` sin re-ejecutar pruebas. Solo **✅ Aprobado** (o **⚠️ Aprobado con observaciones**, mostrando las observaciones) permite continuar; **❌ Rechazado** (algún criterio de aceptación sin cubrir o con prueba fallida) bloquea el merge.
-- **Working tree limpio otra vez, ya pasadas las puertas:** las puertas pueden dejar cambios sin commitear (correcciones aplicadas por `quality-check`, o por `work-implement` en su modo corrección) **y sus propios artefactos**: `docs/audits/quality-check.md`, `docs/audits/code-review.md`, `.sdd-devkit/test-run.json` y el `trace-report.md` del trabajo, que se escriben siempre. Antes del merge, re-comprobar `git status --porcelain` e invocar de nuevo `git-commit` si hay salida — lo que verificaron las puertas debe ser exactamente lo que se integra, artefactos incluidos.
+- **Working tree limpio otra vez, ya pasadas las puertas:** las puertas pueden dejar cambios sin commitear (correcciones aplicadas por `quality-check`, o por `work-implement` en su modo corrección) **y sus propios artefactos versionados**: `docs/audits/quality-check.md`, `docs/audits/code-review.md` y el `trace-report.md` del trabajo, que se escriben siempre. (`.sdd-devkit/test-run.json` no aparece: está en el `.gitignore` por ser una caché local.) Antes del merge, re-comprobar `git status --porcelain` e invocar de nuevo `git-commit` si hay salida — lo que verificaron las puertas debe ser exactamente lo que se integra, artefactos incluidos.
 
 **Si hay conflicto:**
 ```
@@ -135,17 +135,57 @@ Camino feliz cuando todas las verificaciones pasan.
    - Fallback: `git config --get branch.<branch>.merge` y derivar la rama base local correspondiente.
    - Si ninguno concluye o hay ambigüedad: preguntar al usuario sin proponer un default.
 6. **Ejecutar `quality-check`** (modificador `default`) sobre la rama actual. Si el veredicto es **❌ Rechazado** o **⚠️ Incompleto**, parar y reportar el informe al usuario — no continuar con el merge hasta obtener veredicto **✅ Aprobado** en una nueva ejecución.
-7. **Ejecutar `code-review`** con `base <rama-base>` (la del paso 5). Su alcance incluye los cambios sin commitear, así que también revisa las correcciones que `quality-check` haya podido aplicar. Si el veredicto es **❌ Rechazado** o **⚠️ Incompleto**, parar y reportar los hallazgos — no continuar hasta obtener **✅ Aprobado** con los hallazgos bloqueantes corregidos o justificados.
+7. **Ejecutar `code-review`** con `base <rama-base>` (la del paso 5). Su alcance incluye los cambios sin commitear, así que también revisa las correcciones que `quality-check` haya podido aplicar. Si su informe existente ya estaba fresco **y aprobado** (mismo fingerprint, misma base y mismo modo, sin correcciones en el paso 6), lo devuelve sin volver a revisar; no forzar `revalidate` desde aquí. Un `❌`/`⚠️` previo lo revisa de nuevo por su cuenta. Si el veredicto es **❌ Rechazado** o **⚠️ Incompleto**, parar y reportar los hallazgos — no continuar hasta obtener **✅ Aprobado** con los hallazgos bloqueantes corregidos o justificados.
 8. **Ejecutar `trace-validate`** sobre el trabajo de la rama (después de `quality-check`, para reutilizar su `test-run.json`). Si el veredicto es **❌ Rechazado**, parar y reportar los criterios faltantes/fallidos — no mergear hasta obtener **✅ Aprobado** (o **⚠️ Aprobado con observaciones**, mostrando las observaciones al usuario).
-9. **Re-comprobar el working tree tras las puertas.** Las puertas pueden haber dejado cambios sin commitear (correcciones aplicadas por `quality-check` o por `work-implement` en su modo corrección). Volver a ejecutar `git status --porcelain` y, si hay salida, **invocar de nuevo `git-commit`** con el mismo criterio del paso 2. **El merge solo procede con el árbol limpio:** lo verificado por las puertas debe ser exactamente lo que se integra.
-10. **Calcular delta** con `git rev-list --count <base>..HEAD` para reportar cuántos commits se van a integrar.
+9. **Re-comprobar el working tree tras las puertas.** Las puertas dejan cambios sin commitear de dos clases: **correcciones** (aplicadas por `quality-check` o por `work-implement` en su modo corrección) y **sus propios artefactos** —`docs/audits/quality-check.md`, `docs/audits/code-review.md` y el `trace-report.md` del trabajo, que se escriben siempre—. Los dos se commitean: la rama debe conservar su evidencia (el paso 12 es quien decide qué **no** pasa a la base). Volver a ejecutar `git status --porcelain` y, si hay salida, **invocar de nuevo `git-commit`** con el mismo criterio del paso 2. **El merge solo procede con el árbol limpio:** lo verificado por las puertas debe ser exactamente lo que se integra.
+10. **Calcular delta** con `git rev-list --count <base>..HEAD`. Es una **puerta, no solo un dato para el reporte**: si el resultado es `0`, la rama ya está integrada (típicamente porque el PR se mergeó en la plataforma) — parar y avisar, sin tocar nada. Seguir adelante produciría un commit que no es un merge y que solo borra archivos, con un mensaje que miente.
 11. **Cambiar a la rama base** con `git checkout <base>`. Si falla, parar y reportar.
-12. **Ejecutar el merge** con `git merge --no-ff <feature-branch> -m "Merge <ID>: <nombre-corto>"`, donde `<ID>` es el identificador del trabajo (`US-XXX` o `WI-XXX`) y `<nombre-corto>` su nombre/slug sin el prefijo de rama. Si surge conflicto, ir al flujo de conflictos.
-13. **Reportar resultado** al usuario: rama origen (con su prefijo), rama destino, número de commits integrados, hash del commit de merge, estado del HEAD y nota explícita de que **no** se hizo push ni se borró la rama del trabajo.
+12. **Ejecutar el merge en tres tiempos**, para que los informes de las puertas no lleguen a la rama base (ver [Los informes de las puertas no se integran](#los-informes-de-las-puertas-no-se-integran)):
+
+    ```bash
+    git merge --no-ff --no-commit <feature-branch>
+    test -f "$(git rev-parse --git-dir)/MERGE_HEAD" || { echo "no hay merge en curso"; exit 1; }
+    git rm -q -f --ignore-unmatch ':(top)docs/audits/quality-check.md' ':(top)docs/audits/code-review.md'
+    test -z "$(git ls-files --cached -- ':(top)docs/audits/quality-check.md' ':(top)docs/audits/code-review.md')" \
+      || { echo "los informes siguen en el índice"; exit 1; }
+    git commit -m "Merge <ID>: <nombre-corto>"
+    ```
+
+    `<ID>` es el identificador del trabajo (`US-XXX` o `WI-XXX`) y `<nombre-corto>` su nombre/slug sin el prefijo de rama.
+
+    Las dos comprobaciones no son adorno:
+
+    - **`MERGE_HEAD`** confirma que el merge quedó realmente en curso. Si git respondió *Already up to date*, no hay merge, y ejecutar el `git rm` + `git commit` de todos modos crearía un commit normal que borra dos archivos de la base. Parar ahí.
+    - **`:(top)` en las rutas** las ancla a la raíz del repositorio. `git rm` las interpreta **relativas al cwd**, así que en un monorepo lanzado desde `packages/api/` no casarían, `--ignore-unmatch` devolvería `0` sin borrar nada, y los informes se integrarían en la base **en silencio** mientras el paso 13 reporta lo contrario. El `git ls-files --cached` posterior es el cinturón: verifica el resultado en vez de confiar en el código de salida. **Tiene que ser `ls-files`, no `git diff --cached`:** el diff lista también los **borrados** stageados, así que cuando la base ya trackeaba el informe —y el `git rm` funcionó— la ruta aparecería igual y el guard cortaría un merge correcto. `ls-files --cached` responde la pregunta que importa: ¿queda algo de esos dos archivos en el índice?
+
+    `--ignore-unmatch` está para el caso legítimo de que un informe no se haya commiteado en la rama, no para tapar rutas mal resueltas. **Borrar exactamente esos dos archivos, ni uno más:** las copias de `save-report` y los `arch-audit-*.md` se quedan. Si surge conflicto, ir al flujo de conflictos.
+13. **Reportar resultado** al usuario: rama origen (con su prefijo), rama destino, número de commits integrados, hash del commit de merge, estado del HEAD y nota explícita de que **no** se hizo push ni se borró la rama del trabajo. Mencionar también que los informes de las puertas quedaron en la rama del trabajo y no se integraron.
 
 ---
 
-> **Conflictos y rama base ambigua:** si el `git merge` produce conflictos, seguir el **Flujo de manejo de conflictos** (abortar con `git merge --abort`, reportar archivos, parar). Si la rama base no se resuelve por reflog ni config, seguir el **Flujo de rama base ambigua** (listar candidatos, preguntar, no asumir default). Ambos flujos íntegros y el **checklist detallado** están en [references/flows.md](references/flows.md).
+### Los informes de las puertas no se integran
+
+`docs/audits/quality-check.md` y `docs/audits/code-review.md` son **fotos de una rama concreta**: su encabezado lleva la rama y el commit sobre los que se corrieron las puertas. Se **versionan en la rama del trabajo** —ahí valen: quedan junto a los commits que verifican, y el revisor los ve en el PR— pero **no deben llegar a la rama base**, por dos razones:
+
+- **En `develop` serían mentira.** Nadie corrió las puertas sobre `develop`; ese archivo diría «✅ Aprobado» sobre una rama que ni siquiera es la suya. Y con cada integración lo pisaría la última feature en entrar.
+- **Viven en una ruta fija**, así que toda rama escribe el mismo archivo: dejarlos integrarse convierte cada merge en un conflicto seguro sobre un artefacto generado.
+
+Por eso el paso 12 parte el merge: `--no-commit` deja el resultado en el índice, se retiran los dos informes y el commit de merge se cierra ya sin ellos. La rama del trabajo **conserva los suyos intactos** — no se reescribe su historia, solo se decide qué entra en la base.
+
+**Qué NO se toca:**
+
+| Artefacto | Por qué se queda |
+|-----------|------------------|
+| `docs/audits/arch-audit-*.md` | Auditorías de arquitectura del **repositorio**, no de una rama. Su sitio es la rama base. |
+| `docs/audits/quality-check-<timestamp>.md` · `code-review-<timestamp>.md` | Copias de `save-report`: el usuario las pidió **para conservar histórico**. Llevan marca de tiempo, así que no colisionan ni pisan nada. |
+| `trace-report.md` del trabajo | Vive junto a su artefacto en `docs/specs/`, es del **trabajo** y no de la rama, y se integra con él. |
+| `.sdd-devkit/test-run.json` | Ni aparece: está en el `.gitignore`. |
+
+> **Esta limpieza solo cubre los merges que hace este skill.** Un merge desde la UI de GitHub/GitLab —el camino de `pr-create`— sí propaga los informes: ahí la limpieza hay que hacerla en la rama base después de integrar. Ver [`pr-create`](../pr-create/SKILL.md).
+
+---
+
+> **Conflictos y rama base ambigua:** si el `git merge` produce conflictos, seguir el **Flujo de manejo de conflictos**, que **clasifica antes de abortar**: un `modify/delete` sobre los dos informes de `docs/audits/` se resuelve por el lado del borrado y el merge continúa; cualquier otro conflicto se aborta con `git merge --abort`, se reporta y se para. Si la rama base no se resuelve por reflog ni config, seguir el **Flujo de rama base ambigua** (listar candidatos, preguntar, no asumir default). Ambos flujos íntegros y el **checklist detallado** están en [references/flows.md](references/flows.md).
 
 ---
 

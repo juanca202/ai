@@ -5,10 +5,13 @@ Ejecutar desde la raíz del repositorio **antes** de aceptar el staging. El agen
 ## Comando
 
 ```bash
-git diff --staged | grep -nEi 'password[[:space:]]*=|api[_-]?key|secret[[:space:]]*=|token[[:space:]]*=|BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY|aws_access_key_id|aws_secret_access_key|-----BEGIN CERTIFICATE-----'
+git diff --staged | grep '^+' | grep -v '^+++' | \
+  grep -nEi 'password[[:space:]]*=|api[_-]?key|secret[[:space:]]*=|token[[:space:]]*=|BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY|aws_access_key_id|aws_secret_access_key|-----BEGIN CERTIFICATE-----'
 ```
 
 Salida esperada cuando hay hallazgos: números de línea en el diff unificado (no el valor del secreto).
+
+> **Solo líneas añadidas.** El filtro `grep '^+'` (descartando la cabecera `+++`) es lo que hace útil la detección: sin él, el patrón casa también con líneas **eliminadas** y de contexto, y bloquearía commits que precisamente **quitan** un secreto del repo o que borran un archivo que lo mencionaba. Un ejemplo real en este plugin: el commit de promoción de `pr-create` retira `docs/audits/quality-check.md`, un informe que puede citar salidas de linter con `api_key` o `token =`; con el diff completo, ese borrado detendría el cierre sin salida posible. Lo que hay que vigilar es lo que **entra** en la historia, no lo que sale.
 
 ## Archivos sensibles por nombre
 

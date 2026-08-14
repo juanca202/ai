@@ -158,13 +158,14 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 /arch-audit
 /arch-audit revalida la última auditoría
 /arch-audit nueva auditoría desde cero
-/arch-audit solo Testing Standards
 ```
 
 - «¿El código respeta los estándares?»
 - «Audita el cumplimiento de AGENTS.md y docs/standards»
-- «Revalida audit-2026-06-30.md»
-- «Chequea las reglas del repo; enfócate en API Standards»
+- «Revalida arch-audit-2026-06-30.md»
+- «Chequea las reglas del repo»
+
+> La auditoría cubre **todos** los estándares del repo; no hay modificador para acotarla a uno. Si el usuario pide enfocarse en un dominio, se audita completo y se le señala dónde mirar.
 
 ---
 
@@ -454,7 +455,7 @@ Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrat
 
 **Cuándo:** verificaciones automatizadas pre-merge (usuario u otro skill: `work-integrate`, `pr-create`, `trace-validate`). No proactivo durante el desarrollo.
 
-**Produce:** informe de checks (`docs/audits/quality-check.md`) y la caché de pruebas `.sdd-devkit/test-run.json`.
+**Produce:** informe de checks (`docs/audits/quality-check.md`, artefacto **de rama**: se versiona en ella y `work-integrate` lo retira al integrar) y la caché de pruebas `.sdd-devkit/test-run.json` (local, gitignorada).
 
 **Alcance:** **todo el repositorio** en el estado actual de la rama (o todo el módulo elegido, en monorepo). No se acota al diff: una regresión en código que nadie tocó también debe salir.
 
@@ -503,13 +504,15 @@ En prosa (el skill mapea al modificador en inglés):
 
 **Cuándo:** revisión **cualitativa** pre-merge (usuario u otro skill: `work-integrate`, `pr-create`). No proactivo durante el desarrollo. **No ejecuta pruebas ni checks** — eso es `quality-check`.
 
-**Produce:** informe de hallazgos (`docs/audits/code-review.md`) sobre el diff: intención, arquitectura y diseño (ISO/IEC 25010) y feedback senior.
+**Produce:** informe de hallazgos (`docs/audits/code-review.md`, artefacto **de rama**: se versiona en ella y `work-integrate` lo retira al integrar) sobre el diff: intención, arquitectura y diseño (ISO/IEC 25010) y feedback senior.
 
 **Alcance:** el diff de la rama contra su base, **incluidos los cambios sin commitear**. Con `working-tree` (solo lo sin commitear) o `scope` (rutas concretas) la revisión es acotada y **no** sobrescribe `docs/audits/code-review.md`: va al chat o a `save-report`.
 
 **Severidad:** `🔴` Crítico · `🟠` Mayor (bloquean) · `🟡` Menor · `💡` Sugerencia.
 
 **Veredicto:** `✅ Aprobado` · `❌ Rechazado` · `⚠️ Incompleto` — **independiente** del de `quality-check`.
+
+Idempotente: si ni el fingerprint, ni el commit de la base, ni el modo cambiaron **y el informe existente está `✅ Aprobado`**, no vuelve a revisar (usar `revalidate` para forzar). Un `❌`/`⚠️` nunca se sirve desde caché: justificar un hallazgo no toca el código y el veredicto quedaría congelado. Las revisiones acotadas (`working-tree`, `scope`) no se cachean.
 
 **Modificadores de invocación** (opcionales; claves en inglés). Sin ninguno se asume `default`.
 
@@ -522,6 +525,7 @@ En prosa (el skill mapea al modificador en inglés):
 | `scope <ruta…>` | Limita la revisión a esas rutas                                  |
 | `blocking-only` | Solo hallazgos 🔴/🟠 en el informe                               |
 | `save-report`   | Copia con marca de tiempo en `docs/audits/code-review-<timestamp>.md`, además del informe vigente |
+| `revalidate`    | Fuerza la revisión aunque el informe existente esté fresco                        |
 
 
 **Ejemplos de invocación:**
@@ -532,11 +536,13 @@ En prosa (el skill mapea al modificador en inglés):
 /code-review working-tree
 /code-review scope src/domain
 /code-review blocking-only save-report
+/code-review revalidate
 ```
 
 En prosa:
 
 - «Revisa la arquitectura y el diseño del cambio» → `default`
+- «Vuelve a revisar aunque no haya cambiado nada» → `revalidate`
 - «Revisa solo lo que bloquea el merge» → `blocking-only`
 - «Revisa solo la carpeta de dominio» → `scope src/domain`
 - «Revisa lo que llevo antes de commitear» → `working-tree`
@@ -555,7 +561,7 @@ En prosa:
 
 **Veredicto:** `✅ Aprobado` · `⚠️ Aprobado con observaciones` · `❌ Rechazado`.
 
-No ejecuta pruebas: reutiliza `.sdd-devkit/test-run.json` fresco o invoca `quality-check` en `tests-only`. Idempotente: si el fingerprint no cambió, no regenera el reporte.
+No ejecuta pruebas: reutiliza `.sdd-devkit/test-run.json` fresco o invoca `quality-check` en `tests-only`. Idempotente con **dos** claves: el `fingerprint` canónico (código y tests) y un `spec` sobre la carpeta del artefacto (criterios y `TC-XXX`). Si ambos coinciden y la corrida anterior sí pudo ejecutar las pruebas, devuelve el reporte sin regenerarlo; `revalidate` fuerza.
 
 **Alcance:** **un artefacto** y sus criterios de aceptación — ni el repo ni el diff. Si la rama abarca varios trabajos, se valida uno por corrida.
 
@@ -570,6 +576,7 @@ No ejecuta pruebas: reutiliza `.sdd-devkit/test-run.json` fresco o invoca `quali
 /trace-validate FT-001
 /trace-validate US-012 solo AC-002 y AC-005
 /trace-validate docs/specs/api-pagos.md
+/trace-validate US-012 revalidate
 ```
 
 - «Genera la matriz de trazabilidad de US-012»
@@ -584,6 +591,8 @@ No ejecuta pruebas: reutiliza `.sdd-devkit/test-run.json` fresco o invoca `quali
 ### work-integrate
 
 **Cuándo:** cerrar e integrar localmente (merge `--no-ff` a la rama base). No push, no PR.
+
+El merge se hace en tres tiempos (`--no-commit` → retirar `docs/audits/quality-check.md` y `code-review.md` → `commit`): esos dos informes son fotos de la rama del trabajo y no deben llegar a la base. Los `arch-audit-*.md`, las copias de `save-report` y el `trace-report.md` sí se integran.
 
 **Opciones — tipo:**
 
@@ -622,11 +631,20 @@ No ejecuta pruebas: reutiliza `.sdd-devkit/test-run.json` fresco o invoca `quali
 
 **Plataformas (auto-detectadas):** GitHub (`gh`) · GitLab (`glab`) · Bitbucket · Azure Repos (`az repos`) · Gitea (`tea`).
 
+**Dos modos**, deducidos del par origen→destino:
+
+| | Origen → destino | Puertas |
+|---|---|---|
+| **Implementación** | `feature/`\|`fix/`\|`chore/`\|`refactor/`\|`test/` → rama de integración | `quality-check` + `code-review` + `trace-validate` (+ DoD si existe) |
+| **Promoción** | `develop` → `master`\|`main`\|`release/*` | `quality-check` (+ DoD si existe) |
+
+En una promoción, `code-review` y `trace-validate` se reportan como `— No aplica`: cada trabajo ya pasó las tres puertas al integrarse, y lo que queda por demostrar es que la rama consolidada está verde. Estar en una rama protegida **no** bloquea; el Paso 3 confirma la intención antes de seguir.
+
 **Puertas (obligatorias, sin draft ni skip):**
 
 1. `quality-check` sobre la rama (batería completa; produce `test-run.json`)
-2. `code-review` sobre el diff contra `origin/<destino>` (revisión cualitativa; veredicto propio)
-3. `trace-validate` sobre el `US`/`WI` de la rama
+2. `code-review` sobre el diff contra `origin/<destino>` (revisión cualitativa; veredicto propio) — solo en implementación
+3. `trace-validate` sobre el `US`/`WI` de la rama — solo en implementación
 4. Definition of Done (`docs/policies/definition-of-done.md`) — **solo si existe**; si no, se omite
 
 Working tree sucio → `git-commit` automático. Título/descripción se generan sin pedir confirmación. Ante fallo de puerta: informa, propone acciones y solo corrige con autorización explícita.
@@ -642,4 +660,5 @@ Working tree sucio → `git-commit` automático. Título/descripción se generan
 - «Crea el PR»
 - «Abre un MR a develop»
 - «Súbelo a main» (el destino se confirma; las puertas no se pueden saltar)
+- «Promueve develop a master» (modo promoción, desde `develop`)
 

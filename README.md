@@ -60,7 +60,7 @@ flowchart TD
     end
     S --> IMPL
     IMPL --> DONE(["Entregable"])
-    NOTE["ℹ️ Puertas de calidad al cierre<br/>(quality-check + code-review + trace-validate)<br/>corren dentro de work-integrate / pr-create"]
+    NOTE["ℹ️ Puertas de calidad al cierre<br/>(quality-check + code-review + trace-validate)<br/>corren dentro de work-integrate / pr-create.<br/>En un PR de promoción, solo quality-check"]
     DONE -.-> NOTE
 
     classDef nestedFlow fill:#fff7ed,stroke:#ea580c,stroke-width:2px,stroke-dasharray:5 5,color:#9a3412
@@ -80,7 +80,7 @@ flowchart TD
 3. En paralelo (o a continuación), se configura la **compuerta de calidad** vía `arch-init`; el camino brownfield también converge ahí.
 4. Luego se definen o actualizan los ADRs/Estándares con `arch-manage`. Opcionalmente se audita el cumplimiento con `arch-audit`.
 5. Con la base arquitectónica lista, el trabajo entra a la implementación de requerimientos (otro flujo: historias → planificación → implementación → integración/PR).
-6. Ese flujo de implementación **ya cierra** con `work-integrate` o `pr-create`, que ejecutan internamente las puertas de calidad (`quality-check`, `code-review`, `trace-validate`) — no son pasos aparte de este flujo de alto nivel.
+6. Ese flujo de implementación **ya cierra** con `work-integrate` o `pr-create`, que ejecutan internamente las puertas de calidad (`quality-check`, `code-review`, `trace-validate`) — no son pasos aparte de este flujo de alto nivel. Y un paso más allá queda la **promoción**: `pr-create` desde `develop` hacia la rama de despliegue, donde solo aplica `quality-check` porque cada trabajo ya pasó las tres al integrarse.
 7. El flujo termina en un entregable: trabajo verificado, validado y listo para producción.
 
 
@@ -102,7 +102,7 @@ Skills del ciclo de vida de un requerimiento: de la historia de usuario al PR me
 | [code‑review](SKILLS.md#code-review)       | Revisión cualitativa pre-merge del diff: intención, arquitectura y diseño (ISO/IEC 25010, SOLID) con feedback accionable y veredicto apto/no apto/incompleto                                                                                                                                      |
 | [trace‑validate](SKILLS.md#trace-validate) | Reporte de trazabilidad: criterios de aceptación de US/WI/FT ↔ casos y artefactos de prueba, con veredicto de cobertura                                                                                                                                                                           |
 | [work‑integrate](SKILLS.md#work-integrate) | Cerrar e integrar el trabajo de una US, un WI o una automatización de pruebas                                       |
-| [pr‑create](SKILLS.md#pr-create)           | Crear PR o MR desde la rama actual (GitHub, GitLab, Azure Repos, etc.) con puertas de calidad obligatorias: quality-check, code-review, trace-validate y Definition of Done                                                                                                                                      |
+| [pr‑create](SKILLS.md#pr-create)           | Crear PR o MR desde la rama actual (GitHub, GitLab, Azure Repos, etc.) con puertas de calidad obligatorias. Dos modos: implementación (feature → integración; quality-check, code-review, trace-validate y Definition of Done) y promoción (develop → master/release; quality-check y DoD)                                                                                                                                      |
 
 
 
@@ -133,7 +133,7 @@ flowchart TD
     G --> I["Creación de PR<br/>**/pr-create**"]
     H --> J(["Entregable"])
     I --> J
-    NOTE["ℹ️ Ambos ejecutan internamente<br/>quality-check + code-review + trace-validate"]
+    NOTE["ℹ️ Ambos ejecutan internamente<br/>quality-check + code-review + trace-validate.<br/>La promoción posterior (develop → master)<br/>solo ejecuta quality-check"]
     H -.-> NOTE
     I -.-> NOTE
 
@@ -154,7 +154,7 @@ flowchart TD
 3. **Planificación de tareas** (`work-plan`): desde una historia produce tareas técnicas (`TK-XXX`); sin historia, tareas de mantenimiento (`WI-XXX`).
 4. Durante la planificación, opcionalmente se investiga con `work-research` y/o se ajusta el diseño arquitectónico con `design-define`.
 5. Las tareas planificadas pasan a `work-implement` para su codificación. Los casos de prueba (`TC-XXX`, incluidos los de un feature legacy `FT-XXX`) también pueden pasar por `work-implement` para automatizarse como pruebas.
-6. El flujo termina por uno de dos caminos, y ambos llegan al mismo entregable — el trabajo listo para producción, ya sea integrado directo (`work-integrate`) o vía Pull/Merge Request (`pr-create`). Cada uno ejecuta **internamente** las mismas puertas de calidad (`quality-check`, `code-review`, `trace-validate`); no son pasos aparte de este flujo.
+6. El flujo termina por uno de dos caminos, y ambos llegan al mismo entregable — el trabajo listo para producción, ya sea integrado directo (`work-integrate`) o vía Pull/Merge Request (`pr-create`). Cada uno ejecuta **internamente** las mismas puertas de calidad (`quality-check`, `code-review`, `trace-validate`); no son pasos aparte de este flujo. Después, promover lo acumulado en `develop` a la rama de despliegue es un `pr-create` en **modo promoción**, que solo ejecuta `quality-check`.
 
 
 
@@ -176,7 +176,7 @@ flowchart TD
     S --> I["Creación de PR<br/>**/pr-create**"]
     H --> J(["Entregable"])
     I --> J
-    NOTE["ℹ️ Ambos ejecutan internamente<br/>quality-check + code-review + trace-validate"]
+    NOTE["ℹ️ Ambos ejecutan internamente<br/>quality-check + code-review + trace-validate.<br/>La promoción posterior (develop → master)<br/>solo ejecuta quality-check"]
     H -.-> NOTE
     I -.-> NOTE
 
@@ -197,7 +197,7 @@ flowchart TD
 1. **Inicio**: el requerimiento se convierte en historias de usuario con `work-define`.
 2. Opcionalmente, desde las historias se investiga (`work-research`), se definen casos de prueba (`test-define`) y/o diseño arquitectónico (`design-define`).
 3. Las historias alimentan **Specs de terceros** (la implementación la corre el framework elegido: Speckit, OpenSpec, AgentOS, etc.).
-4. El flujo termina por uno de dos caminos, igual que en Specs: integración directa (`work-integrate`) o vía Pull/Merge Request (`pr-create`); ambos llegan al entregable y ejecutan **internamente** las mismas puertas de calidad (`quality-check`, `code-review`, `trace-validate`), sin ser pasos aparte de este flujo.
+4. El flujo termina por uno de dos caminos, igual que en Specs: integración directa (`work-integrate`) o vía Pull/Merge Request (`pr-create`); ambos llegan al entregable y ejecutan **internamente** las mismas puertas de calidad (`quality-check`, `code-review`, `trace-validate`), sin ser pasos aparte de este flujo. La promoción posterior a la rama de despliegue es un `pr-create` en **modo promoción**, que solo ejecuta `quality-check`.
 
 
 
@@ -213,7 +213,7 @@ El humano define la intención, las restricciones y las decisiones importantes; 
 | Casos de prueba           | Humano / QA            | `/test-define`                     |
 | UX/UI (cómo debe verse)   | Humano / Diseñador     | —                                  |
 | Modelo de dominio / datos | Humano / Arquitecto    | `/design-define`                   |
-| Arquitectura              | Humano / Arquitecto    | `/adr-manage`                      |
+| Arquitectura              | Humano / Arquitecto    | `/arch-manage`                     |
 | Validación de criterios de aceptación | Humano / QA | `/trace-validate`                  |
 | Implementación detallada  | Agente                 | `/work-implement` o Spec Framework |
 

@@ -41,6 +41,10 @@ Referencia del skill `trace-validate`. Casos de uso y errores a evitar.
 
 ## Anti-patrones
 
+- **Regenerar el reporte cuando el existente está fresco** (coinciden los dos hashes, sin filas `No ejecutado` y sin `revalidate`): sería idéntico y obliga a redelegar la ejecución de pruebas. Devolver el existente.
+- A la inversa: **devolver un reporte cacheado** cuyo `fingerprint` o `spec` no coincide, uno **sin** marca de pie, o uno que registra una ejecución que no se pudo hacer — ese `⚠️` describe un fallo de entorno, no del código, y congelarlo lo vuelve permanente.
+- **Comparar solo el `fingerprint` y olvidar el `spec`**: es justo la mitad que detecta que los criterios de aceptación o los `TC-XXX` cambiaron. Sin ella, una US con criterios reescritos pasaría la puerta con un ✅ que traza criterios que ya no existen.
+- **Publicar el reporte sin la marca de pie del fingerprint** (sí se eliminan los bloques de instrucciones de la plantilla, no la marca): sin ella, la próxima corrida no puede reutilizarlo.
 - Inventar cobertura, casos de prueba o vínculos criterio-test que no se desprenden del repo.
 - Reportar `Paso`/`Fallo` sin que `quality-check` haya ejecutado realmente la prueba (caché fresca o delegación `tests-only`).
 - Marcar `Cubierto` un criterio cuya prueba falló: es `No cubierto` si se pudo aislar que el test suyo falló, o `Parcial` si la suite falló sin poder aislarlo (ver «Mapeo a la matriz» en `SKILL.md`).

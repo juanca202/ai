@@ -20,8 +20,9 @@ Detalla **cómo** ejecutar las verificaciones automatizadas paso a paso y cómo 
 
 1. Identificar el ecosistema y cargar lo relativo a ese stack desde [`stacks.md`](stacks.md) (categoría por check, comando, parseo). Si no se detecta stack o el monorepo es ambiguo, parar y preguntar.
 2. Resolver el comando concreto de cada check (scripts del manifiesto + *fallback* canónico).
-3. Capturar metadata: stack detectado, rama (`git rev-parse --abbrev-ref HEAD`), commit corto (`git rev-parse --short HEAD`) y working tree (`git status --porcelain`).
-4. Calcular el **fingerprint canónico del estado del código** (recipe exacto en [`SKILL.md` → Caché de corrida de pruebas](../SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate); es el mismo que usan `code-review` y `trace-validate`). Clave de frescura de la caché de pruebas (ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas)).
+3. Capturar metadata: stack detectado, rama (`git rev-parse --abbrev-ref HEAD`), commit corto (`git rev-parse --short HEAD`) y working tree. **`workingTreeClean` se evalúa con los mismos pathspecs del fingerprint** (`git status --porcelain -uall -- "${EXC[@]}"` vacío), no con un `git status` pelado: si no, el árbol saldría «sucio» por los propios artefactos de la tubería —el informe que esta corrida está a punto de escribir— y `trace-validate` publicaría un caveat falso en cada reporte.
+4. **Normalizar el `.gitignore`** (ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas)): comprobar con `git check-ignore -q .sdd-devkit/test-run.json` si la caché ya está ignorada y, solo si no lo está, añadir la línea `.sdd-devkit/test-run.json` (creando el archivo si no existe). **Va aquí, antes del paso 5, y no en la escritura de la caché:** el `.gitignore` es un archivo oculto de la **raíz**, que la receta **no** excluye, así que tocarlo desplaza la clave. Hacerlo después significaría persistir un `test-run.json` cuyo fingerprint ya no corresponde al árbol — y la caché no volvería a darse por fresca **nunca**.
+5. Calcular el **fingerprint canónico del estado del código** (recipe exacto en [`SKILL.md` → Caché de corrida de pruebas](../SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate); es el mismo que usan `code-review` y `trace-validate`). Clave de frescura de la caché de pruebas (ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas)).
 
 ### Paso 2 — Ejecutar los checks
 
@@ -35,7 +36,7 @@ los resultados por suite. **`tests-only` es no interactivo:** no hace ninguna de
 
 En otro caso, ejecutar **secuencialmente** (no en paralelo) los checks Bloqueantes y Condicionales-con-config-presente, midiendo la duración:
 
-1. **tipado** — solo si Bloqueante (TS) o Condicional con config. Si **FAIL** → **fail-fast**: marcar el resto `⏸️ No ejecutado (fail-fast)` y pasar a la evaluación. **No** marcarlos `N/A` (sí correspondían) ni `SKIPPED` (no hay problema de tooling).
+1. **tipado** — solo si Bloqueante (TS) o Condicional con config. Si **FAIL** → **fail-fast**: marcar el resto `⏸️` (en el informe, **Pendiente**) y pasar a la evaluación. **No** marcarlos `N/A` (sí correspondían) ni `SKIPPED` (no hay problema de tooling).
 2. **linter** — parsear `error` vs `warning` según la herramienta.
 3. **unit tests** — comando del stack; *fallback* canónico.
 4. **coverage** — PASS/FAIL según la regla del catálogo de checks (`SKILL.md`). Sin ninguna herramienta ni config de cobertura en el repo → `N/A` con nota en Próximas acciones, no `SKIPPED`.
@@ -76,7 +77,7 @@ En otro caso, ejecutar **secuencialmente** (no en paralelo) los checks Bloqueant
 Rellenar la plantilla [`../assets/quality-check-template.md`](../assets/quality-check-template.md) (ver [Formato del informe](#formato-del-informe)):
 
 1. Calcular el veredicto con la tabla de Veredicto (`SKILL.md`): considera Bloqueantes/Condicionales-presentes (las filas `N/A` no cuentan).
-2. Tabla resumen de checks: una fila por check ejecutado, `SKIPPED`, `N/A` o `⏸️` (no ejecutado por fail-fast).
+2. Tabla resumen de checks: una fila por check ejecutado, `SKIPPED`, `N/A` o `⏸️` (cortado por el fail-fast), con la **etiqueta en español** de la tabla de [Formato del informe](#formato-del-informe).
 3. Detalle de checks **solo** para FAIL o `SKIPPED`; truncar a 10 errores por check (`… y N más`).
 4. "Próximas acciones": FAIL Bloqueantes/Condicionales en orden de ejecución → warnings de linter → Sonar → `SKIPPED` por config ausente/rota.
 
@@ -86,10 +87,12 @@ Decidir **dónde** queda el informe según el contexto. La corrida es **completa
 no de una unidad, así que su informe reside en una **ubicación fija**, no en la carpeta de la US/WI:
 
 - **Informe vigente de la rama:** **escribir siempre** `docs/audits/quality-check.md` rellenando la plantilla [`../assets/quality-check-template.md`](../assets/quality-check-template.md), sin importar desde qué `US`/`WI` se invocó ni si el repo es spec-driven. Crear `docs/audits/` si no existe. **Sobrescribir** en re-ejecuciones: representa el estado vigente de la rama, no un histórico. Mostrar también un resumen en el chat.
+  > **Es una foto de esta rama, no del repositorio.** Se versiona para que viaje en el PR y el revisor lo lea junto al cambio, pero **no debe integrarse en la rama base**: allí afirmaría un veredicto que nadie corrió. Al integrar, `work-integrate` lo retira dentro del propio merge; en un merge hecho en la plataforma hay que borrarlo en la base a mano. No es asunto de este skill —aquí solo se escribe—, pero sí explica por qué el encabezado lleva siempre la rama y el commit.
 - **`save-report`:** además del informe vigente, guardar una copia con marca de tiempo en `docs/audits/quality-check-<YYYYMMDD-HHMMSS>.md`. Es el modo para conservar histórico puntual; **no** sustituye ni omite el `quality-check.md` vigente.
 
-**Escribir la caché de corrida de pruebas.** Si en esta corrida **se ejecutaron los checks de pruebas**
-(unit/coverage/integración/e2e — es decir, cualquier modo salvo `no-tests` o un `only <check>` que no sea de pruebas),
+**Escribir la caché de corrida de pruebas.** Solo si esta corrida ejecutó **las cuatro** suites
+(unit/coverage/integración/e2e). En corridas **parciales** no se escribe ni se sobrescribe — ver
+[Caché de corrida de pruebas](#caché-de-corrida-de-pruebas). Cuando sí toca,
 escribir/actualizar `.sdd-devkit/test-run.json` en la **raíz del repo** con el `FINGERPRINT` **vigente** (el del Paso 1 si no hubo correcciones; el recalculado tras la última corrección si las hubo) y el resultado por suite. Crear `.sdd-devkit/` si no existe. Ver
 [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas). En modo `tests-only` este es el artefacto de salida.
 
@@ -103,7 +106,21 @@ La estructura canónica del informe está en la plantilla [`../assets/quality-ch
 
 La plantilla incluye: encabezado con metadata (donde vive el **Veredicto**, con su justificación de una línea; no hay sección propia), **Resumen**, **Verificaciones** (tabla + detalle de fallidos) y **Próximas acciones**.
 
-Símbolos a usar (exactamente estos): `✅` PASS · `❌` FAIL · `⏭️` SKIPPED · `⏸️` no ejecutado por fail-fast · `—` N/A · `ℹ️` informativo (Sonar).
+**Dos vocabularios, no uno.** El razonamiento de este skill, `stacks.md`, la tabla de veredicto y el
+esquema de `test-run.json` usan los nombres **canónicos en inglés**; el informe que lee el usuario usa las
+**etiquetas en español** de la plantilla. Traducir solo al escribir el informe — **nunca** al revés:
+
+| Concepto (canónico) | Símbolo | Etiqueta en el informe | Qué significa |
+|---------------------|---------|------------------------|---------------|
+| `PASS` | `✅` | **Pasó** | El check se ejecutó y salió limpio. No confundir con el **veredicto** `✅ Aprobado`, que es del informe entero. |
+| `FAIL` | `❌` | **Falló** | El check se ejecutó y no pasó. |
+| `SKIPPED` | `⏭️` | **Omitido** | Correspondía (Bloqueante, o Condicional con config presente) pero la herramienta o la config está ausente o rota → `⚠️ Incompleto`. |
+| — (fail-fast) | `⏸️` | **Pendiente** | Correspondía y no llegó a ejecutarse porque el **fail-fast** del tipado cortó la corrida. Ni `SKIPPED` (no hay problema de tooling) ni `N/A` (sí correspondía); no altera el veredicto, que ya lo fijó el FAIL del tipado. Si hace falta desambiguar en el detalle, escribir «Pendiente (fail-fast)». |
+| `N/A` | `—` | **No aplica** | El repo nunca pidió ese check: no aplica al stack, no hay config/herramienta/script, o el usuario lo omitió por modificador. No cuenta para el veredicto. |
+| informativo | `ℹ️` | **Informativo** | **No es un estado, es una categoría**: vive en la columna Categoría, no en Estado. Un check informativo que falla se reporta `❌ Falló` como cualquier otro; lo que lo distingue es que no mueve el veredicto. Hoy solo Sonar. |
+
+> **`result` de `test-run.json` no se traduce:** ahí van siempre `PASS` / `FAIL` / `SKIPPED` / `N/A`, porque
+> lo consume una máquina (`trace-validate`), no una persona. Escribir «Pasó» en el JSON rompe el esquema.
 
 Reglas al rellenar:
 - Sustituir cada `{{…}}` de la plantilla por el valor real; el informe publicado no debe conservar placeholders ni el bloque de comentario inicial.
@@ -116,13 +133,29 @@ Reglas al rellenar:
 Artefacto reutilizable que evita que `trace-validate` vuelva a ejecutar las pruebas. La semántica y el
 esquema están en `SKILL.md` ([Caché de corrida de pruebas](../SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate)); aquí, lo operativo.
 
-**Cuándo se escribe.** Al final de toda corrida que ejecutó los checks de pruebas (Paso 5), sea o no
-spec-driven el repo. Ruta **fija**: `.sdd-devkit/test-run.json` en la **raíz del repositorio**, no por
+**Cuándo se escribe.** Al final de toda corrida que ejecutó **las cuatro** suites de pruebas (Paso 5), sea o no
+spec-driven el repo. En corridas parciales, no — ver «Cuándo NO se escribe» más abajo. Ruta **fija**: `.sdd-devkit/test-run.json` en la **raíz del repositorio**, no por
 unidad y fuera de `docs/` (es un artefacto de máquina, no documentación). Se **sobrescribe** en cada
-corrida (es el estado vigente de la rama) y **se versiona**, para que viaje en el PR. Crear `.sdd-devkit/`
-si no existe; comprobar de paso que el `.gitignore` del repo no lo excluya (si lo hace, avisar: la caché no
-viajaría en el PR). Solo si el usuario pide explícitamente no crear el directorio, devolver los resultados
-en la respuesta y advertir que no habrá reutilización entre corridas. Ver [Caché de corrida de pruebas](../SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
+corrida (es el estado vigente de la rama) y **no se versiona**.
+
+**El `.gitignore` se normaliza en el Paso 1**, no aquí: `git check-ignore -q .sdd-devkit/test-run.json` y,
+solo si devuelve distinto de 0, añadir esa línea (creando el archivo si hace falta), en silencio. Es la única
+edición de configuración que este skill hace por iniciativa propia y no se reporta al usuario. **Usar
+`check-ignore`, no un grep de la línea:** en un repo que ya ignora `.sdd-devkit/` entero, el grep no
+encontraría el patrón exacto y añadiría una línea redundante que no cambia nada.
+
+**Cuándo NO se escribe la caché.** Solo se escribe si la corrida ejecutó **las cuatro** suites de pruebas.
+En una corrida **parcial** —`no-tests`, `no-unit-tests`/`no-integration`/`no-e2e`/`no-coverage`, un
+`only <check>`, o cualquier corrida cortada por el **fail-fast** del tipado— **no** escribir ni sobrescribir
+`test-run.json`: dejar intacta la que hubiera. El motivo es que el consumidor no puede distinguir un `N/A`
+«el repo no tiene esa suite» de un `N/A` «el usuario la omitió», y `trace-validate` traduce el primero
+publicando que esa clase de prueba no existe en el repo — un artefacto falso. Una caché parcial es peor que
+ninguna.
+
+**No comentar la caché al usuario.** Que exista y se reutilice, o que no exista y haya que generarla, son
+los dos caminos normales; ninguno es una incidencia. Solo si el usuario pide explícitamente no crear el
+directorio, devolver los resultados en la respuesta y advertir que no habrá reutilización entre corridas.
+Ver [Caché de corrida de pruebas](../SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
 
 **Qué se guarda.** El `FINGERPRINT` vigente en `git.fingerprint`, más **las cuatro** entradas de suite
 (`unit`, `coverage`, `integration`, `e2e`) con su `command`, `result` (`PASS`/`FAIL`/`SKIPPED`/`N/A`) y un
@@ -138,10 +171,10 @@ consumidor no tenga que distinguir «ausente» de «no aplica». No inventar sui
 - **Diferente o no existe** → caché **obsoleta/ausente**: ejecutar las suites, sobrescribir `test-run.json`
   y devolver los nuevos resultados.
 
-**Validez.** El fingerprint canónico (recipe en `SKILL.md`) cubre código, specs y tests, y excluye los
-artefactos generados; no detecta la edición de **contenido** de un archivo que permanezca sin
-trackear, ni cambios de entorno (dependencias instaladas, red, servicios) — si el resultado pudiera
-depender de eso, tratar la caché como no concluyente. Si el árbol
+**Validez.** El fingerprint canónico (recipe en `SKILL.md`) cubre código, tests y manifiestos, y excluye
+las carpetas ocultas, `docs/` y los `trace-report.md` sueltos; no detecta la edición de **contenido** de un
+archivo que permanezca sin trackear, ni cambios de entorno (dependencias instaladas, red, servicios) — si el
+resultado pudiera depender de eso, tratar la caché como no concluyente. Si el árbol
 estaba sucio, `workingTreeClean: false` queda registrado como señal para el consumidor.
 
 ---
@@ -155,15 +188,15 @@ estaba sucio, `workingTreeClean: false` queda registrado como señal para el con
 | Tipado **Bloqueante** (TS) pero falta `tsconfig.json` | `SKIPPED` → `⚠️ Incompleto`. |
 | Tipado **Condicional** (Python/Rust) sin config ni herramienta | `N/A`. No afecta veredicto. |
 | Tipado **N/A** para el stack (Java, Go, JS, .NET) | No ejecutar; no listar como `SKIPPED`. |
-| Tipado **FAIL** (cuando aplica) | **STOP fail-fast.** Resto `⏸️ No ejecutado (fail-fast)` — ni `N/A` ni `SKIPPED`. |
+| Tipado **FAIL** (cuando aplica) | **STOP fail-fast.** Resto `⏸️` / **Pendiente** — ni `N/A` ni `SKIPPED`. |
 | Runner/build tool ausente del PATH | Parar y preguntar al usuario. |
-| Script/tarea definida pero binario inexistente (config rota) | `❌ FAIL` si el comando se intentó y rompió; `⏭️ SKIPPED` si no se pudo ni invocar. Nunca `N/A`. |
+| Script/tarea definida pero binario inexistente (config rota) | `FAIL` (`❌` / **Falló**) si el comando se intentó y rompió; `SKIPPED` (`⏭️` / **Omitido**) si no se pudo ni invocar. Nunca `N/A`. |
 | Unit tests sin script ni comando canónico | `SKIPPED` → `⚠️ Incompleto` (unit es Bloqueante). |
 | Coverage con config o herramienta presente pero que no se pudo ejecutar | `SKIPPED` → `⚠️ Incompleto` (coverage es Bloqueante). |
 | Coverage sin herramienta **ni** configuración alguna en el repo | `N/A` + recomendación en Próximas acciones. No condenar el veredicto a `⚠️ Incompleto` permanente por un check que el proyecto nunca declaró. |
 | Suite de integración no distinguible de la unitaria | `N/A`. No contar la suite unitaria como integración ni inventar un comando. |
-| Coverage bajo umbral configurado | `❌ FAIL`. |
-| Coverage sin umbrales configurados y exit 0 | `✅ PASS`. |
+| Coverage bajo umbral configurado | `FAIL` (`❌` / **Falló**). |
+| Coverage sin umbrales configurados y exit 0 | `PASS` (`✅` / **Pasó**). |
 | E2E **Condicional** con config presente pero tool ausente/rota | `SKIPPED` → `⚠️ Incompleto`. |
 | E2E sin config ni script de e2e | `N/A`. No afecta veredicto. |
 | Build **N/A** (Python sin empaquetado) | Omitir fila; no afecta veredicto. |
@@ -174,6 +207,7 @@ estaba sucio, `workingTreeClean: false` queda registrado como señal para el con
 | FAIL en algún check | Mostrar reporte y **preguntar** si corregir. Nunca corregir sin autorización. Con autorización, delegar en `work-implement` si hay un artefacto en curso (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin); si no hay ninguno, corregir aquí. Tras corregir, **re-ejecutar el check que fallaba**; si pasa, **recalcular el fingerprint** y **re-ejecutar toda la corrida**. |
 | Autorización de corrección pero el artefacto de trabajo es ambiguo (varios candidatos) | Preguntar cuál antes de delegar; no delegar sobre un artefacto adivinado. |
 | FAIL o SKIPPED durante una corrida `tests-only` | **No preguntar nada** — el modo es no interactivo: devolver los resultados por suite (con su `result`) y la ruta de `test-run.json`. Corregir o resolver el tooling es decisión del flujo que invocó. |
+| Stack no detectable, monorepo ambiguo o runner ausente **en modo `tests-only`** | **Tampoco preguntar**, pese a lo que dicen las filas de arriba: el modo es no interactivo de principio a fin. Devolver «no ejecutable» con el motivo concreto y sin `test-run.json`. Es el retorno que `trace-validate` espera para reportar sus filas como `No ejecutado`; una pregunta ahí colgaría una delegación que nadie está mirando. |
 | Usuario no quiere corregir los FAIL, o pide solo el informe | Cerrar en `❌ Rechazado` con el detalle de lo pendiente en Próximas acciones; no maquillar el veredicto ni volver a insistir con la corrección. |
 | Corrida **fuera de una implementación** (rama sin artefacto derivable) con hallazgos que exigen tocar código | Preguntar explícitamente **[Corregir]** / **[Solo el informe]** antes de nada. Entregar solo el informe es un resultado legítimo, no un flujo incompleto. |
 | El usuario acota qué corregir («el linter sí, el test no») | Respetarlo: corregir solo lo autorizado y tratar el resto como *solo informe*, dejándolo en Próximas acciones. |
