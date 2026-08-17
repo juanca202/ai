@@ -20,20 +20,30 @@ Flujo para **ejecutar en codigo** una tarea de mantenimiento `WI-XXX` bajo `docs
 
 **Rama de trabajo:** `feature/WI-XXX-[kebab-case]` por defecto. Si el equipo usa prefijos por tipo, derivarlo del campo `Tipo` del WI segun esta tabla — son los ocho valores canonicos de la plantilla (`work-plan/assets/work-item-template.md`), sin abreviar ni traducir:
 
-| `Tipo` del WI | Prefijo de rama |
-| ------------- | --------------- |
-| `bug-fix` | `fix/` |
+| `Tipo` del WI | Rama |
+| ------------- | ---- |
+| `bug-fix` | **Sin rama propia — directo en la rama de integracion** (ver excepcion abajo) |
+| `security-update` | **Sin rama propia — directo en la rama de integracion** (ver excepcion abajo) |
 | `refactor` | `refactor/` |
 | `optimization` | `refactor/` |
 | `dependency-update` | `chore/` |
-| `security-update` | `fix/` |
 | `test-improvement` | `chore/` |
 | `documentation-update` | `chore/` |
 | `operational-change` | `chore/` |
 
-No asumir la rama base; acordarla con el usuario.
+No asumir la rama base ni la de integracion; acordarla con el usuario.
 
-> **Por que `test-improvement` va a `chore/` y no a `test/`.** El prefijo `test/` esta reservado para la **automatizacion de `TC-XXX`/`FT-XXX`**: `work-integrate` lo usa para inferir el tipo de trabajo y, a partir de ahi, exige en `Done` unicamente las unidades `TC-XXX`/`FT-XXX` de esa ejecucion. Un WI de mejora de pruebas no tiene esas unidades —su `progress.md` tiene una sola entrada, la del propio `WI-XXX`—, asi que con `test/` el cierre no encontraria nada que verificar y el WI se integraria sin comprobar su estado. Los cuatro prefijos de la tabla (`feature/`, `fix/`, `chore/`, `refactor/`) son exactamente los que `work-integrate` acepta para un WI.
+> **Por que `test-improvement` va a `chore/` y no a `test/`.** El prefijo `test/` esta reservado para la **automatizacion de `TC-XXX`/`FT-XXX`**: `work-integrate` lo usa para inferir el tipo de trabajo y, a partir de ahi, exige en `Done` unicamente las unidades `TC-XXX`/`FT-XXX` de esa ejecucion. Un WI de mejora de pruebas no tiene esas unidades —su `progress.md` tiene una sola entrada, la del propio `WI-XXX`—, asi que con `test/` el cierre no encontraria nada que verificar y el WI se integraria sin comprobar su estado. `work-integrate` acepta `feature/`, `fix/`, `chore/` y `refactor/` para un WI; de esos, este skill solo **crea** `feature/`, `chore/` y `refactor/` — `fix/` queda para ramas creadas fuera de este flujo.
+
+### Excepcion: `bug-fix` y `security-update` no crean rama
+
+Un WI de tipo **`bug-fix`** o **`security-update`** se implementa **directamente sobre la rama de integracion** (la que el equipo use como tal: `develop`, `main`, `trunk`…). **No se crea ni se cambia a una rama `fix/`.**
+
+- **Es el comportamiento por defecto y no se pregunta.** Basta con leer `Tipo` del WI: si es uno de esos dos, no hay eleccion de rama que ofrecer al usuario.
+- **La rama de integracion si se confirma**, porque no se asume: si la rama actual no es la de integracion acordada, resolverla con el usuario (opciones tappables con los candidatos detectados) y hacer checkout antes de tocar codigo. No adivinar `main` ni `develop`.
+- **El commit avisara.** `git-commit` pide una confirmacion extra al comitear en una rama de integracion o despliegue; es esperado, se responde una sola vez por invocacion y no sustituye la confirmacion de avance del Paso 3.
+- **El cierre no hace handoff:** ver [Paso 4](#paso-4---cierre). No hay rama que mergear, asi que no se invoca `work-integrate` ni `pr-create`.
+- **Sigue rigiendo todo lo demas:** `Ready` con criterios de aceptacion, ciclo TDD, lint/build, `progress.md`, checkboxes y la pausa de confirmacion antes de comitear.
 
 > Si el repo esta vinculado a un tracker externo (`work_item_tracking:` en `.agents/MEMORY.md`), el numero del WI es el ID del work item en ese sistema (`WI-1847`); si no lo esta, es un secuencial local (`WI-001`). Respetar el numero tal cual aparece en el archivo.
 
@@ -47,7 +57,7 @@ No asumir la rama base; acordarla con el usuario.
 | **Alcance** | Un WI concreto o una lista de `WI-` hermanos | Preguntar si hay ambiguedad |
 | **Tipo** | Campo `Tipo` del WI — uno de los ocho canonicos: `bug-fix`, `refactor`, `dependency-update`, `optimization`, `security-update`, `test-improvement`, `documentation-update`, `operational-change` | Leer del archivo; condiciona la rama (ver la tabla de prefijos) y el cierre |
 | **Repositorio** | Campo `Repositorio` del WI (nombre del repositorio git al que afecta) | Leer del archivo; para `Ready` es obligatorio |
-| **Rama** | Derivada del WI segun convencion del equipo | Crear desde la rama base acordada |
+| **Rama** | Derivada del WI segun convencion del equipo. **`bug-fix` y `security-update` no tienen rama propia:** se trabaja en la rama de integracion | Crear desde la rama base acordada; para `bug-fix`/`security-update`, confirmar cual es la rama de integracion |
 
 ---
 
@@ -76,7 +86,9 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 ### Paso 1 - Preparar repositorio y rama
 
 1. Verificar working tree limpio; si no, parar y avisar.
-2. Resolver y hacer checkout de la rama del WI (crear desde la rama base acordada si no existe).
+2. Resolver la rama segun el `Tipo` del WI:
+   - **`bug-fix` / `security-update`:** no crear rama. Confirmar cual es la rama de integracion y hacer checkout de ella si no se esta ya ahi (ver [Excepcion](#excepcion-bug-fix-y-security-update-no-crean-rama)).
+   - **Resto de tipos:** hacer checkout de la rama del WI (crear desde la rama base acordada si no existe).
 3. Leer o crear `progress.md` dentro de la carpeta del WI (`docs/specs/work-items/WI-XXX-[kebab-case]/progress.md`) desde `assets/progress-template.md`. El `progress.md` es específico de este WI — contiene únicamente las entradas del plan de implementación del `README.md`.
 
 ### Paso 2 - Presentar alcance
@@ -112,7 +124,8 @@ Por cada WI aprobado:
 ### Paso 4 - Cierre
 
 1. Si el ultimo WI completado quedo sin commitear (el usuario detuvo el flujo en el Paso 3 antes de confirmar el siguiente), **invocar `/git-commit` sobre sus cambios ahora**. Verificar que las pruebas **de los archivos afectados** pasen limpias (unitarias e integracion, acotadas al cambio) y, **una sola vez sobre el codigo consolidado, correr las pruebas e2e** del alcance si el repo las tiene (ver [Uso escalonado de pruebas](../SKILL.md#uso-escalonado-de-pruebas-optimizacion) en `SKILL.md`); el working tree limpio y con todos los commits hechos. **La bateria completa de pruebas no se corre aqui:** la ejecuta `quality-check` al integrar (`work-integrate`) o crear el PR (`pr-create`).
-2. **Handoff:** si el alcance esta en `Done`, **preguntar al usuario** (herramienta estructurada) como continuar:
+2. **`bug-fix` / `security-update` — cierre sin handoff.** El trabajo ya esta en la rama de integracion: no hay nada que mergear ni PR que crear. Con el WI en `Done` y el working tree limpio, **terminar ahi**: no invocar `work-integrate` ni `pr-create`, ni ofrecer las opciones del punto siguiente. Reportar el WI cerrado, los SHA de los commits y la rama sobre la que quedaron. El push queda a criterio del usuario, fuera de este skill.
+3. **Handoff (resto de tipos):** si el alcance esta en `Done`, **preguntar al usuario** (herramienta estructurada) como continuar:
 
    > "Implementacion completada. ¿Que quieres hacer ahora?"
    > Opciones: [Integrar el trabajo] / [Crear un PR] / [Terminar aqui]
@@ -127,13 +140,13 @@ Por cada WI aprobado:
 
 ## Checklist
 
-**Repositorio:** working tree limpio; rama del WI activa o creada; `progress.md` leido o creado.
+**Repositorio:** working tree limpio; rama del WI activa o creada — **o**, si el `Tipo` es `bug-fix`/`security-update`, rama de integracion confirmada y activa, sin crear rama; `progress.md` leido o creado.
 
 **Alcance:** cada `WI-*/README.md` leido completo; listas presentadas; confirmacion recibida antes del primer cambio de codigo.
 
 **Por cada WI:** `Ready` con criterios de aceptacion; no `Done`; ciclo TDD (Red→Green→Refactor) por cada comportamiento; test cases automatizables del `test-cases/README.md` cubiertos; UI bajo `ui-specialist`; Figma via MCP; plan completo implementado; criterios de aceptacion cubiertos por tests; lint/typecheck/build y tests **unitarios y de integracion** del cambio en verde (las e2e escritas se difieren al cierre y no bloquean el `Done` del WI si quedan registradas); `progress.md` a `Done` con `Cobertura de test cases` (TC no automatizados o con otro tipo de prueba documentados); decisiones de sesion registradas; **confirmacion explicita antes del siguiente WI**; `/git-commit` invocado recien al confirmar el avance (no antes) — o en el cierre, si el usuario detiene ahi.
 
-**Cierre:** pruebas unitarias e integracion de los archivos afectados en verde (acotadas al cambio) y e2e del alcance corridas una vez sobre el codigo consolidado (la bateria completa la corre `quality-check`, no este skill); working tree limpio; handoff a `pr-create` o `work-integrate`.
+**Cierre:** pruebas unitarias e integracion de los archivos afectados en verde (acotadas al cambio) y e2e del alcance corridas una vez sobre el codigo consolidado (la bateria completa la corre `quality-check`, no este skill); working tree limpio; handoff a `pr-create` o `work-integrate` — **salvo `bug-fix`/`security-update`, que cierran sin handoff** por estar ya en la rama de integracion.
 
 ---
 
@@ -150,6 +163,10 @@ Por cada WI aprobado:
 **Ejemplo 2b - Varios WI hermanos sin confirmacion**
 - *Entrada:* "Implementa WI-003, WI-004 y WI-005 de corrido, sin preguntar."
 - *Comportamiento:* varios WI + peticion explicita de no confirmar => **modo de ejecucion paralela** (ver `SKILL.md`). Analisis de dependencias primero: si son independientes, corren en subagentes con worktree (max 3 en paralelo); si un WI depende de otro fuera del alcance, avisar para excluir o detener. Merge secuencial a la rama del artefacto, con lint/build/tests tras cada merge.
+
+**Ejemplo 2c - WI de tipo `bug-fix`**
+- *Entrada:* "Implementa el WI-011, corregir el calculo de impuestos en el carrito" (`Tipo: bug-fix`).
+- *Comportamiento:* no se crea rama `fix/`; se confirma cual es la rama de integracion y se trabaja ahi. Mismo ciclo TDD, lint/build, `progress.md` a `Done` y pausa de confirmacion; al confirmar, `/git-commit` (que pedira su confirmacion extra por ser rama de integracion). El cierre **no** ofrece integrar ni crear PR: se reporta el WI cerrado y los SHA.
 
 **Ejemplo 3 - WI en Draft**
 - *Entrada:* "Ejecuta WI-007" y esta en Draft (stub sin criterios).
@@ -169,6 +186,9 @@ Por cada WI aprobado:
 - Marcar `Done` sin que los tests de los criterios de aceptacion **existan**. Deben **pasar en verde** los que corresponde ejecutar en la iteracion (unitarios y de integracion); las **e2e escritas y diferidas al cierre** —y, en modo paralelo, la integracion diferida por infra no aislable— no bloquean el `Done` si estan registradas en `progress.md` (ver [Uso escalonado de pruebas](../SKILL.md#uso-escalonado-de-pruebas-optimizacion)).
 - Buscar los insumos de comportamiento en una US padre: el WI no proviene de una US; los tests se basan en los insumos del propio WI (`AC-XXX` y, si existen, `BR-XX` / `TC-XXX`).
 - Implementar un WI en `Draft` (stub) como si estuviera listo.
+- Crear una rama `fix/` para un WI de tipo `bug-fix` o `security-update`: esos van directo en la rama de integracion.
+- Preguntar al usuario si quiere rama para un `bug-fix`/`security-update` (no hay eleccion), o dar por supuesta la rama de integracion sin confirmarla (esa si se confirma).
+- Ofrecer handoff a `work-integrate` o `pr-create` al cerrar un `bug-fix`/`security-update`: no hay rama que integrar.
 - Escribir codigo de produccion antes del test (romper el ciclo Red→Green→Refactor).
 - Implementar UI sin `ui-specialist`, o UI con referencia Figma sin el MCP de Figma.
 
@@ -182,5 +202,5 @@ Posicion: **implementacion** - un WI es autocontenido (no proviene de `work-defi
 |--|--|
 | **Entrada** | `WI-XXX` en `Estado: Ready` (Descripcion, Criterios de aceptacion, Dependencias, Referencias y Plan). Stubs en `Draft` **no** habilitan la implementacion. |
 | **Salida** | Codigo commiteado; `progress.md` con el WI en `Done`; working tree limpio. |
-| **Siguiente paso** | El WI ya comiteado via `/git-commit` durante la implementacion => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara las tres puertas de cierre (`quality-check`, `code-review` y `trace-validate`) y exigira veredicto Aprobado en las tres antes de integrar. |
+| **Siguiente paso** | El WI ya comiteado via `/git-commit` durante la implementacion => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara las tres puertas de cierre (`quality-check`, `code-review` y `trace-validate`) y exigira veredicto Aprobado en las tres antes de integrar. **Excepcion `bug-fix` / `security-update`:** el trabajo ya esta en la rama de integracion, asi que **no hay siguiente paso** — el ciclo termina con el commit. |
 | **Regreso desde plan** | Ambiguedad tecnica, criterios faltantes o alcance incorrecto => volver a `work-plan` para ajustar el WI. |

@@ -80,7 +80,7 @@ Verificar estas condiciones antes de implementar, sea cual sea el tipo. Si algun
 
 - **No iniciar en la rama de otro trabajo (primera verificacion):** obtener la rama actual con `git branch --show-current`. Si ya tiene un prefijo de implementacion (`feature/`, `fix/`, `chore/`, `refactor/`, `test/`) y **no** corresponde al artefacto que se va a implementar, **parar** e indicar al usuario que no se puede iniciar la implementacion desde la rama de otro trabajo; debe situarse en la rama base acordada (p. ej. `develop`/`main`) para que el skill cree o cambie a la rama del artefacto. **Excepcion - reanudar:** si la rama actual es precisamente la del artefacto pedido, continuar normalmente.
 - **Working tree limpio:** `git status --porcelain` sin cambios pendientes no resueltos **al iniciar la sesion de implementacion** (o al reanudarla). No aplica durante la pausa de confirmacion entre unidades: los cambios de la unidad recien terminada quedan sin commitear ahi a proposito (ver *Ritmo obligatorio*), hasta que el usuario confirma avanzar.
-- **Rama correcta:** estar en (o crear) la rama de trabajo del artefacto. No implementar en `main` ni en ramas de otro trabajo sin instruccion explicita. El nombre de rama lo define cada referencia segun el tipo.
+- **Rama correcta:** estar en (o crear) la rama de trabajo del artefacto. No implementar en `main` ni en ramas de otro trabajo sin instruccion explicita. El nombre de rama lo define cada referencia segun el tipo. **Excepcion — `WI-XXX` de tipo `bug-fix` o `security-update`:** no llevan rama propia; se implementan **directamente sobre la rama de integracion** y cierran sin handoff (ver [`references/work-items.md`](references/work-items.md#excepcion-bug-fix-y-security-update-no-crean-rama)). Ahi la verificacion no es "estar en la rama del artefacto" sino **estar en la rama de integracion confirmada** con el usuario — que tampoco se asume.
 - **Solo trabajo de la rama actual:** solo se implementan unidades (TK / WI / TC / FT) que pertenezcan al artefacto asociado a la rama de implementacion actual. No implementar tareas de otro artefacto o de otra rama: si la unidad pedida no corresponde a la rama actual, **parar** y cambiar a su rama correspondiente (o pedir al usuario que lo haga) antes de continuar; nunca mezclar trabajo de distintos artefactos en una misma rama.
 - **Artefacto en `Ready`:** el artefacto a implementar existe y esta en `Estado: Ready` (lo verifica cada referencia con su regla propia).
 - **Solapamiento de progreso:** leer `progress.md` si existe; respetar unidades ya en `Done`; si hay alguna `In Progress`, revisar notas y estado real antes de continuar.
@@ -247,7 +247,7 @@ Es el **primer paso** y condiciona todo lo demas. No lanzar ningun subagente ant
 
 - **Maximo 3 subagentes en paralelo.** Si una ola tiene mas de 3 unidades independientes, despacharlas en lotes de hasta 3; al liberarse un cupo, entra la siguiente unidad pendiente de la ola.
 - **Un worktree por unidad.** Cada subagente trabaja en su propio `git worktree`, en una rama derivada de la rama del artefacto:
-  - Rama base = la rama del artefacto de esta ejecucion (`feature/US-XXX-*` o la rama del `WI`).
+  - Rama base = la rama del artefacto de esta ejecucion (`feature/US-XXX-*` o la rama del `WI`). **Si el alcance son WI de tipo `bug-fix` / `security-update`** —que no tienen rama propia—, la base de los worktrees es la **rama de integracion** confirmada, y ahi mismo se hacen los merges de las unidades; no se crea una rama intermedia para agruparlos.
   - Crear el worktree en una ruta temporal fuera del arbol principal con `git worktree add <ruta-temporal> -b wt/<unidad> <rama-base>` (p. ej. rama `wt/TK-003`). El worktree parte del estado de la rama base **ya integrado con las olas anteriores**.
 - Cada subagente **ejecuta el flujo completo de su unidad** segun la referencia del tipo (Paso 3 de la referencia correspondiente): ciclo TDD, lint/typecheck/build, validacion, checkboxes del artefacto, cobertura de test cases y commits dentro de su worktree. **Excepcion a la delegacion en `/git-commit` del Paso 3:** dentro del worktree el commit se hace de forma **directa** (`git commit`), sin invocar `/git-commit` — ese skill siempre pausa a confirmar su propuesta con el usuario (no tiene modo silencioso ni delegado), algo incompatible con el modo paralelo, que existe precisamente para no pausar. Como compensacion, el subagente debe aplicar antes de cada commit directo la misma deteccion de secretos que usa `git-commit` (patrones de nombre de archivo sensibles y `grep` sobre el diff staged) y, si encuentra alguno, **abortar la unidad sin comitear** y escalar el hallazgo al orquestador en vez de comitear. El subagente **no** integra ni mergea a la rama base ni ofrece handoffs; al terminar devuelve al orquestador el resultado (unidad, rama, estado, notas, resultado de tests/validacion).
 - El orquestador arranca una **nueva ola solo cuando la anterior este completamente integrada** en la rama base, para que las unidades dependientes vean el codigo de sus predecesoras.
@@ -351,6 +351,8 @@ Todo paso a otra fase del ciclo se realiza **invocando el skill correspondiente*
 
 Las opciones de cierre se ofrecen con la herramienta de preguntas estructuradas (ver el Paso 4 de cada referencia) y cada una hace handoff **invocando** el skill dueño de esa fase.
 
+> **Excepcion — `WI-XXX` de tipo `bug-fix` / `security-update`.** Al implementarse directamente sobre la rama de integracion, **no hay handoff de cierre**: no queda rama que mergear ni PR que crear, asi que no se ofrecen las opciones ni se invoca `work-integrate` / `pr-create`. El ciclo termina con el commit. Los handoffs de escalado (`work-plan`, `work-define`, `test-define`) siguen vigentes igual.
+
 ---
 
 ## Mensaje al usuario
@@ -379,7 +381,8 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 - Arrancar una nueva ola antes de integrar la anterior en la rama del artefacto.
 - Mezclar dos tipos de implementacion en una misma ejecucion.
 - Codificar con working tree sucio sin avisar y pausar — **salvo** en el modo correccion delegado desde `quality-check`, donde el arbol sucio del cierre es lo esperado.
-- Implementar en `main` u otra rama que no sea la del artefacto sin instruccion explicita.
+- Implementar en `main` u otra rama que no sea la del artefacto sin instruccion explicita — **salvo** los `WI-XXX` de tipo `bug-fix` y `security-update`, que por definicion van en la rama de integracion.
+- Crear una rama `fix/` para un WI de tipo `bug-fix` o `security-update`, u ofrecerles handoff a `work-integrate` / `pr-create` en el cierre: ya estan en la rama de integracion.
 - Tratar como ejecutable un artefacto que no esta en `Ready` — **salvo** en el modo correccion delegado desde `quality-check`, donde el artefacto ya esta implementado y el estado `Ready` no aplica.
 - Modificar la especificacion de producto (US/TK/WI/TC/FT, ADRs, technical-docs) durante la implementacion, salvo marcar checkboxes de subtareas completadas en el artefacto activo.
 - En los tipos `TC-XXX` / `FT-XXX`: inventar casos de prueba que `test-define` no documento, automatizar un TC `Manual`, relajar una asercion para forzar el verde, o corregir codigo de produccion por iniciativa propia sin la decision explicita del usuario.

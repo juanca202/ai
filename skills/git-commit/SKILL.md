@@ -30,7 +30,7 @@ Usar la herramienta de preguntas estructuradas del cliente (opciones tappables):
 - Una pregunta por turno; máximo tres en un mismo bloque.
 - Opciones cortas y mutuamente excluyentes (2–4); entrada libre solo si no hay forma de enumerar opciones.
 - No repreguntar lo que ya esté en el contexto de la sesión, en el diff o en una propuesta ya mostrada.
-- Una sola tanda al inicio para resolver ambigüedades. Excepciones deliberadas, una por turno: propuesta de commit, commit en rama protegida, archivo sensible detectado.
+- Una sola tanda al inicio para resolver ambigüedades. Excepciones deliberadas, una por turno: propuesta de commit (una sola por invocación, cubra uno o varios commits), commit en rama protegida, archivo sensible detectado.
 - Fallback: prosa con opciones enumeradas (1, 2, 3…) si el cliente no expone la herramienta.
 
 ## Idioma
@@ -151,9 +151,9 @@ Antes de aceptar el staging, seguir [references/secret-detection.md](references/
 ## Flujo: Múltiples cambios lógicos
 
 1. Agrupar archivos por afinidad desde el diff (área, tipo de cambio, intención). Al agrupar, ya se puede aplicar la parte de la [detección de secretos](#detección-de-secretos-en-el-diff) que **no** requiere staging (nombre de archivo sensible: `.env*`, `*.pem`, `*.key`, `id_rsa*`, `*.p12`, `*.pfx`, contra `git status --porcelain`) — no hace falta esperar al paso 4 para eso.
-2. Proponer la lista ordenada de commits: tipo/scope, archivos y descripción tentativa de cada uno. **Marcar ya aquí** cualquier archivo sensible por nombre detectado en el paso 1 (`⚠️ <ruta> — archivo sensible, se excluirá salvo confirmación`), para que el usuario lo vea en la propuesta inicial y no se entere recién al intentar stagearlo.
-3. Esperar confirmación o ajustes antes de tocar el staging.
-4. Por cada grupo confirmado, en orden: `git reset` para vaciar staging (preserva el working tree; **salvo** que el índice traiga cambios preparados por el skill invocador — ver [Invocación desde otro skill](#invocación-desde-otro-skill)) → `git add <archivos>` del grupo → [Validación](#validación-antes-de-ejecutar) — incluida la detección **por contenido** (`grep` sobre el diff staged), que sí necesita el staging hecho → [Propuesta](#propuesta-de-commit) y confirmación → `git commit` y registrar el SHA.
+2. Proponer la [división](#propuesta-de-commit): lista ordenada de commits con tipo/scope, archivos y descripción de cada uno. **Marcar ya aquí** cualquier archivo sensible por nombre detectado en el paso 1 (`⚠️ <ruta> — archivo sensible, se excluirá salvo confirmación`), para que el usuario lo vea en la propuesta inicial y no se entere recién al intentar stagearlo.
+3. Esperar **una única confirmación de la división** antes de tocar el staging. Lo que se decide aquí es **cómo se reparte el trabajo** —los N commits propuestos o uno solo con todo—, no el detalle de cada mensaje: la lista ya lo muestra, y aprobarla lo aprueba entero. Si el usuario elige un solo commit, continuar por el [flujo estándar](#flujo-commit-estándar) desde el paso 2 con un mensaje que cubra el conjunto. Si ajusta la agrupación, aplicar y volver a mostrar la lista.
+4. Por cada grupo confirmado, en orden y **sin volver a preguntar**: `git reset` para vaciar staging (preserva el working tree; **salvo** que el índice traiga cambios preparados por el skill invocador — ver [Invocación desde otro skill](#invocación-desde-otro-skill)) → `git add <archivos>` del grupo → [Validación](#validación-antes-de-ejecutar) — incluida la detección **por contenido** (`grep` sobre el diff staged), que sí necesita el staging hecho → `git commit` y registrar el SHA. El lote solo se interrumpe si la validación falla (secreto por contenido, header largo, rama sin confirmar): detener ahí, reportar el motivo y esperar al usuario.
 5. Reportar la secuencia final de SHAs y mensajes en el orden ejecutado.
 
 ## Flujo: Recuperación tras fallo de hook
@@ -165,8 +165,9 @@ Antes de aceptar el staging, seguir [references/secret-detection.md](references/
 
 ## Propuesta de commit
 
-Mostrar antes de cada `git commit` y esperar confirmación con la herramienta de preguntas estructuradas:
+Mostrar **una sola vez por invocación** y esperar confirmación con la herramienta de preguntas estructuradas. Con varios commits, la confirmación cubre el lote completo: una vez aprobada la división, ejecutar la secuencia entera sin volver a preguntar por cada commit.
 
+**Un commit:**
 ```
 Propuesta:
   tipo:        <type>
@@ -179,7 +180,23 @@ Propuesta:
   footer:      <texto o "(ninguno)">
 ```
 
-Opciones: [Confirmar] / [Ajustar tipo] / [Ajustar alcance] / [Ajustar descripción] / [Cancelar]. Si el usuario ajusta, aplicar y volver a mostrar la propuesta.
+Opciones: [Confirmar] / [Ajustar tipo] / [Ajustar alcance] / [Ajustar descripción] / [Cancelar].
+
+**Varios commits** — mostrar la división completa, en el orden en que se ejecutarán:
+```
+Propuesta: <N> commits
+
+  1. <type>[scope]: <description>
+     - <archivo 1>
+     - <archivo 2>
+  2. <type>[scope]: <description>
+     - <archivo 3>
+  ...
+
+  (body/footer solo donde aplique)
+```
+
+Opciones: [Confirmar los <N> commits] / [Hacer uno solo] / [Ajustar la agrupación] / [Cancelar]. Si el usuario ajusta, aplicar y volver a mostrar la propuesta; si elige un solo commit, proponer el mensaje único y confirmarlo.
 
 ## Validación antes de ejecutar
 
@@ -191,7 +208,7 @@ Gate obligatorio antes de cada `git commit`. Detenerse si algún punto falla.
 - **Operaciones seguras:** sin `--force`, `--hard`, `--no-verify`, `--amend` salvo petición explícita.
 - **Rama:** segura, o el usuario confirmó commit directo en una rama de integración o despliegue — `main`, `master`, `develop`, `trunk`, `release/*`, y cualquier otra que el repo use como tal (`staging`, `uat`, `qa`, `produccion`). **Una sola vez por invocación** (no por cada commit): la rama no cambia entre los commits de un mismo [flujo de múltiples cambios lógicos](#flujo-múltiples-cambios-lógicos), así que la confirmación obtenida para el primer commit del lote cubre a todos los siguientes — no volver a preguntar en cada iteración del paso 4 de ese flujo.
 - **Formato:** primera línea `<type>[scope]: <description>` válida según [convenciones](#convenciones-del-mensaje) y **de 100 caracteres o menos**; breaking change y footer de issue marcados si aplican.
-- **Confirmación:** [propuesta](#propuesta-de-commit) mostrada y confirmada.
+- **Confirmación:** [propuesta](#propuesta-de-commit) mostrada y confirmada. **Una sola vez por invocación** (no por cada commit): en el [flujo de múltiples cambios lógicos](#flujo-múltiples-cambios-lógicos), la confirmación de la división cubre todos los commits del lote — no repreguntar en cada iteración del paso 4.
 
 Si algo bloquea, informar sin pegar secretos:
 ```
@@ -229,6 +246,7 @@ BREAKING CHANGE: `/v1/users` removed; clients must migrate to `/v2/users`.
 - Confiar en inspección visual y saltar la detección de secretos.
 - Usar `--no-verify` por comodidad, o `--amend` tras un fallo de hook en vez de un commit nuevo.
 - Force push a `main`/`master` o tocar la config global de git sin permiso.
-- Ejecutar `git commit` sin mostrar la propuesta y esperar confirmación.
+- Ejecutar `git commit` sin haber mostrado la propuesta y obtenido confirmación.
+- Repreguntar por el detalle de cada commit del lote cuando el usuario ya confirmó la división.
 - Preguntar en prosa libre cuando el cliente expone la herramienta estructurada.
 - Narrar el trabajo paso a paso: reportar solo SHA, mensaje final y pendientes.
