@@ -12,7 +12,7 @@ Cuando `git merge` produce conflictos.
    - **Si los únicos archivos en conflicto son `quality-check.md` y/o `code-review.md` dentro de un `docs/audits/` —el de la raíz o el de un módulo en monorepo— y el tipo es `modify/delete`** → no es un conflicto de código: saltar al apartado «Conflicto esperado» de abajo y **continuar el merge**. No abortar.
    - **En cualquier otro caso** → seguir con el punto 2.
 2. **Abortar** con `git merge --abort` para restaurar el repo al estado previo al merge. No intentar resolución automática ni usar `--strategy=ours` / `--strategy=theirs`.
-3. **Reportar al usuario** la lista de archivos en conflicto y dejar claro que el repo quedó como estaba **en cuanto al merge**. Matiz obligado: el `git merge --abort` deshace el merge, **no** el commit del paso 11 —que ya llevaba los artefactos de las puertas y el archivado del paso 10— porque ese commit vive en la rama del trabajo y es parte legítima de ella. No revertirlo ni deshacer el archivado: al reintentar el merge se integrará con el resto. Decirlo en el reporte para que el usuario no lo lea como un efecto colateral inesperado. Indicar que el siguiente paso (rebase, merge manual, decisión de alcance) está fuera del skill.
+3. **Reportar al usuario** la lista de archivos en conflicto y dejar claro que el repo quedó como estaba **en cuanto al merge**. Matiz obligado: el `git merge --abort` deshace el merge, **no** el commit del paso 11 —que ya llevaba los artefactos de las puertas y, si el usuario lo confirmó, el archivado del paso 10— porque ese commit vive en la rama del trabajo y es parte legítima de ella. No revertirlo ni deshacer lo que contenga: al reintentar el merge se integrará con el resto. Decirlo en el reporte para que el usuario no lo lea como un efecto colateral inesperado. Indicar que el siguiente paso (rebase, merge manual, decisión de alcance) está fuera del skill.
 4. **Parar.** No reintentar; no encadenar otra acción git sin nueva instrucción del usuario.
 
 ### Conflicto esperado: `modify/delete` sobre los informes de las puertas
@@ -68,6 +68,13 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 - [ ] Delta `<base>..HEAD` > 0 verificado (si es 0, la rama ya está integrada: parar **sin archivar ni commitear**)
 
 **Archivado (paso 10 — solo `US-XXX`/`WI-XXX`; no aplica en ninguna rama `test/`):**
+- [ ] Decidido si el archivado **aplica**; si no (rama `test/`, carpeta ya archivada), saltado sin preguntar
+- [ ] Si aplica: **confirmación pedida al usuario**, mostrando antes carpeta origen → destino y las investigaciones sueltas que se moverían
+
+*Si el usuario dijo que **no**, o no había con quién confirmar:*
+- [ ] Nada movido, flujo continuado con normalidad y motivo anotado para el reporte
+
+*Solo si **confirmó**:*
 - [ ] Destino en `docs/specs/archive/<user-stories|work-items>/` libre antes de mover
 - [ ] Carpeta del trabajo movida con **`git mv`** (renombrado detectado, no borrado + alta)
 - [ ] Investigaciones `RS-XXX` sueltas enlazadas: comprobadas contra `docs/specs/` excluyendo **`docs/specs/archive/` y la propia carpeta del RS** (sin esa segunda exclusión el `README.md` del RS se cuenta a sí mismo y nunca se archivaría ninguna), y archivadas **solo** las que quedaron sin referencias activas
@@ -75,7 +82,7 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 - [ ] El `git mv` quedó stageado, **sin** commit propio (lo recoge el paso 11)
 
 **Cierre del árbol:**
-- [ ] **Working tree limpio de nuevo tras las puertas y el archivado** (correcciones, artefactos de las puertas y renombrado ya commiteados vía `git-commit`)
+- [ ] **Working tree limpio de nuevo tras las puertas** (correcciones, artefactos de las puertas y —si hubo archivado— el renombrado, ya commiteados vía `git-commit`)
 
 **Ejecución:**
 - [ ] `git checkout <base>` exitoso
@@ -87,7 +94,7 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 
 **Cierre:**
 - [ ] Reporte al usuario con rama origen, rama destino, commits integrados y hash de merge
-- [ ] Si el paso 10 movió algo: bloque de archivado en el reporte (origen → destino, y qué pasó con las investigaciones sueltas). Si no archivó (rama `test/`, o ya estaba archivado), dicho en una línea.
+- [ ] Si el paso 10 movió algo: bloque de archivado en el reporte (origen → destino, y qué pasó con las investigaciones sueltas). Si no archivó —el usuario lo declinó, no había con quién confirmar, rama `test/`, o ya estaba archivado—, dicho en una línea con el motivo.
 - [ ] Sin push ejecutado
 - [ ] Sin borrado de rama ejecutado
-- [ ] El **contenido** de `progress.md` no fue modificado por el skill (solo se movió con su carpeta al archivar)
+- [ ] El **contenido** de `progress.md` no fue modificado por el skill (a lo sumo se movió con su carpeta, si se archivó)

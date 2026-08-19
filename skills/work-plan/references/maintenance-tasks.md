@@ -46,7 +46,7 @@ No existe aquí el modo «stubs desde una historia»: no hay US que descomponer.
 | Glosario | `docs/specs/glossary.md` |
 | WI ya archivado (fallback) | `docs/specs/archive/work-items/WI-XXX-[kebab-case]/`, con la misma estructura interna |
 
-> **Los WI archivados siguen contando.** `work-integrate` y `pr-create` mueven la carpeta de un WI cerrado a `docs/specs/archive/work-items/`. Ese WI **no desaparece** a efectos de este skill: su ID sigue ocupado, su alcance sigue siendo alcance ya cubierto, y su carpeta se busca ahí cuando no está en la ruta activa. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+> **Los WI archivados siguen contando.** `work-integrate` y `pr-create` pueden mover la carpeta de un WI cerrado a `docs/specs/archive/work-items/`, si el usuario confirma el archivado. Ese WI **no desaparece** a efectos de este skill: su ID sigue ocupado, su alcance sigue siendo alcance ya cubierto, y su carpeta se busca ahí cuando no está en la ruta activa. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
 ---
 

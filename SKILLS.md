@@ -608,7 +608,7 @@ El merge se hace en tres tiempos (`--no-commit` → retirar `docs/audits/quality
 
 **Puertas (obligatorias):** `quality-check` → `code-review` → `trace-validate`. Working tree sucio → invoca `git-commit` automáticamente.
 
-**Archivado (automático, paso 10):** con el `progress.md` en `Done`, las tres puertas aprobadas y el delta contra la base verificado > 0, la carpeta del trabajo se mueve con `git mv` a `docs/specs/archive/user-stories/` o `docs/specs/archive/work-items/` **en la rama**, para que se integre en el mismo merge. Las investigaciones sueltas de `docs/specs/research/` que quedan sin referencias activas se archivan también; las internas viajan con la carpeta. No aplica a ramas `test/`. Detalle en [archive.md](skills/work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+**Archivado (paso 10, previa confirmación):** con el `progress.md` en `Done`, las tres puertas aprobadas y el delta contra la base verificado > 0, se **pregunta al usuario** si archivar —mostrando antes qué se movería—. Solo con un sí explícito la carpeta del trabajo se mueve con `git mv` a `docs/specs/archive/user-stories/` o `docs/specs/archive/work-items/` **en la rama**, para que se integre en el mismo merge. Las investigaciones sueltas de `docs/specs/research/` que quedan sin referencias activas se archivan también; las internas viajan con la carpeta. Un «no» no bloquea el merge: se anota y se sigue. No aplica a ramas `test/`. Detalle en [archive.md](skills/work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
 **Ejemplos de invocación:**
 
@@ -651,7 +651,7 @@ En una promoción, `code-review` y `trace-validate` se reportan como `— No apl
 3. `trace-validate` sobre el `US`/`WI` de la rama — solo en implementación
 4. Definition of Done (`docs/policies/definition-of-done.md`) — **solo si existe**; si no, se omite
 
-**Archivado (solo implementación, Paso 5):** pasadas las puertas y **antes del push**, la carpeta del trabajo se mueve a `docs/specs/archive/` para que el movimiento viaje dentro del PR. Mismo procedimiento que `work-integrate` ([archive.md](skills/work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo)). **No aplica** en promoción ni en ramas `test/`; con el `progress.md` incompleto se omite y se avisa, pero el PR se crea igual.
+**Archivado (solo implementación, Paso 5):** pasadas las puertas y **antes del push**, se pregunta al usuario si archivar; confirmado, la carpeta del trabajo se mueve a `docs/specs/archive/` para que el movimiento viaje dentro del PR. Declinarlo no impide crear el PR. Mismo procedimiento que `work-integrate` ([archive.md](skills/work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo)). **No aplica** en promoción ni en ramas `test/`; con el `progress.md` incompleto se omite y se avisa, pero el PR se crea igual.
 
 Working tree sucio → `git-commit` automático. Título/descripción se generan sin pedir confirmación. Ante fallo de puerta: informa, propone acciones y solo corrige con autorización explícita.
 

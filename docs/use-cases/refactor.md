@@ -15,7 +15,7 @@ flowchart TD
     G -.->|"si aplica"| DEP["Actualización/instalación<br/>de dependencias"]
     G --> I["Creación de PR<br/>**/pr-create**"]
     I --> J(["Entregable"])
-    NOTE["ℹ️ pr-create ejecuta internamente<br/>quality-check + code-review + trace-validate<br/>y archiva el artefacto al pasarlas"]
+    NOTE["ℹ️ pr-create ejecuta internamente<br/>quality-check + code-review + trace-validate<br/>y ofrece archivar el artefacto al pasarlas"]
     I -.-> NOTE
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
@@ -40,7 +40,7 @@ flowchart TD
 4. **Resolver prerequisitos** — rama **opcional**, que solo se resuelve si la investigación la señaló y no queda encadenada al resto del diagrama: **actualización/definición de ADR y estándares** (`arch-manage`), si el nuevo diseño formaliza una decisión arquitectónica o cambia un criterio de cumplimiento vigente.
 5. **Planificación del refactor** (`work-plan`): WI `Tipo: refactor` con el cambio estructural en sí.
 6. **Implementación** (`work-implement`): cambio estructural sin alterar comportamiento observable; suite en verde. Incluye, como tarea **opcional** dentro de la misma implementación (no encadenada al resto del diagrama), la **actualización/instalación de dependencias** (`work-plan` con WI `Tipo: dependency-update`) cuando el refactor solo es viable con versiones más nuevas de una o más dependencias (API removida, vulnerabilidad, incompatibilidad).
-7. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable. `pr-create` ejecuta **internamente** las puertas de calidad (`quality-check`, `code-review` — SOLID, acoplamiento, duplicación — y `trace-validate`) antes de crear el PR y, pasadas todas, **archiva el `WI-XXX`** moviendo su carpeta a `docs/specs/archive/work-items/` para que el movimiento viaje dentro del PR. No son pasos aparte de este flujo.
+7. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable. `pr-create` ejecuta **internamente** las puertas de calidad (`quality-check`, `code-review` — SOLID, acoplamiento, duplicación — y `trace-validate`) antes de crear el PR y, pasadas todas, **pregunta si archivar el `WI-XXX`**; solo si el usuario confirma mueve su carpeta a `docs/specs/archive/work-items/` (declinarlo no impide crear el PR) para que el movimiento viaje dentro del PR. No son pasos aparte de este flujo.
 
 ## Cuándo no aplica este caso
 

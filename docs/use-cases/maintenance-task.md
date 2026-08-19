@@ -13,7 +13,7 @@ flowchart TD
     C -.->|"automatizar TCs"| G
     G --> I["Creación de PR<br/>**/pr-create**"]
     I --> J(["Entregable"])
-    NOTE["ℹ️ pr-create ejecuta internamente<br/>quality-check + code-review + trace-validate<br/>y archiva el artefacto al pasarlas"]
+    NOTE["ℹ️ pr-create ejecuta internamente<br/>quality-check + code-review + trace-validate<br/>y ofrece archivar el artefacto al pasarlas"]
     I -.-> NOTE
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
@@ -30,7 +30,7 @@ flowchart TD
 2. **Planificación** (`work-plan`): crea el `WI-XXX` eligiendo el `Tipo` según el requerimiento (`dependency-update` / `optimization` / `security-update` / `test-improvement` / `documentation-update` / `operational-change`).
 3. Opcionalmente, durante la planificación se ajusta el diseño arquitectónico (`design-define`) y/o se definen casos de prueba (`test-define`) — igual que en el flujo con historia de usuario.
 4. El `WI` en `Ready` pasa a **Implementación** (`work-implement`). Los casos de prueba definidos en el paso anterior también pueden automatizarse ahí.
-5. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable. `pr-create` ejecuta **internamente** las puertas de calidad (`quality-check`, `code-review`, `trace-validate`) antes de crear el PR y, pasadas todas, **archiva el `WI-XXX`** moviendo su carpeta a `docs/specs/archive/work-items/` para que el movimiento viaje dentro del PR. No son pasos aparte de este flujo.
+5. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable. `pr-create` ejecuta **internamente** las puertas de calidad (`quality-check`, `code-review`, `trace-validate`) antes de crear el PR y, pasadas todas, **pregunta si archivar el `WI-XXX`**; solo si el usuario confirma mueve su carpeta a `docs/specs/archive/work-items/` (declinarlo no impide crear el PR) para que el movimiento viaje dentro del PR. No son pasos aparte de este flujo.
 
 ## Cuándo no aplica este caso
 

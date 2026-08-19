@@ -48,7 +48,7 @@ Antes de planificar o escribir tests, ejecuta `git branch --show-current`.
 
 ### Si la rama coincide con `feature/US-XXX-[nombre-corto]`
 
-1. **Localiza la US:** descontar el prefijo `feature/` → carpeta `docs/specs/user-stories/US-XXX-[nombre-corto]/`. Si no está ahí, buscarla bajo `docs/specs/archive/user-stories/`: al cerrar el trabajo, `work-integrate` y `pr-create` mueven la carpeta al archivo. Se lee igual; **no** se escribe dentro ni se recrea en la ruta activa.
+1. **Localiza la US:** descontar el prefijo `feature/` → carpeta `docs/specs/user-stories/US-XXX-[nombre-corto]/`. Si no está ahí, buscarla bajo `docs/specs/archive/user-stories/`: al cerrar el trabajo, `work-integrate` y `pr-create` ofrecen mover la carpeta al archivo. Se lee igual; **no** se escribe dentro ni se recrea en la ruta activa.
 2. **Lee** `README.md` de esa carpeta, sección **Criterios de aceptación**:
    - Reglas **BR-XX** (RFC 2119: DEBE/MUST, NO DEBE/MUST NOT, etc.).
    - Escenarios **SC-XX** (bloques Gherkin: DADO/CUANDO/ENTONCES o GIVEN/WHEN/THEN).

@@ -1,7 +1,7 @@
 ---
 name: pr-create
 description: >-
-  Crear Pull Request (PR) o Merge Request (MR) desde la rama actual hacia una rama destino preguntada al usuario, en dos modos: implementación (feature/fix/chore/refactor/test hacia su rama de integración) y promoción (develop hacia master/main/release, consolidando trabajos ya integrados). Puertas obligatorias y bloqueantes: en implementación, quality-check, code-review y trace-validate; en promoción solo quality-check. En ambos se verifica docs/policies/definition-of-done.md si existe. En implementación sobre un US/WI, tras las puertas archiva el artefacto en docs/specs/archive/. Funciona sobre cualquier repositorio git con remoto: auto-detecta la plataforma (GitHub, GitLab, Bitbucket, Gitea, Azure Repos) y su CLI. Auto-genera título y descripción y crea el PR en una pasada. Usar siempre que el usuario pida crear, abrir, generar, levantar o subir un PR, MR, pull request o merge request, o promover develop a master, incluso si solo dice "crea el PR" o "súbelo a develop".
+  Crear Pull Request (PR) o Merge Request (MR) desde la rama actual hacia una rama destino preguntada al usuario, en dos modos: implementación (feature/fix/chore/refactor/test hacia su rama de integración) y promoción (develop hacia master/main/release, consolidando trabajos ya integrados). Puertas obligatorias y bloqueantes: en implementación, quality-check, code-review y trace-validate; en promoción solo quality-check. En ambos se verifica docs/policies/definition-of-done.md si existe. En implementación sobre un US/WI ofrece archivarlo en docs/specs/archive/; sin confirmación no se archiva y el PR se crea igual. Funciona sobre cualquier repositorio git con remoto: auto-detecta la plataforma (GitHub, GitLab, Bitbucket, Gitea, Azure Repos) y su CLI, y genera título y descripción. Usar siempre que el usuario pida crear, abrir, generar, levantar o subir un PR, MR, pull request o merge request, o promover develop a master, incluso si solo dice "crea el PR" o "súbelo a develop".
 license: MIT
 ---
 
@@ -175,7 +175,7 @@ Reglas al reportar:
 
 ### Paso 5 — Archivar el artefacto de trabajo (solo PR de implementación)
 
-Con **todas** las puertas del Paso 4 en aprobado, el trabajo está listo para integrarse: mover su carpeta de especificación a `docs/specs/archive/` **en la rama actual**, antes del push, para que el archivado viaje dentro del PR y se integre en el mismo merge que el código.
+Con **todas** las puertas del Paso 4 en aprobado, el trabajo está listo para integrarse: **ofrecer al usuario** mover su carpeta de especificación a `docs/specs/archive/` **en la rama actual**, antes del push, para que el archivado viaje dentro del PR y se integre en el mismo merge que el código. **Preguntar primero, mover después.** Sin un sí explícito no se mueve nada, y **declinarlo no impide crear el PR**: se anota como omitido en el Paso 9 y el flujo sigue. Si el archivado no aplica (promoción, rama `test/`, carpeta ya archivada), no se pregunta nada.
 
 **Localizar la carpeta y verificar el `progress.md`.** Buscar primero en la ruta activa (`docs/specs/<user-stories|work-items>/<ID>-<slug>/`) y, si no está ahí, en `docs/specs/archive/`: si aparece en el archivo, el trabajo **ya estaba archivado** — informarlo en el reporte y saltar el resto del paso, no es un error.
 
@@ -186,7 +186,7 @@ En la ruta activa, leer su `progress.md` y comprobar que **todas** las unidades 
 | **Aplica a** | `US-XXX` y `WI-XXX` en un **PR de implementación** |
 | **No aplica a** | PR de **promoción** (cada trabajo ya se archivó al integrarse); **cualquier** rama `test/`, sea sobre `FT-XXX`, `US-XXX` o `WI-XXX` (cierra unos `TC-XXX`, no el artefacto); trabajos cuyo `progress.md` no esté completo en `Done` (se avisa, no se bloquea); y trabajos cuya carpeta ya esté bajo `docs/specs/archive/` (ya archivados: se informa y se sigue) |
 | **Destino** | `docs/specs/archive/user-stories/US-XXX-{slug}/` · `docs/specs/archive/work-items/WI-XXX-{kebab-case}/` · investigaciones `RS-XXX` sueltas que quedan huérfanas: `docs/specs/archive/research/RS-XXX-{slug}/` |
-| **Confirmación** | Ninguna: es **automático**. Se reporta en el Paso 9, no se pregunta. |
+| **Confirmación** | **Obligatoria.** Se muestra qué se movería (carpeta + investigaciones huérfanas) y se pide confirmación con la herramienta de preguntas estructuradas. Sin un **sí** explícito no se mueve nada — y no archivar **no** impide crear el PR. Sin canal de respuesta: no se archiva. Se reporta el desenlace en el Paso 9. |
 
 El trabajo a archivar es el mismo que resolvió `4.3` (`trace-validate`); no volver a deducirlo por otra vía. Si `4.3` no corrió porque el modo es promoción, este paso entero se omite. **Que `4.3` resuelva un `US-XXX` desde una rama `test/US-XXX` no habilita el archivado:** ese PR cierra la automatización de unos `TC-XXX`, no la historia.
 
@@ -200,7 +200,7 @@ Si el `git mv` falla (destino ya ocupado, origen inexistente con destino present
 
 ### Paso 6 — Push de la rama actual
 
-**Antes del push, re-comprobar el working tree.** Las puertas del Paso 4 pueden haber dejado cambios sin commitear (correcciones aplicadas por `quality-check` o delegadas en `work-implement`), y el Paso 5 deja el renombrado del archivado stageado. Ejecutar `git status --porcelain` y, si hay salida, **invocar de nuevo `git-commit`** con el mismo criterio del pre-flight: el **código** que se sube debe ser exactamente el que las puertas verificaron. El archivado del Paso 5 es la única salvedad, y es deliberada: mueve documentación bajo `docs/specs/`, no toca código ni fuentes de prueba, así que no invalida los veredictos de `quality-check` ni de `code-review`. Sí desplaza el `SPEC_FINGERPRINT` de `trace-validate`, cuyo `trace-report.md` se regenerará una vez en la siguiente validación. **En modo promoción, borrar antes `docs/audits/quality-check.md` del árbol** y, si `develop` lo traía trackeado, retirarlo del índice — ver la nota siguiente. Solo entonces re-comprobar el estado e invocar `git-commit`.
+**Antes del push, re-comprobar el working tree.** Las puertas del Paso 4 pueden haber dejado cambios sin commitear (correcciones aplicadas por `quality-check` o delegadas en `work-implement`), y el Paso 5 deja stageado el renombrado del archivado, si el usuario lo confirmó. Ejecutar `git status --porcelain` y, si hay salida, **invocar de nuevo `git-commit`** con el mismo criterio del pre-flight: el **código** que se sube debe ser exactamente el que las puertas verificaron. El archivado del Paso 5 es la única salvedad, y es deliberada: mueve documentación bajo `docs/specs/`, no toca código ni fuentes de prueba, así que no invalida los veredictos de `quality-check` ni de `code-review`. Sí desplaza el `SPEC_FINGERPRINT` de `trace-validate`, cuyo `trace-report.md` se regenerará una vez en la siguiente validación. **En modo promoción, borrar antes `docs/audits/quality-check.md` del árbol** y, si `develop` lo traía trackeado, retirarlo del índice — ver la nota siguiente. Solo entonces re-comprobar el estado e invocar `git-commit`.
 
 > **`.sdd-devkit/test-run.json` nunca se commitea**, en ninguno de los dos modos: está en el `.gitignore` porque es una caché local y desechable, y un resultado de pruebas producido en otra máquina no es evidencia aquí. Nada de lo que sigue desplaza el fingerprint de frescura: `.sdd-devkit/` cae bajo la exclusión de **carpetas ocultas** y `docs/` bajo la suya.
 >
@@ -269,7 +269,12 @@ Si el CLI indica que ya existe un PR: capturar y devolver la URL existente.
   URL:     <url>
 ```
 
-**En un PR de implementación**, añadir debajo el bloque de archivado del Paso 5 (origen → destino de la carpeta, y qué pasó con las investigaciones sueltas), con el formato de [`work-integrate/references/archive.md`](../work-integrate/references/archive.md). En una promoción ese bloque no aparece: no se archivó nada.
+**En un PR de implementación**, añadir debajo el desenlace del archivado del Paso 5:
+
+- **Si se archivó** — el bloque con origen → destino de la carpeta y qué pasó con las investigaciones sueltas, con el formato de [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#reporte-al-usuario).
+- **Si no se archivó** — una línea con el motivo: el usuario lo declinó, no había canal para confirmarlo, el `progress.md` no estaba completo en `Done`, o el trabajo ya estaba archivado. Nunca omitirlo en silencio.
+
+En una promoción no aparece ninguna de las dos: el archivado no aplica a ese modo.
 
 Bloqueo por una puerta de calidad:
 ```
@@ -304,7 +309,7 @@ Notas:
 
 **Ejemplo 1 — Camino feliz (GitLab self-managed)**
 Usuario: «Crea el PR de esta rama.»
-Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`). Detecta GitLab (`ns.bayteq.com:3311`). Pregunta destino → `develop`. Puertas: `quality-check` → `✅ Aprobado`; `code-review` con `base origin/develop` → `✅ Aprobado`; resuelve `US-042`, `trace-validate` → `✅ Aprobado`; existe `docs/policies/definition-of-done.md` → todos los ítems cumplidos. Archiva: `git mv docs/specs/user-stories/US-042-auth-refresh-token/ docs/specs/archive/user-stories/`, más `RS-003`, suelto y ya sin ningún artefacto activo que lo referencie, a `docs/specs/archive/research/`; `git-commit` recoge el renombrado. Push. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min`. Ejecuta `glab mr create`. Devuelve URL.
+Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`). Detecta GitLab (`ns.bayteq.com:3311`). Pregunta destino → `develop`. Puertas: `quality-check` → `✅ Aprobado`; `code-review` con `base origin/develop` → `✅ Aprobado`; resuelve `US-042`, `trace-validate` → `✅ Aprobado`; existe `docs/policies/definition-of-done.md` → todos los ítems cumplidos. Pregunta si archivar, mostrando `docs/specs/user-stories/US-042-auth-refresh-token/` → `docs/specs/archive/user-stories/` más `RS-003` (suelto, sin artefactos activos que lo referencien) → `docs/specs/archive/research/`; el usuario confirma y `git-commit` recoge el renombrado. Push. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min`. Ejecuta `glab mr create`. Devuelve URL.
 
 **Ejemplo 2 — quality-check bloquea**
 `quality-check` devuelve `❌ Rechazado` (tests fallidos + eslint errors). El skill no crea el PR, no hace push, muestra el reporte, lista las acciones para reintentar y —al estar a su alcance— pregunta si aplica la corrección. Si el usuario no autoriza, termina.
@@ -359,7 +364,9 @@ La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con
 - En un PR de implementación, saltarse `trace-validate` por no encontrar el trabajo (US/WI) en lugar de preguntarlo al usuario — o declararlo «promoción» para esquivar la puerta.
 - **Archivar el artefacto antes de que pasen las puertas**, o antes de que `4.3` escriba el `trace-report.md` dentro de su carpeta.
 - **Archivar en un PR de promoción**, en una rama `test/`, o con el `progress.md` incompleto: el Paso 5 no aplica ahí.
-- **Archivar después del push o del merge**, dejando el movimiento fuera del PR — o preguntando al usuario si desea archivar: en ese punto es automático.
+- **Archivar después del push o del merge**, dejando el movimiento fuera del PR.
+- **Archivar sin confirmación explícita del usuario**, o dar por hecho el sí porque las puertas pasaron.
+- **Tratar una negativa como un bloqueo:** el PR se crea igual, con el archivado anotado como omitido.
 - Reimplementar el archivado aquí en vez de seguir [`work-integrate/references/archive.md`](../work-integrate/references/archive.md), o divergir de ese procedimiento.
 - Commitear `docs/audits/quality-check.md` en un PR de promoción: el origen ya es una rama de integración y ese informe acabaría en la de despliegue sin nadie que lo limpie. Se borra del árbol antes del commit; si la rama ya lo traía trackeado, se retira del índice y ese borrado sí se commitea.
 - Intentar «excluir un archivo» del commit delegando en `git-commit`: su alcance lo decide él, no se le impone desde fuera. O se borra antes, o entra.

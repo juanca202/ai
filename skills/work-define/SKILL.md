@@ -46,7 +46,7 @@ El idioma de la US (criterios de aceptación, INVEST, DoR y texto natural) se de
 | Glosario              | `docs/specs/glossary.md` (opcional)                                                                                  |
 | US ya archivada (fallback) | `docs/specs/archive/user-stories/US-XXX-[nombre-corto]/`, con la misma estructura interna                     |
 
-> **Las US archivadas siguen contando.** Al cerrar una historia, `work-integrate` y `pr-create` mueven su carpeta a `docs/specs/archive/user-stories/`. Eso **no libera su ID** ni la hace invisible: el siguiente `US-XXX` libre se calcula sobre las dos rutas, y el flujo *Actualizar* la busca ahí cuando no está en la activa. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+> **Las US archivadas siguen contando.** Al cerrar una historia, `work-integrate` y `pr-create` pueden mover su carpeta a `docs/specs/archive/user-stories/`. Eso **no libera su ID** ni la hace invisible: el siguiente `US-XXX` libre se calcula sobre las dos rutas, y el flujo *Actualizar* la busca ahí cuando no está en la activa. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
 
 ### Convenciones del nombre de carpeta

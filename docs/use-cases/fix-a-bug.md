@@ -13,7 +13,7 @@ flowchart TD
     F --> I["Creación de PR<br/>**/pr-create**"]
     I --> J(["Entregable"])
     H -.->|"con más información"| B
-    NOTE["ℹ️ pr-create ejecuta internamente<br/>quality-check + code-review + trace-validate<br/>y archiva el artefacto al pasarlas"]
+    NOTE["ℹ️ pr-create ejecuta internamente<br/>quality-check + code-review + trace-validate<br/>y ofrece archivar el artefacto al pasarlas"]
     I -.-> NOTE
 
     classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
@@ -35,7 +35,7 @@ flowchart TD
    - **Sí**: se produce el **dossier de bug** (reproducción, causa raíz, diagnóstico de pruebas y plan rojo→verde propuesto).
 4. **Planificación** (`work-plan`): a partir del dossier, crea un `WI` de tipo `bug-fix` con el plan de implementación (un `IT-XX` por paso del ciclo rojo→verde) y sus criterios de aceptación.
 5. **Implementación** (`work-implement`): ejecuta el ciclo en orden — 🔴 prueba que falla demostrando el bug, corrección mínima de la causa raíz, 🟢 prueba en verde.
-6. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable. `pr-create` ejecuta **internamente** las puertas de calidad (`quality-check`, `code-review`, `trace-validate`) antes de crear el PR y, pasadas todas, **archiva el `WI-XXX`** moviendo su carpeta a `docs/specs/archive/work-items/` —junto con el `RS-XXX` del paso 2 si ningún otro artefacto activo lo referencia— para que el movimiento viaje dentro del PR. No son pasos aparte de este flujo.
+6. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable. `pr-create` ejecuta **internamente** las puertas de calidad (`quality-check`, `code-review`, `trace-validate`) antes de crear el PR y, pasadas todas, **pregunta si archivar el `WI-XXX`**; solo si el usuario confirma mueve su carpeta a `docs/specs/archive/work-items/` (declinarlo no impide crear el PR) —junto con el `RS-XXX` del paso 2 si ningún otro artefacto activo lo referencia— para que el movimiento viaje dentro del PR. No son pasos aparte de este flujo.
 
 ## Cuándo no aplica este caso
 

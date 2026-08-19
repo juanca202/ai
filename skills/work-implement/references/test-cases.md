@@ -41,7 +41,7 @@ El `TC-XXX` siempre vive en la carpeta `test-cases/` de un **artefacto padre**. 
 | ADR | `docs/adr/` |
 | Glosario | `docs/specs/glossary.md` |
 
-> **Si la carpeta del padre no esta en la ruta activa, buscarla bajo `docs/specs/archive/`** antes de darla por inexistente: `work-integrate` y `pr-create` la mueven ahi al cerrar el trabajo. Un padre archivado significa que ese trabajo **ya se cerro**: parar y avisar en vez de escribir dentro, y **nunca** recrear la carpeta en la ruta activa — dejaria dos artefactos con el mismo identificador y la numeracion de los `TC-XXX` reiniciaria en `001`.
+> **Si la carpeta del padre no esta en la ruta activa, buscarla bajo `docs/specs/archive/`** antes de darla por inexistente: `work-integrate` y `pr-create` pueden moverla ahi al cerrar el trabajo, si el usuario lo confirma. Un padre archivado significa que ese trabajo **ya se cerro**: parar y avisar en vez de escribir dentro, y **nunca** recrear la carpeta en la ruta activa — dejaria dos artefactos con el mismo identificador y la numeracion de los `TC-XXX` reiniciaria en `001`.
 >
 > **Excepcion — modo correccion.** En la correccion delegada desde `quality-check` (ver [modo correccion](../SKILL.md#modo-correccion-delegado-desde-quality-check)) un padre archivado es **esperable**, no un error: ahi se continua, pero sin escribir nada dentro de la carpeta archivada — la nota de retrabajo va en el informe de `quality-check`. Importa especialmente en este flujo, porque `quality-check` senala la rama `test/` como el caso donde delegar es **mas** importante, y ahi el padre archivado es lo habitual.
 >

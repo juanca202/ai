@@ -9,7 +9,8 @@ modo que el archivado viaje en el mismo merge/PR que el código.
 
 ## Cuándo se archiva
 
-**Todas** estas condiciones, sin excepción:
+**Todas** estas condiciones, sin excepción — y aun cumplidas todas, hace falta la
+[confirmación explícita del usuario](#confirmación-del-usuario-obligatoria):
 
 1. El `progress.md` del trabajo tiene **todas** sus unidades en `Done`.
 2. **Todas** las puertas de calidad que aplican al flujo quedaron en **aprobado**:
@@ -33,9 +34,6 @@ final que deja el árbol limpio. No al revés: `trace-validate` escribe el `trac
 dentro de la carpeta del trabajo, así que mover antes lo dejaría escribiendo en una ruta
 que ya no existe, o generando una carpeta huérfana en el origen.
 
-**Es automático.** No se pregunta al usuario si desea archivar: llegado este punto, el
-trabajo está cerrado por definición. Sí se **reporta** el movimiento al final.
-
 ---
 
 ## Qué no se archiva
@@ -46,6 +44,76 @@ trabajo está cerrado por definición. Sí se **reporta** el movimiento al final
 | Ramas `test/` sobre un `US-XXX`/`WI-XXX` | El trabajo funcional puede seguir abierto: el flujo solo verificó las unidades `TC-XXX` de esa ejecución, no el `progress.md` completo. Que el skill resuelva un `US-XXX` para `trace-validate` **no** habilita el archivado. |
 | PR de **promoción** (`pr-create`) | No trae trabajo nuevo: cada `US`/`WI` que viaja en él ya se archivó al integrarse. |
 | Un trabajo cuya carpeta ya está bajo `docs/specs/archive/` | Ya archivado. Se detecta, se informa y se continúa sin tocar nada — no es un error. |
+
+---
+
+## Confirmación del usuario (obligatoria)
+
+**El archivado nunca es automático.** Cumplidas las condiciones de arriba **y descartados
+los casos de [Qué no se archiva](#qué-no-se-archiva)**, el skill **pregunta**, y solo mueve
+algo si el usuario lo confirma. Archivar reorganiza el árbol de especificaciones del repo y
+cambia la ruta de un artefacto que otras cosas referencian: es una decisión del usuario, no
+una consecuencia mecánica de que las puertas hayan pasado.
+
+> **Solo se pregunta cuando el archivado aplica.** En una rama `test/`, en un PR de
+> promoción o con el trabajo ya archivado no hay nada que ofrecer: el paso se salta sin
+> molestar al usuario. Preguntar por algo que no se iba a hacer es tan defectuoso como
+> archivar sin preguntar.
+
+**Cómo se pregunta.** Con la herramienta de preguntas estructuradas del cliente —el mismo
+mecanismo que el resto del flujo; `work-integrate` lo define en su sección *Cómo preguntar
+al usuario* y `pr-create` usa el equivalente de su cliente—, **mostrando antes qué se
+movería exactamente**: la carpeta y, si las hay, las investigaciones sueltas que quedaron
+huérfanas. El usuario no puede decidir sobre un movimiento que no ve.
+
+```
+Las puertas pasaron y US-042 está en Done. ¿Archivo el artefacto antes de integrar?
+
+  docs/specs/user-stories/US-042-exportacion-csv/
+  → docs/specs/archive/user-stories/US-042-exportacion-csv/
+
+  Investigaciones sueltas sin referencias activas:
+    RS-003-formatos-csv → docs/specs/archive/research/
+```
+
+La respuesta es **binaria**: se archiva todo lo mostrado, o no se archiva nada. Las
+investigaciones huérfanas no se ofrecen por separado — van dentro de lo que el usuario ve
+antes de decidir, y por eso se listan en la pregunta.
+
+| Respuesta | Efecto |
+|-----------|--------|
+| **Sí, archivar** | Se ejecuta el procedimiento completo: carpeta del trabajo + investigaciones huérfanas listadas. |
+| **No archivar** | No se mueve nada. **El flujo continúa con normalidad** — merge o PR siguen adelante. |
+
+**Negarse no bloquea nada.** El archivado es una consecuencia deseable del cierre, no una
+condición suya: un «no» se anota en el reporte y el trabajo se integra igual. Nunca
+re-preguntar en la misma ejecución ni insistir tras una negativa.
+
+**Sin canal de respuesta** (sesión desatendida o programada, o cualquier entorno donde no
+se pueda preguntar): **no archivar** y decirlo en el reporte. Ante la ausencia de respuesta
+se toma la opción que no mueve nada — un archivado no deseado obliga a deshacer un `git mv`
+ya integrado, mientras que uno pendiente se resuelve corriendo el skill de nuevo.
+
+Confirmado el archivado, el resto del procedimiento **sí** es automático: no se vuelve a
+preguntar por cada investigación ni por cada enlace a reparar. Y en cualquier caso se
+**reporta** el desenlace al final.
+
+### Consecuencia: estar en la ruta activa ya no significa «abierto»
+
+Al ser opcional, un trabajo **cerrado e integrado** puede quedarse indefinidamente en
+`docs/specs/user-stories/` o `docs/specs/work-items/` porque nadie confirmó archivarlo. De
+ahí una asimetría que conviene tener presente al leer la [Regla 1](#regla-1--fallback-de-lectura):
+
+- Encontrar la carpeta **bajo `docs/specs/archive/`** sigue siendo prueba suficiente de que
+  el trabajo está cerrado. Esa dirección no cambia.
+- **No** encontrarla ahí ya **no** prueba lo contrario. Un `US-XXX` en la ruta activa puede
+  estar abierto o cerrado-sin-archivar; quien necesite saberlo mira su `progress.md` y su
+  historial, no su ubicación.
+
+Ningún skill debe inferir «este trabajo sigue abierto» solo de que su carpeta esté en la
+ruta activa. Las guardas que paran ante un artefacto archivado siguen siendo correctas —
+simplemente no cubren el caso del trabajo cerrado que no se archivó, y eso es aceptable: el
+coste de no pararse ahí es bajo comparado con obligar a archivar.
 
 ---
 
@@ -152,6 +220,15 @@ Al cerrar el flujo, incluir:
 
 Si no hubo investigaciones sueltas, omitir ese bloque en vez de escribir «ninguna».
 
+Si el usuario **no** confirmó, el bloque dice qué no se hizo y por qué, sin dramatizarlo:
+
+```
+📦 Archivado: omitido
+   US-042 se queda en docs/specs/user-stories/ (no confirmado por el usuario).
+```
+
+Y si no se pudo preguntar: «omitido — sin canal de respuesta para confirmar».
+
 ---
 
 ## Contrato para el resto del catálogo
@@ -236,7 +313,11 @@ en `001`** y crear una carpeta fantasma. Las dos reglas van juntas justamente po
 
 - Archivar **antes** de que pasen las puertas, o antes de que `trace-validate` escriba su
   `trace-report.md` dentro de la carpeta.
-- Preguntar al usuario si desea archivar: en este punto es automático.
+- **Archivar sin preguntar**, o dar la confirmación por supuesta porque las puertas pasaron.
+- Insistir tras una negativa, o volver a preguntar en la misma ejecución.
+- **Tratar un «no archivar» como un bloqueo**: el merge o el PR siguen adelante igual.
+- Preguntar **sin mostrar antes** qué carpeta y qué investigaciones se moverían.
+- Archivar por defecto cuando no hay quien responda: sin respuesta, no se mueve nada.
 - Usar `mv` en vez de `git mv`, perdiendo la detección de *rename*.
 - Sobrescribir un destino existente en `docs/specs/archive/` en lugar de parar.
 - Archivar un `RS-XXX` suelto sin comprobar que ningún artefacto activo lo referencia.
