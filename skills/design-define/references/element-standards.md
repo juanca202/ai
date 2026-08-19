@@ -5,8 +5,15 @@ Cómo se define cada tipo de elemento dentro del documento de capability. La est
 Reglas comunes a todos los tipos:
 
 - **Id estable por tipo:** `MD-XX`, `API-XX`, `FL-XX`, `DG-XX`, secuencial dentro de la capability. No renumerar nunca: otros artefactos enlazan por ancla. Si un elemento deja de aplicar, marcarlo `(Obsoleto)` en el título y explicar en qué fue reemplazado, en lugar de borrarlo, mientras existan consumidores que lo referencien.
-- **Encabezado enlazable:** cada elemento es un `### ID: Nombre`. El ancla resultante (`#md-01-factura`) es la referencia que consumen US/TK/WI.
-- **Referencias cruzadas por id:** cuando un elemento usa otro (una API recibe un modelo, un flujo invoca una API), citarlo por su id (`MD-01`, `API-02`) — dentro de la misma capability con ancla local; entre capabilities con ruta relativa + ancla (`[MD-01 de facturación](facturacion.md#md-01-factura)`).
+- **Ancla explícita, igual al id en minúsculas.** Cada elemento lleva **inmediatamente antes** de su encabezado una línea con su ancla, y el encabezado sigue siendo `### ID: Nombre`:
+
+  ```markdown
+  <a id="md-01"></a>
+  ### MD-01: Factura
+  ```
+
+  El ancla es **solo el id** (`#md-01`, `#api-04`, `#fl-02`, `#dg-01`), sin el nombre. Es la única referencia que consumen US/TK/WI. **No es opcional ni cosmética:** ver [Por qué el ancla no se deriva del título](#por-qué-el-ancla-no-se-deriva-del-título).
+- **Referencias cruzadas por id:** cuando un elemento usa otro (una API recibe un modelo, un flujo invoca una API), citarlo por su id (`MD-01`, `API-02`) — dentro de la misma capability con ancla local (`[MD-01](#md-01)`); entre capabilities con ruta relativa + ancla (`[MD-01 de facturación](facturacion.md#md-01)`).
 - **No inventar:** todo tipo, código de error, regla o rama de flujo que no venga del input, del código del repo o de la US/TK/WI de origen se pregunta (grilling) o queda en Observaciones. Un dato plausible pero no confirmado es peor que una laguna documentada.
 - **Idioma:** los nombres de campos, rutas y payloads se escriben como existirán en el código. Resolver así, deteniéndose en el primer paso que aplique:
   1. Si ya existen modelos/DTOs/endpoints en el repo (código o documentos técnicos previos), seguir **su** convención de idioma tal cual está, aunque sea español — no imponer inglés sobre un código que ya usa español.
@@ -14,6 +21,20 @@ Reglas comunes a todos los tipos:
   3. Sin precedente y sin poder preguntar (ver "Sin canal de respuesta disponible" en `flow.md`): usar inglés como default y dejar constancia en Observaciones de que la convención de idioma de campos quedó asumida, no confirmada.
 
   Las descripciones (prosa) van siempre en el idioma de preferencia resuelto para el documento, sin importar el idioma elegido para los nombres de campo.
+
+---
+
+## Por qué el ancla no se deriva del título
+
+El ancla que un renderizador genera solo desde `### MD-01: Factura` **no sirve como contrato de enlace**, por tres motivos independientes:
+
+1. **El consumidor no la puede construir.** Quien escribe la referencia —`work-define` o `work-plan` redactando la sección Referencias de una US/TK/WI— conoce el **id**, no el slug del nombre. Tiene que adivinarlo, y cualquier fallo produce un enlace que apunta a nada. Es el fallo más frecuente de esta convención.
+2. **Depende del renderizador.** Los slugs derivados **no** están estandarizados. `### MD-03: Nota de crédito` genera `#md-03-nota-de-credito` en unos motores (que translitera la tilde) y `#md-03-nota-de-crédito` en otros (que la conservan). El mismo documento, dos anclas distintas según dónde se lea: el enlace funciona en la web del repo y falla en el editor, o al revés. La puntuación agrava lo mismo — `API-02: Emitir factura (SRI/ATS)` colapsa a `#api-02-emitir-factura-sriats`, imposible de anticipar.
+3. **Rompe al renombrar.** El id es estable por diseño; el nombre no. Corregir «Factura» por «Factura de venta» invalidaría **todos** los enlaces entrantes, que es justo lo que la estabilidad del id pretendía evitar.
+
+El ancla explícita `<a id="md-01"></a>` resuelve los tres: es derivable del id (`MD-01` → `#md-01`), idéntica en cualquier renderizador porque no se calcula, y sobrevive a cualquier cambio de nombre. `<a id>` es HTML admitido por GitHub, GitLab, Bitbucket y Azure Repos; **no** usar la sintaxis `{#md-01}` de kramdown/pandoc, que GitHub no interpreta y deja visible como texto dentro del título.
+
+> El ancla derivada del título sigue existiendo, no se pierde nada. Pero la **referencia canónica es la explícita**, y es la única que se cita.
 
 ---
 
@@ -30,6 +51,7 @@ Reglas:
 
 **Ejemplo:**
 
+<a id="md-01"></a>
 ### MD-01: Factura
 
 Entidad persistida que representa una factura emitida a un cliente.
@@ -42,7 +64,7 @@ Entidad persistida que representa una factura emitida a un cliente.
 | total | decimal(12,2) | Sí | Total con impuestos | ≥ 0; suma de líneas + impuestos |
 | issuedAt | datetime (ISO 8601, UTC) | No | Fecha de emisión | Requerido si `status ≠ draft` |
 
-**Relaciones:** Factura 1—N LineaFactura (MD-02)
+**Relaciones:** Factura 1—N LineaFactura (`[MD-02](#md-02)`)
 
 ---
 
@@ -60,6 +82,7 @@ Reglas:
 
 **Ejemplo:**
 
+<a id="api-01"></a>
 ### API-01: Crear factura
 
 - **Método y ruta:** `POST /api/v1/invoices`
@@ -134,6 +157,7 @@ Reglas:
 
 **Ejemplo:**
 
+<a id="dg-01"></a>
 ### DG-01: Contexto de la capability facturación
 
 - **Tipo:** Contexto (C4)
@@ -152,7 +176,7 @@ C4Context
 
 **Notas**
 
-- La interacción con la pasarela se detalla en FL-01; el contrato de emisión en API-02.
+- La interacción con la pasarela se detalla en `[FL-01](#fl-01)`; el contrato de emisión en `[API-02](#api-02)`.
 
 ---
 

@@ -63,14 +63,15 @@ Priorizar: preguntar primero lo que **bloquea la implementación** (tipos, contr
    - **Sin canal de respuesta disponible** (modo directo en una sesión desatendida/programada, o modo delegado cuyo subagente no puede interactuar): no inventar ninguna respuesta — documentar cada laguna en Observaciones citando el elemento afectado y continuar con lo que sí está confirmado. Mismo criterio en ambos modos; solo cambia dónde queda visible (respuesta final del subagente en delegado, resumen al usuario en directo — ver [Modos de invocación](../SKILL.md#modos-de-invocación) en `SKILL.md`).
 4. **Redactar**
    - Documento nuevo: usar `assets/technical-doc-template.md` como molde (Propósito, secciones de elementos que apliquen, Observaciones). No copiar la plantilla como artefacto al repo; es un molde.
-   - Cada elemento según su estándar en [`element-standards.md`](element-standards.md), con id siguiente de su secuencia y encabezado `### ID: Nombre`.
+   - Cada elemento según su estándar en [`element-standards.md`](element-standards.md), con id siguiente de su secuencia, **ancla explícita `<a id="<id-en-minúsculas>"></a>` en la línea anterior** y encabezado `### ID: Nombre`. El ancla es obligatoria: es el contrato de enlace con las US/TK/WI (ver [Por qué el ancla no se deriva del título](element-standards.md#por-qué-el-ancla-no-se-deriva-del-título)).
    - En actualizaciones: no renumerar ids existentes; los elementos obsoletos se marcan `(Obsoleto)`, no se borran mientras tengan consumidores.
+   - **Al actualizar un documento anterior a esta convención, añadir el ancla que falte a los elementos que se toquen** (los que se crean o modifican en esta pasada). No hace falta un barrido del documento completo, pero sí dejar anclado todo lo que se edite: un elemento modificado cuya referencia se devuelve al llamador tiene que ser enlazable. Si al hacerlo se detecta que otros elementos del documento siguen sin ancla, mencionarlo en el resumen final para que el usuario decida si completarlos.
    - Lagunas no resueltas → Observaciones, citando el elemento afectado.
 5. **Cerrar el documento**
    - Actualizar la fecha de «Última actualización» (y «Fecha de creación» si el documento es nuevo).
    - Glosario (`docs/specs/glossary.md`): entrada breve si aparecen términos de dominio nuevos.
 6. **Enlazar y cerrar**
-   - **Modo delegado:** devolver al skill llamador la lista de referencias — para cada elemento: id, título y ruta relativa con ancla (p. ej. `docs/specs/technical-docs/facturacion.md#api-01-crear-factura`) — más las lagunas que quedaron en Observaciones. El skill llamador decide cómo insertarlas en su artefacto.
+   - **Modo delegado:** devolver al skill llamador la lista de referencias — para cada elemento: id, título y ruta relativa con ancla, que es **siempre `#<id en minúsculas>`** (p. ej. `docs/specs/technical-docs/facturacion.md#api-01`) — más las lagunas que quedaron en Observaciones. El skill llamador decide cómo insertarlas en su artefacto. **Nunca devolver un ancla derivada del título** (`#api-01-crear-factura`): el llamador la copiaría literalmente y el enlace apuntaría a nada.
    - **Modo directo:** mostrar el resumen de elementos creados/actualizados y, si hay una US/TK/WI relacionada en contexto, **ofrecer** agregar las referencias a su sección Referencias (no editarla sin confirmación). Si quedaron Observaciones, ofrecer las preguntas que las cerrarían.
 
 ---
@@ -87,8 +88,8 @@ Cuando `work-define` o `work-plan` delegan mediante subagente:
 capability: facturacion
 documento: docs/specs/technical-docs/facturacion.md
 elementos:
-  - MD-03: Nota de crédito → docs/specs/technical-docs/facturacion.md#md-03-nota-de-credito
-  - API-04: Emitir nota de crédito → docs/specs/technical-docs/facturacion.md#api-04-emitir-nota-de-credito
+  - MD-03: Nota de crédito → docs/specs/technical-docs/facturacion.md#md-03
+  - API-04: Emitir nota de crédito → docs/specs/technical-docs/facturacion.md#api-04
 pendientes:
   - API-04: estructura de error estándar sin confirmar (Observaciones)
 ```
@@ -103,12 +104,14 @@ pendientes:
 
 - Un solo documento para la capability; nombre kebab-case correcto
 - Plantilla respetada; solo las secciones de elementos que aplican
-- Encabezados `### ID: Nombre` enlazables; ids secuenciales por tipo sin renumeraciones
+- Encabezados `### ID: Nombre`, cada uno precedido de su ancla explícita `<a id="<id>"></a>`; ids secuenciales por tipo sin renumeraciones
+- **Ninguna referencia entregada o escrita usa un ancla derivada del título**: todas son `#<id en minúsculas>`
+- Si el documento ya existía sin anclas, los elementos tocados en esta pasada las tienen
 
 **Contenido:**
 
 - Cada elemento cumple su estándar (tipos concretos, responses exhaustivas, ramas cubiertas — ver [`element-standards.md`](element-standards.md))
-- Referencias cruzadas por id válidas (anclas locales y rutas relativas entre capabilities)
+- Referencias cruzadas por id válidas: ancla local `#<id>` dentro de la capability, ruta relativa + `#<id>` entre capabilities
 - Nada inventado: todo dato no confirmado está en Observaciones, no camuflado como definición
 
 **Cierre:**
@@ -123,7 +126,7 @@ pendientes:
 **Ejemplo 1 — Delegación desde work-define**
 
 - *Entrada:* `work-define` está creando la US-012 «emitir nota de crédito», que menciona un modelo y un endpoint nuevos; delega vía subagente con el texto de la US.
-- *Comportamiento:* design-define detecta que existe `facturacion.md`, continúa las secuencias (MD-03, API-04), hace una tanda de grilling (tipos del modelo, códigos de error), redacta y devuelve las referencias con ancla. `work-define` las agrega a Referencias de la US.
+- *Comportamiento:* design-define detecta que existe `facturacion.md`, continúa las secuencias (MD-03, API-04), hace una tanda de grilling (tipos del modelo, códigos de error), redacta y devuelve las referencias con ancla (`facturacion.md#md-03`, `facturacion.md#api-04`). `work-define` las agrega a Referencias de la US tal cual, sin recomponer nada.
 
 **Ejemplo 2 — Detalle solicitado durante planificación**
 
@@ -163,7 +166,7 @@ Posición: **transversal** al pipeline `work-define` → `work-plan` → `work-i
 | | |
 |--|--|
 | **Entrada** | Pedido directo del usuario, o delegación vía subagente desde `work-define` (US que define modelos/APIs/flujos) o `work-plan` (TK/WI con definiciones técnicas sin especificación). |
-| **Salida** | Documento `docs/specs/technical-docs/[capability].md` creado o actualizado, con elementos `MD-XX`/`API-XX`/`FL-XX`/`DG-XX` enlazables; lista de referencias (ruta + ancla) entregada al llamador o al usuario. |
+| **Salida** | Documento `docs/specs/technical-docs/[capability].md` creado o actualizado, con elementos `MD-XX`/`API-XX`/`FL-XX`/`DG-XX` enlazables por su ancla explícita; lista de referencias (ruta + `#<id>`) entregada al llamador o al usuario. |
 | **Hacia work-define / work-plan** | El skill llamador inserta las referencias en la sección Referencias de su artefacto (US, TK o WI). Este skill nunca edita esos artefactos. |
 | **Hacia work-implement** | Las TK/WI en Ready referencian los elementos de este documento como fuente de implementación; la fecha de última actualización permite detectar si el documento cambió después de redactada la TK/WI. |
 | **Conflicto con la US** | Si al especificar se descubre que la US es inconsistente o incompleta, reportarlo; la corrección de la US se hace con `work-define`, nunca desde aquí. |

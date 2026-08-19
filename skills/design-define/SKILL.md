@@ -59,7 +59,7 @@ El idioma del documento técnico (descripciones y texto natural; los nombres de 
 - **Un documento por capability.** Si el documento de la capability ya existe, se **actualiza** (se añaden o modifican elementos); nunca crear un segundo documento para la misma capability.
 - Nombre de archivo: capability en minúsculas, kebab-case, sin artículos ni palabras vacías. Ejemplos: `facturacion.md`, `gestion-recetas.md`, `autenticacion.md`.
 - Dentro del documento, cada elemento lleva id secuencial **por tipo**, único en el ámbito de la capability: modelos `MD-01, MD-02, …`; APIs `API-01, API-02, …`; flujos `FL-01, FL-02, …`; diagramas `DG-01, DG-02, …`. No renumerar elementos existentes: los ids son estables porque otras historias y tareas ya pueden enlazarlos.
-- Cada elemento es un encabezado `###` con el formato `### MD-01: Nombre` para que sea enlazable por ancla, p. ej. `docs/specs/technical-docs/facturacion.md#md-01-factura`.
+- Cada elemento es un encabezado `###` con el formato `### MD-01: Nombre`, precedido de su **ancla explícita** `<a id="md-01"></a>` en la línea inmediatamente anterior. La referencia que se cita es esa: `docs/specs/technical-docs/facturacion.md#md-01` — **el id en minúsculas, sin el nombre**. Nunca un ancla derivada del título (`#md-01-factura`): depende del renderizador y se rompe al renombrar el elemento. Ver [Por qué el ancla no se deriva del título](references/element-standards.md#por-qué-el-ancla-no-se-deriva-del-título).
 - El documento lleva **fecha de creación** y **última actualización**. Las lagunas abiertas se registran en **Observaciones** del propio documento.
 
 ---
@@ -69,7 +69,7 @@ El idioma del documento técnico (descripciones y texto natural; los nombres de 
 | Modo | Quién invoca | Entrada típica | Salida esperada |
 | ---- | ------------ | -------------- | --------------- |
 | **Directo** | El usuario | «Documenta el modelo de factura», «especifica la API de pagos», «dame más detalle del flujo de aprobación de la TK-004» | Documento creado/actualizado + resumen al usuario + oferta de enlazarlo desde la US/TK/WI relacionada |
-| **Delegado** | `work-define` o `work-plan` vía subagente | Contexto de la US/TK/WI + los elementos técnicos a especificar | Documento creado/actualizado y, **como respuesta final del subagente, la lista de referencias** (ruta relativa + ancla de cada elemento) para que el skill llamador las agregue a la sección Referencias del artefacto |
+| **Delegado** | `work-define` o `work-plan` vía subagente | Contexto de la US/TK/WI + los elementos técnicos a especificar | Documento creado/actualizado y, **como respuesta final del subagente, la lista de referencias** (ruta relativa + ancla `#<id>` de cada elemento) para que el skill llamador las agregue a la sección Referencias del artefacto |
 
 En modo delegado, el grilling de preguntas se dirige igualmente al usuario (el subagente hereda la herramienta de preguntas estructuradas); si el entorno no permite preguntar, documentar las lagunas en Observaciones y reportarlas en la respuesta final en lugar de inventar. **En modo directo**, si el entorno tampoco permite preguntar (p. ej. sesión desatendida/programada sin nadie que responda en el momento), aplicar el mismo criterio: no inventar, documentar cada laguna en Observaciones citando el elemento afectado, y destacarlas de forma prominente al principio del resumen final — a diferencia del modo delegado, aquí no hay un skill llamador que las recoja, así que es el propio resumen al usuario el único lugar donde quedan visibles.
 
@@ -107,11 +107,11 @@ El detalle de **qué preguntar por tipo de elemento** (campos sin tipo, códigos
 El procedimiento completo está en [`references/flow.md`](references/flow.md). Síntesis:
 
 - **Crear/actualizar:** resolver capability → leer el documento existente si lo hay → detectar lagunas y hacer el grilling → redactar los elementos con `assets/technical-doc-template.md` y los estándares de `references/element-standards.md` → asignar ids estables → actualizar la fecha de última actualización → glosario si aplica.
-- **Enlazar:** en modo delegado, devolver las referencias (ruta + ancla) al skill llamador; en modo directo, ofrecer agregar la referencia a la sección Referencias de la US/TK/WI relacionada.
+- **Enlazar:** en modo delegado, devolver las referencias (ruta + ancla `#<id>`) al skill llamador; en modo directo, ofrecer agregar la referencia a la sección Referencias de la US/TK/WI relacionada.
 - **Cierre:** si quedaron lagunas en Observaciones, ofrecerle al usuario las preguntas que las cerrarían (misma mecánica de grilling).
 
 ---
 
 ## Mensaje al usuario
 
-Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamiento interno ni narración del trabajo en curso («leí la US», «creé el archivo»). Si hay pendientes, listarlos agrupados por elemento (`MD-XX`, `API-XX`, `FL-XX`, `DG-XX`). En modo delegado, la respuesta final del subagente es **datos para el skill llamador** (rutas y anclas), no prosa para el humano.
+Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamiento interno ni narración del trabajo en curso («leí la US», «creé el archivo»). Si hay pendientes, listarlos agrupados por elemento (`MD-XX`, `API-XX`, `FL-XX`, `DG-XX`). En modo delegado, la respuesta final del subagente es **datos para el skill llamador** (rutas y anclas `#<id>`), no prosa para el humano.

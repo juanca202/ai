@@ -3,6 +3,9 @@ Convención de placeholders: sustituir manualmente cada {{texto}}; no es un moto
 Eliminar este bloque y sustituir todos los {{…}} al publicar el documento final.
 Un documento por capability. Los elementos llevan id secuencial por tipo (MD-XX, API-XX, FL-XX, DG-XX),
 estable en el tiempo: no renumerar aunque se eliminen elementos (marcar como Obsoleto en su lugar).
+Cada elemento va precedido de su ancla explícita en la línea anterior al ###, con el id en minúsculas
+y sin el nombre: la etiqueta <a> de HTML con id="{{id-en-minusculas}}". Esa ancla (#md-01, #api-04,
+#fl-02, #dg-01) es la referencia que consumen US/TK/WI; ver references/element-standards.md.
 Las secciones Modelos de datos / APIs / Flujos / Diagramas son opcionales: incluir solo las que la capability necesite.
 -->
 
@@ -19,6 +22,7 @@ Las secciones Modelos de datos / APIs / Flujos / Diagramas son opcionales: inclu
 
 <!-- Un elemento por modelo/entidad/DTO. Formato detallado en references/element-standards.md del skill design-define. -->
 
+<a id="md-01"></a>
 ### MD-01: {{nombre del modelo}}
 
 {{descripción breve del modelo y su rol en la capability}}
@@ -36,6 +40,7 @@ erDiagram
 
 ## APIs / Endpoints
 
+<a id="api-01"></a>
 ### API-01: {{operación en verbo — p. ej. Crear factura}}
 
 - **Método y ruta:** `{{POST /api/v1/recurso}}`
@@ -65,6 +70,7 @@ erDiagram
 
 ## Flujos / Procesos
 
+<a id="fl-01"></a>
 ### FL-01: {{nombre del flujo}}
 
 - **Disparador:** {{qué inicia el flujo: acción de usuario, evento, programación}}
@@ -90,6 +96,7 @@ erDiagram
 
 <!-- Diagramas estructurales o de arquitectura de la capability: clases, contexto (C4 nivel 1), contenedores (C4 nivel 2), componentes (C4 nivel 3), despliegue, estados. Formato detallado en references/element-standards.md del skill design-define. -->
 
+<a id="dg-01"></a>
 ### DG-01: {{nombre del diagrama — p. ej. Diagrama de clases del dominio, Contexto de la capability}}
 
 - **Tipo:** {{Clases | Contexto (C4) | Contenedores (C4) | Componentes (C4) | Despliegue | Estados | Otro}}
