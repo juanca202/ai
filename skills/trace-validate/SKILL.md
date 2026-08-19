@@ -1,7 +1,7 @@
 ---
 name: trace-validate
 description: >-
-  Generar un reporte de trazabilidad que cruza los criterios de aceptación de un artefacto —una historia de usuario (US-XXX), una tarea de mantenimiento (WI-XXX), un feature ya implementado (FT-XXX) o cualquier documento cuyos criterios tengan identificador codificado (AC-001, 1.1, R-3…)— contra los casos y artefactos de prueba del repositorio. Por cada criterio indica qué lo cubre, su estado (Cubierto / Parcial / No cubierto), si la prueba se ejecutó y con qué resultado, y cierra con un veredicto de cobertura. No corre la suite: delega la ejecución en quality-check. Activar siempre que el usuario pida validar cobertura, generar una matriz o reporte de trazabilidad, verificar que los criterios de aceptación están probados, comprobar si un trabajo o un feature está cubierto por pruebas, o mencione "trazabilidad", "matriz de cobertura" o "validar criterios de aceptación", aunque no nombre el formato exacto.
+  Generar un reporte de trazabilidad que cruza los criterios de aceptación de un artefacto —una historia de usuario (US-XXX), una tarea de mantenimiento (WI-XXX), un feature ya implementado (FT-XXX) o cualquier documento cuyos criterios tengan identificador codificado (AC-001, 1.1, R-3…)— contra los casos y artefactos de prueba del repositorio. Por cada criterio indica qué lo cubre, su estado (Cubierto / Parcial / No cubierto), si la prueba se ejecutó y con qué resultado, y cierra con un veredicto. No corre la suite: delega la ejecución en quality-check. Activar siempre que el usuario pida validar cobertura, generar una matriz o reporte de trazabilidad, verificar que los criterios de aceptación están probados, comprobar si un trabajo o un feature está cubierto por pruebas, o mencione "trazabilidad", "matriz de cobertura" o "validar criterios de aceptación", aunque no nombre el formato exacto. Traza también trabajo archivado en docs/specs/archive/, dejando el reporte junto al artefacto.
 license: MIT
 ---
 
@@ -254,16 +254,21 @@ cambió.
 | Clave | Qué cubre | Cómo se calcula |
 |-------|-----------|-----------------|
 | `FINGERPRINT` | **El código y los tests.** El fingerprint canónico de la tubería, idéntico al de `quality-check` y `code-review`: excluye toda carpeta oculta, cualquier `docs/` y los `trace-report.md` sueltos, para que escribir un artefacto generado no invalide la caché. Receta exacta en [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate). | Sobre todo el árbol, menos las exclusiones |
-| `SPEC_FINGERPRINT` | **Los criterios y los casos de prueba** del artefacto que se valida: su `README.md` y su carpeta `test-cases/`. Viven bajo `docs/specs/`, que el `FINGERPRINT` excluye — sin esta segunda clave, reescribir un criterio no invalidaría nada. | Sobre la **carpeta del artefacto**, sin exclusiones |
+| `SPEC_FINGERPRINT` | **Los criterios y los casos de prueba** del artefacto que se valida: su `README.md` y su carpeta `test-cases/`. Viven bajo `docs/specs/`, que el `FINGERPRINT` excluye — sin esta segunda clave, reescribir un criterio no invalidaría nada. | Sobre la **carpeta del artefacto**, excluyendo su propio `trace-report.md` |
 
 ```bash
-SPEC_FINGERPRINT=$( { git -C "$ROOT" ls-files -s              -- "$ARTEFACTO"; \
-                      git -C "$ROOT" status --porcelain -uall -- "$ARTEFACTO"; \
-                      git -C "$ROOT" diff                     -- "$ARTEFACTO"; \
+NO_REPORT=":(exclude)${ARTEFACTO%/}/trace-report.md"
+SPEC_FINGERPRINT=$( { git -C "$ROOT" ls-files -s              -- "$ARTEFACTO" "$NO_REPORT"; \
+                      git -C "$ROOT" status --porcelain -uall -- "$ARTEFACTO" "$NO_REPORT"; \
+                      git -C "$ROOT" diff                     -- "$ARTEFACTO" "$NO_REPORT"; \
                     } | git hash-object --stdin )
 ```
 
 donde `$ARTEFACTO` es la carpeta del trabajo (`docs/specs/user-stories/US-042-…/`) o, si el artefacto es un archivo suelto, su ruta. Se reutiliza el reporte **solo si coinciden los dos**.
+
+> **La exclusión del propio reporte no es opcional.** El `trace-report.md` vive **dentro** de `$ARTEFACTO`: sin `$NO_REPORT`, escribirlo en el Paso 7 movería el `SPEC_FINGERPRINT`, la marca de pie guardaría el hash de *antes* de escribir, y ninguna corrida posterior coincidiría — la idempotencia no se dispararía **nunca**. La clave cubre las **entradas** del reporte, no su salida; es el mismo motivo por el que el `FINGERPRINT` excluye `**/trace-report.md`.
+>
+> **Y tiene que ser una ruta literal interpolando `$ARTEFACTO`, no un glob.** `':(exclude,glob)**/trace-report.md'` junto a un pathspec **positivo** hace que git excluya **todo**: las tres órdenes devuelven vacío, la clave queda fija en el hash del blob vacío, y entonces la idempotencia se dispara siempre y un criterio editado nunca invalida el reporte. El `EXC` del `FINGERPRINT` puede usar globs porque ahí no hay pathspec positivo.
 
 > **Por qué dos claves y no una.** Meter `docs/` entero en el `FINGERPRINT` haría que escribir cualquier informe invalidara las tres cachés — el problema que las exclusiones resuelven. Acotar la segunda clave a **la carpeta del artefacto** captura exactamente lo que este reporte traza, sin arrastrar el resto de la documentación. Y a diferencia de «detectar que el usuario editó los criterios», es una comprobación **determinista**: no depende de que el cambio haya ocurrido en esta sesión, ni de que alguien lo mencione.
 
@@ -395,7 +400,10 @@ WARNING No es posible generar el reporte de trazabilidad:
 | Cualquier otro artefacto | La ruta que indique el usuario |
 | Casos de prueba documentados (entrada, los produce `test-define`) | `test-cases/` **dentro de la carpeta del artefacto**, con su índice `test-cases/README.md` |
 | Caché de corrida de pruebas (entrada, la produce `quality-check`) | `.sdd-devkit/test-run.json` (ubicación fija, no por unidad) |
-| Reporte de trazabilidad (salida) | US: `…/US-XXX-[nombre-corto]/trace-report.md` · WI: `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` · FT: `docs/specs/features/FT-XXX-[slug]/trace-report.md` · otro artefacto: `trace-report.md` **junto al artefacto** (confirmar la ruta con el usuario antes de escribir) |
+| Reporte de trazabilidad (salida) | `trace-report.md` **dentro de la carpeta del artefacto, allí donde se haya resuelto** — `…/US-XXX-[nombre-corto]/`, `…/WI-XXX-[kebab]/`, `…/FT-XXX-[slug]/`, o su equivalente bajo `docs/specs/archive/`; para otro artefacto, junto a él (confirmar la ruta con el usuario antes de escribir) |
+| Trabajo ya archivado (fallback de las tres primeras filas) | `docs/specs/archive/user-stories/US-XXX-…/` · `docs/specs/archive/work-items/WI-XXX-…/`, con la misma estructura interna |
+
+> **Un `US`/`WI` archivado se traza igual.** Si la carpeta no está en la ruta activa, buscarla bajo `docs/specs/archive/` antes de reportar que no existe — `work-integrate` y `pr-create` la mueven ahí al cerrar el trabajo. Todo se resuelve relativo a la carpeta encontrada: los criterios, el `test-cases/`, la clave `SPEC_FINGERPRINT` y el `trace-report.md` de salida. **No** recrear la carpeta en la ruta activa. `trace-validate` es el **único** skill que escribe dentro de un artefacto archivado, y solo su propio informe: es un derivado del artefacto, no trabajo nuevo, y revalidar un trabajo ya integrado tiene que seguir siendo posible. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
 ---
 

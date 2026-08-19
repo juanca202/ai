@@ -37,8 +37,15 @@ El `TC-XXX` siempre vive en la carpeta `test-cases/` de un **artefacto padre**. 
 | ---------------- | ---- |
 | Indice de test cases | `[carpeta del padre]/test-cases/README.md` |
 | Reporte de trazabilidad | `[carpeta del padre]/trace-report.md` (lo produce `trace-validate`, no este skill) |
+| Padre ya archivado (fallback) | `docs/specs/archive/user-stories/US-XXX-…/` · `docs/specs/archive/work-items/WI-XXX-…/`, con la misma estructura interna |
 | ADR | `docs/adr/` |
 | Glosario | `docs/specs/glossary.md` |
+
+> **Si la carpeta del padre no esta en la ruta activa, buscarla bajo `docs/specs/archive/`** antes de darla por inexistente: `work-integrate` y `pr-create` la mueven ahi al cerrar el trabajo. Un padre archivado significa que ese trabajo **ya se cerro**: parar y avisar en vez de escribir dentro, y **nunca** recrear la carpeta en la ruta activa — dejaria dos artefactos con el mismo identificador y la numeracion de los `TC-XXX` reiniciaria en `001`.
+>
+> **Excepcion — modo correccion.** En la correccion delegada desde `quality-check` (ver [modo correccion](../SKILL.md#modo-correccion-delegado-desde-quality-check)) un padre archivado es **esperable**, no un error: ahi se continua, pero sin escribir nada dentro de la carpeta archivada — la nota de retrabajo va en el informe de `quality-check`. Importa especialmente en este flujo, porque `quality-check` senala la rama `test/` como el caso donde delegar es **mas** importante, y ahi el padre archivado es lo habitual.
+>
+> Aparte de eso, el unico skill que escribe dentro de un artefacto archivado es `trace-validate`, y solo su `trace-report.md`. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
 **Rama de trabajo:** `test/[ID del artefacto padre]-[slug]` — p. ej. `test/FT-003-carga-masiva`, `test/US-042-login`, `test/WI-018-migracion-logs`. **Una rama por artefacto padre**, aunque se automaticen varios TC de el. No asumir la rama base; acordarla con el usuario.
 

@@ -58,7 +58,10 @@ La investigación de migración se guarda en el **proyecto destino**:
 - `{slug}`: descripción corta de la migración en *kebab-case* (sin acentos), p. ej.
   `orm-sequelize-a-prisma`, `auth-passportjs-a-authjs`.
 - `XXX`: secuencial de tres dígitos, calculado sobre las carpetas `RS-XXX-*`
-  existentes en `<destino>/docs/specs/research/` (mayor + 1; `001` si no hay).
+  existentes en `<destino>/docs/specs/research/` **y en
+  `<destino>/docs/specs/archive/research/`** (mayor + 1 entre las dos; `001` si no hay
+  ninguna). Archivar una investigación **no libera su número**. Ver
+  [`work-integrate/references/archive.md`](../../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
 ## Destino fragmentado
 
@@ -66,9 +69,9 @@ Cuando el origen se reparte entre **varios** proyectos destino, **cada proyecto
 destino tiene su propia carpeta** `RS-XXX-{slug}/` con su `discovery.md`,
 `validation.md` y `README.md`, acotados a la porción del origen que recibe. Usa el
 **mismo `{slug}`** en todos para trazabilidad; calcula `XXX` como el siguiente libre
-considerando el número **más alto entre todos** los `docs/specs/research/` de los
-destinos involucrados. En este documento "el destino" se refiere a **cada** proyecto
-destino cuando está fragmentado.
+considerando el número **más alto entre todos** los `docs/specs/research/` —y sus
+`docs/specs/archive/research/`— de los destinos involucrados. En este documento "el
+destino" se refiere a **cada** proyecto destino cuando está fragmentado.
 
 ## Entradas necesarias
 

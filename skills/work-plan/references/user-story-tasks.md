@@ -46,6 +46,9 @@ En caso de duda entre A y B: preguntar al usuario antes de continuar. No combina
 | ADR | `docs/adr/` |
 | Documentación técnica | `docs/specs/technical-docs/[capability].md` (propiedad de `design-define`; aquí solo se referencia) |
 | Glosario | `docs/specs/glossary.md` |
+| US padre ya archivada (fallback) | `docs/specs/archive/user-stories/US-XXX-[nombre-corto]/` |
+
+> **US padre archivada.** Si la carpeta de la US no está en `docs/specs/user-stories/`, buscarla bajo `docs/specs/archive/user-stories/` antes de darla por inexistente. Si está ahí, la historia **ya se cerró e integró**: **parar y avisar** en vez de añadirle tareas — retomarla exige desarchivarla, y eso lo decide el usuario. **Nunca** crear la carpeta en la ruta activa por no haberla encontrado. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
 ---
 
@@ -53,6 +56,7 @@ En caso de duda entre A y B: preguntar al usuario antes de continuar. No combina
 
 - Formato: `TK-<número>-[nombre-descriptivo].md` con `TK-<número>` en mayúsculas.
 - **Sin tracker externo vinculado**: `<número>` es un secuencial **por historia** (no global); tres dígitos con cero a la izquierda → `TK-001`, `TK-002`, …
+  - Al ser por historia, el escaneo se hace sobre la carpeta de la US **realmente resuelta**, no sobre una ruta activa que se dé por vacía sin haberla comprobado: si la US no aparece ahí, la regla de US archivada ya obligó a parar (ver [Ubicación de archivos](#ubicación-de-archivos)). Reiniciar en `001` dentro de una carpeta recién creada porque «no había nada» duplicaría identificadores.
 - **Con tracker externo vinculado**: `<número>` es el identificador que asigna ese sistema al work item creado; su formato exacto (numérico, con o sin padding, etc.) lo define el archivo de referencia del sistema — ver la sección «Integración con un sistema de seguimiento externo» en `SKILL.md`.
 - Nombre descriptivo: minúsculas, kebab-case, corto y descriptivo.
 - El nombre completo del archivo (`TK-<número>-[nombre-descriptivo].md`) y, si hay un tracker externo vinculado, el título usado al crear el work item deben respetar cualquier límite de longitud propio de ese sistema (ver su archivo de referencia).
@@ -86,7 +90,7 @@ Antes de crear archivos, verificar estas condiciones. Si alguna falla, **no crea
 
 **¿Qué verificar?**
 - **US padre existe y está Ready:** la carpeta `US-XXX-[nombre-corto]/` tiene `README.md` con `Estado: Ready`. No se pueden crear TKs sobre una US en Draft.
-- **ID disponible:** el número `TK-XXX` propuesto no existe ya en la carpeta. (Aplica también con el identificador de un tracker externo: verificar que no exista ya un `TK-<id>-*.md` con ese identificador — ver el archivo de referencia del sistema.)
+- **ID disponible:** el número `TK-XXX` propuesto no existe ya en la carpeta de la US — la carpeta **realmente resuelta**, no una ruta activa que se dé por vacía sin haber comprobado el archivo (si la US resultó estar archivada, la comprobación anterior ya obligó a parar y no hay TK que numerar). (Aplica también con el identificador de un tracker externo: verificar que no exista ya un `TK-<id>-*.md` con ese identificador — ver el archivo de referencia del sistema.)
 - **Solapamiento de alcance:** leer todas las `TK-*.md` de la carpeta y comparar su objetivo con el de la nueva tarea. Si alguna ya cubre el mismo alcance: informar al usuario el conflicto y preguntar si prefiere actualizar la existente o ajustar el alcance de la nueva.
 - **Repositorio definido (solo TK completa):** si el repositorio sigue siendo `Por definir` tras preguntar, publicar como stub en Draft, no como TK completa.
 - **Rama de trabajo actual:** determinar la rama git activa (`git branch --show-current`). La rama de implementación de la TK es la de su **propia** US padre: `feature/US-XXX-[nombre-corto]` (ver `work-implement`). Si la rama activa es una rama de implementación (`feature/US-*`, `feature/WI-*`, `fix/WI-*`, `chore/WI-*`, `refactor/WI-*`, `test/*`) **distinta** de esa —por ejemplo la de otra US o de un WI—, la TK quedaría documentada en el contexto de otro trabajo. No bloquea automáticamente — ver manejo específico abajo.
@@ -113,7 +117,7 @@ Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **De
 
 Un stub reserva el ID y el vínculo a la US. No requiere contexto técnico completo.
 
-1. **Resolver el ID de la tarea:** si el repo tiene un tracker externo vinculado (ver `SKILL.md`), seguir su archivo de referencia (crea el work item primero y usa su identificador). En cualquier otro caso, inferir el siguiente número secuencial libre listando archivos `TK-*.md` en la carpeta de la US.
+1. **Resolver el ID de la tarea:** si el repo tiene un tracker externo vinculado (ver `SKILL.md`), seguir su archivo de referencia (crea el work item primero y usa su identificador). En cualquier otro caso, inferir el siguiente número secuencial libre listando archivos `TK-*.md` en la carpeta de la US — la carpeta real, resuelta según la [Validación](#validación-antes-de-crear); nunca una ruta activa vacía que se dé por buena sin haber comprobado el archivo.
 2. Crear `TK-<número>-[nombre-descriptivo].md` con:
    - `Estado: Draft`
    - `Historia`: enlace a la US `[US-XXX](./README.md)`.
@@ -132,12 +136,12 @@ Un stub reserva el ID y el vínculo a la US. No requiere contexto técnico compl
 
 Una TK completa puede alcanzar `Estado: Ready` si cumple todas las condiciones del checklist.
 
-1. **Resolver el ID de la tarea:** si el repo tiene un tracker externo vinculado, seguir su archivo de referencia. En cualquier otro caso, inferir el siguiente secuencial libre en la carpeta de la US.
+1. **Resolver el ID de la tarea:** si el repo tiene un tracker externo vinculado, seguir su archivo de referencia. En cualquier otro caso, inferir el siguiente secuencial libre en la carpeta de la US — la carpeta real, resuelta según la [Validación](#validación-antes-de-crear); nunca una ruta activa vacía que se dé por buena sin haber comprobado el archivo.
 2. **Redactar el TK** siguiendo `assets/task-template.md`:
    - **Metadatos**: `Historia` con enlace `[US-XXX](./README.md)`; `Repositorio` con el nombre del repositorio git afectado; `Asignado a` indicado por el usuario, inferido con `git config user.name`, u omitido; `Work Item (<sistema>)` con el enlace al work item solo si se creó vía el tracker vinculado (etiqueta y formato en su archivo de referencia).
    - **Descripción**: qué lograr — objetivo claro, tono imperativo y verificable; sin «podría», «quizá», «tal vez».
    - **Dependencias**: solo piezas *dentro del alcance de la tarea* — componentes, servicios, modelos, librerías. ADRs, technical-docs, contratos y referencias de diseño van en **Referencias**.
-   - **Referencias**: ADRs existentes, technical-docs (con ancla al elemento concreto, p. ej. `technical-docs/facturacion.md#api-01-crear-factura`), diseño. No crear ADRs; si falta una decisión, sugerirlo al usuario en Observaciones. Si la tarea depende de un modelo, API o flujo **sin especificación** en `technical-docs/`, registrarlo en Observaciones; si el usuario pide detallarlo, **delegar a `/design-define` vía subagente** y agregar aquí la referencia devuelta.
+   - **Referencias**: ADRs existentes, technical-docs (con ancla al elemento concreto, p. ej. `technical-docs/facturacion.md#api-01`), diseño. El ancla es **siempre `#<id en minúsculas>`** (`#md-01`, `#api-04`, `#fl-02`, `#dg-01`), nunca derivada del título del elemento: `design-define` la emite explícitamente y la devuelve ya formada, así que se **copia tal cual** — no se recompone a partir del nombre. Un `#api-01-crear-factura` apunta a nada. No crear ADRs; si falta una decisión, sugerirlo al usuario en Observaciones. Si la tarea depende de un modelo, API o flujo **sin especificación** en `technical-docs/`, registrarlo en Observaciones; si el usuario pide detallarlo, **delegar a `/design-define` vía subagente** y agregar aquí la referencia devuelta.
    - **Plan de implementación**: pasos concretos acordados o derivados de fuentes citadas en Referencias. Si no se conocen aún, **no inventar** — indicar en Observaciones qué falta.
    - **Migración** (opcional): si la tarea proviene de una investigación de migración (`research/RS-XXX-{slug}/` de `work-research`), rellenar el bloque **Migración (origen → destino)** de la plantilla enlazando esa investigación (contexto progresivo: `discovery.md` y `validation.md` no se duplican). Los `AC-XXX` viven en la US y se validan con los casos Golden Master (`GM-XXX`). Omitir la sección si no es una migración.
    - **Observaciones**: solo si hay pendientes reales. Si no hay nada, **omitir la sección** (o una línea *Sin pendientes documentados* si el equipo lo exige). Con pendientes reales: `Estado: Draft`.
@@ -149,7 +153,7 @@ Una TK completa puede alcanzar `Estado: Ready` si cumple todas las condiciones d
 
 ## Flujo: Actualizar una TK existente
 
-1. **Identificar el archivo** — por número, nombre o título.
+1. **Identificar el archivo** — por número, nombre o título, dentro de la carpeta de su US. Si esa carpeta no está en `docs/specs/user-stories/`, buscarla bajo `docs/specs/archive/user-stories/`: si está archivada, la historia y sus tareas ya se cerraron e integraron — **parar y avisar**, editarlas exige desarchivar primero y eso lo decide el usuario.
 2. **Leer el contenido actual** completo antes de editar.
 3. **Leer el `README.md` de la US y las demás TKs** para detectar solapamientos con los cambios propuestos.
 4. **Aplicar los cambios** solicitados. Reglas invariantes:
@@ -223,7 +227,7 @@ Aplica siempre que se planifiquen o secuencien **varias TK dentro de la misma US
 
 **Validación:**
 - [ ] Carpeta de la US existe con `README.md`
-- [ ] ID `TK-XXX` libre en la carpeta
+- [ ] ID `TK-XXX` libre en la carpeta de la US realmente resuelta (nunca en una ruta activa dada por vacía sin comprobar `docs/specs/archive/user-stories/`)
 - [ ] Sin solapamiento de alcance con TKs existentes
 - [ ] Rama de trabajo actual verificada; si es una rama de implementación distinta de la propia US padre, se advirtió al usuario y se preguntó `Continuar` / `Detenerme aquí` antes de crear
 
@@ -234,7 +238,7 @@ Aplica siempre que se planifiquen o secuencien **varias TK dentro de la misma US
 - [ ] **Dependencias** listadas dentro del alcance de la tarea
 - [ ] **Plan de implementación** con pasos concretos
 - [ ] **Observaciones** sin pendientes abiertos — sección omitida o con *Sin pendientes documentados*
-- [ ] Referencias a ADRs y technical-docs con rutas relativas válidas
+- [ ] Referencias a ADRs y technical-docs con rutas relativas válidas, y las de technical-docs con ancla `#<id>` (`#md-01`, `#api-04`) tal como las devolvió `design-define` — nunca un slug del título
 
 **Formato:**
 - [ ] Plantilla `assets/task-template.md` leída

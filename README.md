@@ -80,7 +80,7 @@ flowchart TD
 3. En paralelo (o a continuación), se configura la **compuerta de calidad** vía `arch-init`; el camino brownfield también converge ahí.
 4. Luego se definen o actualizan los ADRs/Estándares con `arch-manage`. Opcionalmente se audita el cumplimiento con `arch-audit`.
 5. Con la base arquitectónica lista, el trabajo entra a la implementación de requerimientos (otro flujo: historias → planificación → implementación → integración/PR).
-6. Ese flujo de implementación **ya cierra** con `work-integrate` o `pr-create`, que ejecutan internamente las puertas de calidad (`quality-check`, `code-review`, `trace-validate`) — no son pasos aparte de este flujo de alto nivel. Y un paso más allá queda la **promoción**: `pr-create` desde `develop` hacia la rama de despliegue, donde solo aplica `quality-check` porque cada trabajo ya pasó las tres al integrarse.
+6. Ese flujo de implementación **ya cierra** con `work-integrate` o `pr-create`, que ejecutan internamente las puertas de calidad (`quality-check`, `code-review`, `trace-validate`) y, pasadas todas, archivan el artefacto en `docs/specs/archive/` — no son pasos aparte de este flujo de alto nivel. Y un paso más allá queda la **promoción**: `pr-create` desde `develop` hacia la rama de despliegue, donde solo aplica `quality-check` porque cada trabajo ya pasó las tres al integrarse.
 7. El flujo termina en un entregable: trabajo verificado, validado y listo para producción.
 
 
@@ -154,7 +154,7 @@ flowchart TD
 3. **Planificación de tareas** (`work-plan`): desde una historia produce tareas técnicas (`TK-XXX`); sin historia, tareas de mantenimiento (`WI-XXX`).
 4. Durante la planificación, opcionalmente se investiga con `work-research` y/o se ajusta el diseño arquitectónico con `design-define`.
 5. Las tareas planificadas pasan a `work-implement` para su codificación. Los casos de prueba (`TC-XXX`, incluidos los de un feature legacy `FT-XXX`) también pueden pasar por `work-implement` para automatizarse como pruebas.
-6. El flujo termina por uno de dos caminos, y ambos llegan al mismo entregable — el trabajo listo para producción, ya sea integrado directo (`work-integrate`) o vía Pull/Merge Request (`pr-create`). Cada uno ejecuta **internamente** las mismas puertas de calidad (`quality-check`, `code-review`, `trace-validate`); no son pasos aparte de este flujo. Después, promover lo acumulado en `develop` a la rama de despliegue es un `pr-create` en **modo promoción**, que solo ejecuta `quality-check`.
+6. El flujo termina por uno de dos caminos, y ambos llegan al mismo entregable — el trabajo listo para producción, ya sea integrado directo (`work-integrate`) o vía Pull/Merge Request (`pr-create`). Cada uno ejecuta **internamente** las mismas puertas de calidad (`quality-check`, `code-review`, `trace-validate`) y, una vez aprobadas, **archiva el `US-XXX`/`WI-XXX`** moviendo su carpeta a `docs/specs/archive/` en la misma rama, de modo que el archivado se integre con el código; no son pasos aparte de este flujo. Después, promover lo acumulado en `develop` a la rama de despliegue es un `pr-create` en **modo promoción**, que solo ejecuta `quality-check`.
 
 
 
@@ -197,7 +197,7 @@ flowchart TD
 1. **Inicio**: el requerimiento se convierte en historias de usuario con `work-define`.
 2. Opcionalmente, desde las historias se investiga (`work-research`), se definen casos de prueba (`test-define`) y/o diseño arquitectónico (`design-define`).
 3. Las historias alimentan **Specs de terceros** (la implementación la corre el framework elegido: Speckit, OpenSpec, AgentOS, etc.).
-4. El flujo termina por uno de dos caminos, igual que en Specs: integración directa (`work-integrate`) o vía Pull/Merge Request (`pr-create`); ambos llegan al entregable y ejecutan **internamente** las mismas puertas de calidad (`quality-check`, `code-review`, `trace-validate`), sin ser pasos aparte de este flujo. La promoción posterior a la rama de despliegue es un `pr-create` en **modo promoción**, que solo ejecuta `quality-check`.
+4. El flujo termina por uno de dos caminos, igual que en Specs: integración directa (`work-integrate`) o vía Pull/Merge Request (`pr-create`); ambos llegan al entregable, ejecutan **internamente** las mismas puertas de calidad (`quality-check`, `code-review`, `trace-validate`) y archivan el artefacto en `docs/specs/archive/`, sin ser pasos aparte de este flujo. La promoción posterior a la rama de despliegue es un `pr-create` en **modo promoción**, que solo ejecuta `quality-check`.
 
 
 

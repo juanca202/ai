@@ -1,6 +1,6 @@
 ---
 name: test-define
-description: 'Crear casos de prueba (TC-XXX) a partir de los criterios de aceptación de cualquier artefacto de especificación que los tenga con identificador codificado: una historia de usuario (US-XXX), un work item (WI-XXX), un feature ya implementado (FT-XXX) o cualquier otro documento de especificación cuyos criterios estén numerados o codificados (AC-001, 1.1, R-3, etc.), siguiendo el estándar IEEE 29119-4. Activar cuando el usuario pida "definir test cases", "crear casos de prueba", "generar TCs", "pruebas para la US/WI/FT", "pruebas para este spec/documento", "documentar pruebas", "casos de prueba para los criterios de aceptación", o cualquier variante que implique producir documentación de prueba a partir de requisitos ya especificados. También activar cuando el usuario mencione "test-define" o "/test-define".'
+description: 'Crear casos de prueba (TC-XXX) a partir de los criterios de aceptación de cualquier artefacto de especificación que los tenga con identificador codificado: una historia de usuario (US-XXX), un work item (WI-XXX), un feature ya implementado (FT-XXX) o cualquier otro documento de especificación cuyos criterios estén numerados o codificados (AC-001, 1.1, R-3, etc.), siguiendo el estándar IEEE 29119-4. Activar cuando el usuario pida "definir test cases", "crear casos de prueba", "generar TCs", "pruebas para la US/WI/FT", "pruebas para este spec/documento", "documentar pruebas", "casos de prueba para los criterios de aceptación", o cualquier variante que implique producir documentación de prueba a partir de requisitos ya especificados. También activar cuando el usuario mencione "test-define" o "/test-define". Si el artefacto está archivado en docs/specs/archive/, se detiene: es trabajo cerrado y hay que desarchivarlo antes.'
 license: MIT
 ---
 
@@ -63,6 +63,8 @@ El usuario indica un artefacto: puede ser un identificador conocido del repo (`U
 | **Cualquier otro artefacto** de especificación, sea cual sea su origen o formato | La ruta que indique el usuario (buscarla en el repo si solo da un nombre) | `test-cases/` dentro de la carpeta que contiene el artefacto; si el artefacto es un archivo suelto, `test-cases/` junto a él. Confirmar la ruta con el usuario antes de escribir. |
 
 > La carpeta `test-cases/` se crea si no existe; el archivo del artefacto permanece donde está.
+
+> **Artefacto archivado.** Si un `US-XXX`/`WI-XXX` no aparece en su ruta activa, buscarlo bajo `docs/specs/archive/user-stories/` o `docs/specs/archive/work-items/` antes de darlo por inexistente — `work-integrate` y `pr-create` lo mueven ahí al cerrar el trabajo. Si está archivado, **parar y avisar**: definir casos de prueba nuevos para un trabajo ya cerrado requiere desarchivarlo primero, y eso lo decide el usuario. **Nunca** crear la carpeta en la ruta activa por no haberla encontrado: además de duplicar el identificador, la numeración de TCs del [Paso 3](#numeración-y-nombres-de-archivo) reiniciaría en `001` ignorando los TCs que ya existen en el archivo. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
 ### Feature (`FT-XXX`) — funcionalidad ya implementada
 
@@ -140,7 +142,7 @@ Si dentro de una perspectiva hay múltiples escenarios distintos que vale la pen
 
 ### Numeración y nombres de archivo
 
-- **Sin tracker externo vinculado**: el secuencial `XXX` (tres dígitos: 001, 002, …) es por artefacto padre, siguiendo el orden criterio-a-criterio (happy → error → límite). Si la carpeta `test-cases/` ya existe con TCs previos, leer los archivos presentes, determinar el número más alto y continuar desde el siguiente.
+- **Sin tracker externo vinculado**: el secuencial `XXX` (tres dígitos: 001, 002, …) es por artefacto padre, siguiendo el orden criterio-a-criterio (happy → error → límite). Si la carpeta `test-cases/` ya existe con TCs previos, leer los archivos presentes, determinar el número más alto y continuar desde el siguiente. El escaneo se hace sobre el `test-cases/` del padre **realmente resuelto**, no sobre una ruta activa que se dé por vacía sin haberla comprobado: si el padre no aparece ahí, la regla de artefacto archivado ya obligó a parar (ver [Selección del artefacto](#selección-del-artefacto)). Reiniciar en `001` dentro de una carpeta recién creada porque «no había nada» duplicaría identificadores.
 - **Con tracker externo vinculado**: `XXX` es el identificador que asigna ese sistema al work item «Test Case» creado; su formato exacto (numérico, con o sin padding, etc.) lo define el archivo de referencia del sistema. Ver [Integración con un sistema de seguimiento externo](#integración-con-un-sistema-de-seguimiento-externo-condicional).
 - No regenerar TCs ya existentes salvo instrucción explícita del usuario.
 - Nombre de archivo: `TC-XXX-{slug}.md`, donde el slug sigue el patrón `{criterio-resumido}-{perspectiva}` (ver columna Ejemplo arriba). Un TC por archivo.
@@ -233,7 +235,7 @@ Tras editar, informar al usuario qué criterios quedaron enlazados con qué TCs.
 
 El flujo de los Pasos 1–5 **crea** casos de prueba. Pero tres skills devuelven aquí el control para **corregir o ampliar un TC que ya existe** —`work-implement` cuando al automatizar descubre que el TC está mal (`references/test-cases.md`), y `work-research` cuando el análisis de un caso de prueba concluye que la especificación es la que falla—, y ese camino necesita su propio procedimiento: regenerar desde cero perdería el identificador, que es el vínculo de trazabilidad que sostienen el índice, la línea `Casos de prueba:` del artefacto y todos los `trace-report.md`.
 
-1. **Localizar el TC** por su identificador dentro de `test-cases/` del artefacto padre. Si no aparece, parar y preguntar: no crear uno nuevo con ese ID.
+1. **Localizar el TC** por su identificador dentro de `test-cases/` del artefacto padre. Si el **padre** no está en su ruta activa, buscarlo bajo `docs/specs/archive/` como en [Selección del artefacto](#selección-del-artefacto): si está archivado, **parar y avisar** — editar un TC de un trabajo ya cerrado es escribir dentro del archivo, y eso exige desarchivarlo primero. Es el caso más frecuente al llegar aquí desde una escalada de `work-implement` en modo corrección. Si el TC no aparece, parar y preguntar: no crear uno nuevo con ese ID.
 2. **Entender el cambio pedido.** Quien delega debe traer el motivo (paso ambiguo, dato de prueba irreal, resultado esperado que contradice el comportamiento correcto, criterio que quedó sin cubrir). Si no viene, pedirlo; no deducirlo del código, que es circular.
 3. **Aplicar el cambio conservando el identificador y el archivo.** Se editan los campos afectados; **nunca** se renumera, ni se renombra el archivo, ni se crea un TC nuevo para sustituirlo.
 4. **Ajustar el `Estado`** según el desenlace:

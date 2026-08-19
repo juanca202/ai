@@ -48,7 +48,7 @@ Antes de planificar o escribir tests, ejecuta `git branch --show-current`.
 
 ### Si la rama coincide con `feature/US-XXX-[nombre-corto]`
 
-1. **Localiza la US:** descontar el prefijo `feature/` → carpeta `docs/specs/user-stories/US-XXX-[nombre-corto]/`.
+1. **Localiza la US:** descontar el prefijo `feature/` → carpeta `docs/specs/user-stories/US-XXX-[nombre-corto]/`. Si no está ahí, buscarla bajo `docs/specs/archive/user-stories/`: al cerrar el trabajo, `work-integrate` y `pr-create` mueven la carpeta al archivo. Se lee igual; **no** se escribe dentro ni se recrea en la ruta activa.
 2. **Lee** `README.md` de esa carpeta, sección **Criterios de aceptación**:
    - Reglas **BR-XX** (RFC 2119: DEBE/MUST, NO DEBE/MUST NOT, etc.).
    - Escenarios **SC-XX** (bloques Gherkin: DADO/CUANDO/ENTONCES o GIVEN/WHEN/THEN).
@@ -68,7 +68,7 @@ Antes de planificar o escribir tests, ejecuta `git branch --show-current`.
 
 Es una ejecución de **automatización de casos de prueba** de `work-implement` (tipos `TC-XXX` / `FT-XXX`; ver `skills/work-implement/references/test-cases.md`). Aquí **no derivas escenarios**: los casos ya están documentados.
 
-1. **Localiza el artefacto padre** descontando el prefijo `test/`: `test/FT-003-*` → `docs/specs/features/FT-003-*/`; `test/US-042-*` → `docs/specs/user-stories/US-042-*/`; `test/WI-018-*` → `docs/specs/work-items/WI-018-*/`.
+1. **Localiza el artefacto padre** descontando el prefijo `test/`: `test/FT-003-*` → `docs/specs/features/FT-003-*/`; `test/US-042-*` → `docs/specs/user-stories/US-042-*/`; `test/WI-018-*` → `docs/specs/work-items/WI-018-*/`. Para `US-`/`WI-`, si la carpeta no está en la ruta activa buscarla bajo `docs/specs/archive/`: en una rama `test/` el trabajo funcional del padre suele estar ya cerrado y archivado. Se lee igual; **no** se escribe dentro ni se recrea en la ruta activa.
 2. **Lee el índice** `[carpeta del padre]/test-cases/README.md` (columnas `TC · Perspectiva · Tipo de prueba · Prioridad · Criterio de aceptación`) y cada `TC-XXX-{slug}.md` del alcance que te pasen.
 3. **Traduce cada TC a código 1:1**, sin ampliarlo ni reinterpretarlo:
    - `Precondiciones` + `Datos de prueba` → *arrange*; `Pasos de ejecución` → *act*; `Resultado esperado del paso` y `Resultado esperado final` → *assert* sobre comportamiento observable.

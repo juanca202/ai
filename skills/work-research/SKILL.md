@@ -71,6 +71,14 @@ referenciados desde el `README.md`.
 | Artefacto vinculado `FT-XXX`            | `docs/specs/features/FT-XXX-{slug}/research/RS-XXX-{slug}/`                                                                                         |
 | Sin artefacto vinculado                 | `docs/specs/research/RS-XXX-{slug}/` (en la migración, en el **proyecto destino**; en el análisis de legado, en el proyecto que contiene el código) |
 
+> **Artefacto archivado.** Si la carpeta de un `US-XXX`/`TK-XXX`/`WI-XXX`/`RS-XXX` no aparece en su ruta activa, buscarla bajo `docs/specs/archive/` (`archive/user-stories/`, `archive/work-items/`, `archive/research/`) antes de darla por inexistente: `work-integrate` y `pr-create` la mueven ahí al cerrar el trabajo. **Nunca** recrearla en la ruta activa. Lo que se haga con el hallazgo depende de dónde escriba el flujo:
+>
+> - **Flujos que escribirían el `RS-XXX` dentro del `research/` del artefacto** — solo *Analizar decisiones pendientes*: **parar y avisar**. Un trabajo cerrado no tiene decisiones pendientes que resolver, y retomarlo exige desarchivarlo, decisión del usuario.
+> - **Flujos que lo leen como contexto y escriben fuera** (*Analizar issue*, que produce un dossier y un `WI-XXX` nuevo; *Investigación libre*): **continuar**. Leer un artefacto archivado es siempre legítimo — investigar un bug de algo ya entregado es el caso normal.
+> - ***Analizar test case*** **cambia de grupo según el padre:** con padre activo escribe en su `research/`; con padre **archivado** no escribe dentro pero **tampoco para** — lee el padre como contexto y guarda el `RS-XXX` en `docs/specs/research/`, la ruta que su propia tabla ya reserva para un TC sin padre local. Auditar el caso de prueba de un trabajo entregado es legítimo y frecuente; ver [`references/test-case/flow.md`](references/test-case/flow.md).
+>
+> Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+
 
 **Archivos adicionales por flujo:**
 
@@ -274,8 +282,9 @@ Qué leer y en qué orden lo define el archivo de referencia del flujo elegido. 
 comunes a todos:
 
 - **Leer antes de investigar.** Nunca investigar sobre un artefacto sin haberlo abierto.
-- **No duplicar investigaciones previas.** Revisar el `research/` correspondiente; si
-ya hay un RS sobre el mismo tema, mostrarlo al usuario y partir de él.
+- **No duplicar investigaciones previas.** Revisar el `research/` correspondiente —y, si
+la base es `docs/specs/research/`, también `docs/specs/archive/research/`—; si ya hay un
+RS sobre el mismo tema, mostrarlo al usuario y partir de él.
 - **Verificar contra el repo, no contra la memoria.** Stack, versiones y estructura se
 comprueban en los manifiestos y el código.
 - **Registrar lo que no existe.** «No hay ADR sobre esto», «no hay pruebas de este
@@ -349,9 +358,17 @@ es una hipótesis: se marca como tal y se verifica o se descarta.
 1. Determinar la **carpeta base** —la que contendrá las carpetas `RS-XXX-`*— según
   haya artefacto vinculado o no (ver [Salida estandarizada](#salida-estandarizada)):
    `<carpeta-del-artefacto>/research/` si lo hay, `docs/specs/research/` si no. La base
-   ya incluye el segmento `research/`: no anidarlo dos veces.
+   ya incluye el segmento `research/`: no anidarlo dos veces. Si el artefacto vinculado
+   resultó estar archivado, aquí ya no se llega: la regla de artefacto archivado obligó a
+   parar antes.
 2. Determinar el siguiente `RS-XXX` leyendo las carpetas `RS-XXX-*` existentes en esa
   base y tomando el mayor número + 1. Empezar en `001` si no hay ninguna.
+   - **Si la base es `docs/specs/research/`, escanear también `docs/specs/archive/research/`**
+     y tomar el mayor de las dos. `work-integrate` y `pr-create` archivan ahí las
+     investigaciones sueltas que se quedan sin artefacto activo que las referencie; su
+     número **sigue ocupado**, y mirar solo la ruta activa haría retroceder el contador y
+     reemitir un `RS-XXX` ya usado. Ver
+     [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 3. Construir el `{slug}`: descripción corta del tema en kebab-case (p. ej.
   `viabilidad-redis-cache`, `impacto-refactor-pagos`, `orm-sequelize-a-prisma`).
 4. Crear `<base>/RS-XXX-{slug}/` y escribir dentro el `README.md` con su estado
@@ -373,7 +390,9 @@ es una hipótesis: se marca como tal y se verifica o se descarta.
 ## Numeración y nomenclatura
 
 - **Secuencial** `XXX`**:** tres dígitos, por carpeta base de destino. Leer las carpetas
-`RS-XXX-*` existentes y tomar el siguiente número.
+`RS-XXX-*` existentes y tomar el siguiente número. Cuando la base es
+`docs/specs/research/`, el escaneo incluye `docs/specs/archive/research/`: archivar no
+libera el número.
 - **Slug:** kebab-case, descriptivo del tema. Máximo 5 palabras.
 - **Un RS por pregunta de investigación.** Si la sesión produce varias, generar un RS
 por cada una con su propio secuencial. *Excepción:* una migración con **varios

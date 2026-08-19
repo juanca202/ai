@@ -67,7 +67,7 @@ Rutas permitidas: assets/ (recursos propios de este work item) o docs/specs/tech
 -->
 
 - **Arquitectura:** {{enlace a ADR en `docs/adr/` si el work item depende de decisiones ya registradas; no inventar ADRs nuevos}}
-- **Documentación técnica:** {{enlace a `docs/specs/technical-docs/` si aplica}}
+- **Documentación técnica:** {{enlace a `docs/specs/technical-docs/[capability].md#<id>` si aplica. El ancla es el id del elemento en minúsculas (`#md-01`, `#api-04`), tal como lo devuelve `design-define`; no el título convertido a slug}}
 - **Diseño:** {{enlace a Figma, wireframe o imagen de alta fidelidad; obligatorio si el work item toca UI}}
 
 ## Migración (origen → destino)

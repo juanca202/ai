@@ -45,6 +45,8 @@ Cuando existan, cada BR-XX debe estar verificada por al menos un AC-XXX en la se
 Incluir únicamente enlaces a recursos ya almacenados; nunca pegar archivos, imágenes ni descripciones directamente aquí.
 Recursos válidos: mockups, wireframes, flujos, modelos, diagramas, especificaciones técnicas.
 Rutas permitidas: assets/ (recursos propios de esta historia) o docs/specs/technical-docs/ (documentación técnica compartida).
+Al enlazar un elemento de technical-docs, el ancla es el id en minúsculas: docs/specs/technical-docs/[capability].md#md-01,
+#api-04, #fl-02, #dg-01 — tal como lo devuelve design-define, nunca el título convertido a slug.
 -->
 
 - **Diseño / prototipo:** {{enlace markdown al diseño o prototipo}}

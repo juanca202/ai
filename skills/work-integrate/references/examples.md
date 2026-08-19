@@ -9,12 +9,12 @@ Referencias del skill **work-integrate**. Cubren los dos tipos de trabajo (`US-X
 **Ejemplo 1 — Historia de usuario (camino feliz)**
 
 - *Entrada:* Rama `feature/US-042-exportacion-csv`, working tree limpio, `progress.md` con tres TK todas en `Done`, reflog indica `Created from develop`.
-- *Salida:* `quality-check` → **✅ Aprobado** (persiste `.sdd-devkit/test-run.json`); `code-review` → **✅ Aprobado**; `trace-validate` → **✅ Aprobado** (reutiliza ese `test-run.json`, sin re-ejecutar pruebas); `git checkout develop` → `git merge --no-ff --no-commit feature/US-042-exportacion-csv` → `git rm` de `docs/audits/quality-check.md` y `docs/audits/code-review.md` → `git commit -m "Merge US-042: exportacion-csv"` → reporte: «Merged 7 commits de `feature/US-042-exportacion-csv` → `develop`. Commit de merge: `a1b2c3d`. HEAD en `develop`, working tree limpio. Los informes de las puertas quedaron en la rama del trabajo, no se integraron. La rama no fue borrada ni se hizo push.»
+- *Salida:* `quality-check` → **✅ Aprobado** (persiste `.sdd-devkit/test-run.json`); `code-review` → **✅ Aprobado**; `trace-validate` → **✅ Aprobado** (reutiliza ese `test-run.json`, sin re-ejecutar pruebas); archivado: `git mv docs/specs/user-stories/US-042-exportacion-csv/ docs/specs/archive/user-stories/`, más `RS-003-formatos-csv` (suelta, sin referencias activas) → `docs/specs/archive/research/`, y `git-commit` recoge el renombrado junto con los artefactos de las puertas; `git checkout develop` → `git merge --no-ff --no-commit feature/US-042-exportacion-csv` → `git rm` de `docs/audits/quality-check.md` y `docs/audits/code-review.md` → `git commit -m "Merge US-042: exportacion-csv"` → reporte: «Merged 7 commits de `feature/US-042-exportacion-csv` → `develop`. Commit de merge: `a1b2c3d`. HEAD en `develop`, working tree limpio. Los informes de las puertas quedaron en la rama del trabajo, no se integraron. La rama no fue borrada ni se hizo push.»
 
 **Ejemplo 2 — Work item (progress.md por carpeta del WI)**
 
 - *Entrada:* Rama `fix/WI-007-fuga-memoria`, working tree limpio, `docs/specs/work-items/WI-007-fuga-memoria/progress.md` con todas las unidades del WI en `Done`, reflog indica `Created from main`.
-- *Salida:* `git checkout main` → `git merge --no-ff --no-commit fix/WI-007-fuga-memoria` → `git rm` de los dos informes de `docs/audits/` → `git commit -m "Merge WI-007: fuga-memoria"` → reporte con commits integrados y hash de merge.
+- *Salida:* Puertas aprobadas → archivado a `docs/specs/archive/work-items/WI-007-fuga-memoria/` (el `RS-011` que enlaza se queda: `US-051`, aún activa, también lo referencia) → `git checkout main` → `git merge --no-ff --no-commit fix/WI-007-fuga-memoria` → `git rm` de los dos informes de `docs/audits/` → `git commit -m "Merge WI-007: fuga-memoria"` → reporte con commits integrados y hash de merge.
 
 **Ejemplo 3 — Unidad pendiente**
 
@@ -41,7 +41,7 @@ Referencias del skill **work-integrate**. Cubren los dos tipos de trabajo (`US-X
 **Ejemplo 6 — Conflicto en el merge**
 
 - *Entrada:* Verificaciones OK, rama base `main`, `git merge --no-ff --no-commit` produce conflictos en `src/app/Module.java`.
-- *Comportamiento:* El agente ejecuta `git merge --abort`, deja el repo en el estado previo, lista los archivos en conflicto y pide al usuario resolverlos manualmente. No reintenta.
+- *Comportamiento:* El agente ejecuta `git merge --abort`, deja el repo en el estado previo **al merge**, lista los archivos en conflicto y pide al usuario resolverlos manualmente. No reintenta. El commit del paso 11 —artefactos de las puertas más el archivado— sigue en la rama del trabajo y **no se revierte**: es parte de ella y se integrará cuando el merge prospere. Se menciona en el reporte.
 
 **Ejemplo 7 — Rama con prefijo inválido**
 
@@ -57,9 +57,14 @@ Referencias del skill **work-integrate**. Cubren los dos tipos de trabajo (`US-X
 
 ## Anti-patterns
 
-- **Correr este skill sobre una rama que ya se integró por un PR en la plataforma.** El delta contra la base es `0`, git responde *Already up to date*, y seguir adelante crea un commit que no es un merge y que solo borra los dos informes. El paso 10 lo corta antes.
+- **Correr este skill sobre una rama que ya se integró por un PR en la plataforma.** El delta contra la base es `0`, git responde *Already up to date*, y seguir adelante crea un commit que no es un merge y que solo borra los dos informes. El paso 9 lo corta antes — y por eso va delante del archivado: nada se mueve ni se commitea en una rama que solo había que dejar en paz.
 - Encadenar `pr-create` (PR de implementación) **y** este skill sobre el mismo trabajo: son rutas de integración alternativas, no fases sucesivas.
 - Hacer merge sin verificar `progress.md` o ignorando unidades no `Done`.
+- **Archivar antes de que pasen las tres puertas**, o antes de que `trace-validate` escriba su `trace-report.md` dentro de la carpeta del trabajo.
+- **Archivar después del merge**, dejando el movimiento en la rama base como un cambio suelto en vez de integrarlo con el resto del trabajo.
+- **Archivar en una rama `test/`** —incluidas `test/US-XXX` y `test/WI-XXX`—: la ejecución cierra unos `TC-XXX`, no el artefacto, y el paso 4 ni siquiera verificó las unidades funcionales del `progress.md`.
+- **Preguntar al usuario si desea archivar**: llegado ese punto es automático — lo que sí se hace es reportarlo.
+- **Archivar un `RS-XXX` suelto** sin comprobar antes que ningún artefacto activo lo referencia; o usar `mv` en vez de `git mv` y perder la detección de *rename*.
 - Buscar el `progress.md` de un WI en un archivo compartido `docs/specs/work-items/progress.md`; cada WI tiene su propio `progress.md` dentro de su carpeta `WI-XXX-[kebab-case]/`.
 - Hacer merge sin haber ejecutado las **tres** puertas de cierre (`quality-check`, `code-review`, `trace-validate`). En particular, `quality-check` y `code-review` son independientes: un **❌ Rechazado** o **⚠️ Incompleto** en cualquiera de los dos bloquea el merge, que solo procede con **✅ Aprobado** en ambos.
 - Unificar ambas puertas en una sola invocación o dar por hecha una a partir del veredicto de la otra — son skills independientes con veredictos propios.

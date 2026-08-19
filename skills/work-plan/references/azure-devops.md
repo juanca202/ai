@@ -54,7 +54,7 @@ En lugar del número secuencial calculado de los archivos existentes, usar el **
   ```
   Usar la URL que devuelva el MCP, o construirla como `https://dev.azure.com/<org>/<project>/_workitems/edit/<ado_id>` (con `<org>` y `<project>` de la configuración anterior).
 
-> **Nota de solapamiento:** al usar IDs de ADO, el check «ID disponible» se realiza igualmente — verificar que no exista ya `<PREFIJO>-<ado_id>-*.md` en la carpeta destino del tipo de plan (carpeta de la US para `TK-`, `docs/specs/work-items/` para `WI-`) antes de crear el archivo.
+> **Nota de solapamiento:** al usar IDs de ADO, el check «ID disponible» se realiza igualmente — verificar que no exista ya `<PREFIJO>-<ado_id>-*.md` en la carpeta destino del tipo de plan (carpeta de la US para `TK-`, `docs/specs/work-items/` para `WI-`) antes de crear el archivo. **Para `WI-`, el check cubre también `docs/specs/archive/work-items/`**: un WI archivado conserva su ID de ADO, y saltárselo produciría dos carpetas locales para un mismo work item del tracker. **Para `TK-` no se escanea el archivo**: el `TK-` es por historia, y si la US padre estuviera archivada el flujo ya habría parado antes de llegar aquí (Regla 1) — lo que se comprueba es la carpeta de la US **realmente resuelta**.
 
 ## Anti-patrones específicos de ADO
 

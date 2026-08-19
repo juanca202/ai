@@ -19,12 +19,17 @@ Antes de trabajar, evitar regenerar si nada cambió (ver [Reutilización del rep
                     git -C "$ROOT" status --porcelain -uall -- "${EXC[@]}"; \
                     git -C "$ROOT" diff                     -- "${EXC[@]}"; \
                   } | git hash-object --stdin )
-   SPEC_FINGERPRINT=$( { git -C "$ROOT" ls-files -s              -- "$ARTEFACTO"; \
-                         git -C "$ROOT" status --porcelain -uall -- "$ARTEFACTO"; \
-                         git -C "$ROOT" diff                     -- "$ARTEFACTO"; \
+   NO_REPORT=":(exclude)${ARTEFACTO%/}/trace-report.md"
+   SPEC_FINGERPRINT=$( { git -C "$ROOT" ls-files -s              -- "$ARTEFACTO" "$NO_REPORT"; \
+                         git -C "$ROOT" status --porcelain -uall -- "$ARTEFACTO" "$NO_REPORT"; \
+                         git -C "$ROOT" diff                     -- "$ARTEFACTO" "$NO_REPORT"; \
                        } | git hash-object --stdin )
    ```
    El primero cubre **código y tests** (excluye toda carpeta oculta, cualquier `docs/` y los `trace-report.md`; es el mismo de `quality-check` y `code-review`). El segundo cubre **los criterios y los `TC-XXX`** de este artefacto, que el primero deja fuera por vivir bajo `docs/specs/`.
+
+   > **`$NO_REPORT` es lo que hace que la idempotencia funcione.** El `trace-report.md` vive **dentro** de `$ARTEFACTO`, así que sin excluirlo el Paso 7 desplazaría el `SPEC_FINGERPRINT` **al escribir el propio reporte**: el hash grabado en la marca de pie sería el de *antes* de escribir, nunca coincidiría en la corrida siguiente, y el Paso 0 regeneraría siempre. La clave cubre las **entradas** del reporte (criterios y `TC-XXX`), no su salida — el mismo motivo por el que el `FINGERPRINT` lo excluye.
+   >
+   > **La exclusión es una ruta literal, no un glob — y la diferencia no es estética.** Un `':(exclude,glob)**/trace-report.md'` **no** funciona aquí: combinado con el pathspec positivo `"$ARTEFACTO"`, git excluye **todo** y las tres órdenes devuelven vacío. La clave pasaría a ser el hash del blob vacío — constante —, con lo que la idempotencia se dispararía **siempre** y editar un criterio nunca invalidaría el reporte: peor que no excluir nada. (El `EXC` del `FINGERPRINT` sí usa globs porque ahí **no hay pathspec positivo**: solo exclusiones sobre todo el árbol.) Por eso `NO_REPORT` se construye interpolando `$ARTEFACTO`. Si el artefacto es un **archivo suelto**, el reporte va a su lado y no dentro, así que la exclusión no casa con nada y es inocua.
 3. Si el `trace-report.md` **no existe** → no hay caché; continuar en el Paso 1.
 4. Si **existe**, leer su marca de pie `<!-- trace-validate:fingerprint=<hash> · spec=<hash> · generado=YYYY-MM-DD -->` y decidir:
    - **Coinciden los dos hashes**, el reporte **no** registra ejecución fallida, y el usuario **no** pasó `revalidate` → **no regenerar**: devolver el veredicto y el resumen del reporte existente, indicando que no hubo cambios desde `{{generado}}`. No reescribir el archivo ni delegar en `quality-check`. Fin.
@@ -39,6 +44,9 @@ Antes de trabajar, evitar regenerar si nada cambió (ver [Reutilización del rep
    - **WI:** `docs/specs/work-items/WI-XXX-[kebab]/README.md`.
    - **FT:** `docs/specs/features/FT-XXX-[slug]/README.md` (registro de funcionalidad ya implementada —inferida de código legacy o documentada como existente—; su cobertura responde si esa funcionalidad ya existente tiene pruebas).
    - **Cualquier otro artefacto:** la ruta que indique el usuario (buscarla en el repo si solo da un nombre). Si hay varios candidatos o la ruta no es clara, **preguntar**; no adivinar.
+
+   > **Si no está en la ruta activa, buscar en `docs/specs/archive/`** (`archive/user-stories/`, `archive/work-items/`) antes de darlo por inexistente: el trabajo pudo cerrarse e integrarse ya. Un artefacto archivado se traza igual —solo se lee— y el `trace-report.md` del Paso 7 se escribe **junto a él**, en su ruta de archive, no en la activa. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+
 2. Leer el documento y extraer **todos los criterios de aceptación** con su texto y su **identificador verbatim** — el formato es el que use el artefacto (`AC-012`, `AC-1`, `1.3`, `R-3`, `CA-07`…). **Nunca normalizarlo**: el identificador debe poder buscarse literalmente en el artefacto y en los TCs. Si algún criterio no tiene identificador, bloquear (ver «Cuándo bloquear» en `SKILL.md`).
 3. Si no existe la sección de criterios o no hay criterios explícitos, **parar** y reportar (ver «Cuándo bloquear» en `SKILL.md`). No continuar con supuestos.
 
@@ -180,11 +188,14 @@ Aplicar la tabla de «Veredicto» (en `SKILL.md`) sobre el conjunto de criterios
 
 ### Paso 7 — Entregar y guardar el reporte
 
-1. Guardar el reporte (sobrescribir si ya existe, salvo que el usuario pida conservar histórico):
-   - **US:** `docs/specs/user-stories/US-XXX-[nombre-corto]/trace-report.md`.
-   - **WI:** `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` (dentro de la carpeta del WI).
-   - **FT:** `docs/specs/features/FT-XXX-[slug]/trace-report.md` (dentro de la carpeta del feature).
+1. Guardar el reporte **dentro de la carpeta del artefacto tal como se resolvió en el Paso 1** —activa o archivada— (sobrescribir si ya existe, salvo que el usuario pida conservar histórico):
+   - **US:** `docs/specs/user-stories/US-XXX-[nombre-corto]/trace-report.md`, o `docs/specs/archive/user-stories/US-XXX-[nombre-corto]/trace-report.md` si la US está archivada.
+   - **WI:** `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` (dentro de la carpeta del WI), o su equivalente bajo `docs/specs/archive/work-items/`.
+   - **FT:** `docs/specs/features/FT-XXX-[slug]/trace-report.md` (dentro de la carpeta del feature; los features no se archivan).
    - **Cualquier otro artefacto:** `trace-report.md` **junto al artefacto** (en su carpeta, o al lado del archivo si es suelto). Confirmar la ruta con el usuario antes de escribir; si el artefacto es de solo lectura o externo al repo, no escribir y entregar el reporte en el chat.
+
+   > Escribir dentro de una carpeta archivada es la **excepción declarada** de este skill: el `trace-report.md` es un derivado del artefacto, no trabajo nuevo, y revalidar un trabajo ya integrado tiene que seguir siendo posible. Ningún otro skill del catálogo escribe ahí.
+
 2. **Grabar las dos claves** para la próxima comprobación de frescura (Paso 0): escribir al pie del reporte
    la marca `<!-- trace-validate:fingerprint=<FINGERPRINT> · spec=<SPEC_FINGERPRINT> · generado=YYYY-MM-DD -->`
    con los valores vigentes (los del Paso 0; el `FINGERPRINT` recalculado si hubo delegación). Esta marca se

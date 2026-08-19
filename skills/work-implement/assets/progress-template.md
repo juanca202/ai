@@ -18,6 +18,8 @@ Ubicacion y alcance por tipo (cada trabajo tiene su propio `progress.md` dentro 
 - Tarea de mantenimiento (`WI-XXX`): un `progress.md` por carpeta del WI (`docs/specs/work-items/WI-XXX-{{slug}}/progress.md`), específico de ese WI; el encabezado lleva su `WI-XXX` y la unidad es el `WI-XXX` completo (una sola entrada, sin sub-tareas).
 - Feature (`FT-XXX`): un `progress.md` por carpeta del feature (`docs/specs/features/FT-XXX-{{slug}}/progress.md`); el encabezado lleva su `FT-XXX` y la unidad es el `FT-XXX` completo (una sola entrada que cubre todos sus `TC-XXX`).
 - Casos de prueba (`TC-XXX`) sueltos: el `progress.md` vive en la carpeta del **artefacto padre** que los contiene (US, WI o FT); el encabezado lleva el ID de ese padre y hay **una unidad por cada `TC-XXX`** del alcance.
+
+Transversal: si el trabajo ya se archivo, su carpeta vive bajo `docs/specs/archive/` y su `progress.md` con ella. Ahi **solo se lee**: nunca se crea ni se edita, y nunca se recrea la carpeta en la ruta activa. Ver `skills/work-integrate/references/archive.md`.
 -->
 
 ## Unidades

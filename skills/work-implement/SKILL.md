@@ -55,10 +55,17 @@ La senal que distingue los tipos es **el artefacto que el usuario referencia** (
 
 | Tipo | Como se identifica | Que se implementa | Unidad de confirmacion | Flujo a leer |
 |------|--------------------|-------------------|------------------------|--------------|
-| **Tarea de historia de usuario** | El trabajo referencia una historia `US-XXX` o una tarea `TK-XXX` que cuelga de ella; el artefacto vive bajo `docs/specs/user-stories/`. | El plan tecnico de la TK (codigo de produccion + sus tests) | **Una `TK-XXX`** | `references/user-story-tasks.md` — **leer antes de implementar.** |
-| **Tarea de mantenimiento** | El trabajo referencia un `WI-XXX` (bug, refactor, deuda tecnica, dependencias, operativa) **sin historia asociada**; vive bajo `docs/specs/work-items/`. | El plan del WI (codigo de produccion + sus tests) | **El `WI-XXX` completo** | `references/work-items.md` — **leer antes de implementar.** |
+| **Tarea de historia de usuario** | El trabajo referencia una historia `US-XXX` o una tarea `TK-XXX` que cuelga de ella; el artefacto vive bajo `docs/specs/user-stories/` (o su equivalente archivado, ver la nota de abajo). | El plan tecnico de la TK (codigo de produccion + sus tests) | **Una `TK-XXX`** | `references/user-story-tasks.md` — **leer antes de implementar.** |
+| **Tarea de mantenimiento** | El trabajo referencia un `WI-XXX` (bug, refactor, deuda tecnica, dependencias, operativa) **sin historia asociada**; vive bajo `docs/specs/work-items/` (o su equivalente archivado, ver la nota de abajo). | El plan del WI (codigo de produccion + sus tests) | **El `WI-XXX` completo** | `references/work-items.md` — **leer antes de implementar.** |
 | **Caso de prueba** | El trabajo referencia uno o varios `TC-XXX`; viven en la carpeta `test-cases/` de un artefacto padre (`US-XXX`, `WI-XXX` o `FT-XXX`). | **Las pruebas automatizadas de esos `TC-XXX`** | **Un `TC-XXX`** | `references/test-cases.md` — **leer antes de implementar.** |
 | **Feature** | El trabajo referencia un `FT-XXX` — funcionalidad **ya implementada** registrada bajo `docs/specs/features/`. | **Las pruebas de todos los `TC-XXX` asociados a los `AC-XXX` que contiene el feature** — nunca funcionalidad nueva | **El `FT-XXX` completo** | `references/test-cases.md` — **leer antes de implementar.** |
+
+> **Artefacto archivado.** Al cerrar un trabajo, `work-integrate` y `pr-create` mueven su carpeta a `docs/specs/archive/user-stories/` o `docs/specs/archive/work-items/`. Si el artefacto referenciado no aparece en su ruta activa, **buscarlo ahi antes de darlo por inexistente** — y **nunca** crear la carpeta en la ruta activa por no haberla encontrado: este skill hace «leer o crear» el `progress.md`, asi que el descuido produciria una carpeta fantasma con un identificador ya usado. Que se haga con el hallazgo depende del modo:
+>
+> - **En los cuatro tipos de implementacion** (US/TK, WI, TC, FT): **parar y avisar**. Implementar trabajo nuevo sobre un artefacto ya cerrado exige desarchivarlo primero —mover su carpeta de vuelta—, y eso lo decide el usuario.
+> - **En [modo correccion](#modo-correccion-delegado-desde-quality-check)**: un artefacto archivado es **esperable**, no un error — la correccion llega justo en la fase de cierre, cuando el archivado ya se commiteo. Continuar con la correccion, pero **sin escribir dentro de la carpeta archivada**: la nota de retrabajo va en el informe de `quality-check`, no en el `progress.md` archivado.
+>
+> Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
 > **Modo correccion (entrada delegada desde [`quality-check`](../quality-check/SKILL.md#corrección-de-fallos)).** Ademas de los cuatro tipos, este skill acepta una **correccion puntual delegada** por `quality-check` cuando un check falla en el cierre y el usuario autoriza el arreglo. No es un tipo nuevo: es un modo acotado sobre el **artefacto que ya se implemento en esta rama** — `US-XXX`, `WI-XXX`, una automatizacion de pruebas (`FT-XXX` / `TC-XXX` en rama `test/`), o un artefacto externo al plugin. Ver [Modo correccion](#modo-correccion-delegado-desde-quality-check).
 
@@ -316,7 +323,9 @@ relevante y los archivos implicados.
   si no se puede atribuir a una unidad), indicando el check que fallo y que fue retrabajo de cierre. **No**
   se inventan estados: los validos siguen siendo `Pending`, `In Progress`, `Done`, y una unidad ya en
   `Done` permanece en `Done`. **Si el artefacto es externo y no hay `progress.md`**, no crearlo: devolver
-  esa misma nota en la respuesta a `quality-check`.
+  esa misma nota en la respuesta a `quality-check`. **Si el artefacto esta archivado** (su carpeta vive bajo
+  `docs/specs/archive/`), tampoco escribir dentro: mismo trato — la nota va en la respuesta a
+  `quality-check`, que la recoge en su informe.
 - **Sin commit automatico ni handoff:** al terminar, devolver el control a `quality-check`, que verifica el
   arreglo re-ejecutando el check, recalcula el fingerprint y reinicia su corrida. Este skill no re-ejecuta
   la bateria completa ni decide si el cierre continua.
@@ -334,7 +343,9 @@ En esos casos, **no seguir intentando ni improvisar un arreglo parcial**. Devolv
 fallando, **el motivo** (fuera de alcance / discrepancia de especificacion / preexistente) y **a que skill
 se escalo**. `quality-check` no debe reintentar la delegacion sobre ese mismo fallo: le corresponde
 reportarlo al usuario en su informe y emitir el veredicto que aplique (`❌ Rechazado`), dejando el cierre
-bloqueado hasta que el escalado se resuelva. Anotar tambien la decision como **nota** en `progress.md`.
+bloqueado hasta que el escalado se resuelva. Anotar tambien la decision como **nota** en `progress.md` —
+salvo que el artefacto sea externo o este archivado, en cuyo caso la nota viaja en la respuesta a
+`quality-check` y no se escribe dentro de `docs/specs/archive/`.
 
 ---
 

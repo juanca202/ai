@@ -1,6 +1,6 @@
 ---
 name: work-define
-description: Crear o actualizar una Historia de Usuario. Usar cuando se necesite crear, documentar, actualizar o estandarizar historias de usuario. Activar cuando el usuario solicite una nueva historia de usuario, describa una necesidad funcional, pida refinar requisitos, estructurar funcionalidades o alinear historias existentes a las convenciones del proyecto.
+description: Crear o actualizar una Historia de Usuario. Usar cuando se necesite crear, documentar, actualizar o estandarizar historias de usuario. Activar cuando el usuario solicite una nueva historia de usuario, describa una necesidad funcional, pida refinar requisitos, estructurar funcionalidades o alinear historias existentes a las convenciones del proyecto. El ID de una US archivada en docs/specs/archive/ sigue ocupado, y una US archivada no se actualiza sin desarchivarla antes.
 license: MIT
 ---
 
@@ -44,6 +44,9 @@ El idioma de la US (criterios de aceptación, INVEST, DoR y texto natural) se de
 | Archivos de apoyo     | `docs/specs/user-stories/US-XXX-[nombre-corto]/assets/`                                                              |
 | Documentación técnica | `docs/specs/technical-docs/[capability].md` (propiedad del skill `design-define`; este skill solo la referencia, nunca la crea ni edita directamente) |
 | Glosario              | `docs/specs/glossary.md` (opcional)                                                                                  |
+| US ya archivada (fallback) | `docs/specs/archive/user-stories/US-XXX-[nombre-corto]/`, con la misma estructura interna                     |
+
+> **Las US archivadas siguen contando.** Al cerrar una historia, `work-integrate` y `pr-create` mueven su carpeta a `docs/specs/archive/user-stories/`. Eso **no libera su ID** ni la hace invisible: el siguiente `US-XXX` libre se calcula sobre las dos rutas, y el flujo *Actualizar* la busca ahí cuando no está en la activa. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
 
 ### Convenciones del nombre de carpeta
@@ -68,7 +71,7 @@ Antes de crear o editar cualquier US, el agente debe tener clara la siguiente in
 | **Idioma de preferencia**                       | Ver [Resolución de idioma](#resolución-de-idioma) | Preguntar al usuario; no decidir el idioma por cuenta propia                          |
 | **Referencias de diseño** (solo US de UI)       | Figma, prototipos u otros enlaces aportados por el usuario                               | Sin ellas la historia no puede declararse Ready                                       |
 | **Dependencias con otras US o sistemas**        | Indicadas por el usuario o inferibles del contexto                                       | Preguntar; afectan las dimensiones I y E de INVEST                                    |
-| **ID de la US**                                 | Proporcionado por el usuario                                                             | Inferir el siguiente libre revisando carpetas `US-`* en `docs/specs/user-stories/`  |
+| **ID de la US**                                 | Proporcionado por el usuario                                                             | Inferir el siguiente libre revisando carpetas `US-`* en `docs/specs/user-stories/` **y en `docs/specs/archive/user-stories/`** (archivar no libera el ID) |
 | **Repositorios afectados**                      | Proporcionados por el usuario o inferibles del repo                                      | Sin ellos la historia no puede declararse Ready                                       |
 
 

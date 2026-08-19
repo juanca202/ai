@@ -67,13 +67,14 @@ Resolver la intención por este orden, quedándose con la primera fuente disponi
 
 | Fuente | Cómo obtenerla |
 |--------|----------------|
-| **Artefacto del plugin** | `US-XXX` / `WI-XXX` / `FT-XXX` derivado del prefijo de rama + ID (`feature/US-042-…`, `fix/WI-007-…`, `test/FT-003-…`); leer su `README.md` y sus criterios de aceptación. |
+| **Artefacto del plugin** | `US-XXX` / `WI-XXX` / `FT-XXX` derivado del prefijo de rama + ID (`feature/US-042-…`, `fix/WI-007-…`, `test/FT-003-…`); leer su `README.md` y sus criterios de aceptación. Si la carpeta no está en la ruta activa, buscarla bajo `docs/specs/archive/` antes de descartarla (ver la regla siguiente). |
 | **Cualquier otro documento de especificación** | La ruta o nombre que indique el usuario, o el que la rama/PR referencie: un spec suelto en el repo, un documento de otra herramienta o formato. Leerlo completo antes de revisar. |
 | **Ticket de un tracker externo** | El ID en la rama, el commit o el título del PR (`PROJ-1234`). Si el contenido no es accesible desde aquí, **pedírselo al usuario**; no inventarlo. |
 | **Sin documento** | Deducirla de la rama, los mensajes de commit y la descripción del PR. Es una base más débil: decirlo en el informe. |
 
 Reglas:
 
+- **Un artefacto archivado sigue siendo la fuente de intención.** `work-integrate` y `pr-create` mueven la carpeta de un trabajo cerrado a `docs/specs/archive/user-stories/` o `docs/specs/archive/work-items/`. Ocurre de forma rutinaria al revisar una rama cuyo archivado ya se commiteó, así que **buscar ahí antes de bajar a la siguiente fuente**: dar por «sin documento» un artefacto que sí existe degradaría la dimensión 1 a `⚠️ Incompleto` sin motivo. Solo se lee. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 - **La ausencia de artefacto no bloquea la revisión.** Las dimensiones 2 y 3 (arquitectura/diseño y feedback) se evalúan igual sobre cualquier diff, en cualquier repo, sin `docs/specs/` ni convención de ramas.
 - **Sí condiciona la dimensión 1.** Si la intención no es determinable y el usuario no la aporta, no inventarla ni inferirla del propio código —eso es circular, el código siempre "cumple" consigo mismo—: marcar esa dimensión como no evaluada y emitir **`⚠️ Incompleto`**.
 - **Los criterios se citan verbatim.** Sea cual sea el formato del identificador (`AC-012`, `1.3`, `R-3`, `CA-07`), se usa **tal como está escrito** en el artefacto, sin normalizar — mismo contrato que `test-define` y `trace-validate`.

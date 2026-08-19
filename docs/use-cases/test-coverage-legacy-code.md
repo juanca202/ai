@@ -41,7 +41,7 @@ flowchart TD
 6. **Condición — ¿veredicto aprobado?**
    - **No**: `quality-check` delega la corrección en `work-implement` (tipo **feature**, sobre el `FT-XXX`/`TC-XXX` de su rama `test/`), que **automatiza las pruebas documentadas** — nunca escribe funcionalidad nueva, el código de producción solo se toca de forma correctiva y con decisión explícita del usuario. Tras el arreglo, `quality-check` recalcula el fingerprint y **reinicia la corrida completa**. Si `work-implement` devuelve «corrección no aplicada» (p. ej. una discrepancia real entre el `TC-XXX` y el código, un posible bug), la iteración se detiene, el veredicto queda `❌ Rechazado` y se escala al motivo señalado (`test-define` o el diagnóstico de bug vía `work-research`).
    - **Sí**: continúa al cierre.
-7. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable. `pr-create` ejecuta **internamente** `code-review` (calidad de las pruebas escritas, no su ejecución), `trace-validate` (cobertura funcional: cada `AC-XXX` del feature ↔ sus `TC-XXX` ↔ artefactos de prueba) y una corrida final de `quality-check` — no son pasos aparte de este flujo.
+7. **Cierre**: creación de Pull/Merge Request (`pr-create`) hacia el entregable. `pr-create` ejecuta **internamente** `code-review` (calidad de las pruebas escritas, no su ejecución), `trace-validate` (cobertura funcional: cada `AC-XXX` del feature ↔ sus `TC-XXX` ↔ artefactos de prueba) y una corrida final de `quality-check` — no son pasos aparte de este flujo. **Aquí no hay archivado:** la rama es `test/` sobre un `FT-XXX`, y un feature no se archiva — la automatización cierra una ejecución, no el artefacto.
 
 ## Cuándo no aplica este caso
 

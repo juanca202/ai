@@ -13,6 +13,7 @@ Referencia del skill `trace-validate`. Casos de uso y errores a evitar.
 **Ejemplo 2 — Work item con criterios de aceptación**
 - *Entrada:* «Valida la cobertura de WI-007.»
 - *Comportamiento:* lee `docs/specs/work-items/WI-007-[kebab-case]/README.md`, extrae los criterios de la sección **## Criterios de aceptación** (con el identificador que use el documento, sin normalizar), mapea tests, obtiene los resultados vía `quality-check`, guarda `docs/specs/work-items/WI-007-[kebab-case]/trace-report.md` y emite el veredicto.
+- *Variante — WI ya archivado:* si `WI-007` no está en `docs/specs/work-items/`, se resuelve en `docs/specs/archive/work-items/WI-007-[kebab-case]/` y todo el flujo trabaja sobre esa carpeta, incluido el `trace-report.md` de salida. Revalidar un trabajo ya integrado es un caso normal, no un error.
 
 **Ejemplo 3 — Trabajo sin criterios**
 - *Entrada:* «Genera la matriz de cobertura de US-009» y el README no tiene criterios de aceptación, o los tiene sin identificador.

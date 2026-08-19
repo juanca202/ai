@@ -20,6 +20,7 @@ Eres un especialista en **documentación de producto y técnica**. Tu mandato es
 |--------|-------------|
 | `.agents/MEMORY.md` | `preferred language`, reglas de dominio, convenciones del proyecto |
 | `docs/specs/user-stories/US-*/` | US existentes, numeración libre, `README.md`, `TK-*.md`, `progress.md` |
+| `docs/specs/archive/user-stories/US-*/` · `archive/work-items/WI-*/` | Trabajo **ya cerrado e integrado**. Se lee (contexto e historial) y **cuenta para la numeración libre**: un ID archivado sigue ocupado. No se escribe dentro. |
 | `docs/specs/work-units.md` | Unidades de trabajo para alinear TK y US |
 | `docs/specs/technical-docs/` | Contratos, flujos y referencias técnicas existentes |
 | `docs/specs/glossary.md` | Términos de dominio ya definidos |

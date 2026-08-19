@@ -26,8 +26,8 @@ Antes de crear archivos, verificar las siguientes condiciones. Si alguna falla, 
 
 **¿Qué verificar?**
 
-- **Duplicado de ID:** si el usuario proporciona `US-XXX`, confirmar que esa carpeta no existe en `docs/specs/user-stories/`.
-- **Solapamiento de alcance:** revisar los títulos y descripciones de otras US para detectar si el actor + valor + alcance ya está cubierto por una historia existente.
+- **Duplicado de ID:** si el usuario proporciona `US-XXX`, confirmar que esa carpeta no existe **ni en `docs/specs/user-stories/` ni en `docs/specs/archive/user-stories/`**. Un ID archivado sigue ocupado: reutilizarlo dejaría dos historias distintas bajo el mismo identificador y volvería ambiguo todo lo que las referencia (ramas, commits, work items del tracker). Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+- **Solapamiento de alcance:** revisar los títulos y descripciones de otras US —las de `docs/specs/user-stories/` **y las de `docs/specs/archive/user-stories/`**— para detectar si el actor + valor + alcance ya está cubierto por una historia existente. Una US archivada es trabajo **ya entregado**: si el alcance coincide, redefinirlo es duplicarlo, y hay que decírselo al usuario.
 - **INVEST parcialmente valorable:** si la información recibida no permite valorar todas las dimensiones, la historia **sí puede crearse** pero con `Estado: Draft` y las lagunas documentadas en Observaciones. Solo es un bloqueante si el actor o el valor de negocio son completamente desconocidos.
 - **Rama de trabajo actual:** determinar la rama git activa (`git branch --show-current`). Si coincide con el patrón de rama de implementación de una US, un WI o una automatización de pruebas (`feature/US-XXX-*`, `feature/WI-XXX-*`, `fix/WI-XXX-*`, `chore/WI-XXX-*`, `refactor/WI-XXX-*`, `test/*`), crear la historia nueva ahí la mezclaría con ese trabajo en curso. No bloquea automáticamente — ver manejo específico abajo.
 
@@ -59,7 +59,7 @@ Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **De
 ## Flujo: Crear una historia nueva
 
 1. **Fijar el ID y nombre de carpeta**
-  - Usar el `US-XXX` indicado por el usuario o inferir el siguiente libre listando carpetas `US-*` en `docs/specs/user-stories/`.
+  - Usar el `US-XXX` indicado por el usuario o inferir el siguiente libre listando carpetas `US-*` **en `docs/specs/user-stories/` y en `docs/specs/archive/user-stories/`**, tomando el mayor de las dos: archivar no libera el número.
   - Proponer el `nombre-corto` en kebab-case; validar con el usuario si hay ambigüedad.
   - Crear la carpeta `US-XXX-[nombre-corto]/` y `assets/` si habrá archivos vinculados.
 2. **Escribir el** `README.md` usando `assets/user-story-template.md` como molde:
@@ -79,8 +79,8 @@ Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **De
 3. **Documentación técnica** (delegada a `design-define`)
   - **Detectar la necesidad:** si el requerimiento define o modifica **flujos, modelos de datos o APIs** (nuevos o existentes), la especificación técnica de esos elementos debe existir en `docs/specs/technical-docs/`. También aplica si el usuario la pide explícitamente.
   - **Nunca crear ni editar documentos técnicos desde este skill.** Delegar mediante un **subagente que invoque `/design-define`**, pasándole: el texto relevante de la US (descripción, reglas, criterios), la capability inferida si se conoce, la ruta del `README.md` de la US y el idioma resuelto. El grilling técnico (tipos, contratos, ramas de flujo) es responsabilidad de `design-define`.
-  - **Enlazar las referencias devueltas:** el subagente responde con la lista de elementos creados/actualizados (ruta + ancla, p. ej. `docs/specs/technical-docs/facturacion.md#api-01-crear-factura`). Agregarlas a la sección **Referencias** del `README.md` de la US. Si el subagente reporta lagunas técnicas pendientes, reflejarlas en Observaciones de la US.
-  - **No integrarla en la descripción funcional** de la US. Además de Referencias, solo puede citarse desde las secciones INVEST u Observaciones del DoR para justificar complejidad, dependencias o restricciones técnicas que condicionan algún criterio (p. ej. *«Ver* `technical-docs/facturacion.md#api-01-crear-factura` *— justifica la estimación de la dimensión E»*).
+  - **Enlazar las referencias devueltas:** el subagente responde con la lista de elementos creados/actualizados (ruta + ancla, p. ej. `docs/specs/technical-docs/facturacion.md#api-01`). Agregarlas a la sección **Referencias** del `README.md` de la US **copiando el ancla tal cual**: es siempre `#<id en minúsculas>`, la que `design-define` emite de forma explícita en el documento. No recomponerla a partir del nombre del elemento (`#api-01-crear-factura` no existe) ni «mejorarla». Si el subagente reporta lagunas técnicas pendientes, reflejarlas en Observaciones de la US.
+  - **No integrarla en la descripción funcional** de la US. Además de Referencias, solo puede citarse desde las secciones INVEST u Observaciones del DoR para justificar complejidad, dependencias o restricciones técnicas que condicionan algún criterio (p. ej. *«Ver* `technical-docs/facturacion.md#api-01` *— justifica la estimación de la dimensión E»*).
 4. **Glosario** (si aplica)
   - Si aparecen términos de dominio nuevos, crear o reutilizar entrada en `docs/specs/glossary.md` con definición breve en contexto producto/dominio.
 5. **Cierre**
@@ -98,7 +98,7 @@ Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **De
 
 ## Flujo: Actualizar una historia existente
 
-1. **Identificar el archivo** — por ID, nombre-corto o título.
+1. **Identificar el archivo** — por ID, nombre-corto o título. Si no aparece en `docs/specs/user-stories/`, buscarlo bajo `docs/specs/archive/user-stories/` antes de darlo por inexistente. **Si está archivado, parar y avisar:** la historia ya se cerró e integró, y modificarla exige desarchivarla primero —mover su carpeta de vuelta—, decisión que es del usuario. **Nunca** crear una carpeta nueva en la ruta activa por no haber encontrado la historia.
 2. **Leer el** `README.md` **actual** completo antes de editar.
 3. **Aplicar los cambios** solicitados por el usuario. Reglas invariantes:
   - Si el cambio afecta criterios de aceptación: **mantener siempre los ids `AC-XXX` existentes**, también al reordenar o eliminar (ver la regla de inmutabilidad arriba); los nuevos toman el siguiente secuencial libre. Conservar o corregir la categoría entre paréntesis.

@@ -200,11 +200,15 @@ Solo si el usuario autorizó corregir. Depende de si hay un **artefacto de traba
 | `test/US-042-…` \| `test/WI-018-…` | los `TC-XXX` de ese padre | la carpeta de la US o el WI |
 | Otro prefijo o convención (`PROJ-1234`, `ticket/…`, ruta a un spec) | el artefacto externo | la que indique el usuario, o ninguna |
 
+> **Buscar también en `docs/specs/archive/`.** Al cerrar un trabajo, `work-integrate` y `pr-create` mueven su carpeta a `docs/specs/archive/user-stories/` o `docs/specs/archive/work-items/`. Si no está en la ruta activa, mirar ahí antes de concluir que «no hay artefacto» y dejar de delegar en `work-implement` — y **nunca** crear la carpeta en la ruta activa por no haberla encontrado. Este skill **solo lee** la carpeta (para resolver el artefacto y decidir si delega); no escribe nada dentro. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+>
+> **Cuándo se da.** En el flujo normal el archivado ocurre **después** de esta puerta (`work-integrate` paso 10, `pr-create` Paso 5), así que aquí el artefacto suele estar todavía en la ruta activa. Se lo encuentra archivado al **repetir** el cierre tras una corrección, o al correr `quality-check` sobre trabajo ya integrado — dos situaciones normales, no excepcionales.
+>
 > **Una rama `test/` NO es una rama suelta.** Nace en `work-implement` (`references/test-cases.md`, Paso 1) siempre asociada a un artefacto padre y con su `progress.md`, y `work-integrate` la trata como trabajo integrable de pleno derecho. Se resuelve con el mismo mecanismo que `feature/` o `fix/`. Ahí el fallo típico es **una prueba en rojo**, y el skill que sabe escribir esa prueba es `work-implement` (tipos `TC-XXX` / `FT-XXX`) — delegar es especialmente importante en este caso, no la excepción.
 
 Si no se resuelve un artefacto del plugin, **comprobar antes si hay uno externo** (ver [Artefactos externos al plugin](#artefactos-externos-al-plugin)); solo si tampoco lo hay, **no hay artefacto**: no delegar ni inventarlo. Si hay ambigüedad (varios candidatos), preguntar al usuario antes de delegar. Esta es también la señal que distingue los dos contextos del punto 1.
 
-**Qué se le pasa a `work-implement`** al delegar: el artefacto en curso (`US-XXX` / `WI-XXX` / `FT-XXX` / `TC-XXX`), el check que falló, el comando exacto, la salida de error relevante y los archivos implicados. La corrección se atribuye a ese artefacto y se anota en su `progress.md` como nota de retrabajo; `work-implement` aplica su propio criterio en su [Modo corrección](../work-implement/SKILL.md#modo-correccion-delegado-desde-quality-check) — un modo acotado, sin ritmo por unidad y sin exigir `Estado: Ready` ni working tree limpio.
+**Qué se le pasa a `work-implement`** al delegar: el artefacto en curso (`US-XXX` / `WI-XXX` / `FT-XXX` / `TC-XXX`), el check que falló, el comando exacto, la salida de error relevante y los archivos implicados. La corrección se atribuye a ese artefacto y se anota en su `progress.md` como nota de retrabajo — **salvo que el artefacto esté archivado**, en cuyo caso la nota va en este informe y no se escribe dentro de `docs/specs/archive/` (ver la regla de artefacto archivado en [`work-implement`](../work-implement/SKILL.md#seleccion-del-tipo-de-implementacion)); `work-implement` aplica su propio criterio en su [Modo corrección](../work-implement/SKILL.md#modo-correccion-delegado-desde-quality-check) — un modo acotado, sin ritmo por unidad y sin exigir `Estado: Ready` ni working tree limpio.
 
 **Aplica igual a fallos de pruebas** (unit, integración, e2e) que a fallos de tipado, linter o build: en ambos casos hay que escribir o ajustar código, que es justo lo que hace `work-implement`.
 
@@ -328,8 +332,8 @@ difiere, hubo cambios y es **obsoleta** (re-ejecutar).
 >
 > **Nada de `HEAD` — y es deliberado.** La receta **no** referencia `HEAD` en ningún punto, porque `HEAD` no
 > admite pathspec: cualquier commit lo mueve, incluidos los que solo tocan rutas excluidas. Con `git rev-parse HEAD`
-> en la receta, el commit de los propios artefactos que hace el cierre (`work-integrate` paso 9, `pr-create`
-> paso 5) caducaba **las tres claves a la vez** y obligaba a re-ejecutar toda la batería de pruebas — la
+> en la receta, el commit de los propios artefactos que hace el cierre (`work-integrate` paso 11, `pr-create`
+> paso 6) caducaba **las tres claves a la vez** y obligaba a re-ejecutar toda la batería de pruebas — la
 > idempotencia no sobrevivía al flujo que la usa. `ls-files -s` da la misma señal (el SHA de cada blob
 > trackeado) **respetando los pathspecs**, y de paso funciona en un repo **sin ningún commit**, donde
 > `git rev-parse HEAD` aborta con `fatal: bad revision`.
