@@ -16,25 +16,23 @@ Encaja al final de los ciclos **work-define** → **work-plan** → **work-imple
 
 ## Cómo preguntar al usuario
 
-Cuando este skill indique **preguntar, pedir, confirmar, validar o sugerir** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** que ofrezca el cliente (la que renderiza opciones tappables o un selector de respuesta) en lugar de redactar la pregunta como prosa libre. Reglas:
+Mecanismo, ritmo y fallback compartidos: [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md).
 
-- **Una pregunta por turno** cuando sea posible; máximo tres preguntas en un mismo bloque.
-- **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita categorías; usar entrada libre solo si no hay forma razonable de enumerar opciones.
-- **No repreguntar** lo que ya está respondido en el contexto, en `.agents/MEMORY.md` o en el `progress.md` del trabajo.
-- **Una sola tanda al inicio** para resolver lagunas antes de cualquier operación git (trabajo asociado a la rama, carpeta ambigua, rama base); no ir descubriendo huecos turno a turno. **Única excepción:** la confirmación del archivado (paso 10), que por fuerza va después de las puertas — no puede plantearse al inicio porque hasta entonces no se sabe si el trabajo llega a cerrarse ni qué se movería. **Rama base ambigua:** listar los candidatos detectados como opciones tappables (p. ej. `develop`, `main`, `release/2026.q2`); no proponer un default implícito.
-- **Fallback**: si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
+Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar*, *validar* o *sugerir* algo al usuario, asume ese mecanismo; no se repite allí.
 
-Cada sección posterior que diga *preguntar al usuario*, *validar con el usuario*, *confirmar* o *sugerir al usuario* asume este mecanismo; no se vuelve a repetir.
+**La tanda inicial va antes de cualquier operación git** y cubre: trabajo asociado a la rama, carpeta ambigua y rama base. No empezar a mover, mergear ni archivar con lagunas abiertas.
+
+**Excepción al ritmo:** la confirmación del archivado (paso 10) va por fuerza después de las puertas — hasta entonces no se sabe si el trabajo llega a cerrarse ni qué se movería.
+
+**Rama base ambigua:** listar los candidatos detectados como opciones tappables (p. ej. `develop`, `main`, `release/2026.q2`); no proponer un default implícito.
 
 ---
 
 ## Resolución de idioma
 
-Orden canónico compartido con el resto del ciclo de trabajo. Detenerse en el primer paso que aplique:
+Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
 
-1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Si no existe esa línea pero hay claves legacy (`language:`, `idioma:`, `Project language:`), usarlas solo como fallback al leer MEMORY antiguo.
-2. **Idioma del turno del usuario** (mensaje actual).
-3. **Preguntar al usuario** qué idioma prefiere y persistir la respuesta en `.agents/MEMORY.md` con `preferred language: <código>`.
+El idioma resuelto aplica a los mensajes al usuario y a las notas que este skill escribe en `progress.md`.
 
 ---
 
@@ -56,11 +54,15 @@ El tipo se determina por el **identificador presente en el nombre de rama**. Cad
 
 ## Ubicación de archivos
 
+Layout completo del harness e identificadores: [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md). Este skill es el que **ejecuta** el archivado; su contrato para el resto del catálogo está en [`references/archive.md`](references/archive.md).
+
+Lo que este skill lee y mueve:
+
 | Artefacto | Ruta |
 |-----------|------|
 | Carpeta / documento del trabajo | US: `docs/specs/user-stories/US-XXX-[nombre-corto]/` · WI: `docs/specs/work-items/WI-XXX-[kebab-case]/` · FT: `docs/specs/features/FT-XXX-[slug]/` |
-| Progreso del trabajo | US: `…/US-XXX-[nombre-corto]/progress.md` · WI: `docs/specs/work-items/WI-XXX-[kebab-case]/progress.md` · FT: `docs/specs/features/FT-XXX-[slug]/progress.md` |
-| Unidades referenciadas | US: `…/US-XXX-[nombre-corto]/TK-XXX-[kebab-case].md` · WI: el propio `…/WI-XXX-[kebab-case]/README.md` · pruebas: `…/test-cases/TC-XXX-[slug].md` |
+| Progreso del trabajo | `progress.md` dentro de esa carpeta |
+| Unidades referenciadas | US: `…/TK-XXX-[kebab-case].md` · WI: el propio `…/README.md` · pruebas: `…/test-cases/TC-XXX-[slug].md` |
 | Destino del archivado (paso 10) | US: `docs/specs/archive/user-stories/US-XXX-[nombre-corto]/` · WI: `docs/specs/archive/work-items/WI-XXX-[kebab-case]/` · investigaciones sueltas huérfanas: `docs/specs/archive/research/RS-XXX-[slug]/` |
 
 ---
@@ -202,3 +204,12 @@ Cargar bajo demanda; el contenido íntegro vive en estos archivos:
 | Flujo de manejo de conflictos, flujo de rama base ambigua, checklist detallado antes de mergear | [references/flows.md](references/flows.md) |
 | Archivado del artefacto (paso 10): cuándo aplica y cuándo no, destinos, `git mv` y guards, investigaciones `RS-XXX` sueltas huérfanas, reparación de enlaces, formato del reporte, anti-patrones | [references/archive.md](references/archive.md) |
 | Ejemplos por tipo (US/WI: camino feliz, unidad pendiente, base ambigua, working tree sucio, conflicto, prefijo inválido), anti-patrones, y notas (handoffs del ciclo, `progress.md`, estados, detección de rama base, sin push intencional, mensaje al usuario) | [references/examples.md](references/examples.md) |
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+

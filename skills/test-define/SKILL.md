@@ -21,21 +21,33 @@ Carga el archivo correspondiente cuando vayas a ejecutar la tarea; el detalle í
 | Integración condicional con un sistema de seguimiento externo: detalle específico de cada sistema (creación de work items, campos, IDs, vinculación al artefacto padre) | `references/<sistema>.md` (p. ej. [`references/azure-devops.md`](references/azure-devops.md) para Azure DevOps) — leer solo si el repo está vinculado (ver [Integración con un sistema de seguimiento externo](#integración-con-un-sistema-de-seguimiento-externo-condicional)) |
 | Estructura del archivo de un caso de prueba | [`assets/test-case-template.md`](assets/test-case-template.md) |
 
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/alm/azure-devops.md`](../../reference/alm/azure-devops.md): **Azure DevOps** — activación, MCP, URL, límites, sincronización. *Solo si `MEMORY.md` declara `work_item_tracking:`.*
+
 ---
 
 ## Cómo preguntar al usuario
 
-Toda pregunta al usuario va por la **herramienta de preguntas estructuradas** (opciones tappables), no como prosa libre. Reglas:
+Mecanismo, ritmo y fallback compartidos: [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md).
 
-- Opciones cortas y mutuamente excluyentes (2-4 por pregunta).
-- No repreguntar lo que ya conste en el artefacto o en la conversación.
-- Si el cliente no expone la herramienta, formular en prosa con opciones enumeradas.
+Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar*, *validar* o *sugerir* algo al usuario, asume ese mecanismo; no se repite allí.
+
+No repreguntar lo que ya conste en el artefacto origen.
 
 ---
 
 ## Resolución de idioma
 
-Redactar los TCs y los mensajes al usuario **en el idioma del artefacto origen**. Es una excepción deliberada al orden canónico del resto del ciclo (`.agents/MEMORY.md` → sesión → mensaje): un TC que no hable el idioma de los criterios que traza se lee mal junto a ellos, así que aquí manda el artefacto. Si hay conflicto o ambigüedad, preguntar al usuario antes de generar.
+Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
+
+**Excepción deliberada al orden canónico.** Redactar los TC y los mensajes al usuario **en el idioma del artefacto origen**: un TC que no hable el idioma de los criterios que traza se lee mal junto a ellos, así que aquí manda el artefacto por encima de `.agents/MEMORY.md`. Si hay conflicto o ambigüedad, preguntar al usuario antes de generar.
 
 ---
 
@@ -141,6 +153,8 @@ Por cada criterio en el alcance, analizar cuántos TCs son necesarios según la 
 Si dentro de una perspectiva hay múltiples escenarios distintos que vale la pena distinguir (p. ej., dos tipos de error con comportamientos diferentes), crear un TC por escenario en lugar de agruparlos. Si una perspectiva no aplica al criterio, omitirla sin necesidad de justificar salvo que sea evidente que debería existir y se descarta por alguna razón concreta.
 
 ### Numeración y nombres de archivo
+
+> Reglas comunes de identificadores y secuenciales: [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md). Lo específico de los TC:
 
 - **Sin tracker externo vinculado**: el secuencial `XXX` (tres dígitos: 001, 002, …) es por artefacto padre, siguiendo el orden criterio-a-criterio (happy → error → límite). Si la carpeta `test-cases/` ya existe con TCs previos, leer los archivos presentes, determinar el número más alto y continuar desde el siguiente. El escaneo se hace sobre el `test-cases/` del padre **realmente resuelto**, no sobre una ruta activa que se dé por vacía sin haberla comprobado: si el padre no aparece ahí, la regla de artefacto archivado ya obligó a parar (ver [Selección del artefacto](#selección-del-artefacto)). Reiniciar en `001` dentro de una carpeta recién creada porque «no había nada» duplicaría identificadores.
 - **Con tracker externo vinculado**: `XXX` es el identificador que asigna ese sistema al work item «Test Case» creado; su formato exacto (numérico, con o sin padding, etc.) lo define el archivo de referencia del sistema. Ver [Integración con un sistema de seguimiento externo](#integración-con-un-sistema-de-seguimiento-externo-condicional).

@@ -7,13 +7,18 @@ Este repositorio publica dos plugins de Claude Code desde el mismo marketplace (
 | **SDD Devkit** (`sdd-devkit`) | Skills y agentes de Spec-Driven Development en [`skills/`](skills/) y [`agents/`](agents/) |
 | **Utils** (`utils`) | Skills de utilidad en [`others/utils/skills/`](others/utils/skills/) |
 
+> **Instálalo como plugin, no copies skills sueltos.** Los skills de SDD Devkit comparten reglas
+> transversales en [`reference/`](reference/) y las resuelven vía `${CLAUDE_PLUGIN_ROOT}`, que solo
+> existe cuando el plugin está instalado. Un skill copiado por su cuenta pierde esas referencias.
+
 ## Instalación en Cursor
 
 ```bash
 npx skills add https://github.com/juanca202/ai
 ```
 
-El asistente te guiará paso a paso: dónde instalar (proyecto o global), qué agente usar y qué skills incluir.
+El asistente te guiará paso a paso: dónde instalar (proyecto o global) y qué agente usar. **Instala el
+plugin completo**: seleccionar un subconjunto de skills deja fuera la carpeta `reference/` compartida.
 
 ## Instalación en Claude Code
 

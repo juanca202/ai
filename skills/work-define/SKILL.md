@@ -22,34 +22,42 @@ Carga el archivo correspondiente cuando vayas a ejecutar la tarea; el detalle í
 | Detalle de **RFC 2119** (tabla de modalidades), **ISO 25010** (categorías de criterios de aceptación no funcionales), rúbrica **INVEST** y **DoR** ampliado | [`references/quality-criteria.md`](references/quality-criteria.md) |
 | Estructura del `README.md` de una US | [`assets/user-story-template.md`](assets/user-story-template.md) |
 
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+
 ---
 
 ## Resolución de idioma
 
-El idioma de la US (criterios de aceptación, INVEST, DoR y texto natural) se decide en este orden; detenerse en el primer paso que aplique:
+Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
 
-1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Es la clave canónica que escribe `arch-init`; si existe, manda.
-2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesión.
-3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md` con `preferred language: <código>`.
-4. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta, **preguntar si desea persistirlo** en `.agents/MEMORY.md`; no decidir el idioma por cuenta propia.
+El idioma resuelto aplica a la **US**: criterios de aceptación, INVEST, DoR y todo el texto natural.
 
 ---
 
 ## Ubicación de archivos
 
+Layout completo del harness, identificadores y contrato de archivado: [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md).
 
-| Artefacto             | Ruta                                                                                                                   |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Historia de usuario   | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md`                                                            |
-| Archivos de apoyo     | `docs/specs/user-stories/US-XXX-[nombre-corto]/assets/`                                                              |
-| Documentación técnica | `docs/specs/technical-docs/[capability].md` (propiedad del skill `design-define`; este skill solo la referencia, nunca la crea ni edita directamente) |
-| Glosario              | `docs/specs/glossary.md` (opcional)                                                                                  |
-| US ya archivada (fallback) | `docs/specs/archive/user-stories/US-XXX-[nombre-corto]/`, con la misma estructura interna                     |
+Lo propio de este skill:
 
-> **Las US archivadas siguen contando.** Al cerrar una historia, `work-integrate` y `pr-create` pueden mover su carpeta a `docs/specs/archive/user-stories/`. Eso **no libera su ID** ni la hace invisible: el siguiente `US-XXX` libre se calcula sobre las dos rutas, y el flujo *Actualizar* la busca ahí cuando no está en la activa. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+| Artefacto | Ruta |
+| --------- | ---- |
+| Historia de usuario (**salida**) | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md` |
+| Archivos de apoyo | `docs/specs/user-stories/US-XXX-[nombre-corto]/assets/` |
+| Documentación técnica (solo lectura) | `docs/specs/technical-docs/[capability].md` — propiedad de `design-define`; este skill la referencia, nunca la crea ni la edita |
+| Glosario (opcional) | `docs/specs/glossary.md` |
 
+> **Las US archivadas siguen contando.** El siguiente `US-XXX` libre se calcula sobre la ruta activa **y** sobre `docs/specs/archive/user-stories/`, y el flujo *Actualizar* busca ahí la historia cuando no está en la activa.
 
 ### Convenciones del nombre de carpeta
+
+> Reglas comunes de slug e identificadores: [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md). Lo específico de las US:
 
 - Formato: `US-XXX-[nombre-corto]` con `US-XXX` en mayúsculas y número de 3 dígitos.
 - Nombre corto: minúsculas, kebab-case, sin artículos ni palabras vacías.

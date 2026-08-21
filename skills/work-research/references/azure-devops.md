@@ -1,11 +1,12 @@
-# Integración con Azure DevOps (ADO)
+# Integración con Azure DevOps — `work-research`
 
-Referencia específica del sistema **Azure DevOps** para `work-research`. Se activa
-cuando `.agents/MEMORY.md` contiene `work_item_tracking: azure_devops` (ver «Entrada
-desde el gestor de proyectos» en `SKILL.md`). Todo el detalle propio de ADO
-—herramienta MCP, nombres de campos, tipos de work item, configuración de conexión—
-vive únicamente en este archivo; `SKILL.md` y los archivos de flujo no deben contener
-nada específico de ADO.
+> **Base común obligatoria:** [`${CLAUDE_PLUGIN_ROOT}/reference/alm/azure-devops.md`](../../../reference/alm/azure-devops.md)
+> — activación (`work_item_tracking: azure_devops`), claves de `.agents/MEMORY.md`, verificación del MCP
+> y su degradación, construcción de la URL, campo `Work Item (ADO)`, normalización del HTML de
+> `System.Description` y anti-patrones comunes. **Leerla antes que este archivo.**
+
+Este archivo contiene **solo el delta de `work-research`**. Se activa desde «Entrada desde el gestor de
+proyectos» en `SKILL.md`.
 
 > **Rol de esta integración: leer y enrutar, nunca escribir.** `work-research`
 > **investiga**; no crea ni modifica work items. Esta referencia sirve para (1)
@@ -13,32 +14,15 @@ nada específico de ADO.
 > **enrutarlo** al flujo que corresponde a su tipo, y (3) **propagar** su identificador
 > al skill que sí crea work items (`work-define`, `work-plan`, `test-define`).
 
-## Configuración (`.agents/MEMORY.md`)
+> **Degradación sin MCP.** Al no crear artefactos, aquí la falta de MCP no se resuelve con ID secuencial
+> local sino pidiendo el contenido al usuario:
+> ```
+> ⚠️ El repo está vinculado a Azure DevOps pero el MCP no está conectado.
+> No puedo leer el work item #<id> automáticamente.
+> Pégame su contenido, o conecta el MCP de ADO desde el menú de herramientas.
+> ```
 
-Además de `work_item_tracking: azure_devops`, esta integración lee:
-
-| Clave | Uso |
-|-------|-----|
-| `azure_devops_org:` / `ado_org:` | Organización de ADO; usada para construir la URL del work item. |
-| `azure_devops_project:` / `ado_project:` | Proyecto de ADO; usada para construir la URL del work item. |
-
-Si no están definidos, resolver la URL a partir de lo que devuelva el MCP.
-
-## Paso 1 — Verificar disponibilidad del MCP de ADO
-
-Comprobar si existe una herramienta MCP de Azure DevOps disponible en el cliente
-actual (p. ej. `mcp_azure-devops_*` o similar).
-
-- **MCP disponible** → continuar con el Paso 2.
-- **MCP no disponible** → notificar al usuario y continuar la investigación con la
-  información que él aporte manualmente; **no** detener el flujo:
-  ```
-  ⚠️ El repo está vinculado a Azure DevOps pero el MCP no está conectado.
-  No puedo leer el work item #<id> automáticamente.
-  Pégame su contenido, o conecta el MCP de ADO desde el menú de herramientas.
-  ```
-
-## Paso 2 — Leer el work item y enrutarlo
+## Paso 1 — Leer el work item y enrutarlo
 
 Cuando la entrada es un **identificador** (`#4821`, `4821`, una URL de ADO), obtener el
 work item vía MCP y leer su campo `System.WorkItemType` para elegir el flujo:
@@ -51,9 +35,8 @@ work item vía MCP y leer su campo `System.WorkItemType` para elegir el flujo:
 | `Test Case` | `TC-XXX` | **Analizar test case** |
 | `Issue` / `Impediment` / otros | — | Preguntar al usuario qué espera antes de elegir flujo |
 
-> El proceso del proyecto (Agile, Scrum, CMMI, Basic) cambia los nombres de los tipos.
-> Si el tipo devuelto no está en la tabla, **no adivinar**: mostrárselo al usuario y
-> preguntar.
+> El proceso del proyecto cambia los nombres de los tipos: si el tipo devuelto no está en la tabla,
+> **no adivinar** (ver la base común).
 
 Si el work item tiene un documento equivalente en el repo (por su `Work Item (ADO)`
 registrado en el encabezado), **leer también el documento local**: la especificación es
@@ -65,7 +48,7 @@ llegaron al documento. Si discrepan, registrarlo como hallazgo.
 | Campo de ADO | Uso |
 |--------------|-----|
 | `System.Title` | Título del artefacto |
-| `System.Description` | Cuerpo principal (llega en HTML: normalizar a markdown sin perder listas numeradas ni bloques de código) |
+| `System.Description` | Cuerpo principal; normalizar el HTML a markdown (ver la base común) |
 | `System.State`, `System.AreaPath`, `System.IterationPath` | Contexto de gestión; registrar, no interpretar |
 | `System.Tags` | Señales de módulo, entorno o regresión |
 | **Comentarios / discusión** | Decisiones ya tomadas, intentos descartados, datos de reproducción — leerlos siempre |
@@ -108,14 +91,10 @@ Notas transversales:
 
 - **Nunca inventar lo que el work item no dice.** Si falta información, preguntarla al
   usuario.
-- Registrar en el encabezado del informe o del dossier:
-  ```
-  Work Item (ADO): [#<ado_id>](<url-al-work-item>)
-  ```
-  Usar la URL que devuelva el MCP, o construirla como
-  `https://dev.azure.com/<org>/<project>/_workitems/edit/<ado_id>`.
+- Registrar el `Work Item (ADO)` en el encabezado del informe o del dossier, con el formato que define
+  la base común.
 
-## Paso 3 — Propagar el identificador en el *handoff*
+## Paso 2 — Propagar el identificador en el *handoff*
 
 `work-research` no crea work items. Al hacer *handoff*, pasar siempre el `ado_id` y la
 URL del artefacto leído para que el skill destino lo enlace o lo reutilice:
@@ -130,7 +109,7 @@ El detalle de creación y actualización vive en la referencia de ADO de cada sk
 destino (`work-plan/references/azure-devops.md`,
 `test-define/references/azure-devops.md`).
 
-## Anti-patrones específicos de ADO en `work-research`
+## Anti-patrones específicos
 
 - Crear o modificar work items desde este skill — `work-research` solo lee.
 - Asumir el flujo por el prefijo del identificador en vez de leer
@@ -138,7 +117,5 @@ destino (`work-plan/references/azure-devops.md`,
 - Leer el work item y **no** leer su documento equivalente en el repo cuando existe.
 - Investigar un artefacto sin haber leído sus **comentarios** y **adjuntos**: suelen
   contener los pasos reales de reproducción o la decisión que falta.
-- Copiar la descripción HTML de ADO tal cual al informe sin normalizarla.
+- Copiar la descripción HTML de ADO tal cual al informe sin normalizarla a markdown.
 - Completar campos ausentes por inferencia propia en lugar de preguntar.
-- Perder el `ado_id` en el *handoff* y provocar que el skill destino cree un work item
-  duplicado.

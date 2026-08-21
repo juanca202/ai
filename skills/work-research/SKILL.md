@@ -160,18 +160,13 @@ archivo de referencia del sistema):
 
 ## Cómo preguntar al usuario
 
-Toda pregunta va por la **herramienta de preguntas estructuradas** (opciones
-tappables), no como prosa libre. Si el cliente no la expone, formular en prosa con
-opciones enumeradas. Si una herramienta necesaria no está disponible (el MCP del
-gestor de proyectos, el MCP de Chrome en una migración), pedir al usuario que aporte
-los insumos manualmente en lugar de detenerse.
+Mecanismo, ritmo y fallback compartidos: [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md).
 
-No preguntar lo que ya consta en el artefacto, en el work item del gestor o en la
-conversación. Máximo 2-3 preguntas por ronda.
+Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar*, *validar* o *sugerir* algo al usuario, asume ese mecanismo; no se repite allí.
+
+No preguntar lo que ya consta en el artefacto, en el work item del gestor o en la conversación.
 
 ---
-
-
 
 ## Modo de ejecución
 
@@ -195,13 +190,11 @@ usuario (flujo normal).
 
 ## Resolución de idioma
 
-Redactar el informe y los mensajes al usuario en el idioma del mensaje de entrada.
-Si hay artefacto o proyecto vinculado, usar el idioma de ese contexto. Ante
-conflicto, preguntar.
+Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
+
+**Excepción deliberada al orden canónico.** Redactar el informe y los mensajes al usuario en el idioma del **mensaje de entrada**; si hay artefacto o proyecto vinculado, en el idioma de ese contexto. Ante conflicto, preguntar.
 
 ---
-
-
 
 ## Paso 1 — Capturar la intención y elegir el flujo
 
@@ -389,6 +382,8 @@ es una hipótesis: se marca como tal y se verifica o se descarta.
 
 ## Numeración y nomenclatura
 
+> Reglas comunes de identificadores y secuenciales: [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md). Lo específico de los RS:
+
 - **Secuencial** `XXX`**:** tres dígitos, por carpeta base de destino. Leer las carpetas
 `RS-XXX-*` existentes y tomar el siguiente número. Cuando la base es
 `docs/specs/research/`, el escaneo incluye `docs/specs/archive/research/`: archivar no
@@ -455,6 +450,16 @@ generado (en *Analizar issue*, con el dossier de bug).
 | Plantillas del análisis de legado (`discovery.md`, `FT-XXX`)                                                        | `[assets/legacy/discovery-template.md](assets/legacy/discovery-template.md)`, `[assets/legacy/feature-template.md](assets/legacy/feature-template.md)`           |
 | Plantillas de la migración (`discovery.md`, `validation.md`)                                                        | `[assets/migrate/discovery-template.md](assets/migrate/discovery-template.md)`, `[assets/migrate/validation-template.md](assets/migrate/validation-template.md)` |
 
+
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/alm/azure-devops.md`](../../reference/alm/azure-devops.md): **Azure DevOps** — activación, MCP, URL, límites, sincronización. *Solo si `MEMORY.md` declara `work_item_tracking:`.*
 
 ---
 

@@ -76,24 +76,17 @@ Las **claves** son en inglés (estándar); el usuario puede nombrarlas en españ
 
 ## Cómo preguntar al usuario
 
-Cuando este skill indique **preguntar, pedir, confirmar o validar** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** del cliente (opciones tappables o selector) en lugar de prosa libre. Reglas:
+Mecanismo, ritmo y fallback compartidos: [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md).
 
-- **Opciones cortas y mutuamente excluyentes** (2-4 por pregunta) cuando la respuesta admita categorías.
-- **No repreguntar** lo que ya esté respondido en el contexto de la sesión o en los documentos del repo.
-- **Fallback:** si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3...).
+Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar*, *validar* o *sugerir* algo al usuario, asume ese mecanismo; no se repite allí.
 
 ---
 
 ## Resolución de idioma
 
-El idioma del reporte se decide en este orden; detenerse en el primer paso que aplique:
+Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
 
-1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>`. Es la clave canónica que escribe `arch-init`; si existe, manda.
-2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesión.
-3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md` con `preferred language: <código>`.
-4. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta, **preguntar si desea persistirlo** en `.agents/MEMORY.md`; no decidir el idioma por cuenta propia.
-
-La salida y los mensajes de error de las herramientas de prueba no se traducen.
+El idioma resuelto aplica al **reporte de trazabilidad**. La salida y los mensajes de error de las herramientas de prueba no se traducen.
 
 ---
 
@@ -392,18 +385,18 @@ WARNING No es posible generar el reporte de trazabilidad:
 
 ## Ubicación de archivos
 
-| Artefacto | Ruta |
-|-----------|------|
-| Historia de usuario | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md` |
-| Work item | `docs/specs/work-items/WI-XXX-[kebab]/README.md` |
-| Feature (funcionalidad ya implementada) | `docs/specs/features/FT-XXX-[slug]/README.md` |
-| Cualquier otro artefacto | La ruta que indique el usuario |
+Layout completo del harness, identificadores y contrato de archivado: [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md).
+
+Lo propio de este skill:
+
+| Rol | Ruta |
+|-----|------|
+| Artefacto a trazar (entrada) | La carpeta de la `US-XXX` / `WI-XXX` / `FT-XXX`; para cualquier otro artefacto, la ruta que indique el usuario |
 | Casos de prueba documentados (entrada, los produce `test-define`) | `test-cases/` **dentro de la carpeta del artefacto**, con su índice `test-cases/README.md` |
 | Caché de corrida de pruebas (entrada, la produce `quality-check`) | `.sdd-devkit/test-run.json` (ubicación fija, no por unidad) |
-| Reporte de trazabilidad (salida) | `trace-report.md` **dentro de la carpeta del artefacto, allí donde se haya resuelto** — `…/US-XXX-[nombre-corto]/`, `…/WI-XXX-[kebab]/`, `…/FT-XXX-[slug]/`, o su equivalente bajo `docs/specs/archive/`; para otro artefacto, junto a él (confirmar la ruta con el usuario antes de escribir) |
-| Trabajo ya archivado (fallback de las tres primeras filas) | `docs/specs/archive/user-stories/US-XXX-…/` · `docs/specs/archive/work-items/WI-XXX-…/`, con la misma estructura interna |
+| Reporte de trazabilidad (**salida**) | `trace-report.md` **dentro de la carpeta del artefacto, allí donde se haya resuelto** — activa o bajo `docs/specs/archive/`; para otro artefacto, junto a él (confirmar la ruta con el usuario antes de escribir) |
 
-> **Un `US`/`WI` archivado se traza igual.** Si la carpeta no está en la ruta activa, buscarla bajo `docs/specs/archive/` antes de reportar que no existe — `work-integrate` y `pr-create` pueden moverla ahí al cerrar el trabajo, si el usuario lo confirma. Todo se resuelve relativo a la carpeta encontrada: los criterios, el `test-cases/`, la clave `SPEC_FINGERPRINT` y el `trace-report.md` de salida. **No** recrear la carpeta en la ruta activa. `trace-validate` es el **único** skill que escribe dentro de un artefacto archivado, y solo su propio informe: es un derivado del artefacto, no trabajo nuevo, y revalidar un trabajo ya integrado tiene que seguir siendo posible. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+> **Un `US`/`WI` archivado se traza igual.** Todo se resuelve relativo a la carpeta encontrada: los criterios, el `test-cases/`, la clave `SPEC_FINGERPRINT` y el `trace-report.md` de salida. `trace-validate` es el **único** skill que escribe dentro de un artefacto archivado, y solo su propio informe: es un derivado del artefacto, no trabajo nuevo, y revalidar un trabajo ya integrado tiene que seguir siendo posible.
 
 ---
 
@@ -448,3 +441,12 @@ Posición: **validación / cierre de calidad** — después de `work-implement`.
 | `references/flow.md` | Flujo paso a paso (Pasos 0-7), delegación de la ejecución de pruebas en `quality-check` (caché `test-run.json` / `tests-only`) y checklist completo. Leer antes de ejecutar el flujo. |
 | `references/examples.md` | Ejemplos por tipo (US / WI, sin criterios, sin runner, criterio sin prueba) y anti-patrones. Leer ante dudas de comportamiento. |
 | `assets/trace-report-template.md` | Plantilla canónica del reporte de trazabilidad. Leer antes de redactar el reporte. |
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+

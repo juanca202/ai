@@ -33,26 +33,19 @@ No sustituir una invocación de skill por "hacer el trabajo aquí". El handoff e
 
 ## Cómo preguntar al usuario
 
-Cuando este skill (o cualquiera de sus referencias) indique **preguntar, pedir, confirmar, validar o sugerir** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** del cliente (la que renderiza opciones tappables o un selector) en lugar de redactar la pregunta como prosa libre. Reglas:
+Mecanismo, ritmo y fallback compartidos: [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md).
 
-- **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita categorías; usar entrada libre solo si no hay forma razonable de enumerar opciones (p. ej. el objetivo breve de un stub).
-- **No repreguntar** lo que ya está respondido en el contexto, en `.agents/MEMORY.md`, o en los documentos existentes del repo.
-- **Recopilación inicial:** agrupar las preguntas pendientes en una sola tanda (hasta tres por bloque); no ir descubriendo huecos turno a turno.
-- **Confirmaciones de creación:** una pregunta por turno con opciones claras (p. ej. Opciones: [Confirmar] / [Ajustar] / [Cancelar]); no crear archivos antes de la confirmación.
-- **Fallback:** si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
+Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar*, *validar* o *sugerir* algo al usuario, asume ese mecanismo; no se repite allí.
 
-Cada vez que una referencia diga *preguntar al usuario*, *validar con el usuario*, *confirmar* o *sugerir al usuario* asume este mecanismo; no se repite allí.
+**Entrada libre** solo donde no haya opciones razonables que enumerar (p. ej. el objetivo breve de un stub).
 
 ---
 
 ## Resolución de idioma
 
-El idioma de los documentos generados y de los mensajes al usuario se decide en este orden; detenerse en el primer paso que aplique:
+Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
 
-1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Es la clave canónica que escribe `arch-init`; si existe, manda.
-2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesión.
-3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md` con `preferred language: <código>`.
-4. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta, **preguntar si desea persistirlo** en `.agents/MEMORY.md`; no decidir el idioma por cuenta propia.
+El idioma resuelto aplica a los **documentos generados** (`TK-XXX`, `WI-XXX`) y a los mensajes al usuario.
 
 ---
 
@@ -103,3 +96,13 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 | `references/<sistema>.md` (p. ej. `azure-devops.md`) | Solo si se detecta vinculación a un tracker externo (ver [Integración con un sistema de seguimiento externo](#integración-con-un-sistema-de-seguimiento-externo-condicional)); el archivo concreto depende del valor de `work_item_tracking`. |
 | `assets/task-template.md` | Plantilla canónica de una tarea de historia de usuario (`TK-XXX`). Leer antes de redactar el documento. |
 | `assets/work-item-template.md` | Plantilla canónica de una tarea de mantenimiento (`WI-XXX`). Leer antes de redactar el documento. |
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/alm/azure-devops.md`](../../reference/alm/azure-devops.md): **Azure DevOps** — activación, MCP, URL, límites, sincronización. *Solo si `MEMORY.md` declara `work_item_tracking:`.*
+

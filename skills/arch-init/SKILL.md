@@ -31,22 +31,27 @@ Inicializa, en un proyecto **en cualquier punto de partida**, las primeras instr
 
 ## Cómo preguntar al usuario
 
-Cuando este skill indique **preguntar, pedir, confirmar o sugerir** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** del cliente (la que renderiza opciones tappables o un selector) en lugar de redactar la pregunta como prosa libre. Reglas:
+Mecanismo, ritmo y fallback compartidos: [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md).
 
-- **Opciones cortas y mutuamente excluyentes** (2-4 por pregunta) cuando la respuesta admita categorías; selección múltiple solo donde el propio paso lo indique explícitamente (p. ej. capas de testing, candidatos de ADR); texto libre cuando la respuesta no se preste a opciones cerradas.
-- **No repreguntar** lo que ya esté resuelto en el contexto de la sesión, en `.agents/MEMORY.md` o en los manifiestos del repo.
-- **Una tanda por paso**: agrupar las preguntas de un mismo paso en un solo bloque en vez de ir descubriendo huecos turno a turno.
-- **Fallback:** si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
+Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar*, *validar* o *sugerir* algo al usuario, asume ese mecanismo; no se repite allí.
 
-Cada vez que una sección posterior diga *preguntar*, *confirmar* o *sugerir* al usuario, asume este mecanismo; no se repite allí.
+**Ritmo propio: una tanda por paso**, no una sola al inicio. Este flujo tiene cinco pasos con preguntas en cada uno; agrupar las de un mismo paso en un solo bloque, sin tope fijo de preguntas por bloque.
+
+**Selección múltiple** donde el paso lo indique explícitamente: capas de testing y candidatos de ADR.
 
 ---
 
 ## Resolución de idioma
 
+Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
+
+**Excepción deliberada: este skill es quien crea `.agents/MEMORY.md`**, así que no puede leerlo como paso 1 del orden canónico.
+
 1. Si `.agents/MEMORY.md` **ya existe** (reejecución sobre un harness parcialmente inicializado), leer su línea `preferred language: <código>` y usar ese idioma.
 2. Si no existe, usar el **idioma del turno del usuario**.
-3. Persistir el idioma resuelto en `.agents/MEMORY.md` como `preferred language: <código>` al crearlo (Paso 3) — no hace falta preguntarlo aparte salvo que el idioma del turno sea ambiguo.
+3. **Persistir** el idioma resuelto en `.agents/MEMORY.md` como `preferred language: <código>` al crearlo (Paso 3) — no hace falta preguntarlo aparte salvo que el idioma del turno sea ambiguo.
+
+A partir de ahí, el resto del catálogo lee esa clave como paso 1 de su orden canónico.
 
 ---
 
@@ -195,6 +200,15 @@ No confirmar el cierre antes de que `AGENTS.md` tenga el stack ya escrito.
 | `assets/memory-template.md` | Paso 3 — plantilla de `.agents/MEMORY.md`. |
 | `assets/adr-index-template.md` | Paso 3 — plantilla de `docs/adr/README.md`. |
 | `assets/standards-index-template.md` | Paso 3 — plantilla de `docs/standards/README.md`. |
+
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
 
 ---
 

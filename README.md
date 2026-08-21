@@ -14,6 +14,24 @@
 
 Ver la [guía de instalación](INSTALL.md) para Cursor y Claude Code.
 
+## Estructura del plugin
+
+```
+sdd-devkit/
+├── skills/         # un skill por carpeta: SKILL.md + references/ + assets/
+├── agents/         # subagentes especializados (docs, ui, quality)
+└── reference/      # reglas transversales compartidas por varios skills
+```
+
+La carpeta [`reference/`](reference/) es la **fuente única** de lo que aplica a todo el catálogo —
+resolución de idioma, mecanismo de preguntas al usuario, rutas e identificadores de artefactos e
+integración con Azure DevOps. Los skills la referencian con `${CLAUDE_PLUGIN_ROOT}/reference/…` en vez
+de repetir el contenido, y declaran solo su delta. Índice completo en
+[`reference/README.md`](reference/README.md).
+
+> Como el contenido compartido se resuelve vía `${CLAUDE_PLUGIN_ROOT}`, los skills están pensados para
+> usarse **con el plugin instalado**, no copiados sueltos.
+
 ## Skills incluidos
 
 Detalle de uso, opciones y handoffs de cada skill: [SKILLS.md](SKILLS.md).

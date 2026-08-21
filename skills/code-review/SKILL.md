@@ -45,6 +45,14 @@ Carga cada archivo **solo cuando lo necesites** (rutas relativas a la raíz del 
 | [`references/qualitative-review.md`](references/qualitative-review.md) | Detalle de las tres dimensiones, modelo ISO/IEC 25010, calibración de severidad y ejemplos de buen/mal feedback. | En el Paso 3, antes de redactar hallazgos. |
 | [`assets/code-review-template.md`](assets/code-review-template.md) | Plantilla canónica del informe. | En el Paso 4, para rellenar el informe. |
 
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+
 ---
 
 ## Las tres dimensiones
@@ -217,11 +225,7 @@ Que la receta excluya **toda carpeta oculta, todo `docs/` y los `trace-report.md
 
 ### Resolución de idioma
 
-El idioma del informe se decide en este orden; detenerse en el primer paso que aplique:
+Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
 
-1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>`. Es la clave canónica que escribe `arch-init`; si existe, manda.
-2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesión.
-3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md` con `preferred language: <código>`.
-4. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta, **preguntar si desea persistirlo** en `.agents/MEMORY.md`; no decidir el idioma por cuenta propia.
+El idioma resuelto aplica al **informe**. Los mensajes de error de las herramientas no se traducen.
 
-Los mensajes de error de las herramientas no se traducen.

@@ -112,14 +112,9 @@ cualquier informe y respetar su estructura.
 
 ## Resolución de idioma
 
-Decidir el idioma del informe y de los mensajes al usuario en este orden; detenerse en el primer paso que aplique:
+Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
 
-1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>`. Es la clave canónica que escribe `arch-init`; si existe, manda.
-2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesión.
-3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md` con `preferred language: <código>`.
-4. Si no se puede inferir, **preguntar** qué idioma prefiere; no decidir por cuenta propia.
-
-Las rutas de archivo, identificadores (`ADR-XXX`, referencias de criterio `<estándar>/CR-XXX`, referencias de requisito `<estándar>/<slug-requisito>`) y salidas de comandos no se traducen.
+El idioma resuelto aplica al **informe de auditoría** y a los mensajes al usuario.
 
 ---
 
@@ -486,6 +481,14 @@ hallazgo vive en `assets/`. **Leerlos solo cuando la fase correspondiente lo pid
 - [`references/fitness-function-heuristics.md`](references/fitness-function-heuristics.md) — tabla de herramientas típicas por ecosistema + comandos de rastreo genérico. Leer en la Fase 2B, paso 1, solo cuando la fila del criterio no exista o esté incompleta.
 - [`references/dependency-verification.md`](references/dependency-verification.md) — flujo completo (extraer, comprobar, preguntar, instalar o dejar constancia) para las dependencias que implican las normas auditadas. Leer en la Fase 3.5.
 - [`assets/audit-template.md`](assets/audit-template.md) — plantilla del informe, incluido el formato exacto de cada hallazgo. Leer en la Fase 3, al redactar.
+
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
 
 ---
 

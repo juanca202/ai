@@ -1,0 +1,16 @@
+{
+  "$schema": "https://factor.ec",
+  "language": "es",
+  "interaction": {
+    "confirmByUnit": "never",
+    "workTree": "always",
+    "maxParallel": 3,
+    "archiveMode": "ask"
+  },
+  "projectManagement": {
+    "enabled": false
+  },
+  "telemetry": {
+    "enabled": false
+  }
+}

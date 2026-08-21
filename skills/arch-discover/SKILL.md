@@ -31,13 +31,9 @@ aprobados — nadie más los vuelve a crear después.
 
 ## Resolución de idioma
 
-Decidir el idioma de los mensajes al usuario y de lo que se le pasa a `arch-manage` en este orden;
-detenerse en el primer paso que aplique:
+Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
 
-1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>`. Es la clave canónica que escribe `arch-init`; si existe, manda.
-2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesión.
-3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md`.
-4. Si no se puede inferir, **preguntar** qué idioma prefiere; no decidir el idioma por cuenta propia.
+El idioma resuelto aplica a los mensajes al usuario y a lo que se le pasa a `arch-manage` al delegar candidatos.
 
 ---
 
@@ -189,3 +185,10 @@ presentación están en `references/`; **leerlos solo cuando la fase correspondi
 
 - [`references/functional-domains.md`](references/functional-domains.md) — catálogo de los 9 dominios funcionales canónicos. Leer en la Fase 3, al clasificar el dominio de cada candidato.
 - [`references/candidate-presentation.md`](references/candidate-presentation.md) — formato y ejemplo completo para presentar la lista de candidatos al usuario. Leer en la Fase 4.
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
+

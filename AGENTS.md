@@ -13,6 +13,23 @@ Instrucciones para agentes (Claude Code, Cursor, etc.) que trabajen en este repo
   - `scripts/` — código ejecutable para tareas deterministas o repetitivas.
 - `SKILL.md` es el **router**: explica el flujo y delega el detalle a `references/`. Si se acerca a las ~500 líneas, es señal de que algo debe moverse a `references/` con un puntero claro desde el cuerpo ("ver `references/x.md` cuando...").
 
+### Recursos compartidos (`reference/` en la raíz del plugin)
+
+Lo **transversal a varios skills** no se duplica: vive en [`reference/`](reference/), en la raíz del plugin, y cada `SKILL.md` lo referencia con `${CLAUDE_PLUGIN_ROOT}/reference/<archivo>.md`. Índice y catálogo completo en [`reference/README.md`](reference/README.md).
+
+- **Regla de extracción:** si una regla aplica a **tres o más skills** y su redacción es sustancialmente la misma, va a `reference/`. Si aplica a uno o dos, se queda en el `SKILL.md` o en su `references/`.
+- **Puntero, no copia.** El `SKILL.md` enlaza la referencia compartida y declara **solo su delta**: a qué aplica la regla en ese skill y qué excepción tiene, si la tiene. Reescribir el contenido común en el skill es el anti-patrón que esta carpeta existe para evitar.
+- **Las excepciones se declaran en los dos lados:** en el `SKILL.md` que se aparta de la regla y en la tabla de excepciones del archivo compartido, para que el conjunto sea auditable.
+- **Formato del puntero** — el enlace relativo es para navegar el repo; en ejecución la ruta que importa es la de la variable:
+
+  ```markdown
+  Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
+  ```
+
+- Cada skill lista además las referencias compartidas que consume en una subsección **Referencias compartidas del plugin** dentro de su *Mapa de referencias*.
+- **Esto solo resuelve con el plugin instalado.** `${CLAUDE_PLUGIN_ROOT}` no existe si un skill se copia suelto fuera del plugin; el catálogo se distribuye e instala como plugin (ver [INSTALL.md](INSTALL.md)).
+- Al añadir un archivo a `reference/`, registrarlo en la tabla de [`reference/README.md`](reference/README.md).
+
 ### Frontmatter obligatorio
 
 ```yaml
@@ -31,6 +48,7 @@ license: MIT
 
 ## Recursos relacionados
 
+- [reference/README.md](reference/README.md) — índice de los recursos compartidos del plugin.
 - [SKILLS.md](SKILLS.md) — catálogo de skills existentes, con detalle de uso y opciones.
 - [CONTRIBUTING.md](CONTRIBUTING.md) — flujo de contribución (ramas, commits, PR).
 - [README.md](README.md) — visión general del harness y cómo se conectan los skills.

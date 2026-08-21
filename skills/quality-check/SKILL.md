@@ -42,16 +42,24 @@ Carga cada archivo **solo cuando lo necesites** (rutas relativas a la raíz del 
 | [`references/stacks.md`](references/stacks.md) | Detección de ecosistema, categoría de cada check por stack, comandos y parseo por herramienta. | En el Paso 1, **una vez identificado** el stack (no antes). |
 | [`assets/quality-check-template.md`](assets/quality-check-template.md) | Plantilla canónica del informe. | En el Paso 4, para rellenar el informe. |
 
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+
 ---
 
 ## Cómo preguntar al usuario
 
-Cuando este skill (o sus referencias) indique **preguntar, pedir o confirmar** algo —de forma señalada, si se corrigen los fallos o se entrega solo el informe— hacerlo mediante la **herramienta de preguntas estructuradas** del cliente (opciones tappables), no como prosa libre. Reglas:
+Mecanismo, ritmo y fallback compartidos: [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md).
 
-- Opciones cortas y mutuamente excluyentes (2-4 por pregunta).
-- No repreguntar lo que ya esté respondido en la conversación.
-- Presentar antes el reporte de lo que falló: el usuario decide con la información delante.
-- Si el cliente no expone la herramienta, formular en prosa con las opciones enumeradas.
+Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar*, *validar* o *sugerir* algo al usuario, asume ese mecanismo; no se repite allí.
+
+**Excepción al ritmo:** la pregunta señalada de este skill —si se corrigen los fallos o se entrega solo el informe— va **después** de presentar el reporte de lo que falló: el usuario decide con la información delante.
 
 ---
 
@@ -419,11 +427,7 @@ Es un proceso **posterior a la implementación**: no forma parte del desarrollo 
 
 ### Resolución de idioma
 
-El idioma del informe se decide en este orden; detenerse en el primer paso que aplique:
+Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
 
-1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>`. Es la clave canónica que escribe `arch-init`; si existe, manda.
-2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesión.
-3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md` con `preferred language: <código>`.
-4. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta, **preguntar si desea persistirlo** en `.agents/MEMORY.md`; no decidir el idioma por cuenta propia.
+El idioma resuelto aplica al **informe**. Los mensajes de error de las herramientas no se traducen.
 
-Los mensajes de error de las herramientas no se traducen.

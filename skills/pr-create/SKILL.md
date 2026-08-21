@@ -84,9 +84,17 @@ Verificar que el CLI elegido está instalado (`<cli> --version`); si falta, para
 
 ## Resolución de idioma
 
-Si en el contexto de la sesión de chat existe un **idioma de preferencia del usuario**, redactar el título y la descripción en ese idioma. Si no consta, usar el **idioma de la conversación**; y si tampoco es determinable, el idioma predominante de los commits del rango `origin/<destino>..HEAD`. Un título/descripción explícitos del usuario en su mensaje **siempre** tienen prioridad y se respetan literalmente.
+Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
 
-Cuando el idioma resuelto obliga a traducir el título, el prefijo de ticket (`[US-042]`, `[TK-007]`) se mantiene intacto. Los subjects de commits en la lista de la descripción **no** se traducen — se citan literales para preservar trazabilidad. Los reportes de `quality-check`, `code-review` y `trace-validate` siguen su propia resolución de idioma.
+**Excepción deliberada:** este skill opera sobre git, no sobre el harness, y **no lee `.agents/MEMORY.md`**. Orden propio, deteniéndose en el primer paso que aplique:
+
+1. La preferencia de idioma del usuario que conste en el contexto de la sesión.
+2. El idioma de la conversación.
+3. El idioma predominante de los commits del rango `origin/<destino>..HEAD`.
+
+Un título o descripción explícitos del usuario **siempre** tienen prioridad y se respetan literalmente.
+
+Cuando el idioma resuelto obliga a traducir el título, el prefijo de ticket (`[US-042]`, `[TK-007]`) se mantiene intacto. Los subjects de commits de la descripción **no** se traducen: se citan literales para preservar trazabilidad. Los reportes de `quality-check`, `code-review` y `trace-validate` siguen su propia resolución de idioma.
 
 ---
 

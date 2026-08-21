@@ -25,19 +25,21 @@ Nunca pegar en el chat el valor de un secreto (contraseña, PAT, API key, token)
 
 ## Cómo preguntar al usuario
 
-Usar la herramienta de preguntas estructuradas del cliente (opciones tappables):
+Mecanismo, ritmo y fallback compartidos: [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md).
 
-- Una pregunta por turno; máximo tres en un mismo bloque.
-- Opciones cortas y mutuamente excluyentes (2–4); entrada libre solo si no hay forma de enumerar opciones.
-- No repreguntar lo que ya esté en el contexto de la sesión, en el diff o en una propuesta ya mostrada.
-- Una sola tanda al inicio para resolver ambigüedades. Excepciones deliberadas, una por turno: propuesta de commit (una sola por invocación, cubra uno o varios commits), commit en rama protegida, archivo sensible detectado.
-- Fallback: prosa con opciones enumeradas (1, 2, 3…) si el cliente no expone la herramienta.
+Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar*, *validar* o *sugerir* algo al usuario, asume ese mecanismo; no se repite allí.
+
+**No repreguntar** lo que ya esté en el contexto de la sesión, **en el diff o en una propuesta ya mostrada**. Este skill **no lee `.agents/MEMORY.md`**, así que esa fuente de la referencia compartida no aplica aquí.
+
+**Excepciones al ritmo**, una por turno: propuesta de commit (una sola por invocación, cubra uno o varios commits), commit en rama protegida, archivo sensible detectado.
 
 ## Idioma
 
-Si en el contexto de la sesión de chat existe un **idioma de preferencia del usuario**, redactar en ese idioma la parte en lenguaje natural (descripción, body, footers). Si no consta, usar el idioma de la conversación. El output y los mensajes de error de git no se traducen.
+Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
 
-**Tipo y scope van siempre en inglés**, salvo convención explícita del equipo.
+**Excepción deliberada:** este skill opera sobre git, no sobre el harness, y **no lee `.agents/MEMORY.md`**. Si en el contexto de la sesión existe un **idioma de preferencia del usuario**, redactar en ese idioma la parte en lenguaje natural (descripción, body, footers). Si no consta, usar el idioma de la conversación.
+
+El tipo y el scope van **siempre en inglés** (Conventional Commits), salvo convención explícita del equipo. El output y los mensajes de error de git no se traducen.
 
 ## Convenciones del mensaje
 

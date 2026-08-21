@@ -6,6 +6,19 @@ Invocación típica: `/nombre-skill` o una frase que active la descripción del 
 
 ---
 
+## Reglas transversales
+
+Cuatro reglas aplican a todo el catálogo y viven **una sola vez** en [`reference/`](reference/), en la raíz del plugin. Cada `SKILL.md` las enlaza con `${CLAUDE_PLUGIN_ROOT}/reference/…` y declara solo su delta o su excepción:
+
+| Regla | Dónde vive | Qué fija |
+|-------|-----------|----------|
+| **Resolución de idioma** | [`reference/language.md`](reference/language.md) | Orden canónico `.agents/MEMORY.md` → sesión → mensaje → preguntar; qué nunca se traduce; RFC 2119 en el idioma de preferencia. Excepciones declaradas: `arch-init`, `test-define`, `design-define`, `git-commit`, `pr-create`, `work-research`. |
+| **Cómo preguntar al usuario** | [`reference/asking.md`](reference/asking.md) | Herramienta de preguntas estructuradas, opciones cortas y excluyentes, una tanda al inicio, fallback en prosa enumerada. |
+| **Artefactos** | [`reference/artifacts.md`](reference/artifacts.md) | Ruta de cada artefacto, identificadores y numeración, y el contrato de archivado (archivar no libera el ID). |
+| **Azure DevOps** | [`reference/alm/azure-devops.md`](reference/alm/azure-devops.md) | Activación, claves de `MEMORY.md`, verificación del MCP y su degradación, URL, límite de 255 caracteres del título y reconstrucción íntegra. |
+
+---
+
 ## Convención: enlace al gestor de proyectos
 
 Cualquier artefacto que enlace a su work item en un sistema de seguimiento externo (Azure DevOps, Jira u otro) lo hace **en la cabecera de metadatos** con esta etiqueta única, sin variantes por tipo de artefacto:

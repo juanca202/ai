@@ -23,25 +23,17 @@ Guia general para **ejecutar en codigo** trabajo ya especificado, de **distintos
 
 ## Como preguntar al usuario
 
-Cuando este skill (o cualquiera de sus referencias) indique **preguntar, pedir, confirmar o validar** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** del cliente (la que renderiza opciones tappables o un selector) en lugar de redactar la pregunta como prosa libre. Reglas:
+Mecanismo, ritmo y fallback compartidos: [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md).
 
-- **Opciones cortas y mutuamente excluyentes** (2-4 por pregunta) cuando la respuesta admita categorias.
-- **No repreguntar** lo que ya esta respondido en el contexto de la sesion o en los documentos del repo.
-- **Confirmaciones entre unidades:** una pregunta por turno con opciones claras (p. ej. Opciones: [Si, continuar] / [No, detener aqui]). No avanzar antes de la respuesta.
-- **Fallback:** si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3...).
+Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar*, *validar* o *sugerir* algo al usuario, asume ese mecanismo; no se repite allí.
 
-Cada vez que una referencia diga *preguntar al usuario*, *validar con el usuario* o *confirmar* asume este mecanismo; no se repite alli.
+**Confirmaciones entre unidades:** una pregunta por turno con opciones claras (p. ej. Opciones: [Si, continuar] / [No, detener aqui]). No avanzar antes de la respuesta.
 
 ---
 
 ## Resolucion de idioma
 
-El idioma de los mensajes al usuario y de las notas de `progress.md` se decide en este orden; detenerse en el primer paso que aplique:
-
-1. **`.agents/MEMORY.md`** (raiz del repo) => linea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Es la clave canonica que escribe `arch-init`; si existe, manda.
-2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesion.
-3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md` con `preferred language: <codigo>`.
-4. Si no se puede inferir, **preguntar al usuario** que idioma prefiere y, tras su respuesta, **preguntar si desea persistirlo** en `.agents/MEMORY.md`; no decidir el idioma por cuenta propia.
+Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
 
 El idioma resuelto aplica a los mensajes al usuario y a las notas de `progress.md`. La salida y los mensajes de error de las herramientas (lint, build, tests) no se traducen; el codigo, los identificadores y los nombres de artefacto tampoco.
 
@@ -380,6 +372,15 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 | `references/work-items.md` | Tipo = tarea de mantenimiento (`WI-XXX`). Documento unico combinado, validacion por criterios de aceptacion, ciclo por WI completo, cierre, ejemplos y anti-patrones. |
 | `references/test-cases.md` | Tipo = caso de prueba (`TC-XXX`) o feature (`FT-XXX`). Automatizacion de las pruebas documentadas por `test-define`: ubicaciones por artefacto padre, rama `test/`, matriz AC=>TC, traduccion del TC a codigo de prueba, que hacer ante una prueba en rojo, cierre con `trace-validate`, ejemplos y anti-patrones. |
 | `assets/progress-template.md` | Plantilla de `progress.md`. Adaptar encabezado y unidades al tipo. |
+
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
 
 ---
 

@@ -1,0 +1,133 @@
+{
+  "$schema": "http://json-schema.org",
+  "title": "SDD Plugin Settings",
+  "type": "object",
+  "required": ["language", "interaction", "projectManagement", "telemetry"],
+  "additionalProperties": false,
+  "properties": {
+    "language": {
+      "type": "string",
+      "description": "Idioma de preferencia para las respuestas e interacciones de la IA.",
+      "default": "es",
+      "enum": ["es", "en", "fr", "de", "it"]
+    },
+    "interaction": {
+      "type": "object",
+      "description": "Políticas de comportamiento y control de flujos de la IA.",
+      "required": ["confirmByUnit", "workTree", "maxParallel", "archiveMode"],
+      "additionalProperties": false,
+      "properties": {
+        "confirmByUnit": {
+          "type": "string",
+          "description": "Estrategia para solicitar confirmación del usuario por unidad de trabajo.",
+          "enum": ["always", "never"]
+        },
+        "workTree": {
+          "type": "string",
+          "description": "Política de aislamiento de cambios en git worktrees temporales.",
+          "enum": ["ask", "always", "never"]
+        },
+        "maxParallel": {
+          "type": "integer",
+          "minimum": -1,
+          "description": "Número máximo de tareas ejecutándose en paralelo. Usa -1 para sin límite."
+        },
+        "archiveMode": {
+          "type": "string",
+          "description": "Comportamiento del plugin al archivar tareas o contextos antiguos.",
+          "enum": ["ask", "always", "never"]
+        }
+      }
+    },
+    "projectManagement": {
+      "type": "object",
+      "description": "Configuración de la plataforma de gestión de proyectos vinculada.",
+      "required": ["enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Activa o desactiva la integración con sistemas de tickets externos."
+        },
+        "provider": {
+          "type": "string",
+          "description": "Proveedor del sistema de tickets o issues.",
+          "enum": ["jira", "azure-devops"]
+        },
+        "host": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL base de la instancia (ej: https://tu-organizacion.atlassian.net)."
+        },
+        "workspace": {
+          "type": "string",
+          "description": "Nombre de la organización o subdominio en el servicio externo."
+        },
+        "project": {
+          "type": "string",
+          "description": "Clave del proyecto (Jira) o nombre del proyecto (Azure DevOps)."
+        }
+      },
+      "dependencies": {
+        "enabled": {
+          "oneOf": [
+            {
+              "properties": {
+                "enabled": { "enum": [false] }
+              }
+            },
+            {
+              "properties": {
+                "enabled": { "enum": [true] }
+              },
+              "required": ["provider", "host", "workspace", "project"]
+            }
+          ]
+        }
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "description": "Configuración de observabilidad y envío de eventos basada en OpenTelemetry.",
+      "required": ["enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Activa o desactiva por completo el envío de telemetría."
+        },
+        "endpoint": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL base del colector de OpenTelemetry (ej: https://localhost:4318)."
+        },
+        "protocol": {
+          "type": "string",
+          "description": "Protocolo de red y formato de serialización para OTel.",
+          "enum": ["http/protobuf", "http/json", "grpc"]
+        },
+        "serviceName": {
+          "type": "string",
+          "description": "Identificador del servicio (atributo service.name) mapeado en OTel."
+        }
+      },
+      "dependencies": {
+        "enabled": {
+          "oneOf": [
+            {
+              "properties": {
+                "enabled": { "enum": [false] }
+              }
+            },
+            {
+              "properties": {
+                "enabled": { "enum": [true] }
+              },
+              "required": ["endpoint", "protocol", "serviceName"]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

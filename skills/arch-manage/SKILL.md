@@ -136,16 +136,11 @@ El ADR y el estándar se enlazan **por referencia**, nunca duplicando contenido:
 
 ## Resolución de idioma
 
-El idioma de los artefactos y de los mensajes al usuario se decide en este orden; detenerse en el primer paso que aplique:
+Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
 
-1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>`. Es la clave canónica que escribe `arch-init`; si existe, manda.
-2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesión.
-3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md` con `preferred language: <código>`.
-4. Si no se puede inferir, **preguntar** qué idioma prefiere; no decidir el idioma por cuenta propia.
+El idioma resuelto aplica a los **artefactos** (ADR y estándares) y a los mensajes al usuario.
 
-Las claves de frontmatter, los identificadores (`ADR-XXX`, referencias de requisito `<estándar>/<requisito>` y de criterio `<estándar>/CR-XXX`), las rutas y las salidas de comandos **no se traducen**.
-
-Las palabras clave normativas de RFC 2119 / RFC 8174 (MUST/DEBE, SHOULD/DEBERÍA, MAY/PUEDE… — tabla completa en la sección "Concepto: ADR ≠ estándar" más arriba) **sí se redactan en el idioma de preferencia**, siempre en MAYÚSCULAS: un estándar en español usa DEBE/DEBERÍA/PUEDE…, uno en inglés usa MUST/SHOULD/MAY…
+**Palabras clave normativas:** las de RFC 2119 / RFC 8174 **sí** se redactan en el idioma de preferencia, siempre en MAYÚSCULAS (tabla de equivalencias en la referencia compartida y en la sección "Concepto: ADR ≠ estándar" más arriba): un estándar en español usa DEBE/DEBERÍA/PUEDE…, uno en inglés usa MUST/SHOULD/MAY…
 
 ---
 
@@ -291,6 +286,14 @@ mantiene ligero):
 - [`references/conventions.md`](references/conventions.md) — convenciones de identidad, numeración y **frontmatter** de ADR / estándar / requisito / CR. Leer al escribir frontmatter o identificadores.
 - [`references/fitness-functions.md`](references/fitness-functions.md) — cómo **proponer los criterios (CR) con su mecanismo de verificación** para que el usuario elija cuáles crear, cómo crear la **fitness function** de los seleccionados, registrarla en el archivo de checks de su estándar y mantener el **runner** `scripts/arch/verify.<ext>`. Leer **antes de escribir CR nuevos**, al automatizar un CR o al tocar el runner.
 - [`references/dependencies.md`](references/dependencies.md) — flujo para ofrecer **instalar dependencias** ausentes que referencia la decisión. Leer tras crear los artefactos si referencian una tecnología concreta.
+
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
+- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
 
 ---
 
