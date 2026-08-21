@@ -13,8 +13,12 @@ Este repositorio publica dos plugins de Claude Code desde el mismo marketplace (
 
 ## Instalación en Cursor
 
+Cada plugin se instala por separado, apuntando a su propia carpeta de skills — la raíz del repo mezcla
+los dos:
+
 ```bash
-npx skills add https://github.com/juanca202/ai
+npx skills add juanca202/ai/skills          # SDD Devkit
+npx skills add juanca202/ai/others/utils/skills  # Utils
 ```
 
 El asistente te guiará paso a paso: dónde instalar (proyecto o global) y qué agente usar. **Instala el
