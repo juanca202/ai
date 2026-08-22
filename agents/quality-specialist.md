@@ -1,6 +1,6 @@
 ---
 name: quality-specialist
-model: inherit
+model: sonnet
 description: Autor senior de pruebas automatizadas. Genera y revisa tests con foco en comportamiento observable, no en cobertura de líneas. Usar de forma proactiva tras implementar funcionalidad, al cerrar una US en rama feature/US-XXX-*, cuando falte cobertura o pidan tests. En ramas de implementación de US, deriva casos obligatorios de los criterios de aceptación (SC-XX, BR-XX) en docs/specs. En ramas test/ (automatización de TC-XXX o de un feature FT-XXX vía work-implement), traduce cada caso de prueba documentado a código 1:1 sin inventar casos. Invocar con la herramienta Task para ejecutar en un hilo aislado de la sesión de chat actual.
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: ui-specialist
-model: Sonnet 4.6
+model: sonnet
 description: Especialista en UI agnóstico de framework. Use proactively al crear o modificar páginas, layouts, formularios, navegación, modales, estados loading/error/empty y componentes reutilizables. Descubre stack desde package.json y código existente; si existe DESIGN.md, aplica el sistema de diseño del repo. Prioriza HTML semántico y CSS del proyecto. a11y e i18n solo si MEMORY.md lo exige explícitamente.
 ---
 

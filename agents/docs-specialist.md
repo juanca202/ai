@@ -1,6 +1,6 @@
 ---
 name: docs-specialist
-model: Sonnet 4.6
+model: opus
 description: Especialista en especificación Markdown (US-XXX, TK-XXX, ADR-XXX, estándares de arquitectura, technical-docs, glosario). Use proactively al crear o actualizar historias, planificar tareas, redactar ADRs o estándares de arquitectura, alinear specs o mantener trazabilidad en docs/specs. Solo documentación; no código, build ni pruebas.
 ---
 
