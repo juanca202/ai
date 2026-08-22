@@ -10,7 +10,7 @@ Este repositorio publica dos plugins de Claude Code desde el mismo marketplace (
 ## Instalación en Cursor
 
 ```bash
-npx skills add https://github.com/juanca202/ai
+npx skills add https://github.com/juanca202/sdd-devkit
 ```
 
 El asistente te guiará paso a paso: dónde instalar (proyecto o global), qué agente usar y qué skills incluir.
@@ -22,7 +22,7 @@ Manifiestos: [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) 
 Agrega el marketplace y luego instala el plugin que necesites:
 
 ```
-/plugin marketplace add juanca202/ai
+/plugin marketplace add juanca202/sdd-devkit
 /plugin install sdd-devkit@juanca202
 /plugin install utils@juanca202
 ```

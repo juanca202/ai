@@ -10,7 +10,7 @@ Al participar en este proyecto te comprometes a mantener un trato respetuoso y c
 
 ### Reportar un bug o proponer una mejora
 
-Abre un [issue](https://github.com/juanca202/ai/issues) describiendo:
+Abre un [issue](https://github.com/juanca202/sdd-devkit/issues) describiendo:
 
 - **Contexto:** qué skill o agente afecta (`skills/<nombre>` o `agents/<nombre>`).
 - **Comportamiento actual vs. esperado.**
