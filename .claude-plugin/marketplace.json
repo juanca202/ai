@@ -16,9 +16,9 @@
       }
     },
     {
-      "name": "utils",
-      "displayName": "Utils",
-      "source": "./others/utils",
+      "name": "sdd-utils",
+      "displayName": "SDD Utils",
+      "source": "https://github.com/juanca202/sdd-utils",
       "description": "Skills de utilidad generales: instalacion de MCP ALM (Azure DevOps / Jira), creacion de proyectos desde plantilla y validacion de prompts.",
       "version": "1.0.0",
       "author": {

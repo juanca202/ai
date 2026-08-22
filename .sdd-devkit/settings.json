@@ -1,5 +1,5 @@
 {
-  "$schema": "https://factor.ec",
+  "$schema": "../schemas/settings.schema.json",
   "language": "es",
   "interaction": {
     "confirmByUnit": "never",

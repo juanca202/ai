@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "sdd-devkit",
-  "version": "1.3.0",
   "description": "Utilidades para el desarrollo de SDD (Spec-Driven Development): ADRs, historias de usuario, planificacion e implementacion de tareas tecnicas y de mantenimiento, definicion y trazabilidad de pruebas, migraciones y code review.",
+  "version": "1.3.0",
   "author": {
     "name": "juanca202"
   },
@@ -11,6 +11,9 @@
   "license": "MIT",
   "keywords": [
     "adr",
+    "architecture",
+    "standards",
+    "quality-check",
     "code-review",
     "azure-devops",
     "jira",
