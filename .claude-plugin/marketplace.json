@@ -16,17 +16,17 @@
       }
     },
     {
-      "name": "sdd-devkit-2",
+      "name": "sdd-devkit-v2",
       "displayName": "SDD Devkit 2",
       "source": {
         "source": "github",
-        "description": "Utilidades para el desarrollo de SDD (Spec-Driven Development): ADRs, historias de usuario, planificacion e implementacion de tareas tecnicas y de mantenimiento, definicion y trazabilidad de pruebas, migraciones, verificaciones automatizadas y code review.",
-        "version": "2.0.0",
-        "author": {
-          "name": "juanca202"
-        },
         "repo": "juanca202/sdd-devkit",
         "ref": "feature/v2"
+      },
+      "description": "Utilidades para el desarrollo de SDD (Spec-Driven Development).",
+      "version": "2.0.0",
+      "author": {
+        "name": "juanca202"
       }
     },
     {
