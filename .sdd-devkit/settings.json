@@ -12,5 +12,11 @@
   },
   "telemetry": {
     "enabled": false
+  },
+  "specTracking": {
+    "enabled": true,
+    "basePath": "docs/specs/",
+    "requirement": "to-do-app",
+    "url": "https://events.sdd.io/api/v1/events"
   }
 }

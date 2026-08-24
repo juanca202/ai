@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org",
   "title": "SDD Plugin Settings",
   "type": "object",
-  "required": ["language", "interaction", "projectManagement", "telemetry"],
+  "required": ["language", "interaction", "projectManagement", "telemetry", "specTracking"],
   "additionalProperties": false,
   "properties": {
     "language": {
@@ -124,6 +124,48 @@
                 "enabled": { "enum": [true] }
               },
               "required": ["endpoint", "protocol", "serviceName"]
+            }
+          ]
+        }
+      }
+    },
+    "specTracking": {
+      "type": "object",
+      "description": "Configuración del seguimiento de especificaciones: envío de eventos de progreso sobre artefactos en docs/specs/.",
+      "required": ["enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Activa o desactiva el envío de eventos de seguimiento de especificaciones."
+        },
+        "basePath": {
+          "type": "string",
+          "description": "Ruta relativa a la raíz del repositorio donde viven las especificaciones (ej: docs/specs/)."
+        },
+        "requirement": {
+          "type": "string",
+          "description": "Identificador del requerimiento o proyecto cuyo progreso se reporta (ej: to-do-app)."
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL del endpoint de eventos (ej: https://events.sdd.io/api/v1/events)."
+        }
+      },
+      "dependencies": {
+        "enabled": {
+          "oneOf": [
+            {
+              "properties": {
+                "enabled": { "enum": [false] }
+              }
+            },
+            {
+              "properties": {
+                "enabled": { "enum": [true] }
+              },
+              "required": ["basePath", "requirement", "url"]
             }
           ]
         }
