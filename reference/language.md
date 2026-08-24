@@ -9,16 +9,16 @@ excepción tiene, si la tiene).
 
 Detenerse en el **primer paso que aplique**:
 
-1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`).
+1. **`.agents/MEMORY.md`** (raíz del repo) → línea `idioma: <ISO 639-1>` (p. ej. `es`, `en`).
    Es la clave canónica que escribe `arch-init`; si existe, **manda**.
 2. Si no, la **preferencia de idioma del usuario** que conste en el contexto de la sesión.
 3. Si no, usar el **idioma del mensaje del usuario** y **preguntar si desea persistirlo** en
-   `.agents/MEMORY.md` con `preferred language: <código>`.
+   `.agents/MEMORY.md` con `idioma: <código>`.
 4. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta,
    **preguntar si desea persistirlo** en `.agents/MEMORY.md`. **No decidir el idioma por cuenta propia.**
 
-> **Claves legacy.** Si `preferred language:` no existe pero hay claves antiguas (`language:`,
-> `idioma:`, `Project language:`), usarlas solo como fallback al leer un `MEMORY.md` viejo, y proponer
+> **Claves legacy.** Si `idioma:` no existe pero hay claves antiguas (`idioma de preferencia:`,
+> `preferred language:`, `language:`, `Project language:`), usarlas solo como fallback al leer un `MEMORY.md` viejo, y proponer
 > la migración a la clave canónica.
 
 > **Modo delegado.** Cuando el skill se ejecuta invocado por otro skill (subagente), el **paso 2** pasa a
@@ -61,7 +61,7 @@ en su propio `SKILL.md`; esta tabla existe para que el conjunto sea auditable de
 
 | Skill | Excepción |
 |-------|-----------|
-| `arch-init` | Es quien **crea** `.agents/MEMORY.md`. Si ya existe (reejecución), lee su `preferred language:`; si no, usa el idioma del turno del usuario y lo **persiste** al crear el archivo, sin preguntarlo aparte salvo ambigüedad. |
+| `arch-init` | Es quien **crea** `.agents/MEMORY.md`. Si ya existe (reejecución), lee su `idioma:`; si no, usa el idioma del turno del usuario y lo **persiste** al crear el archivo, sin preguntarlo aparte salvo ambigüedad. |
 | `test-define` | Redacta los TC **en el idioma del artefacto origen**, no en el del orden canónico: un TC que no hable el idioma de los criterios que traza se lee mal junto a ellos. Ante conflicto o ambigüedad, preguntar antes de generar. |
 | `design-define` | El orden canónico rige la **prosa**. Los nombres de campos, rutas y payloads siguen la convención del código existente (ver `references/element-standards.md` de ese skill). |
 | `git-commit` · `pr-create` | Operan sobre git, no sobre el harness: no leen `.agents/MEMORY.md`. Orden: preferencia del usuario en sesión → idioma de la conversación → (en `pr-create`) idioma predominante de los commits del rango. Un título o descripción explícitos del usuario se respetan literalmente. |

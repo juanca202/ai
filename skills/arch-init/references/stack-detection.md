@@ -20,7 +20,7 @@ Buscar en la raíz del proyecto (y un nivel de subcarpetas si el repo es un mono
 | Móvil nativo | `Podfile`/`*.xcodeproj` (iOS), `build.gradle` + `AndroidManifest.xml` (Android), `pubspec.yaml` (Flutter) |
 | Infra / contenedores | `Dockerfile`, `docker-compose.yml`, `*.tf`, manifiestos de Kubernetes (no determinan el stack de aplicación por sí solos, pero suman contexto) |
 
-Para cada manifiesto encontrado, extraer también framework(s) principal(es) y su versión cuando esté disponible (p. ej. leer `dependencies`/`devDependencies` de `package.json`, secciones `[project.dependencies]` de `pyproject.toml`, etc.). Esto alimenta directamente la sección `## Stack tecnológico` de `AGENTS.md` en el cierre (Paso 5).
+Para cada manifiesto encontrado, extraer también framework(s) principal(es) y su versión cuando esté disponible (p. ej. leer `dependencies`/`devDependencies` de `package.json`, secciones `[project.dependencies]` de `pyproject.toml`, etc.). Esto alimenta directamente la sección `# Stack tecnológico` de `AGENTS.md` en el cierre (Paso 5).
 
 **Resultado:**
 

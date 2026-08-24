@@ -90,7 +90,7 @@ Antes de tocar git, el agente debe tener clara la siguiente información. **No a
 | **Estado de `progress.md`** | Leer el archivo en la ubicación correspondiente al tipo; si el trabajo ya está archivado, en su ruta bajo `docs/specs/archive/` | Si no existe en ninguna de las dos: parar e informar; el merge requiere `progress.md` poblado |
 | **Working tree** | `git status --porcelain` | Si hay salida: invocar automáticamente el flujo del skill **`git-commit`** sobre los cambios pendientes (sin preguntar al usuario si conviene invocarlo — la decisión de invocar es automática; `git-commit` sí puede pausar con su propia propuesta y pedir confirmación antes de comitear, eso no lo decide `work-integrate`) y continuar una vez quede limpio; si `git-commit` no logra dejarlo limpio, parar e informar el motivo. Detalle operativo (fallback sin `git-commit`, working tree parcialmente limpio): ver [Validación antes de mergear](#validación-antes-de-mergear) |
 | **Rama base** | (1) `git reflog show <branch>` → línea `Created from`; (2) `git config --get branch.<branch>.merge`; (3) preguntar al usuario | No asumir `main`, `master` ni `develop` por defecto |
-| **Idioma de preferencia** | Ver [Resolución de idioma](#resolución-de-idioma) | Preguntar y persistir en `.agents/MEMORY.md` con `preferred language: <código>` |
+| **Idioma de preferencia** | Ver [Resolución de idioma](#resolución-de-idioma) | Preguntar y persistir en `.agents/MEMORY.md` con `idioma: <código>` |
 
 > Leer el `progress.md` **completo** antes de iniciar cualquier operación git. Las tres condiciones (rama, working tree, estados) se evalúan antes de cambiar de rama o invocar `git merge`.
 

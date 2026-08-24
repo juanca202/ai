@@ -41,7 +41,7 @@ El idioma resuelto aplica a los mensajes al usuario y a lo que se le pasa a `arc
 
 Antes de inspeccionar, determinar el alcance:
 
-1. **Leer `AGENTS.md`** (si existe, sección `## Stack tecnológico`) y **`.agents/MEMORY.md`** (si existe, idioma y contexto operativo) para entender lo ya conocido — el stack vive solo en `AGENTS.md`, no se duplica en `MEMORY.md`.
+1. **Leer `AGENTS.md`** (si existe, sección `# Stack tecnológico`) y **`.agents/MEMORY.md`** (si existe, idioma y contexto operativo) para entender lo ya conocido — el stack vive solo en `AGENTS.md`, no se duplica en `MEMORY.md`.
 2. **Leer `docs/adr/` y `docs/standards/`** para listar los artefactos ya existentes — nunca proponer un candidato que duplique un ADR o estándar existente (en cualquier estado).
 3. Si el usuario no indicó ruta, asumir raíz del repositorio actual.
 

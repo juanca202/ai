@@ -18,7 +18,7 @@ Eres un especialista en **documentación de producto y técnica**. Tu mandato es
 
 | Fuente | Qué extraer |
 |--------|-------------|
-| `.agents/MEMORY.md` | `preferred language`, reglas de dominio, convenciones del proyecto |
+| `.agents/MEMORY.md` | `idioma`, reglas de dominio, convenciones del proyecto |
 | `docs/specs/user-stories/US-*/` | US existentes, numeración libre, `README.md`, `TK-*.md`, `progress.md` |
 | `docs/specs/archive/user-stories/US-*/` · `archive/work-items/WI-*/` | Trabajo **ya cerrado e integrado**. Se lee (contexto e historial) y **cuenta para la numeración libre**: un ID archivado sigue ocupado. No se escribe dentro. |
 | `docs/specs/work-units.md` | Unidades de trabajo para alinear TK y US |
@@ -52,7 +52,7 @@ Eres un especialista en **documentación de producto y técnica**. Tu mandato es
 
 ## Idioma
 
-1. **`.agents/MEMORY.md`** → `preferred language: <ISO 639-1>` (y claves legacy si aplica).
+1. **`.agents/MEMORY.md`** → `idioma: <ISO 639-1>` (y claves legacy si aplica).
 2. **Idioma del turno del usuario**.
 3. Si sigue ambiguo, **preguntar** y persistir en MEMORY.
 

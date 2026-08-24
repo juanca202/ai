@@ -1,7 +1,7 @@
 ---
 name: arch-init
 description: >-
-  Identifica el punto de partida de un proyecto (sin código / con código base / con implementación) e inicializa lo que falte de su harness multi-agente: repo git, placeholders `AGENTS.md`/`CLAUDE.md`/`.agents/MEMORY.md`/`docs/adr/README.md`/`docs/standards/README.md`, el stack tecnológico (capturando qué se quiere desarrollar y, si hace falta, investigando con `work-research`), candidatos de ADR/estándares (vía `arch-discover` si ya hay implementación) y la compuerta de calidad (consultando `quality-check` para saber qué se suele validar por stack). Cierra actualizando el stack y sugiriendo continuar con `work-define` o `work-plan`. Activar al pedir inicializar, bootstrapear o preparar un proyecto para agentes, configurar su harness, crear `AGENTS.md`/`CLAUDE.md`/`MEMORY.md` desde cero, o mencionar "arch-init", "/arch-init", "inicializa el harness".
+  Identifica el punto de partida de un proyecto (sin código / con código base / con implementación) e inicializa lo que falte de su harness multi-agente: repo git, placeholders `AGENTS.md`/`CLAUDE.md`/`.agents/MEMORY.md`/`docs/adr/README.md`/`docs/standards/README.md` — migrando al formato de las plantillas los que el proyecto ya tuviera en otro formato, sin perder su contenido —, el stack tecnológico (capturando qué se quiere desarrollar y, si hace falta, investigando con `work-research`), candidatos de ADR/estándares (vía `arch-discover` si ya hay implementación) y la compuerta de calidad (consultando `quality-check` para saber qué se suele validar por stack). Cierra actualizando el stack y sugiriendo continuar con `work-define` o `work-plan`. Activar al pedir inicializar, bootstrapear o preparar un proyecto para agentes, configurar su harness, crear `AGENTS.md`/`CLAUDE.md`/`MEMORY.md` desde cero, o mencionar "arch-init", "/arch-init", "inicializa el harness".
 license: MIT
 ---
 
@@ -13,7 +13,7 @@ Inicializa, en un proyecto **en cualquier punto de partida**, las primeras instr
 >
 > **Alcance:** este skill **bootstrapea** el harness — es el primer paso de SDD Devkit, antes de que exista nada que `arch-discover`, `arch-manage`, `arch-audit` o `quality-check` puedan leer, auditar o revisar. No reemplaza a `work-define` / `work-plan` / `work-implement` (historias y tareas) ni reimplementa la lógica de esos skills — los invoca cuando corresponde. Se ejecuta normalmente **una vez** por proyecto; volver a ejecutarlo sobre uno ya inicializado solo completa lo que falte (ver [Idempotencia](#idempotencia--reejecución)).
 >
-> **Orden con compuertas:** no se avanza de paso mientras el anterior no esté resuelto. La sección `## Stack tecnológico` de `AGENTS.md` se deja **vacía** hasta el cierre (Paso 5) — no se rellena antes, aunque el stack ya se conozca desde el Paso 1 o el Paso 2.
+> **Orden con compuertas:** no se avanza de paso mientras el anterior no esté resuelto. La sección `# Stack tecnológico` de `AGENTS.md` se deja con su comentario de plantilla hasta el cierre (Paso 5) — no se rellena antes, aunque el stack ya se conozca desde el Paso 1 o el Paso 2.
 
 ## Relación con el resto de SDD Devkit
 
@@ -23,7 +23,7 @@ Inicializa, en un proyecto **en cualquier punto de partida**, las primeras instr
 | ----- | ----------------------------------------------------- |
 | `arch-manage` | Crea/actualiza ADRs y estándares de dominio. `arch-init` lo invoca en el Paso 5 con los candidatos que se aceptaron en el Paso 4 — nunca redacta un ADR/estándar por su cuenta. |
 | `arch-discover` | Infiere ADR/estándares candidatos **del código ya existente** y los crea por su cuenta (su Fase 5 invoca `arch-manage`). `arch-init` lo invoca **completo** en el Paso 4.1 cuando el punto de partida es "con implementación" — no reimplementa esa inspección ni repite su creación de artefactos. |
-| `arch-audit` | Audita `docs/standards/` y `AGENTS.md` contra el repo — de `AGENTS.md` toma también el contexto de stack (`## Stack tecnológico`) — y lee `.agents/MEMORY.md` para el idioma. `arch-init` es lo que le da a `arch-audit` algo que auditar la primera vez. |
+| `arch-audit` | Audita `docs/standards/` y `AGENTS.md` contra el repo — de `AGENTS.md` toma también el contexto de stack (`# Stack tecnológico`) — y lee `.agents/MEMORY.md` para el idioma. `arch-init` es lo que le da a `arch-audit` algo que auditar la primera vez. |
 | `quality-check` | Sabe qué se suele validar por stack — tipado, linter, unit tests, coverage, integración, build, e2e, sonar (`quality-check/references/stacks.md`). `arch-init` lo **consulta** en el Paso 4 para saber qué le falta a la compuerta de calidad; no ejecuta la corrida completa (esa corre sobre código ya implementado, no aplica en una inicialización). |
 | `work-define` / `work-plan` | Reciben el handoff que `arch-init` ofrece al cerrar (Paso 5). |
 
@@ -47,9 +47,9 @@ Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/refere
 
 **Excepción deliberada: este skill es quien crea `.agents/MEMORY.md`**, así que no puede leerlo como paso 1 del orden canónico.
 
-1. Si `.agents/MEMORY.md` **ya existe** (reejecución sobre un harness parcialmente inicializado), leer su línea `preferred language: <código>` y usar ese idioma.
+1. Si `.agents/MEMORY.md` **ya existe** (reejecución sobre un harness parcialmente inicializado), leer su línea `idioma: <código>` y usar ese idioma.
 2. Si no existe, usar el **idioma del turno del usuario**.
-3. **Persistir** el idioma resuelto en `.agents/MEMORY.md` como `preferred language: <código>` al crearlo (Paso 3) — no hace falta preguntarlo aparte salvo que el idioma del turno sea ambiguo.
+3. **Persistir** el idioma resuelto en `.agents/MEMORY.md` como `idioma: <código>` al crearlo (Paso 3) — no hace falta preguntarlo aparte salvo que el idioma del turno sea ambiguo.
 
 A partir de ahí, el resto del catálogo lee esa clave como paso 1 de su orden canónico.
 
@@ -59,11 +59,13 @@ A partir de ahí, el resto del catálogo lee esa clave como paso 1 de su orden c
 
 | Archivo | Contenido | Se crea en |
 | ------- | --------- | ---------- |
-| `AGENTS.md` | Reglas operativas/arquitectónicas + sección `Stack tecnológico` | Paso 3 (stub) → Paso 5 (stack definitivo) |
+| `AGENTS.md` | Fuentes de contexto + reglas generales + sección `Stack tecnológico` | Paso 3 (stub) → Paso 5 (stack definitivo) |
 | `CLAUDE.md` | Solo `@AGENTS.md`, por compatibilidad | Paso 3 |
 | `.agents/MEMORY.md` | Memoria persistente (idioma, preferencias, reglas operativas — **no** el stack, eso vive solo en `AGENTS.md`) | Paso 3 (stub, con idioma) |
 | `docs/adr/README.md` | Índice de ADRs vigentes | Paso 3 (stub) → Paso 5 (poblado por `arch-manage`) |
 | `docs/standards/README.md` | Índice de estándares vigentes | Paso 3 (stub) → Paso 5 (poblado por `arch-manage`) |
+
+Cualquiera de estos cinco que **ya exista** en el proyecto se lleva al formato de su plantilla en el Paso 3 (ver [3.1 Migración de formato](#31-migración-de-formato)) — el harness no admite variantes de formato, porque el resto del catálogo lee estas secciones por su título.
 
 ---
 
@@ -128,20 +130,42 @@ Si durante 2.1 o 2.2 hace falta alguna aclaración adicional del usuario para po
 
 ## Paso 3 — Placeholders del harness
 
-Antes de escribir cualquier archivo, aplicar la regla de [Idempotencia](#idempotencia--reejecución).
+Antes de escribir cualquier archivo, verificar si ya existe y aplicar [Idempotencia / reejecución](#idempotencia--reejecución): un archivo del harness que ya exista **nunca se deja con un formato distinto al de su plantilla**. Lo que sigue describe el caso en que el archivo **no** existe.
 
-1. **`AGENTS.md`** — copiar `assets/agents-template.md` tal cual (el bloque de reglas operativas/arquitectónicas y la sección `## Stack tecnológico` **vacía**).
+1. **`AGENTS.md`** — copiar `assets/agents-template.md` tal cual (fuentes de contexto, el comentario de `# Reglas generales` y la sección `# Stack tecnológico` con su comentario, sin rellenar el stack).
 2. **`CLAUDE.md`** — copiar `assets/claude-template.md` tal cual.
-3. **`.agents/MEMORY.md`** — copiar `assets/memory-template.md`, reemplazando `<código>` en `preferred language:` por el idioma resuelto en [Resolución de idioma](#resolución-de-idioma).
+3. **`.agents/MEMORY.md`** — copiar `assets/memory-template.md`, reemplazando `<código>` en `idioma:` por el idioma resuelto en [Resolución de idioma](#resolución-de-idioma).
 4. **`docs/adr/README.md`** — copiar `assets/adr-index-template.md` tal cual.
 5. **`docs/standards/README.md`** — copiar `assets/standards-index-template.md` tal cual.
 
 ### Idempotencia / reejecución
 
-- Si un archivo del harness **ya existe**:
-  - Si su contenido coincide con el patrón gestionado por este skill (p. ej. `AGENTS.md` ya tiene el bloque de "Reglas operativas y arquitectónicas"), **no sobrescribir** — continuar como si ya estuviera creado.
-  - Si existe pero con contenido **distinto** (el usuario ya tenía su propio `AGENTS.md`/`CLAUDE.md`/etc.), **no sobrescribir automáticamente**: mostrar el contenido actual y preguntar si se debe fusionar, reemplazar o dejar como está. Nunca perder contenido del usuario sin su autorización explícita.
-- Si el harness **ya está completo** (los cinco archivos existen y gestionados), informar que el proyecto ya está inicializado y preguntar si se desea continuar igualmente para revisar/completar el resto (Paso 4 en adelante) o terminar aquí.
+Un proyecto existente puede ya tener alguno de los cinco archivos del harness, escrito a mano o por otra herramienta. **Ninguno de ellos se deja como estaba si su formato no es el de la plantilla**: el harness solo funciona si los cinco archivos tienen la estructura que el resto del catálogo espera leer (secciones, títulos y marcadores de las plantillas de `assets/`). Para cada archivo que ya exista, comparar su estructura contra la plantilla correspondiente y aplicar una de estas tres salidas:
+
+| Estado del archivo existente | Qué hacer |
+| ---------------------------- | --------- |
+| **Ya conforme** — tiene todas las secciones de la plantilla, con sus títulos y en su orden | No tocar. Continuar como si ya estuviera creado. |
+| **Formato divergente** — es reconociblemente el mismo archivo (mismo propósito) pero le faltan secciones, tiene otros títulos, otro orden, o perdió los comentarios-marcador | **Migrar al formato de la plantilla** (ver 3.1). |
+| **Contenido ajeno** — el archivo existe con un propósito distinto al del harness y no hay nada que migrar | No sobrescribir. Mostrar el contenido actual y preguntar si fusionar, reemplazar o dejar como está. |
+
+### 3.1 Migración de formato
+
+Migrar significa **imponer la estructura de la plantilla sin perder contenido del usuario**:
+
+1. **Estructura desde la plantilla:** partir de la plantilla de `assets/` — sus secciones, títulos exactos, orden y comentarios-marcador (los `<!-- ... -->` que `arch-manage` usa como punto de inserción en los índices). Restaurar todo marcador que falte.
+2. **Reubicar el contenido propio:** mover cada bloque del archivo original a la sección equivalente de la plantilla. Ejemplos: reglas generales sueltas en un `AGENTS.md` artesanal → bajo `# Reglas generales`; descripción del stack encontrada en `AGENTS.md` → bajo `# Stack tecnológico`, **pero** ver la regla de la sección 3.2; preferencias en un `MEMORY.md` propio → bajo `## Preferencias`; entradas de ADR/estándares ya listadas en un índice → como líneas en el formato que indica el marcador (`- [ADR-XXX: Título](ADR-XXX-slug.md)` / `- [Nombre del estándar](<slug>.md)`), ordenadas por identificador.
+3. **Normalizar sin reescribir:** ajustar formato (nivel de encabezado, viñetas, sintaxis de enlaces e `@`-includes, orden de entradas), no la redacción del usuario. No resumir, reformular ni traducir su texto.
+4. **Contenido sin sección equivalente:** conservarlo. Si no encaja en ninguna sección de la plantilla, dejarlo al final del archivo bajo un encabezado propio en lugar de descartarlo, y mencionarlo al presentar el diff.
+5. **Confirmar antes de escribir:** mostrar el **diff** de la migración (o el antes/después si el diff es corto) y pedir confirmación explícita. Si el usuario declina, dejar el archivo intacto y registrar que ese archivo no está en formato del harness — informarlo en el cierre (Paso 5.3), porque el resto del catálogo puede no leerlo bien.
+6. **Una sola tanda:** agrupar todas las migraciones detectadas en un único bloque de confirmación, no una pregunta por archivo.
+
+### 3.2 Excepción del stack durante la migración
+
+Si el `AGENTS.md` existente ya describía el stack, ese contenido se **preserva** al migrar (va bajo `# Stack tecnológico`, reemplazando el comentario de la plantilla) — no se borra para volver a poner el placeholder. Lo que sigue prohibido es **redactar o completar** ese stack aquí: si la sección queda con el comentario de la plantilla porque el archivo original no decía nada del stack, se rellena en el Paso 5.2 y en ningún otro momento.
+
+### 3.3 Harness ya completo
+
+Si los cinco archivos existen y **todos** están conformes (o ya quedaron migrados), informar que el proyecto ya está inicializado y preguntar si se desea continuar igualmente para revisar/completar el resto (Paso 4 en adelante) o terminar aquí.
 
 ---
 
@@ -176,11 +200,11 @@ Presentar la lista consolidada de candidatos agrupada por dominio funcional, con
 
 ### 5.2 Actualizar el stack
 
-Reemplazar el contenido (vacío) bajo `## Stack tecnológico` en `AGENTS.md` con el stack definitivo — lenguaje(s), framework(s) y versión, gestor de paquetes/build, y las capas de testing configuradas en el 4.2. **`AGENTS.md` es la única fuente del stack** — no se repite en `.agents/MEMORY.md` (ese archivo no lleva sección de stack; ver plantilla). Este es el **único** momento del flujo en que se escribe esa sección.
+Reemplazar el comentario bajo `# Stack tecnológico` en `AGENTS.md` con el stack definitivo — lenguaje(s), framework(s) y versión, gestor de paquetes/build, y las capas de testing configuradas en el 4.2. **`AGENTS.md` es la única fuente del stack** — no se repite en `.agents/MEMORY.md` (ese archivo no lleva sección de stack; ver plantilla). Este es el **único** momento del flujo en que se escribe esa sección.
 
 ### 5.3 Confirmar y sugerir el siguiente paso
 
-Confirmar al usuario que el harness inicial quedó listo, resumiendo: punto de partida (situación del Paso 1.2), repositorio git (creado o ya existía), archivos del harness creados, stack definitivo, compuerta de calidad configurada, y — si aplica — los ADR/estándares creados con sus rutas: los del Paso 5.1 y, si la situación fue "con implementación", también los que creó `arch-discover` en su propia Fase 5 (retenidos del Paso 4.1).
+Confirmar al usuario que el harness inicial quedó listo, resumiendo: punto de partida (situación del Paso 1.2), repositorio git (creado o ya existía), archivos del harness creados, **archivos migrados al formato de plantilla** y los que el usuario prefirió dejar fuera de formato (Paso 3.1), stack definitivo, compuerta de calidad configurada, y — si aplica — los ADR/estándares creados con sus rutas: los del Paso 5.1 y, si la situación fue "con implementación", también los que creó `arch-discover` en su propia Fase 5 (retenidos del Paso 4.1).
 
 Después, ofrecer el siguiente paso natural con la herramienta de preguntas estructuradas — **es una sugerencia, no un paso bloqueante**: *"¿Quieres continuar con...?"* opciones: `Escribir la primera historia de usuario (work-define)` / `Planificar tareas técnicas o de mantenimiento (work-plan)` / `Nada por ahora`.
 
@@ -214,8 +238,14 @@ Reglas transversales del catálogo; viven en la raíz del plugin, no en este ski
 
 ## Anti-patterns
 
-- Rellenar `## Stack tecnológico` en `AGENTS.md` antes del Paso 5, aunque el stack ya se conozca desde el Paso 1 o el Paso 2.
+- Rellenar `# Stack tecnológico` en `AGENTS.md` antes del Paso 5, aunque el stack ya se conozca desde el Paso 1 o el Paso 2.
 - Escribir el stack (o duplicarlo) en `.agents/MEMORY.md` — ese archivo no lleva sección de stack; `AGENTS.md` es la única fuente.
+- Dar por bueno un archivo del harness que ya existía solo porque existe, sin comparar su estructura contra la plantilla de `assets/` (Paso 3).
+- Migrar el formato **reescribiendo** la redacción del usuario — resumir, reformular o traducir su texto en vez de solo reubicarlo y normalizar el formato.
+- Descartar contenido del archivo original porque no encaja en ninguna sección de la plantilla, en vez de conservarlo al final.
+- Migrar sin restaurar los comentarios-marcador de los índices (`docs/adr/README.md`, `docs/standards/README.md`) — sin ellos `arch-manage` no tiene punto de inserción.
+- Borrar el stack que un `AGENTS.md` existente ya describía para dejar el comentario de la plantilla, o al contrario redactar el stack durante la migración en vez de en el Paso 5.2.
+- Escribir la migración sin mostrar el diff y obtener confirmación, o preguntar archivo por archivo en vez de agrupar todas las migraciones en una sola tanda.
 - Sobrescribir un `AGENTS.md`/`CLAUDE.md`/etc. existente con contenido propio del usuario sin preguntar primero.
 - Ejecutar el Paso 2 (conseguir el stack) cuando el Paso 1.2 ya clasificó "con código base" o "con implementación".
 - Clasificar la situación del Paso 1.2 sin evidencia clara, en vez de preguntar ante la ambigüedad.
@@ -252,7 +282,19 @@ Carpeta con un scaffold de Astro recién generado (`npm create astro@latest`), s
 
 **Ejemplo 4 — Reejecución sobre un harness ya inicializado**
 
-El usuario vuelve a pedir `arch-init` sobre un proyecto donde ya corrió antes. Paso 3 detecta que los cinco archivos ya existen y están gestionados por este skill → informa que el harness ya está inicializado y pregunta si continuar para revisar/completar. El usuario confirma porque quiere agregar la compuerta E2E que no se configuró la primera vez → el skill retoma directamente en el Paso 4.2, sin tocar los archivos ya creados.
+El usuario vuelve a pedir `arch-init` sobre un proyecto donde ya corrió antes. Paso 3 detecta que los cinco archivos ya existen y están conformes con las plantillas → informa que el harness ya está inicializado y pregunta si continuar para revisar/completar. El usuario confirma porque quiere agregar la compuerta E2E que no se configuró la primera vez → el skill retoma directamente en el Paso 4.2, sin tocar los archivos ya creados.
+
+**Ejemplo 5 — Proyecto existente con documentos del harness en otro formato**
+
+Monorepo Django con historial propio. Ya tiene un `CLAUDE.md` de 60 líneas escrito a mano (reglas de estilo, comandos de test, una nota sobre migraciones), un `docs/adr/README.md` con una tabla de tres ADRs, y ningún `AGENTS.md`, `.agents/MEMORY.md` ni `docs/standards/README.md`. Paso 1: repo existe; stack Django detectado; situación "con implementación" → se salta el Paso 2.
+
+Paso 3 compara cada archivo existente contra su plantilla:
+
+- `CLAUDE.md` → **contenido ajeno** respecto a la plantilla (que es solo `@AGENTS.md`), pero su contenido sí es material de `AGENTS.md`. Se propone: crear `AGENTS.md` con la plantilla, reubicar las reglas de estilo y los comandos de test bajo `# Reglas generales`, dejar la nota sobre migraciones al final bajo su propio encabezado (no hay sección equivalente), y reducir `CLAUDE.md` a `@AGENTS.md`. El `# Stack tecnológico` de `AGENTS.md` queda con el comentario de la plantilla — el `CLAUDE.md` original no describía el stack, así que se rellenará en el Paso 5.2.
+- `docs/adr/README.md` → **formato divergente**: falta el encabezado y el comentario-marcador, y las entradas están en tabla. Se propone reescribir con el título y el párrafo de la plantilla, restaurar el marcador y convertir las tres filas en líneas `- [ADR-XXX: Título](ADR-XXX-slug.md)` ordenadas por identificador, conservando los títulos tal como los escribió el usuario.
+- Los tres archivos faltantes se crean desde plantilla, sin preguntar.
+
+Las dos migraciones se presentan en **una sola tanda** con su diff; el usuario acepta la del índice de ADRs y declina la de `CLAUDE.md` porque quiere reubicar él mismo esas reglas. `CLAUDE.md` queda intacto y `AGENTS.md` se crea igual desde plantilla (es una creación, no una migración) — solo sin las reglas heredadas. Se registra que `CLAUDE.md` queda fuera de formato para reportarlo en el 5.3, advirtiendo que sus reglas no las verá el resto del catálogo, que lee `AGENTS.md`. El flujo continúa en el Paso 4.
 
 ---
 

@@ -244,7 +244,7 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
    — no queda a discreción de cada corrida, precisamente para que dos auditorías del mismo repo no
    difieran en el conteo de hallazgos por esta razón.
 
-4. **Contexto de stack** — leer `## Stack tecnológico` en `AGENTS.md` si existe, para saber
+4. **Contexto de stack** — leer `# Stack tecnológico` en `AGENTS.md` si existe, para saber
    lenguajes/frameworks y afinar los patrones de búsqueda (evita falsos negativos por buscar en el
    lenguaje equivocado).
 
