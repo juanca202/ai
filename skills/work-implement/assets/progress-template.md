@@ -35,9 +35,11 @@ La "unidad" depende del tipo: TK para historias de usuario, el WI completo para 
 **Finalizado:** {{YYYY-MM-DD HH:mm}}
 **Implementador:** {{inferido de git config user.name}} / {{agente que implementa: Claude | Cursor | Codex | …}} / {{modelo, si el agente lo expone}} / {{id de sesion, si el agente lo expone}}
 
-<!-- Archivos: los archivos tocados durante la implementación de esta unidad, uno por línea y SIN viñeta (a diferencia de Notas, Decisiones adicionales y Cobertura de test cases, que sí la llevan): el prefijo - de un archivo eliminado se confundiría con el guion de la viñeta. Prefijar cada ruta con + (creado), ~ (modificado) o - (eliminado); el símbolo basta, no hace falta etiqueta. -->
+<!-- Archivos: los archivos tocados durante la implementación de esta unidad, uno por línea dentro de un bloque de código (a diferencia de Notas, Decisiones adicionales y Cobertura de test cases, que van con viñeta): el prefijo - de un archivo eliminado se confundiría con el guion de la viñeta, por eso el contenido se envuelve en ``` y el título queda fuera. Prefijar cada ruta con + (creado), ~ (modificado) o - (eliminado); el símbolo basta, no hace falta etiqueta. -->
 **Archivos:** 
+```
 []
+```
 
 <!-- Notas: observaciones surgidas durante la implementación de esta unidad; describirlas de forma específica y concisa. -->
 **Notas:** 
@@ -58,7 +60,9 @@ La "unidad" depende del tipo: TK para historias de usuario, el WI completo para 
 **Implementador:** {{usuario}} / {{agente}} / {{modelo}} / {{session id}}
 
 **Archivos:**
+```
 {{+ / ~ / -}} {{src/ruta/al/archivo.ext}}
+```
 
 **Notas:** 
 - {{observación relevante encontrada al implementar}}
