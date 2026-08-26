@@ -11,12 +11,13 @@ Antes de sugerir nada, buscar configuración de pruebas ya presente: archivos de
 
 ## 2. Qué se suele validar por stack (consultar `quality-check`)
 
-`arch-init` no mantiene su propio catálogo de qué validar por stack — ese catálogo ya existe en el skill `quality-check`, en su `references/stacks.md`, tabla "Aplicabilidad por stack" (Tipado / Linter / Unit tests / Coverage / Build / E2E / Sonar × Node+TS / Node JS / Java-Kotlin / Python / Go / Rust / .NET), con cada check marcado **Bloqueante**, **Condicional**, **N/A** o **Informativo**. Leer esa tabla para la fila del stack de este proyecto:
+`arch-init` no mantiene su propio catálogo de qué validar por stack — ese catálogo ya existe en el skill `quality-check`, en su `references/stacks.md`, tabla "Aplicabilidad por stack" (Tipado / Linter / Unit tests / Coverage / Suites configuradas / Build / E2E / Sonar × Node+TS / Node JS / Java-Kotlin / Python / Go / Rust / .NET), con cada check marcado **Bloqueante**, **Condicional**, **N/A** o **Informativo** — salvo la fila «Suites configuradas», que no lleva categoría por ecosistema porque la fija el estándar de testing. Leer esa tabla para la fila del stack de este proyecto:
 
 - **Bloqueante** → falta configurarlo es un hueco real de la compuerta; se ofrece siempre (§ 4).
 - **Condicional** → aplica solo bajo ciertas condiciones (tipo de proyecto, si tiene UI, si expone API, etc.); usar § 3 de esta referencia para decidir si aplica aquí — la tabla de `quality-check` no distingue por tipo de proyecto, `arch-init` sí.
 - **N/A** → no aplica a este stack; no ofrecerlo.
 - **Informativo** → no bloquea ni condiciona nada; puede mencionarse pero no forma parte de la compuerta mínima.
+- **Suites configuradas** → la fila que la tabla deja sin categoría por ecosistema (integración, contrato, rendimiento…). **Su categoría no la fija el stack, sino el estándar de testing** del repo: `quality-check` las ejecuta solo si `docs/standards/testing.md` las declara (ver [Suites de prueba](../../quality-check/SKILL.md#suites-de-prueba-fijas-y-configuradas)). En una inicialización, si el proyecto necesita una de estas capas, lo que falta no es tooling suelto sino **declararla como requisito del estándar** vía `arch-manage` — además de configurarla (§ 4).
 
 Esta consulta es de lectura — `arch-init` no ejecuta los checks de `quality-check` (esos corren sobre código ya implementado; en una inicialización todavía no hay nada que verificar), solo usa su tabla como checklist de qué le falta a la compuerta.
 

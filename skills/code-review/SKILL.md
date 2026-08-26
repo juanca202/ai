@@ -207,7 +207,7 @@ Usar este skill **solo cuando se le invoca explícitamente** (ni de forma proact
 | | `quality-check` | `code-review` | `trace-validate` |
 |---|---|---|---|
 | Pregunta que responde | ¿El código corre y cumple las reglas? | ¿Resuelve el problema correcto y está bien diseñado? | ¿Cada criterio de aceptación está probado? |
-| Qué hace | Ejecuta tipado, linter, unit, coverage, integración, build, e2e, sonar | Analiza el diff en intención, arquitectura/diseño y feedback | Cruza criterios ↔ casos de prueba ↔ artefactos |
+| Qué hace | Ejecuta tipado, linter, unit, coverage, build, e2e, sonar y las suites del estándar de testing | Analiza el diff en intención, arquitectura/diseño y feedback | Cruza criterios ↔ casos de prueba ↔ artefactos |
 | Artefactos | `docs/audits/quality-check.md`, `.sdd-devkit/test-run.json` | `docs/audits/code-review.md` | `trace-report.md` del trabajo |
 | Veredicto | Propio, solo del plano automatizado | Propio, solo del plano cualitativo | Propio, solo de la cobertura funcional |
 

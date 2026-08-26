@@ -140,7 +140,7 @@ Antes de cualquier push o creación de PR se ejecutan las puertas **que aplican 
 | 4.3 `trace-validate` | Obligatoria | No aplica |
 | 4.4 Definition of Done | Si existe el archivo | Si existe el archivo |
 
-**4.1 — `quality-check` (siempre).** Invocar el flujo de `quality-check` (verificaciones automatizadas: tipado, linter, unit, coverage, integración, build, e2e, sonar) sobre la rama.
+**4.1 — `quality-check` (siempre).** Invocar el flujo de `quality-check` (verificaciones automatizadas: tipado, linter, unit, coverage, build, e2e, sonar, más las suites que declare el estándar de testing) sobre la rama.
 - Aprobado = veredicto **`✅ Aprobado`** → continuar (aunque haya warnings o resultados informativos).
 - Rechazado = **`❌ Rechazado`** o **`⚠️ Incompleto`** → detener.
 

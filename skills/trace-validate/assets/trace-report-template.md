@@ -29,7 +29,7 @@ Plantilla canónica del reporte de trazabilidad (trace-validate).
 
 {{1-3 frases: estado general de la cobertura y criterios faltantes/fallidos si los hay.}}
 
-**Pruebas:** {{procedencia — caché fresca de `quality-check` (commit abc1234, YYYY-MM-DD) | corrida `tests-only` disparada ahora | no ejecutable y por qué}}. {{Resultado por suite: unit `PASS` · integration `FAIL` · e2e `N/A` — o «no ejecutado» si no hubo corrida}}.
+**Pruebas:** {{procedencia — caché fresca de `quality-check` (commit abc1234, YYYY-MM-DD) | corrida `tests-only` disparada ahora | no ejecutable y por qué}}. {{Resultado por suite, solo las que traiga `suites[]`: unit `PASS` · e2e `N/A` · integration-testing `FAIL` (esta última solo si el estándar de testing del repo la declara) — o «no ejecutado» si no hubo corrida}}.
 
 **Cobertura de criterios de aceptación**
 
@@ -40,8 +40,10 @@ Plantilla canónica del reporte de trazabilidad (trace-validate).
 <!--
 - «Total» = M, el total de criterios de aceptación del artefacto. Cubiertos + Parciales + No cubiertos DEBE sumar M.
 - Cifras siempre numéricas: 0, no «—».
-- La línea «Pruebas» se copia de test-run.json: `result` viene por suite (unit/coverage/integration/e2e),
-  no hay agregado global — no inventar uno. Si no hubo corrida, decir «no ejecutable» y el motivo, sin suites.
+- La línea «Pruebas» se copia de test-run.json: `result` viene por suite —las fijas (unit/coverage/e2e) más
+  las que declare el estándar de testing del repo (integration, contract…)—, no hay agregado global: no
+  inventar uno, ni listar una suite que no venga en `suites[]`. Si no hubo corrida, decir «no ejecutable» y
+  el motivo, sin suites.
   La suite `coverage` no se lista aquí: si dio FAIL, va a «Observaciones y pendientes».
 -->
 

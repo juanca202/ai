@@ -474,7 +474,9 @@ Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrat
 
 **Alcance:** **todo el repositorio** en el estado actual de la rama (o todo el módulo elegido, en monorepo). No se acota al diff: una regresión en código que nadie tocó también debe salir.
 
-**Checks:** tipado → linter → unit → coverage → integración → build → e2e → sonar, con categoría por stack (Bloqueante / Condicional / Informativo).
+**Checks:** tipado → linter → unit → coverage → suites configuradas → build → e2e → sonar. La categoría (Bloqueante / Condicional / Informativo) la fija el **stack** en todos salvo las suites configuradas, donde la fija el estándar de testing.
+
+**Suites de prueba:** las únicas **fijas** son `unit`, `coverage` y `e2e` (siempre se listan, aunque salgan `N/A`). El resto del conjunto —integración, contrato, rendimiento…— sale del **estándar de testing** del repo (`docs/standards/testing.md`): una suite por requisito vigente, con la categoría que fije su enunciado RFC 2119 (DEBE → Bloqueante; DEBERÍA/PUEDE → Condicional). Sin estándar, solo las tres fijas.
 
 **Correcciones:** nunca por iniciativa propia. Ante hallazgos que impliquen tocar código pregunta primero: **dentro** de una implementación, si se corrigen; **fuera** de una implementación (rama suelta, auditoría), ofrece explícitamente [Corregir] / [Solo el informe]. Si se corrige y la rama es de un `US-XXX`/`WI-XXX`, delega el arreglo en `work-implement` (modo corrección); si no hay artefacto, corrige él mismo. Aplica igual a fallos de pruebas.
 
@@ -488,7 +490,7 @@ Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrat
 | `default`                                                                                   | Bloqueantes + condicionales presentes + Sonar si hay config            |
 | `blocking-only` / `no-sonar`                                                                | Omite informativos (Sonar)                                             |
 | `include-linter-warnings`                                                                   | Warnings del linter como error                                         |
-| `no-tests` / `no-unit-tests` / `no-integration` / `no-e2e` / `no-coverage` / `no-typecheck` | Omite ese check (`N/A`)                                                |
+| `no-tests` / `no-unit-tests` / `no-e2e` / `no-coverage` / `no-typecheck` / `no-<suite>`      | Omite ese check (`N/A`); `no-<suite>` omite una suite configurada por su `ID` (p. ej. `no-integration`) |
 | `only <check>`                                                                              | Solo ese check                                                         |
 | `tests-only`                                                                                | Solo suites de prueba (caché `test-run.json`; lo usa `trace-validate`) |
 | `save-report`                                                                               | Copia con marca de tiempo en `docs/audits/quality-check-<timestamp>.md`, además del informe vigente |

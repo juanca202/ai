@@ -308,17 +308,20 @@ donde `$ARTEFACTO` es la carpeta del trabajo (`docs/specs/user-stories/US-042-�
 ## Resultados de pruebas: delegación en quality-check
 
 `trace-validate` **no ejecuta la suite de pruebas**. La ejecución es responsabilidad de `quality-check`,
-que la persiste en un artefacto reutilizable `test-run.json` (esquema `test-run/v1`). Como el review es
+que la persiste en un artefacto reutilizable `test-run.json` (esquema `test-run/v2`). Como el review es
 una **corrida completa** de la rama, este artefacto vive en una **ubicación fija**, no por unidad:
 **`.sdd-devkit/test-run.json`**, en la raíz del repositorio.
 
 **Cómo obtener los resultados (Paso 4 del flujo):**
 
 1. **Reusar el fingerprint canónico** ya calculado en el Paso 0 (mismo valor; no recalcular).
-2. **Si existe `test-run.json`, su `generatedBy` es `"quality-check"` y su `git.fingerprint` coincide** →
-   caché **fresca**: no hubo cambios desde la corrida de `quality-check`. **Reutilizar** los resultados por
-   suite (`unit`/`integration`/`e2e`) sin ejecutar nada. Si `generatedBy` trae cualquier otro valor,
-   **descartar la caché** y delegar: `quality-check` es el único productor autorizado. Anotar la procedencia en la línea «Pruebas» del **Resumen**: «resultados tomados de
+2. **Si existe `test-run.json`, su `generatedBy` es `"quality-check"`, su `git.fingerprint` coincide y su
+   `suites[]` cubre el conjunto de suites vigente** (las tres fijas más las que declare el estándar de
+   testing del repo) → caché **fresca**: no hubo cambios desde la corrida de `quality-check`. **Reutilizar**
+   los resultados por suite sin ejecutar nada. Si `generatedBy` trae cualquier otro valor,
+   **descartar la caché** y delegar: `quality-check` es el único productor autorizado. **Si el estándar de
+   testing cambió** desde la corrida (suites de más o de menos), la caché es obsoleta **aunque el fingerprint
+   coincida** —el estándar vive en `docs/`, excluido del fingerprint—: delegar. Anotar la procedencia en la línea «Pruebas» del **Resumen**: «resultados tomados de
    la corrida de `quality-check` del {{commit/fecha}}».
 3. **Si no existe o el fingerprint difiere** (hubo cambios, o nunca corrió) → **delegar en `quality-check`
    en modo `tests-only`**, que ejecuta solo los checks de pruebas, escribe `test-run.json` y devuelve los
@@ -328,8 +331,14 @@ una **corrida completa** de la rama, este artefacto vive en una **ubicación fij
    `Resultado = No ejecutado`, con la razón en «Observaciones y pendientes», y se entrega igualmente la matriz con los
    artefactos hallados. **Nunca fabricar resultados.**
 
-**Mapeo a la matriz.** Cada entrada `suites[]` de `test-run.json` trae `type` (`unit`/`coverage`/
-`integration`/`e2e`) y `result` (`PASS`/`FAIL`/`SKIPPED`/`N/A`). La suite **`coverage` no se mapea a ningún
+**Mapeo a la matriz.** Cada entrada `suites[]` de `test-run.json` trae `type` y `result`
+(`PASS`/`FAIL`/`SKIPPED`/`N/A`). Las **tres fijas** —`unit`, `coverage`, `e2e`— vienen siempre; el resto son
+**suites configuradas** en el estándar de testing del repo, cuyo `type` es el `ID` del requisito que las
+declara (p. ej. `integration-testing`, `contract-testing`) y que traen su referencia global en `standard`
+(p. ej. `testing/integration-testing`). **Pueden no existir**: si el estándar no declara integración, no hay
+entrada para ella —y **no** hay que buscar una clave fija llamada `integration`—, así que una fila de tipo
+`Integration` se resuelve contra la suite donde el repo la tenga (típicamente `unit`) o queda
+`No ejecutado`. **No inferir una suite ausente ni inventar su resultado.** La suite **`coverage` no se mapea a ningún
 criterio**: es cobertura de líneas/ramas, una métrica del repo que juzga `quality-check`, no cobertura
 funcional; si viene en `FAIL`, mencionarlo en «Observaciones y pendientes» y nada más. Traducir al reporte: `PASS`→`Paso`,
 `FAIL`→`Fallo`, `SKIPPED`→`No ejecutado`, `N/A` (el repo no tiene esa suite)→`No ejecutado`, dejando en
