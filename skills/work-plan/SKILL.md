@@ -1,6 +1,6 @@
 ---
 name: work-plan
-description: "Planifica trabajo de distintos tipos sin generar código ni pruebas. Dos tipos de plan: (1) tareas técnicas (TK-XXX) bajo una historia de usuario existente; (2) tareas de mantenimiento (WI-XXX) sin historia asociada — bugs, refactor, deuda técnica, actualización de dependencias, tareas operativas. Activar siempre que el usuario pida planificar implementación, descomponer trabajo, definir alcance técnico, documentar especificaciones técnicas o planificar mantenimiento / deuda técnica / refactor, aunque no nombre «tarea», «TK» o «WI». Activar también — por defecto — cuando solo entregue una referencia a una historia (p. ej. «US-004», «planifica US-007», «tareas para esta historia»): proponer stubs agrupados por repositorio que cubran los criterios de aceptacion (AC-XXX). Selecciona el tipo según haya o no historia asociada y carga su definición desde references/. Cuenta el trabajo archivado en docs/specs/archive/ al asignar IDs y detectar solapamientos; lo archivado no se edita."
+description: "Planifica trabajo de distintos tipos sin generar código ni pruebas. Dos tipos de plan: (1) tareas técnicas (TK-XXX) bajo una historia de usuario existente; (2) tareas de mantenimiento (WI-XXX) sin historia asociada — bugs, refactor, deuda técnica, actualización de dependencias, tareas operativas. Activar siempre que el usuario pida planificar implementación, descomponer trabajo, definir alcance técnico, documentar especificaciones técnicas o planificar mantenimiento / deuda técnica / refactor, aunque no nombre «tarea», «TK» o «WI». Activar también — por defecto — cuando solo entregue una referencia a una historia (p. ej. «US-004», «planifica US-007», «tareas para esta historia»): proponer la descomposición en tareas agrupadas por repositorio que cubra los criterios de aceptacion (AC-XXX) y preguntar si crear los planes completos, crear stubs, ajustar u otro, o cancelar. Selecciona el tipo según haya o no historia asociada y carga su definición desde references/. Cuenta el trabajo archivado en docs/specs/archive/ al asignar IDs y detectar solapamientos; lo archivado no se edita."
 license: MIT
 ---
 
@@ -91,7 +91,7 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 
 | Archivo | Cuándo leerlo |
 |---------|---------------|
-| `references/user-story-tasks.md` | Tipo de plan = tarea técnica de historia de usuario. Contiene modos de invocación, ubicaciones, flujos (stub, TK completa, actualizar, sugerir stubs desde US), checklist, ejemplos y anti-patrones. |
+| `references/user-story-tasks.md` | Tipo de plan = tarea técnica de historia de usuario. Contiene modos de invocación, ubicaciones, flujos (stub, TK completa, actualizar, planificar desde US), checklist, ejemplos y anti-patrones. |
 | `references/maintenance-tasks.md` | Tipo de plan = tarea de mantenimiento. |
 | `references/<sistema>.md` (p. ej. `azure-devops.md`) | Solo si se detecta vinculación a un tracker externo (ver [Integración con un sistema de seguimiento externo](#integración-con-un-sistema-de-seguimiento-externo-condicional)); el archivo concreto depende del valor de `work_item_tracking`. |
 | `assets/task-template.md` | Plantilla canónica de una tarea de historia de usuario (`TK-XXX`). Leer antes de redactar el documento. |

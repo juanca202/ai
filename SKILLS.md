@@ -404,7 +404,7 @@ Solo se hace handoff a `work-implement` si el artefacto está en `Ready`. Si hay
 /work-plan completa TK-002 a Ready
 ```
 
-- «Planifica US-007» → stubs `TK-XXX` por repositorio / AC
+- «Planifica US-007» → propuesta de `TK-XXX` por repositorio / AC, y luego elegir: crear los planes completos, crear stubs, otro o cancelar
 - «Tareas para esta historia» (+ US en contexto)
 - «Plan de mantenimiento: refactor del módulo de auth» → `WI-XXX`
 - «Descompón el bug de timeouts en un WI»

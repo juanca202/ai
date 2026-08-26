@@ -171,7 +171,7 @@ Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **De
 **Ejemplo 4 — Ready y tareas**
 
 - *Entrada:* Historia cerrada en Ready; el usuario dice: «crea las tareas para implementarla».
-- *Salida:* El agente no crea tareas directamente; invoca `/work-plan` pasando el contexto de la US. Toda la lógica de creación de `TK-XXX` (stubs, plantilla, agrupación por repositorio) es responsabilidad de ese skill.
+- *Salida:* El agente no crea tareas directamente; invoca `/work-plan` pasando el contexto de la US. Toda la lógica de creación de `TK-XXX` (propuesta, elección entre planes completos o stubs, plantilla, agrupación por repositorio) es responsabilidad de ese skill.
 
 **Ejemplo 5 — Draft con cierre asistido**
 
