@@ -239,10 +239,14 @@ Añadir además:
 
 1. Redactar el dossier con
    [`assets/issue/diagnosis-template.md`](../../assets/issue/diagnosis-template.md) y
-   presentarlo en el chat con un resumen de 2-3 oraciones (causa raíz + situación de
-   pruebas + qué se propone).
+   presentar en el chat su **contenido íntegro y literal**: todas las secciones, sin
+   resumir, recortar, reordenar ni reformular. Un resumen de causa raíz no sustituye al
+   dossier; si se quiere una línea de encabezado, va **además** del contenido completo.
+   **No escribir nada en disco en este punto** — ni el dossier, ni un `RS-XXX`, ni el
+   `WI`.
 2. Preguntar con la herramienta estructurada: «¿El diagnóstico es correcto?»
    Opciones: `[Sí, crear el WI de corrección]` / `[Profundizar]` / `[Descartar]`.
+   Dejar explícito que todavía no se ha creado ningún artefacto.
 3. **Sí** → *handoff* a `work-plan` (tipo de plan: tarea de mantenimiento,
    `Tipo: bug-fix`) pasando el dossier completo. El mapeo a las secciones del WI:
 

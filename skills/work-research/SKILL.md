@@ -175,11 +175,15 @@ agente principal está ejecutando una TK o un WI), ejecutar la investigación co
 **subagente o tarea delegada**:
 
 - Lanzar la investigación usando la herramienta de subagente/tarea del cliente.
-- El subagente ejecuta el flujo de forma autónoma.
-- Al terminar, **solo devuelve al agente principal**: ruta del RS guardado + resumen
-ejecutivo de 2-3 oraciones. En *Analizar issue* no hay RS: devuelve el resumen del
-diagnóstico y, si el *handoff* ya se ejecutó, la ruta del `WI` creado.
-- El agente principal continúa sin interrumpir el flujo de la sesión.
+- El subagente ejecuta el flujo de forma autónoma **hasta el Paso 4 inclusive**, sin
+escribir nada en disco: la confirmación del usuario no se salta por estar en subagente.
+- Al terminar, **devuelve al agente principal** el contenido íntegro propuesto (los
+archivos que se escribirían, completos) junto con la ruta tentativa. El agente principal
+lo presenta al usuario tal cual y ejecuta el Paso 5 solo tras la confirmación. En
+*Analizar issue* no hay RS: devuelve el dossier completo y, si el *handoff* ya se
+confirmó, la ruta del `WI` creado.
+- El agente principal continúa sin interrumpir el flujo de la sesión, pero **no da por
+guardada** una investigación que el usuario no confirmó.
 
 Si no hay sesión de implementación activa, ejecutar de forma interactiva con el
 usuario (flujo normal).
@@ -325,22 +329,50 @@ es una hipótesis: se marca como tal y se verifica o se descarta.
 
 ## Paso 4 — Sintetizar y presentar
 
-1. Redactar el `README.md` con `assets/research-template.md`. Si no hay artefacto
-  vinculado, marcar la sección **Impacto en el artefacto** como
-   `N/A — investigación independiente`.
-2. Redactar los archivos adicionales que defina el flujo, con sus plantillas (ver
-  [Salida estandarizada](#salida-estandarizada)).
-3. Presentar el informe en el chat con un resumen ejecutivo de 2-3 oraciones.
-4. Preguntar (herramienta estructurada): "¿La investigación responde tu pregunta?"
-  Opciones: [Sí, guardar resultado] / [Profundizar en un subtema] / [Descartar].
-  - **Sí** → Paso 5, guardar con `Estado: Ready` —o `Draft` si el flujo declara
-  pendientes abiertos; su referencia dice cuándo aplica.
-  - **Profundizar** → investigación adicional y volver al inicio de este paso.
-  - **Descartar** → no guardar; el skill termina.
+> **Regla dura, transversal a todos los flujos: nada se escribe en disco antes de la
+> confirmación de este paso.** Ni el `README.md`, ni los archivos adicionales, ni la
+> carpeta `RS-XXX-{slug}/`. Preguntar «¿guardo el resultado?» sobre un archivo que ya
+> está escrito no es una confirmación: es un reporte disfrazado de pregunta.
+
+1. **Redactar el contenido en la conversación, no en el sistema de archivos.** Componer
+  el `README.md` con `assets/research-template.md` —si no hay artefacto vinculado,
+   marcar **Impacto en el artefacto** como `N/A — investigación independiente`— y los
+   archivos adicionales que defina el flujo (ver
+   [Salida estandarizada](#salida-estandarizada)).
+2. **Presentar en el chat el contenido íntegro y literal del `README.md` del RS —y solo
+  ese archivo—**, precedido de su **ruta tentativa** y su estado propuesto
+   (`Ready` / `Draft`). Lo que se muestra debe ser **exactamente** lo que se escribirá:
+   - **No resumir.** No sustituir el informe por un resumen ejecutivo, una lista de
+     hallazgos clave, una tabla de conclusiones ni una descripción de lo que contiene.
+     Si la plantilla incluye una sección de resumen, esa sección se muestra **como parte
+     del contenido completo**, nunca en lugar de él.
+   - **No alterar.** No reordenar secciones, no reformular, no recortar citas, no omitir
+     secciones vacías o largas, no «limpiar» el formato para la vista de chat.
+   - **No abreviar por longitud.** Un informe largo se presenta largo, en bloques
+     sucesivos si hace falta. `…` o «(resto omitido)» no son aceptables.
+   - **Los archivos complementarios NO se muestran.** `discovery.md`, `validation.md`,
+     `analysis.md` y cualquier otro archivo adicional del flujo **no se vuelcan en el
+     chat**: son documentos de trabajo del RS, no el informe. De ellos se lista
+     únicamente **nombre, ruta tentativa, estado propuesto y una línea de qué contienen**
+     — la misma información que el `README.md` ya declara en «Archivos adicionales». El
+     usuario los revisa en disco después de guardar, o los pide explícitamente si quiere
+     verlos antes.
+3. **Preguntar** (herramienta estructurada): «¿La investigación responde tu pregunta?»
+  Opciones: [Sí, guardar] / [Profundizar en un subtema] / [Ajustar el informe] /
+   [Descartar]. Dejar explícito en el mensaje que **todavía no se ha escrito nada**.
+   - **Sí** → Paso 5: escribir en disco el contenido tal como se presentó, con
+     `Estado: Ready` —o `Draft` si el flujo declara pendientes abiertos; su referencia
+     dice cuándo aplica.
+   - **Profundizar** → investigación adicional y volver al punto 1 de este paso.
+   - **Ajustar** → aplicar los cambios pedidos y **volver a presentar el contenido
+     completo** antes de preguntar de nuevo. Nunca escribir una versión que el usuario
+     no ha visto entera.
+   - **Descartar** → el skill termina. No hay nada que borrar, porque nada se escribió.
 
 > **Analizar issue:** no aplican ni el `README.md` del RS ni el Paso 5. Este flujo
 > presenta su dossier y hace *handoff* con su propio cierre — ver
-> `[references/issue/flow.md](references/issue/flow.md)`.
+> `[references/issue/flow.md](references/issue/flow.md)`. La regla de presentación
+> íntegra sí le aplica: el dossier se muestra completo, sin resumir.
 
 ---
 
@@ -348,6 +380,12 @@ es una hipótesis: se marca como tal y se verifica o se descarta.
 
 ## Paso 5 — Guardar el informe
 
+> **Solo se llega aquí con la confirmación explícita del Paso 4.** Este es el **primer y
+> único punto** del skill donde se crean carpetas o se escriben archivos del `RS-XXX`.
+
+0. **Verificar la confirmación.** Si el usuario no eligió [Sí, guardar] sobre el
+  contenido íntegro ya presentado, no continuar. Si el contenido cambió después de esa
+   presentación, volver al Paso 4 y presentarlo de nuevo entero antes de escribir.
 1. Determinar la **carpeta base** —la que contendrá las carpetas `RS-XXX-`*— según
   haya artefacto vinculado o no (ver [Salida estandarizada](#salida-estandarizada)):
    `<carpeta-del-artefacto>/research/` si lo hay, `docs/specs/research/` si no. La base
@@ -366,15 +404,21 @@ es una hipótesis: se marca como tal y se verifica o se descarta.
   `viabilidad-redis-cache`, `impacto-refactor-pagos`, `orm-sequelize-a-prisma`).
 4. Crear `<base>/RS-XXX-{slug}/` y escribir dentro el `README.md` con su estado
   (`Ready`, o `Draft` si quedan pendientes declarados). Añadir los archivos
-   adicionales del flujo, referenciados desde el `README.md`.
-5. Informar la ruta exacta donde se guardó.
+   adicionales del flujo, referenciados desde el `README.md`. **El contenido escrito es
+   literalmente el presentado en el Paso 4**, salvo el `RS-XXX` definitivo si el
+   secuencial cambió entre la presentación y la escritura.
+5. Informar la ruta exacta donde se guardó. Si el `RS-XXX` definitivo difiere del
+  tentativo mostrado en el Paso 4, decirlo.
 
-> **Flujos que reservan el** `RS-XXX` **antes de presentar.** *Analizar legado* y *Analizar
-> migración* necesitan la carpeta creada para escribir su `discovery.md` mientras
-> investigan. En ellos, los puntos 1-4 de este paso se ejecutan **al inicio del flujo**
-> y aquí solo se confirma el estado final y se informa la ruta; su referencia manda
-> sobre este orden. Si el usuario **descarta** la investigación en el Paso 4, borrar la
-> carpeta reservada para no dejarla huérfana ni quemar el secuencial.
+> **Flujos multi-archivo — *Analizar legado* y *Analizar migración*.** Tampoco
+> reservan la carpeta al empezar: el `RS-XXX` es **tentativo** durante toda la
+> investigación y el secuencial se revalida aquí, en la escritura. Sus archivos
+> complementarios (`discovery.md`, `validation.md`) se componen en la conversación **sin
+> volcarlos en el chat** y se escriben **junto con el `README.md`**, en esta única
+> operación, tras la confirmación del Paso 4. Sus compuertas internas (no crear features
+> con el discovery en `Draft`, no preparar la validación antes de cerrar el discovery)
+> siguen vigentes: son compuertas de **contenido**, no de escritura. Si el usuario
+> descarta, no hay carpeta huérfana ni secuencial quemado, porque nunca se creó.
 
 ---
 
@@ -487,7 +531,20 @@ se lee.
 - **Generar el plan de implementación aquí:** los flujos producen discovery,
 diagnóstico o veredicto; el plan lo crean `work-define` o `work-plan`.
 - Escribir código de aplicación o de pruebas: eso es `work-implement`.
-- Guardar el RS sin haber presentado antes el informe al usuario.
+- **Escribir cualquier archivo o carpeta del RS antes de la confirmación del Paso 4**,
+incluida la carpeta `RS-XXX-{slug}/` «reservada» al empezar.
+- **Preguntar «¿guardo el resultado?» cuando el archivo ya está en disco.** Si ya se
+escribió, la pregunta es falsa: la confirmación va **antes** de escribir.
+- **Sustituir el contenido íntegro del `README.md` por un resumen, extracto, paráfrasis
+o tabla de hallazgos** al presentarlo en el chat; o recortarlo con `…` / «resto omitido»
+por ser largo.
+- **Volcar en el chat los archivos complementarios** (`discovery.md`, `validation.md`,
+`analysis.md`): en el chat va el `README.md` del RS y nada más; de los demás se lista
+nombre, ruta y estado.
+- Reordenar, reformular o «limpiar» el informe al mostrarlo, de modo que lo presentado
+no coincida literalmente con lo que se escribirá.
+- Escribir en disco una versión distinta de la que el usuario vio y aprobó, sin volver a
+presentarla entera.
 - Reutilizar un número de secuencia ya existente en la carpeta base.
 - Guardar el informe como un archivo suelto en vez de la carpeta
 `research/RS-XXX-{slug}/README.md`.

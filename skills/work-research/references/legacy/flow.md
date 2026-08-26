@@ -72,9 +72,13 @@ más un `FT-XXX` por feature aceptado en `docs/specs/features/`.
 **Pregunta de investigación:** «¿Qué hace hoy *<código en alcance>* y qué features y
 reglas de negocio implementa?». Confirmarla con el usuario antes de investigar.
 
-> **Este flujo reserva su `RS-XXX` al empezar.** El `discovery.md` se escribe durante la
-> investigación, así que la carpeta `research/RS-XXX-{slug}/` se crea en el Paso 1 —no
-> en el Paso 5 de `SKILL.md`—. El estado (`Draft` / `Ready`) se fija al cerrar.
+> **Este flujo NO reserva su `RS-XXX` al empezar.** El `RS-XXX` y su carpeta son
+> **tentativos** mientras se investiga: nada se escribe en disco sin confirmación del
+> usuario (regla dura del Paso 4 de `SKILL.md`). El `discovery.md` se compone en la
+> conversación pero **no se vuelca en el chat** —lo que se presenta íntegro es el
+> `README.md` del RS; del discovery solo se declara nombre, ruta tentativa y estado—. Con
+> el visto bueno se crea `research/RS-XXX-{slug}/` con ambos archivos dentro, revalidando
+> el secuencial en ese momento.
 
 El flujo es **secuencial y con compuertas**: no se crean features hasta que el
 discovery esté en `Ready`, y no se invoca `test-define` sobre un `FT-XXX` hasta que
@@ -305,14 +309,18 @@ Objetivo: dejar el discovery en **`Ready`**.
 - **Draft**: hay pendientes; se listan todos en `Notas`. **No se crean features
   mientras el discovery esté en `Draft`.**
 
-Copia `assets/legacy/discovery-template.md`, **renómbrala a `discovery.md`** dentro
-de `research/RS-XXX-{slug}/` y rellénala. Luego redacta el `README.md` (informe
-principal) con `assets/research-template.md`, enlazando `discovery.md` en "Archivos
-adicionales" y marcando "Impacto en el artefacto / próximo paso" como el plan de
-creación de features + pruebas.
+Compón el `discovery.md` a partir de `assets/legacy/discovery-template.md` y el
+`README.md` (informe principal) con `assets/research-template.md`, enlazando
+`discovery.md` en "Archivos adicionales" y marcando "Impacto en el artefacto / próximo
+paso" como el plan de creación de features + pruebas.
 
-> Presenta el informe y el discovery al usuario (Paso 4 del SKILL) y obtén su
-> confirmación **antes** de crear los features.
+> **Presentar antes de escribir.** Muestra en el chat el **contenido íntegro y literal
+> del `README.md`** —sin resumir, recortar ni reordenar— con su ruta tentativa
+> `research/RS-XXX-{slug}/`. **El `discovery.md` no se muestra**: se lista por nombre,
+> ruta y estado (`Draft` / `Ready`), como ya lo declara «Archivos adicionales» del
+> `README.md`. Obtén confirmación explícita (Paso 4 del `SKILL.md`) y **recién entonces**
+> crea la carpeta y escribe los dos archivos, revalidando el secuencial `RS-XXX`. No
+> crear features hasta después de esa confirmación.
 
 ---
 
@@ -423,6 +431,12 @@ código ya escrito, así que cerrar un hueco de cobertura significa automatizar 
 
 ## Anti-patrones
 
+- Crear la carpeta `research/RS-XXX-{slug}/` o escribir el `discovery.md` **antes** de
+  presentar el `README.md` y recibir confirmación; o preguntar «¿lo guardo?» cuando ya
+  está escrito.
+- Presentar el `README.md` resumido («encontré 4 features, 12 reglas…») en vez de su
+  contenido completo y literal.
+- Volcar el `discovery.md` en el chat: no se muestra, se lista por nombre, ruta y estado.
 - Crear historias de usuario (`US-XXX`) desde el código: este flujo **no** genera
   historias; cada feature descubierto se materializa como un `FT-XXX`.
 - Guardar los features o sus casos de prueba mezclados con los definidos por negocio

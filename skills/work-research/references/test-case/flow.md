@@ -156,6 +156,10 @@ El `README.md` del RS resume el veredicto en su **Conclusión y recomendación**
 `analysis.md` guarda el detalle (respuestas a las cinco preguntas, comparación
 implementación vs. esperado, evidencia).
 
+> **Qué se presenta en el chat.** Solo el `README.md`, íntegro y literal (Paso 4 del
+> `SKILL.md`). El `analysis.md` **no se vuelca**: se lista por nombre, ruta tentativa y
+> estado. Ninguno de los dos se escribe antes de la confirmación.
+
 ## Anti-patrones
 
 - Dar por correcto un TC porque su prueba automatizada está en verde, sin comprobar
