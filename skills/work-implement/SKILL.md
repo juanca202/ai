@@ -112,6 +112,18 @@ Cada tipo mantiene un `progress.md` como **unica bitacora** que este skill puede
 
 ---
 
+## Estado de iteracion para specTracking (transversal)
+
+Los hooks de seguimiento de especificaciones del plugin (ver `hooks/README.md`) necesitan un `iterationId` que se mantenga igual mientras se reintenta la unidad en curso -o la correccion delegada desde `quality-check`- y cambie al pasar a otra. Se resuelve con un archivo de estado local y no versionado: `.sdd-devkit/current-iteration.json`, con `{"iterationId": "<uuid>", "key": "<codigo de la unidad, o `correction:<check>` en modo correccion>"}`.
+
+- **Al iniciar una unidad** (`Pending` -> `In Progress`, primera vez) o **al recibir una correccion delegada** para un check nuevo: si el archivo no existe, o su `key` no coincide con la unidad/correccion actual, generar un UUID nuevo (p. ej. `uuidgen`) y sobrescribir el archivo.
+- **En un reintento con el mismo `key`** (build/test que vuelve a fallar dentro de la misma unidad, o un segundo intento de la misma correccion): no tocar el archivo — el `iterationId` existente sigue siendo el correcto.
+- **Al cerrar la unidad como `Done`**, o **al terminar la correccion** (aplicada o no — ver [Cuando la correccion no se aplica](#cuando-la-correccion-no-se-aplica)): eliminar el archivo.
+- **La primera vez que se escribe**, normalizar el `.gitignore`: comprobar con `git check-ignore -q .sdd-devkit/current-iteration.json` y, si no esta ignorado, anadir esa linea — es una cache local y desechable, igual que `.sdd-devkit/test-run.json` (ver `quality-check`).
+- Mantenerlo **siempre**, sin comprobar antes si `specTracking` esta activo en `.sdd-devkit/settings.json`: es barato de escribir y, si ningun hook lo lee, no tiene efecto observable.
+
+---
+
 ## Lista de tareas del agente (transversal)
 
 Durante la ejecucion, mantener la **herramienta de lista de tareas (to-dos) del agente** como reflejo vivo del **plan de implementacion en curso**: una entrada por cada tarea del plan. Da visibilidad del progreso en tiempo real y **no sustituye** al `progress.md`, que sigue siendo la bitacora persistente en el repositorio.

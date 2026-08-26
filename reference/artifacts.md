@@ -36,6 +36,7 @@ específico (una salida propia, una excepción de ruta).
 | Informe de code review | `docs/audits/code-review.md` (+ histórico `docs/audits/code-review-<YYYYMMDD-HHMMSS>.md`) | `code-review` |
 | Informe de auditoría de arquitectura | `docs/audits/arch-audit-YYYY-MM-DD.md` | `arch-audit` |
 | Caché de corrida de pruebas | `.sdd-devkit/test-run.json` (**ubicación fija**, no por unidad) | `quality-check` |
+| Estado de iteración para specTracking | `.sdd-devkit/current-iteration.json` (**ubicación fija**, vive mientras dura la unidad o corrección en curso) | `work-implement` |
 
 ## Identificadores y numeración
 
