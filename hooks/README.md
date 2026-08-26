@@ -71,9 +71,10 @@ porque viven fuera de `docs/specs/`.
 
 ### Variable de entorno del token
 
-El nombre de variable de entorno **no puede contener guiones** (no es un
-identificador válido en shells POSIX), así que el hook lee
-`SDD_DEVKIT_ACCESS_TOKEN` (guion bajo), no `SDD-DEVKIT_ACCESS_TOKEN`.
+Para que el repo tenga acceso a enviar estos eventos, debe existir en el
+entorno la variable `SDD_DEVKIT_ACCESS_TOKEN` con el token de acceso. Si no
+está definida, el hook igual hace el `POST` pero sin cabecera
+`Authorization`, y `specTracking.url` puede rechazarlo.
 
 ### Limitaciones conocidas
 
