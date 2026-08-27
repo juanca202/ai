@@ -57,7 +57,7 @@ En caso de duda entre A y B: preguntar al usuario antes de continuar. No combina
 - Formato: `TK-<número>-[nombre-descriptivo].md` con `TK-<número>` en mayúsculas.
 - **Sin tracker externo vinculado**: `<número>` es un secuencial **por historia** (no global); tres dígitos con cero a la izquierda → `TK-001`, `TK-002`, …
   - Al ser por historia, el escaneo se hace sobre la carpeta de la US **realmente resuelta**, no sobre una ruta activa que se dé por vacía sin haberla comprobado: si la US no aparece ahí, la regla de US archivada ya obligó a parar (ver [Ubicación de archivos](#ubicación-de-archivos)). Reiniciar en `001` dentro de una carpeta recién creada porque «no había nada» duplicaría identificadores.
-- **Con tracker externo vinculado**: `<número>` es el identificador que asigna ese sistema al work item creado; su formato exacto (numérico, con o sin padding, etc.) lo define el archivo de referencia del sistema — ver la sección «Integración con un sistema de seguimiento externo» en `SKILL.md`.
+- **Con la integración activa**: `<número>` es el identificador que asigna ese proveedor al work item creado; su formato exacto (numérico, con o sin padding, etc.) lo define el archivo de referencia del proveedor — ver la sección «Resolución de la integración con el gestor de proyectos» en `SKILL.md`.
 - Nombre descriptivo: minúsculas, kebab-case, corto y descriptivo.
 - El nombre completo del archivo (`TK-<número>-[nombre-descriptivo].md`) y, si hay un tracker externo vinculado, el título usado al crear el work item deben respetar cualquier límite de longitud propio de ese sistema (ver su archivo de referencia).
 - Ejemplos sin tracker: `TK-001-modelo-dominio-receta.md`, `TK-002-endpoint-crear-receta.md`.
@@ -79,7 +79,7 @@ Antes de crear o editar cualquier TK, tener clara esta información. **No invent
 | **Repositorio** | Nombre del repositorio git al que afecta la tarea; inferir del repo (git remote / carpeta) o indicado por el usuario | Stub: puede quedar `Por definir`. TK completa: obligatorio; sin él el estado no puede ser `Ready` |
 | **Contexto técnico** (solo TK completa) | ADRs existentes, technical-docs, descripción del usuario | Si falta decisión técnica relevante: sugerir ADR al usuario, no crearlo. Si un modelo, API o flujo mencionado no tiene especificación en `technical-docs/` y el usuario pide detallarlo: delegar a `/design-define` vía subagente y enlazar la referencia devuelta |
 | **Referencia de UI** (solo TK de interfaz) | Figma, wireframe o imagen de alta fidelidad aportados por el usuario | Obligatoria para `Ready`; sin ella el TK de UI no puede salir de `Draft` |
-| **Vinculación con tracker externo** | Ver sección «Integración con un sistema de seguimiento externo» de `SKILL.md` | Si se detecta vinculación, seguir el archivo de referencia del sistema correspondiente antes de crear archivos |
+| **Vinculación con el gestor de proyectos** | Ver sección «Resolución de la integración con el gestor de proyectos» de `SKILL.md` | Si la integración está activa, seguir el archivo de referencia del proveedor antes de crear archivos |
 
 > Leer siempre el `README.md` de la US y **todas** las `TK-*.md` existentes en la carpeta antes de crear o editar. Detectar solapamientos y resolverlos con el usuario antes de continuar.
 
@@ -244,7 +244,7 @@ Aplica siempre que se planifiquen o secuencien **varias TK dentro de la misma US
 - [ ] Modo B: profundidad elegida por el usuario respetada — «Crear los planes» produce TK completas (7a), no stubs
 - [ ] Orden entre TKs de la misma US según [Orden y priorización de tareas](#orden-y-priorización-de-tareas): infraestructura compartida → sin dependencias → con dependencias; ninguna TK depende de otra posterior en la secuencia
 - [ ] Si hay escenario E2E: su TK queda secuenciada al final (tras las tareas que atraviesa) y su ejecución no se exige como condición de `Estado: Ready`, sino en el Quality Gate previo a integrar/liberar
-- [ ] Idioma de preferencia determinado (preferencia en contexto, idioma del mensaje, o preguntado al usuario)
+- [ ] Idioma resuelto según la sección «Resolución de idioma» de `SKILL.md`
 - [ ] **Vinculación con tracker externo**: verificada (ver `SKILL.md`); si está vinculado, seguido su archivo de referencia y el identificador externo extraído antes de crear el archivo local
 
 **Validación:**

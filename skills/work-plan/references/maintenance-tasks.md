@@ -55,7 +55,7 @@ No existe aquí el modo «stubs desde una historia»: no hay US que descomponer.
 - Formato de carpeta: `WI-<número>-[nombre-descriptivo]/` con `WI-<número>` en mayúsculas. Dentro, siempre un `README.md` como documento principal del WI.
 - **Sin tracker externo vinculado**: `<número>` es un secuencial **global de todos los WI del repo** (no hay historia padre que reinicie la cuenta); tres dígitos con cero a la izquierda → `WI-001`, `WI-002`, …
   - **El secuencial se calcula sobre `docs/specs/work-items/` *y* `docs/specs/archive/work-items/`.** Un ID no se libera al archivarse. Si el WI con el número más alto ya está archivado y solo se mira la ruta activa, el contador retrocede y se reemite un `WI-XXX` que ya existe — con dos artefactos distintos bajo el mismo identificador y todo lo que los referencia (ramas, commits, work items del tracker) vuelto ambiguo.
-- **Con tracker externo vinculado**: `<número>` es el identificador que asigna ese sistema al work item creado; su formato exacto (numérico, con o sin padding, etc.) lo define el archivo de referencia del sistema — ver la sección «Integración con un sistema de seguimiento externo» en `SKILL.md`.
+- **Con la integración activa**: `<número>` es el identificador que asigna ese proveedor al work item creado; su formato exacto (numérico, con o sin padding, etc.) lo define el archivo de referencia del proveedor — ver la sección «Resolución de la integración con el gestor de proyectos» en `SKILL.md`.
 - Nombre descriptivo: minúsculas, kebab-case, corto y descriptivo.
 - El nombre completo de la carpeta (`WI-<número>-[nombre-descriptivo]/`) y, si hay un tracker externo vinculado, el título usado al crear el work item deben respetar cualquier límite de longitud propio de ese sistema (ver su archivo de referencia).
 - Ejemplos sin tracker: `WI-001-fix-timeout-login/README.md`, `WI-002-upgrade-spring-boot/README.md`.
@@ -76,7 +76,7 @@ Antes de crear o editar cualquier WI, tener clara esta información. **No invent
 | **Contexto técnico** (WI completo) | ADRs existentes, technical-docs, descripción del usuario | Si falta decisión técnica relevante: sugerir ADR al usuario, no crearlo. Si un modelo, API o flujo mencionado no tiene especificación en `technical-docs/` y el usuario pide detallarlo: delegar a `/design-define` vía subagente y enlazar la referencia devuelta |
 | **Referencia de UI** (solo si toca UI) | Figma, wireframe o imagen de alta fidelidad aportados por el usuario | Obligatoria para `Ready`; sin ella el WI de UI no puede salir de `Draft` |
 | **Tipo** | Del usuario o inferido del requerimiento (bug-fix / refactor / dependency-update / optimization / security-update / test-improvement / documentation-update / operational-change) | Si es ambiguo, preguntar; si hay un tracker externo vinculado, condiciona el tipo de work item que se crea allí (mapeo exacto en su archivo de referencia) |
-| **Vinculación con tracker externo** | Ver sección «Integración con un sistema de seguimiento externo» de `SKILL.md` | Si se detecta vinculación, seguir el archivo de referencia del sistema correspondiente antes de crear archivos |
+| **Vinculación con el gestor de proyectos** | Ver sección «Resolución de la integración con el gestor de proyectos» de `SKILL.md` | Si la integración está activa, seguir el archivo de referencia del proveedor antes de crear archivos |
 
 > **Entrada desde `work-research`.** Cuando el WI nace de un **dossier de bug** (flujo «Analizar issue»), ese documento ya trae el problema, la evidencia y los criterios propuestos, y define un mapeo sección a sección hacia el `README.md` del WI (ver `work-research/references/issue/flow.md`). En ese caso: leerlo completo, aplicar ese mapeo, y limitar la entrevista a lo que el dossier deje abierto. **Los `AC-XXX` sí se reescriben aquí**: el dossier los propone en prosa y es este skill el que les da formato verificable e identificador — es lo que el propio dossier declara.
 >
@@ -192,7 +192,7 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 - [ ] Modo de invocación identificado (A o B)
 - [ ] Modo A: intención clara: stub vs WI completo
 - [ ] Modo B: propuesta presentada al usuario sin archivos creados; confirmación recibida antes del primer `WI-*/README.md`
-- [ ] Idioma de preferencia determinado (preferencia en contexto, idioma del mensaje, o preguntado al usuario)
+- [ ] Idioma resuelto según la sección «Resolución de idioma» de `SKILL.md`
 - [ ] **Vinculación con tracker externo**: verificada (ver `SKILL.md`); si está vinculado, seguido su archivo de referencia y el identificador externo extraído antes de crear el archivo local
 
 **Validación:**

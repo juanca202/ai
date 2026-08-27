@@ -4,5 +4,5 @@ Memoria de preferencias del proyecto. Las decisiones arquitectónicas se registr
 
 ## Preferencias
 
-- Idioma: <código>
+<!-- Preferencias operativas del proyecto. -->
 

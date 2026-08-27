@@ -112,31 +112,30 @@ explícitamente se guarda además un `RS-XXX` en `docs/specs/research/`.
 
 
 
-## Entrada desde el gestor de proyectos (condicional)
+## Resolución de la integración con el gestor de proyectos
 
-El repositorio puede estar vinculado a un gestor de proyectos / sistema de seguimiento
-de trabajo (Azure DevOps, Jira u otro). Cuando lo está, **cualquier artefacto que el
-usuario pase por su código o URL** —no solo un bug— se lee vía MCP y **enruta al flujo
-que corresponda a su tipo**. Para `work-research` la integración es de **solo
-lectura**: trae contexto; no crea ni modifica work items.
+Antes de ejecutar este skill, DEBES leer [`../../reference/project-management.md`](../../reference/project-management.md).
 
-Este skill solo resuelve **si** hay vinculación y **qué** referencia cargar; todo el
-detalle propio de cada sistema (herramienta MCP, nombres de campos, tipos de work item,
-configuración de conexión) vive exclusivamente en su archivo de `references/`.
+Las reglas de `project-management.md` son obligatorias y tienen prioridad para determinar si hay integración con un gestor de proyectos, con qué proveedor y con qué datos de conexión.
 
-1. **Detectar** la vinculación leyendo `.agents/MEMORY.md` (raíz del repo): buscar la
-  señal `work_item_tracking: <sistema>` con valor no vacío (p. ej. `azure_devops`).
-2. **Si NO hay señal** → el repo no usa un gestor externo. Trabajar con lo que aporte
-  el usuario y con el repo; **no** leer ninguna referencia de gestor.
-3. **Si hay señal** → cargar `references/<sistema>.md` (p. ej.
-  `[references/azure-devops.md](references/azure-devops.md)` para
-   `work_item_tracking: azure_devops`) y seguir **únicamente** sus pasos para obtener el
-   artefacto. Si no existe archivo de referencia para ese sistema, o su MCP no está
-   conectado, informarlo y continuar con la información que aporte el usuario —
-   **nunca detener la investigación por esto**.
+No continúes hasta haber leído y aplicado `project-management.md`.
+
+**Delta de este skill:** cuando la integración está activa, **cualquier artefacto que el usuario pase
+por su código o URL** —no solo un bug— se lee vía MCP y **enruta al flujo que corresponda a su tipo**.
+Para `work-research` la integración es de **solo lectura**: trae contexto; no crea ni modifica work
+items. Todo el detalle propio de cada proveedor (herramienta MCP, nombres de campos, tipos de work item)
+vive exclusivamente en su archivo de `references/`.
+
+- **Desactivada** → trabajar con lo que aporte el usuario y con el repo; **no** leer ninguna
+  referencia de proveedor.
+- **Activada** → cargar `references/<proveedor>.md` (p. ej.
+  [`references/azure-devops.md`](references/azure-devops.md)) y seguir **únicamente** sus pasos para
+  obtener el artefacto. Si este skill no tiene referencia para ese proveedor, o su MCP no está
+  conectado, informarlo y continuar con la información que aporte el usuario — **nunca detener la
+  investigación por esto**.
 
 **Enrutado por tipo de artefacto** (los nombres exactos de cada tipo los define el
-archivo de referencia del sistema):
+archivo de referencia del proveedor):
 
 
 | Lo que se pasa                                   | Flujo                                                       |
@@ -160,7 +159,7 @@ archivo de referencia del sistema):
 
 ## Cómo preguntar al usuario
 
-Mecanismo, ritmo y fallback compartidos: [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md).
+Mecanismo, ritmo y fallback compartidos: [`../../reference/asking.md`](../../reference/asking.md).
 
 Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar*, *validar* o *sugerir* algo al usuario, asume ese mecanismo; no se repite allí.
 
@@ -194,9 +193,13 @@ usuario (flujo normal).
 
 ## Resolución de idioma
 
-Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
+Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../reference/language.md).
 
-**Excepción deliberada al orden canónico.** Redactar el informe y los mensajes al usuario en el idioma del **mensaje de entrada**; si hay artefacto o proyecto vinculado, en el idioma de ese contexto. Ante conflicto, preguntar.
+Las reglas de `language.md` son obligatorias y tienen prioridad para determinar el idioma de todos los artefactos y mensajes generados por este skill.
+
+No continúes hasta haber leído y aplicado `language.md`.
+
+**Excepción deliberada:** si hay artefacto o proyecto vinculado, redactar el informe en el idioma de ese contexto. Ante conflicto con el idioma resuelto, preguntar.
 
 ---
 
@@ -206,7 +209,7 @@ Evaluar la entrada **en este orden** y quedarse con la primera coincidencia:
 
 1. **¿Es un identificador del gestor de proyectos** (`#4821`, una URL del gestor, un
   código con prefijo propio del sistema)? → resolver la vinculación
-   ([Entrada desde el gestor de proyectos](#entrada-desde-el-gestor-de-proyectos-condicional)),
+   ([Resolución de la integración con el gestor de proyectos](#resolución-de-la-integración-con-el-gestor-de-proyectos)),
    **leer el work item por MCP** y enrutar según su tipo con la tabla de esa sección.
    Leer antes de preguntar: lo que ya está en el work item no se pregunta.
 2. **¿Es un caso de prueba** (`TC-XXX`, "revisa este test", "¿este caso de prueba está
@@ -426,7 +429,7 @@ es una hipótesis: se marca como tal y se verifica o se descarta.
 
 ## Numeración y nomenclatura
 
-> Reglas comunes de identificadores y secuenciales: [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md). Lo específico de los RS:
+> Reglas comunes de identificadores y secuenciales: [`../../reference/artifacts.md`](../../reference/artifacts.md). Lo específico de los RS:
 
 - **Secuencial** `XXX`**:** tres dígitos, por carpeta base de destino. Leer las carpetas
 `RS-XXX-*` existentes y tomar el siguiente número. Cuando la base es
@@ -487,7 +490,7 @@ generado (en *Analizar issue*, con el dossier de bug).
 | Procedimiento de **Analizar migración** (discovery, validación, dimensionamiento y handoff)                         | `[references/migrate/flow.md](references/migrate/flow.md)`                                                                                                       |
 | Preparación de casos de Golden Master (migración)                                                                   | `[references/migrate/golden-master-testing.md](references/migrate/golden-master-testing.md)`                                                                     |
 | Estrategias de migración incremental                                                                                | `[references/migrate/migration-strategies.md](references/migrate/migration-strategies.md)`                                                                       |
-| Leer un artefacto del gestor de proyectos vía MCP y enrutarlo                                                       | `references/<sistema>.md` (p. ej. `[references/azure-devops.md](references/azure-devops.md)`) — solo si `.agents/MEMORY.md` declara `work_item_tracking`         |
+| Leer un artefacto del gestor de proyectos vía MCP y enrutarlo                                                       | `references/<proveedor>.md` (p. ej. `[references/azure-devops.md](references/azure-devops.md)`) — solo si `project-management.md` resolvió la integración como activada |
 | Plantilla del `README.md` (informe principal)                                                                       | `[assets/research-template.md](assets/research-template.md)`                                                                                                     |
 | Plantilla del `analysis.md` (Analizar test case)                                                                    | `[assets/test-case/analysis-template.md](assets/test-case/analysis-template.md)`                                                                                 |
 | Plantilla del dossier de bug (Analizar issue) y su mapeo al `WI`                                                    | `[assets/issue/diagnosis-template.md](assets/issue/diagnosis-template.md)`                                                                                       |
@@ -500,10 +503,11 @@ generado (en *Analizar issue*, con el dossier de bug).
 
 Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
 
-- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
-- [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
-- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
-- [`${CLAUDE_PLUGIN_ROOT}/reference/alm/azure-devops.md`](../../reference/alm/azure-devops.md): **Azure DevOps** — activación, MCP, URL, límites, sincronización. *Solo si `MEMORY.md` declara `work_item_tracking:`.*
+- [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
+- [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`../../reference/project-management.md`](../../reference/project-management.md): **Gestor de proyectos** — si la integración está activa, proveedor y datos de conexión. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/alm/azure-devops.md`](../../reference/alm/azure-devops.md): **Azure DevOps** — MCP, URL, límites, sincronización. *Solo si el `provider` resuelto es `azure-devops`.*
 
 ---
 

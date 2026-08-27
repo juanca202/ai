@@ -22,12 +22,12 @@ por aquel commit de merge; si después se volvieron a correr las puertas en la r
 **modificados** allí y git levanta un `modify/delete` sobre exactamente esos dos archivos. Es el desenlace que
 el paso 13 buscaba de todos modos, así que se resuelve por el lado del borrado y el merge continúa:
 
-```bash
+`bash
 git rm -q -f --ignore-unmatch ':(top,glob)**/docs/audits/quality-check.md' ':(top,glob)**/docs/audits/code-review.md'
 test -z "$(git ls-files --cached -- ':(top,glob)**/docs/audits/quality-check.md' ':(top,glob)**/docs/audits/code-review.md')" \
   || { echo "los informes siguen en el índice"; exit 1; }
 git commit -m "Merge <ID>: <nombre-corto>"
-```
+`
 
 Es la misma secuencia del paso 13, guard incluido: la resolución del conflicto no es motivo para saltárselo.
 
@@ -53,15 +53,15 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 - [ ] Rama actual detectada, tipo identificado y validada contra el patrón de su tipo
 - [ ] Carpeta/documento del trabajo localizado según el tipo
 - [ ] Rama base resuelta (reflog, config o confirmación del usuario)
-- [ ] Idioma de preferencia determinado y `.agents/MEMORY.md` actualizado si fue necesario
+- [ ] Idioma resuelto según la sección «Resolución de idioma» de `SKILL.md`
 
 **Validación:**
 - [ ] `git status --porcelain` sin salida (working tree limpio); si había cambios pendientes, se resolvieron invocando automáticamente `git-commit` (sin preguntar al usuario si convenía invocarlo — `git-commit` sí pudo pedir su propia confirmación antes de comitear)
 - [ ] `progress.md` existe en la ubicación del tipo
 - [ ] **Todas** las unidades del trabajo de la rama en estado `Done` (leídas del `progress.md` en la carpeta del trabajo)
-- [ ] **`quality-check`** ejecutado con veredicto **✅ Aprobado**
-- [ ] **`code-review`** ejecutado con veredicto **✅ Aprobado**
-- [ ] **`trace-validate`** ejecutado (después de `quality-check`) con veredicto **✅ Aprobado** (o **⚠️ Aprobado con observaciones**)
+- [ ] **`quality-check`** ejecutado con veredicto `APPROVED`
+- [ ] **`code-review`** ejecutado con veredicto `APPROVED`
+- [ ] **`trace-validate`** ejecutado (después de `quality-check`) con veredicto `APPROVED` (o `APPROVED_WITH_NOTES`)
 - [ ] Sin commits sin commitear ni stash sin aplicar relevante al alcance
 
 **Delta (paso 9 — antes de mover o commitear nada):**

@@ -1,7 +1,7 @@
 # Integración con Azure DevOps — `work-research`
 
-> **Base común obligatoria:** [`${CLAUDE_PLUGIN_ROOT}/reference/alm/azure-devops.md`](../../../reference/alm/azure-devops.md)
-> — activación (`work_item_tracking: azure_devops`), claves de `.agents/MEMORY.md`, verificación del MCP
+> **Base común obligatoria:** [`../../../reference/alm/azure-devops.md`](../../../reference/alm/azure-devops.md)
+> — activación y datos de conexión resueltos en [`../../../reference/project-management.md`](../../../reference/project-management.md), verificación del MCP
 > y su degradación, construcción de la URL, campo `Work Item (ADO)`, normalización del HTML de
 > `System.Description` y anti-patrones comunes. **Leerla antes que este archivo.**
 

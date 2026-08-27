@@ -6,6 +6,13 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 # WI-XXX: {{título corto del work item}}
 
 **Estado:** {{Draft | Ready}}
+
+<!-- wi:status={{Draft|Ready}} -->
+<!--
+Esta marca se CONSERVA al publicar. Sus claves y sus valores van en inglés SIEMPRE, aunque el resto del
+documento esté en otro idioma: es el ancla que otros skills parsean, no contenido. La etiqueta visible
+de arriba sí se redacta en el idioma resuelto. Ver ../../reference/verdicts.md.
+-->
 **Tipo:** {{bug-fix | refactor | dependency-update | optimization | security-update | test-improvement | documentation-update | operational-change}}
 <!--
 Tipos de work item:

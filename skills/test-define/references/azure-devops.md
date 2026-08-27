@@ -1,13 +1,13 @@
 # Integración con Azure DevOps — `test-define`
 
-> **Base común obligatoria:** [`${CLAUDE_PLUGIN_ROOT}/reference/alm/azure-devops.md`](../../../reference/alm/azure-devops.md)
-> — activación (`work_item_tracking: azure_devops`), claves de `.agents/MEMORY.md`, verificación del MCP
+> **Base común obligatoria:** [`../../../reference/alm/azure-devops.md`](../../../reference/alm/azure-devops.md)
+> — activación y datos de conexión resueltos en [`../../../reference/project-management.md`](../../../reference/project-management.md), verificación del MCP
 > y su degradación, construcción de la URL, campo `Work Item (ADO)`, uso del `id` de ADO como número
 > local, límite de 255 caracteres del título, contrato de reconstrucción íntegra y anti-patrones
 > comunes. **Leerla antes que este archivo.**
 
-Este archivo contiene **solo el delta de `test-define`**. Se activa desde «Integración con un sistema de
-seguimiento externo» en `SKILL.md` y aplica a los TC generados en su Paso 3.
+Este archivo contiene **solo el delta de `test-define`**. Se activa desde «Resolución de la integración con el
+gestor de proyectos» en `SKILL.md` y aplica a los TC generados en su Paso 3.
 
 ## Jerarquía de Azure Test Plans
 
@@ -22,7 +22,7 @@ Ninguno de los dos niveles se crea si ya existe uno con el nombre correcto — *
 existente**.
 
 1. **Test Plan** — su nombre es el del **proyecto de Azure DevOps** al que está vinculado el repo
-   (`azure_devops_project:` / `ado_project:` en `.agents/MEMORY.md`).
+   (el `project` resuelto en `project-management.md`).
    Buscarlo vía MCP en el proyecto; **si no existe, crearlo** antes de continuar.
 2. **Test Suite** — su nombre es el de la **historia de usuario o work item padre** del artefacto
    origen: el título completo tal como aparece en su `README.md` (p. ej.
@@ -42,7 +42,7 @@ Suite resuelto**, nunca como work item aislado:
 | **Tipo de work item** | `Test Case` (o el equivalente configurado en el proyecto). |
 | **Pasos de ejecución** | Campo dedicado `Microsoft.VSTS.TCM.Steps` si existe: un paso del work item por cada fila de la tabla **Pasos de ejecución** (acción del actor + resultado esperado). Si el MCP no lo expone, incluirlos dentro de Descripción. |
 | **Descripción** | El resto del documento completo, con los mismos encabezados que el `.md`: Perspectiva, Criterio de aceptación, Artefacto padre, Precondiciones, Datos de prueba, Resultado esperado final, Observaciones. |
-| **Iteración / Area Path** | De `.agents/MEMORY.md` si está definido; si no, omitir. |
+| **Iteración / Area Path** | Omitir: no son configurables (ver la base común). ADO aplica los valores por defecto del proyecto. |
 | **Test Suite** | Agregar el TC al Test Suite resuelto en el Paso 1 (mecanismo que provea el MCP). **Obligatorio.** |
 | **Padre** | Trazabilidad adicional, best-effort: si el artefacto origen (US/WI/FT) tiene un `Work Item (ADO)` en su encabezado, vincular el TC a ese work item con la relación «Tests» / «Tested By». |
 
@@ -60,7 +60,7 @@ Verificar que no exista ya `TC-<ado_id>-*.md` en el `test-cases/` del artefacto 
 
 ## Ejemplo — Repo vinculado a ADO con MCP disponible
 
-- *Contexto:* `.agents/MEMORY.md` contiene `azure_devops_project: MyProject`. MCP de ADO disponible. La
+- *Contexto:* `project-management.md` resolvió `project: MyProject`. MCP de ADO disponible. La
   US padre (`US-003: Endpoint de autenticación`) tiene `Work Item (ADO): [#1500](https://dev.azure.com/…)`
   en su encabezado.
 - *Entrada:* generar TCs para `AC-001` de `US-003`.

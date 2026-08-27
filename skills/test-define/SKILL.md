@@ -18,7 +18,7 @@ Carga el archivo correspondiente cuando vayas a ejecutar la tarea; el detalle í
 
 | Necesitas… | Archivo |
 | ---------- | ------- |
-| Integración condicional con un sistema de seguimiento externo: detalle específico de cada sistema (creación de work items, campos, IDs, vinculación al artefacto padre) | `references/<sistema>.md` (p. ej. [`references/azure-devops.md`](references/azure-devops.md) para Azure DevOps) — leer solo si el repo está vinculado (ver [Integración con un sistema de seguimiento externo](#integración-con-un-sistema-de-seguimiento-externo-condicional)) |
+| Integración condicional con un gestor de proyectos: detalle específico de cada proveedor (creación de work items, campos, IDs, vinculación al artefacto padre) | `references/<proveedor>.md` (p. ej. [`references/azure-devops.md`](references/azure-devops.md) para Azure DevOps) — leer solo si la integración está activa (ver [Resolución de la integración con el gestor de proyectos](#resolución-de-la-integración-con-el-gestor-de-proyectos)) |
 | Estructura del archivo de un caso de prueba | [`assets/test-case-template.md`](assets/test-case-template.md) |
 
 
@@ -26,16 +26,17 @@ Carga el archivo correspondiente cuando vayas a ejecutar la tarea; el detalle í
 
 Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
 
-- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
-- [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
-- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
-- [`${CLAUDE_PLUGIN_ROOT}/reference/alm/azure-devops.md`](../../reference/alm/azure-devops.md): **Azure DevOps** — activación, MCP, URL, límites, sincronización. *Solo si `MEMORY.md` declara `work_item_tracking:`.*
+- [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
+- [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`../../reference/project-management.md`](../../reference/project-management.md): **Gestor de proyectos** — si la integración está activa, proveedor y datos de conexión. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/alm/azure-devops.md`](../../reference/alm/azure-devops.md): **Azure DevOps** — MCP, URL, límites, sincronización. *Solo si el `provider` resuelto es `azure-devops`.*
 
 ---
 
 ## Cómo preguntar al usuario
 
-Mecanismo, ritmo y fallback compartidos: [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md).
+Mecanismo, ritmo y fallback compartidos: [`../../reference/asking.md`](../../reference/asking.md).
 
 Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar*, *validar* o *sugerir* algo al usuario, asume ese mecanismo; no se repite allí.
 
@@ -45,19 +46,30 @@ No repreguntar lo que ya conste en el artefacto origen.
 
 ## Resolución de idioma
 
-Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
+Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../reference/language.md).
 
-**Excepción deliberada al orden canónico.** Redactar los TC y los mensajes al usuario **en el idioma del artefacto origen**: un TC que no hable el idioma de los criterios que traza se lee mal junto a ellos, así que aquí manda el artefacto por encima de `.agents/MEMORY.md`. Si hay conflicto o ambigüedad, preguntar al usuario antes de generar.
+Las reglas de `language.md` son obligatorias y tienen prioridad para determinar el idioma de todos los artefactos y mensajes generados por este skill.
+
+No continúes hasta haber leído y aplicado `language.md`.
+
+**Excepción deliberada:** redactar los TC **en el idioma del artefacto origen** — un TC que no hable el idioma de los criterios que traza se lee mal junto a ellos. Si hay conflicto con el idioma resuelto o ambigüedad, preguntar al usuario antes de generar.
 
 ---
 
-## Integración con un sistema de seguimiento externo (condicional)
+## Resolución de la integración con el gestor de proyectos
 
-La sincronización con un sistema de seguimiento de trabajo externo (Azure DevOps, Jira u otro) es transversal a la generación de TCs, pero **solo aplica si el repositorio está vinculado a uno**. Este skill solo resuelve **si** hay vinculación y **qué** referencia cargar; todo el detalle propio de cada sistema (herramienta MCP, campos, tipo de work item, configuración de conexión, límites de formato) vive exclusivamente en su archivo de `references/`. Para no cargar contexto innecesario:
+Antes de ejecutar este skill, DEBES leer [`../../reference/project-management.md`](../../reference/project-management.md).
 
-1. **Detectar** la vinculación leyendo `.agents/MEMORY.md` (raíz del repo): buscar la señal `work_item_tracking: <sistema>` con valor no vacío (p. ej. `azure_devops`).
-2. **Si NO hay señal** → el repo no usa un tracker externo. Continuar con la numeración local secuencial (ver [Numeración y nombres de archivo](#numeración-y-nombres-de-archivo)); **no** leer ninguna referencia de tracker.
-3. **Si hay señal** → cargar `references/<sistema>.md` (p. ej. `references/azure-devops.md` para `work_item_tracking: azure_devops`) y seguir **únicamente** sus pasos antes de guardar cualquier archivo local (Paso 4). Algunos sistemas exigen resolver una jerarquía propia (p. ej. un plan y una suite de pruebas) antes de crear el work item del caso de prueba; esos pasos, si aplican, viven íntegramente en el archivo de referencia del sistema. Si no existe un archivo de referencia para el sistema indicado, informar al usuario y continuar con numeración local secuencial.
+Las reglas de `project-management.md` son obligatorias y tienen prioridad para determinar si hay integración con un gestor de proyectos, con qué proveedor y con qué datos de conexión.
+
+No continúes hasta haber leído y aplicado `project-management.md`.
+
+**Delta de este skill:**
+
+- **Desactivada** → continuar con la numeración local secuencial (ver [Numeración y nombres de archivo](#numeración-y-nombres-de-archivo)); no leer ninguna referencia de proveedor.
+- **Activada** → además de la referencia compartida del proveedor, cargar `references/<proveedor>.md` de este skill (p. ej. [`references/azure-devops.md`](references/azure-devops.md)) y seguir **únicamente** sus pasos antes de guardar cualquier archivo local (Paso 4). Algunos proveedores exigen resolver una jerarquía propia (un plan y una suite de pruebas) antes de crear el work item del caso de prueba; esos pasos viven íntegramente en esa referencia. Si este skill no tiene referencia para ese proveedor, informar al usuario y continuar con numeración local secuencial.
+
+Todo el detalle propio de cada proveedor (herramienta MCP, campos, tipo de work item, límites de formato) vive exclusivamente en esos archivos.
 
 **Regla de fidelidad (transversal a cualquier sistema):** toda la información del TC debe quedar representada en el work item externo — los pasos de ejecución en un campo dedicado si el sistema lo expone, el resto en la descripción si no lo expone. Ninguna sección del `.md` puede omitirse al sincronizar; el objetivo es poder reconstruir el TC completo a partir del work item si el archivo local se perdiera. Qué campo usa cada sistema para qué sección es detalle de su archivo de referencia.
 
@@ -154,10 +166,10 @@ Si dentro de una perspectiva hay múltiples escenarios distintos que vale la pen
 
 ### Numeración y nombres de archivo
 
-> Reglas comunes de identificadores y secuenciales: [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md). Lo específico de los TC:
+> Reglas comunes de identificadores y secuenciales: [`../../reference/artifacts.md`](../../reference/artifacts.md). Lo específico de los TC:
 
 - **Sin tracker externo vinculado**: el secuencial `XXX` (tres dígitos: 001, 002, …) es por artefacto padre, siguiendo el orden criterio-a-criterio (happy → error → límite). Si la carpeta `test-cases/` ya existe con TCs previos, leer los archivos presentes, determinar el número más alto y continuar desde el siguiente. El escaneo se hace sobre el `test-cases/` del padre **realmente resuelto**, no sobre una ruta activa que se dé por vacía sin haberla comprobado: si el padre no aparece ahí, la regla de artefacto archivado ya obligó a parar (ver [Selección del artefacto](#selección-del-artefacto)). Reiniciar en `001` dentro de una carpeta recién creada porque «no había nada» duplicaría identificadores.
-- **Con tracker externo vinculado**: `XXX` es el identificador que asigna ese sistema al work item «Test Case» creado; su formato exacto (numérico, con o sin padding, etc.) lo define el archivo de referencia del sistema. Ver [Integración con un sistema de seguimiento externo](#integración-con-un-sistema-de-seguimiento-externo-condicional).
+- **Con la integración activa**: `XXX` es el identificador que asigna ese proveedor al work item «Test Case» creado; su formato exacto (numérico, con o sin padding, etc.) lo define el archivo de referencia del proveedor. Ver [Resolución de la integración con el gestor de proyectos](#resolución-de-la-integración-con-el-gestor-de-proyectos).
 - No regenerar TCs ya existentes salvo instrucción explícita del usuario.
 - Nombre de archivo: `TC-XXX-{slug}.md`, donde el slug sigue el patrón `{criterio-resumido}-{perspectiva}` (ver columna Ejemplo arriba). Un TC por archivo.
 - El nombre completo del archivo (`TC-XXX-{slug}.md`) y, si hay un tracker externo vinculado, el título usado al crear el work item deben respetar cualquier límite de longitud propio de ese sistema (ver su archivo de referencia); si el título GWT completo lo supera, usar una versión abreviada como título del work item y conservar el título completo en el encabezado del TC (`# TC-{{XXX}} — ...`).
@@ -195,7 +207,7 @@ Usar `assets/test-case-template.md` para todos los campos. Reglas de llenado:
 
 ## Paso 4 — Guardar y reportar
 
-1. Crear la carpeta `test-cases/` si no existe. Si el repo tiene un tracker externo vinculado (ver [Integración con un sistema de seguimiento externo](#integración-con-un-sistema-de-seguimiento-externo-condicional)), los work items ya deben estar creados y sus identificadores resueltos antes de este paso.
+1. Crear la carpeta `test-cases/` si no existe. Si la integración con el gestor de proyectos está activa (ver [Resolución de la integración con el gestor de proyectos](#resolución-de-la-integración-con-el-gestor-de-proyectos)), los work items ya deben estar creados y sus identificadores resueltos antes de este paso.
 2. Escribir cada `TC-XXX-{slug}.md` en la ruta correcta según la tabla de Selección del artefacto. Guardar cada TC con `Estado: Ready` salvo que el usuario indique lo contrario.
 3. Crear o actualizar el índice `test-cases/README.md` con una tabla que liste **todos** los TCs de la carpeta (los recién creados más los que ya existieran), ordenados por número de TC. La tabla lleva estas columnas:
 

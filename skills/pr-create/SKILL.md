@@ -54,9 +54,9 @@ El ciclo normal tiene **dos saltos**, no uno: el trabajo se implementa en una ra
 
 **Qué es «aguas abajo».** El orden canónico del ciclo es:
 
-```
+`
 rama de implementación  →  develop  →  release/*  →  main | master
-```
+`
 
 El destino está **aguas abajo** si aparece a la derecha del origen en ese orden. `develop → master` lo está; `master → develop` no, y por eso la fila 3 lo corta. **No usar «la rama de la que nace» como criterio:** en git-flow `develop` nace de `master`, así que esa lectura clasificaría la promoción canónica como marcha atrás y desactivaría el modo entero. Si el repo usa otros nombres, el orden lo fija el usuario al indicar el destino; ante duda sobre la dirección, preguntar en vez de asumir.
 
@@ -84,17 +84,13 @@ Verificar que el CLI elegido está instalado (`<cli> --version`); si falta, para
 
 ## Resolución de idioma
 
-Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
+Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../reference/language.md).
 
-**Excepción deliberada:** este skill opera sobre git, no sobre el harness, y **no lee `.agents/MEMORY.md`**. Orden propio, deteniéndose en el primer paso que aplique:
+Las reglas de `language.md` son obligatorias y tienen prioridad para determinar el idioma de todos los artefactos y mensajes generados por este skill.
 
-1. La preferencia de idioma del usuario que conste en el contexto de la sesión.
-2. El idioma de la conversación.
-3. El idioma predominante de los commits del rango `origin/<destino>..HEAD`.
+No continúes hasta haber leído y aplicado `language.md`.
 
-Un título o descripción explícitos del usuario **siempre** tienen prioridad y se respetan literalmente.
-
-Cuando el idioma resuelto obliga a traducir el título, el prefijo de ticket (`[US-042]`, `[TK-007]`) se mantiene intacto. Los subjects de commits de la descripción **no** se traducen: se citan literales para preservar trazabilidad. Los reportes de `quality-check`, `code-review` y `trace-validate` siguen su propia resolución de idioma.
+**Excepción deliberada:** un título o descripción **explícitos del usuario** se respetan literalmente, en el idioma en que los escribió. Cuando el idioma resuelto obliga a traducir el título, el prefijo de ticket (`[US-042]`, `[TK-007]`) se mantiene intacto; los subjects de commits citados en la descripción **no** se traducen: van literales para preservar la trazabilidad. Si `language.md` llega a su paso de preguntar, ofrecer como opción por defecto el idioma predominante de los commits del rango `origin/<destino>..HEAD` — pero preguntar igual, no decidirlo por cuenta propia.
 
 ---
 
@@ -141,18 +137,20 @@ Antes de cualquier push o creación de PR se ejecutan las puertas **que aplican 
 | 4.4 Definition of Done | Si existe el archivo | Si existe el archivo |
 
 **4.1 — `quality-check` (siempre).** Invocar el flujo de `quality-check` (verificaciones automatizadas: tipado, linter, unit, coverage, build, e2e, sonar, más las suites que declare el estándar de testing) sobre la rama.
-- Aprobado = veredicto **`✅ Aprobado`** → continuar (aunque haya warnings o resultados informativos).
-- Rechazado = **`❌ Rechazado`** o **`⚠️ Incompleto`** → detener.
+- Aprobado = `verdict=APPROVED` en la marca de pie → continuar (aunque haya warnings o resultados informativos).
+- Rechazado = `verdict=REJECTED` o `verdict=INCOMPLETE` → detener.
+
+> **Cómo se lee un veredicto.** Los informes de las puertas se redactan en el idioma resuelto del repo, así que **ni la palabra ni el símbolo del encabezado son comparables**. Lo que se lee es la **marca oculta del pie** del informe: `<!-- <skill>:verdict=<VALOR> … -->`. `APPROVED` deja pasar; `REJECTED` e `INCOMPLETE` bloquean; `APPROVED_WITH_NOTES` (solo `trace-validate`) **no** bloquea: se muestran las observaciones y se continúa. Contrato completo en [`../../reference/verdicts.md`](../../reference/verdicts.md).
 
 > Este es el punto de cierre donde `quality-check` ejecuta la batería completa de pruebas y persiste `test-run.json`. El orden importa: `4.1` antes de `4.3` permite que `trace-validate` **reutilice** esa corrida sin re-ejecutar las pruebas.
 
 **4.2 — `code-review` (solo en PR de implementación).** Invocar el flujo de `code-review` (revisión cualitativa: intención, arquitectura y diseño) con `base origin/<destino>`, su alcance por defecto (todo lo que la rama difiere de esa base, incluidas las correcciones que `4.1` haya podido dejar sin commitear). Emite un veredicto **propio e independiente** del de `4.1`; ninguno sustituye al otro. Si el `docs/audits/code-review.md` existente ya estaba fresco **y aprobado** (mismo fingerprint, misma base y mismo modo, y `4.1` no aplicó correcciones), lo devuelve sin volver a revisar — **no** forzar `revalidate` desde aquí. Un informe previo en `❌`/`⚠️` nunca se sirve desde caché: `code-review` lo revisa de nuevo por su cuenta.
-- Aprobado = veredicto **`✅ Aprobado`** → continuar.
-- Rechazado = **`❌ Rechazado`** o **`⚠️ Incompleto`** → detener.
+- Aprobado = `verdict=APPROVED` en la marca de pie → continuar.
+- Rechazado = `verdict=REJECTED` o `verdict=INCOMPLETE` → detener.
 
 **4.3 — `trace-validate` (solo en PR de implementación).** Resolver el **trabajo** a validar (`US-XXX` o `WI-XXX`) del patrón de la rama, del prefijo de los commits, o de la ruta de trabajo. `trace-validate` traza los **criterios de aceptación** `AC-XXX` del trabajo (mismo formato en US y WI). Si no se puede determinar el trabajo, preguntar al usuario cuál validar; si no lo provee, la puerta **no** puede quedar aprobada → detener. Invocar `trace-validate` sobre ese trabajo. Reutiliza el `test-run.json` producido por `4.1` (misma rama, sin cambios) y, si el `trace-report.md` ya estaba fresco, lo devuelve sin regenerarlo.
-- Aprobado = **`✅ Aprobado`** → continuar. **`⚠️ Aprobado con observaciones`** también se considera aprobado, pero se **muestran las observaciones al usuario** antes de seguir.
-- Rechazado = **`❌ Rechazado`** → detener.
+- Aprobado = `verdict=APPROVED` en la marca de pie → continuar. El `⚠️` de esta puerta es `APPROVED_WITH_NOTES` y **también** se considera aprobado, pero se **muestran las observaciones al usuario** antes de seguir.
+- Rechazado = `verdict=REJECTED` → detener.
 
 **4.4 — Definition of Done (solo si existe el archivo).** Comprobar si existe `docs/policies/definition-of-done.md` en la raíz del repo (`test -f docs/policies/definition-of-done.md`).
 
@@ -177,7 +175,7 @@ Una promoción **no introduce código nuevo**: cada trabajo que viaja en ella ya
 
 Reglas al reportar:
 
-- En el resumen al usuario y en la descripción del PR, esas dos puertas se listan como **`— No aplica (PR de promoción)`**. **No** se omiten en silencio ni se marcan como aprobadas: quien lea el PR debe ver que no corrieron y por qué.
+- En el resumen al usuario y en la descripción del PR, esas dos puertas se listan como `N/A` (`—`) con el motivo «PR de promoción». **No** se omiten en silencio ni se marcan como aprobadas: quien lea el PR debe ver que no corrieron y por qué.
 - **La Definition of Done sí aplica**, si el archivo existe: sus ítems suelen ser condiciones de despliegue (changelog, versión, migraciones revisadas) que es justo aquí donde toca comprobar. Su alcance es el mismo rango `origin/<destino>..HEAD`.
 - Si el usuario **pide expresamente** una revisión adicional, se puede invocar `code-review` o `trace-validate` a mano; no es parte del flujo ni condiciona la creación del PR.
 
@@ -250,7 +248,7 @@ Sin pedir confirmación (salvo override explícito del usuario):
   Si ninguno da nada, **no inventar**: el título va sin lista y la confirmación del Paso 3 se formula por delta («N commits») en lugar de enumerar trabajos.
 - **Título:** `Promoción <origen> → <destino>`, más los identificadores si se obtuvieron (p. ej. `Promoción develop → master (US-042, US-047, WI-007)`) o `(N commits)` si no. Sin prefijo de ticket: no hay uno solo.
 - **Descripción:** los **trabajos que se promueven**, el **delta** (`git rev-list --count origin/<destino>..HEAD` commits) y el resumen de cambios (`git diff --stat origin/<destino>..HEAD`). Si algún commit del rango no mapea a ningún trabajo, listarlo aparte como «commits sueltos»: es información que el revisor de una promoción quiere ver.
-- **Veredictos de las puertas:** el de `quality-check` con su resumen —aquí va **el contenido**, no un enlace: el informe no se commitea en este modo— y las otras dos como `— No aplica (PR de promoción)`, con el motivo en una línea.
+- **Veredictos de las puertas:** el de `quality-check` con su resumen —aquí va **el contenido**, no un enlace: el informe no se commitea en este modo— y las otras dos como `N/A` (`—`) con el motivo «PR de promoción», con el motivo en una línea.
 
 **Solo en implementación**, si el commit de las puertas incluyó informes en `docs/audits/`, añadir como última línea: «`docs/audits/quality-check.md` y `docs/audits/code-review.md` son artefactos de esta rama — eliminarlos al integrar.» Ver la nota del Paso 6.
 
@@ -269,13 +267,13 @@ Si el CLI indica que ya existe un PR: capturar y devolver la URL existente.
 
 ### Paso 9 — Reportar
 
-```
+`
 ✓ PR creado en <plataforma>
   Origen:  <rama-actual>
   Destino: <rama-destino>
   Título:  <título-generado>
   URL:     <url>
-```
+`
 
 **En un PR de implementación**, añadir debajo el desenlace del archivado del Paso 5:
 
@@ -285,16 +283,16 @@ Si el CLI indica que ya existe un PR: capturar y devolver la URL existente.
 En una promoción no aparece ninguna de las dos: el archivado no aplica a ese modo.
 
 Bloqueo por una puerta de calidad:
-```
-✗ PR NO creado: la puerta <quality-check | code-review | trace-validate | definition-of-done> no quedó en aprobado.
+`
+✗ PR NO creado: la puerta <quality-check | code-review | trace-validate | definition-of-done> no quedó en `APPROVED`.
   (En un PR de promoción solo pueden aparecer aquí quality-check y definition-of-done.)
-  Veredicto: <❌ Rechazado (quality-check) | ⚠️ Incompleto (quality-check) | ❌ Rechazado (code-review) | ⚠️ Incompleto (code-review) | ❌ Rechazado (trace-validate) | DoD incumplida>
+  Veredicto: <`REJECTED` (quality-check) | `INCOMPLETE` (quality-check) | `REJECTED` (code-review) | `INCOMPLETE` (code-review) | `REJECTED` (trace-validate) | DoD incumplida>
 
 <reporte literal del skill, o lista de ítems de la DoD incumplidos>
 
 Acciones para reintentar:
   <pasos concretos que debe tomar el usuario para dejar la puerta en aprobado>
-```
+`
 Si la corrección está al alcance de este skill, ofrecer aplicarla antes de pedir acción manual (ver [Manejo de fallos en las puertas](#manejo-de-fallos-en-las-puertas-de-calidad)).
 
 ---
@@ -317,13 +315,13 @@ Notas:
 
 **Ejemplo 1 — Camino feliz (GitLab self-managed)**
 Usuario: «Crea el PR de esta rama.»
-Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`). Detecta GitLab (`ns.bayteq.com:3311`). Pregunta destino → `develop`. Puertas: `quality-check` → `✅ Aprobado`; `code-review` con `base origin/develop` → `✅ Aprobado`; resuelve `US-042`, `trace-validate` → `✅ Aprobado`; existe `docs/policies/definition-of-done.md` → todos los ítems cumplidos. Pregunta si archivar, mostrando `docs/specs/user-stories/US-042-auth-refresh-token/` → `docs/specs/archive/user-stories/` más `RS-003` (suelto, sin artefactos activos que lo referencien) → `docs/specs/archive/research/`; el usuario confirma y `git-commit` recoge el renombrado. Push. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min`. Ejecuta `glab mr create`. Devuelve URL.
+Skill: pre-flight OK (rama `feature/US-042-auth-refresh-token`). Detecta GitLab (`ns.bayteq.com:3311`). Pregunta destino → `develop`. Puertas: `quality-check` → `APPROVED`; `code-review` con `base origin/develop` → `APPROVED`; resuelve `US-042`, `trace-validate` → `APPROVED`; existe `docs/policies/definition-of-done.md` → todos los ítems cumplidos. Pregunta si archivar, mostrando `docs/specs/user-stories/US-042-auth-refresh-token/` → `docs/specs/archive/user-stories/` más `RS-003` (suelto, sin artefactos activos que lo referencien) → `docs/specs/archive/research/`; el usuario confirma y `git-commit` recoge el renombrado. Push. Auto-genera título `[US-042] feat(auth): refresh token con expiración 15min`. Ejecuta `glab mr create`. Devuelve URL.
 
 **Ejemplo 2 — quality-check bloquea**
-`quality-check` devuelve `❌ Rechazado` (tests fallidos + eslint errors). El skill no crea el PR, no hace push, muestra el reporte, lista las acciones para reintentar y —al estar a su alcance— pregunta si aplica la corrección. Si el usuario no autoriza, termina.
+`quality-check` devuelve `REJECTED` (tests fallidos + eslint errors). El skill no crea el PR, no hace push, muestra el reporte, lista las acciones para reintentar y —al estar a su alcance— pregunta si aplica la corrección. Si el usuario no autoriza, termina.
 
 **Ejemplo 3 — trace-validate bloquea**
-`quality-check` y `code-review` → `✅ Aprobado`, pero `trace-validate` de `US-042` devuelve `RECHAZADO` (criterio `AC-003` sin test). El skill no crea el PR; informa que falta cubrir `AC-003` y pregunta si desea que se intente la corrección (delegando al flujo correspondiente). Sin autorización, termina con las acciones indicadas.
+`quality-check` y `code-review` → `APPROVED`, pero `trace-validate` de `US-042` devuelve `REJECTED` (criterio `AC-003` sin test). El skill no crea el PR; informa que falta cubrir `AC-003` y pregunta si desea que se intente la corrección (delegando al flujo correspondiente). Sin autorización, termina con las acciones indicadas.
 
 **Ejemplo 4 — Definition of Done incumplida**
 Las tres primeras puertas en aprobado, pero `docs/policies/definition-of-done.md` exige «CHANGELOG.md actualizado» y el diff no lo toca. El skill detiene la creación, lista ese ítem como incumplido e indica la acción; si el usuario autoriza y la corrección está a su alcance, la aplica y reintenta la puerta.
@@ -335,7 +333,7 @@ No existe `docs/policies/definition-of-done.md`. Esa puerta se omite; el PR se c
 `origin` apunta a `https://dev.azure.com/<org>/<proyecto>/_git/<repo>`. Detecta Azure Repos, verifica `az repos`, pregunta destino, ejecuta las puertas, push, crea PR con `az repos pr create`.
 
 **Ejemplo 7 — PR de promoción**
-Usuario en `develop`: «crea un PR a master.» El Paso 1 no bloquea: `develop` es rama de integración, así que el modo queda abierto. El Paso 3 ve que el destino es una rama de despliegue y **confirma**: «Vas a crear un PR de promoción de `develop` a `master`: 23 commits, trabajos US-042, US-047 y WI-007. ¿Es lo que quieres, o te olvidaste de cambiar a tu rama de trabajo?». Confirmado, corre `quality-check` (+ DoD si existe), marca `code-review` y `trace-validate` como `— No aplica (PR de promoción)`, y crea el PR titulado `Promoción develop → master (US-042, US-047, WI-007)`.
+Usuario en `develop`: «crea un PR a master.» El Paso 1 no bloquea: `develop` es rama de integración, así que el modo queda abierto. El Paso 3 ve que el destino es una rama de despliegue y **confirma**: «Vas a crear un PR de promoción de `develop` a `master`: 23 commits, trabajos US-042, US-047 y WI-007. ¿Es lo que quieres, o te olvidaste de cambiar a tu rama de trabajo?». Confirmado, corre `quality-check` (+ DoD si existe), marca `code-review` y `trace-validate` como `N/A` (`—`) con el motivo «PR de promoción», y crea el PR titulado `Promoción develop → master (US-042, US-047, WI-007)`.
 
 **Ejemplo 7b — Promoción hacia atrás**
 Usuario en `master`: «crea un PR a develop.» Fila 3 de la tabla de decisión: `develop` está **aguas arriba** de `master` en el orden del ciclo, así que no es una promoción. Parar: «Traer `master` a `develop` es sincronizar, no promover: hazlo con un merge — no con este skill.»
@@ -364,11 +362,11 @@ La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con
 - Usar «la rama de la que nace el origen» para detectar una promoción hacia atrás: en git-flow `develop` nace de `master`, así que ese criterio clasificaría `develop → master` como marcha atrás y desactivaría el modo. La dirección la fija el **orden aguas abajo**.
 - **Clasificar como promoción una rama que no encaja en nada** (`hotfix-cache`, `PROJ-1234`) por descarte, en lugar de preguntar (fila 5).
 - A la inversa: **dar por hecho que es una promoción sin confirmarlo**. El mismo estado se da cuando alguien olvidó cambiar de rama —típicamente justo después de `work-integrate`, que deja HEAD en la base—, y ahí el PR correcto es otro.
-- **Marcar `code-review` o `trace-validate` como aprobadas en una promoción**, u omitirlas en silencio: se reportan como `— No aplica (PR de promoción)`, con el motivo visible en el PR.
+- **Marcar `code-review` o `trace-validate` como aprobadas en una promoción**, u omitirlas en silencio: se reportan como `N/A` (`—`) con el motivo «PR de promoción», con el motivo visible en el PR.
 - Saltarse `code-review` o `trace-validate` en un PR de **implementación** con el argumento de que «ya se revisó»: ahí sí aplican, sin excepción.
 - Dar por cumplida una puerta a partir del veredicto de otra (p. ej. asumir `code-review` aprobado porque `quality-check` lo está): son skills independientes con veredictos propios.
 - Pedir confirmación de título o descripción (flujo no interactivo).
-- Crear el PR con `quality-check` o `code-review` en `❌ Rechazado`/`⚠️ Incompleto`, con `trace-validate` en `RECHAZADO`, o con la Definition of Done incumplida.
+- Crear el PR con `quality-check` o `code-review` en `REJECTED`/`INCOMPLETE`, con `trace-validate` en `REJECTED`, o con la Definition of Done incumplida.
 - En un PR de implementación, saltarse `trace-validate` por no encontrar el trabajo (US/WI) en lugar de preguntarlo al usuario — o declararlo «promoción» para esquivar la puerta.
 - **Archivar el artefacto antes de que pasen las puertas**, o antes de que `4.3` escriba el `trace-report.md` dentro de su carpeta.
 - **Archivar en un PR de promoción**, en una rama `test/`, o con el `progress.md` incompleto: el Paso 5 no aplica ahí.
@@ -388,5 +386,4 @@ La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con
 - Usar `git push --force` o `--force-with-lease`.
 - Asignar reviewers, labels o milestones por iniciativa propia.
 - Re-implementar la lógica de `quality-check`, `code-review` o `trace-validate` en lugar de invocar el flujo existente.
-- Referenciar `.agents/MEMORY.md` directamente para el idioma (usar el contexto de la sesión).
 - Crear un segundo PR cuando ya existe uno para `<rama-actual> → <destino>`.

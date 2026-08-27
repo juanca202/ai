@@ -5,12 +5,18 @@ Plantilla canónica del reporte de trazabilidad (trace-validate).
   (1) «Cobertura por criterio»: una fila por criterio de aceptación — vista de veredicto.
   (2) «Matriz de trazabilidad»: una fila por criterio × TC × tipo de prueba declarado — vista auditable.
 - Identificador del criterio siempre verbatim (AC-XXX, 1.1, R-3…). Nunca normalizarlo.
-- Valores permitidos:
-  · Estado: Cubierto | Parcial | No cubierto
+- IDIOMA: los títulos de sección, los encabezados de columna y TODA etiqueta de estado, resultado y
+  veredicto se redactan en el IDIOMA RESUELTO (ver «Resolución de idioma» en SKILL.md). Esta plantilla
+  los muestra en español solo porque el repositorio del plugin está en español: son un ejemplo de
+  redacción, no un texto fijo. Lo que NO cambia nunca: la estructura, el orden, los símbolos y los
+  valores canónicos. Ver ../../reference/verdicts.md.
+- Valores canónicos permitidos (en la celda va SÍMBOLO + ETIQUETA en el idioma resuelto):
+  · Estado: `COVERED` (✅) | `PARTIAL` (⚠️) | `UNCOVERED` (❌)
   · Tipo: Manual | Unit | Integration | API Test | Visual Test | E2E | — (sin TC ni artefacto)
   · Evidencia: ruta del artefacto · ruta del TC en filas Manual · — (intención no materializada)
   · Ejecución: quality-check | Manual | — (no se ejecutó)
-  · Resultado: Paso | Fallo | No ejecutado | No cubierto | N/A
+  · Resultado: `PASS` | `FAIL` | `NOT_RUN` | `UNCOVERED` | `N/A`
+  Tipo, Evidencia y Ejecución NO se traducen: son nombres de campo, rutas y nombres de skill.
 - Sustituir manualmente cada {{texto}}; no es un motor de plantillas.
 - Al publicar: eliminar TODOS los bloques de comentario de instrucciones (este y los intercalados)
   y sustituir todos los {{…}}.
@@ -23,7 +29,7 @@ Plantilla canónica del reporte de trazabilidad (trace-validate).
 **Rama:** {{rama}}
 **Commit:** {{sha-corto}}
 **Trabajo:** [{{US-XXX | WI-XXX | FT-XXX | identificador del artefacto}}]({{./README.md | ruta relativa al artefacto}})
-**Veredicto:** {{✅ Aprobado | ❌ Rechazado | ⚠️ Aprobado con observaciones}}
+**Veredicto:** {{símbolo + etiqueta en el idioma resuelto: `✅` APPROVED | `❌` REJECTED | `⚠️` APPROVED_WITH_NOTES}}
 
 ## Resumen
 
@@ -33,12 +39,12 @@ Plantilla canónica del reporte de trazabilidad (trace-validate).
 
 **Cobertura de criterios de aceptación**
 
-| Total | Cubiertos | Parciales | No Cubiertos |
+| Total | `COVERED` | `PARTIAL` | `UNCOVERED` |
 | ----- | --------- | --------- | ------------ |
 | {{M}} | {{N}}     | {{P}}     | {{Q}}         |
 
 <!--
-- «Total» = M, el total de criterios de aceptación del artefacto. Cubiertos + Parciales + No cubiertos DEBE sumar M.
+- «Total» = M, el total de criterios de aceptación del artefacto. `COVERED` + `PARTIAL` + `UNCOVERED`s DEBE sumar M.
 - Cifras siempre numéricas: 0, no «—».
 - La línea «Pruebas» se copia de test-run.json: `result` viene por suite —las fijas (unit/coverage/e2e) más
   las que declare el estándar de testing del repo (integration, contract…)—, no hay agregado global: no
@@ -53,10 +59,10 @@ Vista de veredicto: un criterio por fila. El detalle de qué lo prueba está en 
 
 | Criterio | Descripción                | Estado      | Observaciones                                                |
 | -------- | -------------------------- | ----------- | ------------------------------------------------------------ |
-| AC-001   | {{Criterio de aceptación}} | Cubierto    | {{Cobertura apoyada en TC-005 `Manual` (por diseño)}}        |
-| AC-002   | {{Criterio de aceptación}} | Parcial     | {{E2E declarado en TC-002 sin automatizar}}                  |
-| AC-003   | {{Criterio de aceptación}} | No cubierto | {{Hueco: sin caso de prueba ni artefacto asociado}}          |
-| AC-004   | {{Criterio de aceptación}} | No cubierto | {{`ruta/al/test.integration.ext` falla — aislado a su test}} |
+| AC-001   | {{Criterio de aceptación}} | `COVERED`    | {{Cobertura apoyada en TC-005 `Manual` (por diseño)}}        |
+| AC-002   | {{Criterio de aceptación}} | `PARTIAL`     | {{E2E declarado en TC-002 sin automatizar}}                  |
+| AC-003   | {{Criterio de aceptación}} | `UNCOVERED` | {{Hueco: sin caso de prueba ni artefacto asociado}}          |
+| AC-004   | {{Criterio de aceptación}} | `UNCOVERED` | {{`ruta/al/test.integration.ext` falla — aislado a su test}} |
 
 ## Matriz de trazabilidad
 
@@ -64,12 +70,12 @@ Vista auditable: **una fila por cada combinación criterio × caso de prueba × 
 
 | Criterio | TC     | Tipo        | Evidencia                       | Ejecución     | Resultado   |
 | -------- | ------ | ----------- | ------------------------------- | ------------- | ----------- |
-| AC-001   | TC-001 | Unit        | `ruta/al/test.ext`              | quality-check | Paso        |
-| AC-001   | TC-005 | Manual      | `test-cases/TC-005-{{slug}}.md` | Manual        | N/A         |
-| AC-002   | TC-002 | Unit        | `ruta/al/test.ext`              | quality-check | Paso        |
-| AC-002   | TC-002 | E2E         | —                               | —             | No cubierto |
-| AC-003   | —      | —           | —                               | —             | No cubierto |
-| AC-004   | TC-004 | Integration | `ruta/al/test.integration.ext`  | quality-check | Fallo       |
+| AC-001   | TC-001 | Unit        | `ruta/al/test.ext`              | quality-check | `PASS`      |
+| AC-001   | TC-005 | Manual      | `test-cases/TC-005-{{slug}}.md` | Manual        | `N/A`       |
+| AC-002   | TC-002 | Unit        | `ruta/al/test.ext`              | quality-check | `PASS`      |
+| AC-002   | TC-002 | E2E         | —                               | —             | `UNCOVERED` |
+| AC-003   | —      | —           | —                               | —             | `UNCOVERED` |
+| AC-004   | TC-004 | Integration | `ruta/al/test.integration.ext`  | quality-check | `FAIL`      |
 
 ## Observaciones y pendientes
 
@@ -88,4 +94,4 @@ Marca de frescura: NO eliminar al publicar. `fingerprint` es el canónico de la 
 coincidan LOS DOS para reutilizar el reporte.
 -->
 
-<!-- trace-validate:fingerprint={{hash}} · spec={{hash}} · generado={{YYYY-MM-DD}} -->
+<!-- trace-validate:verdict={{APPROVED|APPROVED_WITH_NOTES|REJECTED}} · fingerprint={{hash}} · spec={{hash}} · generated={{YYYY-MM-DD}} -->

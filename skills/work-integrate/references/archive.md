@@ -13,8 +13,8 @@ modo que el archivado viaje en el mismo merge/PR que el código.
 [confirmación explícita del usuario](#confirmación-del-usuario-obligatoria):
 
 1. El `progress.md` del trabajo tiene **todas** sus unidades en `Done`.
-2. **Todas** las puertas de calidad que aplican al flujo quedaron en **aprobado**:
-   `quality-check`, `code-review` y `trace-validate` (`⚠️ Aprobado con observaciones` de
+2. **Todas** las puertas de calidad que aplican al flujo quedaron en `APPROVED`:
+   `quality-check`, `code-review` y `trace-validate` (`APPROVED_WITH_NOTES` de
    `trace-validate` cuenta como aprobado), más la **Definition of Done** en `pr-create`
    cuando existe `docs/policies/definition-of-done.md`.
 3. El tipo de trabajo es **`US-XXX` o `WI-XXX`** (ver [Qué no se archiva](#qué-no-se-archiva)).
@@ -66,7 +66,7 @@ al usuario* y `pr-create` usa el equivalente de su cliente—, **mostrando antes
 movería exactamente**: la carpeta y, si las hay, las investigaciones sueltas que quedaron
 huérfanas. El usuario no puede decidir sobre un movimiento que no ve.
 
-```
+`
 Las puertas pasaron y US-042 está en Done. ¿Archivo el artefacto antes de integrar?
 
   docs/specs/user-stories/US-042-exportacion-csv/
@@ -74,7 +74,7 @@ Las puertas pasaron y US-042 está en Done. ¿Archivo el artefacto antes de inte
 
   Investigaciones sueltas sin referencias activas:
     RS-003-formatos-csv → docs/specs/archive/research/
-```
+`
 
 La respuesta es **binaria**: se archiva todo lo mostrado, o no se archiva nada. Las
 investigaciones huérfanas no se ofrecen por separado — van dentro de lo que el usuario ve
@@ -140,12 +140,12 @@ renombra, no se aplana, no se comprime, no se borra nada de dentro.
 
 ### 1 — Mover la carpeta del trabajo
 
-```bash
+`bash
 mkdir -p docs/specs/archive/<user-stories|work-items>
 test ! -e "docs/specs/archive/<subcarpeta>/<ID>-<slug>" \
   || { echo "el destino ya existe"; exit 1; }
 git mv "docs/specs/<subcarpeta>/<ID>-<slug>" "docs/specs/archive/<subcarpeta>/<ID>-<slug>"
-```
+`
 
 - **`git mv`, no `mv`**: deja el renombrado ya stageado y git lo detecta como *rename*,
   preservando el historial del archivo. Un `mv` a secas aparecería como borrado + alta.
@@ -209,23 +209,23 @@ directos como sustituto, ni revertir el `git mv`.
 
 Al cerrar el flujo, incluir:
 
-```
+`
 📦 Archivado
    docs/specs/user-stories/US-042-exportacion-csv/
    → docs/specs/archive/user-stories/US-042-exportacion-csv/
    Investigaciones sueltas:
      RS-003-formatos-csv → archivada (sin referencias activas)
      RS-007-limites-export → se queda (referenciada por US-051)
-```
+`
 
 Si no hubo investigaciones sueltas, omitir ese bloque en vez de escribir «ninguna».
 
 Si el usuario **no** confirmó, el bloque dice qué no se hizo y por qué, sin dramatizarlo:
 
-```
+`
 📦 Archivado: omitido
    US-042 se queda en docs/specs/user-stories/ (no confirmado por el usuario).
-```
+`
 
 Y si no se pudo preguntar: «omitido — sin canal de respuesta para confirmar».
 
@@ -242,11 +242,11 @@ y aquí vive el porqué. Las dos son independientes y ninguna sustituye a la otr
 **Quien busque la carpeta de un `US-XXX`, `WI-XXX` o `RS-XXX` y no la encuentre en la ruta
 activa, debe mirar en `docs/specs/archive/` antes de darla por inexistente.**
 
-```
+`
 docs/specs/user-stories/US-042-…/   →  docs/specs/archive/user-stories/US-042-…/
 docs/specs/work-items/WI-007-…/     →  docs/specs/archive/work-items/WI-007-…/
 docs/specs/research/RS-003-…/       →  docs/specs/archive/research/RS-003-…/
-```
+`
 
 Lo que se encuentra ahí es un trabajo **cerrado**. **Leerlo es siempre legítimo**: sirve
 como consulta, contexto e historial, y un flujo que solo necesita mirarlo —para entender el

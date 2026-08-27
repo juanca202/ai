@@ -31,9 +31,11 @@ aprobados — nadie más los vuelve a crear después.
 
 ## Resolución de idioma
 
-Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
+Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../reference/language.md).
 
-El idioma resuelto aplica a los mensajes al usuario y a lo que se le pasa a `arch-manage` al delegar candidatos.
+Las reglas de `language.md` son obligatorias y tienen prioridad para determinar el idioma de todos los artefactos y mensajes generados por este skill.
+
+No continúes hasta haber leído y aplicado `language.md`.
 
 ---
 
@@ -41,7 +43,7 @@ El idioma resuelto aplica a los mensajes al usuario y a lo que se le pasa a `arc
 
 Antes de inspeccionar, determinar el alcance:
 
-1. **Leer `AGENTS.md`** (si existe, sección `# Stack tecnológico`) y **`.agents/MEMORY.md`** (si existe, idioma y contexto operativo) para entender lo ya conocido — el stack vive solo en `AGENTS.md`, no se duplica en `MEMORY.md`.
+1. **Leer `AGENTS.md`** (si existe, sección `# Stack tecnológico`) y **`.agents/MEMORY.md`** (si existe, contexto operativo) para entender lo ya conocido — el stack vive solo en `AGENTS.md`, no se duplica en `MEMORY.md`.
 2. **Leer `docs/adr/` y `docs/standards/`** para listar los artefactos ya existentes — nunca proponer un candidato que duplique un ADR o estándar existente (en cualquier estado).
 3. Si el usuario no indicó ruta, asumir raíz del repositorio actual.
 
@@ -152,7 +154,7 @@ Por cada candidato aprobado por el usuario:
    - La decisión inferida
    - **Si fija un requisito:** el enunciado de la regla en lenguaje RFC 2119 y **el estándar de dominio** al que pertenece (para que `arch-manage` cree o amplíe ese estándar)
    - Las alternativas implícitas detectadas (si las hay)
-   - Los **Decisores** y el **idioma**, acordados una sola vez para todo el lote, de modo que `arch-manage` no vuelva a preguntar lo mismo por cada artefacto
+   - Los **Decisores**, acordados una sola vez para todo el lote, de modo que `arch-manage` no vuelva a preguntar lo mismo por cada artefacto
 
 2. Dejar que `arch-manage` ejecute su flujo completo: crea el ADR y, cuando corresponda, añade el requisito al estándar de dominio (creándolo o ampliándolo), **propone los criterios de cumplimiento candidatos con su mecanismo de verificación para que el usuario elija cuáles crear**, escribe los seleccionados como `CR-XXX` con su `Enfoque` (bloqueante/warning), enlaza `emits` (a nivel de CR) / `source_adrs` y crea las fitness functions elegidas. En lote, esa propuesta y selección se presenta **una sola vez para todos los candidatos aprobados** (una tabla con columna `Estándar`), no una por artefacto.
 
@@ -190,5 +192,5 @@ presentación están en `references/`; **leerlos solo cuando la fase correspondi
 
 Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
 
-- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
+- [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
 

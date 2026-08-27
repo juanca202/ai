@@ -2,7 +2,7 @@
 
 Flujo para **ejecutar en codigo** las tareas tecnicas `TK-XXX` de una historia de usuario `US-XXX` bajo `docs/specs/user-stories/`. Esta referencia se carga desde `SKILL.md` cuando la seleccion de tipo resuelve a este caso. Asume ya resueltos el mecanismo de preguntas, el idioma, la validacion de repositorio y el ritmo de confirmacion (ver `SKILL.md`).
 
-> **Unidad de confirmacion:** **una `TK-XXX` por turno.** Al terminar cada TK, detenerse y preguntar si continuar con la siguiente, aunque el usuario haya aprobado la cola completa. **Excepcion:** si el alcance tiene varias TK y el usuario pide ejecutar **sin confirmacion**, se activa el **modo de ejecucion paralela** del `SKILL.md` (analisis de dependencias, subagentes con worktree — max 3 — y merge secuencial), que omite estas pausas.
+> **Unidad de confirmacion:** **una `TK-XXX` por turno.** Al terminar cada TK, detenerse y preguntar si continuar con la siguiente, aunque el usuario haya aprobado la cola completa. **Excepcion:** si el alcance tiene varias TK y la politica resuelta no exige pausar entre ellas (`confirmByUnit: never`, o peticion explicita del usuario en el turno), se activa el **modo de ejecucion paralela** del `SKILL.md` (analisis de dependencias, subagentes con worktree — hasta `maxParallel` — y merge secuencial), que omite estas pausas.
 
 ---
 
@@ -74,7 +74,7 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 
 ### Paso 3 - Implementar tarea a tarea
 
-> IMPORTANTE **Regla de oro - una TK por turno.** Al terminar cada TK, detenerse y preguntar si continuar. Esta regla no tiene excepciones, aunque el usuario haya aprobado la cola completa en el Paso 2.
+> IMPORTANTE **Regla de oro - una TK por turno, con `confirmByUnit: always`.** Al terminar cada TK, detenerse y preguntar si continuar, aunque el usuario haya aprobado la cola completa en el Paso 2. Las unicas dos situaciones que levantan la pausa son las de la nota de cabecera: `confirmByUnit: never` y la peticion explicita del usuario en el turno.
 
 Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto:
 
@@ -116,11 +116,11 @@ Un `TK-XXX` siempre vive bajo la carpeta de una US. Si el usuario indica solo el
 2. **Validar** que `TK-XXX-[nombre].md` existe dentro de `docs/specs/user-stories/US-XXX-[nombre-corto]/`.
 3. Si no pertenece o no se encuentra, **parar** e informar:
 
-```
+`
 WARNING No es posible continuar con la implementacion:
 - TK-XXX no pertenece a US-XXX o no se encontro en su carpeta.
 - Verificar el numero de tarea y la historia indicada antes de continuar.
-```
+`
 
 4. **No** implementar hasta confirmar la relacion TK => US.
 
@@ -154,13 +154,13 @@ WARNING No es posible continuar con la implementacion:
 
 **Ejemplo 4 - "implementar todo de corrido"**
 - *Entrada:* "Implementa todas las tareas Ready de la US-042 de una vez, sin preguntar."
-- *Comportamiento:* varias TK + peticion explicita de no confirmar => **modo de ejecucion paralela** (ver `SKILL.md`). Primero el analisis de dependencias (Paso 0): ordenar por olas y, si alguna TK depende de trabajo fuera del alcance, avisar para excluirla o detener. Tras confirmar el plan una vez, ejecutar las TK independientes en subagentes con worktree (max 3 en paralelo) e integrarlas por merge secuencial a `feature/US-042-*`. Si el alcance fuera una sola TK o no se pidiera "sin preguntar", se mantiene el flujo estandar con una TK por confirmacion.
+- *Comportamiento:* varias TK + peticion explicita de no confirmar => **modo de ejecucion paralela** (ver `SKILL.md`). Primero el analisis de dependencias (Paso 0): ordenar por olas y, si alguna TK depende de trabajo fuera del alcance, avisar para excluirla o detener. Tras confirmar el plan una vez, ejecutar las TK independientes en subagentes con worktree (hasta `maxParallel` en paralelo) e integrarlas por merge secuencial a `feature/US-042-*`. Si el alcance fuera una sola TK o no se pidiera "sin preguntar", se mantiene el flujo estandar con una TK por confirmacion.
 
 ---
 
 ## Anti-patterns (especificos del tipo)
 
-- Arrancar la siguiente TK sin confirmacion explicita (aunque la cola este aprobada), salvo cuando el usuario haya pedido el **modo de ejecucion paralela**.
+- Con `confirmByUnit: always`, arrancar la siguiente TK sin confirmacion explicita (aunque la cola este aprobada), salvo en **modo de ejecucion paralela**.
 - Comitear los cambios de una TK inmediatamente al terminarla, antes de la pausa de confirmacion; el commit se hace al confirmar el avance a la siguiente TK (o en el cierre, si el usuario detiene ahi).
 - Omitir el mensaje de cola e ir directo al codigo.
 - Tratar tareas en Draft como ejecutables.
@@ -178,5 +178,5 @@ Posicion: **implementacion** - entre `work-plan` e `work-integrate`.
 |--|--|
 | **Entrada** | US `Ready`; TK del alcance `Ready`; rama `feature/US-XXX-*` activa o creada desde la rama base. |
 | **Salida** | Codigo commiteado; `progress.md` con cada TK del alcance en `Done`; working tree limpio. |
-| **Siguiente paso** | Cada TK ya comiteada via `/git-commit` durante la implementacion => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara las tres puertas de cierre (`quality-check`, `code-review` y `trace-validate`) y exigira veredicto Aprobado en las tres antes de integrar. |
+| **Siguiente paso** | Cada TK ya comiteada via `/git-commit` durante la implementacion => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara las tres puertas de cierre (`quality-check`, `code-review` y `trace-validate`) y exigira veredicto `APPROVED` en las tres antes de integrar. |
 | **Regreso desde plan** | TK en Draft o conflicto tecnico => volver a `work-plan`. |

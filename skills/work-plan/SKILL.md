@@ -33,7 +33,7 @@ No sustituir una invocación de skill por "hacer el trabajo aquí". El handoff e
 
 ## Cómo preguntar al usuario
 
-Mecanismo, ritmo y fallback compartidos: [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md).
+Mecanismo, ritmo y fallback compartidos: [`../../reference/asking.md`](../../reference/asking.md).
 
 Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar*, *validar* o *sugerir* algo al usuario, asume ese mecanismo; no se repite allí.
 
@@ -43,9 +43,11 @@ Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar
 
 ## Resolución de idioma
 
-Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
+Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../reference/language.md).
 
-El idioma resuelto aplica a los **documentos generados** (`TK-XXX`, `WI-XXX`) y a los mensajes al usuario.
+Las reglas de `language.md` son obligatorias y tienen prioridad para determinar el idioma de todos los artefactos y mensajes generados por este skill.
+
+No continúes hasta haber leído y aplicado `language.md`.
 
 ---
 
@@ -69,13 +71,20 @@ Reglas de selección:
 
 ---
 
-## Integración con un sistema de seguimiento externo (condicional)
+## Resolución de la integración con el gestor de proyectos
 
-La sincronización con un sistema de seguimiento de trabajo externo (Azure DevOps, Jira u otro) es transversal a los tipos de plan que crean work items, pero **solo aplica si el repositorio está vinculado a uno**. Este skill solo resuelve **si** hay vinculación y **qué** referencia cargar; todo el detalle propio de cada sistema (herramienta MCP, campos, tipos de work item, configuración de conexión, límites de formato) vive exclusivamente en su archivo de `references/` — nunca aquí ni en las referencias de tipo de plan.
+Antes de ejecutar este skill, DEBES leer [`../../reference/project-management.md`](../../reference/project-management.md).
 
-1. **Detectar** la vinculación leyendo `.agents/MEMORY.md` (raíz del repo): buscar la señal `work_item_tracking: <sistema>` con valor no vacío (p. ej. `azure_devops`).
-2. **Si NO hay señal** → el repo no usa un tracker externo. Continuar con el flujo del tipo de plan usando ID secuencial local; **no** leer ninguna referencia de tracker.
-3. **Si hay señal** → cargar `references/<sistema>.md` (p. ej. `references/azure-devops.md` para `work_item_tracking: azure_devops`) y seguir **únicamente** sus pasos antes de crear cualquier archivo local. Si no existe un archivo de referencia para el sistema indicado, informar al usuario y continuar con ID secuencial local.
+Las reglas de `project-management.md` son obligatorias y tienen prioridad para determinar si hay integración con un gestor de proyectos, con qué proveedor y con qué datos de conexión.
+
+No continúes hasta haber leído y aplicado `project-management.md`.
+
+**Delta de este skill:** la integración solo aplica a los tipos de plan que crean work items.
+
+- **Desactivada** → continuar con el flujo del tipo de plan usando **ID secuencial local**; no leer ninguna referencia de proveedor.
+- **Activada** → además de la referencia compartida del proveedor, cargar `references/<proveedor>.md` de este skill (p. ej. [`references/azure-devops.md`](references/azure-devops.md)) y seguir **únicamente** sus pasos antes de crear cualquier archivo local. Si este skill no tiene referencia para ese proveedor, informar al usuario y continuar con ID secuencial local.
+
+Todo el detalle propio de cada proveedor (herramienta MCP, campos, tipos de work item, límites de formato) vive exclusivamente en esos archivos — nunca aquí ni en las referencias de tipo de plan.
 
 **Regla de fidelidad (transversal a cualquier sistema):** toda la información del documento local debe quedar representada en el work item externo — en un campo dedicado si el sistema lo expone (p. ej. un campo de criterios de aceptación), o dentro de la descripción si no lo expone. Ninguna sección del `.md` puede omitirse al sincronizar; el objetivo es poder reconstruir el documento completo a partir del work item si el archivo local se perdiera. Qué campo usa cada sistema para qué sección es detalle de su archivo de referencia.
 
@@ -93,7 +102,7 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 |---------|---------------|
 | `references/user-story-tasks.md` | Tipo de plan = tarea técnica de historia de usuario. Contiene modos de invocación, ubicaciones, flujos (stub, TK completa, actualizar, planificar desde US), checklist, ejemplos y anti-patrones. |
 | `references/maintenance-tasks.md` | Tipo de plan = tarea de mantenimiento. |
-| `references/<sistema>.md` (p. ej. `azure-devops.md`) | Solo si se detecta vinculación a un tracker externo (ver [Integración con un sistema de seguimiento externo](#integración-con-un-sistema-de-seguimiento-externo-condicional)); el archivo concreto depende del valor de `work_item_tracking`. |
+| `references/<proveedor>.md` (p. ej. `azure-devops.md`) | Solo si `project-management.md` resolvió la integración como activada; el archivo concreto depende del `provider` resuelto. |
 | `assets/task-template.md` | Plantilla canónica de una tarea de historia de usuario (`TK-XXX`). Leer antes de redactar el documento. |
 | `assets/work-item-template.md` | Plantilla canónica de una tarea de mantenimiento (`WI-XXX`). Leer antes de redactar el documento. |
 
@@ -101,8 +110,9 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 
 Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
 
-- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
-- [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
-- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
-- [`${CLAUDE_PLUGIN_ROOT}/reference/alm/azure-devops.md`](../../reference/alm/azure-devops.md): **Azure DevOps** — activación, MCP, URL, límites, sincronización. *Solo si `MEMORY.md` declara `work_item_tracking:`.*
+- [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
+- [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`../../reference/project-management.md`](../../reference/project-management.md): **Gestor de proyectos** — si la integración está activa, proveedor y datos de conexión. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/alm/azure-devops.md`](../../reference/alm/azure-devops.md): **Azure DevOps** — MCP, URL, límites, sincronización. *Solo si el `provider` resuelto es `azure-devops`.*
 

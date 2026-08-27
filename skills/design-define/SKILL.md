@@ -38,24 +38,26 @@ Carga el archivo correspondiente cuando vayas a ejecutar la tarea; el detalle í
 
 Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
 
-- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
-- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
 
 ---
 
 ## Resolución de idioma
 
-Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
+Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../reference/language.md).
 
-El idioma resuelto aplica a la **prosa** del documento técnico (descripciones y texto natural). En **modo delegado**, el paso 2 del orden canónico es la preferencia que transmita el skill llamador o el idioma de la US/TK/WI de origen — pero `.agents/MEMORY.md` sigue mandando por encima de ambos.
+Las reglas de `language.md` son obligatorias y tienen prioridad para determinar el idioma de todos los artefactos y mensajes generados por este skill.
 
-**Excepción propia:** los nombres de campos, rutas y payloads **no** siguen este orden — siguen la convención del código existente (ver [`references/element-standards.md`](references/element-standards.md)).
+No continúes hasta haber leído y aplicado `language.md`.
+
+**Excepción deliberada:** los nombres de campos, rutas y payloads **no** siguen el idioma resuelto — siguen la convención del código existente (ver [`references/element-standards.md`](references/element-standards.md)).
 
 ---
 
 ## Ubicación de archivos
 
-Layout completo del harness e identificadores: [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md).
+Layout completo del harness e identificadores: [`../../reference/artifacts.md`](../../reference/artifacts.md).
 
 Lo propio de este skill:
 
@@ -88,7 +90,7 @@ En modo delegado, el grilling de preguntas se dirige igualmente al usuario (el s
 
 ## Cómo preguntar al usuario (grilling)
 
-Mecanismo, ritmo y fallback compartidos: [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md).
+Mecanismo, ritmo y fallback compartidos: [`../../reference/asking.md`](../../reference/asking.md).
 
 Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar*, *validar* o *sugerir* algo al usuario, asume ese mecanismo; no se repite allí.
 
@@ -110,7 +112,6 @@ El detalle de **qué preguntar por tipo de elemento** (campos sin tipo, códigos
 | **Tipo(s) de elemento** (modelo, API, flujo, diagrama) | Del pedido o del contenido de la US/TK/WI | Preguntar |
 | **Contenido de cada elemento** (campos, contratos, pasos) | Del input recibido, del código existente del repo, o de la US/TK/WI de origen | Grilling de preguntas; lo irresoluble queda en Observaciones |
 | **Artefacto(s) que lo consumirán** (US/TK/WI) | Del contexto o del skill llamador | Opcional en modo directo; si existe, ofrecer enlazar la referencia al terminar |
-| **Idioma de preferencia** | Ver [Resolución de idioma](#resolución-de-idioma) | Preguntar; no decidir por cuenta propia |
 
 ---
 

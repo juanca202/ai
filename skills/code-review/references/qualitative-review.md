@@ -145,10 +145,10 @@ Principios de tono:
 
 | Severidad | Regla práctica | Características ISO/IEC 25010 típicas |
 |-----------|----------------|---------------------------------------|
-| 🔴 **Crítico** | Si entra así, el sistema hace lo incorrecto, se rompe, o el diseño impedirá cambios necesarios pronto. Mismatch intención↔implementación; violación de límites que invierte dependencias del dominio; acoplamiento que bloquea la evolución; vulnerabilidad de seguridad explotable; estado inconsistente ante fallo. | Adecuación funcional, Seguridad, Fiabilidad |
-| 🟠 **Mayor** | No rompe hoy, pero es deuda real que costará caro: violación SOLID con impacto, duplicación significativa, abstracción innecesaria costosa, divergencia fuerte del patrón del repo; N+1 en ruta crítica; cambio de contrato sin versionado. | Mantenibilidad, Eficiencia en el desempeño, Compatibilidad |
-| 🟡 **Menor** | Mejora la calidad sin riesgo sistémico: naming, legibilidad, duplicación pequeña, micro-inconsistencias, caso borde de baja probabilidad. | Mantenibilidad (analizabilidad) |
-| 💡 **Sugerencia** | Opcional: alternativa de estilo, idea a futuro, "nice to have". | Cualquiera |
+| `CRITICAL` (`🔴`) | Si entra así, el sistema hace lo incorrecto, se rompe, o el diseño impedirá cambios necesarios pronto. Mismatch intención↔implementación; violación de límites que invierte dependencias del dominio; acoplamiento que bloquea la evolución; vulnerabilidad de seguridad explotable; estado inconsistente ante fallo. | Adecuación funcional, Seguridad, Fiabilidad |
+| `MAJOR` (`🟠`) | No rompe hoy, pero es deuda real que costará caro: violación SOLID con impacto, duplicación significativa, abstracción innecesaria costosa, divergencia fuerte del patrón del repo; N+1 en ruta crítica; cambio de contrato sin versionado. | Mantenibilidad, Eficiencia en el desempeño, Compatibilidad |
+| `MINOR` (`🟡`) | Mejora la calidad sin riesgo sistémico: naming, legibilidad, duplicación pequeña, micro-inconsistencias, caso borde de baja probabilidad. | Mantenibilidad (analizabilidad) |
+| `SUGGESTION` (`💡`) | Opcional: alternativa de estilo, idea a futuro, "nice to have". | Cualquiera |
 
 Ante la duda entre dos niveles, decide por el **impacto en el sistema**, no por lo molesto que te resulte. No infles ni minimices.
 

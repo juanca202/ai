@@ -6,6 +6,13 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 # US-XXX: {{título corto de la historia de usuario}}
 
 **Estado:** {{Draft | Ready}}
+
+<!-- us:status={{Draft|Ready}} -->
+<!--
+Esta marca se CONSERVA al publicar. Sus claves y sus valores van en inglés SIEMPRE, aunque el resto del
+documento esté en otro idioma: es el ancla que otros skills parsean, no contenido. La etiqueta visible
+de arriba sí se redacta en el idioma resuelto. Ver ../../reference/verdicts.md.
+-->
 **Fecha de creación:** {{YYYY-MM-DD}}
 **Última actualización:** {{YYYY-MM-DD}}
 **Work Item ({{Sistema}}):** {{enlace markdown al work item del sistema de seguimiento externo — solo si se creó manualmente para esta historia; {{Sistema}} es el nombre corto del sistema (p. ej. "ADO"); omitir línea si no aplica. A diferencia de TK-XXX/WI-XXX/TC-XXX (que sí se sincronizan automáticamente cuando hay un tracker externo vinculado), ningún skill de esta suite crea o pobla este campo por su cuenta para la US — si alguien lo puebla manualmente, regla de fidelidad recomendada: la sección Criterios de aceptación va en el campo dedicado del sistema si lo expone (p. ej. Acceptance Criteria en ADO); el resto del documento (Descripción, Contexto, Fuera de alcance, Reglas de negocio, Referencias, Complejidad, Repositorios, Validación, Observaciones) va en la descripción del work item, serializado por secciones, para que la US pueda reconstruirse completa desde el work item si este .md se pierde — ninguna sección debería omitirse}}

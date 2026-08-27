@@ -27,7 +27,7 @@ fecha/hora que lo confirma. Cada revalidación posterior agrega además una entr
 **Repositorio**: {{nombre/ruta del repo o subproyecto auditado}}
 **Alcance**: {{criterios auditados y estándares/requisitos de contexto cubiertos + fuentes AGENTS.md — p. ej. "14 criterios en 4 estándares (Testing, API, Persistence, Security) · 2 en Draft excluidos + AGENTS.md raíz"}}
 **Método**: {{descripción corta de lo que realmente se usó — herramientas de inspección y fitness functions ejecutadas, p. ej. "grep + lectura de package.json/composer.json; runner node scripts/arch/verify.mjs ejecutado". No se corre el build ni la suite completa.}}
-**Veredicto**: {{✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones}} {{si hubo alguna revalidación, agregar aquí mismo "(revalidado YYYY-MM-DD HH:MM)" con la fecha/hora de la última entrada de ## Revalidaciones; omitir si no hubo ninguna}}
+**Veredicto**: {{`COMPLIANT` | `NON_COMPLIANT` | `COMPLIANT_WITH_NOTES`}} {{si hubo alguna revalidación, agregar aquí mismo "(revalidado YYYY-MM-DD HH:MM)" con la fecha/hora de la última entrada de ## Revalidaciones; omitir si no hubo ninguna}}
 
 ## Resumen
 
@@ -210,10 +210,18 @@ refleja también en "Veredicto" de la cabecera, junto a la fecha/hora que lo con
 
 ### Revalidación — {{YYYY-MM-DD HH:MM}}
 
-**Veredicto resultante**: {{✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones}}
+**Veredicto resultante**: {{`COMPLIANT` | `NON_COMPLIANT` | `COMPLIANT_WITH_NOTES`}}
 
 **Cambios evidenciados:**
 
-- {{<estándar>/CR-XXX | AGENTS.md §Regla}} — {{✅ Resuelto | ❌ Nuevo incumplimiento | ⚠️ Regresión / cambio de evidencia}}: {{descripción corta del cambio, con rutas afectadas si aplica}}
+- {{<estándar>/CR-XXX | AGENTS.md §Regla}} — {{símbolo + etiqueta en el idioma resuelto: `✅` RESOLVED | `❌` NEW_VIOLATION | `⚠️` REGRESSION}}: {{descripción corta del cambio, con rutas afectadas si aplica}}
 
 {{Si no hubo ningún cambio desde la última verificación, escribir "Sin cambios respecto a la última verificación." y omitir la lista de arriba.}}
+
+<!-- arch-audit:verdict={{COMPLIANT|NON_COMPLIANT|COMPLIANT_WITH_NOTES}} · generated={{YYYY-MM-DD}} -->
+<!--
+Esta marca se CONSERVA al publicar. Sus claves y su valor van en inglés SIEMPRE, aunque el resto del
+informe esté en otro idioma; es el identificador estable del veredicto, no contenido.
+En una revalidación, actualizar su `verdict` al veredicto resultante y su `generated` a la fecha de esa
+entrada de `## Revalidaciones`. Ver ../../reference/verdicts.md.
+-->

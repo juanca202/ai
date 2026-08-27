@@ -1,13 +1,13 @@
 # Integración con Azure DevOps — `work-plan`
 
-> **Base común obligatoria:** [`${CLAUDE_PLUGIN_ROOT}/reference/alm/azure-devops.md`](../../../reference/alm/azure-devops.md)
-> — activación (`work_item_tracking: azure_devops`), claves de `.agents/MEMORY.md`, verificación del MCP
+> **Base común obligatoria:** [`../../../reference/alm/azure-devops.md`](../../../reference/alm/azure-devops.md)
+> — activación y datos de conexión resueltos en [`../../../reference/project-management.md`](../../../reference/project-management.md), verificación del MCP
 > y su degradación, construcción de la URL, campo `Work Item (ADO)`, uso del `id` de ADO como número
 > local, límite de 255 caracteres del título, contrato de reconstrucción íntegra y anti-patrones
 > comunes. **Leerla antes que este archivo.**
 
-Este archivo contiene **solo el delta de `work-plan`**. Se activa desde «Integración con un sistema de
-seguimiento externo» en `SKILL.md`, y aplica de forma transversal a cualquier tipo de plan que cree work
+Este archivo contiene **solo el delta de `work-plan`**. Se activa desde «Resolución de la integración con el
+gestor de proyectos» en `SKILL.md`, y aplica de forma transversal a cualquier tipo de plan que cree work
 items; cuando dice «tarea» se refiere al artefacto del tipo de plan en curso (p. ej. un `TK-XXX` de
 historia de usuario).
 
@@ -22,7 +22,7 @@ Antes de generar el archivo local, crear el work item vía MCP:
 | **Tipo de work item — `WI-`** | Según el `Tipo` del WI: `bug-fix` → `Bug`; el resto (`refactor`, `dependency-update`, `optimization`, `security-update`, `test-improvement`, `documentation-update`, `operational-change`) → `Task`. Ante duda, confirmar con el usuario. |
 | **Criterios de aceptación** | Solo si el artefacto tiene esa sección (un `WI-XXX` puede tenerla, un `TK-XXX` no). Campo dedicado `Microsoft.VSTS.Common.AcceptanceCriteria` si existe; si no, dentro de Descripción. |
 | **Descripción** | El documento completo, serializado con los mismos encabezados que el `.md`. `TK-XXX`: Descripción, Dependencias, Referencias, Plan de implementación (`IT-XX`), Observaciones. `WI-XXX`: Descripción, Contexto, Fuera de alcance, Reglas de negocio, Dependencias, Referencias, Plan de implementación, Observaciones. |
-| **Iteración / Area Path** | De `.agents/MEMORY.md` si está definido; si no, omitir. |
+| **Iteración / Area Path** | Omitir: no son configurables (ver la base común). ADO aplica los valores por defecto del proyecto. |
 | **Padre** | Si aplica (p. ej. una US vinculada en ADO), vincular al work item padre. Best-effort. |
 
 Tras la llamada, extraer el `id` numérico y usarlo como número de la tarea local, con el prefijo del
@@ -39,7 +39,7 @@ tipo de plan en curso: `TK-<ado_id>-[nombre-descriptivo].md` o `WI-<ado_id>-[nom
 
 ## Ejemplo — Repo vinculado a ADO con MCP disponible
 
-- *Contexto:* `.agents/MEMORY.md` contiene `azure_devops_project: MyProject`. MCP de ADO disponible.
+- *Contexto:* `project-management.md` resolvió `project: MyProject`. MCP de ADO disponible.
 - *Entrada:* «TK para el endpoint de autenticación en US-003.»
 - *Comportamiento:* El agente detecta ADO (en `SKILL.md`), lee la base común y este archivo, verifica que
   el MCP está disponible, crea el work item en ADO (`Task`, título "Endpoint de autenticación",

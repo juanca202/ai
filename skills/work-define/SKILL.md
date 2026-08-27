@@ -27,22 +27,24 @@ Carga el archivo correspondiente cuando vayas a ejecutar la tarea; el detalle í
 
 Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
 
-- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
-- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
 
 ---
 
 ## Resolución de idioma
 
-Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
+Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../reference/language.md).
 
-El idioma resuelto aplica a la **US**: criterios de aceptación, INVEST, DoR y todo el texto natural.
+Las reglas de `language.md` son obligatorias y tienen prioridad para determinar el idioma de todos los artefactos y mensajes generados por este skill.
+
+No continúes hasta haber leído y aplicado `language.md`.
 
 ---
 
 ## Ubicación de archivos
 
-Layout completo del harness, identificadores y contrato de archivado: [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md).
+Layout completo del harness, identificadores y contrato de archivado: [`../../reference/artifacts.md`](../../reference/artifacts.md).
 
 Lo propio de este skill:
 
@@ -57,7 +59,7 @@ Lo propio de este skill:
 
 ### Convenciones del nombre de carpeta
 
-> Reglas comunes de slug e identificadores: [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md). Lo específico de las US:
+> Reglas comunes de slug e identificadores: [`../../reference/artifacts.md`](../../reference/artifacts.md). Lo específico de las US:
 
 - Formato: `US-XXX-[nombre-corto]` con `US-XXX` en mayúsculas y número de 3 dígitos.
 - Nombre corto: minúsculas, kebab-case, sin artículos ni palabras vacías.
@@ -76,7 +78,6 @@ Antes de crear o editar cualquier US, el agente debe tener clara la siguiente in
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | **Actor y valor de negocio**                    | Del contexto o descripción del usuario                                                   | Preguntar al usuario                                                                  |
 | **Criterios de aceptación (AC-XXX)**            | Del contexto o descripción del usuario                                                   | Preguntar; sin al menos un `AC-XXX` INVEST no es valorable y la historia solo puede crearse en Draft |
-| **Idioma de preferencia**                       | Ver [Resolución de idioma](#resolución-de-idioma) | Preguntar al usuario; no decidir el idioma por cuenta propia                          |
 | **Referencias de diseño** (solo US de UI)       | Figma, prototipos u otros enlaces aportados por el usuario                               | Sin ellas la historia no puede declararse Ready                                       |
 | **Dependencias con otras US o sistemas**        | Indicadas por el usuario o inferibles del contexto                                       | Preguntar; afectan las dimensiones I y E de INVEST                                    |
 | **ID de la US**                                 | Proporcionado por el usuario                                                             | Inferir el siguiente libre revisando carpetas `US-`* en `docs/specs/user-stories/` **y en `docs/specs/archive/user-stories/`** (archivar no libera el ID) |

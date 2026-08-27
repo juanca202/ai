@@ -136,11 +136,11 @@ El ADR y el estándar se enlazan **por referencia**, nunca duplicando contenido:
 
 ## Resolución de idioma
 
-Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
+Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../reference/language.md).
 
-El idioma resuelto aplica a los **artefactos** (ADR y estándares) y a los mensajes al usuario.
+Las reglas de `language.md` son obligatorias y tienen prioridad para determinar el idioma de todos los artefactos y mensajes generados por este skill.
 
-**Palabras clave normativas:** las de RFC 2119 / RFC 8174 **sí** se redactan en el idioma de preferencia, siempre en MAYÚSCULAS (tabla de equivalencias en la referencia compartida y en la sección "Concepto: ADR ≠ estándar" más arriba): un estándar en español usa DEBE/DEBERÍA/PUEDE…, uno en inglés usa MUST/SHOULD/MAY…
+No continúes hasta haber leído y aplicado `language.md`.
 
 ---
 
@@ -263,7 +263,7 @@ excepción, añadir un requisito a un dominio existente). El estándar es **vivo
 - Escribir el runner o los checks en un lenguaje ajeno al stack del repo (p. ej. shell en un proyecto Node) — se escriben con el runtime que el proyecto ya usa; el shell POSIX es solo el último recurso cuando el repo no tiene ningún runtime de stack.
 - Crear un archivo de chequeo por criterio de cumplimiento — el archivo de checks es **por estándar** (`scripts/arch/checks/<slug-estándar>.<ext>`); la trazabilidad por CR va dentro, en comentarios y en las líneas de salida de cada chequeo.
 - Instalar o configurar dependencias sin la aprobación explícita del usuario, o correr build/suites completas por iniciativa propia.
-- Al invocarse en lote (p. ej. desde `arch-discover`), volver a preguntar decisores/idioma o la instalación de dependencias por cada artefacto en vez de resolverlo una sola vez para todo el lote.
+- Al invocarse en lote (p. ej. desde `arch-discover`), volver a preguntar los decisores o la instalación de dependencias por cada artefacto en vez de resolverlo una sola vez para todo el lote.
 - Pedirle al usuario el número del próximo ADR o CR — siempre se calcula releyendo `docs/adr/` o la tabla del estándar, nunca se pregunta.
 
 ---
@@ -292,8 +292,8 @@ mantiene ligero):
 
 Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
 
-- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
-- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
 
 ---
 

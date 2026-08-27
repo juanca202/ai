@@ -85,7 +85,7 @@ Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **De
   - Si aparecen términos de dominio nuevos, crear o reutilizar entrada en `docs/specs/glossary.md` con definición breve en contexto producto/dominio.
 5. **Cierre**
   - Si la US queda en **Draft**, identificar las lagunas documentadas en Observaciones (datos faltantes, dependencias sin confirmar, dimensiones de INVEST en `Parcial` o `No cumple`, criterios del DoR sin satisfacer) y ofrecer al usuario, mediante la **herramienta de preguntas estructuradas**, las preguntas concretas que cerrarían cada laguna. Reglas:
-    - Una pregunta por laguna, con opciones cuando la respuesta admita categorías (idioma, formato, prioridad, dependencias enumerables, story points Fibonacci); entrada libre solo para campos narrativos (refinamiento del valor, reglas nuevas, criterios verificables).
+    - Una pregunta por laguna, con opciones cuando la respuesta admita categorías (formato, prioridad, dependencias enumerables, story points Fibonacci); entrada libre solo para campos narrativos (refinamiento del valor, reglas nuevas, criterios verificables).
     - Respetar el máximo de tres preguntas por bloque; si hay más lagunas, encadenar tandas hasta agotarlas o hasta que el usuario indique que prefiere mantener el resto como Draft.
     - Tras recibir respuestas, actualizar las secciones afectadas del `README.md`, revalidar los checklists de INVEST y DoR, y promover a `Estado: Ready` solo si quedan completos. Si alguna laguna sigue abierta, mantener `Draft` y reflejar el residual en Observaciones.
   - Si la US queda en **Ready**, sugerir explícitamente al usuario dos próximos pasos posibles: **[Definir casos de prueba]** o **[Planificar tareas]**.
@@ -119,7 +119,7 @@ Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **De
 
 - Actor y valor de negocio claros
 - Reglas de negocio con suficiente detalle para valorar INVEST
-- Idioma de preferencia determinado (preferencia en contexto, idioma del mensaje, o preguntado al usuario)
+- Idioma resuelto según la sección «Resolución de idioma» de `SKILL.md`
 - Si es US de UI: referencias de diseño presentes o acordadas
 - Dependencias con otras US o sistemas identificadas
 - **Artefactos visuales del requerimiento leídos:** si el requerimiento incluye imágenes, enlaces a Figma, o archivos `.md` con diagramas, wireframes o prototipos, **leerlos y cargarlos en el contexto antes de redactar** (no asumir su contenido). Si al revisarlos aparecen lagunas, conflictos con el texto del requerimiento, o algo no queda del todo claro, **incluir esas dudas en las preguntas estructuradas** (recopilación inicial, en tandas de máximo tres por bloque pero **sin limitar el total**: encadenar tandas hasta resolver toda laguna) en lugar de inventar o inferir

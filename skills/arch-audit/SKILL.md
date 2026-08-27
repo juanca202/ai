@@ -55,7 +55,7 @@ técnico o funcional), no el estándar entero, ni el requisito como bloque, ni e
 - `docs/standards/` — todos los estándares de dominio (técnico o funcional) y sus **criterios de cumplimiento** (`CR-XXX`), agrupados por requisito, priorizando los de estándares `Active` (obligatorios). Criterios en estándares `Draft` se listan pero no generan hallazgo con prioridad ni afectan el veredicto; `Deprecated`/`Superseded` no generan hallazgos salvo que el código siga dependiendo de ellos.
 - `AGENTS.md` (y `AGENTS.md` anidados por subcarpeta, si existen) — cada regla explícita del documento.
 - `docs/adr/` — **solo como trazabilidad**: para cada criterio auditado, citar su ADR de origen; y para detectar ADR `Accepted` con regla enforceable que aún no fijó ningún criterio.
-- `.agents/MEMORY.md` (si existe) — contexto de idioma, **no** es fuente de reglas por sí mismo (el stack vive en `AGENTS.md § Stack tecnológico`, no aquí).
+- `.agents/MEMORY.md` (si existe) — contexto operativo, **no** es fuente de reglas por sí mismo (el stack vive en `AGENTS.md § Stack tecnológico`, no aquí).
 
 **Evidencia (el "ser"):** el código, la estructura de carpetas y los manifiestos de dependencias del repo.
 
@@ -112,9 +112,21 @@ cualquier informe y respetar su estructura.
 
 ## Resolución de idioma
 
-Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
+Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../reference/language.md).
 
-El idioma resuelto aplica al **informe de auditoría** y a los mensajes al usuario.
+Las reglas de `language.md` son obligatorias y tienen prioridad para determinar el idioma de todos los artefactos y mensajes generados por este skill.
+
+No continúes hasta haber leído y aplicado `language.md`.
+
+---
+
+## Vocabulario de veredictos y estados
+
+Antes de redactar cualquier informe, DEBES leer [`../../reference/verdicts.md`](../../reference/verdicts.md).
+
+Las reglas de `verdicts.md` son obligatorias: el valor canónico y el símbolo son estables, y la **etiqueta que lee la persona se redacta siempre en el idioma resuelto** por `language.md`. Ninguna etiqueta de este skill se fija en un idioma concreto.
+
+No continúes hasta haber leído y aplicado `verdicts.md`.
 
 ---
 
@@ -149,7 +161,7 @@ reordena ni elimina ese contenido. Los cambios de cada revalidación se document
 1. Leer el informe previo elegido completo, incluida su sección `## Revalidaciones` si ya existe.
    El **estado de referencia** para comparar no es solo el informe original: es el informe original
    **ajustado** por los cambios acumulados en todas las entradas de `## Revalidaciones` previas (p.
-   ej. un hallazgo marcado `✅ Resuelto` en una revalidación anterior ya no cuenta como incumplimiento
+   ej. un hallazgo marcado `RESOLVED` en una revalidación anterior ya no cuenta como incumplimiento
    vigente al comparar).
 2. Repetir la recopilación y verificación contra el estado actual del repo, reutilizando las mismas
    fases que una auditoría nueva, sin modificar nada de lo ya escrito en el documento:
@@ -159,16 +171,16 @@ reordena ni elimina ese contenido. Los cambios de cada revalidación se document
    - **Fase 3.5** — reverificar las dependencias de los estándares/ADR auditados (ver esa fase); su
      resultado se trata como un cambio evidenciado más, no se pregunta ni se escribe por separado.
 3. Identificar **solo los cambios evidenciados** en esta corrida frente al estado de referencia (paso 1):
-   - Incumplimiento ya no presente → cambio `✅ Resuelto`.
+   - Incumplimiento ya no presente → cambio `RESOLVED` (`✅`).
    - Sigue presente pero con evidencia nueva relevante → registrar el cambio de evidencia.
-   - Nuevo incumplimiento o regresión (de una regla ya auditada o de una nueva) → registrarlo.
+   - Nuevo incumplimiento (`NEW_VIOLATION`, `❌`) o regresión (`REGRESSION`, `⚠️`), de una regla ya auditada o de una nueva → registrarlo.
    - Dependencia que faltaba y ya fue instalada, sigue faltando, o aparece una nueva (Fase 3.5) → registrarlo.
    - Si no hubo ningún cambio desde la última verificación, la entrada lo indica explícitamente
      ("Sin cambios respecto a la última verificación.") en vez de listar hallazgos sin novedad.
 4. Calcular fecha y hora de esta ejecución:
-   ```bash
+   ``bash
    date "+%F %H:%M"
-   ```
+   ``
 5. Calcular el **veredicto resultante** de esta revalidación, considerando el estado combinado
    (estado de referencia del paso 1 + cambios evidenciados en los pasos 2-3).
 6. **Añadir al final del mismo archivo** (nunca crear un archivo nuevo ni sobrescribir lo anterior)
@@ -187,9 +199,9 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
 ## Fase 1 — Recopilar las normas (el "deber ser")
 
 1. **Estándares, sus requisitos y sus criterios** — listar y leer:
-   ```bash
+   ``bash
    ls docs/standards/*.md 2>/dev/null || echo "No hay estándares"
-   ```
+   ``
    De cada estándar de dominio técnico o funcional (identificado por su **nombre**, sin código; archivo
    `docs/standards/<slug>.md` o carpeta `docs/standards/<slug>/README.md`) extraer del **frontmatter YAML**
    su `name`, `domain`, `status` y `source_adrs` — es ahí donde `arch-manage` los escribe
@@ -228,9 +240,9 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
    confundirlo con una decisión deliberada de no fijar criterios.
 
 3. **AGENTS.md** — leer el/los archivo(s):
-   ```bash
+   ``bash
    find . -maxdepth 3 -iname "AGENTS.md" -not -path "*/node_modules/*" 2>/dev/null
-   ```
+   ``
    Descomponer el documento en **reglas atómicas y verificables**. Ignorar prosa de contexto sin
    una regla accionable. A cada regla asignarle un identificador estable con el formato
    `AGENTS.md §<sección>` (p. ej. `AGENTS.md §APIs`).
@@ -405,12 +417,12 @@ Esta fase aplica a una **Nueva auditoría desde cero**. Para revalidaciones, seg
 flujo de `Comportamiento en Revalidación` descrito en la Fase 0 — no se reescribe el informe.
 
 1. Calcular la fecha de hoy:
-   ```bash
+   ``bash
    date +%F
-   ```
+   ``
 2. Asegurar el directorio: `docs/audits/` (crearlo si no existe).
 3. Leer `assets/audit-template.md` y redactar `docs/audits/arch-audit-<hoy>.md` siguiendo su estructura:
-   - Encabezado con fecha, repositorio, alcance, método y **veredicto** (`✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones`, siguiendo el patrón de `trace-validate`).
+   - Encabezado con fecha, repositorio, alcance, método y **veredicto** (`COMPLIANT` | `NON_COMPLIANT` | `COMPLIANT_WITH_NOTES`, siguiendo el patrón de `trace-validate`).
      - **Alcance:** ser específico — indicar cuántos criterios se auditaron y sobre cuántos estándares/requisitos de contexto, el desglose por estado de los excluidos, más las fuentes de AGENTS.md consideradas. Ejemplo: `14 criterios en 4 estándares · 1 Draft, 1 Superseded excluidos + AGENTS.md raíz`.
      - **Método:** no es un texto fijo — describir en una frase corta qué se usó realmente en esta auditoría: las técnicas de inspección aplicadas (p. ej. `grep`, lectura de manifiestos) y las fitness functions ejecutadas. Aclarar que no se corre el build ni la suite completa.
    - **Resumen** con la tabla de conteos por prioridad y estado, seguida de 1-3 frases con la lectura global de la salud arquitectónica del repo.
@@ -487,8 +499,8 @@ hallazgo vive en `assets/`. **Leerlos solo cuando la fase correspondiente lo pid
 
 Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
 
-- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
-- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
 
 ---
 
