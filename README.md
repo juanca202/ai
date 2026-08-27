@@ -25,12 +25,60 @@ sdd-devkit/
 
 La carpeta [`reference/`](reference/) es la **fuente única** de lo que aplica a todo el catálogo —
 resolución de idioma, mecanismo de preguntas al usuario, rutas e identificadores de artefactos e
-integración con Azure DevOps. Los skills la referencian con `${CLAUDE_PLUGIN_ROOT}/reference/…` en vez
-de repetir el contenido, y declaran solo su delta. Índice completo en
+integración con Azure DevOps. Los skills la referencian con rutas relativas (`../../reference/…`) en
+vez de repetir el contenido, y declaran solo su delta. Índice completo en
 [`reference/README.md`](reference/README.md).
 
-> Como el contenido compartido se resuelve vía `${CLAUDE_PLUGIN_ROOT}`, los skills están pensados para
-> usarse **con el plugin instalado**, no copiados sueltos.
+> Las referencias son relativas a propósito: funcionan en GitHub, en un editor y en cualquier agente.
+> Lo que no funciona es copiar un skill sin la carpeta `reference/` al lado.
+
+## Configuración del proyecto (`.sdd-devkit/settings.json`)
+
+`arch-init` crea este archivo en la raíz de **cada proyecto** que adopta el harness (no en el plugin). Controla el idioma de los artefactos, el ritmo de confirmaciones e implementación (worktrees, paralelismo, archivado), el comportamiento de `git-commit` (si pide confirmación antes de commitear y si hace push, y con qué política), si `quality-check` y `code-review` piden autorización antes de corregir un fallo/hallazgo o corrigen directo, y las integraciones opcionales con gestión de proyectos, telemetría y seguimiento de specs. Esquema completo en [`schemas/settings.schema.json`](schemas/settings.schema.json).
+
+Ejemplo con las tres integraciones activadas:
+
+```json
+{
+  "language": "es",
+  "implementation": {
+    "confirmByUnit": "always",
+    "workTree": "ask",
+    "workTreePath": "../worktrees",
+    "maxParallel": 3,
+    "archiveMode": "ask"
+  },
+  "git": {
+    "confirmCommit": "always",
+    "push": "ask"
+  },
+  "qualityGates": {
+    "qualityCheckConfirmFix": "always",
+    "codeReviewConfirmFix": "always"
+  },
+  "projectManagement": {
+    "enabled": true,
+    "provider": "azure-devops",
+    "host": "https://dev.azure.com/mi-organizacion",
+    "workspace": "mi-organizacion",
+    "project": "MiProyecto"
+  },
+  "telemetry": {
+    "enabled": true,
+    "endpoint": "https://localhost:4318",
+    "protocol": "http/protobuf",
+    "serviceName": "sdd-devkit"
+  },
+  "specTracking": {
+    "enabled": true,
+    "basePath": "docs/specs/",
+    "requirement": "to-do-app",
+    "url": "https://events.sdd.io/api/v1/events"
+  }
+}
+```
+
+Con las integraciones desactivadas —el mínimo que genera `arch-init` por defecto— cada bloque queda en `"enabled": false` sin el resto de sus campos; ver la plantilla en [`skills/arch-init/assets/settings-template.json`](skills/arch-init/assets/settings-template.json).
 
 ## Skills incluidos
 
@@ -45,7 +93,7 @@ Un **harness** es el "andamiaje" que sostiene y guía todo el proceso de desarro
 
 | Skill                                    | Uso                                                                                                                                                                                                                                                                                                                                                                      |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [arch‑init](SKILLS.md#arch-init)         | Inicializar el harness de un proyecto (nuevo o existente): repo git, diagnóstico base limpia/con características implementadas, stack tecnológico (detectado o investigado y scaffolded), placeholders `AGENTS.md`/`CLAUDE.md`/`.agents/MEMORY.md`/`docs/adr/README.md`/`docs/standards/README.md`, compuerta de calidad y los primeros ADR/estándares vía `arch-manage` |
+| [arch‑init](SKILLS.md#arch-init)         | Inicializar el harness de un proyecto (nuevo o existente): repo git, diagnóstico base limpia/con características implementadas, stack tecnológico (detectado o investigado y scaffolded), placeholders `AGENTS.md`/`CLAUDE.md`/`.agents/MEMORY.md`/`.sdd-devkit/settings.json`/`docs/adr/README.md`/`docs/standards/README.md`, compuerta de calidad y los primeros ADR/estándares vía `arch-manage` |
 | [arch‑manage](SKILLS.md#arch-manage)     | Crear o actualizar ADRs (decisiones, en `docs/adr/`) y estándares de arquitectura **por dominio** (en `docs/standards/`, p. ej. *Testing Standards*).                                                                                                                                                                                                                    |
 | [arch‑discover](SKILLS.md#arch-discover) | Analizar un repositorio y proponer ADRs y criterios de cumplimiento candidatos, agrupados por estándar de dominio, a partir de decisiones y reglas implícitas                                                                                                                                                                                                            |
 | [arch‑audit](SKILLS.md#arch-audit)       | Auditar los **criterios de cumplimiento** de los estándares (`docs/standards/`) y de `AGENTS.md` contra el estado real del repo — criterio por criterio, citando el ADR de origen — y generar un informe priorizado en `docs/audits/` con revalidaciones incrementales                                                                                                   |

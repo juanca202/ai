@@ -8,14 +8,19 @@ Invocación típica: `/nombre-skill` o una frase que active la descripción del 
 
 ## Reglas transversales
 
-Cuatro reglas aplican a todo el catálogo y viven **una sola vez** en [`reference/`](reference/), en la raíz del plugin. Cada `SKILL.md` las enlaza con `${CLAUDE_PLUGIN_ROOT}/reference/…` y declara solo su delta o su excepción:
+Nueve reglas aplican a todo el catálogo y viven **una sola vez** en [`reference/`](reference/), en la raíz del plugin. Cada `SKILL.md` las enlaza con una ruta relativa (`../../reference/…`) y declara solo su delta o su excepción:
 
 | Regla | Dónde vive | Qué fija |
 |-------|-----------|----------|
-| **Resolución de idioma** | [`reference/language.md`](reference/language.md) | Orden canónico `.agents/MEMORY.md` → sesión → mensaje → preguntar; qué nunca se traduce; RFC 2119 en el idioma de preferencia. Excepciones declaradas: `arch-init`, `test-define`, `design-define`, `git-commit`, `pr-create`, `work-research`. |
+| **Resolución de idioma** | [`reference/language.md`](reference/language.md) | Regla única y obligatoria: cada skill y agente DEBE leer `language.md` antes de ejecutarse. Excepciones declaradas dentro de la propia sección: `arch-init`, `test-define`, `design-define`, `git-commit`, `pr-create`, `work-research`, `code-review`, `quality-check`, `trace-validate`, `work-implement`, y los agentes `quality-specialist` y `ui-specialist`. |
+| **Política de implementación** | [`reference/implementation.md`](reference/implementation.md) | Regla única y obligatoria para `work-implement`: ritmo de confirmación por unidad (`confirmByUnit`), worktrees y su ruta (`workTree`, `workTreePath`) y concurrencia máxima (`maxParallel`), resueltos desde `.sdd-devkit/settings.json`. |
+| **Política de commit y push** | [`reference/git.md`](reference/git.md) | Regla única y obligatoria para `git-commit`: si se muestra la propuesta y se espera confirmación (`confirmCommit`) y si se hace push tras commitear (`push`, solo en invocación directa), resueltos desde `.sdd-devkit/settings.json`. Las gates de seguridad no son configurables. |
+| **Política de corrección en puertas de calidad** | [`reference/quality-gates.md`](reference/quality-gates.md) | Regla única y obligatoria para `quality-check` y `code-review`: si se pide confirmación antes de corregir un fallo/hallazgo (`always`, por defecto) o se corrige directo sin preguntar (`never`), resuelto por skill desde `.sdd-devkit/settings.json` (`qualityGates.qualityCheckConfirmFix` / `qualityGates.codeReviewConfirmFix`). No aplica a `trace-validate`, que nunca corrige. |
 | **Cómo preguntar al usuario** | [`reference/asking.md`](reference/asking.md) | Herramienta de preguntas estructuradas, opciones cortas y excluyentes, una tanda al inicio, fallback en prosa enumerada. |
+| **Veredictos y estados** | [`reference/verdicts.md`](reference/verdicts.md) | Regla única para `quality-check`, `code-review`, `trace-validate` y `arch-audit`: valor canónico + símbolo estables, **etiqueta siempre en el idioma resuelto**. Los consumidores leen el **símbolo**, nunca la palabra. |
 | **Artefactos** | [`reference/artifacts.md`](reference/artifacts.md) | Ruta de cada artefacto, identificadores y numeración, y el contrato de archivado (archivar no libera el ID). |
-| **Azure DevOps** | [`reference/alm/azure-devops.md`](reference/alm/azure-devops.md) | Activación, claves de `MEMORY.md`, verificación del MCP y su degradación, URL, límite de 255 caracteres del título y reconstrucción íntegra. |
+| **Gestor de proyectos** | [`reference/project-management.md`](reference/project-management.md) | Regla única y obligatoria para `work-plan`, `test-define` y `work-research`: si la integración está activa, con qué proveedor y con qué `host`/`workspace`/`project`, resueltos desde `.sdd-devkit/settings.json`. Desactivada ⇒ ID secuencial local. |
+| **Azure DevOps** (delta del proveedor) | [`reference/alm/azure-devops.md`](reference/alm/azure-devops.md) | Verificación del MCP y su degradación, URL del work item, el ID de ADO sobre el secuencial local, límite de 255 caracteres del título y reconstrucción íntegra. |
 
 ---
 
@@ -42,7 +47,7 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 
 ### arch-init
 
-**Cuándo:** bootstrapear un proyecto para agentes (nuevo o existente): git, `AGENTS.md` / `CLAUDE.md` / `.agents/MEMORY.md`, índices de ADR/estándares, stack y compuerta de calidad.
+**Cuándo:** bootstrapear un proyecto para agentes (nuevo o existente): git, `AGENTS.md` / `CLAUDE.md` / `.agents/MEMORY.md` / `.sdd-devkit/settings.json`, índices de ADR/estándares, stack y compuerta de calidad.
 
 **Produce:** archivos base del harness; al cerrar sugiere continuar con `work-define` o `work-plan`.
 
@@ -161,7 +166,7 @@ Los candidatos se agrupan por **dominio técnico/funcional** (testing, api, secu
 | **Nueva auditoría desde cero** | Audita todas las normas de nuevo                                                                  |
 
 
-**Veredicto:** `✅ Conforme` · `❌ No conforme` · `⚠️ Conforme con observaciones`.
+**Veredicto:** `COMPLIANT` (`✅`) · `NON_COMPLIANT` (`❌`) · `COMPLIANT_WITH_NOTES` (`⚠️`) — la etiqueta del informe va en el idioma resuelto.
 
 Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Deprecated`/`Superseded` solo si el código sigue dependiendo de ellos.
 
@@ -188,7 +193,7 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 
 **Cuándo:** hacer commit(s) con Conventional Commits a partir del diff real.
 
-**Produce:** commit(s) locales (no hace push).
+**Produce:** commit(s) locales; push opcional según `.sdd-devkit/settings.json` (`git.push`), solo en invocación directa del usuario.
 
 **Opciones — flujo:**
 
@@ -196,9 +201,11 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 | Condición                | Flujo                                                                                           |
 | ------------------------ | ----------------------------------------------------------------------------------------------- |
 | Sin cambios              | Informa y no commitea                                                                           |
-| Un solo tema lógico      | Commit estándar (propuesta → confirmación → commit)                                             |
-| Varios temas mezclados   | Propone varios commits y ejecuta en secuencia                                                   |
+| Un solo tema lógico      | Commit estándar (propuesta → confirmación → commit), o directo sin confirmación si `git.confirmCommit: "never"` |
+| Varios temas mezclados   | Propone varios commits y ejecuta en secuencia (misma excepción con `confirmCommit: never`)       |
 | Falló un pre-commit hook | Corrige, re-stagea y **nuevo** commit (sin `--amend` ni `--no-verify` salvo petición explícita) |
+
+**Configuración (`.sdd-devkit/settings.json` → `git`):** `confirmCommit` (`always`/`never`) decide si se pide confirmación antes de commitear; `push` (`ask`/`always`/`never`) decide si se hace push tras completar el/los commits — nunca en invocación delegada por `work-integrate`/`pr-create`. Por defecto: `confirmCommit: "always"`, `push: "never"`.
 
 
 **Tipos de mensaje:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert` (tipo/scope en inglés). Detiene el commit ante secretos o archivos sensibles salvo confirmación explícita sobre ese archivo.
@@ -244,7 +251,7 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 | **Analizar migración**             | Proyecto origen + destino                    | Discovery + validación → `work-define` (cambio grande) o `work-plan` / WI (pequeño)                                                                 |
 
 
-Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefacto que se pase por su código se lee vía MCP y enruta al flujo según su tipo (historia/tarea → decisiones pendientes; bug → issue; test case → test case).
+Si el repo tiene activada la integración con un gestor de proyectos en `.sdd-devkit/settings.json`, cualquier artefacto que se pase por su código se lee vía MCP y enruta al flujo según su tipo (historia/tarea → decisiones pendientes; bug → issue; test case → test case).
 
 **Ejemplos de invocación:**
 
@@ -392,7 +399,7 @@ Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefa
 | **Mantenimiento**     | Sin US (bug, refactor, deuda, deps, operativa) | `WI-XXX` en `docs/specs/work-items/` |
 
 
-Solo se hace handoff a `work-implement` si el artefacto está en `Ready`. Si hay vinculación ADO en `.agents/MEMORY.md`, sincroniza work items antes de crear archivos locales. Puede delegar detalle técnico a `design-define`.
+Solo se hace handoff a `work-implement` si el artefacto está en `Ready`. Si la integración con el gestor de proyectos está activa en `.sdd-devkit/settings.json`, sincroniza work items antes de crear archivos locales. Puede delegar detalle técnico a `design-define`.
 
 **Ejemplos de invocación:**
 
@@ -437,8 +444,8 @@ Los dos primeros entregan **funcionalidad**; los dos últimos entregan **pruebas
 
 | Modo                     | Cuándo                                                                                                                                                      |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Secuencial** (default) | Una unidad → lint/build → pausa → commit al confirmar → siguiente                                                                                           |
-| **Paralelo**             | Solo si hay **más de una** unidad **y** el usuario pide explícitamente «sin preguntar» / «de corrido»; worktrees + subagentes tras análisis de dependencias |
+| **Secuencial** (default) | Una unidad → lint/build → pausa (`confirmByUnit: always`) → commit al confirmar → siguiente                                                                 |
+| **Paralelo**             | Solo si hay **más de una** unidad **y** no hay que pausar entre ellas (`confirmByUnit: never`, o petición explícita del usuario en el turno); worktrees + subagentes tras análisis de dependencias |
 
 
 Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrate` o `pr-create` (para `TC`/`FT`, además `trace-validate`).
@@ -478,9 +485,9 @@ Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrat
 
 **Suites de prueba:** las únicas **fijas** son `unit`, `coverage` y `e2e` (siempre se listan, aunque salgan `N/A`). El resto del conjunto —integración, contrato, rendimiento…— sale del **estándar de testing** del repo (`docs/standards/testing.md`): una suite por requisito vigente, con la categoría que fije su enunciado RFC 2119 (DEBE → Bloqueante; DEBERÍA/PUEDE → Condicional). Sin estándar, solo las tres fijas.
 
-**Correcciones:** nunca por iniciativa propia. Ante hallazgos que impliquen tocar código pregunta primero: **dentro** de una implementación, si se corrigen; **fuera** de una implementación (rama suelta, auditoría), ofrece explícitamente [Corregir] / [Solo el informe]. Si se corrige y la rama es de un `US-XXX`/`WI-XXX`, delega el arreglo en `work-implement` (modo corrección); si no hay artefacto, corrige él mismo. Aplica igual a fallos de pruebas.
+**Correcciones:** gobernadas por `.sdd-devkit/settings.json` → `qualityGates.qualityCheckConfirmFix` (`always` por defecto / `never`). Con `always`, nunca corrige por iniciativa propia — ante hallazgos que impliquen tocar código pregunta primero: **dentro** de una implementación, si se corrigen; **fuera** de una implementación (rama suelta, auditoría), ofrece explícitamente [Corregir] / [Solo el informe]. Con `never`, corrige directo sin preguntar. Si se corrige y la rama es de un `US-XXX`/`WI-XXX`, delega el arreglo en `work-implement` (modo corrección); si no hay artefacto, corrige él mismo. Aplica igual a fallos de pruebas.
 
-**Veredicto:** `✅ Aprobado` · `❌ Rechazado` · `⚠️ Incompleto`.
+**Veredicto:** `APPROVED` (`✅`) · `REJECTED` (`❌`) · `INCOMPLETE` (`⚠️`) — la etiqueta del informe va en el idioma resuelto.
 
 **Modificadores de invocación** (opcionales; claves en inglés; se pueden combinar cuando no se contradicen). Sin ninguno se asume `default`.
 
@@ -527,9 +534,11 @@ En prosa (el skill mapea al modificador en inglés):
 
 **Severidad:** `🔴` Crítico · `🟠` Mayor (bloquean) · `🟡` Menor · `💡` Sugerencia.
 
-**Veredicto:** `✅ Aprobado` · `❌ Rechazado` · `⚠️ Incompleto` — **independiente** del de `quality-check`.
+**Correcciones:** gobernadas por `.sdd-devkit/settings.json` → `qualityGates.codeReviewConfirmFix` (`always` por defecto / `never`). Ante un hallazgo bloqueante, con `always` pausa y ofrece [Corregir] / [Justificar]; con `never` corrige directo sin preguntar (la justificación sigue disponible si el usuario la aporta).
 
-Idempotente: si ni el fingerprint, ni el commit de la base, ni el modo cambiaron **y el informe existente está `✅ Aprobado`**, no vuelve a revisar (usar `revalidate` para forzar). Un `❌`/`⚠️` nunca se sirve desde caché: justificar un hallazgo no toca el código y el veredicto quedaría congelado. Las revisiones acotadas (`working-tree`, `scope`) no se cachean.
+**Veredicto:** `APPROVED` (`✅`) · `REJECTED` (`❌`) · `INCOMPLETE` (`⚠️`) — **independiente** del de `quality-check`; la etiqueta del informe va en el idioma resuelto.
+
+Idempotente: si ni el fingerprint, ni el commit de la base, ni el modo cambiaron **y el informe existente está en `APPROVED`**, no vuelve a revisar (usar `revalidate` para forzar). Un `❌`/`⚠️` nunca se sirve desde caché: justificar un hallazgo no toca el código y el veredicto quedaría congelado. Las revisiones acotadas (`working-tree`, `scope`) no se cachean.
 
 **Modificadores de invocación** (opcionales; claves en inglés). Sin ninguno se asume `default`.
 
@@ -576,7 +585,7 @@ En prosa:
 
 **Estados por criterio:** Cubierto · Parcial · No cubierto.
 
-**Veredicto:** `✅ Aprobado` · `⚠️ Aprobado con observaciones` · `❌ Rechazado`.
+**Veredicto:** `APPROVED` (`✅`) · `APPROVED_WITH_NOTES` (`⚠️`, no bloquea) · `REJECTED` (`❌`) — la etiqueta del informe va en el idioma resuelto.
 
 No ejecuta pruebas: reutiliza `.sdd-devkit/test-run.json` fresco o invoca `quality-check` en `tests-only`. Idempotente con **dos** claves: el `fingerprint` canónico (código y tests) y un `spec` sobre la carpeta del artefacto (criterios y `TC-XXX`). Si ambos coinciden y la corrida anterior sí pudo ejecutar las pruebas, devuelve el reporte sin regenerarlo; `revalidate` fuerza.
 
@@ -657,7 +666,7 @@ El merge se hace en tres tiempos (`--no-commit` → retirar `docs/audits/quality
 | **Implementación** | `feature/`\|`fix/`\|`chore/`\|`refactor/`\|`test/` → rama de integración | `quality-check` + `code-review` + `trace-validate` (+ DoD si existe) |
 | **Promoción** | `develop` → `master`\|`main`\|`release/*` | `quality-check` (+ DoD si existe) |
 
-En una promoción, `code-review` y `trace-validate` se reportan como `— No aplica`: cada trabajo ya pasó las tres puertas al integrarse, y lo que queda por demostrar es que la rama consolidada está verde. Estar en una rama protegida **no** bloquea; el Paso 3 confirma la intención antes de seguir.
+En una promoción, `code-review` y `trace-validate` se reportan como `N/A` (`—`): cada trabajo ya pasó las tres puertas al integrarse, y lo que queda por demostrar es que la rama consolidada está verde. Estar en una rama protegida **no** bloquea; el Paso 3 confirma la intención antes de seguir.
 
 **Puertas (obligatorias, sin draft ni skip):**
 
