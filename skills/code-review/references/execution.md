@@ -13,7 +13,7 @@ Detalla **cómo** ejecutar la revisión cualitativa paso a paso y cómo actuar a
 
 ## Flujo de ejecución
 
-> **Principio rector:** revisar el **diff**, no el repo. **Ninguna corrección se aplica sin autorización explícita del usuario.** Tras aplicar una corrección autorizada (o cuando el usuario indique que corrigió manualmente), **reinicia la revisión desde el Paso 1** sobre el código ya corregido: los hallazgos anteriores pueden haber cambiado de forma o de severidad. Para ahorrar vueltas, si el usuario autoriza varias correcciones, aplícalas juntas y reinicia **una sola vez**.
+> **Principio rector:** revisar el **diff**, no el repo. **Ninguna corrección se aplica sin autorización** —explícita del usuario, o de antemano vía `qualityGates.codeReviewConfirmFix: "never"` (ver [`SKILL.md` → Política de corrección](../SKILL.md#política-de-corrección))—. Tras aplicar una corrección autorizada (o cuando el usuario indique que corrigió manualmente), **reinicia la revisión desde el Paso 1** sobre el código ya corregido: los hallazgos anteriores pueden haber cambiado de forma o de severidad. Para ahorrar vueltas, si hay varias correcciones autorizadas, aplícalas juntas y reinicia **una sola vez**.
 >
 > **Este skill no ejecuta checks.** No corre pruebas, linter, tipado ni build; si la corrección de un hallazgo toca lógica cubierta por pruebas, **sugiere** re-ejecutar `quality-check` y sigue con la revisión.
 
@@ -43,13 +43,13 @@ BASE_COMMIT=$( git rev-parse --short "$BASE" )
 
 1. Si el modo es **acotado** (`working-tree` o `scope`) → no hay caché aplicable: continuar en el Paso 1. Esos modos no escriben el informe vigente, así que ni lo consumen ni lo actualizan.
 2. Buscar `docs/audits/code-review.md`. Si **no existe** → no hay caché; continuar en el Paso 1.
-3. Si **existe**, comparar contra la clave ya calculada en el 0.2. Leer la marca de pie del informe: `<!-- code-review:fingerprint=<hash> · base=<sha-corto> · generado=YYYY-MM-DD -->`. Hay **cuatro** condiciones y deben cumplirse **todas** para reutilizar:
+3. Si **existe**, comparar contra la clave ya calculada en el 0.2. Leer la marca de pie del informe: `<!-- code-review:verdict=<canónico> · mode=<modo> · fingerprint=<hash> · base=<sha-corto> · generated=YYYY-MM-DD -->`. **Esa marca es la fuente de las cuatro condiciones** — el veredicto y el modo se leen de ahí, nunca del encabezado visible, que está redactado en el idioma resuelto. Hay **cuatro** condiciones y deben cumplirse **todas** para reutilizar:
 
    | # | Condición | Por qué |
    |---|-----------|---------|
    | 1 | `FINGERPRINT` y `base` coinciden | El código y el otro lado del diff no se movieron. |
    | 2 | El **modo** del encabezado es el pedido | Ver la definición de «modo» abajo. |
-   | 3 | El veredicto del informe es **`✅ Aprobado`** | **Un `❌ Rechazado` o `⚠️ Incompleto` nunca se sirve desde caché.** Ambos son estados con puerta abierta: se resuelven **justificando** un hallazgo o **aportando** la intención que faltaba, y ninguna de las dos cosas toca el código, así que la clave no se movería y el veredicto quedaría congelado para siempre — con los orquestadores prohibiendo `revalidate`, el cierre se bloquearía sin salida. Ante un veredicto no aprobado se revisa de nuevo, se leen del informe las justificaciones ya aceptadas y se vuelve a abrir la puerta del Paso 4. |
+   | 3 | El veredicto del informe es **`APPROVED`** | **Un `REJECTED` o `INCOMPLETE` nunca se sirve desde caché.** Ambos son estados con puerta abierta: se resuelven **justificando** un hallazgo o **aportando** la intención que faltaba, y ninguna de las dos cosas toca el código, así que la clave no se movería y el veredicto quedaría congelado para siempre — con los orquestadores prohibiendo `revalidate`, el cierre se bloquearía sin salida. Ante un veredicto no aprobado se revisa de nuevo, se leen del informe las justificaciones ya aceptadas y se vuelve a abrir la puerta del Paso 4. |
    | 4 | El usuario **no** pasó `revalidate` | Escotilla manual. |
 
    Si falla cualquiera, o no hay marca de pie (informe antiguo) → continuar el flujo completo (Pasos 1-5).
@@ -82,20 +82,22 @@ Un hallazgo que ignora el patrón vigente del repo o una decisión ya tomada en 
 
 1. Leer [`qualitative-review.md`](qualitative-review.md) y recorrer las tres dimensiones (semántica, arquitectura/diseño según ISO/IEC 25010, feedback senior).
 2. Emitir hallazgos con severidad (🔴/🟠/🟡/💡). Para cada uno: **qué** (ubicado en archivo/símbolo), **por qué**, **impacto** y **sugerencia concreta**, con la característica ISO/IEC 25010 correspondiente.
-3. Si una dimensión no arroja hallazgos, **decirlo explícitamente** (`✅ Conforme`) y explicar brevemente por qué el cambio está bien en ese plano. El silencio no es feedback.
-4. Si una dimensión **no se pudo evaluar** (intención no determinable y el usuario no la aportó, parte del diff inaccesible o generada), marcarla como *No evaluada* con el motivo: es lo que produce el veredicto `⚠️ Incompleto` del Paso 4. No confundir *No evaluada* con `✅ Conforme`.
+3. Si una dimensión no arroja hallazgos, **decirlo explícitamente** (`COMPLIANT`) y explicar brevemente por qué el cambio está bien en ese plano. El silencio no es feedback.
+4. Si una dimensión **no se pudo evaluar** (intención no determinable y el usuario no la aportó, parte del diff inaccesible o generada), marcarla como `NOT_ASSESSED` con el motivo: es lo que produce el veredicto `INCOMPLETE` del Paso 4. No confundir `NOT_ASSESSED` con `COMPLIANT`.
 
-> **Los puntos 3 y 4 aplican a las dimensiones 1 y 2, no a la 3.** La dimensión 3 (feedback estilo senior) es **transversal**: no es un cubo de hallazgos propio sino la forma de redactar los de las otras dos, más los nitpicks `🟡`/`💡` que van a «Feedback adicional». Por eso no se declara `✅ Conforme`, no puede quedar *No evaluada* y no aporta al veredicto — y por eso `blocking-only` puede omitir esa sección sin dejar cojo el informe. En la tabla de justificaciones sí aparece como dimensión, para poder atribuir un hallazgo `🟡`/`💡` que el usuario haya justificado.
+> **Los puntos 3 y 4 aplican a las dimensiones 1 y 2, no a la 3.** La dimensión 3 (feedback estilo senior) es **transversal**: no es un cubo de hallazgos propio sino la forma de redactar los de las otras dos, más los nitpicks `🟡`/`💡` que van a «Feedback adicional». Por eso no se declara `COMPLIANT`, no puede quedar `NOT_ASSESSED` y no aporta al veredicto — y por eso `blocking-only` puede omitir esa sección sin dejar cojo el informe. En la tabla de justificaciones sí aparece como dimensión, para poder atribuir un hallazgo `🟡`/`💡` que el usuario haya justificado.
 5. No inflar ni minimizar severidades; ante la duda, decidir por el **impacto en el sistema** (ver la calibración en `qualitative-review.md`).
 
 ### Paso 4 — Puerta cualitativa e informe
 
-1. **Puerta** — si hay hallazgos bloqueantes (🔴/🟠), **pausar y pedir** al usuario, por cada uno, **corregir** o **justificar**:
-   - **Justificar** → registrar la justificación en el informe; el hallazgo deja de bloquear.
-   - **Corregir con autorización expresa** → aplicar el cambio y **reiniciar la revisión desde el Paso 1**.
-   - **Corregir manualmente** (el usuario indica que ya lo hizo) → **reiniciar la revisión desde el Paso 1**.
+1. **Puerta** — si hay hallazgos bloqueantes (🔴/🟠), resolver según `qualityGates.codeReviewConfirmFix` (ver [`SKILL.md` → Política de corrección](../SKILL.md#política-de-corrección)):
+   - **`always`** (o sin `settings.json`) → **pausar y pedir** al usuario, por cada uno, **corregir** o **justificar**:
+     - **Justificar** → registrar la justificación en el informe; el hallazgo deja de bloquear.
+     - **Corregir con autorización expresa** → aplicar el cambio y **reiniciar la revisión desde el Paso 1**.
+     - **Corregir manualmente** (el usuario indica que ya lo hizo) → **reiniciar la revisión desde el Paso 1**.
+   - **`never`** → **no pausar**: aplicar directamente el cambio sugerido para cada hallazgo (como si fuera «Corregir con autorización expresa») y **reiniciar la revisión desde el Paso 1**. Si el usuario aporta una justificación explícita para uno en particular, registrarla en vez de corregirlo.
    - Repetir hasta que no queden bloqueantes sin resolver o el usuario detenga. Aplica la **cota de 3 reinicios** (ver [Manejo de errores](#manejo-de-errores)): tras 3 reinicios sin llegar a `✅`, resumir lo pendiente y preguntar al usuario cómo proceder.
-2. **Dimensiones no evaluadas** (Paso 3.4): si queda alguna y no hay bloqueantes pendientes, el veredicto es `⚠️ Incompleto`; listarlas en el informe con su motivo y en Próximas acciones con qué haría falta para evaluarlas.
+2. **Dimensiones no evaluadas** (Paso 3.4): si queda alguna y no hay bloqueantes pendientes, el veredicto es `INCOMPLETE`; listarlas en el informe con su motivo y en Próximas acciones con qué haría falta para evaluarlas.
 3. Rellenar la plantilla [`../assets/code-review-template.md`](../assets/code-review-template.md) (ver [Formato del informe](#formato-del-informe)) con el veredicto de la tabla de `SKILL.md`, los hallazgos por dimensión, las próximas acciones y las justificaciones aceptadas.
 
 ### Paso 5 — Registro y salida
@@ -111,12 +113,12 @@ La revisión cubre **la rama contra su base** (incluidos los cambios sin commite
 **Grabar la marca de frescura.** Al escribir el `code-review.md` vigente, cerrar el documento con
 
 ```
-<!-- code-review:fingerprint=<FINGERPRINT> · base=<BASE_COMMIT> · generado=YYYY-MM-DD -->
+<!-- code-review:verdict=<VEREDICTO CANÓNICO> · mode=<default|blocking-only> · fingerprint=<FINGERPRINT> · base=<BASE_COMMIT> · generated=YYYY-MM-DD -->
 ```
 
 usando los valores **vigentes** (los del Paso 0 si no hubo correcciones; los recalculados tras la última corrección si las hubo). Es lo que lee el Paso 0 de la siguiente invocación (ver [Reutilización del informe](../SKILL.md#reutilización-del-informe-idempotencia)). La marca **se conserva** en el documento publicado, a diferencia de los bloques de comentario de instrucciones de la plantilla. Las copias de `save-report` llevan la marca **solo si la revisión cubrió la rama completa**; una revisión acotada (`working-tree`/`scope`) se guarda **sin** marca, porque esos valores describirían un diff que no revisó. En ningún caso se leen como caché: la caché vive solo en el informe vigente.
 
-Devolver el informe completo (y la ruta del `code-review.md` si se escribió). **No** continuar con `git commit`, push ni merge aunque el veredicto sea `✅ Aprobado` — salvo instrucción explícita del usuario. Si el cierre requiere también las verificaciones automatizadas, **sugerir** invocar `quality-check`; no ejecutarlo desde aquí.
+Devolver el informe completo (y la ruta del `code-review.md` si se escribió). **No** continuar con `git commit`, push ni merge aunque el veredicto sea `APPROVED` — salvo instrucción explícita del usuario. Si el cierre requiere también las verificaciones automatizadas, **sugerir** invocar `quality-check`; no ejecutarlo desde aquí.
 
 ---
 
@@ -124,11 +126,12 @@ Devolver el informe completo (y la ruta del `code-review.md` si se escribió). *
 
 La estructura canónica está en la plantilla [`../assets/code-review-template.md`](../assets/code-review-template.md). **Rellénala** (no la reescribas desde cero) para todo informe, tanto el resumen que se muestra en chat como el `docs/audits/code-review.md` que se escribe siempre.
 
-La plantilla incluye: encabezado con metadata (donde vive el **Veredicto**, con su justificación de una línea; no hay sección propia), **Resumen**, **Intención detectada**, **Hallazgos** por dimensión (con **Dimensiones no evaluadas**, obligatoria para sostener un `⚠️ Incompleto`), **Próximas acciones** y **Justificaciones aceptadas**, más la marca de pie del fingerprint.
+La plantilla incluye: encabezado con metadata (donde vive el **Veredicto**, con su justificación de una línea; no hay sección propia), **Resumen**, **Intención detectada**, **Hallazgos** por dimensión (con **Dimensiones no evaluadas**, obligatoria para sostener un `INCOMPLETE`), **Próximas acciones** y **Justificaciones aceptadas**, más la marca de pie del fingerprint.
 
 > **El informe no reporta el estado de las otras dos puertas.** Cada una escribe el suyo (`docs/audits/quality-check.md`, el `trace-report.md` del trabajo) y quien las consolida es el orquestador de cierre (`work-integrate`, `pr-create`). Copiar aquí sus veredictos solo produce dos fuentes que se desincronizan: este documento responde por el plano cualitativo y nada más.
 
-Símbolos de severidad (exactamente estos): `🔴` Crítico · `🟠` Mayor · `🟡` Menor · `💡` Sugerencia · `✅` Conforme.
+Símbolos de severidad (exactamente estos, con la etiqueta en el idioma resuelto):
+`🔴` `CRITICAL` · `🟠` `MAJOR` · `🟡` `MINOR` · `💡` `SUGGESTION` · `✅` `COMPLIANT`.
 
 Reglas al rellenar:
 - Sustituir cada `{{…}}` de la plantilla por el valor real; el informe publicado no debe conservar placeholders ni el bloque de comentario inicial — pero **sí** conserva la marca de pie con el fingerprint y la base (Paso 5).
@@ -144,7 +147,7 @@ Reglas al rellenar:
 | Situación | Cómo actuar |
 |-----------|-------------|
 | Rama base ambigua o no inferible | Parar y preguntar contra qué rama comparar (Paso 0.1). No adivinar. Sin base no hay `BASE_COMMIT` ni diff. |
-| Informe existente fresco pero con veredicto `❌ Rechazado` o `⚠️ Incompleto` | **No es un hit de caché**: revisar de nuevo. Arrastrar del informe anterior las justificaciones ya aceptadas y reabrir la puerta del Paso 4 sobre los hallazgos que sigan sin resolver. Servir ese veredicto desde caché dejaría el cierre sin salida. |
+| Informe existente fresco pero con veredicto `REJECTED` o `INCOMPLETE` | **No es un hit de caché**: revisar de nuevo. Arrastrar del informe anterior las justificaciones ya aceptadas y reabrir la puerta del Paso 4 sobre los hallazgos que sigan sin resolver. Servir ese veredicto desde caché dejaría el cierre sin salida. |
 | Informe existente **fresco** (mismo `FINGERPRINT`, misma base, mismo modo) | Devolver su veredicto y su resumen indicando desde cuándo no hay cambios. **No** volver a revisar ni reescribir el archivo. Si el usuario quiere una revisión nueva de todos modos, ofrecerle `revalidate`. |
 | Informe existente **sin marca de pie** (generado antes de esta convención) | Tratarlo como caché ausente: revisar de nuevo y grabar la marca al guardar. |
 | Marca de pie ilegible, incompleta o con un hash que no parsea | No intentar repararla ni adivinar: tratar la caché como ausente, revisar y regrabarla. |
@@ -158,7 +161,7 @@ Reglas al rellenar:
 | `working-tree` invocado desde `work-integrate` o `pr-create` | No corresponde: en el cierre hay que revisar **todo** lo que se va a integrar, no solo lo aún sin commitear. Usar el alcance por defecto (rama contra base), que de todos modos incluye los cambios sin commitear — p. ej. las correcciones que `quality-check` haya podido aplicar en la puerta anterior. |
 | Diff enorme (cientos de archivos) | Avisar del volumen y proponer acotar con `scope`; si el usuario prefiere seguir, priorizar por impacto y decirlo en el Resumen. |
 | Archivos generados o vendorizados en el diff | Excluirlos de la revisión y dejar constancia; no reportar hallazgos sobre código generado. |
-| No se puede inferir la intención (sin US/WI/FT, rama genérica, commits opacos) | Pedir al usuario una frase con el objetivo del cambio; no inventar intención. Si no la aporta, la dimensión semántica queda sin evaluar → `⚠️ Incompleto`. |
+| No se puede inferir la intención (sin US/WI/FT, rama genérica, commits opacos) | Pedir al usuario una frase con el objetivo del cambio; no inventar intención. Si no la aporta, la dimensión semántica queda sin evaluar → `INCOMPLETE`. |
 | El repo no documenta arquitectura ni patrones claros | Revisar contra el estilo predominante en el código vecino; no imponer un patrón ajeno al repo como si fuera regla. |
 | Usuario justifica un hallazgo 🔴/🟠 | Registrar la justificación; el hallazgo deja de bloquear. Incluirla en `code-review.md`. |
 | Corrección de un hallazgo (auto autorizada o manual) | Reiniciar **toda la revisión desde el Paso 1**. Si tocó lógica cubierta por pruebas, sugerir re-ejecutar `quality-check`. |
@@ -177,7 +180,7 @@ Reglas al rellenar:
 - Invocar `quality-check` desde aquí o unificar ambos veredictos en un solo informe — son skills independientes.
 - Condicionar el veredicto cualitativo al resultado de las pruebas (o al revés): cada skill responde por su plano.
 - **Reportar como hallazgo la falta de pruebas de un criterio de aceptación** — esa es la pregunta de `trace-validate`. Aquí se juzga la calidad de las pruebas que el diff sí incluye.
-- Cerrar en `✅ Aprobado` con una dimensión sin evaluar: eso es `⚠️ Incompleto`.
+- Cerrar en `APPROVED` con una dimensión sin evaluar: eso es `INCOMPLETE`.
 - **Solo reportar violaciones de reglas** sin razonar sobre la intención del diseño ni el impacto en el sistema.
 - Dar un hallazgo sin explicar el **porqué** o sin **sugerencia concreta** (un "esto está mal" pelado no es feedback senior).
 - Marcar 🔴/🟠 algo que es 🟡/💡 (inflar severidad) o al revés (minimizar un defecto real de diseño).
@@ -186,9 +189,10 @@ Reglas al rellenar:
 - Revisar todo el repo en lugar del diff bajo revisión, o reportar hallazgos sobre código que el diff no tocó (salvo que sea el impacto directo del cambio, y diciéndolo).
 - Cambiar de alcance por cuenta propia: si `working-tree` no encuentra cambios, se reporta y se termina; no se sustituye por el diff de la rama.
 - Reportar hallazgos sobre archivos generados o vendorizados.
-- Declarar `✅ Aprobado` con un hallazgo bloqueante sin corregir **ni** justificar.
+- Declarar `APPROVED` con un hallazgo bloqueante sin corregir **ni** justificar.
 - Aceptar una justificación y **no registrarla** en el `code-review.md`.
-- Aplicar una corrección **automáticamente sin que el usuario la pida expresamente**.
+- Aplicar una corrección **sin autorización** — explícita del usuario, o de antemano vía `qualityGates.codeReviewConfirmFix: "never"`.
+- Pausar a preguntar «corregir o justificar» cuando `qualityGates.codeReviewConfirmFix = "never"` — ahí se corrige directo, sin esperar confirmación.
 - Corregir un hallazgo y **no reiniciar** la revisión.
 - No decir nada cuando una dimensión está conforme (el silencio no es feedback).
 - Escribir `code-review.md` en la carpeta de una US/WI, o en `docs/specs/`, en vez de en `docs/audits/`; o no escribirlo porque el repo no sea spec-driven **cuando la revisión cubrió la rama completa**.
@@ -198,4 +202,4 @@ Reglas al rellenar:
 - **Consumir o escribir la caché en una revisión acotada** (`working-tree`, `scope`): esos modos no representan el estado vigente de la rama.
 - **Grabar la marca de pie con el fingerprint anterior a una corrección** — el informe afirmaría corresponder a un código que ya no existe.
 - Eliminar la marca de pie al publicar el informe (sí se eliminan los bloques de instrucciones de la plantilla, no la marca).
-- Continuar a commit/push/merge tras `✅ Aprobado` sin instrucción explícita.
+- Continuar a commit/push/merge tras `APPROVED` sin instrucción explícita.

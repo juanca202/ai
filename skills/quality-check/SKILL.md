@@ -1,7 +1,7 @@
 ---
 name: quality-check
 description: >-
-  Ejecutar sobre todo el repositorio las verificaciones automatizadas que exige el stack —tipado, linter, pruebas unitarias, cobertura, compilación, e2e, análisis estático (Sonar) y las suites de prueba que declare el estándar de testing del repo— y emitir un veredicto (aprobado/rechazado/incompleto) con informe por check, detalle de fallos y próximas acciones. Produce la caché de corrida test-run.json que consume trace-validate. No exige artefactos de este plugin: corre sobre cualquier repositorio y delega las correcciones en work-implement. Activar cuando el usuario pida correr las pruebas o las verificaciones: "ejecuta los checks", "corre los tests", "quality check", "pasa el linter y el build", "valida antes del PR/merge", "¿está verde el repo?", o cuando lo invoque otro skill (work-integrate, pr-create, trace-validate). Proceso de cierre, no proactivo durante el desarrollo. Nunca corrige por iniciativa propia — ante fallos pregunta. La revisión cualitativa de diseño y arquitectura es de code-review.
+  Ejecutar sobre todo el repositorio las verificaciones automatizadas que exige el stack —tipado, linter, pruebas unitarias, cobertura, compilación, e2e, análisis estático (Sonar) y las suites de prueba que declare el estándar de testing del repo— y emitir un veredicto (aprobado/rechazado/incompleto) con informe por check, detalle de fallos y próximas acciones. Produce la caché de corrida test-run.json que consume trace-validate. No exige artefactos de este plugin: corre sobre cualquier repositorio y delega las correcciones en work-implement. Activar cuando el usuario pida correr las pruebas o las verificaciones: "ejecuta los checks", "corre los tests", "quality check", "pasa el linter y el build", "valida antes del PR/merge", "¿está verde el repo?", o cuando lo invoque otro skill (work-integrate, pr-create, trace-validate). Proceso de cierre, no proactivo durante el desarrollo. Por defecto pide confirmación antes de corregir un fallo; `.sdd-devkit/settings.json` (`qualityGates.qualityCheckConfirmFix: "never"`) permite corregir directo sin preguntar. La revisión cualitativa de diseño y arquitectura es de code-review.
 license: MIT
 ---
 
@@ -11,7 +11,7 @@ Ejecuta la **batería de checks automatizados** que el stack exige (tipado, lint
 
 > **Alcance: solo el plano automatizado.** Este skill responde a «¿el código corre y cumple las reglas?». La pregunta «¿resuelve el problema correcto y está bien diseñado?» es del skill **[`code-review`](../code-review/SKILL.md)** (revisión cualitativa). Y «¿cada criterio de aceptación está probado?» es de **`trace-validate`**. Son **tres skills independientes**, cada uno con su veredicto e informe; quien los encadena es el orquestador de cierre (`work-integrate`, `pr-create`). Ver [Relación con otros skills](#relación-con-otros-skills).
 >
-> **Audita, no arregla.** **Nunca corrige por iniciativa propia**; aplica correcciones **solo si el usuario lo autoriza explícitamente** y, tras corregir, **vuelve a ejecutar**. Fuera de un ciclo de implementación, **entregar solo el informe es un resultado válido y frecuente**: se pregunta antes de tocar código (ver [Corrección de fallos](#corrección-de-fallos)). No edita configuración, no instala dependencias ni hace commit/push/merge sin instrucción explícita. (**Única excepción:** dejar su propia caché ignorada en el `.gitignore` —añadiendo esa línea, y creando el archivo si no existiera—, ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate).)
+> **Audita, no arregla (por defecto).** Aplica correcciones **solo si el usuario lo autoriza explícitamente** —o si `.sdd-devkit/settings.json` tiene `qualityGates.qualityCheckConfirmFix: "never"` (ver [Política de corrección](#política-de-corrección))— y, tras corregir, **vuelve a ejecutar**. Fuera de un ciclo de implementación, **entregar solo el informe es un resultado válido y frecuente** con la política por defecto (`always`): se pregunta antes de tocar código (ver [Corrección de fallos](#corrección-de-fallos)). No edita configuración, no instala dependencias ni hace commit/push/merge sin instrucción explícita. (**Única excepción:** dejar su propia caché ignorada en el `.gitignore` —añadiendo esa línea, y creando el archivo si no existiera—, ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate).)
 >
 > **Proceso iterativo:** toda corrección reinicia la corrida completa hasta un veredicto estable.
 >
@@ -47,56 +47,85 @@ Carga cada archivo **solo cuando lo necesites** (rutas relativas a la raíz del 
 
 Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
 
-- [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md): **Idioma** — orden canónico, qué no se traduce, RFC 2119. *Antes de redactar cualquier salida.*
-- [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
-- [`${CLAUDE_PLUGIN_ROOT}/reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
+- [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`../../reference/quality-gates.md`](../../reference/quality-gates.md): **Política de corrección** — si se pregunta antes de corregir un fallo o se corrige directo. *Lectura obligatoria antes de ejecutar el skill.*
 
 ---
 
 ## Cómo preguntar al usuario
 
-Mecanismo, ritmo y fallback compartidos: [`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`](../../reference/asking.md).
+Mecanismo, ritmo y fallback compartidos: [`../../reference/asking.md`](../../reference/asking.md).
 
 Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar*, *validar* o *sugerir* algo al usuario, asume ese mecanismo; no se repite allí.
 
-**Excepción al ritmo:** la pregunta señalada de este skill —si se corrigen los fallos o se entrega solo el informe— va **después** de presentar el reporte de lo que falló: el usuario decide con la información delante.
+**Excepción al ritmo:** cuando aplica (ver [Política de corrección](#política-de-corrección)), la pregunta señalada de este skill —si se corrigen los fallos o se entrega solo el informe— va **después** de presentar el reporte de lo que falló: el usuario decide con la información delante.
+
+---
+
+## Política de corrección
+
+Antes de ejecutar este skill, DEBES leer [`../../reference/quality-gates.md`](../../reference/quality-gates.md).
+
+Las reglas de `quality-gates.md` son obligatorias y determinan, vía `qualityGates.qualityCheckConfirmFix`, si se pide confirmación antes de corregir un fallo (`always`, comportamiento por defecto) o si se corrige directamente sin preguntar (`never`). Ver [Corrección de fallos](#corrección-de-fallos).
+
+No continúes hasta haber leído y aplicado `quality-gates.md`.
+
+---
+
+## Vocabulario de veredictos y estados
+
+Antes de redactar cualquier informe, DEBES leer [`../../reference/verdicts.md`](../../reference/verdicts.md).
+
+Las reglas de `verdicts.md` son obligatorias: el valor canónico y el símbolo son estables, y la **etiqueta que lee la persona se redacta siempre en el idioma resuelto** por `language.md`. Ninguna etiqueta de este skill se fija en un idioma concreto.
+
+No continúes hasta haber leído y aplicado `verdicts.md`.
 
 ---
 
 ## Modelo de aplicabilidad y veredicto
 
-Todo check pertenece a **una** de estas tres categorías (sin solape).
+Todo check pertenece a **una** de estas tres categorías (sin solape). Los nombres de la columna «Categoría» son **valores canónicos**: en el informe se escribe su etiqueta en el idioma resuelto.
 
-| Categoría | Cuándo se ejecuta | Si FALLA | Si no se puede ejecutar |
-|-----------|-------------------|----------|--------------------------|
-| **Bloqueante** | Siempre (el stack lo exige). | `❌ Rechazado` | Herramienta/config ausente → `SKIPPED` → `⚠️ Incompleto` |
-| **Condicional** | Solo si hay config o herramienta del check presente. | `❌ Rechazado` | Config presente pero binario/tarea rota → `SKIPPED` → `⚠️ Incompleto`. Sin config **ni** herramienta → `N/A` (no afecta veredicto). |
-| **Informativo** | Si hay config presente. | No afecta veredicto (FAIL informativo). | `N/A` o `SKIPPED` → no afecta veredicto. |
+| Categoría (canónica) | Símbolo | Cuándo se ejecuta | Si FALLA | Si no se puede ejecutar |
+|----------------------|---------|-------------------|----------|--------------------------|
+| `BLOCKING` | — | Siempre (el stack lo exige). | `REJECTED` | Herramienta/config ausente → `SKIPPED` → `INCOMPLETE` |
+| `CONDITIONAL` | — | Solo si hay config o herramienta del check presente. | `REJECTED` | Config presente pero binario/tarea rota → `SKIPPED` → `INCOMPLETE`. Sin config **ni** herramienta → `N/A` (no afecta veredicto). |
+| `INFORMATIVE` | `ℹ️` | Si hay config presente. | No afecta veredicto (FAIL informativo). | `N/A` o `SKIPPED` → no afecta veredicto. |
 
 ### SKIPPED vs N/A (definición tajante)
 
-- **`N/A`** = el check **no corresponde** a este repo: ni aplica al stack, ni existe config/herramienta/script. No cuenta para el veredicto (se omite o se marca `— N/A`).
-- **`SKIPPED`** = el check **sí correspondía** (Bloqueante, o Condicional con config presente) pero **no pudo ejecutarse** porque la herramienta o la config está ausente o rota. Cuenta como `⚠️ Incompleto`.
+- **`N/A`** = el check **no corresponde** a este repo: ni aplica al stack, ni existe config/herramienta/script. No cuenta para el veredicto (se omite, o se marca con el símbolo `—` y su etiqueta).
+- **`SKIPPED`** = el check **sí correspondía** (Bloqueante, o Condicional con config presente) pero **no pudo ejecutarse** porque la herramienta o la config está ausente o rota. Cuenta como `INCOMPLETE`.
 
-> Mnemónica: si el proyecto **declara** que algo debe correr y no corre → `SKIPPED` (Incompleto); si **nunca pidió** ese check → `N/A` (irrelevante).
+> Mnemónica: si el proyecto **declara** que algo debe correr y no corre → `SKIPPED` (`INCOMPLETE`); si **nunca pidió** ese check → `N/A` (irrelevante).
 
 ### Veredicto
 
-| Veredicto | Condición exacta |
-|-----------|------------------|
-| `✅ Aprobado` | **Cero** FAIL en checks Bloqueantes y Condicionales-presentes y **cero** `SKIPPED`. Informativos en cualquier estado. |
-| `❌ Rechazado` | **Al menos un** Bloqueante o Condicional-presente en FAIL. (Tiene prioridad sobre Incompleto.) |
-| `⚠️ Incompleto` | **Cero** FAIL, pero **al menos un** `SKIPPED` (Bloqueante, o Condicional con config rota). |
+| Veredicto (canónico) | Símbolo | Condición exacta |
+|----------------------|---------|------------------|
+| `APPROVED` | `✅` | **Cero** `FAIL` en checks `BLOCKING` y `CONDITIONAL`-presentes y **cero** `SKIPPED`. Informativos en cualquier estado. |
+| `REJECTED` | `❌` | **Al menos un** `BLOCKING` o `CONDITIONAL`-presente en `FAIL`. (Tiene prioridad sobre `INCOMPLETE`.) |
+| `INCOMPLETE` | `⚠️` | **Cero** `FAIL`, pero **al menos un** `SKIPPED` (`BLOCKING`, o `CONDITIONAL` con config rota). |
 
-Precedencia: `❌ Rechazado` > `⚠️ Incompleto` > `✅ Aprobado`.
+Precedencia: `REJECTED` > `INCOMPLETE` > `APPROVED`.
 
-Además de los estados de check, el informe usa `⏸️ Pendiente` para los checks que **sí correspondían** pero quedaron sin correr por el **fail-fast** del tipado. No es `N/A` (sí correspondían) ni `SKIPPED` (no hay problema de tooling): el veredicto ya está determinado por el FAIL que disparó el fail-fast, así que `⏸️` no lo altera.
+### Estados de check
 
-> **Los estados de check se nombran en inglés aquí y en español en el informe.** `PASS`/`FAIL`/`SKIPPED`/`N/A` son el vocabulario canónico de este documento, de `stacks.md` y del `result` de `test-run.json`; el informe que lee el usuario los muestra como **Pasó** / **Falló** / **Omitido** / **No aplica** (más **Pendiente** para el `⏸️`). La correspondencia exacta está en [`references/execution.md` → Formato del informe](references/execution.md#formato-del-informe). Ojo con el solape: `✅` como **estado de un check** significa «Pasó», mientras que `✅ Aprobado` es el **veredicto** del informe entero.
+| Estado (canónico) | Símbolo | Qué significa |
+|-------------------|---------|---------------|
+| `PASS` | `✅` | El check se ejecutó y salió limpio. |
+| `FAIL` | `❌` | El check se ejecutó y no pasó. |
+| `SKIPPED` | `⏭️` | Correspondía pero la herramienta o la config está ausente o rota → `INCOMPLETE`. |
+| `PENDING` | `⏸️` | Correspondía y no llegó a ejecutarse porque el **fail-fast** del tipado cortó la corrida. Ni `SKIPPED` (no hay problema de tooling) ni `N/A` (sí correspondía); no altera el veredicto, que ya lo fijó el `FAIL` del tipado. |
+| `N/A` | `—` | El repo nunca pidió ese check. No cuenta para el veredicto. |
+
+> **Los valores canónicos no se traducen; las etiquetas del informe sí se redactan en el idioma resuelto.** `PASS`/`FAIL`/`SKIPPED`/`PENDING`/`N/A`, `BLOCKING`/`CONDITIONAL`/`INFORMATIVE` y `APPROVED`/`REJECTED`/`INCOMPLETE` son el vocabulario canónico de este documento, de `stacks.md` y —los cuatro primeros— del `result` de `test-run.json`. El informe lleva **símbolo + etiqueta en el idioma resuelto**, con la leyenda que los ata al inicio; ver [`../../reference/verdicts.md`](../../reference/verdicts.md) y [`references/execution.md` → Formato del informe](references/execution.md#formato-del-informe). Ojo con el solape de símbolos: `✅` como **estado de un check** es `PASS`, mientras que `✅` en la línea `Veredicto:` es `APPROVED`, del informe entero.
 
 > **Este veredicto cubre solo el plano automatizado.** No lo mezcles con el de `code-review` ni con el de `trace-validate`: cada skill emite el suyo y el orquestador (`work-integrate`, `pr-create`) exige **las tres** puertas en aprobado antes de integrar o crear el PR. (Única salvedad: en un **PR de promoción** —`develop → master`—, `pr-create` solo exige esta puerta, porque cada trabajo ya pasó las tres al integrarse; ver [`pr-create`](../pr-create/SKILL.md#puertas-en-un-pr-de-promoción).)
 >
-> **Ojo con el símbolo `⚠️` en el cierre:** aquí (y en `code-review`) `⚠️ Incompleto` **bloquea**; en `trace-validate`, `⚠️ Aprobado con observaciones` **no bloquea** (se muestran las observaciones y se continúa). Mismo símbolo, efecto de compuerta opuesto — no asumir equivalencia al leer los tres informes juntos.
+> **Ojo con el símbolo `⚠️` en el cierre:** aquí (y en `code-review`) `⚠️` es `INCOMPLETE` y **bloquea**; en `trace-validate` es `APPROVED_WITH_NOTES` y **no bloquea** (se muestran las observaciones y se continúa). Mismo símbolo, efecto de compuerta opuesto — no asumir equivalencia al leer los tres informes juntos.
 
 ---
 
@@ -117,7 +146,7 @@ Checks canónicos en **orden de ejecución**. La categoría real depende del sta
 
 El orden sigue la pirámide de tests (*rápido → lento*, *dependencias antes que consumidores*): estático (tipado/linter) → unit+coverage → suites configuradas → build → e2e → sonar. Una suite configurada que **requiera el artefacto compilado** (rendimiento, carga, accesibilidad sobre la app desplegada) se ejecuta después de build, junto a e2e. El fail-fast solo aplica al tipado, para evitar ruido en cascada. Justificación detallada en [`references/execution.md`](references/execution.md#paso-2--ejecutar-los-checks).
 
-> **Cobertura sin tooling — no es un callejón sin salida.** Si el repo **no tiene ninguna herramienta ni configuración** de cobertura, el check es `N/A` (el proyecto nunca lo pidió), no `SKIPPED`: aplica la mnemónica de [SKIPPED vs N/A](#skipped-vs-na-definición-tajante) y el veredicto no queda condenado a `⚠️ Incompleto` de forma permanente. En ese caso, **señalarlo en Próximas acciones** como recomendación (configurar cobertura), sin bloquear. En cuanto exista config o herramienta, el check vuelve a ser Bloqueante y su ausencia de ejecución sí es `SKIPPED`.
+> **Cobertura sin tooling — no es un callejón sin salida.** Si el repo **no tiene ninguna herramienta ni configuración** de cobertura, el check es `N/A` (el proyecto nunca lo pidió), no `SKIPPED`: aplica la mnemónica de [SKIPPED vs N/A](#skipped-vs-na-definición-tajante) y el veredicto no queda condenado a `INCOMPLETE` de forma permanente. En ese caso, **señalarlo en Próximas acciones** como recomendación (configurar cobertura), sin bloquear. En cuanto exista config o herramienta, el check vuelve a ser Bloqueante y su ausencia de ejecución sí es `SKIPPED`.
 
 > **Los checks de prueba alimentan la caché de pruebas** —las tres fijas (`unit`, `coverage`, `e2e`) más las suites configuradas— que consume `trace-validate` — ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate). Tipado, linter, build y sonar no producen suites.
 
@@ -129,16 +158,16 @@ El **conjunto de pruebas** de una corrida tiene dos partes, y solo la primera es
 
 | | Cuáles | De dónde salen | En el informe |
 |-|--------|----------------|---------------|
-| **Fijas** | `unit` · `coverage` · `e2e` | Del catálogo de checks: son las tres que este skill exige a cualquier repo. | **Siempre** se listan, aunque el estado sea `— No aplica`. Nunca se omiten. |
+| **Fijas** | `unit` · `coverage` · `e2e` | Del catálogo de checks: son las tres que este skill exige a cualquier repo. | **Siempre** se listan, aunque el estado sea `N/A`. Nunca se omiten. |
 | **Configuradas** | Integración, contrato, rendimiento/carga, mutación, accesibilidad, seguridad… **cualquier otra clase** | Del **estándar de testing** del repo: `docs/standards/testing.md` (forma simple) o `docs/standards/testing/README.md` (forma con carpeta), un bloque `## <Requisito>` con su `ID` por clase de prueba. | Una fila por requisito vigente, en el **orden en que el estándar los declara**. |
 
 **Reglas:**
 
 - **El estándar es la única fuente de las suites no fijas.** Si el repo no tiene estándar de testing, o su estándar no declara más clases de prueba que las fijas, la corrida son **solo las tres fijas**. No se añade ninguna suite por haberla detectado en el repo.
 - **Solo cuentan los requisitos vigentes.** Un requisito con `**Estado:** Deprecated` o `Superseded` no se ejecuta ni se lista: dejó de ser exigible.
-- **La categoría sale del enunciado normativo** del requisito (RFC 2119, ver [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md)): **DEBE / MUST → Bloqueante**; **DEBERÍA / PUEDE (SHOULD / MAY) → Condicional**. Si el enunciado no es claro, tratarla como **Condicional** y anotarlo en el detalle del check.
+- **La categoría sale del enunciado normativo** del requisito (RFC 2119, ver [`../../reference/language.md`](../../reference/language.md)): **DEBE / MUST → Bloqueante**; **DEBERÍA / PUEDE (SHOULD / MAY) → Condicional**. Si el enunciado no es claro, tratarla como **Condicional** y anotarlo en el detalle del check.
 - **El estándar puede endurecer una fija, nunca ablandarla.** Si declara e2e con **DEBE**, e2e pasa de Condicional a Bloqueante. Lo que el stack exige como Bloqueante (unit, coverage) sigue siéndolo aunque el estándar calle o suavice.
-- **Suite declarada que no se puede ejecutar → `SKIPPED`** (`⚠️ Incompleto`), no `N/A`: el estándar es precisamente la declaración de que ese check debe correr — es la mnemónica de [SKIPPED vs N/A](#skipped-vs-na-definición-tajante) aplicada al pie de la letra.
+- **Suite declarada que no se puede ejecutar → `SKIPPED`** (`INCOMPLETE`), no `N/A`: el estándar es precisamente la declaración de que ese check debe correr — es la mnemónica de [SKIPPED vs N/A](#skipped-vs-na-definición-tajante) aplicada al pie de la letra.
 - **Suite presente en el repo pero no declarada en el estándar:** **no se ejecuta y no bloquea**. Anotarla en **Próximas acciones** como recomendación de declararla en el estándar (vía `arch-manage`), igual que se hace con la cobertura sin tooling.
 - **El comando se resuelve como el de cualquier otro check:** scripts/tareas del manifiesto según [`references/stacks.md`](references/stacks.md#resolución-de-comandos-por-stack), usando como pista lo que el propio requisito diga sobre herramienta y ubicación. Si no se resuelve con certeza, preguntar en vez de adivinar.
 
@@ -175,17 +204,17 @@ Las **claves** de los modificadores son siempre en inglés (estándar). Si el us
 | `save-report` | **Además** del informe vigente `docs/audits/quality-check.md` (que siempre se escribe), guardar una copia con marca de tiempo en `docs/audits/quality-check-<YYYYMMDD-HHMMSS>.md` para conservar histórico. |
 | `tests-only` | Ejecutar **solo los checks de ejecución de pruebas** (las tres fijas —unit, coverage, e2e— más las suites configuradas; build solo si es prerrequisito de alguna de ellas); omitir tipado/linter/sonar. Pensado como **objetivo de delegación de `trace-validate`**: honra la caché de corrida de pruebas — si existe un `test-run.json` **fresco** (fingerprint coincide, ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate)) **reutiliza** ese resultado sin re-ejecutar; si no, ejecuta y escribe/actualiza la caché. **Modo no interactivo:** devuelve los resultados por suite y la ruta de `test-run.json` **sin** entrar al ciclo de corrección, **sin** emitir veredicto y **sin** escribir `quality-check.md` — su único artefacto es `test-run.json`. Si hay suites en FAIL, se reportan como tales; corregirlas es decisión del flujo que invocó, no de esta corrida. |
 
-> Todo check omitido **por modificador del usuario** es `N/A`, nunca `SKIPPED`: una omisión solicitada no convierte el veredicto en Incompleto.
+> Todo check omitido **por modificador del usuario** es `N/A`, nunca `SKIPPED`: una omisión solicitada no convierte el veredicto en `INCOMPLETE`.
 
 ---
 
 ## Flujo de ejecución (resumen)
 
-**Ninguna corrección se aplica sin autorización explícita del usuario**; tras corregir, verifica el arreglo y reinicia. El detalle paso a paso, el formato del informe, el manejo de errores y los anti-patterns están en **[`references/execution.md`](references/execution.md)** — léelo al iniciar la ejecución.
+**Ninguna corrección se aplica sin autorización** —explícita del usuario, o de antemano vía `qualityGates.qualityCheckConfirmFix: "never"` (ver [Política de corrección](#política-de-corrección))—; tras corregir, verifica el arreglo y reinicia. El detalle paso a paso, el formato del informe, el manejo de errores y los anti-patterns están en **[`references/execution.md`](references/execution.md)** — léelo al iniciar la ejecución.
 
 1. **Detectar entorno:** identificar stack, cargar `references/stacks.md`, **leer el estándar de testing** para resolver las suites configuradas, resolver comandos, capturar metadata y calcular el fingerprint.
 2. **Ejecutar los checks** secuencialmente según el catálogo.
-3. **Evaluar el resultado y el veredicto** con la tabla de [Veredicto](#veredicto). Si hay FAIL, mostrar el reporte y **preguntar** qué hacer; nunca corregir sin autorización. Dentro de una implementación, la pregunta es si se corrige; **fuera de una implementación**, ofrecer además la salida **«solo el informe»**. Si el usuario autoriza corregir y la rama tiene un artefacto identificable (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin), la corrección se **delega en `work-implement`**; solo si no hay artefacto de ningún tipo se aplica aquí — ver [Corrección de fallos](#corrección-de-fallos).
+3. **Evaluar el resultado y el veredicto** con la tabla de [Veredicto](#veredicto). Si hay FAIL, mostrar el reporte y resolver si se corrige según `qualityGates.qualityCheckConfirmFix` (ver [Política de corrección](#política-de-corrección)): con `always`, **preguntar** qué hacer — dentro de una implementación la pregunta es si se corrige, **fuera de una implementación** ofrecer además la salida **«solo el informe»**; con `never`, corregir directo sin preguntar. Si corresponde corregir y la rama tiene un artefacto identificable (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin), la corrección se **delega en `work-implement`**; solo si no hay artefacto de ningún tipo se aplica aquí — ver [Corrección de fallos](#corrección-de-fallos).
 4. **Construir informe:** rellenar [`assets/quality-check-template.md`](assets/quality-check-template.md).
 5. **Registro y salida:** escribir siempre el informe en `docs/audits/quality-check.md` y —**solo si la corrida ejecutó el conjunto de pruebas completo** (las tres fijas más todas las suites configuradas)— la caché en `.sdd-devkit/test-run.json` (creando los directorios si no existen), más un resumen en el chat. **Excepción `tests-only`:** no hay informe ni veredicto; el único artefacto es `test-run.json`. **No** hacer commit/push/merge sin instrucción explícita.
 
@@ -199,19 +228,23 @@ Todo hallazgo que implique **modificar código** —un check en FAIL o una prueb
 
 ### 1. ¿Se corrige o se entrega solo el informe?
 
-Depende del **contexto de ejecución**:
+Se resuelve primero por `qualityGates.qualityCheckConfirmFix` (ver [Política de corrección](#política-de-corrección)):
+
+- **`never`** → corregir directo, sin preguntar, en cuanto haya un check en FAIL o una prueba en rojo. Saltar el resto de este punto y seguir con el punto 2.
+- **`always`** (o sin `settings.json`, comportamiento por defecto) → depende del **contexto de ejecución**:
 
 | Contexto | Qué hacer |
 |----------|-----------|
 | **Dentro de una implementación** — hay un **trabajo en curso** al que atribuir la rama: un artefacto del plugin (`US-XXX`, `WI-XXX`, o `FT-XXX`/`TC-XXX` sobre rama `test/`) **o un artefacto externo** (ticket, spec suelto) que el usuario o la rama señalen. **No se exige carpeta ni `progress.md`** (cierre vía `work-integrate` / `pr-create`) | Mostrar el reporte y **preguntar si se corrige**. Es el flujo normal del cierre: corregir es lo esperado, pero sigue requiriendo autorización. |
 | **Fuera de una implementación** — corrida suelta sobre un repo, rama sin artefacto derivable, auditoría puntual, revisión exploratoria | **Preguntar explícitamente qué quiere el usuario**, con dos opciones: **[Corregir los hallazgos]** o **[Solo el informe, detener aquí]**. **No asumir que hay que corregir.** Quien pide una verificación fuera de un ciclo de implementación muchas veces solo quiere el diagnóstico. |
 
-La pregunta va por la **herramienta de preguntas estructuradas** del cliente (opciones tappables); si el cliente no la expone, formularla en prosa con las opciones enumeradas. Reglas:
+Con `always`, la pregunta va por la **herramienta de preguntas estructuradas** del cliente (opciones tappables); si el cliente no la expone, formularla en prosa con las opciones enumeradas. Reglas:
 
 - **Preguntar una sola vez por corrida**, presentando antes el reporte completo de lo que falló, para que el usuario decida con la información delante.
-- Si el usuario elige **Solo el informe** → construir el informe (Paso 4), emitir el veredicto que corresponda (`❌ Rechazado` si hay FAIL) y **terminar**. No tocar código, no reiniciar la corrida, no insistir. Dejar en Próximas acciones qué habría que corregir.
+- Si el usuario elige **Solo el informe** → construir el informe (Paso 4), emitir el veredicto que corresponda (`REJECTED` si hay FAIL) y **terminar**. No tocar código, no reiniciar la corrida, no insistir. Dejar en Próximas acciones qué habría que corregir.
 - Si el usuario elige **Corregir** → seguir con el punto 2.
 - El usuario puede acotar el alcance («corrige solo el linter, el test lo veo yo»): respetarlo y tratar el resto como *solo informe*.
+- **Una petición explícita del usuario gana**, en cualquier sentido («corrige todo sin preguntar», «esta vez solo quiero el informe»): se respeta para esa corrida sin tocar `settings.json`.
 
 ### 2. ¿Quién aplica la corrección?
 
@@ -249,9 +282,9 @@ Si no se resuelve un artefacto del plugin, **comprobar antes si hay uno externo*
 
 **Tras la delegación**, este skill retoma el control: **verifica que el arreglo funciona** re-ejecutando el check o la prueba que fallaba y, solo si pasa, **recalcula el fingerprint** y **reinicia la corrida completa** (Paso 2). Si el arreglo no resuelve el fallo, seguir iterando antes de reiniciar.
 
-**Si `work-implement` devuelve «corrección no aplicada»**, la iteración **se detiene ahí**. Ese resultado significa que el arreglo excedía su alcance acotado, que hay una discrepancia de especificación, o que el fallo es preexistente — y viene con el motivo y el skill al que se escaló (`work-plan` / `test-define`). En ese caso: **no reintentar la delegación sobre ese mismo fallo** ni corregirlo aquí como sustituto. Construir el informe (Paso 4) recogiendo el motivo y el escalado en **Próximas acciones**, emitir **`❌ Rechazado`** y terminar. El cierre queda bloqueado hasta que el escalado se resuelva — que es el resultado correcto, no un flujo incompleto.
+**Si `work-implement` devuelve «corrección no aplicada»**, la iteración **se detiene ahí**. Ese resultado significa que el arreglo excedía su alcance acotado, que hay una discrepancia de especificación, o que el fallo es preexistente — y viene con el motivo y el skill al que se escaló (`work-plan` / `test-define`). En ese caso: **no reintentar la delegación sobre ese mismo fallo** ni corregirlo aquí como sustituto. Construir el informe (Paso 4) recogiendo el motivo y el escalado en **Próximas acciones**, emitir **`REJECTED`** y terminar. El cierre queda bloqueado hasta que el escalado se resuelva — que es el resultado correcto, no un flujo incompleto.
 
-> **Límites.** La delegación **no** convierte a este skill en implementador: no decide el diseño de la corrección ni escribe código por su cuenta cuando delega. Y **nunca** delega sin autorización explícita del usuario — la delegación es *cómo* se corrige, no *si* se corrige.
+> **Límites.** La delegación **no** convierte a este skill en implementador: no decide el diseño de la corrección ni escribe código por su cuenta cuando delega. Y **nunca** delega sin la autorización resuelta en el punto 1 (explícita del usuario, o `qualityGates.qualityCheckConfirmFix: "never"`) — la delegación es *cómo* se corrige, no *si* se corrige.
 
 ### Artefactos externos al plugin
 
@@ -440,7 +473,7 @@ El detalle operativo (cuándo escribirla, cómo reutilizarla en `tests-only`) es
 Usar este skill **solo cuando se le invoca explícitamente** (ni de forma proactiva, ni "por si acaso", ni al detectar que se terminó código):
 
 - **El usuario lo pide explícitamente** — solicita correr las verificaciones o las pruebas, validar antes de PR/merge, o nombra este skill.
-- **Otro skill lo invoca explícitamente**, p. ej. `work-integrate` o `pr-create`, que exigen `✅ Aprobado` **aquí y** en `code-review` antes de integrar o crear el PR. En un **PR de promoción**, `pr-create` invoca solo esta puerta: es la única que sigue teniendo algo que demostrar sobre la rama consolidada.
+- **Otro skill lo invoca explícitamente**, p. ej. `work-integrate` o `pr-create`, que exigen `APPROVED` **aquí y** en `code-review` antes de integrar o crear el PR. En un **PR de promoción**, `pr-create` invoca solo esta puerta: es la única que sigue teniendo algo que demostrar sobre la rama consolidada.
 - **`trace-validate` delega en este skill la ejecución de pruebas.** `trace-validate` no corre pruebas por sí mismo: reutiliza el `test-run.json` fresco de una corrida previa de este skill o, si no hay una fresca, invoca este skill en modo `tests-only` para producirlo. Este skill es la **única** autoridad que ejecuta la batería de pruebas del trabajo. Ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
 - **`work-implement` recibe la delegación de las correcciones** cuando hay un artefacto de trabajo en curso (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin) y el usuario las autoriza. Ver [Corrección de fallos](#corrección-de-fallos).
 
@@ -452,7 +485,7 @@ Usar este skill **solo cuando se le invoca explícitamente** (ni de forma proact
 | **`code-review`** | ¿Resuelve el problema correcto y está bien diseñado? | Intención, arquitectura y diseño del diff — incluida la **calidad** de las pruebas escritas, no su ejecución. |
 | **`trace-validate`** | ¿Cada criterio de aceptación está probado? | Cobertura **funcional**: criterio ↔ caso de prueba ↔ artefacto. |
 
-> **«Cobertura» significa dos cosas distintas en este cierre:** aquí es la métrica de líneas/ramas de un check; en `trace-validate` es el estado de un criterio de aceptación (`Cubierto`/`Parcial`/`No cubierto`). Un repo puede tener 95 % de líneas y un criterio sin probar, o al revés. Ambas bloquean, pero por motivos distintos; no usar una para justificar la otra.
+> **«Cobertura» significa dos cosas distintas en este cierre:** aquí es la métrica de líneas/ramas de un check; en `trace-validate` es el estado de un criterio de aceptación (`COVERED`/`PARTIAL`/`UNCOVERED`). Un repo puede tener 95 % de líneas y un criterio sin probar, o al revés. Ambas bloquean, pero por motivos distintos; no usar una para justificar la otra.
 
 El orden recomendado en el cierre es `quality-check` → `code-review` → `trace-validate`: los dos primeros porque revisar diseño sobre código que ni compila suele ser trabajo perdido; el tercero **después de este skill** para que reutilice el `test-run.json` sin re-ejecutar pruebas. Es una recomendación del orquestador, no una dependencia dura, y el usuario puede pedir solo uno de los tres.
 
@@ -460,7 +493,10 @@ Es un proceso **posterior a la implementación**: no forma parte del desarrollo 
 
 ### Resolución de idioma
 
-Orden canónico compartido por todo el catálogo: [`${CLAUDE_PLUGIN_ROOT}/reference/language.md`](../../reference/language.md).
+Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../reference/language.md).
 
-El idioma resuelto aplica al **informe**. Los mensajes de error de las herramientas no se traducen.
+Las reglas de `language.md` son obligatorias y tienen prioridad para determinar el idioma de todos los artefactos y mensajes generados por este skill.
 
+No continúes hasta haber leído y aplicado `language.md`.
+
+**Excepción deliberada:** la salida y los mensajes de error de las herramientas no se traducen; se citan literales.

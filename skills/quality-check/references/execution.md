@@ -14,7 +14,7 @@ Detalla **cómo** ejecutar las verificaciones automatizadas paso a paso y cómo 
 
 ## Flujo de ejecución
 
-> **Principio rector:** ejecutar, reportar y **proponer**. **Ninguna corrección se aplica sin autorización explícita del usuario.** Tras aplicar una corrección, primero **verifica que el arreglo funciona** re-ejecutando solo el check o la prueba que fallaba; **únicamente si ese check puntual pasa**, dispara el **reinicio** de la corrida completa para re-evaluar sobre el código ya corregido. Si el arreglo no resuelve el fallo, sigue iterando la corrección — no reinicies con algo que aún no funciona. Para ahorrar vueltas, si el usuario autoriza varias correcciones, aplícalas juntas, verifícalas y reinicia **una sola vez**.
+> **Principio rector:** ejecutar, reportar y **proponer**. **Ninguna corrección se aplica sin autorización** —explícita del usuario, o de antemano vía `qualityGates.qualityCheckConfirmFix: "never"` (ver [`SKILL.md` → Política de corrección](../SKILL.md#política-de-corrección))—. Tras aplicar una corrección, primero **verifica que el arreglo funciona** re-ejecutando solo el check o la prueba que fallaba; **únicamente si ese check puntual pasa**, dispara el **reinicio** de la corrida completa para re-evaluar sobre el código ya corregido. Si el arreglo no resuelve el fallo, sigue iterando la corrección — no reinicies con algo que aún no funciona. Para ahorrar vueltas, si hay varias correcciones autorizadas, aplícalas juntas, verifícalas y reinicia **una sola vez**.
 
 ### Paso 1 — Detectar entorno
 
@@ -64,15 +64,16 @@ En otro caso, ejecutar **secuencialmente** (no en paralelo) los checks Bloqueant
 
 ### Paso 3 — Evaluar el resultado
 
-- **Hay al menos un FAIL** (Bloqueante o Condicional-presente): **mostrar el reporte completo al usuario** y **preguntar qué hacer**. **No corregir sin autorización**, y **no dar por hecho que hay que corregir**.
-  - **Cómo preguntar** (ver [Corrección de fallos](../SKILL.md#corrección-de-fallos)): si la corrida está **dentro de una implementación** (hay un trabajo en curso al que atribuir la rama: `US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin (ticket, spec suelto, doc de otra herramienta)), preguntar si se corrigen los fallos. Si está **fuera de una implementación** (rama suelta sin artefacto de ningún tipo, auditoría, revisión puntual), ofrecer explícitamente las dos salidas: **[Corregir los hallazgos]** / **[Solo el informe, detener aquí]**.
+- **Hay al menos un FAIL** (Bloqueante o Condicional-presente): **mostrar el reporte completo al usuario** y resolver si se corrige según `qualityGates.qualityCheckConfirmFix` (ver [`SKILL.md` → Política de corrección](../SKILL.md#política-de-corrección) y [Corrección de fallos](../SKILL.md#corrección-de-fallos)).
+  - **`never`** → saltar la pregunta: ir directo a «autoriza la corrección» más abajo.
+  - **`always`** (o sin `settings.json`) → **preguntar qué hacer**. **No corregir sin autorización**, y **no dar por hecho que hay que corregir**. Si la corrida está **dentro de una implementación** (hay un trabajo en curso al que atribuir la rama: `US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin (ticket, spec suelto, doc de otra herramienta)), preguntar si se corrigen los fallos. Si está **fuera de una implementación** (rama suelta sin artefacto de ningún tipo, auditoría, revisión puntual), ofrecer explícitamente las dos salidas: **[Corregir los hallazgos]** / **[Solo el informe, detener aquí]**.
   - Si el usuario elige **solo el informe** → ir al Paso 4 con el veredicto que corresponda y **terminar**: no tocar código, no reiniciar la corrida, no volver a ofrecer la corrección. Dejar lo pendiente en Próximas acciones.
-  - Si **autoriza la corrección** → resolver **quién la aplica** según [Corrección de fallos](../SKILL.md#corrección-de-fallos): si la rama tiene un artefacto identificable (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin — ticket, spec suelto, doc de otra herramienta), **delegar en `work-implement`** sobre ese artefacto, pasándole el check fallido, el comando, la salida de error y los archivos implicados; solo si no hay artefacto de ningún tipo, aplicar aquí los cambios mínimos (sin tocar más de lo necesario). En ambos casos: **re-ejecutar el check/prueba que fallaba para confirmar que ya pasa**, **recalcular el `FINGERPRINT`** y solo entonces **re-ejecutar TODA la corrida** (reiniciar el Paso 2). Si el check puntual sigue en FAIL, iterar la corrección antes de reiniciar. **Excepción — si `work-implement` devuelve «corrección no aplicada»** (escalado a `work-plan`/`test-define`, o fallo preexistente): no reintentar ni corregir aquí, no reiniciar la corrida — pasar al informe con el motivo y emitir `❌ Rechazado`.
+  - Si **autoriza la corrección** → resolver **quién la aplica** según [Corrección de fallos](../SKILL.md#corrección-de-fallos): si la rama tiene un artefacto identificable (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin — ticket, spec suelto, doc de otra herramienta), **delegar en `work-implement`** sobre ese artefacto, pasándole el check fallido, el comando, la salida de error y los archivos implicados; solo si no hay artefacto de ningún tipo, aplicar aquí los cambios mínimos (sin tocar más de lo necesario). En ambos casos: **re-ejecutar el check/prueba que fallaba para confirmar que ya pasa**, **recalcular el `FINGERPRINT`** y solo entonces **re-ejecutar TODA la corrida** (reiniciar el Paso 2). Si el check puntual sigue en FAIL, iterar la corrección antes de reiniciar. **Excepción — si `work-implement` devuelve «corrección no aplicada»** (escalado a `work-plan`/`test-define`, o fallo preexistente): no reintentar ni corregir aquí, no reiniciar la corrida — pasar al informe con el motivo y emitir `REJECTED`.
   - Si **corrige manualmente** e indica que ya está → **re-ejecutar el check/prueba que fallaba**; si pasa, **recalcular el `FINGERPRINT`** y **re-ejecutar TODA la corrida**; si no, avisar y volver a la corrección.
-  - Si **no desea corregir ahora** → continuar al informe con veredicto `❌ Rechazado`, dejando registrado qué falló y qué falta para llegar a Aprobado.
+  - Si **no desea corregir ahora** → continuar al informe con veredicto `REJECTED`, dejando registrado qué falló y qué falta para llegar a `APPROVED`.
   - Repetir el ciclo de corrección hasta quedar sin FAIL, hasta que el usuario detenga, o hasta que `work-implement` devuelva **«corrección no aplicada»** — ese resultado cierra el ciclo, no lo reinicia.
-- **Solo SKIPPED, sin FAIL** (`⚠️ Incompleto`): reportar el motivo y **preguntar** si resolver el tooling primero o cerrar asumiendo el Incompleto. No avanzar en silencio. **En `tests-only` no se pregunta:** devolver las suites con su `result` (incluidos los `SKIPPED`) y terminar.
-- **Sin FAIL ni SKIPPED**: `✅ Aprobado`.
+- **Solo SKIPPED, sin FAIL** (`INCOMPLETE`): reportar el motivo y **preguntar** si resolver el tooling primero o cerrar asumiendo el `INCOMPLETE`. No avanzar en silencio. **En `tests-only` no se pregunta:** devolver las suites con su `result` (incluidos los `SKIPPED`) y terminar.
+- **Sin FAIL ni SKIPPED**: `APPROVED`.
 
 > Aplica la **cota de 3 reinicios** (ver [Manejo de errores](#manejo-de-errores)): tras 3 reinicios sin llegar a `✅`, resumir lo pendiente y preguntar al usuario cómo proceder.
 
@@ -81,7 +82,7 @@ En otro caso, ejecutar **secuencialmente** (no en paralelo) los checks Bloqueant
 Rellenar la plantilla [`../assets/quality-check-template.md`](../assets/quality-check-template.md) (ver [Formato del informe](#formato-del-informe)):
 
 1. Calcular el veredicto con la tabla de Veredicto (`SKILL.md`): considera Bloqueantes/Condicionales-presentes (las filas `N/A` no cuentan).
-2. Tabla resumen de checks: una fila por check ejecutado, `SKIPPED`, `N/A` o `⏸️` (cortado por el fail-fast), con la **etiqueta en español** de la tabla de [Formato del informe](#formato-del-informe). Las tres **suites fijas** (unit, coverage, e2e) llevan fila siempre; las **configuradas**, una por requisito vigente del estándar de testing. Rellenar además la línea **Estándar de testing** del encabezado (ruta y requisitos vigentes, o «sin estándar de testing»).
+2. Tabla resumen de checks: una fila por check ejecutado, `SKIPPED`, `N/A` o `⏸️` (cortado por el fail-fast), con la **etiqueta en el idioma resuelto** de la tabla de [Formato del informe](#formato-del-informe). Las tres **suites fijas** (unit, coverage, e2e) llevan fila siempre; las **configuradas**, una por requisito vigente del estándar de testing. Rellenar además la línea **Estándar de testing** del encabezado (ruta y requisitos vigentes, o «sin estándar de testing»).
 3. Detalle de checks **solo** para FAIL o `SKIPPED`; truncar a 10 errores por check (`… y N más`).
 4. "Próximas acciones": FAIL Bloqueantes/Condicionales en orden de ejecución → warnings de linter → Sonar → `SKIPPED` por config ausente/rota → recomendaciones (cobertura sin tooling; **suite presente en el repo pero no declarada en el estándar de testing**, con la sugerencia de declararla vía `arch-manage`).
 
@@ -101,7 +102,7 @@ las tres fijas (unit/coverage/e2e) **y** todas las suites configuradas en el est
 escribir/actualizar `.sdd-devkit/test-run.json` en la **raíz del repo** con el `FINGERPRINT` **vigente** (el del Paso 1 si no hubo correcciones; el recalculado tras la última corrección si las hubo) y el resultado por suite. Crear `.sdd-devkit/` si no existe. Ver
 [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas). En modo `tests-only` este es el artefacto de salida.
 
-Devolver el informe completo y la ruta del `quality-check.md` escrito (en `tests-only` no hay informe: devolver los resultados por suite y la ruta de `test-run.json`). **No** continuar con `git commit`, push ni merge aunque el veredicto sea `✅ Aprobado` — salvo instrucción explícita del usuario. Si el cierre requiere también la revisión cualitativa, **sugerir** invocar `code-review`; no ejecutarlo desde aquí.
+Devolver el informe completo y la ruta del `quality-check.md` escrito (en `tests-only` no hay informe: devolver los resultados por suite y la ruta de `test-run.json`). **No** continuar con `git commit`, push ni merge aunque el veredicto sea `APPROVED` — salvo instrucción explícita del usuario. Si el cierre requiere también la revisión cualitativa, **sugerir** invocar `code-review`; no ejecutarlo desde aquí.
 
 ---
 
@@ -109,27 +110,36 @@ Devolver el informe completo y la ruta del `quality-check.md` escrito (en `tests
 
 La estructura canónica del informe está en la plantilla [`../assets/quality-check-template.md`](../assets/quality-check-template.md). **Rellénala** (no la reescribas desde cero) para todo informe, tanto el resumen que se muestra en chat como el `docs/audits/quality-check.md` que se escribe siempre.
 
+> **La marca de pie se escribe siempre y se conserva:** `<!-- quality-check:verdict=<canónico> · fingerprint=<FINGERPRINT> · generated=YYYY-MM-DD -->`. Es lo que leen `work-integrate` y `pr-create` para decidir si la puerta deja pasar — no la línea visible del veredicto, que va en el idioma resuelto.
+
 La plantilla incluye: encabezado con metadata (donde vive el **Veredicto**, con su justificación de una línea; no hay sección propia), **Resumen**, **Verificaciones** (tabla + detalle de fallidos) y **Próximas acciones**.
 
-**Dos vocabularios, no uno.** El razonamiento de este skill, `stacks.md`, la tabla de veredicto y el
-esquema de `test-run.json` usan los nombres **canónicos en inglés**; el informe que lee el usuario usa las
-**etiquetas en español** de la plantilla. Traducir solo al escribir el informe — **nunca** al revés:
+**Tres formas por estado, no dos.** Contrato completo en [`../../../reference/verdicts.md`](../../../reference/verdicts.md):
+el **valor canónico** (`PASS`, `BLOCKING`, `APPROVED`…) es el vocabulario de este documento, de
+`stacks.md`, de la tabla de veredicto del `SKILL.md` y del `result` de `test-run.json`; el **símbolo** es
+estable y es lo que leen las otras puertas; la **etiqueta** —la palabra que ve la persona— se redacta al
+escribir el informe **en el idioma resuelto**, nunca fijada a un idioma concreto. Traducir solo al
+escribir el informe, **nunca** al revés.
 
-| Concepto (canónico) | Símbolo | Etiqueta en el informe | Qué significa |
-|---------------------|---------|------------------------|---------------|
-| `PASS` | `✅` | **Pasó** | El check se ejecutó y salió limpio. No confundir con el **veredicto** `✅ Aprobado`, que es del informe entero. |
-| `FAIL` | `❌` | **Falló** | El check se ejecutó y no pasó. |
-| `SKIPPED` | `⏭️` | **Omitido** | Correspondía (Bloqueante, o Condicional con config presente) pero la herramienta o la config está ausente o rota → `⚠️ Incompleto`. |
-| — (fail-fast) | `⏸️` | **Pendiente** | Correspondía y no llegó a ejecutarse porque el **fail-fast** del tipado cortó la corrida. Ni `SKIPPED` (no hay problema de tooling) ni `N/A` (sí correspondía); no altera el veredicto, que ya lo fijó el FAIL del tipado. Si hace falta desambiguar en el detalle, escribir «Pendiente (fail-fast)». |
-| `N/A` | `—` | **No aplica** | El repo nunca pidió ese check: no aplica al stack, no hay config/herramienta/script, o el usuario lo omitió por modificador. No cuenta para el veredicto. |
-| informativo | `ℹ️` | **Informativo** | **No es un estado, es una categoría**: vive en la columna Categoría, no en Estado. Un check informativo que falla se reporta `❌ Falló` como cualquier otro; lo que lo distingue es que no mueve el veredicto. Hoy solo Sonar. |
+| Estado (canónico) | Símbolo | Qué significa |
+|-------------------|---------|---------------|
+| `PASS` | `✅` | El check se ejecutó y salió limpio. No confundir con el **veredicto** `APPROVED`, que es del informe entero y lleva el mismo símbolo en otra línea. |
+| `FAIL` | `❌` | El check se ejecutó y no pasó. |
+| `SKIPPED` | `⏭️` | Correspondía (`BLOCKING`, o `CONDITIONAL` con config presente) pero la herramienta o la config está ausente o rota → `INCOMPLETE`. |
+| `PENDING` | `⏸️` | Correspondía y no llegó a ejecutarse porque el **fail-fast** del tipado cortó la corrida. Ni `SKIPPED` (no hay problema de tooling) ni `N/A` (sí correspondía); no altera el veredicto, que ya lo fijó el `FAIL` del tipado. Si hace falta desambiguar en el detalle, añadir «(fail-fast)» a la etiqueta. |
+| `N/A` | `—` | El repo nunca pidió ese check: no aplica al stack, no hay config/herramienta/script, o el usuario lo omitió por modificador. No cuenta para el veredicto. |
+| `INFORMATIVE` | `ℹ️` | **No es un estado, es una categoría**: vive en la columna Categoría, no en Estado. Un check informativo que falla se reporta como `FAIL` con su símbolo `❌` como cualquier otro; lo que lo distingue es que no mueve el veredicto. Hoy solo Sonar. |
+
+> **La leyenda del informe se redacta en el idioma resuelto**, en el orden de esta tabla y con estos
+> mismos símbolos. Es lo que permite que un lector entienda las celdas sin conocer el vocabulario
+> canónico.
 
 > **`result` de `test-run.json` no se traduce:** ahí van siempre `PASS` / `FAIL` / `SKIPPED` / `N/A`, porque
-> lo consume una máquina (`trace-validate`), no una persona. Escribir «Pasó» en el JSON rompe el esquema.
+> lo consume una máquina (`trace-validate`), no una persona. Escribir ahí una etiqueta traducida rompe el esquema.
 
 Reglas al rellenar:
 - Sustituir cada `{{…}}` de la plantilla por el valor real; el informe publicado no debe conservar placeholders ni el bloque de comentario inicial.
-- Incluir solo las filas de checks que aplican, **con una excepción**: las tres suites fijas (unit, coverage, e2e) se listan siempre, aunque estén en `— No aplica`.
+- Incluir solo las filas de checks que aplican, **con una excepción**: las tres suites fijas (unit, coverage, e2e) se listan siempre, aunque estén en `N/A`.
 - Las filas de **suites configuradas** salen del estándar de testing, una por requisito vigente y en su orden de declaración. Ninguna otra: no añadir una suite por haberla detectado en el repo.
 - El detalle de checks va **solo** para FAIL o SKIPPED (truncar a 10 errores por check con `… y N más`).
 
@@ -201,24 +211,24 @@ estaba sucio, `workingTreeClean: false` queda registrado como señal para el con
 |-----------|-------------|
 | Stack no detectable | Parar antes de ejecutar nada; preguntar al usuario. |
 | Monorepo ambiguo | Parar y preguntar qué módulo auditar. |
-| Tipado **Bloqueante** (TS) pero falta `tsconfig.json` | `SKIPPED` → `⚠️ Incompleto`. |
+| Tipado **Bloqueante** (TS) pero falta `tsconfig.json` | `SKIPPED` → `INCOMPLETE`. |
 | Tipado **Condicional** (Python/Rust) sin config ni herramienta | `N/A`. No afecta veredicto. |
 | Tipado **N/A** para el stack (Java, Go, JS, .NET) | No ejecutar; no listar como `SKIPPED`. |
 | Tipado **FAIL** (cuando aplica) | **STOP fail-fast.** Resto `⏸️` / **Pendiente** — ni `N/A` ni `SKIPPED`. |
 | Runner/build tool ausente del PATH | Parar y preguntar al usuario. |
-| Script/tarea definida pero binario inexistente (config rota) | `FAIL` (`❌` / **Falló**) si el comando se intentó y rompió; `SKIPPED` (`⏭️` / **Omitido**) si no se pudo ni invocar. Nunca `N/A`. |
-| Unit tests sin script ni comando canónico | `SKIPPED` → `⚠️ Incompleto` (unit es Bloqueante). |
-| Coverage con config o herramienta presente pero que no se pudo ejecutar | `SKIPPED` → `⚠️ Incompleto` (coverage es Bloqueante). |
-| Coverage sin herramienta **ni** configuración alguna en el repo | `N/A` + recomendación en Próximas acciones. No condenar el veredicto a `⚠️ Incompleto` permanente por un check que el proyecto nunca declaró. |
+| Script/tarea definida pero binario inexistente (config rota) | `FAIL` (`❌`) si el comando se intentó y rompió; `SKIPPED` (`⏭️`) si no se pudo ni invocar. Nunca `N/A`. |
+| Unit tests sin script ni comando canónico | `SKIPPED` → `INCOMPLETE` (unit es Bloqueante). |
+| Coverage con config o herramienta presente pero que no se pudo ejecutar | `SKIPPED` → `INCOMPLETE` (coverage es Bloqueante). |
+| Coverage sin herramienta **ni** configuración alguna en el repo | `N/A` + recomendación en Próximas acciones. No condenar el veredicto a `INCOMPLETE` permanente por un check que el proyecto nunca declaró. |
 | Repo **sin estándar de testing** (`docs/standards/testing.md` no existe) | Corrida de **solo las tres fijas**. No es error ni `SKIPPED`: no hay suites configuradas que ejecutar. Opcionalmente, recomendar en Próximas acciones crear el estándar vía `arch-manage`. |
-| Suite **declarada en el estándar** que no se puede ejecutar (sin script, tarea o herramienta) | `SKIPPED` → `⚠️ Incompleto`. El estándar es la declaración de que ese check debe correr. |
+| Suite **declarada en el estándar** que no se puede ejecutar (sin script, tarea o herramienta) | `SKIPPED` → `INCOMPLETE`. El estándar es la declaración de que ese check debe correr. |
 | Suite declarada cuyo comando **no se resuelve con certeza** | Preguntar al usuario; no adivinar un comando ni partir la suite unitaria para simularla. |
 | Requisito del estándar con `**Estado:** Deprecated` o `Superseded` | No ejecutar ni listar: dejó de ser exigible. |
 | Suite **presente en el repo pero no declarada** en el estándar (p. ej. script `test:it` sin requisito) | No ejecutarla y no bloquear. Anotarla en Próximas acciones como recomendación de declararla en el estándar (`arch-manage`). |
-| Suite de integración no distinguible de la unitaria, con el estándar declarándola | `SKIPPED` → `⚠️ Incompleto`. No contar la suite unitaria como integración ni inventar un comando. |
-| Coverage bajo umbral configurado | `FAIL` (`❌` / **Falló**). |
-| Coverage sin umbrales configurados y exit 0 | `PASS` (`✅` / **Pasó**). |
-| E2E **Condicional** con config presente pero tool ausente/rota | `SKIPPED` → `⚠️ Incompleto`. |
+| Suite de integración no distinguible de la unitaria, con el estándar declarándola | `SKIPPED` → `INCOMPLETE`. No contar la suite unitaria como integración ni inventar un comando. |
+| Coverage bajo umbral configurado | `FAIL` (`❌`). |
+| Coverage sin umbrales configurados y exit 0 | `PASS` (`✅`). |
+| E2E **Condicional** con config presente pero tool ausente/rota | `SKIPPED` → `INCOMPLETE`. |
 | E2E sin config ni script de e2e | `N/A`. No afecta veredicto. |
 | Build **N/A** (Python sin empaquetado) | Omitir fila; no afecta veredicto. |
 | `sonar-scanner` no disponible o falta `sonar-project.properties` | `N/A`. No afecta veredicto. |
@@ -228,12 +238,12 @@ estaba sucio, `workingTreeClean: false` queda registrado como señal para el con
 | FAIL en algún check | Mostrar reporte y **preguntar** si corregir. Nunca corregir sin autorización. Con autorización, delegar en `work-implement` si hay un artefacto en curso (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin); si no hay ninguno, corregir aquí. Tras corregir, **re-ejecutar el check que fallaba**; si pasa, **recalcular el fingerprint** y **re-ejecutar toda la corrida**. |
 | Autorización de corrección pero el artefacto de trabajo es ambiguo (varios candidatos) | Preguntar cuál antes de delegar; no delegar sobre un artefacto adivinado. |
 | FAIL o SKIPPED durante una corrida `tests-only` | **No preguntar nada** — el modo es no interactivo: devolver los resultados por suite (con su `result`) y la ruta de `test-run.json`. Corregir o resolver el tooling es decisión del flujo que invocó. |
-| Stack no detectable, monorepo ambiguo o runner ausente **en modo `tests-only`** | **Tampoco preguntar**, pese a lo que dicen las filas de arriba: el modo es no interactivo de principio a fin. Devolver «no ejecutable» con el motivo concreto y sin `test-run.json`. Es el retorno que `trace-validate` espera para reportar sus filas como `No ejecutado`; una pregunta ahí colgaría una delegación que nadie está mirando. |
-| Usuario no quiere corregir los FAIL, o pide solo el informe | Cerrar en `❌ Rechazado` con el detalle de lo pendiente en Próximas acciones; no maquillar el veredicto ni volver a insistir con la corrección. |
+| Stack no detectable, monorepo ambiguo o runner ausente **en modo `tests-only`** | **Tampoco preguntar**, pese a lo que dicen las filas de arriba: el modo es no interactivo de principio a fin. Devolver «no ejecutable» con el motivo concreto y sin `test-run.json`. Es el retorno que `trace-validate` espera para reportar sus filas como `NOT_RUN`; una pregunta ahí colgaría una delegación que nadie está mirando. |
+| Usuario no quiere corregir los FAIL, o pide solo el informe | Cerrar en `REJECTED` con el detalle de lo pendiente en Próximas acciones; no maquillar el veredicto ni volver a insistir con la corrección. |
 | Corrida **fuera de una implementación** (rama sin artefacto derivable) con hallazgos que exigen tocar código | Preguntar explícitamente **[Corregir]** / **[Solo el informe]** antes de nada. Entregar solo el informe es un resultado legítimo, no un flujo incompleto. |
 | El usuario acota qué corregir («el linter sí, el test no») | Respetarlo: corregir solo lo autorizado y tratar el resto como *solo informe*, dejándolo en Próximas acciones. |
 | Corrección aplicada que **no** resuelve el fallo (el check puntual sigue en FAIL) | **No reiniciar.** Iterar la corrección hasta que el check puntual pase; recién entonces disparar el reinicio. |
-| `work-implement` devuelve **«corrección no aplicada»** (fuera de alcance → `work-plan`; discrepancia `TC-XXX`↔código → `test-define`; fallo preexistente) | **Detener el ciclo.** No reintentar la delegación sobre ese fallo ni corregirlo aquí. Recoger el motivo y el skill escalado en **Próximas acciones**, emitir `❌ Rechazado` y terminar. Ver [Corrección de fallos](../SKILL.md#corrección-de-fallos). |
+| `work-implement` devuelve **«corrección no aplicada»** (fuera de alcance → `work-plan`; discrepancia `TC-XXX`↔código → `test-define`; fallo preexistente) | **Detener el ciclo.** No reintentar la delegación sobre ese fallo ni corregirlo aquí. Recoger el motivo y el skill escalado en **Próximas acciones**, emitir `REJECTED` y terminar. Ver [Corrección de fallos](../SKILL.md#corrección-de-fallos). |
 | Usuario pide "corrige tú" sin más contexto | Confirmar el alcance exacto a corregir antes de tocar nada; resolver quién corrige según [Corrección de fallos](../SKILL.md#corrección-de-fallos); aplicar solo lo mínimo; luego re-ejecutar. |
 | Varias correcciones autorizadas a la vez | Aplicarlas juntas y reiniciar **una sola vez** para no encadenar pasadas innecesarias. |
 | Bucle de correcciones que no converge | Tras 3 reinicios sin llegar a `✅`, resumir lo pendiente y preguntar al usuario cómo proceder. |
@@ -245,14 +255,14 @@ estaba sucio, `workingTreeClean: false` queda registrado como señal para el con
 
 - Asumir TypeScript/Node si el repo es Java, Python u otro stack.
 - Ejecutar `tsc --noEmit` en un proyecto Java — la compilación va en **build**.
-- Marcar `⚠️ Incompleto` un check Condicional que simplemente **no aplica** (debe ser `N/A`).
+- Marcar `INCOMPLETE` un check Condicional que simplemente **no aplica** (debe ser `N/A`).
 - Marcar `N/A` un check cuya config **sí existe** pero falló al ejecutarse (debe ser `SKIPPED` o `FAIL`).
-- **Corregir código sin autorización explícita** del usuario — por defecto solo se ejecuta y se reporta.
-- **Dar por hecho que el usuario quiere corregir** cuando la corrida ocurre fuera de un ciclo de implementación: ahí hay que ofrecer explícitamente la salida «solo el informe».
+- **Corregir código sin autorización** — explícita del usuario, o de antemano vía `qualityGates.qualityCheckConfirmFix: "never"` — con `always` (el default) solo se ejecuta y se reporta.
+- **Dar por hecho que el usuario quiere corregir** cuando la corrida ocurre fuera de un ciclo de implementación y `qualityGates.qualityCheckConfirmFix = "always"`: ahí hay que ofrecer explícitamente la salida «solo el informe».
 - Insistir con la corrección después de que el usuario haya pedido solo el informe.
 - Usar `--fix` / `--write` / `--force` **al ejecutar un check** (falsea el resultado); la corrección autorizada es un paso aparte y deliberado.
 - Modificar manifiestos para añadir scripts faltantes.
-- Declarar `✅ Aprobado` con algún Bloqueante o Condicional-presente en `SKIPPED` — es `⚠️ Incompleto`.
+- Declarar `APPROVED` con algún Bloqueante o Condicional-presente en `SKIPPED` — es `INCOMPLETE`.
 - **Corregir y no volver a ejecutar** los checks.
 - **Reiniciar la corrida con un arreglo sin verificar** — primero confirma que el check que fallaba ya pasa.
 - Cargar `stacks.md` antes de detectar el ecosistema, o arrastrar a contexto columnas de stacks que no aplican.
@@ -264,14 +274,14 @@ estaba sucio, `workingTreeClean: false` queda registrado como señal para el con
 - **Corregir código directamente cuando hay un artefacto en curso** (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin (ticket, spec suelto, doc de otra herramienta)): esa corrección se delega en `work-implement` (ver `SKILL.md`). A la inversa, **delegar cuando no hay artefacto de ningún tipo** (rama suelta, sin ID ni documento derivable) — ahí se corrige aquí, sin inventar un artefacto al que atribuir el cambio.
 - Delegar una corrección **sin autorización explícita** del usuario: delegar es *cómo* se corrige, no *si* se corrige.
 - **Escribir `test-run.json` con el fingerprint anterior a una corrección** — el artefacto afirmaría corresponder a un código que ya no existe.
-- Continuar a commit/push/merge tras `✅ Aprobado` sin instrucción explícita.
+- Continuar a commit/push/merge tras `APPROVED` sin instrucción explícita.
 - **Invadir el terreno de `code-review`:** emitir juicios sobre arquitectura, SOLID, acoplamiento o intención del cambio. Este skill reporta resultados de herramientas; la revisión cualitativa es otro skill.
 - **Invadir el terreno de `trace-validate`:** concluir que un criterio de aceptación está o no cubierto a partir del porcentaje de cobertura. La cobertura de este skill es cuantitativa (líneas/ramas); la funcional (criterio ↔ prueba) la juzga `trace-validate`.
 - Invocar `code-review` desde aquí, o unificar ambos veredictos en un solo informe — son skills independientes.
 - Escribir `quality-check.md` en la carpeta de una US/WI, o en `docs/specs/`, en vez de en `docs/audits/`; o no escribirlo porque el repo no sea spec-driven.
 - Dejar `test-run.json` en `docs/` (o dentro de una US/WI) en vez de en `.sdd-devkit/` de la raíz.
 - Escribir `quality-check.md` o emitir veredicto en modo `tests-only` — ahí el único artefacto es `test-run.json`.
-- **Omitir alguna de las tres suites fijas** (unit, coverage, e2e) del informe o de `suites[]`: si no aplican, van con `result: "N/A"` / `— No aplica`, pero se listan.
+- **Omitir alguna de las tres suites fijas** (unit, coverage, e2e) del informe o de `suites[]`: si no aplican, van con `result: "N/A"` y `—` en el informe, pero se listan.
 - **Ejecutar o reportar una suite que el estándar de testing no declara** — integración incluida: dejó de ser una fila fija. Si el repo la tiene y el estándar no la declara, va a Próximas acciones como recomendación, no a la tabla de verificaciones.
 - **Inferir el conjunto de pruebas del repo en lugar de leerlo del estándar** (deducirlo de carpetas o scripts). El estándar es la única fuente de las suites no fijas.
 - Dar por fresca una caché cuyo `suites[]` no coincide con el conjunto vigente porque el `FINGERPRINT` sí coincide — el estándar vive en `docs/`, que el fingerprint excluye.
