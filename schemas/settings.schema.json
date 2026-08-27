@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org",
   "title": "SDD Plugin Settings",
   "type": "object",
-  "required": ["language", "interaction", "projectManagement", "telemetry", "specTracking"],
+  "required": ["language", "implementation", "git", "qualityGates", "projectManagement", "telemetry", "specTracking"],
   "additionalProperties": false,
   "properties": {
     "language": {
@@ -11,7 +11,7 @@
       "default": "es",
       "enum": ["es", "en", "fr", "de", "it"]
     },
-    "interaction": {
+    "implementation": {
       "type": "object",
       "description": "Políticas de comportamiento y control de flujos de la IA.",
       "required": ["confirmByUnit", "workTree", "maxParallel", "archiveMode"],
@@ -27,6 +27,10 @@
           "description": "Política de aislamiento de cambios en git worktrees temporales.",
           "enum": ["ask", "always", "never"]
         },
+        "workTreePath": {
+          "type": "string",
+          "description": "Ruta, absoluta o relativa a la raíz del repositorio, donde generar los git worktrees temporales (ej: ../worktrees)."
+        },
         "maxParallel": {
           "type": "integer",
           "minimum": -1,
@@ -36,6 +40,42 @@
           "type": "string",
           "description": "Comportamiento del plugin al archivar tareas o contextos antiguos.",
           "enum": ["ask", "always", "never"]
+        }
+      }
+    },
+    "git": {
+      "type": "object",
+      "description": "Política de confirmación de commits y de push del skill git-commit.",
+      "required": ["confirmCommit", "push"],
+      "additionalProperties": false,
+      "properties": {
+        "confirmCommit": {
+          "type": "string",
+          "description": "Si se muestra la propuesta de commit (o de división en varios) y se espera confirmación antes de ejecutarla.",
+          "enum": ["always", "never"]
+        },
+        "push": {
+          "type": "string",
+          "description": "Política de push tras completar el/los commits. Solo aplica en invocación directa del usuario, nunca cuando git-commit es invocado por otro skill.",
+          "enum": ["ask", "always", "never"]
+        }
+      }
+    },
+    "qualityGates": {
+      "type": "object",
+      "description": "Política de confirmación antes de aplicar correcciones en las puertas de calidad.",
+      "required": ["qualityCheckConfirmFix", "codeReviewConfirmFix"],
+      "additionalProperties": false,
+      "properties": {
+        "qualityCheckConfirmFix": {
+          "type": "string",
+          "description": "Si quality-check pide confirmación antes de corregir un fallo (always) o corrige directamente sin preguntar (never).",
+          "enum": ["always", "never"]
+        },
+        "codeReviewConfirmFix": {
+          "type": "string",
+          "description": "Si code-review pide confirmación antes de aplicar la corrección de un hallazgo bloqueante (always) o la aplica directamente sin preguntar (never).",
+          "enum": ["always", "never"]
         }
       }
     },

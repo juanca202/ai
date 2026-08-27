@@ -1,0 +1,26 @@
+{
+  "language": "<código>",
+  "implementation": {
+    "confirmByUnit": "always",
+    "workTree": "ask",
+    "maxParallel": 3,
+    "archiveMode": "ask"
+  },
+  "git": {
+    "confirmCommit": "always",
+    "push": "never"
+  },
+  "qualityGates": {
+    "qualityCheckConfirmFix": "always",
+    "codeReviewConfirmFix": "always"
+  },
+  "projectManagement": {
+    "enabled": false
+  },
+  "telemetry": {
+    "enabled": false
+  },
+  "specTracking": {
+    "enabled": false
+  }
+}
