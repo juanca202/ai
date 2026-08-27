@@ -16,6 +16,7 @@ específico (una salida propia, una excepción de ruta).
 | Artefacto | Ruta | Skill propietario |
 |-----------|------|-------------------|
 | Memoria del harness | `.agents/MEMORY.md` | `arch-init` |
+| Configuración del plugin (incluye el idioma) | `.sdd-devkit/settings.json` | `arch-init` |
 | Instrucciones para agentes | `AGENTS.md` (+ `CLAUDE.md` como puntero) | `arch-init` |
 | ADR | `docs/adr/ADR-XXX-[slug].md` | `arch-manage` · índice `docs/adr/README.md`: lo crea `arch-init`, lo mantiene `arch-manage` |
 | Estándar de dominio | `docs/standards/[slug].md` (o `docs/standards/[slug]/README.md`) | `arch-manage` · índice `docs/standards/README.md`: lo crea `arch-init`, lo mantiene `arch-manage` |

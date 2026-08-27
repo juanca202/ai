@@ -13,31 +13,24 @@ qué tipo de work item crea, en qué jerarquía lo ancla y qué campos usa.
 | `test-define` | Crea `Test Case` dentro de la jerarquía Test Plan → Test Suite — [`skills/test-define/references/azure-devops.md`](../../skills/test-define/references/azure-devops.md) |
 | `work-research` | **Solo lee**: obtiene, enruta y propaga — [`skills/work-research/references/azure-devops.md`](../../skills/work-research/references/azure-devops.md) |
 
-## Activación
+## Activación y configuración
 
-Esta integración se activa cuando `.agents/MEMORY.md` contiene:
+Esta referencia se lee **únicamente** cuando [`../project-management.md`](../project-management.md)
+resolvió la integración como **activada** con `provider: azure-devops`. Ese archivo es la única fuente
+de la activación y de los datos de conexión; aquí no se vuelve a resolver nada ni se pregunta al usuario.
 
-```
-work_item_tracking: azure_devops
-```
+| Valor resuelto | Uso en ADO |
+|----------------|------------|
+| `workspace` | **Organización** de ADO. Construye la URL del work item. |
+| `project` | **Proyecto** de ADO. Construye la URL del work item y, en `test-define`, es además el **nombre del Test Plan**. |
+| `host` | URL base de la instancia (p. ej. `https://dev.azure.com/mi-organizacion`). Se usa para las llamadas y para construir la URL cuando el MCP no devuelve una. |
 
-Todo el detalle propio de ADO —herramienta MCP, nombres de campos, tipos de work item, configuración de
-conexión, límites de formato— vive en archivos de referencia de ADO; **ni los `SKILL.md` ni sus archivos de
-flujo o de tipo de plan deben contener nada específico de ADO**.
+**Area Path e Iteración** no son configurables: omitirlos al crear el work item y dejar que ADO aplique
+los valores por defecto del proyecto.
 
-## Configuración (`.agents/MEMORY.md`)
-
-Además de `work_item_tracking:`, la integración lee:
-
-| Clave | Uso |
-|-------|-----|
-| `azure_devops_org:` / `ado_org:` | Organización de ADO; se usa para construir la URL del work item. |
-| `azure_devops_project:` / `ado_project:` | Proyecto de ADO; se usa para construir la URL del work item. En `test-define` es además el **nombre del Test Plan**. |
-| `ado_area_path:` | Area Path a asignar al crear el work item. Si no está definido, omitir (ADO usa el default del proyecto). |
-| `ado_iteration:` | Iteración a asignar al crear el work item. Si no está definido, omitir. |
-
-Si `azure_devops_org` / `azure_devops_project` no están definidos, resolver la URL a partir de lo que
-devuelva el MCP.
+Todo el detalle propio de ADO —herramienta MCP, nombres de campos, tipos de work item, límites de
+formato— vive en archivos de referencia de ADO; **ni los `SKILL.md` ni sus archivos de flujo o de tipo
+de plan deben contener nada específico de ADO**.
 
 ## Paso común — Verificar disponibilidad del MCP
 
@@ -70,8 +63,10 @@ Work Item (ADO): [#<ado_id>](<url-al-work-item>)
 Usar la URL que devuelva el MCP, o construirla como:
 
 ```
-https://dev.azure.com/<org>/<project>/_workitems/edit/<ado_id>
+<host>/<project>/_workitems/edit/<ado_id>
 ```
+
+donde `<host>` y `<project>` son los valores resueltos en `project-management.md`.
 
 ## El ID de ADO manda sobre el secuencial local
 

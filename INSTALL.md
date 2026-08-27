@@ -3,8 +3,9 @@
 Este repositorio publica el plugin **SDD Devkit** (`sdd-devkit`): skills y agentes de Spec-Driven Development en [`skills/`](skills/) y [`agents/`](agents/).
 
 > **Instálalo como plugin, no copies skills sueltos.** Los skills comparten reglas
-> transversales en [`reference/`](reference/) y las resuelven vía `${CLAUDE_PLUGIN_ROOT}`, que solo
-> existe cuando el plugin está instalado. Un skill copiado por su cuenta pierde esas referencias.
+> transversales en [`reference/`](reference/) y las citan con rutas relativas (`../../reference/…`),
+> así que esa carpeta tiene que viajar con ellos. Un skill copiado por su cuenta pierde esas
+> referencias.
 
 ## Instalación en Cursor
 
