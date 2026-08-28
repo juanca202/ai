@@ -234,7 +234,7 @@ de **cambio grande** (→ `work-define`, varias US):
 - Requiere una estrategia incremental por fases (Strangler Fig, Branch by
   Abstraction, arquitectura transitoria — ver
   [migration-strategies.md](./migration-strategies.md)) que conviene descomponer en
-  varias unidades de trabajo.
+  varios `WI-XXX`.
 
 Señales de **cambio pequeño** (→ `work-plan`, un `WI-XXX`):
 

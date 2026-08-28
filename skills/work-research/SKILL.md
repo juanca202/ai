@@ -200,7 +200,7 @@ En cualquier flujo, antes de investigar:
 - **Clarificar lagunas de alcance.** Si la entrada tiene vacíos que impedirían una
 investigación de calidad (alcance impreciso, contexto faltante, restricciones no mencionadas), resolverlos con la herramienta de preguntas estructuradas.
 - **Formular la pregunta de investigación** en una oración concisa y confirmarla:
-opciones [Confirmar / Ajustar / Cancelar]. No investigar hasta recibir confirmación. Qué forma toma la pregunta según el flujo:
+opciones [Confirmar] / [Cancelar] — el ajuste llega por respuesta libre, no como opción; si el usuario pide uno, aplicarlo y volver a formular la pregunta. No investigar hasta recibir confirmación. Qué forma toma la pregunta según el flujo:
 
   | Flujo                          | La pregunta es…                                                                                                               |
   | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
