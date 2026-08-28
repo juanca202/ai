@@ -2,14 +2,14 @@
 name: arch-manage
 description: >
   Crear o actualizar la arquitectura documentada del proyecto: Architecture Decision Records
-  (ADR, en docs/adr/) y estándares de arquitectura por dominio técnico/funcional (en docs/standards/), en la
-  raíz del repositorio al que pertenece el código —repo principal o submódulo. Un ADR
-  registra el "por qué" de una decisión (histórico, inmutable); un estándar (p. ej. "Testing Standards")
-  agrupa los requisitos verificables de un dominio — el "qué hay que cumplir hoy". Cada decisión que fija
-  una regla añade o actualiza un requisito del estándar de dominio (no crea un estándar por decisión).
+  (ADR, en docs/adr/) y estándares de arquitectura por dominio (en docs/standards/), en la
+  raíz del repositorio al que pertenece el código (repo principal o submódulo). Un ADR
+  registra el "por qué" de una decisión (histórico, inmutable); un estándar agrupa los requisitos
+  verificables de un dominio — el "qué hay que cumplir hoy". Cada decisión que fija una regla
+  actualiza el estándar de su dominio, no crea uno nuevo.
   Activar para documentar, registrar o cambiar el estado de una decisión arquitectónica o norma del
   proyecto, aunque no use las palabras "ADR" o "estándar".
-  Frases que activan este skill: "registrar decisión", "documentar por qué usamos X", "decision record",
+  Frases: "registrar decisión", "documentar por qué usamos X", "decision record",
   "cambiar ADR a Accepted", "marcar como Superseded", "crear/actualizar ADR", "ADR-XXX", "definir un
   estándar", "añadir un requisito".
   Usar también ante una tensión arquitectónica que deba quedar documentada.

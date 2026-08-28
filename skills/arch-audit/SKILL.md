@@ -4,16 +4,14 @@ description: >
   Auditar el cumplimiento de los estándares de arquitectura (docs/standards/) y de las reglas de
   AGENTS.md contra el estado real del repositorio (Architecture Compliance Checking), citando el ADR
   de origen de cada estándar, y generar un informe priorizado en docs/audits/arch-audit-YYYY-MM-DD.md.
-  Audita una raíz de arquitectura por corrida —el repo principal o un submódulo—, con sus estándares,
-  sus fitness functions y su informe.
+  Audita una raíz de arquitectura por corrida (repo principal o submódulo), con sus estándares,
+  fitness functions e informe.
   Activar siempre que el usuario quiera verificar, auditar o comprobar si el código respeta los
-  estándares, las decisiones arquitectónicas o las reglas del proyecto — incluso si no dice
-  "estándar", "ADR" o "auditoría".
-  Frases que activan este skill: "audita el cumplimiento", "¿el código respeta los estándares?",
-  "¿el código respeta los ADR?", "verifica que seguimos las reglas de AGENTS.md",
-  "revisa si cumplimos la arquitectura", "compliance de arquitectura", "qué normas estamos incumpliendo",
-  "chequea las reglas del repo", "arch-audit", "/arch-audit". Usar también cuando el usuario sospeche
-  que el repo se desvió de lo documentado y quiera un informe de brechas con acciones.
+  estándares, decisiones arquitectónicas o reglas del proyecto, aunque no diga "estándar", "ADR" o
+  "auditoría".
+  Frases: "audita el cumplimiento", "¿el código respeta los estándares/ADR?", "verifica que seguimos
+  las reglas de AGENTS.md", "compliance de arquitectura", "arch-audit", "/arch-audit". Usar también
+  ante sospecha de desvío de lo documentado, para un informe de brechas con acciones.
 license: MIT
 ---
 
