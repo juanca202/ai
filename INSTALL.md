@@ -12,11 +12,9 @@ Este repositorio publica el plugin **SDD Devkit** (`sdd-devkit`): skills y agent
 Instala el plugin completo desde la raíz del repositorio — no un subconjunto de skills, o queda
 fuera la carpeta `reference/` compartida:
 
-```bash
-npx skills add juanca202/sdd-devkit
 ```
-
-El asistente te guiará paso a paso: dónde instalar (proyecto o global) y qué agente usar.
+/add-plugin https://github.com/juanca202/sdd-devkit
+```
 
 ## Instalación en Claude Code
 

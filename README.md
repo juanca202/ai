@@ -1,6 +1,6 @@
 # SDD Devkit
 
-**SDD Devkit** (`sdd-devkit`) es un conjunto de skills para practicar Spec-Driven Development: parte de un requerimiento, lo convierte en documentación viva (historias de usuario, ADRs/estándares, diseño técnico, casos de prueba) y guía la implementación paso a paso hasta un entregable verificado. Cubre:
+**SDD Devkit** (`sdd-devkit`) es un plugin para desarrollo usando Spec-Driven Development: parte de un requerimiento, lo convierte en documentación viva (historias de usuario, ADRs/estándares, diseño técnico, casos de prueba) y guía la implementación paso a paso hasta un entregable verificado. Cubre:
 
 - Documentación de arquitectura: ADRs, estándares y auditoría de cumplimiento.
 - Historias de usuario, planificación e implementación de tareas técnicas y tareas de mantenimiento.
