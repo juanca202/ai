@@ -56,7 +56,7 @@ Cuando reflog y config no concluyen, o existen varios candidatos plausibles.
 - [ ] Idioma resuelto según la sección «Resolución de idioma» de `SKILL.md`
 
 **Validación:**
-- [ ] `git status --porcelain` sin salida (working tree limpio); si había cambios pendientes, se resolvieron invocando automáticamente `git-commit` (sin preguntar al usuario si convenía invocarlo — `git-commit` sí pudo pedir su propia confirmación antes de comitear)
+- [ ] `git status --porcelain` sin salida (working tree limpio); si había cambios pendientes, se resolvieron invocando automáticamente `git-commit` (sin preguntar al usuario si convenía invocarlo — `git-commit` sí pudo pausar para confirmar una propuesta de división, o detenerse ante secretos, rama protegida o hook fallido)
 - [ ] `progress.md` existe en la ubicación del tipo
 - [ ] **Todas** las unidades del trabajo de la rama en estado `Done` (leídas del `progress.md` en la carpeta del trabajo)
 - [ ] Rama base resuelta contra `integrationBranches`; si su `commitPolicy` es `pull_request`, el flujo paró y se ofreció `pr-create`
