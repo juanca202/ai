@@ -53,7 +53,7 @@ específico (una salida propia, una excepción de ruta).
 | Reporte de trazabilidad | `trace-report.md` dentro de la carpeta del artefacto | `trace-validate` |
 | Informe de calidad | `docs/audits/quality-check.md` (+ histórico `docs/audits/quality-check-<YYYYMMDD-HHMMSS>.md`) | `quality-check` |
 | Informe de code review | `docs/audits/code-review.md` (+ histórico `docs/audits/code-review-<YYYYMMDD-HHMMSS>.md`) | `code-review` |
-| Informe de auditoría de arquitectura | `<raíz-arq>/docs/audits/arch-audit-YYYY-MM-DD.md` | `arch-audit` |
+| Informe de auditoría de arquitectura | `<raíz-arq>/docs/audits/arch-audit-YYYY-MM-DD.md` (con sufijo `-HHMM` si ya hay uno de ese día) | `arch-audit` |
 | Caché de corrida de pruebas | `.sdd-devkit/test-run.json` (**ubicación fija**, no por unidad) | `quality-check` |
 | Estado de iteración para el seguimiento de especificaciones | `.sdd-devkit/current-iteration.json` (**ubicación fija**, vive mientras dura la unidad o corrección en curso) | `work-implement` |
 

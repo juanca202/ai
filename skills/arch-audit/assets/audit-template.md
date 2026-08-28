@@ -187,7 +187,7 @@ Opcional. Notas operativas que no son un hallazgo de incumplimiento (no van bajo
 decisión sin criterio, pero que la próxima auditoría o el mantenimiento del harness debería conocer.
 Ejemplos: una fitness function ejecutada individualmente porque no está registrada en el archivo de
 checks de su estándar (scripts/arch/checks/<slug-estándar>.<ext>); un runner o checks escritos en un
-lenguaje ajeno al stack del repo; un estándar o ADR en formato antiguo (sin frontmatter o sin la clave "domain", sin "emits",
+lenguaje ajeno al stack del repo; un estándar o ADR fuera de la convención de arch-manage (sin frontmatter o sin la clave "domain", sin "emits",
 o con los criterios en tablas por requisito en vez de la tabla única); una dependencia que el
 usuario rechazó instalar (Fase 3.5). Si no hay ninguna, omitir esta sección o escribir "Ninguna.".
 -->

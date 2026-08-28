@@ -200,8 +200,8 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
    `docs/standards/<slug>.md` o carpeta `docs/standards/<slug>/README.md`) extraer del **frontmatter YAML**
    su `name`, `domain`, `status` y `source_adrs` — es ahí donde `arch-manage` los escribe
    (`assets/standard-template.md`), no en una línea del cuerpo. **Si falta el frontmatter o la clave
-   `domain`** (estándar previo a esta convención, o escrito a mano), usar el nombre del archivo/carpeta como
-   `domain` de facto y señalarlo como observación (formato de estándar desactualizado) — no bloquea la
+   `domain`** (estándar escrito a mano o por otra herramienta), usar el nombre del archivo/carpeta como
+   `domain` de facto y señalarlo como observación (estándar fuera de la convención de `arch-manage`) — no bloquea la
    auditoría de sus criterios. Dentro del
    documento, cada **requisito** (`## <Nombre>` con `**ID:** <slug-requisito>` y `**Estado:**`;
    referencia `<slug-estándar>/<slug-requisito>`) es una **agrupación legible**. **Leer ese estado**
@@ -216,10 +216,10 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
    que fijó ese criterio), `Automatizable` (yes/no), `Enfoque` (`bloqueante` | `warning`; por defecto
    `bloqueante`) y `Verificación` (`yes` = la verificación existe — el chequeo vive en el archivo de
    checks de su estándar, que se localiza por convención en `scripts/arch/checks/<slug-estándar>.<ext>`,
-   o hay evidencia externa registrada en el requisito; `no` = pendiente). **Si el estándar trae el
-   formato antiguo** (una tabla `### Criterios de cumplimiento` dentro de cada requisito, sin columna
-   `Requisito`, o con rutas/`TODO`/`N/A` en `Verificación` en vez de yes/no), leer esas
-   tablas igual y señalarlo como observación (formato de estándar desactualizado) — no bloquea la
+   o hay evidencia externa registrada en el requisito; `no` = pendiente). **Si el estándar no sigue esa
+   estructura** (una tabla `### Criterios de cumplimiento` dentro de cada requisito en vez de la tabla única,
+   sin columna `Requisito`, o con rutas/`TODO`/`N/A` en `Verificación` en vez de yes/no), leer esas
+   tablas igual y señalarlo como observación (estándar fuera de la convención de `arch-manage`) — no bloquea la
    auditoría. **Cada criterio `CR-XXX` es una entrada en la lista de reglas a auditar**,
    contextualizado por el requisito que lo agrupa.
 
@@ -228,10 +228,10 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
    `emits: [testing/CR-001]`). Además, detectar **ADR `Accepted` con una regla claramente enforceable
    que no fijó ningún criterio** (`emits: []`): no auditar el ADR como norma, sino anotarlo como
    observación → sugerir emitir el criterio vía `arch-manage`. **Si el ADR no tiene el campo `emits`
-   en absoluto** (formato antiguo, previo a esta convención) en vez de `emits: []`, tratarlo igual que
+   en absoluto** (escrito a mano o por otra herramienta) en vez de `emits: []`, tratarlo igual que
    un ADR sin criterio para esta fase (mismo tratamiento: observación + sugerir emitir vía
-   `arch-manage`), pero señalar además que el ADR usa un formato desactualizado (sin `emits`), para no
-   confundirlo con una decisión deliberada de no fijar criterios.
+   `arch-manage`), pero señalar además que al ADR le falta el campo `emits`, para no confundir la
+   ausencia del campo con una decisión deliberada de no fijar criterios.
 
 3. **AGENTS.md** — leer el/los archivo(s):
    ``bash
@@ -403,7 +403,7 @@ flujo de `Comportamiento en Revalidación` descrito en la Fase 0 — no se reesc
    - **Fitness functions**: indicar si existe el **runner** (`scripts/arch/verify.<ext>`, en el lenguaje del stack del repo) y su resultado conjunto (criterios PASS / WARN / FAIL); una sub-tabla de las **existentes** (criterio `CR-XXX`, enfoque, herramienta, comando, si está registrada en el archivo de checks de su estándar, resultado PASS/FAIL/WARN/No ejecutable) y una lista de las **sugeridas** (criterio apto sin fitness function → qué medir, herramienta y esbozo). Si hay dos o más fitness functions sueltas y no existe el runner, recomendarlo aquí.
    - Sección de reglas **No verificables**.
    - Sección de **Decisiones sin criterio** (opcional): ADR `Accepted` con regla enforceable que no fijó ningún criterio (`emits: []`) → sugerir emitirlo vía `arch-manage`.
-   - Sección de **Observaciones** (opcional): notas operativas que no son un hallazgo de incumplimiento (fitness function no registrada en el archivo de checks de su estándar, runner o checks escritos en un lenguaje ajeno al stack del repo, estándar/ADR en formato antiguo, dependencia rechazada en la Fase 3.5, etc.) — es el destino de cualquier "señalar/anotar como observación" mencionado en las fases anteriores.
+   - Sección de **Observaciones** (opcional): notas operativas que no son un hallazgo de incumplimiento (fitness function no registrada en el archivo de checks de su estándar, runner o checks escritos en un lenguaje ajeno al stack del repo, estándar/ADR fuera de la convención de `arch-manage`, dependencia rechazada en la Fase 3.5, etc.) — es el destino de cualquier "señalar/anotar como observación" mencionado en las fases anteriores.
 4. **Nunca sobrescribir** un informe anterior: el nombre lleva la fecha para conservar el histórico. Si ya existe un `arch-audit-<hoy>.md`, **no se sobrescribe**: una auditoría nueva del mismo día se guarda como `arch-audit-<hoy>-<HHMM>.md`, y una revalidación añade su entrada en `## Revalidaciones` del informe existente. Al buscar la auditoría previa, desempatar por el sufijo horario y, si no lo hay, por la fecha de modificación.
 
 El formato exacto de cada hallazgo (qué campos lleva y en qué orden) es el que ya trae
