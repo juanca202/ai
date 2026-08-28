@@ -39,6 +39,7 @@ Se necesita un script ejecutable (`node scripts/validate-skills.js`) que aplique
 - **AC-008 (Idoneidad funcional):** el script DEBE imprimir un reporte agrupado por skill, listando cada hallazgo con su severidad (`ERROR`/`WARNING`) y una descripción concreta (qué campo, qué archivo, qué línea si aplica).
 - **AC-009 (Fiabilidad):** el proceso DEBE terminar con código de salida `1` si hay al menos un `ERROR` en cualquier skill, y `0` si el resultado son solo `WARNING` o no hay hallazgos.
 - **AC-010 (Mantenibilidad):** el script NO DEBE requerir dependencias de `npm` ni un `package.json` para ejecutarse — solo `node scripts/validate-skills.js` desde la raíz del repo.
+- **AC-011 (Idoneidad funcional):** el script DEBE recorrer **todas** las carpetas directas de `skills/`, no solo las que ya tienen `SKILL.md`, y reportar `ERROR` («no existe SKILL.md en esta carpeta») para cualquiera que no lo tenga — en vez de omitirla en silencio del reporte.
 
 ## Archivos afectados
 
@@ -57,3 +58,4 @@ sdd-devkit/
 - [x] **IT-04** — Implementar la resolución de enlaces relativos y anclas (AC-006, AC-007) sobre `SKILL.md` y los archivos de su carpeta `references/`, con slugificación de encabezados estilo GitHub.
 - [x] **IT-05** — Implementar el reporte agrupado por skill y el código de salida según severidad (AC-008, AC-009).
 - [x] **IT-06** — Correr el script sobre el catálogo actual del repo y confirmar que reproduce los hallazgos ya conocidos por la investigación (6 skills con `description` > 1000, 2 con más de 500 líneas) sin falsos positivos ni negativos.
+- [x] **IT-07** — Implementar AC-011: recorrer todas las carpetas de `skills/` (no solo las que ya tienen `SKILL.md`) y reportar `ERROR` para las que no lo tengan.

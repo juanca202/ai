@@ -321,6 +321,17 @@ test('validateSkill: agrega ERROR y WARNING segun corresponda', () => {
   assert.ok(severities.includes('WARNING')); // description entre 1001 y 1536
 });
 
+test('validateSkill: ERROR si la carpeta no tiene SKILL.md', () => {
+  const root = makeFixture();
+  const skillDir = path.join(root, 'skills', 'demo-skill');
+  // makeFixture crea la carpeta pero no escribe SKILL.md dentro.
+  const result = validateSkill(skillDir, root);
+  assert.equal(result.skill, 'demo-skill');
+  assert.equal(result.findings.length, 1);
+  assert.equal(result.findings[0].severity, 'ERROR');
+  assert.match(result.findings[0].message, /no existe/);
+});
+
 test('validateSkill: sin hallazgos para un skill conforme', () => {
   const root = makeFixture();
   const skillDir = path.join(root, 'skills', 'demo-skill');

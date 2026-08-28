@@ -270,6 +270,18 @@ function walkMarkdownFiles(dir) {
 function validateSkill(skillDir, repoRoot) {
   const dirName = path.basename(skillDir);
   const skillMdPath = path.join(skillDir, 'SKILL.md');
+
+  if (!fs.existsSync(skillMdPath)) {
+    return {
+      skill: dirName,
+      findings: [{
+        severity: 'ERROR',
+        file: 'SKILL.md',
+        message: 'no existe SKILL.md en esta carpeta',
+      }],
+    };
+  }
+
   const content = fs.readFileSync(skillMdPath, 'utf-8');
 
   const fields = parseFrontmatter(content);
@@ -324,7 +336,7 @@ function main() {
   const skillsDir = path.join(repoRoot, 'skills');
   const dirs = fs
     .readdirSync(skillsDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && fs.existsSync(path.join(skillsDir, entry.name, 'SKILL.md')))
+    .filter((entry) => entry.isDirectory())
     .map((entry) => path.join(skillsDir, entry.name));
 
   const results = dirs.map((skillDir) => validateSkill(skillDir, repoRoot));
