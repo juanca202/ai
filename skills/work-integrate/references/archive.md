@@ -44,6 +44,22 @@ que ya no existe, o generando una carpeta huérfana en el origen.
 | Ramas `test/` sobre un `US-XXX`/`WI-XXX` | El trabajo funcional puede seguir abierto: el flujo solo verificó las unidades `TC-XXX` de esa ejecución, no el `progress.md` completo. Que el skill resuelva un `US-XXX` para `trace-validate` **no** habilita el archivado. |
 | PR de **promoción** (`pr-create`) | No trae trabajo nuevo: cada `US`/`WI` que viaja en él ya se archivó al integrarse. |
 | Un trabajo cuya carpeta ya está bajo `docs/archive/` | Ya archivado. Se detecta, se informa y se continúa sin tocar nada — no es un error. |
+| **Artefactos de un framework de terceros** (Speckit, OpenSpec, AgentOS…) | No son de SDD Devkit. Ver la regla de abajo. |
+
+> **El archivado alcanza solo a los artefactos de SDD Devkit.** Lo que se mueve es la carpeta del
+> `US-XXX` / `WI-XXX` con lo que cuelga de ella (`TK-XXX`, `test-cases/`, `research/`, `progress.md`,
+> `assets/`, `coverage.md`) y las investigaciones sueltas que queden huérfanas. **Nada más.**
+>
+> Cuando la implementación la corre un **framework de especificación de terceros** —Speckit, OpenSpec,
+> AgentOS u otro—, ese framework genera sus propios artefactos (sus specs, planes, tareas o carpetas de
+> trabajo). **Esos no se tocan:** ni se mueven, ni se renombran, ni se archivan, ni se enlazan desde el
+> destino de archivado, aunque vivan junto a los de SDD Devkit o incluso dentro de la misma carpeta del
+> trabajo. Tienen su propio ciclo de vida y lo gobierna su framework; SDD Devkit archiva **su** unidad de
+> especificación y deja el resto exactamente donde está.
+>
+> Si al listar lo que se movería aparece algo que no es un artefacto de este plugin, **excluirlo del
+> movimiento** y mencionarlo en el reporte como contenido ajeno que se deja en la ruta activa — nunca
+> arrastrarlo «porque estaba en la carpeta».
 
 ---
 
@@ -355,6 +371,9 @@ en `001`** y crear una carpeta fantasma. Las dos reglas van juntas justamente po
 - Usar `mv` en vez de `git mv`, perdiendo la detección de *rename*.
 - Sobrescribir un destino existente en `docs/archive/` en lugar de parar.
 - Archivar un `RS-XXX` suelto sin comprobar que ningún artefacto activo lo referencia.
+- **Arrastrar artefactos de un framework de terceros** (Speckit, OpenSpec, AgentOS…) al archivado por
+  estar dentro o al lado de la carpeta del trabajo. Solo se mueve lo que produjo SDD Devkit; lo ajeno se
+  deja en su sitio y, si aparece en el listado, se menciona en el reporte.
 - Archivar en una rama `test/`, o en un PR de promoción.
 - Mover la carpeta **después** del merge o del push: el archivado debe viajar en el mismo
   commit range que el código, no quedarse en la rama base como un cambio suelto.
