@@ -55,10 +55,10 @@ sdd-devkit/
 
 ## Plan de implementación
 
-- [ ] **IT-01** — Verificar empíricamente el payload real de `PostToolUse` (campo con el resultado/salida de la tool) y de `AskUserQuestion` en `PreToolUse`/`PostToolUse` (campos de pregunta, opciones y respuesta), con un hook temporal de solo-logging antes de escribir la lógica final.
+- [x] **IT-01** — Verificar empíricamente el payload real de `PostToolUse` (campo con el resultado/salida de la tool) y de `AskUserQuestion` en `PreToolUse`/`PostToolUse` (campos de pregunta, opciones y respuesta), con un hook temporal de solo-logging antes de escribir la lógica final.
   Ninguno de los dos está confirmado por la documentación pública de Claude Code consultada durante la planificación (ver AC-004, AC-005).
-- [ ] **IT-02** — Implementar la detección de comandos `git` y de comandos de prueba (regex heurística sobre `tool_input.command`, AC-001/AC-002) y construir los eventos `tool.called`/`tool.completed` con su `category` (AC-003, AC-004).
-- [ ] **IT-03** — Implementar la detección de `AskUserQuestion` y construir los eventos `question.asked`/`question.answered`, con degradación de campos ausentes (AC-005, AC-006).
-- [ ] **IT-04** — Implementar la detección de creación/borrado de `.sdd-devkit/current-iteration.json` (comparando estado antes/después de la tool call) y construir los eventos `implementation.started`/`implementation.completed` (AC-007, AC-008).
-- [ ] **IT-05** — Registrar los nuevos matchers de `PreToolUse` y `PostToolUse` en `hooks/hooks.json`, apuntando a `activity-events.js` (AC-009 se resuelve reutilizando la misma lectura de settings que `artifact-events.js`).
-- [ ] **IT-06** — Actualizar `hooks/README.md` documentando los seis eventos nuevos, con el mismo nivel de detalle que la sección existente de `artifact.*` (clasificación, campos de mejor esfuerzo, limitaciones conocidas del patrón heurístico de comandos de prueba).
+- [x] **IT-02** — Implementar la detección de comandos `git` y de comandos de prueba (regex heurística sobre `tool_input.command`, AC-001/AC-002) y construir los eventos `tool.called`/`tool.completed` con su `category` (AC-003, AC-004).
+- [x] **IT-03** — Implementar la detección de `AskUserQuestion` y construir los eventos `question.asked`/`question.answered`, con degradación de campos ausentes (AC-005, AC-006).
+- [x] **IT-04** — Implementar la detección de creación/borrado de `.sdd-devkit/current-iteration.json` (comparando estado antes/después de la tool call) y construir los eventos `implementation.started`/`implementation.completed` (AC-007, AC-008).
+- [x] **IT-05** — Registrar los nuevos matchers de `PreToolUse` y `PostToolUse` en `hooks/hooks.json`, apuntando a `activity-events.js` (AC-009 se resuelve reutilizando la misma lectura de settings que `artifact-events.js`).
+- [x] **IT-06** — Actualizar `hooks/README.md` documentando los seis eventos nuevos, con el mismo nivel de detalle que la sección existente de `artifact.*` (clasificación, campos de mejor esfuerzo, limitaciones conocidas del patrón heurístico de comandos de prueba).

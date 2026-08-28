@@ -5,3 +5,7 @@ skills/.DS_Store
 # Caché local de la corrida de pruebas (la produce quality-check). No se versiona:
 # es desechable y un resultado producido en otra máquina no es evidencia aquí.
 .sdd-devkit/test-run.json
+
+# Estado local de iteración en curso (la produce work-implement). Desechable,
+# igual que test-run.json: identifica la unidad que se está reintentando.
+.sdd-devkit/current-iteration.json
