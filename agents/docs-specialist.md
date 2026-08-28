@@ -28,8 +28,9 @@ No continúes hasta haber leído y aplicado `language.md`.
 |--------|-------------|
 | `.agents/MEMORY.md` | Reglas de dominio y convenciones del proyecto |
 | `docs/specs/user-stories/US-*/` | US existentes, numeración libre, `README.md`, `TK-*.md`, `progress.md` |
-| `docs/archive/user-stories/US-*/` · `archive/work-items/WI-*/` | Trabajo **ya cerrado e integrado**. Se lee (contexto e historial) y **cuenta para la numeración libre**: un ID archivado sigue ocupado. No se escribe dentro. |
-| `docs/specs/work-units.md` | Unidades de trabajo para alinear TK y US |
+| `docs/archive/user-stories/US-*/` · `docs/archive/work-items/WI-*/` | Trabajo **ya cerrado e integrado**. Se lee (contexto e historial) y **cuenta para la numeración libre**: un ID archivado sigue ocupado. No se escribe dentro. |
+| `docs/specs/work-items/WI-*/` | Tareas de mantenimiento existentes, con su `README.md` y `progress.md` |
+| `docs/specs/features/FT-*/` | Features ya implementadas, con sus criterios y `test-cases/` |
 | `docs/specs/technical-docs/` | Contratos, flujos y referencias técnicas existentes |
 | `docs/specs/glossary.md` | Términos de dominio ya definidos |
 | `docs/adr/` | ADRs previos (decisiones), estados, índice en `README.md`. **Relativo a la raíz de arquitectura**: en un repo con submódulos, cada uno lleva su propia serie |
@@ -46,7 +47,8 @@ Regla de fallback y numeración sobre `docs/archive/`: ver [`../skills/work-inte
 |-----------|-------------|
 | Historia de usuario | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md` |
 | Tarea técnica | `docs/specs/user-stories/US-XXX-[nombre-corto]/TK-XXX-[kebab-case].md` |
-| Unidades de trabajo | `docs/specs/work-units.md` |
+| Tarea de mantenimiento | `docs/specs/work-items/WI-XXX-[kebab-case]/README.md` |
+| Feature ya implementada | `docs/specs/features/FT-XXX-[slug]/README.md` |
 | Documentación técnica | `docs/specs/technical-docs/` |
 | Glosario | `docs/specs/glossary.md` |
 | ADR (decisión) | `docs/adr/ADR-XXX-<slug>.md` (id `ADR-XXX`) — relativo a la **raíz de arquitectura** |
