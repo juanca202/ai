@@ -28,6 +28,7 @@ Reglas transversales del catálogo; viven en la raíz del plugin, no en este ski
 
 - [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
 - [`../../reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
+- [`../../reference/planning.md`](../../reference/planning.md): **Casos de prueba** — de ahí sale `askDetails`, que decide si este skill entrevista o aplica valores por defecto. *Lectura obligatoria antes de ejecutar el skill.*
 - [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
 - [`../../reference/project-management.md`](../../reference/project-management.md): **Gestor de proyectos** — si la integración está activa, proveedor y datos de conexión. *Lectura obligatoria antes de ejecutar el skill.*
 - [`../../reference/alm/azure-devops.md`](../../reference/alm/azure-devops.md): **Azure DevOps** — MCP, URL, límites, sincronización. *Solo si el `provider` resuelto es `azure-devops`.*
@@ -53,6 +54,23 @@ Las reglas de `language.md` son obligatorias y tienen prioridad para determinar 
 No continúes hasta haber leído y aplicado `language.md`.
 
 **Excepción deliberada:** redactar los TC **en el idioma del artefacto origen** — un TC que no hable el idioma de los criterios que traza se lee mal junto a ellos. Si hay conflicto con el idioma resuelto o ambigüedad, preguntar al usuario antes de generar.
+
+---
+
+## Política de definición de casos de prueba
+
+Antes de ejecutar este skill, DEBES leer [`../../reference/planning.md`](../../reference/planning.md).
+
+De ese bloque, este skill consume **`specification.testCases.askDetails`** (el `mode` lo consumen
+`work-define` y `work-plan` para decidir si invocan este skill; aquí ya es irrelevante):
+
+| `askDetails` | Comportamiento |
+|--------------|----------------|
+| `true` | **Hacer la entrevista de clarificación** del [Paso 2](#paso-2--entrevista-de-clarificación) antes de generar los TC. |
+| `false` | **No preguntar nada**: aplicar los [valores por defecto](#valores-por-defecto-askdetails-false) y dejar constancia de los supuestos en los propios TC. |
+
+`askDetails` se aplica igual venga este skill invocado por la planificación o directamente por el usuario.
+**No afecta al alcance:** con cualquier valor, los TC cubren **todos** los criterios de aceptación.
 
 ---
 
@@ -138,23 +156,51 @@ discovery marcó como posible bug preservado, anotarlo para trazabilidad.
 
 ## Paso 2 — Entrevista de clarificación
 
+> **Este paso entero se salta con `specification.testCases.askDetails: false`** — ver [Política de
+> definición de casos de prueba](#política-de-definición-de-casos-de-prueba). En ese caso, aplicar los
+> [valores por defecto](#valores-por-defecto-askdetails-false) y pasar directamente al Paso 3.
+
 Antes de generar ningún TC, resolver las dudas que puedan afectar la calidad de los casos. Las preguntas a continuación son el conjunto estándar; **omitir las que ya estén respondidas en el artefacto o en la conversación** para no interrogar innecesariamente al usuario.
+
+> **El alcance no se pregunta: son siempre TODOS los criterios de aceptación del artefacto.** Es el
+> comportamiento por defecto y no admite una pregunta de confirmación — un criterio sin TC es un hueco de
+> cobertura que `trace-validate` reportará después, así que cubrirlos todos es lo que el usuario espera al
+> pedir casos de prueba. **Solo** se genera un subconjunto si el usuario lo **pide explícitamente** («solo
+> AC-002», «únicamente los criterios de pago»); en ese caso se respeta su selección y se anota en el índice
+> qué criterios quedaron sin TC. No ofrecer «¿todos o un subconjunto?»: la respuesta ya está decidida.
 
 Preguntar usando la herramienta de preguntas estructuradas sobre:
 
-1. **Alcance**: ¿TCs para todos los criterios o para un subconjunto? Opciones: [Todos] / [Seleccionar criterios].
-2. **Entorno de referencia**: ¿desarrollo, staging o producción? Afecta URLs, datos de prueba y configuraciones.
-3. **Roles de usuario involucrados**: si el artefacto no los especifica, listar los inferidos y confirmar.
-4. **Datos de prueba**: ¿hay juegos de datos ya definidos o se proponen dentro del TC? Opciones: [Ya existen] / [Proponer en el TC].
-5. **Escenarios de error críticos**: ¿el negocio prioriza algún error específico que el artefacto no detalla?
+1. **Entorno de referencia**: ¿desarrollo, staging o producción? Afecta URLs, datos de prueba y configuraciones.
+2. **Roles de usuario involucrados**: si el artefacto no los especifica, listar los inferidos y confirmar.
+3. **Datos de prueba**: ¿hay juegos de datos ya definidos o se proponen dentro del TC? Opciones: [Ya existen] / [Proponer en el TC].
+4. **Escenarios de error críticos**: ¿el negocio prioriza algún error específico que el artefacto no detalla?
 
 No avanzar al Paso 3 hasta recibir respuesta a las preguntas que apliquen.
+
+### Valores por defecto (`askDetails: false`)
+
+Con `askDetails: false` **no se pregunta ninguna de las cuatro**: se resuelven en este orden — primero lo
+que diga el artefacto, y solo si calla, el valor por defecto. Lo que salga de un valor por defecto (no del
+artefacto) se **marca como supuesto** en el TC que lo use, para que quien lo ejecute sepa qué no estaba
+especificado.
+
+| Pregunta | Se resuelve así |
+|----------|-----------------|
+| **Entorno de referencia** | El que declare el artefacto; si no declara ninguno, **desarrollo**. Es el entorno donde se ejecutan las pruebas de una funcionalidad aún no implementada, y el único que se puede asumir sin riesgo: dar por hecho staging o producción llevaría a TCs con URLs y datos que nadie autorizó. |
+| **Roles de usuario involucrados** | Los que se **infieran del artefacto** (de los criterios, la narrativa o las precondiciones). Si no se infiere ninguno, redactar el TC sin rol específico en vez de inventar uno. |
+| **Datos de prueba** | **Proponerlos dentro del TC**, marcados `[propuesto]` como ya exige el Paso 4. Nunca dar por existente un juego de datos que el artefacto no nombra. |
+| **Escenarios de error críticos** | Los que el **artefacto detalle**, más los que se deriven de las perspectivas de error y límite del Paso 3. No inventar prioridades de negocio que nadie escribió. |
+
+Si al aplicar un valor por defecto se detecta una **ambigüedad que haría el TC incorrecto** —no meramente
+incompleto—, sí se pregunta: `askDetails: false` suprime la entrevista estándar, no la obligación de no
+escribir un caso de prueba que se sabe erróneo.
 
 ---
 
 ## Paso 3 — Generar casos de prueba
 
-Por cada criterio en el alcance, analizar cuántos TCs son necesarios según la información del artefacto, las respuestas del usuario en la entrevista y la complejidad del escenario. No hay un número fijo: un criterio simple puede requerir un solo TC; uno complejo puede necesitar varios. Las tres perspectivas sirven como guía de cobertura mínima, no como límite:
+Por cada criterio del artefacto —**todos**, salvo que el usuario haya pedido explícitamente un subconjunto—, analizar cuántos TCs son necesarios según la información del artefacto, lo resuelto en el Paso 2 (entrevista o valores por defecto) y la complejidad del escenario. No hay un número fijo: un criterio simple puede requerir un solo TC; uno complejo puede necesitar varios. Las tres perspectivas sirven como guía de cobertura mínima, no como límite:
 
 | Perspectiva | Qué cubre | Ejemplo de slug |
 |-------------|-----------|-----------------|
@@ -199,7 +245,7 @@ Usar `assets/test-case-template.md` para todos los campos. Reglas de llenado:
 - **Prioridad:** derivar del impacto del criterio en el negocio: Alta si el criterio es bloqueante o afecta seguridad/datos; Media si es funcional importante; Baja si es edge case o cosmético. Si no hay suficiente contexto, preguntar al usuario.
 - **Creado por:** usar `git config user.name` del repositorio. Si no está disponible, dejar el campo vacío.
 - **Precondiciones:** ser específico — incluir estado del sistema, datos existentes y permisos requeridos.
-- **Datos de prueba:** usar los confirmados en el Paso 2; si se proponen, marcarlos con `[propuesto]`.
+- **Datos de prueba:** usar los confirmados en el Paso 2 o, con `askDetails: false`, los propuestos según los [valores por defecto](#valores-por-defecto-askdetails-false); si se proponen, marcarlos con `[propuesto]`.
 - **Pasos:** acciones atómicas y observables; cada fila incluye actor + acción + resultado esperado del paso.
 - **Resultado esperado final:** estado observable del sistema (UI, código HTTP, mensaje, evento publicado), no estado interno.
 
@@ -305,8 +351,12 @@ La trazabilidad inversa (de un criterio a sus TCs) se obtiene buscando el identi
 
 ## Anti-patterns
 
-- Generar TCs sin haber completado la entrevista del Paso 2 (incluso si parece obvio).
+- Generar TCs sin haber completado la entrevista del Paso 2 (incluso si parece obvio) **cuando `askDetails` es `true`**.
+- **Hacer la entrevista del Paso 2 con `askDetails: false`**, aunque las respuestas parezcan valiosas: ese valor es la instrucción de no preguntar. Lo que se hace en su lugar es aplicar los valores por defecto y **marcar los supuestos** en los TC, no callarlos.
+- Confundir `askDetails` con el alcance: `false` suprime las preguntas de clarificación, **no** reduce los criterios cubiertos.
 - Crear un TC que cubra más de un criterio de aceptación.
+- **Preguntar al usuario si quiere cubrir todos los criterios o solo algunos.** Por defecto se cubren **todos**; un subconjunto solo se genera cuando el usuario lo pidió por su cuenta, sin que el skill se lo ofrezca.
+- **Dejar un criterio sin TC en una corrida de alcance completo** — aunque parezca trivial, redundante o difícil de probar. Si de verdad no admite un caso de prueba, generar igual el TC y dejar constancia del motivo, en vez de omitirlo en silencio.
 - Omitir una perspectiva que evidentemente debería existir sin dejar constancia del motivo (una perspectiva que no aplica al criterio puede omitirse sin justificación; ver Paso 3).
 - Dejar el campo **Criterio de aceptación** vacío o con un valor genérico ("criterio 1").
 - Reutilizar un número de secuencia ya existente en `test-cases/`.

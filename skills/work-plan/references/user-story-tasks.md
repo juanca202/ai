@@ -148,7 +148,7 @@ Una TK completa puede alcanzar `Estado: Ready` si cumple todas las condiciones d
    - **Observaciones**: solo si hay pendientes reales. Si no hay nada, **omitir la sección** (o una línea *Sin pendientes documentados* si el equipo lo exige). Con pendientes reales: `Estado: Draft`.
 3. **Documentación técnica y glosario**: si la TK requiere crear o actualizar especificaciones en `technical-docs/`, **delegar a `/design-define` vía subagente** (nunca editarlas desde este skill) y enlazar las referencias devueltas; glossary sí puede actualizarse aquí con entradas breves (no sustituye ADR ni technical-doc).
 4. **Verificar el checklist** antes de asignar `Estado: Ready`.
-5. **Handoff:** con todas las TK del alcance en `Ready`, aplicar antes `specification.testCases` sobre la US padre (ver [`../../../reference/planning.md`](../../../reference/planning.md)); después, si el usuario quiere implementar, **invocar `/work-implement`** (no implementar directamente desde este skill). Si otras siguen en `Draft`, listar cuáles completar antes.
+5. **Handoff:** con todas las TK del alcance en `Ready`, aplicar antes `specification.testCases.mode` sobre la US padre (ver [`../../../reference/planning.md`](../../../reference/planning.md)); después, si el usuario quiere implementar, **invocar `/work-implement`** (no implementar directamente desde este skill). Si otras siguen en `Draft`, listar cuáles completar antes.
 
 ---
 
@@ -186,8 +186,9 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
    |--------|-------------|--------------|
    | **Crear los planes** | Materializar la descomposición como **TK completas** (tareas definitivas), no como stubs. | Paso 7a |
    | **Crear stubs** | Materializar solo el anclaje de ID y el vínculo a la US, en `Draft`. | Paso 7b |
-   | **Otro** | Entrada libre: ajustar alcance, cambiar el agrupamiento, quitar o añadir tareas, o cualquier otra indicación. | Aplicar lo indicado y **repetir pasos 5–6**. |
    | **Cancelar** | No crear nada. | Terminar sin escribir archivos. |
+
+   **No ofrecer una opción de «Otro» ni de «Ajustar»**: la herramienta de preguntas ya admite respuesta libre, y es ahí donde el usuario pide cambiar el agrupamiento, el alcance o las tareas. Si responde con un ajuste, aplicarlo y **repetir los pasos 5–6**.
 
    **No continuar sin confirmación explícita**, salvo que el mensaje inicial ya declarara la intención con detalle suficiente (p. ej. «crea las tareas definitivas de US-004») — en ese caso la opción queda determinada, pero la propuesta del paso 5 se presenta igualmente.
 
@@ -241,7 +242,7 @@ Aplica siempre que se planifiquen o secuencien **varias TK dentro de la misma US
 - [ ] Modo A: intención clara: stub vs TK completa
 - [ ] Modo B: AC-XXX identificados en **Criterios de aceptación** del `README.md`; US en `Estado: Ready`
 - [ ] Modo B: propuesta presentada al usuario (paso 5) sin archivos creados
-- [ ] Modo B: confirmación estructurada recibida (paso 6) antes del primer `TK-*.md`, con las opciones `Crear los planes` / `Crear stubs` / `Otro` / `Cancelar`
+- [ ] Modo B: confirmación estructurada recibida (paso 6) antes del primer `TK-*.md`, con las opciones `Crear los planes` / `Crear stubs` / `Cancelar`
 - [ ] Modo B: profundidad elegida por el usuario respetada — «Crear los planes» produce TK completas (7a), no stubs
 - [ ] Orden entre TKs de la misma US según [Orden y priorización de tareas](#orden-y-priorización-de-tareas): infraestructura compartida → sin dependencias → con dependencias; ninguna TK depende de otra posterior en la secuencia
 - [ ] Si hay escenario E2E: su TK queda secuenciada al final (tras las tareas que atraviesa) y su ejecución no se exige como condición de `Estado: Ready`, sino en el Quality Gate previo a integrar/liberar
@@ -268,7 +269,7 @@ Aplica siempre que se planifiquen o secuencien **varias TK dentro de la misma US
 - [ ] Nombre de archivo en kebab-case, secuencial por historia
 - [ ] Sin código de aplicación en el archivo
 - [ ] Sin párrafos instructivos de plantilla en el TK publicado
-- [ ] `specification.testCases` aplicado sobre la **US padre** al cerrar: invocado, ofrecido o no mencionado según la política — y saltado si la US ya tenía `test-cases/` con algún `TC-XXX`
+- [ ] `specification.testCases.mode` aplicado sobre la **US padre** al cerrar: invocado, ofrecido o no mencionado según la política — y saltado si la US ya tenía `test-cases/` con algún `TC-XXX`
 
 ---
 
@@ -288,7 +289,7 @@ Aplica siempre que se planifiquen o secuencien **varias TK dentro de la misma US
 
 **Ejemplo 4 — Planificar desde una US, opción stubs (modo B)**
 - *Entrada:* «Crea las tareas necesarias para implementar US-004.» (sin describir tareas específicas).
-- *Comportamiento — turno 1:* Activa el *Flujo: Planificar desde una US*. Verifica que `US-004/README.md` está en `Ready` y contiene `AC-XXX`. Lee la US completa, identifica los repositorios afectados, y presenta la propuesta agrupada por repositorio (paso 5) con `TK-XXX` tentativo, nombre de archivo, objetivo breve y cobertura de `AC-XXX` por tarea, ordenada según [Orden y priorización de tareas](#orden-y-priorización-de-tareas): primero la infraestructura compartida (p. ej. modelo de dominio común), luego las tareas sin dependencias, y al final las que dependen de otras — el eventual escenario E2E queda último. Pregunta con opciones: [Crear los planes] / [Crear stubs] / [Otro] / [Cancelar]. **No crea archivos.**
+- *Comportamiento — turno 1:* Activa el *Flujo: Planificar desde una US*. Verifica que `US-004/README.md` está en `Ready` y contiene `AC-XXX`. Lee la US completa, identifica los repositorios afectados, y presenta la propuesta agrupada por repositorio (paso 5) con `TK-XXX` tentativo, nombre de archivo, objetivo breve y cobertura de `AC-XXX` por tarea, ordenada según [Orden y priorización de tareas](#orden-y-priorización-de-tareas): primero la infraestructura compartida (p. ej. modelo de dominio común), luego las tareas sin dependencias, y al final las que dependen de otras — el eventual escenario E2E queda último. Pregunta con opciones: [Crear los planes] / [Crear stubs] / [Cancelar]. **No crea archivos.**
 - *Comportamiento — turno 2:* El usuario elige **Crear stubs**. Crea cada stub en `Estado: Draft` sin referencias a `AC-XXX` en el archivo (paso 7b) y reporta rutas creadas con cobertura AC (paso 8).
 - *Salida:* Stubs `TK-001-...md` a `TK-NNN-...md` en Draft.
 
@@ -323,7 +324,7 @@ Aplica siempre que se planifiquen o secuencien **varias TK dentro de la misma US
 - **Modo B**: incluir identificadores `AC-XXX` dentro del archivo `TK-XXX.md`; la cobertura se reporta al usuario, no se documenta.
 - **Modo B**: forzar un mapeo 1 tarea = 1 `AC-XXX`; las tareas se agrupan por repositorio.
 - **Modo B**: redactar Plan, Dependencias o Referencias detalladas cuando el usuario eligió **stubs**.
-- **Modo B**: ofrecer solo stubs en la confirmación del paso 6, u omitir alguna de las opciones `Crear los planes` / `Crear stubs` / `Otro` / `Cancelar`.
+- **Modo B**: ofrecer solo stubs en la confirmación del paso 6, u omitir alguna de las opciones `Crear los planes` / `Crear stubs` / `Cancelar`. Y al revés: añadir una opción «Otro»/«Ajustar», que la respuesta libre ya cubre.
 - **Modo B**: crear stubs cuando el usuario eligió **Crear los planes**, en vez de preguntar el contexto faltante y dejar los pendientes en Observaciones.
 - **Modo B**: forzar `Estado: Ready` en TK creadas con «Crear los planes» inventando Plan, Dependencias o Referencias que no se acordaron.
 - Crear una TK estando en una rama de implementación distinta de la propia US padre sin advertir al usuario y preguntar `Continuar` / `Detenerme aquí` primero.
@@ -346,7 +347,7 @@ Posición: **planificación** — entre `work-define` e `work-implement`.
 | **Entrada** | US con `Estado: Ready` y **Criterios de aceptación** (`AC-XXX`) en su `README.md`. Si la US está en Draft o no tiene `AC-XXX`: **bloquear** y devolver handoff a **`work-define`**. |
 | **Salida (modo B)** | Según la opción elegida en el paso 6: **Crear los planes** → `TK-XXX-*.md` completas (`Ready` las que cumplen el checklist, `Draft` las que conservan pendientes); **Crear stubs** → `TK-XXX-*.md` en `Draft`. En ambos casos, cobertura `AC-XXX` reportada al usuario. |
 | **Salida para implementar** | Cada TK del alcance acordado en **`Estado: Ready`**. Stubs en Draft **no** habilitan `work-implement`. |
-| **Siguiente paso** | Según `specification.testCases`: **`/test-define`** sobre la US si corresponde y aún no tiene `TC-XXX`, y **`/work-implement`** — solo cuando US Ready **y** las TK a ejecutar están Ready. La implementación nunca se hace directamente desde `work-plan`. |
+| **Siguiente paso** | Según `specification.testCases.mode`: **`/test-define`** sobre la US si corresponde y aún no tiene `TC-XXX`, y **`/work-implement`** — solo cuando US Ready **y** las TK a ejecutar están Ready. La implementación nunca se hace directamente desde `work-plan`. |
 | **Regreso desde define** | Cambio funcional en la US → releer `README.md` y actualizar TKs afectadas antes de continuar. |
 | **Regreso desde implement** | TK fuera de alcance o ambigüedad técnica → ajustar el TK aquí; no modificar el `README.md` de la US. Si el conflicto es funcional, escalar a **`work-define`**. |
 

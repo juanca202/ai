@@ -47,7 +47,7 @@ No continúes hasta haber leído y aplicado `language.md`.
 
 Antes de ejecutar este skill, DEBES leer [`../../reference/planning.md`](../../reference/planning.md).
 
-Las reglas de `planning.md` son obligatorias y determinan, vía `specification.testCases`, si al dejar la US en `Ready` se pregunta si definir los casos de prueba (`ask`, comportamiento por defecto), se invoca `/test-define` automáticamente sin preguntar (`always`), o nunca se sugiere ni se invoca (`never`). Ver [Flujo (resumen)](#flujo-resumen).
+Las reglas de `planning.md` son obligatorias y determinan, vía `specification.testCases.mode`, si al dejar la US en `Ready` se pregunta si definir los casos de prueba (`ask`, comportamiento por defecto), se invoca `/test-define` automáticamente sin preguntar (`always`), o nunca se sugiere ni se invoca (`never`). La otra clave del objeto, `askDetails`, **no la consume este skill**: la lee `test-define`. Ver [Flujo (resumen)](#flujo-resumen).
 
 No continúes hasta haber leído y aplicado `planning.md`.
 
@@ -105,7 +105,7 @@ El procedimiento completo —cómo preguntar al usuario, validación antes de cr
 
 - **Crear:** fijar ID y carpeta `US-XXX-[nombre-corto]/` → redactar el `README.md` con la plantilla (Descripción RFC 2119, Referencias, Criterios `AC-XXX` con categoría y enunciado RFC 2119, Repositorios, Complejidad Fibonacci, INVEST, DoR, Observaciones) → si el requerimiento define modelos, APIs o flujos, **delegar la documentación técnica a `/design-define` mediante subagente** y agregar las referencias devueltas a la sección Referencias → glosario si aplica → cierre.
 - **Actualizar:** identificar y leer el `README.md` → aplicar cambios conservando **siempre** los ids `AC-XXX` existentes (son inmutables: los nuevos toman el siguiente libre) → revalidar → confirmar. Ante conflicto `TK-XXX` ↔ US, **la US prevalece**.
-- **Cierre:** si queda **Draft**, cerrar lagunas con preguntas estructuradas (una por laguna, máx. tres por bloque); si queda **Ready**, resolver la definición de casos de prueba según `specification.testCases` (`ask` pregunta, `always` invoca `/test-define` directo, `never` no la ofrece — ver [Política de planificación](#política-de-planificación)) y sugerir crear las `TK-XXX` con `/work-plan` (nunca crear TCs ni tareas directamente desde este skill).
+- **Cierre:** si queda **Draft**, cerrar lagunas con preguntas estructuradas (una por laguna, máx. tres por bloque); si queda **Ready**, resolver la definición de casos de prueba según `specification.testCases.mode` (`ask` pregunta, `always` invoca `/test-define` directo, `never` no la ofrece — ver [Política de planificación](#política-de-planificación)) y sugerir crear las `TK-XXX` con `/work-plan` (nunca crear TCs ni tareas directamente desde este skill).
 
 Las modalidades **RFC 2119**, las **categorías de AC-XXX** (funcionales e ISO 25010) y las rúbricas **INVEST** y **DoR** detalladas están en [`references/quality-criteria.md`](references/quality-criteria.md).
 

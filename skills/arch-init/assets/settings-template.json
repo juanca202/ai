@@ -4,7 +4,10 @@
     "basePath": "docs/specs/",
     "archivePath": "docs/archive/",
     "trackingEnabled": false,
-    "testCases": "ask"
+    "testCases": {
+      "mode": "ask",
+      "askDetails": true
+    }
   },
   "implementation": {
     "confirmByUnit": "always",

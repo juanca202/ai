@@ -148,7 +148,7 @@ Un WI completo puede alcanzar `Estado: Ready` si cumple todas las condiciones de
    - **Observaciones**: solo si hay pendientes reales. Si no hay nada, **omitir la sección**. Con pendientes reales: `Estado: Draft`.
 3. **Documentación técnica y glosario**: si el WI requiere crear o actualizar especificaciones en `technical-docs/`, **delegar a `/design-define` vía subagente** (nunca editarlas desde este skill) y enlazar las referencias devueltas; glossary sí puede actualizarse aquí con entradas breves (no sustituye ADR ni technical-doc).
 4. **Verificar el checklist** antes de asignar `Estado: Ready`.
-5. **Handoff:** con el WI en `Ready`, aplicar antes `specification.testCases` sobre el propio WI (ver [`../../../reference/planning.md`](../../../reference/planning.md)); después, si el usuario quiere implementar, **invocar `/work-implement`** (no implementar directamente desde este skill). Si quedó en `Draft`, listar qué falta para completarlo.
+5. **Handoff:** con el WI en `Ready`, aplicar antes `specification.testCases.mode` sobre el propio WI (ver [`../../../reference/planning.md`](../../../reference/planning.md)); después, si el usuario quiere implementar, **invocar `/work-implement`** (no implementar directamente desde este skill). Si quedó en `Draft`, listar qué falta para completarlo.
 
 ---
 
@@ -217,7 +217,7 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 - [ ] Nombre de archivo en kebab-case, secuencial global sobre `work-items/` **+ `archive/work-items/`**
 - [ ] Sin código de aplicación en el archivo
 - [ ] Sin párrafos instructivos de plantilla en el WI publicado
-- [ ] `specification.testCases` aplicado sobre el **WI** al cerrar: invocado, ofrecido o no mencionado según la política — y saltado si el WI ya tenía `test-cases/` con algún `TC-XXX`
+- [ ] `specification.testCases.mode` aplicado sobre el **WI** al cerrar: invocado, ofrecido o no mencionado según la política — y saltado si el WI ya tenía `test-cases/` con algún `TC-XXX`
 
 ---
 
@@ -275,7 +275,7 @@ Posición: **planificación** — una tarea de mantenimiento (`WI`) es **autocon
 |--|--|
 | **Entrada** | Petición de mantenimiento del usuario, o un **dossier de bug** de `work-research` (flujo «Analizar issue»), del que se mapean descripción, evidencia y criterios (bug, refactor, deuda técnica, dependencias, operativa). No requiere una US previa. |
 | **Salida para implementar** | WI en **`Estado: Ready`** (Descripción, Criterios, Plan, Dependencias y Referencias según checklist). Stubs en Draft **no** habilitan `work-implement`. |
-| **Siguiente paso** | Según `specification.testCases`: **`/test-define`** sobre el WI si corresponde y aún no tiene `TC-XXX`, y **`/work-implement`** — solo cuando el WI a ejecutar está `Ready`. La implementación nunca se hace directamente desde `work-plan`. |
+| **Siguiente paso** | Según `specification.testCases.mode`: **`/test-define`** sobre el WI si corresponde y aún no tiene `TC-XXX`, y **`/work-implement`** — solo cuando el WI a ejecutar está `Ready`. La implementación nunca se hace directamente desde `work-plan`. |
 | **Regreso desde implement** | Ambigüedad técnica o alcance incorrecto → ajustar el WI aquí. |
 
 ### Repositorio afectado

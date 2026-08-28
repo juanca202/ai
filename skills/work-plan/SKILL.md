@@ -35,7 +35,7 @@ No sustituir una invocación de skill por "hacer el trabajo aquí". El handoff e
 
 Antes de ejecutar este skill, DEBES leer [`../../reference/planning.md`](../../reference/planning.md).
 
-Las reglas de `planning.md` son obligatorias y determinan, vía `specification.testCases`, si al dejar las tareas del alcance en `Ready` se pregunta si definir los casos de prueba (`ask`, comportamiento por defecto), se invoca `/test-define` automáticamente sin preguntar (`always`), o nunca se sugiere ni se invoca (`never`).
+Las reglas de `planning.md` son obligatorias y determinan, vía `specification.testCases.mode`, si al dejar las tareas del alcance en `Ready` se pregunta si definir los casos de prueba (`ask`, comportamiento por defecto), se invoca `/test-define` automáticamente sin preguntar (`always`), o nunca se sugiere ni se invoca (`never`). La otra clave del objeto, `askDetails`, **no la consume este skill**: la lee `test-define`.
 
 No continúes hasta haber leído y aplicado `planning.md`.
 
