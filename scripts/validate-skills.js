@@ -155,7 +155,12 @@ function slugifyHeadingText(text) {
     .toLowerCase()
     .replace(/[^\p{L}\p{N} -]/gu, '')
     .trim()
-    .replace(/\s+/g, '-');
+    // GitHub reemplaza cada espacio por su propio "-": no colapsa espacios
+    // consecutivos. Una puntuacion eliminada entre dos espacios (p. ej. un
+    // guion largo "—") deja dos espacios adyacentes, que deben producir dos
+    // guiones seguidos, no uno solo — de ahi anclas reales del repo como
+    // `#paso-4---cierre` o `#idempotencia--reejecución`.
+    .replace(/ /g, '-');
 }
 
 // Devuelve el conjunto de anclas reales de un archivo (una por encabezado),

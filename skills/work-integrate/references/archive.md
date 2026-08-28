@@ -133,7 +133,7 @@ coste de no pararse ahí es bajo comparado con obligar a archivar.
 ## Destinos
 
 `docs/archive/` es el valor por defecto de `specification.archivePath`
-(`.sdd-devkit/settings.json`) — ver [`../../../reference/artifacts.md`](../../../reference/artifacts.md#resolución-de-docsspecsarchive).
+(`.sdd-devkit/settings.json`) — ver [`../../../reference/artifacts.md`](../../../reference/artifacts.md).
 **Resolverlo primero**: si el repo declaró un valor distinto, sustituirlo por ese valor en la
 columna Destino y en el resto de esta sección.
 

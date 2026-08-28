@@ -174,6 +174,18 @@ test('slugifyHeading: quita formato en negrita', () => {
   assert.equal(slugifyHeading('**Contrato** para el resto del catálogo'), 'contrato-para-el-resto-del-catálogo');
 });
 
+test('slugifyHeading: un guion largo entre espacios produce guion doble', () => {
+  // GitHub no colapsa espacios: cada uno se reemplaza por su propio "-".
+  // "Paso 2 — Ejecutar" -> se quita el em dash y quedan dos espacios ->
+  // "paso-2--ejecutar" (dos guiones), no "paso-2-ejecutar" (uno).
+  assert.equal(slugifyHeading('Paso 2 — Ejecutar los checks'), 'paso-2--ejecutar-los-checks');
+});
+
+test('slugifyHeading: guion literal entre espacios produce tres guiones', () => {
+  // "Paso 4 - Cierre": el "-" se conserva y cada espacio se reemplaza aparte.
+  assert.equal(slugifyHeading('Paso 4 - Cierre'), 'paso-4---cierre');
+});
+
 test('slugifyHeading: anclas duplicadas reciben sufijo -1, -2', () => {
   const content = '# Ejemplo\n\ntexto\n\n# Ejemplo\n\nmas texto\n\n# Ejemplo\n';
   const slugs = extractHeadingSlugs(content);
