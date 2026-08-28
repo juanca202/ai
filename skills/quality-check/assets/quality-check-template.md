@@ -17,7 +17,7 @@ Ver ../../reference/verdicts.md.
 **Rama:** {{rama}}
 **Commit:** {{sha-corto}}
 **Modo:** {{default | blocking-only | only nombre-del-check | no-tests | …}}  <!-- `tests-only` no produce este informe: su único artefacto es test-run.json -->
-**Estándar de testing:** {{docs/standards/testing.md — requisitos vigentes: integration-testing, contract-testing | sin estándar de testing (solo las suites fijas)}}
+**Estándar de testing:** {{docs/standards/testing.md — requisitos vigentes: integration-testing, contract-testing | sin estándar de testing (solo las fijas y, si hay config, e2e)}}
 **Veredicto:** {{símbolo + etiqueta en el idioma resuelto: `✅` APPROVED | `❌` REJECTED | `⚠️` INCOMPLETE}}
 
 ## Resumen
@@ -38,25 +38,33 @@ Leyenda de estados — **redactar cada etiqueta en el idioma resuelto**, en este
 | 5 | {{integración}} | {{comando}}     | {{BLOCKING}}    | {{✅ PASS}}       | {{18 passed}}           | {{41.2s}}  |
 | 6 | {{contrato}}    | {{comando}}     | {{CONDITIONAL}} | {{⏭️ SKIPPED}}    | {{config rota}}         | {{—}}      |
 | 7 | build      | {{comando}}          | {{BLOCKING}}    | {{✅ PASS}}       | {{OK}}                  | {{12.4s}}  |
-| 8 | e2e        | {{comando}}          | {{CONDITIONAL}} | {{— N/A}}        | {{sin config e2e}}      | {{—}}      |
-| 9 | sonar      | {{comando}}          | {{INFORMATIVE}} | {{— N/A}}        | {{sin config}}          | {{—}}      |
+| 8 | e2e        | {{comando}}          | {{CONDITIONAL}} | {{✅ PASS}}       | {{7 passed}}            | {{63.5s}}  |
+| 9 | sonar      | {{comando}}          | {{INFORMATIVE}} | {{❌ FAIL}}       | {{2 code smells}}       | {{31.0s}}  |
 
 <!-- En las celdas de Categoría y Estado, {{VALOR}} significa: escribir la ETIQUETA de ese valor
      canónico en el idioma resuelto (precedida de su símbolo cuando lo tenga). El valor canónico en sí
      NO aparece en el informe. -->
 
 <!--
-FILAS DE PRUEBAS — fijas vs configuradas (ver `SKILL.md` → Suites de prueba: fijas y configuradas):
-  - FIJAS, siempre presentes: `unit tests`, `coverage` y `e2e`. Se listan aunque su estado sea
-    `—` + etiqueta de `N/A`; nunca se omiten.
+QUÉ FILAS EXISTEN — la tabla lista SOLO lo que se ejecutó, con UNA excepción (ver `SKILL.md` →
+Suites de prueba: fijas y configuradas):
+  - FIJAS, siempre presentes: `unit tests` y `coverage`, y SOLO esas dos. Se listan aunque su estado
+    sea `—` + etiqueta de `N/A`; nunca se omiten, porque un repo sin pruebas unitarias ni cobertura
+    es información que el informe debe dar explícitamente.
+  - TODO LO DEMÁS SE OMITE SI NO APLICA. Un check que quedó en `N/A` —porque el stack no lo tiene,
+    porque no hay config, o porque el usuario lo excluyó con un modificador— NO lleva fila: se borra
+    del ejemplo de arriba. Esto incluye `e2e`, que ya NO es fija: si el repo no tiene config e2e, la
+    fila 8 no existe. Las filas del ejemplo son ilustrativas de checks que SÍ corrieron; en un informe
+    real la tabla suele ser más corta.
+    No añadir nota al pie ni sección que enumere lo omitido: si no aplicó, no aparece.
   - CONFIGURADAS (filas 5 y 6 del ejemplo —integración, contrato— que es ilustrativo, no una lista
     cerrada): una fila por cada clase de prueba que declare el estándar de testing del repo
     (`docs/standards/testing.md` o `docs/standards/testing/README.md`), en el orden en que el estándar
     la declara. Sin estándar de testing, o sin más requisitos que los de las fijas, estas filas
     simplemente no existen — NO inventar una suite que el estándar no declara.
+Renumerar la columna `#` de forma correlativa sobre las filas que queden; no dejar huecos por las
+filas omitidas. El orden relativo de los checks no cambia.
 El resto de checks (tipado, linter, build, sonar) no son pruebas: se incluyen solo si aplican al stack.
-Los `N/A` por modificador del usuario o por no aplicar al stack pueden omitirse o marcarse con `—`
-y su etiqueta; las tres fijas se listan siempre.
 La columna Estado lleva SÍMBOLO + ETIQUETA EN EL IDIOMA RESUELTO, siempre de la leyenda de arriba.
 Los valores canónicos (PASS/FAIL/SKIPPED/PENDING/N/A) son vocabulario interno y del test-run.json:
 no aparecen en el informe, tampoco en la columna Detalle.

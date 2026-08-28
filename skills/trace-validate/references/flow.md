@@ -33,7 +33,7 @@ Antes de trabajar, evitar regenerar si nada cambió (ver [Reutilización del rep
 3. Si el `trace-report.md` **no existe** → no hay caché; continuar en el Paso 1.
 4. Si **existe**, leer su marca de pie `<!-- trace-validate:verdict=<canónico> · fingerprint=<hash> · spec=<hash> · generated=YYYY-MM-DD -->` y decidir:
    - **Coinciden los dos hashes**, el reporte **no** registra ejecución fallida, y el usuario **no** pasó `revalidate` → **no regenerar**: devolver el veredicto y el resumen del reporte existente, indicando que no hubo cambios desde `{{generated}}`. No reescribir el archivo ni delegar en `quality-check`. Fin.
-   - **Difiere alguno**, falta la marca o el campo `spec=` (reporte anterior a esta convención), el reporte trae filas en `NOT_RUN` por una delegación que no se pudo hacer, o el usuario pide `revalidate` → continuar el flujo completo (Pasos 1-7).
+   - **Difiere alguno**, falta la marca o el campo `spec=`, el reporte trae filas en `NOT_RUN` por una delegación que no se pudo hacer, o el usuario pide `revalidate` → continuar el flujo completo (Pasos 1-7).
 
 > Computar ambos hashes **una sola vez**: el `FINGERPRINT` se reutiliza en el Paso 4 (delegación) y los dos en el Paso 7 (guardado). La delegación en modo `tests-only` no abre ciclo de corrección, pero **sí** puede normalizar el `.gitignore` la primera vez que corre en un repo (ver `quality-check`, Paso 1), y eso mueve el `FINGERPRINT`. Por eso: **si se delegó, recalcularlo antes de guardar**; el `SPEC_FINGERPRINT` no se ve afectado.
 
@@ -71,15 +71,15 @@ Antes de trabajar, evitar regenerar si nada cambió (ver [Reutilización del rep
 
    | `Tipo de prueba` del TC | Artefacto esperado | Suite de `test-run.json` |
    |-------------------------|--------------------|--------------------------|
-   | `Unit` | unit | `unit` (suite fija) |
+   | `Unit` | unit | `unit` (suite fija, siempre presente) |
    | `Integration` | integración | la suite de integración **si el estándar de testing del repo la declara**; si no existe esa entrada, `unit` |
    | `API Test` | integración (prueba de contrato del endpoint) | la suite de integración o contrato que declare el estándar, o `unit`/`e2e` según dónde viva en el repo |
    | `Visual Test` | e2e (snapshot/visual regression) o unit según la herramienta | la suite que realmente lo ejecuta |
-   | `E2E` | e2e | `e2e` (suite fija) |
+   | `E2E` | e2e | `e2e` **si existe la entrada**; si el repo no ejecuta e2e, no habrá ninguna |
 
    Si el repo ubica una de estas pruebas en otra suite, mandar **dónde está realmente**, no la tabla: registrar la suite efectiva en Observaciones. No dejar un criterio en `PARTIAL` solo porque su tipo no tenga una suite homónima.
 
-   > **Solo `unit`, `coverage` y `e2e` están garantizadas en `test-run.json`.** El resto de suites —integración, contrato, rendimiento…— existen únicamente si el **estándar de testing** del repo las declara (ver [`quality-check` → Suites de prueba](../../quality-check/SKILL.md#suites-de-prueba-fijas-y-configuradas)). Si la entrada que esperabas no está, es que el repo no declara esa clase de prueba: resolver contra la suite donde viva realmente, o dejar `NOT_RUN` con la nota en Observaciones. **Nunca** inventar la entrada ausente.
+   > **Solo `unit` y `coverage` están garantizadas en `test-run.json`.** El resto de suites —**e2e incluida**, más integración, contrato, rendimiento…— existen únicamente si el repo tiene su config (e2e) o si el **estándar de testing** las declara (ver [`quality-check` → Suites de prueba](../../quality-check/SKILL.md#suites-de-prueba-fijas-y-configuradas)). Si la entrada que esperabas no está, es que el repo no declara esa clase de prueba: resolver contra la suite donde viva realmente, o dejar `NOT_RUN` con la nota en Observaciones. **Nunca** inventar la entrada ausente.
 
 5. Para cada artefacto, registrar su **ruta** y a qué criterio apunta (por vínculo declarado en el TC o, en su defecto, por nombre del test, describe/it o comentarios).
 
@@ -103,8 +103,9 @@ ejecución) y los mapea a los criterios.
 
 1. **Reusar el `FINGERPRINT` canónico** ya calculado en el Paso 0.
 2. **Buscar la caché** en la ubicación fija `.sdd-devkit/test-run.json` (no por unidad; es la corrida completa de la rama):
-   - **Existe, `git.fingerprint` coincide y su `suites[]` cubre el conjunto vigente** del estándar de
-     testing → caché **fresca** (sin cambios desde la corrida de `quality-check`): **reutilizar** sus
+   - **Existe, su `schema` es `test-run/v1`, `git.fingerprint` coincide y su `suites[]` cubre el conjunto
+     vigente** —las dos fijas, más e2e si el repo la ejecuta y las suites que declare el estándar de
+     testing— → caché **fresca** (sin cambios desde la corrida de `quality-check`): **reutilizar** sus
      `suites[]` sin ejecutar. Registrar la procedencia en la prosa del Resumen.
    - **No existe, el fingerprint difiere, o el `suites[]` no cubre el conjunto vigente** (el estándar de
      testing cambió: vive en `docs/`, que el fingerprint excluye) → **delegar en `quality-check` modo `tests-only`**, que ejecuta
@@ -211,7 +212,7 @@ Aplicar la tabla de «Veredicto» (en `SKILL.md`) sobre el conjunto de criterios
 ## Ejecución de pruebas: delegación en quality-check
 
 `trace-validate` **no detecta runners ni ejecuta pruebas**. La ejecución la realiza `quality-check`, que
-persiste el resultado en `.sdd-devkit/test-run.json` (esquema `test-run/v2`; ubicación fija, no por unidad).
+persiste el resultado en `.sdd-devkit/test-run.json` (esquema `test-run/v1`; ubicación fija, no por unidad).
 `trace-validate` solo **consume** ese artefacto.
 
 **Fuente de resultados (orden):**
@@ -228,9 +229,10 @@ persiste el resultado en `.sdd-devkit/test-run.json` (esquema `test-run/v2`; ubi
 [`quality-check` → Caché de corrida de pruebas](../../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate).
 **No** se replica aquí para que no diverja. Lo que este skill necesita de ella:
 
+- `schema` debe ser `test-run/v1`; cualquier otro valor → **descartar la caché** y delegar en `quality-check`: un `suites[]` de otro esquema no es interpretable con estas reglas.
 - `generatedBy` debe ser `"quality-check"`; cualquier otro valor → descartar la caché.
 - `git.fingerprint` es la clave de frescura del **código**; la conformidad del `suites[]` con el estándar de testing vigente es la segunda condición (siguiente viñeta). Ambas deben cumplirse para reutilizar.
-- `suites[]` trae **siempre las tres fijas** (`unit`, `coverage`, `e2e`); las que el repo no tiene vienen con `result: "N/A"`. Las demás entradas son **suites configuradas** en el estándar de testing del repo, cuyo `type` es el **`ID` del requisito** que las declara (p. ej. `integration-testing`, `contract-testing`), con su referencia global en `standard` (p. ej. `testing/integration-testing`). **Pueden no estar**: su ausencia significa que el repo no declara esa clase de prueba, no que falte información. **No buscar una clave fija como `integration`:** localizar la suite por su `standard` o por el `type` que el estándar declare.
+- `suites[]` trae **siempre las dos fijas** (`unit`, `coverage`); la que el repo no tiene viene con `result: "N/A"`. **Todo lo demás puede no estar, `e2e` incluido**: las otras entradas son `e2e`, cuando el repo tiene config, y las **suites configuradas** en el estándar de testing, cuyo `type` es el **`ID` del requisito** que las declara (p. ej. `integration-testing`, `contract-testing`), con su referencia global en `standard` (p. ej. `testing/integration-testing`). La ausencia de una de ellas significa que el repo no ejecuta esa clase de prueba, no que falte información — y **no** se traduce en un fallo. **No buscar una clave fija como `e2e` o `integration`:** localizar la suite por su `standard` o por el `type` que el estándar declare, y tratar la ausencia como «no declarada».
 - Si el `suites[]` de la caché **no cubre el conjunto vigente** de suites del estándar de testing (porque el estándar cambió después de la corrida), tratarla como **obsoleta** y delegar en `quality-check`, aunque el `git.fingerprint` coincida: el estándar vive en `docs/`, que el fingerprint excluye deliberadamente. Ver [`quality-check` → Caché de corrida de pruebas](../../quality-check/references/execution.md#caché-de-corrida-de-pruebas).
 - `invokedFrom` es informativo: **no** filtrar resultados por él ni descartar la caché porque nombre otro trabajo — la corrida es de la rama, no de la unidad.
 

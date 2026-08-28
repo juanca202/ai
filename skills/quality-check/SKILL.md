@@ -7,7 +7,7 @@ license: MIT
 
 # Skill: Verificaciones automatizadas de calidad
 
-Ejecuta la **batería de checks automatizados** que el stack exige (tipado, linter, unit tests, cobertura, build, e2e, sonar) más las **suites de prueba que declare el estándar de testing** del repo (integración, contrato, rendimiento…), adaptada al **stack detectado**, y emite un **veredicto** con su informe. Las únicas pruebas fijas son **unit, cobertura y e2e**; el resto del conjunto de pruebas lo define el estándar — ver [Suites de prueba](#suites-de-prueba-fijas-y-configuradas).
+Ejecuta la **batería de checks automatizados** que el stack exige (tipado, linter, unit tests, cobertura, build, e2e, sonar) más las **suites de prueba que declare el estándar de testing** del repo (integración, contrato, rendimiento…), adaptada al **stack detectado**, y emite un **veredicto** con su informe. Las únicas pruebas fijas son **unit y cobertura** —las dos únicas que se listan siempre, aunque salgan `N/A`—; el resto del conjunto sale de la config del propio repo (e2e) o del estándar de testing, y **lo que no aplica no se lista** — ver [Suites de prueba](#suites-de-prueba-fijas-y-configuradas).
 
 > **Alcance: solo el plano automatizado.** Este skill responde a «¿el código corre y cumple las reglas?». La pregunta «¿resuelve el problema correcto y está bien diseñado?» es del skill **[`code-review`](../code-review/SKILL.md)** (revisión cualitativa). Y «¿cada criterio de aceptación está probado?» es de **`trace-validate`**. Son **tres skills independientes**, cada uno con su veredicto e informe; quien los encadena es el orquestador de cierre (`work-integrate`, `pr-create`). Ver [Relación con otros skills](#relación-con-otros-skills).
 >
@@ -141,14 +141,14 @@ Checks canónicos en **orden de ejecución**. La categoría real depende del sta
 | 4 | Cobertura — **suite fija** | Bloqueante **si el proyecto tiene tooling de cobertura**; `N/A` si no lo tiene en absoluto | PASS si exit 0 **y** (sin umbrales configurados **o** umbrales cumplidos). FAIL si exit ≠ 0 **o** umbral configurado incumplido. |
 | 5 | **Suites configuradas** (integración, contrato, rendimiento, mutación, accesibilidad…) | La que fije el estándar de testing (ver [Suites de prueba](#suites-de-prueba-fijas-y-configuradas)) | Una por cada clase de prueba que **declare el estándar de testing** del repo, en su orden de declaración. Sin estándar, o sin más requisitos que los de las fijas, **no hay ninguna**: no inventar suites. |
 | 6 | Compilación | Bloqueante (Condicional en Python sin empaquetado) | FAIL si exit ≠ 0. En stacks compilados (Java, Go, Rust, .NET) cubre la compilación. Prerrequisito habitual de e2e. |
-| 7 | E2E — **suite fija** | Condicional (Bloqueante si el estándar de testing la exige) | Se ejecuta sobre el artefacto ya compilado. |
+| 7 | E2E | Condicional (Bloqueante si el estándar de testing la exige) | Se ejecuta sobre el artefacto ya compilado. **No es fija:** sin config e2e queda en `N/A` y **se omite del informe**, salvo que el estándar la declare (entonces es `SKIPPED` y sí se lista). |
 | 8 | Análisis estático (Sonar) | Informativo | Nunca bloquea. |
 
 El orden sigue la pirámide de tests (*rápido → lento*, *dependencias antes que consumidores*): estático (tipado/linter) → unit+coverage → suites configuradas → build → e2e → sonar. Una suite configurada que **requiera el artefacto compilado** (rendimiento, carga, accesibilidad sobre la app desplegada) se ejecuta después de build, junto a e2e. El fail-fast solo aplica al tipado, para evitar ruido en cascada. Justificación detallada en [`references/execution.md`](references/execution.md#paso-2--ejecutar-los-checks).
 
 > **Cobertura sin tooling — no es un callejón sin salida.** Si el repo **no tiene ninguna herramienta ni configuración** de cobertura, el check es `N/A` (el proyecto nunca lo pidió), no `SKIPPED`: aplica la mnemónica de [SKIPPED vs N/A](#skipped-vs-na-definición-tajante) y el veredicto no queda condenado a `INCOMPLETE` de forma permanente. En ese caso, **señalarlo en Próximas acciones** como recomendación (configurar cobertura), sin bloquear. En cuanto exista config o herramienta, el check vuelve a ser Bloqueante y su ausencia de ejecución sí es `SKIPPED`.
 
-> **Los checks de prueba alimentan la caché de pruebas** —las tres fijas (`unit`, `coverage`, `e2e`) más las suites configuradas— que consume `trace-validate` — ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate). Tipado, linter, build y sonar no producen suites.
+> **Los checks de prueba alimentan la caché de pruebas** —las dos fijas (`unit`, `coverage`) más `e2e` y las suites configuradas, cuando existen— que consume `trace-validate` — ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate). Tipado, linter, build y sonar no producen suites.
 
 ---
 
@@ -158,15 +158,24 @@ El **conjunto de pruebas** de una corrida tiene dos partes, y solo la primera es
 
 | | Cuáles | De dónde salen | En el informe |
 |-|--------|----------------|---------------|
-| **Fijas** | `unit` · `coverage` · `e2e` | Del catálogo de checks: son las tres que este skill exige a cualquier repo. | **Siempre** se listan, aunque el estado sea `N/A`. Nunca se omiten. |
-| **Configuradas** | Integración, contrato, rendimiento/carga, mutación, accesibilidad, seguridad… **cualquier otra clase** | Del **estándar de testing** del repo: `docs/standards/testing.md` (forma simple) o `docs/standards/testing/README.md` (forma con carpeta), un bloque `## <Requisito>` con su `ID` por clase de prueba. | Una fila por requisito vigente, en el **orden en que el estándar los declara**. |
+| **Fijas** | `unit` · `coverage` — **solo esas dos** | Del catálogo de checks: son las dos que este skill exige a cualquier repo. | **Siempre** se listan, aunque el estado sea `N/A`. Nunca se omiten: que un repo no tenga pruebas unitarias ni cobertura es justo lo que el informe debe decir. |
+| **Configuradas** | `e2e`, integración, contrato, rendimiento/carga, mutación, accesibilidad, seguridad… **cualquier otra clase** | `e2e` sale del catálogo de checks **si el repo tiene config e2e**; el resto, del **estándar de testing** del repo: `docs/standards/testing.md` (forma simple) o `docs/standards/testing/README.md` (forma con carpeta), un bloque `## <Requisito>` con su `ID` por clase de prueba. | Una fila por suite que exista, en el **orden en que el estándar los declara**. **Si no aplica, no lleva fila** — ver la regla de omisión abajo. |
+
+> **De qué raíz sale el estándar de testing.** Del **módulo o repositorio que se está auditando**, no
+> siempre del principal: es la misma raíz que fija la [Excepción monorepo](#alcance) del alcance. Si la
+> corrida cubre un submódulo o un módulo de monorepo, el estándar que manda es su
+> `docs/standards/testing.md`, y solo si ese no existe se cae al del repo principal. Es coherente con
+> `arch-manage`, que escribe los estándares en la raíz del código que gobiernan (ver
+> [`../../reference/artifacts.md`](../../reference/artifacts.md#raíz-de-arquitectura-adr-estándares-y-fitness-functions)).
+> Todas las menciones a `docs/standards/testing.md` de este skill se leen contra esa raíz.
 
 **Reglas:**
 
-- **El estándar es la única fuente de las suites no fijas.** Si el repo no tiene estándar de testing, o su estándar no declara más clases de prueba que las fijas, la corrida son **solo las tres fijas**. No se añade ninguna suite por haberla detectado en el repo.
+- **Lo que no aplica no se lista.** La tabla del informe incluye **solo los checks que se ejecutaron**, más `unit` y `coverage` siempre. Cualquier otro check en `N/A` —sin stack/config detectable, o excluido por un modificador del usuario— **se omite del informe**: no lleva fila, y no se añade nota al pie ni sección que enumere lo omitido. Esto vale para `e2e` igual que para tipado, linter, build o sonar.
+- **El estándar es la única fuente de las suites configuradas** (salvo `e2e`, que sale del catálogo de checks). Si el repo no tiene estándar de testing, o su estándar no declara más clases de prueba que las fijas, la corrida son **solo `unit`, `coverage` y —si hay config— `e2e`**. No se añade ninguna otra suite por haberla detectado en el repo.
 - **Solo cuentan los requisitos vigentes.** Un requisito con `**Estado:** Deprecated` o `Superseded` no se ejecuta ni se lista: dejó de ser exigible.
 - **La categoría sale del enunciado normativo** del requisito (RFC 2119, ver [`../../reference/language.md`](../../reference/language.md)): **DEBE / MUST → Bloqueante**; **DEBERÍA / PUEDE (SHOULD / MAY) → Condicional**. Si el enunciado no es claro, tratarla como **Condicional** y anotarlo en el detalle del check.
-- **El estándar puede endurecer una fija, nunca ablandarla.** Si declara e2e con **DEBE**, e2e pasa de Condicional a Bloqueante. Lo que el stack exige como Bloqueante (unit, coverage) sigue siéndolo aunque el estándar calle o suavice.
+- **El estándar puede endurecer un check, nunca ablandarlo.** Si declara e2e con **DEBE**, e2e pasa de Condicional a Bloqueante (y, al estar declarado, un e2e que no se puede ejecutar es `SKIPPED`, no `N/A`, así que **sí lleva fila**). Lo que el stack exige como Bloqueante (unit, coverage) sigue siéndolo aunque el estándar calle o suavice.
 - **Suite declarada que no se puede ejecutar → `SKIPPED`** (`INCOMPLETE`), no `N/A`: el estándar es precisamente la declaración de que ese check debe correr — es la mnemónica de [SKIPPED vs N/A](#skipped-vs-na-definición-tajante) aplicada al pie de la letra.
 - **Suite presente en el repo pero no declarada en el estándar:** **no se ejecuta y no bloquea**. Anotarla en **Próximas acciones** como recomendación de declararla en el estándar (vía `arch-manage`), igual que se hace con la cobertura sin tooling.
 - **El comando se resuelve como el de cualquier otro check:** scripts/tareas del manifiesto según [`references/stacks.md`](references/stacks.md#resolución-de-comandos-por-stack), usando como pista lo que el propio requisito diga sobre herramienta y ubicación. Si no se resuelve con certeza, preguntar en vez de adivinar.
@@ -181,7 +190,7 @@ El **detalle por ecosistema** vive en [`references/stacks.md`](references/stacks
 
 1. Inspeccionar la raíz e identificar el ecosistema por manifiesto (`package.json`, `pom.xml`, `build.gradle`, `pyproject.toml`/`requirements.txt`, `go.mod`, `Cargo.toml`, `*.sln`/`*.csproj`, `composer.json`).
 2. **Una vez identificado el stack**, abrir `references/stacks.md` y usar únicamente la **categoría**, el **comando** y el **parseo** de ese stack — no antes (no arrastres columnas que no aplican).
-3. **Leer el estándar de testing** (`docs/standards/testing.md` o `docs/standards/testing/README.md`) para resolver las **suites configuradas**. Si no existe, la corrida son solo las tres suites fijas — no es un error ni hay que avisarlo. Ver [Suites de prueba](#suites-de-prueba-fijas-y-configuradas).
+3. **Leer el estándar de testing** (`docs/standards/testing.md` o `docs/standards/testing/README.md`) para resolver las **suites configuradas**. Si no existe, la corrida son solo las dos suites fijas más `e2e` si el repo tiene config — no es un error ni hay que avisarlo. Ver [Suites de prueba](#suites-de-prueba-fijas-y-configuradas).
 4. **Monorepo** ambiguo o **stack no detectable**: parar y preguntar.
 
 ---
@@ -197,12 +206,12 @@ Las **claves** de los modificadores son siempre en inglés (estándar). Si el us
 | `no-sonar` | Omitir Sonar específicamente. |
 | `include-linter-warnings` | Tratar los `warning` del linter como `error` (p. ej. `eslint --max-warnings=0`). |
 | `include-eslint-warnings` | Alias de `include-linter-warnings` para Node. |
-| `no-tests` | Omitir **todos los checks de pruebas**: las tres fijas (unit, coverage, e2e) y todas las suites configuradas (→ `N/A`, no `SKIPPED`: lo pidió el usuario). |
-| `no-unit-tests` / `no-e2e` / `no-coverage` / `no-typecheck` | Omitir solo ese check (→ `N/A`). |
+| `no-tests` | Omitir **todos los checks de pruebas**: las dos fijas (unit, coverage), e2e y todas las suites configuradas (→ `N/A`, no `SKIPPED`: lo pidió el usuario). Solo `unit` y `coverage` conservan su fila en el informe, con estado `N/A`; el resto se omite. |
+| `no-unit-tests` / `no-e2e` / `no-coverage` / `no-typecheck` | Omitir solo ese check (→ `N/A`). El modificador del usuario **gana siempre**: `no-e2e` deja e2e en `N/A` —y por tanto **sin fila**— aunque el estándar de testing la declare con DEBE; nunca se convierte en `SKIPPED`. `unit` y `coverage` conservan su fila con estado `N/A`, por ser fijas. |
 | `no-<suite>` | Omitir una **suite configurada** por su `ID` de requisito en el estándar (p. ej. `no-integration`, `no-contract`) → `N/A`. |
 | `only <check>` | Ejecutar ÚNICAMENTE ese check (p. ej. `only build`); el resto → `N/A`. |
 | `save-report` | **Además** del informe vigente `docs/audits/quality-check.md` (que siempre se escribe), guardar una copia con marca de tiempo en `docs/audits/quality-check-<YYYYMMDD-HHMMSS>.md` para conservar histórico. |
-| `tests-only` | Ejecutar **solo los checks de ejecución de pruebas** (las tres fijas —unit, coverage, e2e— más las suites configuradas; build solo si es prerrequisito de alguna de ellas); omitir tipado/linter/sonar. Pensado como **objetivo de delegación de `trace-validate`**: honra la caché de corrida de pruebas — si existe un `test-run.json` **fresco** (fingerprint coincide, ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate)) **reutiliza** ese resultado sin re-ejecutar; si no, ejecuta y escribe/actualiza la caché. **Modo no interactivo:** devuelve los resultados por suite y la ruta de `test-run.json` **sin** entrar al ciclo de corrección, **sin** emitir veredicto y **sin** escribir `quality-check.md` — su único artefacto es `test-run.json`. Si hay suites en FAIL, se reportan como tales; corregirlas es decisión del flujo que invocó, no de esta corrida. |
+| `tests-only` | Ejecutar **solo los checks de ejecución de pruebas** (las dos fijas —unit, coverage— más e2e y las suites configuradas, cuando existen; build solo si es prerrequisito de alguna de ellas); omitir tipado/linter/sonar. Pensado como **objetivo de delegación de `trace-validate`**: honra la caché de corrida de pruebas — si existe un `test-run.json` **fresco** (fingerprint coincide, ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate)) **reutiliza** ese resultado sin re-ejecutar; si no, ejecuta y escribe/actualiza la caché. **Modo no interactivo:** devuelve los resultados por suite y la ruta de `test-run.json` **sin** entrar al ciclo de corrección, **sin** emitir veredicto y **sin** escribir `quality-check.md` — su único artefacto es `test-run.json`. Si hay suites en FAIL, se reportan como tales; corregirlas es decisión del flujo que invocó, no de esta corrida. |
 
 > Todo check omitido **por modificador del usuario** es `N/A`, nunca `SKIPPED`: una omisión solicitada no convierte el veredicto en `INCOMPLETE`.
 
@@ -216,7 +225,7 @@ Las **claves** de los modificadores son siempre en inglés (estándar). Si el us
 2. **Ejecutar los checks** secuencialmente según el catálogo.
 3. **Evaluar el resultado y el veredicto** con la tabla de [Veredicto](#veredicto). Si hay FAIL, mostrar el reporte y resolver si se corrige según `verification.qualityCheck.confirmFix` (ver [Política de corrección](#política-de-corrección)): con `always`, **preguntar** qué hacer — dentro de una implementación la pregunta es si se corrige, **fuera de una implementación** ofrecer además la salida **«solo el informe»**; con `never`, corregir directo sin preguntar. Si corresponde corregir y la rama tiene un artefacto identificable (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin), la corrección se **delega en `work-implement`**; solo si no hay artefacto de ningún tipo se aplica aquí — ver [Corrección de fallos](#corrección-de-fallos).
 4. **Construir informe:** rellenar [`assets/quality-check-template.md`](assets/quality-check-template.md).
-5. **Registro y salida:** escribir siempre el informe en `docs/audits/quality-check.md` y —**solo si la corrida ejecutó el conjunto de pruebas completo** (las tres fijas más todas las suites configuradas)— la caché en `.sdd-devkit/test-run.json` (creando los directorios si no existen), más un resumen en el chat. **Excepción `tests-only`:** no hay informe ni veredicto; el único artefacto es `test-run.json`. **No** hacer commit/push/merge sin instrucción explícita.
+5. **Registro y salida:** escribir siempre el informe en `docs/audits/quality-check.md` y —**solo si la corrida ejecutó el conjunto de pruebas completo** (las dos fijas, e2e y todas las suites configuradas que apliquen)— la caché en `.sdd-devkit/test-run.json` (creando los directorios si no existen), más un resumen en el chat. **Excepción `tests-only`:** no hay informe ni veredicto; el único artefacto es `test-run.json`. **No** hacer commit/push/merge sin instrucción explícita.
 
 > **Tras cualquier corrección, el código cambió: recalcular el fingerprint** (Paso 1) antes de escribir la caché. Escribir un `test-run.json` con el fingerprint previo lo vuelve falso — afirmaría corresponder a un estado del código que ya no existe.
 
@@ -276,7 +285,7 @@ Si no se resuelve un artefacto del plugin, **comprobar antes si hay uno externo*
 
 **Qué se le pasa a `work-implement`** al delegar: el artefacto en curso (`US-XXX` / `WI-XXX` / `FT-XXX` / `TC-XXX`), el check que falló, el comando exacto, la salida de error relevante y los archivos implicados. La corrección se atribuye a ese artefacto y se anota en su `progress.md` como nota de retrabajo — **salvo que el artefacto esté archivado**, en cuyo caso la nota va en este informe y no se escribe dentro de `docs/archive/` (ver la regla de artefacto archivado en [`work-implement`](../work-implement/SKILL.md#seleccion-del-tipo-de-implementacion)); `work-implement` aplica su propio criterio en su [Modo corrección](../work-implement/SKILL.md#modo-correccion-delegado-desde-quality-check) — un modo acotado, sin ritmo por unidad y sin exigir `Estado: Ready` ni working tree limpio.
 
-**Aplica igual a fallos de pruebas** (las tres fijas y cualquier suite configurada) que a fallos de tipado, linter o build: en ambos casos hay que escribir o ajustar código, que es justo lo que hace `work-implement`.
+**Aplica igual a fallos de pruebas** (las dos fijas, e2e y cualquier suite configurada) que a fallos de tipado, linter o build: en ambos casos hay que escribir o ajustar código, que es justo lo que hace `work-implement`.
 
 > **En ramas `test/`, no presuponer que el fallo está en la prueba.** Una prueba en rojo ahí puede significar que la prueba está mal **o** que hay una discrepancia real entre el `TC-XXX` y el comportamiento del código. Esa decisión no la toma este skill: se delega en `work-implement`, que aplica su criterio para los tipos `TC-XXX` / `FT-XXX` (parar, presentar la evidencia y decidir con el usuario si se corrige producción, si se corrige la prueba, o si vuelve a `test-define`). **Nunca relajar una aserción para forzar el verde.**
 
@@ -305,7 +314,7 @@ Cuando el trabajo está descrito por un artefacto externo y el usuario autoriza 
 
 ## Caché de corrida de pruebas (compartida con trace-validate)
 
-Cuando este skill **ejecuta los checks de pruebas** (las fijas —unit, coverage, e2e— más las suites
+Cuando este skill **ejecuta los checks de pruebas** (las fijas —unit, coverage— más e2e y las suites
 configuradas en el estándar de testing), persiste el resultado en `.sdd-devkit/test-run.json` —ruta
 **fija**, en la raíz del repositorio, no versionado (se sobrescribe en cada corrida)— para que
 `trace-validate` **no vuelva a correr las pruebas**: si el código no cambió desde esta corrida, reutiliza

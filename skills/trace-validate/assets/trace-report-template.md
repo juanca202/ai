@@ -35,19 +35,19 @@ Plantilla canónica del reporte de trazabilidad (trace-validate).
 
 {{1-3 frases: estado general de la cobertura y criterios faltantes/fallidos si los hay.}}
 
-**Pruebas:** {{procedencia — caché fresca de `quality-check` (commit abc1234, YYYY-MM-DD) | corrida `tests-only` disparada ahora | no ejecutable y por qué}}. {{Resultado por suite, solo las que traiga `suites[]`: unit `PASS` · e2e `N/A` · integration-testing `FAIL` (esta última solo si el estándar de testing del repo la declara) — o «no ejecutado» si no hubo corrida}}.
+**Pruebas:** {{procedencia — caché fresca de `quality-check` (commit abc1234, YYYY-MM-DD) | corrida `tests-only` disparada ahora | no ejecutable y por qué}}. {{Resultado por suite, solo las que traiga `suites[]`: unit `PASS` · coverage `PASS` · e2e `FAIL` (solo si el repo ejecuta e2e) · integration-testing `FAIL` (solo si el estándar de testing del repo la declara) — o «no ejecutado» si no hubo corrida}}.
 
 **Cobertura de criterios de aceptación**
 
-| Total | `COVERED` | `PARTIAL` | `UNCOVERED` |
+| Total | {{COVERED}} | {{PARTIAL}} | {{UNCOVERED}} |
 | ----- | --------- | --------- | ------------ |
 | {{M}} | {{N}}     | {{P}}     | {{Q}}         |
 
 <!--
 - «Total» = M, el total de criterios de aceptación del artefacto. `COVERED` + `PARTIAL` + `UNCOVERED`s DEBE sumar M.
 - Cifras siempre numéricas: 0, no «—».
-- La línea «Pruebas» se copia de test-run.json: `result` viene por suite —las fijas (unit/coverage/e2e) más
-  las que declare el estándar de testing del repo (integration, contract…)—, no hay agregado global: no
+- La línea «Pruebas» se copia de test-run.json: `result` viene por suite —las fijas (unit/coverage), más e2e
+  si el repo la ejecuta y las que declare el estándar de testing (integration, contract…)—, no hay agregado global: no
   inventar uno, ni listar una suite que no venga en `suites[]`. Si no hubo corrida, decir «no ejecutable» y
   el motivo, sin suites.
   La suite `coverage` no se lista aquí: si dio FAIL, va a «Observaciones y pendientes».
@@ -59,10 +59,10 @@ Vista de veredicto: un criterio por fila. El detalle de qué lo prueba está en 
 
 | Criterio | Descripción                | Estado      | Observaciones                                                |
 | -------- | -------------------------- | ----------- | ------------------------------------------------------------ |
-| AC-001   | {{Criterio de aceptación}} | `COVERED`    | {{Cobertura apoyada en TC-005 `Manual` (por diseño)}}        |
-| AC-002   | {{Criterio de aceptación}} | `PARTIAL`     | {{E2E declarado en TC-002 sin automatizar}}                  |
-| AC-003   | {{Criterio de aceptación}} | `UNCOVERED` | {{Hueco: sin caso de prueba ni artefacto asociado}}          |
-| AC-004   | {{Criterio de aceptación}} | `UNCOVERED` | {{`ruta/al/test.integration.ext` falla — aislado a su test}} |
+| AC-001   | {{Criterio de aceptación}} | {{✅ COVERED}}   | {{Cobertura apoyada en TC-005 `Manual` (por diseño)}}        |
+| AC-002   | {{Criterio de aceptación}} | {{⚠️ PARTIAL}}   | {{E2E declarado en TC-002 sin automatizar}}                  |
+| AC-003   | {{Criterio de aceptación}} | {{❌ UNCOVERED}} | {{Hueco: sin caso de prueba ni artefacto asociado}}          |
+| AC-004   | {{Criterio de aceptación}} | {{❌ UNCOVERED}} | {{`ruta/al/test.integration.ext` falla — aislado a su test}} |
 
 ## Matriz de trazabilidad
 
@@ -70,12 +70,12 @@ Vista auditable: **una fila por cada combinación criterio × caso de prueba × 
 
 | Criterio | TC     | Tipo        | Evidencia                       | Ejecución     | Resultado   |
 | -------- | ------ | ----------- | ------------------------------- | ------------- | ----------- |
-| AC-001   | TC-001 | Unit        | `ruta/al/test.ext`              | quality-check | `PASS`      |
-| AC-001   | TC-005 | Manual      | `test-cases/TC-005-{{slug}}.md` | Manual        | `N/A`       |
-| AC-002   | TC-002 | Unit        | `ruta/al/test.ext`              | quality-check | `PASS`      |
-| AC-002   | TC-002 | E2E         | —                               | —             | `UNCOVERED` |
-| AC-003   | —      | —           | —                               | —             | `UNCOVERED` |
-| AC-004   | TC-004 | Integration | `ruta/al/test.integration.ext`  | quality-check | `FAIL`      |
+| AC-001   | TC-001 | Unit        | `ruta/al/test.ext`              | quality-check | {{✅ PASS}}      |
+| AC-001   | TC-005 | Manual      | `test-cases/TC-005-{{slug}}.md` | Manual        | {{— N/A}}       |
+| AC-002   | TC-002 | Unit        | `ruta/al/test.ext`              | quality-check | {{✅ PASS}}      |
+| AC-002   | TC-002 | E2E         | —                               | —             | {{❌ UNCOVERED}} |
+| AC-003   | —      | —           | —                               | —             | {{❌ UNCOVERED}} |
+| AC-004   | TC-004 | Integration | `ruta/al/test.integration.ext`  | quality-check | {{❌ FAIL}}      |
 
 ## Observaciones y pendientes
 

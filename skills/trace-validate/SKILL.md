@@ -148,7 +148,7 @@ Los valores de la columna `Estado` son **canónicos**: en el reporte se escribe 
 
 > **Cobertura ≠ ejecución.** Que exista prueba que valida el criterio es una cosa; que haya corrido y con qué resultado, otra. Un criterio cuya prueba **falló** —y se pudo aislar que fue la suya— se reporta `UNCOVERED` con el fallo en Observaciones; si la suite falló pero no se puede aislar el test, es `PARTIAL` (ver «Mapeo a la matriz»).
 >
-> **El `status` del TC filtra la cobertura.** `test-define` guarda cada TC con una marca oculta `<!-- tc:status=Draft|Ready|Obsolete · testType=… -->` — **leer de ahí**, no de la etiqueta visible, que va en el idioma resuelto. Un TC **`Obsolete`** no cuenta como cobertura (dejar Observación); uno **`Draft`** cuenta como cobertura `PARTIAL` (aún no está listo para respaldar el criterio); solo los **`Ready`** cuentan como cobertura plena. Si el TC no trae el campo, tratarlo como `Ready`. Esto es distinto del `Estado:` del **artefacto**, que este skill no exige (ver «Cuándo bloquear»).
+> **El `status` del TC filtra la cobertura.** La fuente primaria es la **columna `Estado` del índice** `test-cases/README.md`; si el índice no la trae, abrir el `TC-XXX-*.md` y leer su campo `Estado`, con la marca oculta `<!-- tc:status=Draft|Ready|Obsolete · testType=… -->` como desempate. Los **valores** (`Draft`/`Ready`/`Obsolete`) son canónicos y no se traducen; lo que va en el idioma resuelto es la etiqueta del campo. Un TC **`Obsolete`** no cuenta como cobertura (dejar Observación); uno **`Draft`** cuenta como cobertura `PARTIAL` (aún no está listo para respaldar el criterio); solo los **`Ready`** cuentan como cobertura plena. Si el TC no trae el campo, tratarlo como `Ready`. Esto es distinto del `Estado:` del **artefacto**, que este skill no exige (ver «Cuándo bloquear»).
 >
 > **Manual por diseño vs. pendiente de automatizar.** `test-define` distingue los dos casos en el campo **Tipo de prueba** del TC: `Manual` significa *no se automatiza por decisión de diseño*; cualquier otro valor (`Unit`, `Integration`, `API Test`, `Visual Test`, `E2E`) significa *debería existir artefacto automatizado*. Respetar esa declaración: un criterio con TCs `Manual` que lo cubren por completo es `COVERED` (sus filas van con `Ejecución = Manual` y `Resultado = N/A`), no una deuda; un criterio con TCs automatizables **sin** artefacto es `PARTIAL` o `UNCOVERED`. No penalizar una decisión de diseño ni disimular una automatización pendiente.
 >
@@ -306,7 +306,7 @@ donde `$ARTEFACTO` es la carpeta del trabajo (`docs/specs/user-stories/US-042-�
      ejecutar el flujo completo (Pasos 1-7) y **regrabar** ambos hashes al guardar (Paso 7).
 4. La marca de pie **se conserva** en el documento publicado (no se elimina como el bloque de instrucciones
    de la plantilla). Si está **ilegible o incompleta** (un hash que no parsea, marca truncada, o falta el
-   campo `spec=` porque el reporte es anterior a esta convención), no intentar repararla ni adivinar: tratar
+   campo `spec=`), no intentar repararla ni adivinar: tratar
    la caché como ausente, regenerar y regrabarla.
 
 > **Un reporte que no pudo ejecutar las pruebas nunca se sirve desde caché.** Si el reporte existente tiene
@@ -324,16 +324,16 @@ donde `$ARTEFACTO` es la carpeta del trabajo (`docs/specs/user-stories/US-042-�
 ## Resultados de pruebas: delegación en quality-check
 
 `trace-validate` **no ejecuta la suite de pruebas**. La ejecución es responsabilidad de `quality-check`,
-que la persiste en un artefacto reutilizable `test-run.json` (esquema `test-run/v2`). Como el review es
+que la persiste en un artefacto reutilizable `test-run.json` (esquema `test-run/v1`). Como el review es
 una **corrida completa** de la rama, este artefacto vive en una **ubicación fija**, no por unidad:
 **`.sdd-devkit/test-run.json`**, en la raíz del repositorio.
 
 **Cómo obtener los resultados (Paso 4 del flujo):**
 
 1. **Reusar el fingerprint canónico** ya calculado en el Paso 0 (mismo valor; no recalcular).
-2. **Si existe `test-run.json`, su `generatedBy` es `"quality-check"`, su `git.fingerprint` coincide y su
-   `suites[]` cubre el conjunto de suites vigente** (las tres fijas más las que declare el estándar de
-   testing del repo) → caché **fresca**: no hubo cambios desde la corrida de `quality-check`. **Reutilizar**
+2. **Si existe `test-run.json`, su `schema` es `test-run/v1`, su `generatedBy` es `"quality-check"`, su `git.fingerprint` coincide y su
+   `suites[]` cubre el conjunto de suites vigente** (las dos fijas, más e2e si el repo la ejecuta y las que
+   declare el estándar de testing) → caché **fresca**: no hubo cambios desde la corrida de `quality-check`. **Reutilizar**
    los resultados por suite sin ejecutar nada. Si `generatedBy` trae cualquier otro valor,
    **descartar la caché** y delegar: `quality-check` es el único productor autorizado. **Si el estándar de
    testing cambió** desde la corrida (suites de más o de menos), la caché es obsoleta **aunque el fingerprint
@@ -348,7 +348,7 @@ una **corrida completa** de la rama, este artefacto vive en una **ubicación fij
    artefactos hallados. **Nunca fabricar resultados.**
 
 **Mapeo a la matriz.** Cada entrada `suites[]` de `test-run.json` trae `type` y `result`
-(`PASS`/`FAIL`/`SKIPPED`/`N/A`). Las **tres fijas** —`unit`, `coverage`, `e2e`— vienen siempre; el resto son
+(`PASS`/`FAIL`/`SKIPPED`/`N/A`). Las **dos fijas** —`unit`, `coverage`— vienen siempre; `e2e` solo si el repo la ejecuta, y el resto son
 **suites configuradas** en el estándar de testing del repo, cuyo `type` es el `ID` del requisito que las
 declara (p. ej. `integration-testing`, `contract-testing`) y que traen su referencia global en `standard`
 (p. ej. `testing/integration-testing`). **Pueden no existir**: si el estándar no declara integración, no hay
