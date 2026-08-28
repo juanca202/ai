@@ -19,12 +19,23 @@
     "language": {
       "type": "string",
       "description": "Idioma de preferencia para las respuestas e interacciones de la IA. Sin valor resuelto, el catálogo no asume ninguno: lo infiere del contexto o pregunta (ver reference/language.md).",
-      "enum": ["es", "en", "fr", "de", "it"]
+      "enum": [
+        "es",
+        "en",
+        "fr",
+        "de",
+        "it"
+      ]
     },
     "specification": {
       "type": "object",
       "description": "Configuración de especificaciones: rutas base y de archivado de docs/specs/, envío de eventos de seguimiento y política de definición de casos de prueba al planificar.",
-      "required": ["basePath", "archivePath", "trackingEnabled", "testCases"],
+      "required": [
+        "basePath",
+        "archivePath",
+        "trackingEnabled",
+        "testCases"
+      ],
       "additionalProperties": false,
       "properties": {
         "basePath": {
@@ -47,13 +58,20 @@
         "testCases": {
           "type": "object",
           "description": "Política de definición de casos de prueba: cuándo se ofrece test-define al cerrar la planificación, y si test-define entrevista al usuario o usa valores por defecto.",
-          "required": ["mode", "askDetails"],
+          "required": [
+            "mode",
+            "askDetails"
+          ],
           "additionalProperties": false,
           "properties": {
             "mode": {
               "type": "string",
               "description": "Si se ofrecen los casos de prueba (test-define) al cerrar la planificación —en work-define al dejar una historia en Ready, y en work-plan al dejar las tareas en Ready—: se pregunta (ask), se invoca automáticamente sin preguntar (always), o nunca se sugiere ni se invoca (never).",
-              "enum": ["ask", "always", "never"]
+              "enum": [
+                "ask",
+                "always",
+                "never"
+              ]
             },
             "askDetails": {
               "type": "boolean",
@@ -68,17 +86,23 @@
             {
               "properties": {
                 "trackingEnabled": {
-                  "enum": [false]
+                  "enum": [
+                    false
+                  ]
                 }
               }
             },
             {
               "properties": {
                 "trackingEnabled": {
-                  "enum": [true]
+                  "enum": [
+                    true
+                  ]
                 }
               },
-              "required": ["trackingUrl"]
+              "required": [
+                "trackingUrl"
+              ]
             }
           ]
         }
@@ -100,17 +124,28 @@
         "confirmByUnit": {
           "type": "string",
           "description": "Estrategia para solicitar confirmación del usuario por unidad de trabajo.",
-          "enum": ["always", "never"]
+          "enum": [
+            "always",
+            "never"
+          ]
         },
         "uncommittedChanges": {
           "type": "string",
           "description": "Qué hacer si hay cambios sin commitear al iniciar (o reanudar) una sesión de implementación: comitearlos (commit), guardarlos en git stash (stash), o preguntar al usuario (ask).",
-          "enum": ["commit", "stash", "ask"]
+          "enum": [
+            "commit",
+            "stash",
+            "ask"
+          ]
         },
         "workTree": {
           "type": "string",
           "description": "Política de aislamiento de cambios en git worktrees temporales.",
-          "enum": ["ask", "always", "never"]
+          "enum": [
+            "ask",
+            "always",
+            "never"
+          ]
         },
         "workTreePath": {
           "type": "string",
@@ -124,12 +159,19 @@
         "archiveMode": {
           "type": "string",
           "description": "Al cerrar un trabajo, si su carpeta se mueve a la ruta de archivado: se pide confirmación mostrando origen y destino (ask), se archiva sin preguntar (always), o no se archiva ni se ofrece (never). Lo resuelven work-integrate y pr-create.",
-          "enum": ["ask", "always", "never"]
+          "enum": [
+            "ask",
+            "always",
+            "never"
+          ]
         },
         "handoff": {
           "type": "string",
           "description": "Al cerrar el alcance implementado: invocar directamente el siguiente skill del ciclo sin preguntar (always), o presentar las opciones de cierre y esperar la elección del usuario (ask).",
-          "enum": ["always", "ask"]
+          "enum": [
+            "always",
+            "ask"
+          ]
         }
       }
     },
@@ -147,7 +189,10 @@
         "qualityCheck": {
           "type": "object",
           "description": "Puerta quality-check.",
-          "required": ["enabled", "confirmFix"],
+          "required": [
+            "enabled",
+            "confirmFix"
+          ],
           "additionalProperties": false,
           "properties": {
             "enabled": {
@@ -156,15 +201,21 @@
             },
             "confirmFix": {
               "type": "string",
-              "description": "Indica si se requiere confirmación del usuario antes de aplicar automáticamente las correcciones detectadas.",
-              "enum": ["always", "never"]
+              "description": "Si quality-check pide confirmación antes de corregir un fallo (always) o corrige directamente sin preguntar (never).",
+              "enum": [
+                "always",
+                "never"
+              ]
             }
           }
         },
         "codeReview": {
           "type": "object",
           "description": "Puerta code-review.",
-          "required": ["enabled", "confirmFix"],
+          "required": [
+            "enabled",
+            "confirmFix"
+          ],
           "additionalProperties": false,
           "properties": {
             "enabled": {
@@ -173,15 +224,21 @@
             },
             "confirmFix": {
               "type": "string",
-              "description": "Indica si se requiere confirmación del usuario antes de aplicar automáticamente las correcciones detectadas.",
-              "enum": ["always", "never"]
+              "description": "Si code-review pide confirmación antes de aplicar la corrección de un hallazgo bloqueante (always) o la aplica directamente sin preguntar (never).",
+              "enum": [
+                "always",
+                "never"
+              ]
             }
           }
         },
         "requirementCoverage": {
           "type": "object",
           "description": "Puerta trace-validate.",
-          "required": ["enabled", "confirmFix"],
+          "required": [
+            "enabled",
+            "confirmFix"
+          ],
           "additionalProperties": false,
           "properties": {
             "enabled": {
@@ -190,40 +247,59 @@
             },
             "confirmFix": {
               "type": "string",
-              "description": "Indica si se requiere confirmación del usuario antes de aplicar automáticamente las correcciones detectadas.",
-              "enum": ["always", "never"]
+              "description": "Reservado por consistencia con las otras dos puertas. trace-validate no aplica correcciones por sí mismo (solo reporta y delega la ejecución de pruebas en quality-check), así que este valor no tiene efecto hoy.",
+              "enum": [
+                "always",
+                "never"
+              ]
             }
           }
         },
         "handoff": {
           "type": "string",
           "description": "Dentro de work-integrate, tras un veredicto de cierre que deja pasar (todas las puertas activas en APPROVED/APPROVED_WITH_NOTES): continuar con el archivado y el merge sin preguntar (always), o pedir confirmación al usuario antes de seguir (ask).",
-          "enum": ["always", "ask"]
+          "enum": [
+            "always",
+            "ask"
+          ]
         }
       }
     },
     "git": {
       "type": "object",
       "description": "Política de confirmación de commits y de push del skill git-commit.",
-      "required": ["commitConfirmation", "push"],
+      "required": [
+        "commitConfirmation",
+        "push"
+      ],
       "additionalProperties": false,
       "properties": {
         "commitConfirmation": {
           "type": "string",
           "description": "Si se muestra la propuesta de división en varios commits y se espera confirmación antes de ejecutar el lote. Un commit único nunca se confirma: se infiere el mensaje y se ejecuta tras la validación.",
-          "enum": ["always", "never"]
+          "enum": [
+            "always",
+            "never"
+          ]
         },
         "push": {
           "type": "string",
           "description": "Política de push tras completar el/los commits. Solo aplica en invocación directa del usuario, nunca cuando git-commit es invocado por otro skill.",
-          "enum": ["ask", "always", "never"]
+          "enum": [
+            "ask",
+            "always",
+            "never"
+          ]
         },
         "integrationBranches": {
           "type": "array",
           "description": "Ramas que el repositorio usa como ramas de integración o despliegue, con su política de commit. Una lista vacía o ausente significa que el repo no las declara: los skills preguntarán cuando necesiten resolver una.",
           "items": {
             "type": "object",
-            "required": ["name", "commitPolicy"],
+            "required": [
+              "name",
+              "commitPolicy"
+            ],
             "additionalProperties": false,
             "properties": {
               "name": {
@@ -233,7 +309,10 @@
               "commitPolicy": {
                 "type": "string",
                 "description": "Cómo entra trabajo en esta rama de integración. merge: admite merge y commit en local, sin pedir confirmación extra por ser rama protegida. pull_request: solo se integra vía pull request; nada se comitea ni se mergea sobre ella en local.",
-                "enum": ["merge", "pull_request"]
+                "enum": [
+                  "merge",
+                  "pull_request"
+                ]
               }
             }
           }
@@ -243,7 +322,9 @@
     "projectManagement": {
       "type": "object",
       "description": "Configuración de la plataforma de gestión de proyectos vinculada.",
-      "required": ["enabled"],
+      "required": [
+        "enabled"
+      ],
       "additionalProperties": false,
       "properties": {
         "enabled": {
@@ -253,7 +334,10 @@
         "provider": {
           "type": "string",
           "description": "Proveedor del sistema de tickets o issues.",
-          "enum": ["jira", "azure-devops"]
+          "enum": [
+            "jira",
+            "azure-devops"
+          ]
         },
         "host": {
           "type": "string",
@@ -275,17 +359,26 @@
             {
               "properties": {
                 "enabled": {
-                  "enum": [false]
+                  "enum": [
+                    false
+                  ]
                 }
               }
             },
             {
               "properties": {
                 "enabled": {
-                  "enum": [true]
+                  "enum": [
+                    true
+                  ]
                 }
               },
-              "required": ["provider", "host", "workspace", "project"]
+              "required": [
+                "provider",
+                "host",
+                "workspace",
+                "project"
+              ]
             }
           ]
         }
