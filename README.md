@@ -34,7 +34,7 @@ vez de repetir el contenido, y declaran solo su delta. Índice completo en
 
 ## Configuración del proyecto (`.sdd-devkit/settings.json`)
 
-`arch-init` crea este archivo en la raíz de **cada proyecto** que adopta el harness (no en el plugin). Controla el idioma de los artefactos, la ruta base y de archivado de las especificaciones, si `work-define`/`work-plan` ofrecen o invocan `test-define` al llegar a Ready, el ritmo de confirmaciones e implementación (cambios sin commitear, worktrees, paralelismo, archivado, handoff de cierre), el comportamiento de `git-commit` (si pide confirmación antes de commitear y si hace push, y con qué política), qué puertas de verificación ejecuta `work-integrate` antes del merge y si piden autorización antes de corregir lo que encuentren, y la integración opcional con gestión de proyectos y el seguimiento de specs. Esquema completo en [`schemas/settings.schema.json`](schemas/settings.schema.json).
+`arch-init` crea este archivo en la raíz de **cada proyecto** que adopta el harness (no en el plugin). Controla el idioma de los artefactos, la ruta base y de archivado de las especificaciones, si `work-define`/`work-plan` ofrecen o invocan `test-define` al llegar a Ready, el ritmo de confirmaciones e implementación (cambios sin commitear, worktrees, paralelismo, archivado, handoff de cierre), el comportamiento de `git-commit` (si confirma la división en varios commits y si hace push, y con qué política), qué puertas de verificación ejecuta `work-integrate` antes del merge y si piden autorización antes de corregir lo que encuentren, y la integración opcional con gestión de proyectos y el seguimiento de specs. Esquema completo en [`schemas/settings.schema.json`](schemas/settings.schema.json).
 
 Ejemplo con las integraciones activadas:
 
@@ -46,7 +46,7 @@ Ejemplo con las integraciones activadas:
     "archivePath": "docs/archive/",
     "trackingEnabled": true,
     "trackingUrl": "https://events.sdd.io/api/v1/events",
-    "testCases": "ask"
+    "testCases": { "mode": "ask", "askDetails": true }
   },
   "implementation": {
     "confirmByUnit": "always",
