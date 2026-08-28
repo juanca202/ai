@@ -30,7 +30,7 @@ Si alguna falla, **no se archiva**.
 - En `pr-create` el `progress.md` **no** se valida en el pre-flight, así que se lee en el propio paso de archivado. Si no está completo en `Done`, se **omite el archivado y se avisa** — el PR se crea igual: las puertas pasaron y no es ese el momento de bloquearlo.
 
 **Orden.** El archivado ocurre **después** de la última puerta y **antes** del commit
-final que deja el árbol limpio. No al revés: `trace-validate` escribe el `trace-report.md`
+final que deja el árbol limpio. No al revés: `trace-validate` escribe el `coverage.md`
 dentro de la carpeta del trabajo, así que mover antes lo dejaría escribiendo en una ruta
 que ya no existe, o generando una carpeta huérfana en el origen.
 
@@ -144,7 +144,7 @@ columna Destino y en el resto de esta sección.
 | Investigación suelta enlazada | `docs/specs/research/RS-XXX-{slug}/` | `docs/archive/research/RS-XXX-{slug}/` |
 
 La carpeta se mueve **completa y tal cual**: `README.md`, los `TK-XXX-*.md`, `progress.md`,
-`trace-report.md`, `test-cases/` y el `research/` **interno** del artefacto. No se
+`coverage.md`, `test-cases/` y el `research/` **interno** del artefacto. No se
 renombra, no se aplana, no se comprime, no se borra nada de dentro.
 
 > Las investigaciones que viven **dentro** del artefacto
@@ -299,7 +299,7 @@ No hay más; cualquier otra escritura dentro de `docs/archive/` es un defecto.
 
 | Quién | Qué puede escribir | Por qué |
 |-------|--------------------|---------|
-| **`trace-validate`** | Su `trace-report.md`, dentro de la carpeta del artefacto | Es un **derivado** del artefacto, no trabajo nuevo, y revalidar la cobertura de un trabajo ya integrado tiene que seguir siendo posible. Se guarda junto a lo que traza o deja de tener sentido. |
+| **`trace-validate`** | Su `coverage.md`, dentro de la carpeta del artefacto | Es un **derivado** del artefacto, no trabajo nuevo, y revalidar la cobertura de un trabajo ya integrado tiene que seguir siendo posible. Se guarda junto a lo que traza o deja de tener sentido. |
 | **`work-implement` en [modo corrección](../../work-implement/SKILL.md#modo-correccion-delegado-desde-quality-check)** | **Nada dentro de la carpeta.** Continúa el flujo en vez de parar, pero la nota de retrabajo va al informe de `quality-check` | La corrección delegada llega **en la fase de cierre**, con el archivado ya commiteado: encontrarse el artefacto archivado es lo normal, no un error. Parar ahí bloquearía el cierre que la corrección venía a desbloquear. |
 
 La segunda no es en rigor una excepción a *escribir* —sigue sin escribir— sino a **parar**.
@@ -307,7 +307,7 @@ Se enuncia aquí porque es donde se busca.
 
 > **Ojo con el efecto sobre `trace-validate`.** Su `SPEC_FINGERPRINT` se calcula sobre la
 > carpeta del artefacto, y el `git mv` del archivado **cambia las rutas** que entran en ese
-> hash. El `trace-report.md` previo queda marcado como no fresco y se regenera **una vez**
+> hash. El `coverage.md` previo queda marcado como no fresco y se regenera **una vez**
 > tras archivar; a partir de ahí la clave vuelve a ser estable en la nueva ruta. Es un coste
 > conocido y acotado, no una corrupción.
 
@@ -320,7 +320,7 @@ siendo `US-042` para siempre.
 Sin esto, el contador **retrocede** en cuanto se archiva el trabajo con el número más alto:
 el siguiente `work-define` reemite `US-042`, y a partir de ahí hay dos artefactos distintos
 con el mismo ID —uno en el archivo, otro activo— y todo lo que los referencia (commits,
-ramas, work items del gestor, `trace-report.md`) queda ambiguo.
+ramas, work items del gestor, `coverage.md`) queda ambiguo.
 
 Aplica a **todos** los contadores, no solo a los globales:
 
@@ -343,7 +343,7 @@ en `001`** y crear una carpeta fantasma. Las dos reglas van juntas justamente po
 ## Anti-patrones
 
 - Archivar **antes** de que pasen las puertas, o antes de que `trace-validate` escriba su
-  `trace-report.md` dentro de la carpeta.
+  `coverage.md` dentro de la carpeta.
 - **Archivar sin preguntar con `archiveMode: ask`**, o dar la confirmación por supuesta porque
   las puertas pasaron.
 - **Preguntar igual con `archiveMode: always` o `never`.** La política ya resolvió la

@@ -15,7 +15,7 @@ El trazado primario es para **historias de usuario** (`US-XXX`) con sus **criter
 >
 > **No ejecuta pruebas por sí mismo.** La ejecución de la batería de pruebas se **delega en `quality-check`**: si existe una corrida previa fresca de `quality-check` (sin cambios en el código desde entonces), se **reutilizan** sus resultados; si no, se invoca `quality-check` en modo `tests-only` para producirlos. Ver [Resultados de pruebas: delegación en quality-check](#resultados-de-pruebas-delegación-en-quality-check).
 >
-> **Reporte idempotente.** Si no han cambiado ni el código, ni las pruebas, ni los criterios y casos de prueba del artefacto desde la última vez que se generó el `trace-report.md`, **no se genera un documento nuevo**: se devuelven los mismos resultados del reporte existente. Ver [Reutilización del reporte (idempotencia)](#reutilización-del-reporte-idempotencia).
+> **Reporte idempotente.** Si no han cambiado ni el código, ni las pruebas, ni los criterios y casos de prueba del artefacto desde la última vez que se generó el `coverage.md`, **no se genera un documento nuevo**: se devuelven los mismos resultados del reporte existente. Ver [Reutilización del reporte (idempotencia)](#reutilización-del-reporte-idempotencia).
 >
 > **Qué NO hace:** no escribe ni modifica código de aplicación, no escribe nuevos tests (eso es de `quality-specialist` vía `work-implement`), no edita la especificación de producto (README de la US, `TK-XXX`, `WI-XXX`, `FT-XXX`, `validation.md`, ADRs), **ni corre la suite de pruebas directamente**. Lo único que produce es el **reporte de trazabilidad**. Lo que no se puede determinar de las fuentes va a **Observaciones** o se pregunta al usuario — nunca se inventa cobertura ni resultados.
 
@@ -29,8 +29,8 @@ Consecuencias prácticas:
 
 - **Se validan todos los criterios del artefacto**, aunque en esta rama no se haya tocado el código de alguno de ellos: un criterio cuya prueba nunca se escribió sigue siendo un hueco.
 - **No se reportan pruebas ni código ajenos al artefacto.** Tests de otros trabajos, cobertura global o fallos en módulos que no mapean a ningún criterio de este artefacto no entran en la matriz — a lo sumo van a «Observaciones y pendientes».
-- **Si la rama abarca varios trabajos**, se valida uno por corrida, con su propio `trace-report.md` junto a su artefacto. Los resultados de pruebas sí son compartidos (vienen de la corrida de `quality-check`), pero el **mapeo** es por artefacto.
-- **La clave de frescura tiene una mitad de rama y otra de artefacto.** El `FINGERPRINT` cubre el código y los tests de todo el árbol, así que un cambio en *otro* trabajo de la misma rama invalida también este `trace-report.md`; el `SPEC_FINGERPRINT` cubre solo la carpeta de **este** artefacto. Es conservador a propósito: prefiere revalidar de más antes que devolver un reporte que ya no corresponde.
+- **Si la rama abarca varios trabajos**, se valida uno por corrida, con su propio `coverage.md` junto a su artefacto. Los resultados de pruebas sí son compartidos (vienen de la corrida de `quality-check`), pero el **mapeo** es por artefacto.
+- **La clave de frescura tiene una mitad de rama y otra de artefacto.** El `FINGERPRINT` cubre el código y los tests de todo el árbol, así que un cambio en *otro* trabajo de la misma rama invalida también este `coverage.md`; el `SPEC_FINGERPRINT` cubre solo la carpeta de **este** artefacto. Es conservador a propósito: prefiere revalidar de más antes que devolver un reporte que ya no corresponde.
 
 ---
 
@@ -70,7 +70,7 @@ Las **claves** son en inglés (estándar); el usuario puede nombrarlas en españ
 
 | Modifier | Efecto exacto |
 |----------|----------------|
-| `revalidate` | **Forzar la regeneración** del `trace-report.md` aunque el existente esté fresco: ignorar la comprobación del Paso 0 y ejecutar el flujo completo. Sinónimos aceptados: «revalidar», «forzar», «vuelve a validar». Necesario cuando los criterios viven **fuera del repo** (un ticket, un documento externo) y han cambiado allí — eso el `SPEC_FINGERPRINT` no puede verlo. Mismo modificador y mismo significado que en [`code-review`](../code-review/SKILL.md). |
+| `revalidate` | **Forzar la regeneración** del `coverage.md` aunque el existente esté fresco: ignorar la comprobación del Paso 0 y ejecutar el flujo completo. Sinónimos aceptados: «revalidar», «forzar», «vuelve a validar». Necesario cuando los criterios viven **fuera del repo** (un ticket, un documento externo) y han cambiado allí — eso el `SPEC_FINGERPRINT` no puede verlo. Mismo modificador y mismo significado que en [`code-review`](../code-review/SKILL.md). |
 
 ---
 
@@ -115,12 +115,12 @@ No inventar nada. Si un dato no es explícito, obtenerlo del repo o preguntar al
 
 Resumen de los pasos. El detalle íntegro de cada paso está en **`references/flow.md`** (leerlo antes de ejecutar el flujo).
 
-0. **Comprobar frescura del reporte** — si ya existe `trace-report.md` con un fingerprint guardado y no hubo cambios en los archivos desde entonces, **devolver el reporte existente sin regenerarlo** (ver [Reutilización del reporte (idempotencia)](#reutilización-del-reporte-idempotencia)). Solo si hay cambios (o el usuario pide revalidar) continuar con los pasos siguientes.
+0. **Comprobar frescura del reporte** — si ya existe `coverage.md` con un fingerprint guardado y no hubo cambios en los archivos desde entonces, **devolver el reporte existente sin regenerarlo** (ver [Reutilización del reporte (idempotencia)](#reutilización-del-reporte-idempotencia)). Solo si hay cambios (o el usuario pide revalidar) continuar con los pasos siguientes.
 1. **Localizar y leer el trabajo** — resolver tipo y ubicación; extraer todos los criterios con su identificador **verbatim**. Sin criterios (o sin identificador) → bloquear (ver «Cuándo bloquear»).
 2. **Inventariar casos y artefactos** — leer la carpeta `test-cases/` del artefacto y su índice como fuente primaria, y clasificar los tests del repo por tipo, con ruta y criterio.
 3. **Mapear cobertura fila a fila** — expandir cada criterio en sus filas (criterio × TC × tipo declarado), rellenar `Evidencia` y derivar el estado del criterio (ver «Estados de cobertura») con sus observaciones. No forzar mapeos inciertos.
 4. **Obtener resultados de pruebas (delegando en `quality-check`)** — reutilizar la caché `test-run.json` si está fresca, o invocar `quality-check` en modo `tests-only`; mapear por suite a las filas y rellenar `Ejecución` (`quality-check` / `Manual` / `—`) y `Resultado` (`PASS` / `FAIL` / `NOT_RUN` / `UNCOVERED` / `N/A`). **No** correr pruebas directamente. Nunca fabricar resultados (ver [Resultados de pruebas: delegación en quality-check](#resultados-de-pruebas-delegación-en-quality-check) y `references/flow.md`).
-5. **Redactar el reporte** desde `assets/trace-report-template.md` (leerla antes de redactar): cabecera, Resumen (prosa con la procedencia + tabla de indicadores), **cobertura por criterio** (una fila por criterio, con su Estado), **matriz de trazabilidad** (una fila por criterio × TC × tipo declarado, con Evidencia, Ejecución y Resultado) y, si los hay, los caveats globales en «Observaciones y pendientes». Ver [Vistas del reporte](#vistas-del-reporte-cobertura-por-criterio-y-matriz).
+5. **Redactar el reporte** desde `assets/coverage-template.md` (leerla antes de redactar): cabecera, Resumen (prosa con la procedencia + tabla de indicadores), **cobertura por criterio** (una fila por criterio, con su Estado), **matriz de trazabilidad** (una fila por criterio × TC × tipo declarado, con Evidencia, Ejecución y Resultado) y, si los hay, los caveats globales en «Observaciones y pendientes». Ver [Vistas del reporte](#vistas-del-reporte-cobertura-por-criterio-y-matriz).
 6. **Emitir el veredicto** (ver «Veredicto») respondiendo si todos los criterios quedan cubiertos.
 7. **Entregar y guardar** el reporte en la ubicación del tipo (ver «Ubicación de archivos»), **grabando el fingerprint** del estado actual para la próxima comprobación de frescura; no modificar otros artefactos.
 
@@ -248,25 +248,25 @@ Semántica de las columnas:
 Mismo principio de caché que `quality-check` y [`code-review`](../code-review/SKILL.md#reutilización-del-informe-idempotencia)
 —las **tres** puertas del cierre lo aplican, cada una sobre su propio artefacto—: **si no hubo cambios en los
 archivos desde la última generación, no se produce un reporte nuevo** — se devuelven los mismos resultados del
-`trace-report.md` existente. Esto evita rehacer el mapeo y volver a delegar la ejecución de pruebas cuando nada
+`coverage.md` existente. Esto evita rehacer el mapeo y volver a delegar la ejecución de pruebas cuando nada
 cambió.
 
 > **Contexto de ejecución.** Como `quality-check`, este skill es una **compuerta de cierre** (al integrar o
 > antes del PR), no corre por tarea ni durante la implementación. La frescura se evalúa sobre la rama
 > **consolidada** del cierre. En el pipeline típico de cierre `pr-create` corre `quality-check` **primero**
 > (produce `test-run.json` fresco) y luego `trace-validate`, que reutiliza esa corrida — sin doble
-> ejecución de pruebas; y si el código tampoco cambió desde el último `trace-report.md`, este Paso 0 lo
+> ejecución de pruebas; y si el código tampoco cambió desde el último `coverage.md`, este Paso 0 lo
 > devuelve sin regenerarlo.
 
 **Clave de frescura — dos hashes, porque el reporte depende de dos cosas distintas.**
 
 | Clave | Qué cubre | Cómo se calcula |
 |-------|-----------|-----------------|
-| `FINGERPRINT` | **El código y los tests.** El fingerprint canónico de la tubería, idéntico al de `quality-check` y `code-review`: excluye toda carpeta oculta, cualquier `docs/` y los `trace-report.md` sueltos, para que escribir un artefacto generado no invalide la caché. Receta exacta en [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate). | Sobre todo el árbol, menos las exclusiones |
-| `SPEC_FINGERPRINT` | **Los criterios y los casos de prueba** del artefacto que se valida: su `README.md` y su carpeta `test-cases/`. Viven bajo `docs/specs/`, que el `FINGERPRINT` excluye — sin esta segunda clave, reescribir un criterio no invalidaría nada. | Sobre la **carpeta del artefacto**, excluyendo su propio `trace-report.md` |
+| `FINGERPRINT` | **El código y los tests.** El fingerprint canónico de la tubería, idéntico al de `quality-check` y `code-review`: excluye toda carpeta oculta, cualquier `docs/` y los `coverage.md` sueltos, para que escribir un artefacto generado no invalide la caché. Receta exacta en [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate). | Sobre todo el árbol, menos las exclusiones |
+| `SPEC_FINGERPRINT` | **Los criterios y los casos de prueba** del artefacto que se valida: su `README.md` y su carpeta `test-cases/`. Viven bajo `docs/specs/`, que el `FINGERPRINT` excluye — sin esta segunda clave, reescribir un criterio no invalidaría nada. | Sobre la **carpeta del artefacto**, excluyendo su propio `coverage.md` |
 
 `bash
-NO_REPORT=":(exclude)${ARTEFACTO%/}/trace-report.md"
+NO_REPORT=":(exclude)${ARTEFACTO%/}/coverage.md"
 SPEC_FINGERPRINT=$( { git -C "$ROOT" ls-files -s              -- "$ARTEFACTO" "$NO_REPORT"; \
                       git -C "$ROOT" status --porcelain -uall -- "$ARTEFACTO" "$NO_REPORT"; \
                       git -C "$ROOT" diff                     -- "$ARTEFACTO" "$NO_REPORT"; \
@@ -275,16 +275,16 @@ SPEC_FINGERPRINT=$( { git -C "$ROOT" ls-files -s              -- "$ARTEFACTO" "$
 
 donde `$ARTEFACTO` es la carpeta del trabajo (`docs/specs/user-stories/US-042-…/`) o, si el artefacto es un archivo suelto, su ruta. Se reutiliza el reporte **solo si coinciden los dos**.
 
-> **La exclusión del propio reporte no es opcional.** El `trace-report.md` vive **dentro** de `$ARTEFACTO`: sin `$NO_REPORT`, escribirlo en el Paso 7 movería el `SPEC_FINGERPRINT`, la marca de pie guardaría el hash de *antes* de escribir, y ninguna corrida posterior coincidiría — la idempotencia no se dispararía **nunca**. La clave cubre las **entradas** del reporte, no su salida; es el mismo motivo por el que el `FINGERPRINT` excluye `**/trace-report.md`.
+> **La exclusión del propio reporte no es opcional.** El `coverage.md` vive **dentro** de `$ARTEFACTO`: sin `$NO_REPORT`, escribirlo en el Paso 7 movería el `SPEC_FINGERPRINT`, la marca de pie guardaría el hash de *antes* de escribir, y ninguna corrida posterior coincidiría — la idempotencia no se dispararía **nunca**. La clave cubre las **entradas** del reporte, no su salida; es el mismo motivo por el que el `FINGERPRINT` excluye `**/coverage.md`.
 >
-> **Y tiene que ser una ruta literal interpolando `$ARTEFACTO`, no un glob.** `':(exclude,glob)**/trace-report.md'` junto a un pathspec **positivo** hace que git excluya **todo**: las tres órdenes devuelven vacío, la clave queda fija en el hash del blob vacío, y entonces la idempotencia se dispara siempre y un criterio editado nunca invalida el reporte. El `EXC` del `FINGERPRINT` puede usar globs porque ahí no hay pathspec positivo.
+> **Y tiene que ser una ruta literal interpolando `$ARTEFACTO`, no un glob.** `':(exclude,glob)**/coverage.md'` junto a un pathspec **positivo** hace que git excluya **todo**: las tres órdenes devuelven vacío, la clave queda fija en el hash del blob vacío, y entonces la idempotencia se dispara siempre y un criterio editado nunca invalida el reporte. El `EXC` del `FINGERPRINT` puede usar globs porque ahí no hay pathspec positivo.
 
 > **Por qué dos claves y no una.** Meter `docs/` entero en el `FINGERPRINT` haría que escribir cualquier informe invalidara las tres cachés — el problema que las exclusiones resuelven. Acotar la segunda clave a **la carpeta del artefacto** captura exactamente lo que este reporte traza, sin arrastrar el resto de la documentación. Y a diferencia de «detectar que el usuario editó los criterios», es una comprobación **determinista**: no depende de que el cambio haya ocurrido en esta sesión, ni de que alguien lo mencione.
 
 > **Lo que sigue sin cubrirse:** criterios que viven **fuera del repo** (un ticket de un tracker, un documento externo). Ahí no hay nada que hashear; si el artefacto es externo, decirlo en el reporte y pedir `revalidate` cuando cambie.
 
 > **Un solo cálculo por corrida, con una excepción.** Ambos hashes se computan una vez, en el Paso 0. El
-> `FINGERPRINT` sirve para las **dos** comprobaciones de frescura —la del `trace-report.md` (Paso 0) y la del
+> `FINGERPRINT` sirve para las **dos** comprobaciones de frescura —la del `coverage.md` (Paso 0) y la del
 > `test-run.json` (Paso 4, delegación)—; el `SPEC_FINGERPRINT` solo para la primera. Los dos se regraban en el
 > Paso 7. **Si hubo delegación en `tests-only`, recalcular el `FINGERPRINT` antes de grabar:** esa corrida no
 > toca código, pero sí puede normalizar el `.gitignore` la primera vez que `quality-check` corre en el repo, y
@@ -294,7 +294,7 @@ donde `$ARTEFACTO` es la carpeta del trabajo (`docs/specs/user-stories/US-042-�
 
 1. Resolver la ubicación del trabajo y **calcular `FINGERPRINT` y `SPEC_FINGERPRINT`**. Siempre, haya reporte
    previo o no: el Paso 7 los necesita para grabar la marca de pie, también en la primera validación.
-2. Buscar su `trace-report.md`. Si no existe → generar normal (no hay caché).
+2. Buscar su `coverage.md`. Si no existe → generar normal (no hay caché).
 3. Si existe, leer los hashes guardados en su marca de pie
    (`<!-- trace-validate:verdict=<canónico> · fingerprint=<hash> · spec=<hash> · generated=YYYY-MM-DD -->`) y reutilizarlo **solo si
    se cumple todo**: coinciden **los dos** hashes, el reporte **no** registra una ejecución fallida, y el
@@ -315,7 +315,7 @@ donde `$ARTEFACTO` es la carpeta del trabajo (`docs/specs/user-stories/US-042-�
 > comprobar» para siempre aunque el entorno ya funcione. Regenerar y volver a intentar la delegación.
 
 > Un cambio en una **carpeta oculta** (`.sdd-devkit/`, `.github/`…), en `docs/` fuera de la carpeta del
-> artefacto, o en un `trace-report.md` **no** cuenta como cambio: están excluidos, así que ningún artefacto
+> artefacto, o en un `coverage.md` **no** cuenta como cambio: están excluidos, así que ningún artefacto
 > que generen este skill, `quality-check`, `code-review` o `arch-audit` desplaza la clave. Los criterios y los
 > `TC-XXX` **sí** cuentan, vía `SPEC_FINGERPRINT`.
 
@@ -418,9 +418,9 @@ Lo propio de este skill:
 | Artefacto a trazar (entrada) | La carpeta de la `US-XXX` / `WI-XXX` / `FT-XXX`; para cualquier otro artefacto, la ruta que indique el usuario |
 | Casos de prueba documentados (entrada, los produce `test-define`) | `test-cases/` **dentro de la carpeta del artefacto**, con su índice `test-cases/README.md` |
 | Caché de corrida de pruebas (entrada, la produce `quality-check`) | `.sdd-devkit/test-run.json` (ubicación fija, no por unidad) |
-| Reporte de trazabilidad (**salida**) | `trace-report.md` **dentro de la carpeta del artefacto, allí donde se haya resuelto** — activa o bajo `docs/archive/`; para otro artefacto, junto a él (confirmar la ruta con el usuario antes de escribir) |
+| Reporte de trazabilidad (**salida**) | `coverage.md` **dentro de la carpeta del artefacto, allí donde se haya resuelto** — activa o bajo `docs/archive/`; para otro artefacto, junto a él (confirmar la ruta con el usuario antes de escribir) |
 
-> **Un `US`/`WI` archivado se traza igual.** Todo se resuelve relativo a la carpeta encontrada: los criterios, el `test-cases/`, la clave `SPEC_FINGERPRINT` y el `trace-report.md` de salida. `trace-validate` es el **único** skill que escribe dentro de un artefacto archivado, y solo su propio informe: es un derivado del artefacto, no trabajo nuevo, y revalidar un trabajo ya integrado tiene que seguir siendo posible.
+> **Un `US`/`WI` archivado se traza igual.** Todo se resuelve relativo a la carpeta encontrada: los criterios, el `test-cases/`, la clave `SPEC_FINGERPRINT` y el `coverage.md` de salida. `trace-validate` es el **único** skill que escribe dentro de un artefacto archivado, y solo su propio informe: es un derivado del artefacto, no trabajo nuevo, y revalidar un trabajo ya integrado tiene que seguir siendo posible.
 
 ---
 
@@ -451,7 +451,7 @@ Posición: **validación / cierre de calidad** — después de `work-implement`.
 | | |
 |--|--|
 | **Entrada** | Trabajo (`US-XXX` / `WI-XXX`, u otro artefacto) con **criterios de aceptación identificados**; código implementado; idealmente tests escritos por `quality-specialist` en el cierre de `work-implement`. Resultados de pruebas **vía `quality-check`** (caché `test-run.json` o delegación `tests-only`). **O** un `FT-XXX` (registro de funcionalidad ya implementada — inferida de código legacy o documentada como existente) para comprobar si está cubierta por pruebas. |
-| **Salida** | `trace-report.md` en la ubicación del tipo + veredicto sobre la cobertura. |
+| **Salida** | `coverage.md` en la ubicación del tipo + veredicto sobre la cobertura. |
 | **Veredicto `REJECTED` (US/WI)** | Volver a `work-implement` (fase de pruebas con `quality-specialist`) para cubrir los criterios faltantes; revalidar después. |
 | **Veredicto `REJECTED` (FT)** | Hay comportamiento ya implementado **sin pruebas**: escribir los tests faltantes sobre el código existente (no código funcional) con `work-implement` en su tipo **feature** —que automatiza los `TC-XXX` del `FT-XXX`— y revalidar. Formalizar ese trabajo como una tarea de mantenimiento (`WI-XXX`) es opcional y lo decide el usuario. |
 | **Falta funcional en el trabajo** | Si la matriz revela que un criterio no es testeable o está mal definido, escalar a la definición/planificación del trabajo — para un `FT`, a quien lo registró (el flujo «Analizar legado» de `work-research` u otra fuente de la funcionalidad); no editar la especificación desde aquí. |
@@ -464,7 +464,7 @@ Posición: **validación / cierre de calidad** — después de `work-implement`.
 |---------|---------------|
 | `references/flow.md` | Flujo paso a paso (Pasos 0-7), delegación de la ejecución de pruebas en `quality-check` (caché `test-run.json` / `tests-only`) y checklist completo. Leer antes de ejecutar el flujo. |
 | `references/examples.md` | Ejemplos por tipo (US / WI, sin criterios, sin runner, criterio sin prueba) y anti-patrones. Leer ante dudas de comportamiento. |
-| `assets/trace-report-template.md` | Plantilla canónica del reporte de trazabilidad. Leer antes de redactar el reporte. |
+| `assets/coverage-template.md` | Plantilla canónica del reporte de trazabilidad. Leer antes de redactar el reporte. |
 
 ### Referencias compartidas del plugin
 

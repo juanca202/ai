@@ -70,7 +70,7 @@ Referencias del skill **work-integrate**. Cubren los dos tipos de trabajo (`US-X
 - **Correr este skill sobre una rama que ya se integró por un PR en la plataforma.** El delta contra la base es `0`, git responde *Already up to date*, y seguir adelante crea un commit que no es un merge y que solo borra los dos informes. El paso 7 lo corta antes — y por eso va delante del archivado: nada se mueve ni se commitea en una rama que solo había que dejar en paz.
 - Encadenar `pr-create` (PR de implementación) **y** este skill sobre el mismo trabajo: son rutas de integración alternativas, no fases sucesivas.
 - Hacer merge sin verificar `progress.md` o ignorando unidades no `Done`.
-- **Archivar antes de que pasen las tres puertas**, o antes de que `trace-validate` escriba su `trace-report.md` dentro de la carpeta del trabajo.
+- **Archivar antes de que pasen las tres puertas**, o antes de que `trace-validate` escriba su `coverage.md` dentro de la carpeta del trabajo.
 - **Archivar después del merge**, dejando el movimiento en la rama base como un cambio suelto en vez de integrarlo con el resto del trabajo.
 - **Archivar en una rama `test/`** —incluidas `test/US-XXX` y `test/WI-XXX`—: la ejecución cierra unos `TC-XXX`, no el artefacto, y el paso 4 ni siquiera verificó las unidades funcionales del `progress.md`.
 - **Archivar sin preguntar**, o dar por supuesta la confirmación porque las puertas pasaron: el archivado se confirma explícitamente, mostrando antes qué se movería.

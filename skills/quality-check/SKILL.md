@@ -324,9 +324,9 @@ archivo; las pruebas acotadas que `work-implement` corre durante el desarrollo n
 consumen.
 
 La clave de frescura es el **`FINGERPRINT` canónico** —compartido, con la misma receta, entre las tres
-puertas del cierre (`test-run.json` aquí, `trace-report.md` en `trace-validate`, `docs/audits/code-review.md`
+puertas del cierre (`test-run.json` aquí, `coverage.md` en `trace-validate`, `docs/audits/code-review.md`
 en `code-review`)—: un hash del commit + working tree + cambios sin commitear, excluyendo toda carpeta
-oculta, cualquier `docs/` y los `trace-report.md` sueltos, para que escribir un artefacto que produce la
+oculta, cualquier `docs/` y los `coverage.md` sueltos, para que escribir un artefacto que produce la
 propia tubería no desplace la clave.
 
 Detalle completo (receta exacta del fingerprint y por qué cada exclusión existe, esquema `test-run.json`

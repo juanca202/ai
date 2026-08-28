@@ -36,7 +36,7 @@ El `TC-XXX` siempre vive en la carpeta `test-cases/` de un **artefacto padre**. 
 | Otros artefactos | Ruta |
 | ---------------- | ---- |
 | Indice de test cases | `[carpeta del padre]/test-cases/README.md` |
-| Reporte de trazabilidad | `[carpeta del padre]/trace-report.md` (lo produce `trace-validate`, no este skill) |
+| Reporte de trazabilidad | `[carpeta del padre]/coverage.md` (lo produce `trace-validate`, no este skill) |
 | Padre ya archivado (fallback) | `docs/archive/user-stories/US-XXX-…/` · `docs/archive/work-items/WI-XXX-…/`, con la misma estructura interna |
 | ADR | `docs/adr/` |
 | Glosario | `docs/specs/glossary.md` |
@@ -45,7 +45,7 @@ El `TC-XXX` siempre vive en la carpeta `test-cases/` de un **artefacto padre**. 
 >
 > **Excepcion — modo correccion.** En la correccion delegada desde `quality-check` (ver [modo correccion](../SKILL.md#modo-correccion-delegado-desde-quality-check)) un padre archivado es **esperable**, no un error: ahi se continua, pero sin escribir nada dentro de la carpeta archivada — la nota de retrabajo va en el informe de `quality-check`. Importa especialmente en este flujo, porque `quality-check` senala la rama `test/` como el caso donde delegar es **mas** importante, y ahi el padre archivado es lo habitual.
 >
-> Aparte de eso, el unico skill que escribe dentro de un artefacto archivado es `trace-validate`, y solo su `trace-report.md`. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+> Aparte de eso, el unico skill que escribe dentro de un artefacto archivado es `trace-validate`, y solo su `coverage.md`. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
 **Rama de trabajo:** `test/[ID del artefacto padre]-[slug]` — p. ej. `test/FT-003-carga-masiva`, `test/US-042-login`, `test/WI-018-migracion-logs`. **Una rama por artefacto padre**, aunque se automaticen varios TC de el. No asumir la rama base; acordarla con el usuario.
 

@@ -95,7 +95,7 @@ sección de **fitness functions**: cuáles existen y su resultado al ejecutarlas
 >
 > Todo `docs/` —y por tanto `docs/audits/`— está **excluido del fingerprint canónico** de la tubería de
 > cierre (ver [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate)):
-> **escribir el informe** de auditoría no invalida la caché de pruebas, ni el `trace-report.md`, ni el
+> **escribir el informe** de auditoría no invalida la caché de pruebas, ni el `coverage.md`, ni el
 > `code-review.md`.
 >
 > **Pero verificar dependencias sí las invalida.** La Fase 3.5 puede **instalar dependencias** y tocar el

@@ -148,7 +148,7 @@ Antes de cualquier push o creación de PR se ejecutan las puertas **que aplican 
 - Aprobado = `verdict=APPROVED` en la marca de pie → continuar.
 - Rechazado = `verdict=REJECTED` o `verdict=INCOMPLETE` → detener.
 
-**4.3 — `trace-validate` (solo en PR de implementación).** Resolver el **trabajo** a validar (`US-XXX` o `WI-XXX`) del patrón de la rama, del prefijo de los commits, o de la ruta de trabajo. `trace-validate` traza los **criterios de aceptación** `AC-XXX` del trabajo (mismo formato en US y WI). Si no se puede determinar el trabajo, preguntar al usuario cuál validar; si no lo provee, la puerta **no** puede quedar aprobada → detener. Invocar `trace-validate` sobre ese trabajo. Reutiliza el `test-run.json` producido por `4.1` (misma rama, sin cambios) y, si el `trace-report.md` ya estaba fresco, lo devuelve sin regenerarlo.
+**4.3 — `trace-validate` (solo en PR de implementación).** Resolver el **trabajo** a validar (`US-XXX` o `WI-XXX`) del patrón de la rama, del prefijo de los commits, o de la ruta de trabajo. `trace-validate` traza los **criterios de aceptación** `AC-XXX` del trabajo (mismo formato en US y WI). Si no se puede determinar el trabajo, preguntar al usuario cuál validar; si no lo provee, la puerta **no** puede quedar aprobada → detener. Invocar `trace-validate` sobre ese trabajo. Reutiliza el `test-run.json` producido por `4.1` (misma rama, sin cambios) y, si el `coverage.md` ya estaba fresco, lo devuelve sin regenerarlo.
 - Aprobado = `verdict=APPROVED` en la marca de pie → continuar. El `⚠️` de esta puerta es `APPROVED_WITH_NOTES` y **también** se considera aprobado, pero se **muestran las observaciones al usuario** antes de seguir.
 - Rechazado = `verdict=REJECTED` → detener.
 
@@ -171,7 +171,7 @@ Una promoción **no introduce código nuevo**: cada trabajo que viaja en ella ya
 | Puerta | Por qué no aplica |
 |--------|-------------------|
 | `code-review` | Su unidad es un diff sin revisar. En una promoción, todo el diff `origin/<destino>..HEAD` ya fue revisado y aprobado PR a PR; volver a pasarlo sería revisar diez diffs ya cerrados y produciría hallazgos sobre código que ya se justificó en su momento. |
-| `trace-validate` | Valida **un** artefacto contra sus criterios de aceptación. Una promoción abarca varios trabajos, así que no hay un artefacto que validar; y cada uno ya trae su `trace-report.md` aprobado. |
+| `trace-validate` | Valida **un** artefacto contra sus criterios de aceptación. Una promoción abarca varios trabajos, así que no hay un artefacto que validar; y cada uno ya trae su `coverage.md` aprobado. |
 
 Reglas al reportar:
 
@@ -198,7 +198,7 @@ En la ruta activa, leer su `progress.md` y comprobar que **todas** las unidades 
 
 El trabajo a archivar es el mismo que resolvió `4.3` (`trace-validate`); no volver a deducirlo por otra vía. Si `4.3` no corrió porque el modo es promoción, este paso entero se omite. **Que `4.3` resuelva un `US-XXX` desde una rama `test/US-XXX` no habilita el archivado:** ese PR cierra la automatización de unos `TC-XXX`, no la historia.
 
-**El orden importa:** `4.3` escribe el `trace-report.md` **dentro** de la carpeta del trabajo, así que archivar antes lo dejaría escribiendo en una ruta que ya no existe. Y archivar **después** del push dejaría el movimiento fuera del PR.
+**El orden importa:** `4.3` escribe el `coverage.md` **dentro** de la carpeta del trabajo, así que archivar antes lo dejaría escribiendo en una ruta que ya no existe. Y archivar **después** del push dejaría el movimiento fuera del PR.
 
 El `git mv` queda **stageado sin commitear**: lo recoge la re-comprobación del working tree del Paso 6. No commitear aquí.
 
@@ -208,14 +208,14 @@ Si el `git mv` falla (destino ya ocupado, origen inexistente con destino present
 
 ### Paso 6 — Push de la rama actual
 
-**Antes del push, re-comprobar el working tree.** Las puertas del Paso 4 pueden haber dejado cambios sin commitear (correcciones aplicadas por `quality-check` o delegadas en `work-implement`), y el Paso 5 deja stageado el renombrado del archivado, si el usuario lo confirmó. Ejecutar `git status --porcelain` y, si hay salida, **invocar de nuevo `git-commit`** con el mismo criterio del pre-flight: el **código** que se sube debe ser exactamente el que las puertas verificaron. El archivado del Paso 5 es la única salvedad, y es deliberada: mueve documentación bajo `docs/specs/`, no toca código ni fuentes de prueba, así que no invalida los veredictos de `quality-check` ni de `code-review`. Sí desplaza el `SPEC_FINGERPRINT` de `trace-validate`, cuyo `trace-report.md` se regenerará una vez en la siguiente validación. **En modo promoción, borrar antes `docs/audits/quality-check.md` del árbol** y, si `develop` lo traía trackeado, retirarlo del índice — ver la nota siguiente. Solo entonces re-comprobar el estado e invocar `git-commit`.
+**Antes del push, re-comprobar el working tree.** Las puertas del Paso 4 pueden haber dejado cambios sin commitear (correcciones aplicadas por `quality-check` o delegadas en `work-implement`), y el Paso 5 deja stageado el renombrado del archivado, si el usuario lo confirmó. Ejecutar `git status --porcelain` y, si hay salida, **invocar de nuevo `git-commit`** con el mismo criterio del pre-flight: el **código** que se sube debe ser exactamente el que las puertas verificaron. El archivado del Paso 5 es la única salvedad, y es deliberada: mueve documentación bajo `docs/specs/`, no toca código ni fuentes de prueba, así que no invalida los veredictos de `quality-check` ni de `code-review`. Sí desplaza el `SPEC_FINGERPRINT` de `trace-validate`, cuyo `coverage.md` se regenerará una vez en la siguiente validación. **En modo promoción, borrar antes `docs/audits/quality-check.md` del árbol** y, si `develop` lo traía trackeado, retirarlo del índice — ver la nota siguiente. Solo entonces re-comprobar el estado e invocar `git-commit`.
 
 > **`.sdd-devkit/test-run.json` nunca se commitea**, en ninguno de los dos modos: está en el `.gitignore` porque es una caché local y desechable, y un resultado de pruebas producido en otra máquina no es evidencia aquí. Nada de lo que sigue desplaza el fingerprint de frescura: `.sdd-devkit/` cae bajo la exclusión de **carpetas ocultas** y `docs/` bajo la suya.
 >
-> **En un PR de implementación, los informes viajan en el PR.** Las puertas escriben `docs/audits/quality-check.md`, `docs/audits/code-review.md` y el `trace-report.md` del trabajo; ese commit los incluye a propósito, para que el revisor vea los tres veredictos junto al cambio. **Pero los dos de `docs/audits/` son fotos de esta rama y no deben quedarse en la de destino:** su encabezado lleva la rama y el commit sobre los que se corrieron las puertas, en `develop` afirmarían un veredicto que nadie ejecutó allí, y como viven en una ruta fija, cada rama que se integre los pisaría. `work-integrate` los retira dentro del propio merge, pero **aquí el merge lo hace la plataforma y este skill no lo controla**. De ahí dos cosas:
+> **En un PR de implementación, los informes viajan en el PR.** Las puertas escriben `docs/audits/quality-check.md`, `docs/audits/code-review.md` y el `coverage.md` del trabajo; ese commit los incluye a propósito, para que el revisor vea los tres veredictos junto al cambio. **Pero los dos de `docs/audits/` son fotos de esta rama y no deben quedarse en la de destino:** su encabezado lleva la rama y el commit sobre los que se corrieron las puertas, en `develop` afirmarían un veredicto que nadie ejecutó allí, y como viven en una ruta fija, cada rama que se integre los pisaría. `work-integrate` los retira dentro del propio merge, pero **aquí el merge lo hace la plataforma y este skill no lo controla**. De ahí dos cosas:
 >
 > - **Decirlo en el cuerpo del PR.** La descripción que compone el Paso 7 cierra con esta línea: «`docs/audits/quality-check.md` y `docs/audits/code-review.md` son artefactos de esta rama — eliminarlos al integrar.»
-> - **Al reportar al usuario**, recordar que tras el merge en la plataforma conviene borrarlos en la rama de destino (`git rm docs/audits/quality-check.md docs/audits/code-review.md`), o integrar con `work-integrate`, que ya lo hace solo. **Solo esos dos**: los `arch-audit-*.md`, las copias de `save-report` y el `trace-report.md` del trabajo sí pertenecen a la rama base.
+> - **Al reportar al usuario**, recordar que tras el merge en la plataforma conviene borrarlos en la rama de destino (`git rm docs/audits/quality-check.md docs/audits/code-review.md`), o integrar con `work-integrate`, que ya lo hace solo. **Solo esos dos**: los `arch-audit-*.md`, las copias de `save-report` y el `coverage.md` del trabajo sí pertenecen a la rama base.
 >
 > **En un PR de promoción, el informe no llega a disco.** Aquí la rama de origen **ya es** una rama de integración: commitear `docs/audits/quality-check.md` lo dejaría plantado en `develop` y de ahí viajaría a `master` con la promoción — el problema anterior, pero sin nadie que pueda limpiarlo después. El manejo, en el orden exacto en que ocurre:
 >
@@ -370,7 +370,7 @@ La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con
 - Pedir confirmación de título o descripción (flujo no interactivo).
 - Crear el PR con `quality-check` o `code-review` en `REJECTED`/`INCOMPLETE`, con `trace-validate` en `REJECTED`, o con la Definition of Done incumplida.
 - En un PR de implementación, saltarse `trace-validate` por no encontrar el trabajo (US/WI) en lugar de preguntarlo al usuario — o declararlo «promoción» para esquivar la puerta.
-- **Archivar el artefacto antes de que pasen las puertas**, o antes de que `4.3` escriba el `trace-report.md` dentro de su carpeta.
+- **Archivar el artefacto antes de que pasen las puertas**, o antes de que `4.3` escriba el `coverage.md` dentro de su carpeta.
 - **Archivar en un PR de promoción**, en una rama `test/`, o con el `progress.md` incompleto: el Paso 5 no aplica ahí.
 - **Archivar después del push o del merge**, dejando el movimiento fuera del PR.
 - **Archivar sin confirmación explícita del usuario**, o dar por hecho el sí porque las puertas pasaron.

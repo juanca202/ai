@@ -8,12 +8,12 @@ Referencia del skill `trace-validate`. Casos de uso y errores a evitar.
 
 **Ejemplo 1 — US completa con tests**
 - *Entrada:* «Valida la trazabilidad de US-042.»
-- *Comportamiento:* lee `US-042/README.md`, extrae los criterios con su identificador verbatim, lee la carpeta `test-cases/` del artefacto e inventaria tests (unit/integración/e2e), mapea cada criterio, obtiene los resultados de pruebas de `quality-check` (caché `test-run.json` fresca o delegación en modo `tests-only`), construye la matriz, guarda `trace-report.md` y reporta el veredicto.
+- *Comportamiento:* lee `US-042/README.md`, extrae los criterios con su identificador verbatim, lee la carpeta `test-cases/` del artefacto e inventaria tests (unit/integración/e2e), mapea cada criterio, obtiene los resultados de pruebas de `quality-check` (caché `test-run.json` fresca o delegación en modo `tests-only`), construye la matriz, guarda `coverage.md` y reporta el veredicto.
 
 **Ejemplo 2 — Work item con criterios de aceptación**
 - *Entrada:* «Valida la cobertura de WI-007.»
-- *Comportamiento:* lee `docs/specs/work-items/WI-007-[kebab-case]/README.md`, extrae los criterios de la sección **## Criterios de aceptación** (con el identificador que use el documento, sin normalizar), mapea tests, obtiene los resultados vía `quality-check`, guarda `docs/specs/work-items/WI-007-[kebab-case]/trace-report.md` y emite el veredicto.
-- *Variante — WI ya archivado:* si `WI-007` no está en `docs/specs/work-items/`, se resuelve en `docs/archive/work-items/WI-007-[kebab-case]/` y todo el flujo trabaja sobre esa carpeta, incluido el `trace-report.md` de salida. Revalidar un trabajo ya integrado es un caso normal, no un error.
+- *Comportamiento:* lee `docs/specs/work-items/WI-007-[kebab-case]/README.md`, extrae los criterios de la sección **## Criterios de aceptación** (con el identificador que use el documento, sin normalizar), mapea tests, obtiene los resultados vía `quality-check`, guarda `docs/specs/work-items/WI-007-[kebab-case]/coverage.md` y emite el veredicto.
+- *Variante — WI ya archivado:* si `WI-007` no está en `docs/specs/work-items/`, se resuelve en `docs/archive/work-items/WI-007-[kebab-case]/` y todo el flujo trabaja sobre esa carpeta, incluido el `coverage.md` de salida. Revalidar un trabajo ya integrado es un caso normal, no un error.
 
 **Ejemplo 3 — Trabajo sin criterios**
 - *Entrada:* «Genera la matriz de cobertura de US-009» y el README no tiene criterios de aceptación, o los tiene sin identificador.

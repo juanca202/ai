@@ -50,7 +50,7 @@ específico (una salida propia, una excepción de ruta).
 | Investigación | `research/RS-XXX-[slug]/README.md` **dentro de la carpeta del artefacto vinculado**; suelta: `docs/specs/research/RS-XXX-[slug]/README.md` | `work-research` |
 | Progreso de un trabajo | `progress.md` dentro de la carpeta del trabajo (US / WI / FT) | `work-implement` |
 | Archivos de apoyo | `assets/` dentro de la carpeta del artefacto; enlazar con rutas relativas | — |
-| Reporte de trazabilidad | `trace-report.md` dentro de la carpeta del artefacto | `trace-validate` |
+| Reporte de trazabilidad | `coverage.md` dentro de la carpeta del artefacto | `trace-validate` |
 | Informe de calidad | `docs/audits/quality-check.md` (+ histórico `docs/audits/quality-check-<YYYYMMDD-HHMMSS>.md`) | `quality-check` |
 | Informe de code review | `docs/audits/code-review.md` (+ histórico `docs/audits/code-review-<YYYYMMDD-HHMMSS>.md`) | `code-review` |
 | Informe de auditoría de arquitectura | `<raíz-arq>/docs/audits/arch-audit-YYYY-MM-DD.md` (con sufijo `-HHMM` si ya hay uno de ese día) | `arch-audit` |
@@ -159,6 +159,6 @@ trabajo:
 3. **La estructura interna se conserva** intacta (`README.md`, `TK-XXX-*.md`, `test-cases/`,
    `research/`, `progress.md`, `assets/`), así que todo se resuelve relativo a la carpeta encontrada.
 4. **Solo `trace-validate` escribe dentro de un artefacto archivado**, y solo su propio
-   `trace-report.md`: es un derivado del artefacto, no trabajo nuevo.
+   `coverage.md`: es un derivado del artefacto, no trabajo nuevo.
 
 Detalle del flujo de archivado: [`skills/work-integrate/references/archive.md`](../skills/work-integrate/references/archive.md).

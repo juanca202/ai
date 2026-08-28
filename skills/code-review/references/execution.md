@@ -31,7 +31,7 @@ Este paso hace **tres** cosas, en este orden. Las dos primeras se ejecutan **sie
 
 ```bash
 ROOT=$( git rev-parse --show-toplevel )
-EXC=( ':(top,exclude,glob)**/.*/**' ':(top,exclude,glob)**/docs/**' ':(top,exclude,glob)**/trace-report.md' )
+EXC=( ':(top,exclude,glob)**/.*/**' ':(top,exclude,glob)**/docs/**' ':(top,exclude,glob)**/coverage.md' )
 FINGERPRINT=$( { git -C "$ROOT" ls-files -s              -- "${EXC[@]}"; \
                  git -C "$ROOT" status --porcelain -uall -- "${EXC[@]}"; \
                  git -C "$ROOT" diff                     -- "${EXC[@]}"; \
@@ -128,7 +128,7 @@ La estructura canónica está en la plantilla [`../assets/code-review-template.m
 
 La plantilla incluye: encabezado con metadata (donde vive el **Veredicto**, con su justificación de una línea; no hay sección propia), **Resumen**, **Intención detectada**, **Hallazgos** por dimensión (con **Dimensiones no evaluadas**, obligatoria para sostener un `INCOMPLETE`), **Próximas acciones** y **Justificaciones aceptadas**, más la marca de pie del fingerprint.
 
-> **El informe no reporta el estado de las otras dos puertas.** Cada una escribe el suyo (`docs/audits/quality-check.md`, el `trace-report.md` del trabajo) y quien las consolida es el orquestador de cierre (`work-integrate`, `pr-create`). Copiar aquí sus veredictos solo produce dos fuentes que se desincronizan: este documento responde por el plano cualitativo y nada más.
+> **El informe no reporta el estado de las otras dos puertas.** Cada una escribe el suyo (`docs/audits/quality-check.md`, el `coverage.md` del trabajo) y quien las consolida es el orquestador de cierre (`work-integrate`, `pr-create`). Copiar aquí sus veredictos solo produce dos fuentes que se desincronizan: este documento responde por el plano cualitativo y nada más.
 
 Símbolos de severidad (exactamente estos, con la etiqueta en el idioma resuelto):
 `🔴` `CRITICAL` · `🟠` `MAJOR` · `🟡` `MINOR` · `💡` `SUGGESTION` · `✅` `COMPLIANT`.
@@ -151,7 +151,7 @@ Reglas al rellenar:
 | Informe existente **fresco** (mismo `FINGERPRINT`, misma base, mismo modo) | Devolver su veredicto y su resumen indicando desde cuándo no hay cambios. **No** volver a revisar ni reescribir el archivo. Si el usuario quiere una revisión nueva de todos modos, ofrecerle `revalidate`. |
 | Informe existente **sin marca de pie** (escrito a mano o generado fuera de este skill) | Tratarlo como caché ausente: revisar de nuevo y grabar la marca al guardar. |
 | Marca de pie ilegible, incompleta o con un hash que no parsea | No intentar repararla ni adivinar: tratar la caché como ausente, revisar y regrabarla. |
-| Cambia solo una carpeta oculta (`.sdd-devkit/`, `.github/`…), algo de `docs/` o un `trace-report.md` suelto | **No** es un cambio de código: el fingerprint los excluye y la caché sigue fresca. Correr `quality-check`, `trace-validate` o `arch-audit` no invalida esta revisión. |
+| Cambia solo una carpeta oculta (`.sdd-devkit/`, `.github/`…), algo de `docs/` o un `coverage.md` suelto | **No** es un cambio de código: el fingerprint los excluye y la caché sigue fresca. Correr `quality-check`, `trace-validate` o `arch-audit` no invalida esta revisión. |
 | Cambian los **criterios de aceptación** del artefacto origen (`docs/specs/…`) sin tocar el código | El fingerprint no se mueve porque `docs/` está excluido, pero la dimensión semántica sí cambia de vara. Avisar al usuario y revisar con `revalidate`; no devolver el informe cacheado. |
 | La base se movió (`git fetch`) sin tocar el árbol local | El `FINGERPRINT` no cambia pero `BASE_COMMIT` sí → caché obsoleta: revisar de nuevo. Es justo el caso que justifica guardar la base en la marca. |
 | La intención cambió sin cambiar el código (el usuario la aporta, o el ticket se editó fuera del repo) | El fingerprint no lo detecta. Decírselo al usuario y revisar con `revalidate`. |

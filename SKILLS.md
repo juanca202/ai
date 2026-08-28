@@ -594,7 +594,7 @@ No ejecuta pruebas: reutiliza `.sdd-devkit/test-run.json` fresco o invoca `quali
 
 **Alcance:** **un artefacto** y sus criterios de aceptación — ni el repo ni el diff. Si la rama abarca varios trabajos, se valida uno por corrida.
 
-**Reporte:** `trace-report.md` en la carpeta del artefacto.
+**Reporte:** `coverage.md` en la carpeta del artefacto.
 
 **Ejemplos de invocación:**
 
@@ -621,7 +621,7 @@ No ejecuta pruebas: reutiliza `.sdd-devkit/test-run.json` fresco o invoca `quali
 
 **Cuándo:** cerrar e integrar localmente (merge `--no-ff` a la rama base). No push, no PR.
 
-El merge se hace en tres tiempos (`--no-commit` → retirar `docs/audits/quality-check.md` y `code-review.md` → `commit`): esos dos informes son fotos de la rama del trabajo y no deben llegar a la base. Los `arch-audit-*.md`, las copias de `save-report` y el `trace-report.md` sí se integran.
+El merge se hace en tres tiempos (`--no-commit` → retirar `docs/audits/quality-check.md` y `code-review.md` → `commit`): esos dos informes son fotos de la rama del trabajo y no deben llegar a la base. Los `arch-audit-*.md`, las copias de `save-report` y el `coverage.md` sí se integran.
 
 **Opciones — tipo:**
 
