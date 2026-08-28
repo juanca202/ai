@@ -50,10 +50,10 @@ sdd-devkit/
 
 ## Plan de implementación
 
-- [ ] **IT-01** — Recorrer `skills/*/SKILL.md` y extraer su frontmatter (parser propio, sin dependencias) soportando valores en línea y bloques `>`/`>-`/`|`/`|-`.
+- [x] **IT-01** — Recorrer `skills/*/SKILL.md` y extraer su frontmatter (parser propio, sin dependencias) soportando valores en línea y bloques `>`/`>-`/`|`/`|-`.
   Reutilizar como referencia el enfoque ya validado en la investigación RS-002 (parseo línea a línea del bloque entre `---`).
-- [ ] **IT-02** — Implementar los chequeos de la capa "Convenciones del proyecto" (AC-003): `name` (formato, longitud, coincidencia con la carpeta), `description` (≤ 1000), `license` (`MIT`).
-- [ ] **IT-03** — Implementar los chequeos de la capa "Señales blandas" (AC-004) y el límite duro de plataforma (AC-005) sobre `description`.
-- [ ] **IT-04** — Implementar la resolución de enlaces relativos y anclas (AC-006, AC-007) sobre `SKILL.md` y los archivos de su carpeta `references/`, con slugificación de encabezados estilo GitHub.
-- [ ] **IT-05** — Implementar el reporte agrupado por skill y el código de salida según severidad (AC-008, AC-009).
-- [ ] **IT-06** — Correr el script sobre el catálogo actual del repo y confirmar que reproduce los hallazgos ya conocidos por la investigación (6 skills con `description` > 1000, 2 con más de 500 líneas) sin falsos positivos ni negativos.
+- [x] **IT-02** — Implementar los chequeos de la capa "Convenciones del proyecto" (AC-003): `name` (formato, longitud, coincidencia con la carpeta), `description` (≤ 1000), `license` (`MIT`).
+- [x] **IT-03** — Implementar los chequeos de la capa "Señales blandas" (AC-004) y el límite duro de plataforma (AC-005) sobre `description`.
+- [x] **IT-04** — Implementar la resolución de enlaces relativos y anclas (AC-006, AC-007) sobre `SKILL.md` y los archivos de su carpeta `references/`, con slugificación de encabezados estilo GitHub.
+- [x] **IT-05** — Implementar el reporte agrupado por skill y el código de salida según severidad (AC-008, AC-009).
+- [x] **IT-06** — Correr el script sobre el catálogo actual del repo y confirmar que reproduce los hallazgos ya conocidos por la investigación (6 skills con `description` > 1000, 2 con más de 500 líneas) sin falsos positivos ni negativos.
