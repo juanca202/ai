@@ -167,7 +167,7 @@ Los candidatos se agrupan por **dominio técnico/funcional** (testing, api, secu
 | **Nueva auditoría desde cero** | Audita todas las normas de nuevo                                                                  |
 
 
-**Veredicto:** `COMPLIANT` (`✅`) · `NON_COMPLIANT` (`❌`) · `COMPLIANT_WITH_NOTES` (`⚠️`) — la etiqueta del informe va en el idioma resuelto.
+**Veredicto:** `APPROVED` (`✅`) · `REJECTED` (`❌`) · `APPROVED_WITH_NOTES` (`⚠️`) — la etiqueta del informe va en el idioma resuelto.
 
 Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Deprecated`/`Superseded` solo si el código sigue dependiendo de ellos.
 

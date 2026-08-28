@@ -125,7 +125,7 @@ Precedencia: `REJECTED` > `INCOMPLETE` > `APPROVED`.
 
 > **Este veredicto cubre solo el plano automatizado.** No lo mezcles con el de `code-review` ni con el de `trace-validate`: cada skill emite el suyo y el orquestador (`work-integrate`, `pr-create`) exige **las tres** puertas en aprobado antes de integrar o crear el PR. (Única salvedad: en un **PR de promoción** —`develop → master`—, `pr-create` solo exige esta puerta, porque cada trabajo ya pasó las tres al integrarse; ver [`pr-create`](../pr-create/SKILL.md#puertas-en-un-pr-de-promoción).)
 >
-> **Ojo con el símbolo `⚠️` en el cierre:** aquí (y en `code-review`) `⚠️` es `INCOMPLETE` y **bloquea**; en `trace-validate` es `APPROVED_WITH_NOTES` y **no bloquea** (se muestran las observaciones y se continúa). Mismo símbolo, efecto de compuerta opuesto — no asumir equivalencia al leer los tres informes juntos.
+> **Ojo con el símbolo `⚠️` en el cierre:** aquí (y en `code-review`) `⚠️` es `INCOMPLETE` y **bloquea**; en `trace-validate` y `arch-audit` es `APPROVED_WITH_NOTES` y **no bloquea** (se muestran las observaciones y se continúa). Mismo símbolo, efecto de compuerta opuesto — no asumir equivalencia al leer los tres informes juntos.
 
 ---
 

@@ -5,7 +5,7 @@ IDIOMA: los títulos de sección, los encabezados de columna, la leyenda y TODA 
 severidad y estado de dimensión se redactan en el IDIOMA RESUELTO (ver «Resolución de idioma» en
 SKILL.md). Esta plantilla los muestra en español solo porque el repositorio del plugin está en
 español: son un ejemplo de redacción, no un texto fijo. Lo que NO cambia nunca: la estructura, el
-orden, los símbolos y los valores canónicos (APPROVED/REJECTED/INCOMPLETE, COMPLIANT/NOT_ASSESSED,
+orden, los símbolos y los valores canónicos (APPROVED/REJECTED/INCOMPLETE, CLEAN/NOT_ASSESSED,
 CRITICAL/MAJOR/MINOR/SUGGESTION). Ver ../../reference/verdicts.md.
 Excepción: la marca de pie del final (code-review:fingerprint) SÍ se conserva en el documento
 publicado — es la clave de frescura que lee el Paso 0 de la próxima revisión.
@@ -32,18 +32,18 @@ publicado — es la clave de frescura que lee el Paso 0 de la próxima revisión
 ## Hallazgos
 
 Leyenda de severidad — **redactar cada etiqueta en el idioma resuelto**, con estos símbolos:
-`🔴` {{CRITICAL}} · `🟠` {{MAJOR}} · `🟡` {{MINOR}} · `💡` {{SUGGESTION}} · `✅` {{COMPLIANT}}.
+`🔴` {{CRITICAL}} · `🟠` {{MAJOR}} · `🟡` {{MINOR}} · `💡` {{SUGGESTION}} · `✅` {{CLEAN}}.
 Formato de cada hallazgo: `[ISO-25010: <Característica>]` + severidad + qué (ubicado) + por qué + impacto + sugerencia concreta.
 
 ### Análisis semántico (intención)
 
-{{`✅` + etiqueta de `COMPLIANT` con una frase que explique por qué, o lista de hallazgos.}}
+{{`✅` + etiqueta de `CLEAN` con una frase que explique por qué, o lista de hallazgos.}}
 
 - {{🔴 | 🟠 | 🟡 | 💡}} `[ISO-25010: Adecuación funcional]` {{título del hallazgo}} — **Qué:** {{problema, en archivo/símbolo}} **Por qué:** {{qué se rompe o encarece}} **Impacto:** {{alcance en el sistema}} **Sugerencia:** {{cómo quedaría mejor}}
 
 ### Arquitectura y diseño
 
-{{`✅` + etiqueta de `COMPLIANT` con una frase que explique por qué, o lista de hallazgos (SOLID, límites de capas, acoplamiento, duplicación, abstracción innecesaria, patrones del proyecto, fiabilidad, seguridad, desempeño, compatibilidad).}}
+{{`✅` + etiqueta de `CLEAN` con una frase que explique por qué, o lista de hallazgos (SOLID, límites de capas, acoplamiento, duplicación, abstracción innecesaria, patrones del proyecto, fiabilidad, seguridad, desempeño, compatibilidad).}}
 
 - {{🔴 | 🟠 | 🟡 | 💡}} `[ISO-25010: {{Característica}}]` {{título}} — **Qué:** {{…}} **Por qué:** {{…}} **Impacto:** {{…}} **Sugerencia:** {{…}}
 

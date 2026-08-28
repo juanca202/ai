@@ -134,7 +134,7 @@ Precedencia: `REJECTED` > `INCOMPLETE` > `APPROVED`.
 
 > **Este veredicto cubre solo el plano cualitativo.** El del plano automatizado lo emite `quality-check` y el de la cobertura funcional `trace-validate`, cada uno por separado: el cierre de un trabajo exige **las tres** puertas en aprobado. Un `APPROVED` aquí **no** dice nada sobre si las pruebas pasan ni sobre si cada criterio está cubierto. (En un **PR de promoción** —`develop → master`— esta puerta no corre: su unidad es un diff sin revisar, y ahí todo el diff ya se revisó PR a PR. Ver [`pr-create`](../pr-create/SKILL.md#puertas-en-un-pr-de-promoción).)
 >
-> **Ojo con el símbolo `⚠️` en el cierre:** aquí (y en `quality-check`) `INCOMPLETE` **bloquea**; en `trace-validate`, `APPROVED_WITH_NOTES` **no bloquea**. Mismo símbolo, efecto de compuerta opuesto.
+> **Ojo con el símbolo `⚠️` en el cierre:** aquí (y en `quality-check`) `INCOMPLETE` **bloquea**; en `trace-validate` y `arch-audit`, `APPROVED_WITH_NOTES` **no bloquea**. Mismo símbolo, efecto de compuerta opuesto.
 
 **Ante un hallazgo bloqueante (🔴/🟠)**, lo que sigue depende de `verification.codeReview.confirmFix` (ver [Política de corrección](#política-de-corrección)):
 

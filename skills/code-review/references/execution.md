@@ -82,10 +82,10 @@ Un hallazgo que ignora el patrón vigente del repo o una decisión ya tomada en 
 
 1. Leer [`qualitative-review.md`](qualitative-review.md) y recorrer las tres dimensiones (semántica, arquitectura/diseño según ISO/IEC 25010, feedback senior).
 2. Emitir hallazgos con severidad (🔴/🟠/🟡/💡). Para cada uno: **qué** (ubicado en archivo/símbolo), **por qué**, **impacto** y **sugerencia concreta**, con la característica ISO/IEC 25010 correspondiente.
-3. Si una dimensión no arroja hallazgos, **decirlo explícitamente** (`COMPLIANT`) y explicar brevemente por qué el cambio está bien en ese plano. El silencio no es feedback.
-4. Si una dimensión **no se pudo evaluar** (intención no determinable y el usuario no la aportó, parte del diff inaccesible o generada), marcarla como `NOT_ASSESSED` con el motivo: es lo que produce el veredicto `INCOMPLETE` del Paso 4. No confundir `NOT_ASSESSED` con `COMPLIANT`.
+3. Si una dimensión no arroja hallazgos, **decirlo explícitamente** (`CLEAN`) y explicar brevemente por qué el cambio está bien en ese plano. El silencio no es feedback.
+4. Si una dimensión **no se pudo evaluar** (intención no determinable y el usuario no la aportó, parte del diff inaccesible o generada), marcarla como `NOT_ASSESSED` con el motivo: es lo que produce el veredicto `INCOMPLETE` del Paso 4. No confundir `NOT_ASSESSED` con `CLEAN`.
 
-> **Los puntos 3 y 4 aplican a las dimensiones 1 y 2, no a la 3.** La dimensión 3 (feedback estilo senior) es **transversal**: no es un cubo de hallazgos propio sino la forma de redactar los de las otras dos, más los nitpicks `🟡`/`💡` que van a «Feedback adicional». Por eso no se declara `COMPLIANT`, no puede quedar `NOT_ASSESSED` y no aporta al veredicto — y por eso `blocking-only` puede omitir esa sección sin dejar cojo el informe. En la tabla de justificaciones sí aparece como dimensión, para poder atribuir un hallazgo `🟡`/`💡` que el usuario haya justificado.
+> **Los puntos 3 y 4 aplican a las dimensiones 1 y 2, no a la 3.** La dimensión 3 (feedback estilo senior) es **transversal**: no es un cubo de hallazgos propio sino la forma de redactar los de las otras dos, más los nitpicks `🟡`/`💡` que van a «Feedback adicional». Por eso no se declara `CLEAN`, no puede quedar `NOT_ASSESSED` y no aporta al veredicto — y por eso `blocking-only` puede omitir esa sección sin dejar cojo el informe. En la tabla de justificaciones sí aparece como dimensión, para poder atribuir un hallazgo `🟡`/`💡` que el usuario haya justificado.
 5. No inflar ni minimizar severidades; ante la duda, decidir por el **impacto en el sistema** (ver la calibración en `qualitative-review.md`).
 
 ### Paso 4 — Puerta cualitativa e informe
@@ -131,7 +131,7 @@ La plantilla incluye: encabezado con metadata (donde vive el **Veredicto**, con 
 > **El informe no reporta el estado de las otras dos puertas.** Cada una escribe el suyo (`docs/audits/quality-check.md`, el `coverage.md` del trabajo) y quien las consolida es el orquestador de cierre (`work-integrate`, `pr-create`). Copiar aquí sus veredictos solo produce dos fuentes que se desincronizan: este documento responde por el plano cualitativo y nada más.
 
 Símbolos de severidad (exactamente estos, con la etiqueta en el idioma resuelto):
-`🔴` `CRITICAL` · `🟠` `MAJOR` · `🟡` `MINOR` · `💡` `SUGGESTION` · `✅` `COMPLIANT`.
+`🔴` `CRITICAL` · `🟠` `MAJOR` · `🟡` `MINOR` · `💡` `SUGGESTION` · `✅` `CLEAN`.
 
 Reglas al rellenar:
 - Sustituir cada `{{…}}` de la plantilla por el valor real; el informe publicado no debe conservar placeholders ni el bloque de comentario inicial — pero **sí** conserva la marca de pie con el fingerprint y la base (Paso 5).
