@@ -40,6 +40,7 @@ Se necesita un script ejecutable (`node scripts/validate-skills.js`) que aplique
 - **AC-009 (Fiabilidad):** el proceso DEBE terminar con código de salida `1` si hay al menos un `ERROR` en cualquier skill, y `0` si el resultado son solo `WARNING` o no hay hallazgos.
 - **AC-010 (Mantenibilidad):** el script NO DEBE requerir dependencias de `npm` ni un `package.json` para ejecutarse — solo `node scripts/validate-skills.js` desde la raíz del repo.
 - **AC-011 (Idoneidad funcional):** el script DEBE recorrer **todas** las carpetas directas de `skills/`, no solo las que ya tienen `SKILL.md`, y reportar `ERROR` («no existe SKILL.md en esta carpeta») para cualquiera que no lo tenga — en vez de omitirla en silencio del reporte.
+- **AC-012 (Idoneidad funcional):** el script DEBE validar el **nombre de la carpeta** en sí (kebab-case, menor a 64 caracteres) de forma independiente de si existe o no el campo `name` en el frontmatter — no solo transitivamente a través de las reglas de `name` (AC-003).
 
 ## Archivos afectados
 
@@ -59,3 +60,4 @@ sdd-devkit/
 - [x] **IT-05** — Implementar el reporte agrupado por skill y el código de salida según severidad (AC-008, AC-009).
 - [x] **IT-06** — Correr el script sobre el catálogo actual del repo y confirmar que reproduce los hallazgos ya conocidos por la investigación (6 skills con `description` > 1000, 2 con más de 500 líneas) sin falsos positivos ni negativos.
 - [x] **IT-07** — Implementar AC-011: recorrer todas las carpetas de `skills/` (no solo las que ya tienen `SKILL.md`) y reportar `ERROR` para las que no lo tengan.
+- [x] **IT-08** — Implementar AC-012: validar formato/tamaño del nombre de carpeta de forma independiente del campo `name`, evitando duplicar el mismo hallazgo cuando ambos coinciden.

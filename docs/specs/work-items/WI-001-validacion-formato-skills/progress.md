@@ -6,7 +6,7 @@
 <!-- work:id=WI-001 · status=Done -->
 **Tipo:** tarea de mantenimiento
 **Fecha de creación:** 2026-08-27 22:50
-**Ultima actualizacion:** 2026-08-27 23:40
+**Ultima actualizacion:** 2026-08-27 23:55
 
 ## Unidades
 
@@ -33,6 +33,7 @@
 - **Sin corregir, pendiente de decisión del usuario:** las 10 WARNING (7 `description` > 1000 caracteres, 3 archivos > 500 líneas) son violaciones reales de la convención del proyecto, pero acortarlas/reestructurarlas es edición de contenido con criterio editorial, no un fix mecánico — se dejaron fuera de esta corrección puntual. *(Resuelto en la corrección siguiente: las 7 `description` se acortaron y los 3 archivos se redujeron bajo 500 líneas — 0 WARNING.)*
 - **Consulta del usuario sobre el conteo de caracteres de `description`:** verificado con tres métodos independientes (parser JS, reimplementación en Python desde cero, `wc -m`) — los tres coinciden exactamente para las 16 skills. No había bug; el `1148` que el usuario citó era el largo original de `code-review` antes de acortarlo. Se agregó un test de regresión sobre el archivo real (con tildes/ñ) para fijar que el conteo es en caracteres unicode, no en bytes UTF-8.
 - **AC-011 (a pedido del usuario):** el script omitía en silencio cualquier carpeta de `skills/` sin `SKILL.md` — quedaba invisible en el reporte en vez de señalarse como un problema. Corregido: `main()` ahora recorre todas las carpetas de `skills/`, y `validateSkill()` reporta `ERROR` si falta el archivo. Verificado con un fixture temporal fuera del repo (una carpeta con `SKILL.md` + una vacía) y contra el catálogo real (sin cambios: las 16 carpetas ya tienen `SKILL.md`).
+- **AC-012 (a pedido del usuario):** `checkNaming` validaba el formato/tamaño kebab-case solo sobre el campo `name` del frontmatter; si ese campo faltaba, la función cortaba antes de mirar el nombre de la carpeta en sí, dejándolo sin validar. Corregido: la carpeta se valida siempre, primero y de forma independiente; si `name` coincide con la carpeta no se repite el mismo hallazgo dos veces, y si difiere se siguen reportando por separado la discrepancia y el formato/tamaño propio de `name`. 4 tests nuevos (40/40 en verde); sin cambios en el catálogo real.
 
 **Decisiones adicionales:**
 - Se usó el test runner nativo de Node (`node --test` + `node:assert/strict`) en vez de un framework externo, para cumplir AC-010 (sin dependencias de npm) también en las pruebas, no solo en el script.

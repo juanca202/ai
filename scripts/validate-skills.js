@@ -75,18 +75,35 @@ function parseFrontmatter(content) {
 
 function checkNaming(fields, dirName) {
   const findings = [];
-  const name = fields.name;
 
+  // El nombre de la carpeta debe cumplir el formato/tamaño siempre, exista o
+  // no un campo `name` con el que compararlo.
+  if (!NAME_RE.test(dirName)) {
+    findings.push({
+      severity: 'ERROR',
+      message: `el nombre de la carpeta (\`${dirName}\`) no es kebab-case (\`${NAME_RE}\`)`,
+    });
+  }
+  if (dirName.length >= NAME_MAX_LENGTH) {
+    findings.push({
+      severity: 'ERROR',
+      message: `el nombre de la carpeta (\`${dirName}\`) tiene ${dirName.length} caracteres, debe ser menor a ${NAME_MAX_LENGTH}`,
+    });
+  }
+
+  const name = fields.name;
   if (!name) {
     findings.push({ severity: 'ERROR', message: 'falta el campo `name` en el frontmatter' });
     return findings;
   }
-  if (name !== dirName) {
-    findings.push({
-      severity: 'ERROR',
-      message: `\`name: ${name}\` no coincide con el nombre de la carpeta (\`${dirName}\`)`,
-    });
+  if (name === dirName) {
+    // Ya validado arriba junto con la carpeta: no repetir el mismo hallazgo dos veces.
+    return findings;
   }
+  findings.push({
+    severity: 'ERROR',
+    message: `\`name: ${name}\` no coincide con el nombre de la carpeta (\`${dirName}\`)`,
+  });
   if (!NAME_RE.test(name)) {
     findings.push({ severity: 'ERROR', message: `\`name: ${name}\` no es kebab-case (\`${NAME_RE}\`)` });
   }

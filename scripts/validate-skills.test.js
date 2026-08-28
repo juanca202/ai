@@ -103,6 +103,29 @@ test('checkNaming: ERROR si falta el campo name', () => {
   assert.ok(findings.some((f) => f.severity === 'ERROR' && /name/.test(f.message)));
 });
 
+test('checkNaming: valida el formato de la carpeta aunque falte el campo name', () => {
+  // Antes: sin `name`, la función cortaba y nunca miraba si la carpeta en sí
+  // era kebab-case. El nombre del directorio debe cumplir la regla siempre,
+  // no solo cuando hay un `name` con el que compararlo.
+  const findings = checkNaming({}, 'Not_Kebab');
+  assert.ok(findings.some((f) => f.severity === 'ERROR' && /carpeta/.test(f.message) && /kebab-case/.test(f.message)));
+});
+
+test('checkNaming: valida el tamano de la carpeta aunque falte el campo name', () => {
+  const longDir = 'a'.repeat(64);
+  const findings = checkNaming({}, longDir);
+  assert.ok(findings.some((f) => f.severity === 'ERROR' && /carpeta/.test(f.message) && /64/.test(f.message)));
+});
+
+test('checkNaming: reporta el formato invalido del propio name cuando difiere de la carpeta', () => {
+  // La carpeta es válida (kebab-case, corta); el `name` no coincide Y además
+  // el `name` en sí tampoco es kebab-case: las dos cosas deben salir, no solo
+  // la discrepancia.
+  const findings = checkNaming({ name: 'Work_Plan' }, 'work-plan');
+  assert.ok(findings.some((f) => f.severity === 'ERROR' && /no coincide/.test(f.message)));
+  assert.ok(findings.some((f) => f.severity === 'ERROR' && /`name: Work_Plan`/.test(f.message) && /kebab-case/.test(f.message)));
+});
+
 // --- checkDescription -----------------------------------------------------
 
 test('checkDescription: sin hallazgos si tiene 1000 caracteres o menos', () => {
