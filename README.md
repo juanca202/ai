@@ -34,27 +34,48 @@ vez de repetir el contenido, y declaran solo su delta. Índice completo en
 
 ## Configuración del proyecto (`.sdd-devkit/settings.json`)
 
-`arch-init` crea este archivo en la raíz de **cada proyecto** que adopta el harness (no en el plugin). Controla el idioma de los artefactos, el ritmo de confirmaciones e implementación (worktrees, paralelismo, archivado), el comportamiento de `git-commit` (si pide confirmación antes de commitear y si hace push, y con qué política), si `quality-check` y `code-review` piden autorización antes de corregir un fallo/hallazgo o corrigen directo, y las integraciones opcionales con gestión de proyectos, telemetría y seguimiento de specs. Esquema completo en [`schemas/settings.schema.json`](schemas/settings.schema.json).
+`arch-init` crea este archivo en la raíz de **cada proyecto** que adopta el harness (no en el plugin). Controla el idioma de los artefactos, la ruta base y de archivado de las especificaciones, si `work-define`/`work-plan` ofrecen o invocan `test-define` al llegar a Ready, el ritmo de confirmaciones e implementación (cambios sin commitear, worktrees, paralelismo, archivado, handoff de cierre), el comportamiento de `git-commit` (si pide confirmación antes de commitear y si hace push, y con qué política), qué puertas de verificación ejecuta `work-integrate` antes del merge y si piden autorización antes de corregir lo que encuentren, y la integración opcional con gestión de proyectos y el seguimiento de specs. Esquema completo en [`schemas/settings.schema.json`](schemas/settings.schema.json).
 
-Ejemplo con las tres integraciones activadas:
+Ejemplo con las integraciones activadas:
 
 ```json
 {
   "language": "es",
+  "specification": {
+    "basePath": "docs/specs/",
+    "archivePath": "docs/archive/",
+    "trackingEnabled": true,
+    "trackingUrl": "https://events.sdd.io/api/v1/events",
+    "testCases": "ask"
+  },
   "implementation": {
     "confirmByUnit": "always",
+    "uncommittedChanges": "ask",
     "workTree": "ask",
     "workTreePath": "../worktrees",
     "maxParallel": 3,
-    "archiveMode": "ask"
+    "archiveMode": "ask",
+    "handoff": "ask"
+  },
+  "verification": {
+    "qualityCheck": {
+      "enabled": true,
+      "confirmFix": "always"
+    },
+    "codeReview": {
+      "enabled": true,
+      "confirmFix": "always"
+    },
+    "requirementCoverage": {
+      "enabled": true,
+      "confirmFix": "always"
+    },
+    "handoff": "ask"
   },
   "git": {
-    "confirmCommit": "always",
-    "push": "ask"
-  },
-  "qualityGates": {
-    "qualityCheckConfirmFix": "always",
-    "codeReviewConfirmFix": "always"
+    "commitConfirmation": "always",
+    "push": "ask",
+    "integrationBranches": []
   },
   "projectManagement": {
     "enabled": true,
@@ -62,23 +83,11 @@ Ejemplo con las tres integraciones activadas:
     "host": "https://dev.azure.com/mi-organizacion",
     "workspace": "mi-organizacion",
     "project": "MiProyecto"
-  },
-  "telemetry": {
-    "enabled": true,
-    "endpoint": "https://localhost:4318",
-    "protocol": "http/protobuf",
-    "serviceName": "sdd-devkit"
-  },
-  "specTracking": {
-    "enabled": true,
-    "basePath": "docs/specs/",
-    "requirement": "to-do-app",
-    "url": "https://events.sdd.io/api/v1/events"
   }
 }
 ```
 
-Con las integraciones desactivadas —el mínimo que genera `arch-init` por defecto— cada bloque queda en `"enabled": false` sin el resto de sus campos; ver la plantilla en [`skills/arch-init/assets/settings-template.json`](skills/arch-init/assets/settings-template.json).
+Con las integraciones desactivadas —el mínimo que genera `arch-init` por defecto— `projectManagement` queda en `"enabled": false` sin el resto de sus campos, y `specification` omite `trackingUrl` con `trackingEnabled: false`. Ver la plantilla en [`skills/arch-init/assets/settings-template.json`](skills/arch-init/assets/settings-template.json).
 
 ## Skills incluidos
 
@@ -94,9 +103,9 @@ Un **harness** es el "andamiaje" que sostiene y guía todo el proceso de desarro
 | Skill                                    | Uso                                                                                                                                                                                                                                                                                                                                                                      |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [arch‑init](SKILLS.md#arch-init)         | Inicializar el harness de un proyecto (nuevo o existente): repo git, diagnóstico base limpia/con características implementadas, stack tecnológico (detectado o investigado y scaffolded), placeholders `AGENTS.md`/`CLAUDE.md`/`.agents/MEMORY.md`/`.sdd-devkit/settings.json`/`docs/adr/README.md`/`docs/standards/README.md`, compuerta de calidad y los primeros ADR/estándares vía `arch-manage` |
-| [arch‑manage](SKILLS.md#arch-manage)     | Crear o actualizar ADRs (decisiones, en `docs/adr/`) y estándares de arquitectura **por dominio** (en `docs/standards/`, p. ej. *Testing Standards*).                                                                                                                                                                                                                    |
+| [arch‑manage](SKILLS.md#arch-manage)     | Crear o actualizar ADRs (decisiones, en `docs/adr/`) y estándares de arquitectura **por dominio** (en `docs/standards/`, p. ej. *Testing Standards*), en la raíz del repositorio al que pertenece el código —principal o submódulo.                                                                                                                                       |
 | [arch‑discover](SKILLS.md#arch-discover) | Analizar un repositorio y proponer ADRs y criterios de cumplimiento candidatos, agrupados por estándar de dominio, a partir de decisiones y reglas implícitas                                                                                                                                                                                                            |
-| [arch‑audit](SKILLS.md#arch-audit)       | Auditar los **criterios de cumplimiento** de los estándares (`docs/standards/`) y de `AGENTS.md` contra el estado real del repo — criterio por criterio, citando el ADR de origen — y generar un informe priorizado en `docs/audits/` con revalidaciones incrementales                                                                                                   |
+| [arch‑audit](SKILLS.md#arch-audit)       | Auditar los **criterios de cumplimiento** de los estándares (`docs/standards/`) y de `AGENTS.md` contra el estado real del repo — criterio por criterio, citando el ADR de origen — y generar un informe priorizado en el `docs/audits/` de la raíz auditada (una por corrida), con revalidaciones incrementales                                                          |
 | [git‑commit](SKILLS.md#git-commit)       | Preparar commits con mensajes Conventional Commits inferidos del diff                                                                                                                                                                                                                                                                                                    |
 
 
@@ -146,7 +155,7 @@ flowchart TD
 3. En paralelo (o a continuación), se configura la **compuerta de calidad** vía `arch-init`; el camino brownfield también converge ahí.
 4. Luego se definen o actualizan los ADRs/Estándares con `arch-manage`. Opcionalmente se audita el cumplimiento con `arch-audit`.
 5. Con la base arquitectónica lista, el trabajo entra a la implementación de requerimientos (otro flujo: historias → planificación → implementación → integración/PR).
-6. Ese flujo de implementación **ya cierra** con `work-integrate` o `pr-create`, que ejecutan internamente las puertas de calidad (`quality-check`, `code-review`, `trace-validate`) y, pasadas todas, ofrecen archivar el artefacto en `docs/specs/archive/` —solo si el usuario lo confirma; declinarlo no bloquea el cierre— no son pasos aparte de este flujo de alto nivel. Y un paso más allá queda la **promoción**: `pr-create` desde `develop` hacia la rama de despliegue, donde solo aplica `quality-check` porque cada trabajo ya pasó las tres al integrarse.
+6. Ese flujo de implementación **ya cierra** con `work-integrate` o `pr-create`, que ejecutan internamente las puertas de calidad (`quality-check`, `code-review`, `trace-validate`) y, pasadas todas, ofrecen archivar el artefacto en `docs/archive/` —solo si el usuario lo confirma; declinarlo no bloquea el cierre— no son pasos aparte de este flujo de alto nivel. Y un paso más allá queda la **promoción**: `pr-create` desde `develop` hacia la rama de despliegue, donde solo aplica `quality-check` porque cada trabajo ya pasó las tres al integrarse.
 7. El flujo termina en un entregable: trabajo verificado, validado y listo para producción.
 
 
@@ -220,7 +229,7 @@ flowchart TD
 3. **Planificación de tareas** (`work-plan`): desde una historia produce tareas técnicas (`TK-XXX`); sin historia, tareas de mantenimiento (`WI-XXX`).
 4. Durante la planificación, opcionalmente se investiga con `work-research` y/o se ajusta el diseño arquitectónico con `design-define`.
 5. Las tareas planificadas pasan a `work-implement` para su codificación. Los casos de prueba (`TC-XXX`, incluidos los de un feature legacy `FT-XXX`) también pueden pasar por `work-implement` para automatizarse como pruebas.
-6. El flujo termina por uno de dos caminos, y ambos llegan al mismo entregable — el trabajo listo para producción, ya sea integrado directo (`work-integrate`) o vía Pull/Merge Request (`pr-create`). Cada uno ejecuta **internamente** las mismas puertas de calidad (`quality-check`, `code-review`, `trace-validate`) y, una vez aprobadas, **pregunta si archivar el `US-XXX`/`WI-XXX`**; si el usuario confirma, mueve su carpeta a `docs/specs/archive/` en la misma rama para que el archivado se integre con el código. Declinarlo no bloquea el cierre. No son pasos aparte de este flujo. Después, promover lo acumulado en `develop` a la rama de despliegue es un `pr-create` en **modo promoción**, que solo ejecuta `quality-check`.
+6. El flujo termina por uno de dos caminos, y ambos llegan al mismo entregable — el trabajo listo para producción, ya sea integrado directo (`work-integrate`) o vía Pull/Merge Request (`pr-create`). Cada uno ejecuta **internamente** las mismas puertas de calidad (`quality-check`, `code-review`, `trace-validate`) y, una vez aprobadas, **pregunta si archivar el `US-XXX`/`WI-XXX`**; si el usuario confirma, mueve su carpeta a `docs/archive/` en la misma rama para que el archivado se integre con el código. Declinarlo no bloquea el cierre. No son pasos aparte de este flujo. Después, promover lo acumulado en `develop` a la rama de despliegue es un `pr-create` en **modo promoción**, que solo ejecuta `quality-check`.
 
 
 
@@ -263,7 +272,7 @@ flowchart TD
 1. **Inicio**: el requerimiento se convierte en historias de usuario con `work-define`.
 2. Opcionalmente, desde las historias se investiga (`work-research`), se definen casos de prueba (`test-define`) y/o diseño arquitectónico (`design-define`).
 3. Las historias alimentan **Specs de terceros** (la implementación la corre el framework elegido: Speckit, OpenSpec, AgentOS, etc.).
-4. El flujo termina por uno de dos caminos, igual que en Specs: integración directa (`work-integrate`) o vía Pull/Merge Request (`pr-create`); ambos llegan al entregable, ejecutan **internamente** las mismas puertas de calidad (`quality-check`, `code-review`, `trace-validate`) y ofrecen archivar el artefacto en `docs/specs/archive/` previa confirmación del usuario —que puede declinarla sin bloquear el cierre—, sin ser pasos aparte de este flujo. La promoción posterior a la rama de despliegue es un `pr-create` en **modo promoción**, que solo ejecuta `quality-check`.
+4. El flujo termina por uno de dos caminos, igual que en Specs: integración directa (`work-integrate`) o vía Pull/Merge Request (`pr-create`); ambos llegan al entregable, ejecutan **internamente** las mismas puertas de calidad (`quality-check`, `code-review`, `trace-validate`) y ofrecen archivar el artefacto en `docs/archive/` previa confirmación del usuario —que puede declinarla sin bloquear el cierre—, sin ser pasos aparte de este flujo. La promoción posterior a la rama de despliegue es un `pr-create` en **modo promoción**, que solo ejecuta `quality-check`.
 
 
 

@@ -30,9 +30,10 @@ tipo de plan en curso: `TK-<ado_id>-[nombre-descriptivo].md` o `WI-<ado_id>-[nom
 
 ## Alcance del check de ID disponible
 
-- **`WI-`**: el escaneo cubre `docs/specs/work-items/` **y** `docs/specs/archive/work-items/`. Un WI
+- **`WI-`**: el escaneo cubre `docs/specs/work-items/` **y** `docs/archive/work-items/`. Un WI
   archivado conserva su ID de ADO, y saltárselo produciría dos carpetas locales para un mismo work item
-  del tracker.
+  del tracker. (`docs/archive/` resuelto desde `specification.archivePath` — ver
+  [`../../work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).)
 - **`TK-`**: **no** se escanea el archivo. El `TK-` es por historia, y si la US padre estuviera
   archivada el flujo ya habría parado antes de llegar aquí (Regla 1) — lo que se comprueba es la carpeta
   de la US **realmente resuelta**.

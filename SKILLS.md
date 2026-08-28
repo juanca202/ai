@@ -8,14 +8,15 @@ Invocación típica: `/nombre-skill` o una frase que active la descripción del 
 
 ## Reglas transversales
 
-Nueve reglas aplican a todo el catálogo y viven **una sola vez** en [`reference/`](reference/), en la raíz del plugin. Cada `SKILL.md` las enlaza con una ruta relativa (`../../reference/…`) y declara solo su delta o su excepción:
+Once reglas aplican a todo el catálogo y viven **una sola vez** en [`reference/`](reference/), en la raíz del plugin. Cada `SKILL.md` las enlaza con una ruta relativa (`../../reference/…`) y declara solo su delta o su excepción:
 
 | Regla | Dónde vive | Qué fija |
 |-------|-----------|----------|
 | **Resolución de idioma** | [`reference/language.md`](reference/language.md) | Regla única y obligatoria: cada skill y agente DEBE leer `language.md` antes de ejecutarse. Excepciones declaradas dentro de la propia sección: `arch-init`, `test-define`, `design-define`, `git-commit`, `pr-create`, `work-research`, `code-review`, `quality-check`, `trace-validate`, `work-implement`, y los agentes `quality-specialist` y `ui-specialist`. |
-| **Política de implementación** | [`reference/implementation.md`](reference/implementation.md) | Regla única y obligatoria para `work-implement`: ritmo de confirmación por unidad (`confirmByUnit`), worktrees y su ruta (`workTree`, `workTreePath`) y concurrencia máxima (`maxParallel`), resueltos desde `.sdd-devkit/settings.json`. |
-| **Política de commit y push** | [`reference/git.md`](reference/git.md) | Regla única y obligatoria para `git-commit`: si se muestra la propuesta y se espera confirmación (`confirmCommit`) y si se hace push tras commitear (`push`, solo en invocación directa), resueltos desde `.sdd-devkit/settings.json`. Las gates de seguridad no son configurables. |
-| **Política de corrección en puertas de calidad** | [`reference/quality-gates.md`](reference/quality-gates.md) | Regla única y obligatoria para `quality-check` y `code-review`: si se pide confirmación antes de corregir un fallo/hallazgo (`always`, por defecto) o se corrige directo sin preguntar (`never`), resuelto por skill desde `.sdd-devkit/settings.json` (`qualityGates.qualityCheckConfirmFix` / `qualityGates.codeReviewConfirmFix`). No aplica a `trace-validate`, que nunca corrige. |
+| **Política de planificación** | [`reference/planning.md`](reference/planning.md) | Regla única y obligatoria para `work-define` y `work-plan`: al cerrar la planificación —US en Ready, o tareas en Ready— se pregunta si definir los casos de prueba (`ask`, por defecto), se invoca `test-define` directo (`always`) o no se ofrece (`never`), resuelto desde `.sdd-devkit/settings.json` (`specification.testCases`). Los `TC-XXX` cuelgan del artefacto padre: el segundo skill en llegar no repite la oferta. |
+| **Política de implementación** | [`reference/implementation.md`](reference/implementation.md) | Regla única y obligatoria para `work-implement`: ritmo de confirmación por unidad (`confirmByUnit`), qué hacer con cambios sin commitear al iniciar (`uncommittedChanges`), worktrees y su ruta (`workTree`, `workTreePath`), concurrencia máxima (`maxParallel`) y si el cierre pasa al siguiente skill sin preguntar (`handoff`), resueltos desde `.sdd-devkit/settings.json`. |
+| **Política de commit y push** | [`reference/git.md`](reference/git.md) | Regla única y obligatoria para `git-commit`: si se muestra la propuesta y se espera confirmación (`commitConfirmation`) y si se hace push tras commitear (`push`, solo en invocación directa), resueltos desde `.sdd-devkit/settings.json`. Las gates de seguridad no son configurables. |
+| **Política de verificación** | [`reference/verification.md`](reference/verification.md) | Regla única y obligatoria para `quality-check`, `code-review` y `work-integrate`: por puerta (`qualityCheck`, `codeReview`, `requirementCoverage`), si corre antes del merge (`enabled`, lo resuelve `work-integrate`) y si pide confirmación antes de corregir lo que encuentre (`confirmFix`, lo resuelve `quality-check`/`code-review`; no aplica a `trace-validate`); y si el cierre pasa a `work-integrate` sin preguntar (`handoff`). Resuelto desde `.sdd-devkit/settings.json` (`verification.*`). Una puerta omitida no bloquea el merge pero tampoco cuenta como aprobada. |
 | **Cómo preguntar al usuario** | [`reference/asking.md`](reference/asking.md) | Herramienta de preguntas estructuradas, opciones cortas y excluyentes, una tanda al inicio, fallback en prosa enumerada. |
 | **Veredictos y estados** | [`reference/verdicts.md`](reference/verdicts.md) | Regla única para `quality-check`, `code-review`, `trace-validate` y `arch-audit`: valor canónico + símbolo estables, **etiqueta siempre en el idioma resuelto**. Los consumidores leen el **símbolo**, nunca la palabra. |
 | **Artefactos** | [`reference/artifacts.md`](reference/artifacts.md) | Ruta de cada artefacto, identificadores y numeración, y el contrato de archivado (archivar no libera el ID). |
@@ -82,7 +83,7 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 
 **Cuándo:** documentar o cambiar una decisión arquitectónica (ADR) o una norma de dominio (estándar / criterio de cumplimiento).
 
-**Produce:** `docs/adr/ADR-XXX-*.md` y/o criterios de cumplimiento (`CR-XXX`) en `docs/standards/` (p. ej. *Testing Standards*), con fitness functions cuando apliquen.
+**Produce:** `docs/adr/ADR-XXX-*.md` y/o criterios de cumplimiento (`CR-XXX`) en `docs/standards/` (p. ej. *Testing Standards*), con fitness functions cuando apliquen — **en la raíz del repositorio al que pertenece el código**: la principal, o la del submódulo, si la decisión es suya (ver [`reference/artifacts.md`](reference/artifacts.md#raíz-de-arquitectura-adr-estándares-y-fitness-functions)).
 
 **Opciones — qué se produce:**
 
@@ -120,7 +121,7 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 
 **Cuándo:** hay código existente y se quieren sacar a la luz decisiones/normas implícitas.
 
-**Produce:** lista de candidatos; tras aprobación del usuario, crea los artefactos vía `arch-manage`.
+**Produce:** lista de candidatos; tras aprobación del usuario, crea los artefactos vía `arch-manage`. Cubre **una raíz de arquitectura por corrida** (repo principal o submódulo).
 
 **Opciones — clasificación de cada candidato:**
 
@@ -153,9 +154,9 @@ Los candidatos se agrupan por **dominio técnico/funcional** (testing, api, secu
 
 ### arch-audit
 
-**Cuándo:** comprobar si el repo cumple los criterios de cumplimiento de `docs/standards/` y las reglas de `AGENTS.md`.
+**Cuándo:** comprobar si una raíz de arquitectura —el repo principal o un submódulo— cumple los criterios de cumplimiento de su `docs/standards/` y las reglas de `AGENTS.md`. Una raíz por corrida.
 
-**Produce:** `docs/audits/arch-audit-YYYY-MM-DD.md` con hallazgos priorizados y veredicto.
+**Produce:** `docs/audits/arch-audit-YYYY-MM-DD.md` **en la raíz auditada**, con hallazgos priorizados y veredicto.
 
 **Opciones — si ya hay auditoría previa:**
 
@@ -201,11 +202,11 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 | Condición                | Flujo                                                                                           |
 | ------------------------ | ----------------------------------------------------------------------------------------------- |
 | Sin cambios              | Informa y no commitea                                                                           |
-| Un solo tema lógico      | Commit estándar (propuesta → confirmación → commit), o directo sin confirmación si `git.confirmCommit: "never"` |
-| Varios temas mezclados   | Propone varios commits y ejecuta en secuencia (misma excepción con `confirmCommit: never`)       |
+| Un solo tema lógico      | Commit estándar (propuesta → confirmación → commit), o directo sin confirmación si `git.commitConfirmation: "never"` |
+| Varios temas mezclados   | Propone varios commits y ejecuta en secuencia (misma excepción con `commitConfirmation: never`)       |
 | Falló un pre-commit hook | Corrige, re-stagea y **nuevo** commit (sin `--amend` ni `--no-verify` salvo petición explícita) |
 
-**Configuración (`.sdd-devkit/settings.json` → `git`):** `confirmCommit` (`always`/`never`) decide si se pide confirmación antes de commitear; `push` (`ask`/`always`/`never`) decide si se hace push tras completar el/los commits — nunca en invocación delegada por `work-integrate`/`pr-create`. Por defecto: `confirmCommit: "always"`, `push: "never"`.
+**Configuración (`.sdd-devkit/settings.json` → `git`):** `commitConfirmation` (`always`/`never`) decide si se pide confirmación antes de commitear; `push` (`ask`/`always`/`never`) decide si se hace push tras completar el/los commits — nunca en invocación delegada por `work-integrate`/`pr-create`. Por defecto: `commitConfirmation: "always"`, `push: "never"`.
 
 
 **Tipos de mensaje:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert` (tipo/scope en inglés). Detiene el commit ante secretos o archivos sensibles salvo confirmación explícita sobre ese archivo.
@@ -293,6 +294,8 @@ Si el repo tiene activada la integración con un gestor de proyectos en `.sdd-de
 
 
 **Estados:** `Draft` (lagunas en Observaciones) · `Ready` (DoR + INVEST + repos + AC completos). En Ready sugiere `test-define` y `work-plan`.
+
+**Configuración (`.sdd-devkit/settings.json` → `specification.testCases`):** `ask` (por defecto) pregunta si se definen los casos de prueba al llegar a Ready; `always` invoca `test-define` directo, sin preguntar; `never` no lo ofrece. `work-plan` se sigue ofreciendo igual en los tres casos.
 
 **Ejemplos de invocación:**
 
@@ -485,7 +488,7 @@ Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrat
 
 **Suites de prueba:** las únicas **fijas** son `unit`, `coverage` y `e2e` (siempre se listan, aunque salgan `N/A`). El resto del conjunto —integración, contrato, rendimiento…— sale del **estándar de testing** del repo (`docs/standards/testing.md`): una suite por requisito vigente, con la categoría que fije su enunciado RFC 2119 (DEBE → Bloqueante; DEBERÍA/PUEDE → Condicional). Sin estándar, solo las tres fijas.
 
-**Correcciones:** gobernadas por `.sdd-devkit/settings.json` → `qualityGates.qualityCheckConfirmFix` (`always` por defecto / `never`). Con `always`, nunca corrige por iniciativa propia — ante hallazgos que impliquen tocar código pregunta primero: **dentro** de una implementación, si se corrigen; **fuera** de una implementación (rama suelta, auditoría), ofrece explícitamente [Corregir] / [Solo el informe]. Con `never`, corrige directo sin preguntar. Si se corrige y la rama es de un `US-XXX`/`WI-XXX`, delega el arreglo en `work-implement` (modo corrección); si no hay artefacto, corrige él mismo. Aplica igual a fallos de pruebas.
+**Correcciones:** gobernadas por `.sdd-devkit/settings.json` → `verification.qualityCheck.confirmFix` (`always` por defecto / `never`). Con `always`, nunca corrige por iniciativa propia — ante hallazgos que impliquen tocar código pregunta primero: **dentro** de una implementación, si se corrigen; **fuera** de una implementación (rama suelta, auditoría), ofrece explícitamente [Corregir] / [Solo el informe]. Con `never`, corrige directo sin preguntar. Si se corrige y la rama es de un `US-XXX`/`WI-XXX`, delega el arreglo en `work-implement` (modo corrección); si no hay artefacto, corrige él mismo. Aplica igual a fallos de pruebas.
 
 **Veredicto:** `APPROVED` (`✅`) · `REJECTED` (`❌`) · `INCOMPLETE` (`⚠️`) — la etiqueta del informe va en el idioma resuelto.
 
@@ -534,7 +537,7 @@ En prosa (el skill mapea al modificador en inglés):
 
 **Severidad:** `🔴` Crítico · `🟠` Mayor (bloquean) · `🟡` Menor · `💡` Sugerencia.
 
-**Correcciones:** gobernadas por `.sdd-devkit/settings.json` → `qualityGates.codeReviewConfirmFix` (`always` por defecto / `never`). Ante un hallazgo bloqueante, con `always` pausa y ofrece [Corregir] / [Justificar]; con `never` corrige directo sin preguntar (la justificación sigue disponible si el usuario la aporta).
+**Correcciones:** gobernadas por `.sdd-devkit/settings.json` → `verification.codeReview.confirmFix` (`always` por defecto / `never`). Ante un hallazgo bloqueante, con `always` pausa y ofrece [Corregir] / [Justificar]; con `never` corrige directo sin preguntar (la justificación sigue disponible si el usuario la aporta).
 
 **Veredicto:** `APPROVED` (`✅`) · `REJECTED` (`❌`) · `INCOMPLETE` (`⚠️`) — **independiente** del de `quality-check`; la etiqueta del informe va en el idioma resuelto.
 
@@ -632,7 +635,7 @@ El merge se hace en tres tiempos (`--no-commit` → retirar `docs/audits/quality
 
 **Puertas (obligatorias):** `quality-check` → `code-review` → `trace-validate`. Working tree sucio → invoca `git-commit` automáticamente.
 
-**Archivado (paso 10, previa confirmación):** con el `progress.md` en `Done`, las tres puertas aprobadas y el delta contra la base verificado > 0, se **pregunta al usuario** si archivar —mostrando antes qué se movería—. Solo con un sí explícito la carpeta del trabajo se mueve con `git mv` a `docs/specs/archive/user-stories/` o `docs/specs/archive/work-items/` **en la rama**, para que se integre en el mismo merge. Las investigaciones sueltas de `docs/specs/research/` que quedan sin referencias activas se archivan también; las internas viajan con la carpeta. Un «no» no bloquea el merge: se anota y se sigue. No aplica a ramas `test/`. Detalle en [archive.md](skills/work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+**Archivado (paso 8, según `implementation.archiveMode`):** con el `progress.md` en `Done`, las tres puertas aprobadas y el delta contra la base verificado > 0, se resuelve `implementation.archiveMode`: con `ask` (por defecto) **pregunta al usuario** si archivar —mostrando antes qué se movería—, con `always` archiva directo sin preguntar, con `never` no archiva ni pregunta. Cuando archiva, la carpeta del trabajo se mueve con `git mv` a `docs/archive/user-stories/` o `docs/archive/work-items/` **en la rama**, para que se integre en el mismo merge. Las investigaciones sueltas de `docs/specs/research/` que quedan sin referencias activas se archivan también; las internas viajan con la carpeta. No archivar —negativa, `never`, o sin canal para preguntar— no bloquea el merge: se anota y se sigue. No aplica a ramas `test/`. Detalle en [archive.md](skills/work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
 **Ejemplos de invocación:**
 
@@ -675,7 +678,7 @@ En una promoción, `code-review` y `trace-validate` se reportan como `N/A` (`—
 3. `trace-validate` sobre el `US`/`WI` de la rama — solo en implementación
 4. Definition of Done (`docs/policies/definition-of-done.md`) — **solo si existe**; si no, se omite
 
-**Archivado (solo implementación, Paso 5):** pasadas las puertas y **antes del push**, se pregunta al usuario si archivar; confirmado, la carpeta del trabajo se mueve a `docs/specs/archive/` para que el movimiento viaje dentro del PR. Declinarlo no impide crear el PR. Mismo procedimiento que `work-integrate` ([archive.md](skills/work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo)). **No aplica** en promoción ni en ramas `test/`; con el `progress.md` incompleto se omite y se avisa, pero el PR se crea igual.
+**Archivado (solo implementación, Paso 5, según `implementation.archiveMode`):** pasadas las puertas y **antes del push**, se resuelve la misma política que `work-integrate` — con `ask` (por defecto) se pregunta al usuario si archivar, con `always` archiva directo, con `never` no archiva ni pregunta. Confirmado o forzado por `always`, la carpeta del trabajo se mueve a `docs/archive/` para que el movimiento viaje dentro del PR. Declinarlo (o `never`) no impide crear el PR. Mismo procedimiento que `work-integrate` ([archive.md](skills/work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo)). **No aplica** en promoción ni en ramas `test/`; con el `progress.md` incompleto se omite y se avisa, pero el PR se crea igual.
 
 Working tree sucio → `git-commit` automático. Título/descripción se generan sin pedir confirmación. Ante fallo de puerta: informa, propone acciones y solo corrige con autorización explícita.
 

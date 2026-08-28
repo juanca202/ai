@@ -71,7 +71,7 @@ referenciados desde el `README.md`.
 | Artefacto vinculado `FT-XXX`            | `docs/specs/features/FT-XXX-{slug}/research/RS-XXX-{slug}/`                                                                                         |
 | Sin artefacto vinculado                 | `docs/specs/research/RS-XXX-{slug}/` (en la migración, en el **proyecto destino**; en el análisis de legado, en el proyecto que contiene el código) |
 
-> **Artefacto archivado.** Si la carpeta de un `US-XXX`/`TK-XXX`/`WI-XXX`/`RS-XXX` no aparece en su ruta activa, buscarla bajo `docs/specs/archive/` (`archive/user-stories/`, `archive/work-items/`, `archive/research/`) antes de darla por inexistente: `work-integrate` y `pr-create` pueden moverla ahí al cerrar el trabajo, si el usuario lo confirma. **Nunca** recrearla en la ruta activa. Lo que se haga con el hallazgo depende de dónde escriba el flujo:
+> **Artefacto archivado.** Si la carpeta de un `US-XXX`/`TK-XXX`/`WI-XXX`/`RS-XXX` no aparece en su ruta activa, buscarla bajo `docs/archive/` (`archive/user-stories/`, `archive/work-items/`, `archive/research/`) antes de darla por inexistente: `work-integrate` y `pr-create` pueden moverla ahí al cerrar el trabajo, si el usuario lo confirma. **Nunca** recrearla en la ruta activa. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo). Lo que se haga con el hallazgo depende de dónde escriba el flujo:
 >
 > - **Flujos que escribirían el `RS-XXX` dentro del `research/` del artefacto** — solo *Analizar decisiones pendientes*: **parar y avisar**. Un trabajo cerrado no tiene decisiones pendientes que resolver, y retomarlo exige desarchivarlo, decisión del usuario.
 > - **Flujos que lo leen como contexto y escriben fuera** (*Analizar issue*, que produce un dossier y un `WI-XXX` nuevo; *Investigación libre*): **continuar**. Leer un artefacto archivado es siempre legítimo — investigar un bug de algo ya entregado es el caso normal.
@@ -283,7 +283,7 @@ comunes a todos:
 
 - **Leer antes de investigar.** Nunca investigar sobre un artefacto sin haberlo abierto.
 - **No duplicar investigaciones previas.** Revisar el `research/` correspondiente —y, si
-la base es `docs/specs/research/`, también `docs/specs/archive/research/`—; si ya hay un
+la base es `docs/specs/research/`, también `docs/archive/research/`—; si ya hay un
 RS sobre el mismo tema, mostrarlo al usuario y partir de él.
 - **Verificar contra el repo, no contra la memoria.** Stack, versiones y estructura se
 comprueban en los manifiestos y el código.
@@ -361,15 +361,16 @@ es una hipótesis: se marca como tal y se verifica o se descarta.
      usuario los revisa en disco después de guardar, o los pide explícitamente si quiere
      verlos antes.
 3. **Preguntar** (herramienta estructurada): «¿La investigación responde tu pregunta?»
-  Opciones: [Sí, guardar] / [Profundizar en un subtema] / [Ajustar el informe] /
-   [Descartar]. Dejar explícito en el mensaje que **todavía no se ha escrito nada**.
+  Opciones: [Sí, guardar] / [Profundizar en un subtema] / [Descartar]. **No ofrecer una opción
+   de "ajustar el informe"**: el ajuste se pide por respuesta libre, donde el usuario ya explica
+   qué cambiar. Dejar explícito en el mensaje que **todavía no se ha escrito nada**.
    - **Sí** → Paso 5: escribir en disco el contenido tal como se presentó, con
      `Estado: Ready` —o `Draft` si el flujo declara pendientes abiertos; su referencia
      dice cuándo aplica.
    - **Profundizar** → investigación adicional y volver al punto 1 de este paso.
-   - **Ajustar** → aplicar los cambios pedidos y **volver a presentar el contenido
-     completo** antes de preguntar de nuevo. Nunca escribir una versión que el usuario
-     no ha visto entera.
+   - **Ajuste pedido en respuesta libre** → aplicar los cambios y **volver a presentar el
+     contenido completo** antes de preguntar de nuevo. Nunca escribir una versión que el
+     usuario no ha visto entera.
    - **Descartar** → el skill termina. No hay nada que borrar, porque nada se escribió.
 
 > **Analizar issue:** no aplican ni el `README.md` del RS ni el Paso 5. Este flujo
@@ -397,7 +398,7 @@ es una hipótesis: se marca como tal y se verifica o se descarta.
    parar antes.
 2. Determinar el siguiente `RS-XXX` leyendo las carpetas `RS-XXX-*` existentes en esa
   base y tomando el mayor número + 1. Empezar en `001` si no hay ninguna.
-   - **Si la base es `docs/specs/research/`, escanear también `docs/specs/archive/research/`**
+   - **Si la base es `docs/specs/research/`, escanear también `docs/archive/research/`**
      y tomar el mayor de las dos. `work-integrate` y `pr-create` archivan ahí las
      investigaciones sueltas que se quedan sin artefacto activo que las referencie; su
      número **sigue ocupado**, y mirar solo la ruta activa haría retroceder el contador y
@@ -433,7 +434,7 @@ es una hipótesis: se marca como tal y se verifica o se descarta.
 
 - **Secuencial** `XXX`**:** tres dígitos, por carpeta base de destino. Leer las carpetas
 `RS-XXX-*` existentes y tomar el siguiente número. Cuando la base es
-`docs/specs/research/`, el escaneo incluye `docs/specs/archive/research/`: archivar no
+`docs/specs/research/`, el escaneo incluye `docs/archive/research/`: archivar no
 libera el número.
 - **Slug:** kebab-case, descriptivo del tema. Máximo 5 palabras.
 - **Un RS por pregunta de investigación.** Si la sesión produce varias, generar un RS

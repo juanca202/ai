@@ -64,7 +64,7 @@ Leer el artefacto **antes** de investigar:
 | `WI-XXX` | `docs/specs/work-items/WI-XXX-{kebab-case}/README.md` | Descripción, criterios, plan de implementación actual, Observaciones          |
 
 
-> **Si el artefacto no está en la ruta activa, buscarlo bajo `docs/specs/archive/`**
+> **Si el artefacto no está en la ruta activa, buscarlo bajo `docs/archive/`**
 > (`archive/user-stories/`, `archive/work-items/`): `work-integrate` y `pr-create` lo
 > mueven ahí al cerrar el trabajo. Un artefacto archivado es trabajo **ya cerrado**: no
 > tiene decisiones pendientes que analizar, así que **parar y avisar** en vez de escribir

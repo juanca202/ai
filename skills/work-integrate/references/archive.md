@@ -2,15 +2,15 @@
 
 Procedimiento **compartido** por `work-integrate` (merge local) y `pr-create` (PR de
 implementación): cuando el trabajo ya está cerrado y verificado, su carpeta de
-especificación se mueve a `docs/specs/archive/` **dentro de la rama del trabajo**, de
+especificación se mueve a `docs/archive/` **dentro de la rama del trabajo**, de
 modo que el archivado viaje en el mismo merge/PR que el código.
 
 ---
 
 ## Cuándo se archiva
 
-**Todas** estas condiciones, sin excepción — y aun cumplidas todas, hace falta la
-[confirmación explícita del usuario](#confirmación-del-usuario-obligatoria):
+**Todas** estas condiciones, sin excepción — y aun cumplidas todas, lo que sigue depende de
+[`implementation.archiveMode`](#política-implementationarchivemode):
 
 1. El `progress.md` del trabajo tiene **todas** sus unidades en `Done`.
 2. **Todas** las puertas de calidad que aplican al flujo quedaron en `APPROVED`:
@@ -26,7 +26,7 @@ modo que el archivado viaje en el mismo merge/PR que el código.
 
 Si alguna falla, **no se archiva**.
 
-- En `work-integrate` esto no llega a ocurrir: el flujo ya se detuvo antes por esa misma razón (el `progress.md` se valida en su paso 4, las puertas en los pasos 6–8, el delta en el paso 9).
+- En `work-integrate` esto no llega a ocurrir: el flujo ya se detuvo antes por esa misma razón (el `progress.md` se valida en su paso 4, las puertas en el paso 6, el delta en el paso 7).
 - En `pr-create` el `progress.md` **no** se valida en el pre-flight, así que se lee en el propio paso de archivado. Si no está completo en `Done`, se **omite el archivado y se avisa** — el PR se crea igual: las puertas pasaron y no es ese el momento de bloquearlo.
 
 **Orden.** El archivado ocurre **después** de la última puerta y **antes** del commit
@@ -43,17 +43,30 @@ que ya no existe, o generando una carpeta huérfana en el origen.
 | Ramas `test/` sobre un `FT-XXX` | El feature sigue vivo: la automatización de sus `TC-XXX` cierra una ejecución, no el artefacto. |
 | Ramas `test/` sobre un `US-XXX`/`WI-XXX` | El trabajo funcional puede seguir abierto: el flujo solo verificó las unidades `TC-XXX` de esa ejecución, no el `progress.md` completo. Que el skill resuelva un `US-XXX` para `trace-validate` **no** habilita el archivado. |
 | PR de **promoción** (`pr-create`) | No trae trabajo nuevo: cada `US`/`WI` que viaja en él ya se archivó al integrarse. |
-| Un trabajo cuya carpeta ya está bajo `docs/specs/archive/` | Ya archivado. Se detecta, se informa y se continúa sin tocar nada — no es un error. |
+| Un trabajo cuya carpeta ya está bajo `docs/archive/` | Ya archivado. Se detecta, se informa y se continúa sin tocar nada — no es un error. |
 
 ---
 
-## Confirmación del usuario (obligatoria)
+## Política (`implementation.archiveMode`)
 
-**El archivado nunca es automático.** Cumplidas las condiciones de arriba **y descartados
-los casos de [Qué no se archiva](#qué-no-se-archiva)**, el skill **pregunta**, y solo mueve
+Cumplidas las condiciones de arriba y descartados los casos de [Qué no se archiva](#qué-no-se-archiva),
+lo que sigue depende de `implementation.archiveMode` (ver [`../../../reference/implementation.md`](../../../reference/implementation.md)):
+
+| `archiveMode` | Qué hace el skill |
+|----------------|--------------------|
+| `ask` (por defecto) | **Pregunta** — ver [Confirmación del usuario](#confirmación-del-usuario-obligatoria-con-ask) — y solo mueve algo si el usuario confirma. |
+| `always` | **Archiva directo, sin preguntar.** Ejecuta el procedimiento completo (carpeta del trabajo + investigaciones huérfanas) y lo reporta al cierre, igual que si el usuario hubiera confirmado. |
+| `never` | **No archiva ni pregunta.** El paso se salta en silencio — no es una negativa que haya que anotar como «omitido por el usuario», es la política del repo. Se anota igual en el reporte del cierre, con motivo `policy`. |
+
+Las secciones siguientes describen el flujo con `ask`; con `always` se salta la pregunta y se
+va directo al procedimiento, y con `never` se salta el paso entero.
+
+## Confirmación del usuario (obligatoria con `ask`)
+
+**Con `archiveMode: ask` el archivado nunca es automático.** El skill **pregunta**, y solo mueve
 algo si el usuario lo confirma. Archivar reorganiza el árbol de especificaciones del repo y
-cambia la ruta de un artefacto que otras cosas referencian: es una decisión del usuario, no
-una consecuencia mecánica de que las puertas hayan pasado.
+cambia la ruta de un artefacto que otras cosas referencian: por defecto es una decisión del
+usuario, no una consecuencia mecánica de que las puertas hayan pasado.
 
 > **Solo se pregunta cuando el archivado aplica.** En una rama `test/`, en un PR de
 > promoción o con el trabajo ya archivado no hay nada que ofrecer: el paso se salta sin
@@ -70,10 +83,10 @@ huérfanas. El usuario no puede decidir sobre un movimiento que no ve.
 Las puertas pasaron y US-042 está en Done. ¿Archivo el artefacto antes de integrar?
 
   docs/specs/user-stories/US-042-exportacion-csv/
-  → docs/specs/archive/user-stories/US-042-exportacion-csv/
+  → docs/archive/user-stories/US-042-exportacion-csv/
 
   Investigaciones sueltas sin referencias activas:
-    RS-003-formatos-csv → docs/specs/archive/research/
+    RS-003-formatos-csv → docs/archive/research/
 `
 
 La respuesta es **binaria**: se archiva todo lo mostrado, o no se archiva nada. Las
@@ -104,7 +117,7 @@ Al ser opcional, un trabajo **cerrado e integrado** puede quedarse indefinidamen
 `docs/specs/user-stories/` o `docs/specs/work-items/` porque nadie confirmó archivarlo. De
 ahí una asimetría que conviene tener presente al leer la [Regla 1](#regla-1--fallback-de-lectura):
 
-- Encontrar la carpeta **bajo `docs/specs/archive/`** sigue siendo prueba suficiente de que
+- Encontrar la carpeta **bajo `docs/archive/`** sigue siendo prueba suficiente de que
   el trabajo está cerrado. Esa dirección no cambia.
 - **No** encontrarla ahí ya **no** prueba lo contrario. Un `US-XXX` en la ruta activa puede
   estar abierto o cerrado-sin-archivar; quien necesite saberlo mira su `progress.md` y su
@@ -119,11 +132,16 @@ coste de no pararse ahí es bajo comparado con obligar a archivar.
 
 ## Destinos
 
+`docs/archive/` es el valor por defecto de `specification.archivePath`
+(`.sdd-devkit/settings.json`) — ver [`../../../reference/artifacts.md`](../../../reference/artifacts.md#resolución-de-docsspecsarchive).
+**Resolverlo primero**: si el repo declaró un valor distinto, sustituirlo por ese valor en la
+columna Destino y en el resto de esta sección.
+
 | Artefacto | Origen | Destino |
 |-----------|--------|---------|
-| Historia de usuario | `docs/specs/user-stories/US-XXX-{nombre-corto}/` | `docs/specs/archive/user-stories/US-XXX-{nombre-corto}/` |
-| Tarea de mantenimiento | `docs/specs/work-items/WI-XXX-{kebab-case}/` | `docs/specs/archive/work-items/WI-XXX-{kebab-case}/` |
-| Investigación suelta enlazada | `docs/specs/research/RS-XXX-{slug}/` | `docs/specs/archive/research/RS-XXX-{slug}/` |
+| Historia de usuario | `docs/specs/user-stories/US-XXX-{nombre-corto}/` | `docs/archive/user-stories/US-XXX-{nombre-corto}/` |
+| Tarea de mantenimiento | `docs/specs/work-items/WI-XXX-{kebab-case}/` | `docs/archive/work-items/WI-XXX-{kebab-case}/` |
+| Investigación suelta enlazada | `docs/specs/research/RS-XXX-{slug}/` | `docs/archive/research/RS-XXX-{slug}/` |
 
 La carpeta se mueve **completa y tal cual**: `README.md`, los `TK-XXX-*.md`, `progress.md`,
 `trace-report.md`, `test-cases/` y el `research/` **interno** del artefacto. No se
@@ -140,11 +158,13 @@ renombra, no se aplana, no se comprime, no se borra nada de dentro.
 
 ### 1 — Mover la carpeta del trabajo
 
+Con `<archive>` = `specification.archivePath` resuelto (por defecto `docs/archive/`):
+
 `bash
-mkdir -p docs/specs/archive/<user-stories|work-items>
-test ! -e "docs/specs/archive/<subcarpeta>/<ID>-<slug>" \
+mkdir -p <archive>/<user-stories|work-items>
+test ! -e "<archive>/<subcarpeta>/<ID>-<slug>" \
   || { echo "el destino ya existe"; exit 1; }
-git mv "docs/specs/<subcarpeta>/<ID>-<slug>" "docs/specs/archive/<subcarpeta>/<ID>-<slug>"
+git mv "docs/specs/<subcarpeta>/<ID>-<slug>" "<archive>/<subcarpeta>/<ID>-<slug>"
 `
 
 - **`git mv`, no `mv`**: deja el renombrado ya stageado y git lo detecta como *rename*,
@@ -165,9 +185,9 @@ referencie.
    —ya en su ruta de archive— y quedarse con los que resuelven a una carpeta existente en
    `docs/specs/research/`.
 2. **Para cada candidato, contar referencias vivas:** buscar ese `RS-XXX` en `docs/specs/`
-   **excluyendo** `docs/specs/archive/` y `docs/specs/research/<el propio RS>/`.
+   **excluyendo** `<archive>` y `docs/specs/research/<el propio RS>/`.
 3. **Decidir:**
-   - **0 referencias vivas** → huérfano: `git mv` a `docs/specs/archive/research/RS-XXX-{slug}/`,
+   - **0 referencias vivas** → huérfano: `git mv` a `<archive>/research/RS-XXX-{slug}/`,
      con el mismo guard de destino del paso 1.
    - **≥ 1 referencia viva** → se queda donde está. Listarlo en el reporte con quién lo
      referencia; no es un problema que haya que resolver.
@@ -185,7 +205,7 @@ se rompen en las dos direcciones. Revisar y corregir:
   (p. ej. `../../research/RS-001-...`, `../../../docs/policies/...`): añadir el nivel que
   falta. Los enlaces internos a la propia carpeta no cambian.
 - **Entrantes** — referencias desde artefactos que **siguen activos** hacia el trabajo
-  recién archivado: repuntarlas a `docs/specs/archive/...`. Si un artefacto activo depende
+  recién archivado: repuntarlas a `docs/archive/...`. Si un artefacto activo depende
   de forma sustantiva del archivado, mencionarlo en el reporte; no es motivo para revertir
   el archivado.
 
@@ -212,7 +232,7 @@ Al cerrar el flujo, incluir:
 `
 📦 Archivado
    docs/specs/user-stories/US-042-exportacion-csv/
-   → docs/specs/archive/user-stories/US-042-exportacion-csv/
+   → docs/archive/user-stories/US-042-exportacion-csv/
    Investigaciones sueltas:
      RS-003-formatos-csv → archivada (sin referencias activas)
      RS-007-limites-export → se queda (referenciada por US-051)
@@ -220,11 +240,17 @@ Al cerrar el flujo, incluir:
 
 Si no hubo investigaciones sueltas, omitir ese bloque en vez de escribir «ninguna».
 
-Si el usuario **no** confirmó, el bloque dice qué no se hizo y por qué, sin dramatizarlo:
+Si no se archivó — el usuario no confirmó (`ask`), o la política es `never` —, el bloque dice
+qué no se hizo y por qué, sin dramatizarlo:
 
 `
 📦 Archivado: omitido
    US-042 se queda en docs/specs/user-stories/ (no confirmado por el usuario).
+`
+
+`
+📦 Archivado: omitido
+   US-042 se queda en docs/specs/user-stories/ (implementation.archiveMode: never).
 `
 
 Y si no se pudo preguntar: «omitido — sin canal de respuesta para confirmar».
@@ -237,15 +263,20 @@ Archivar mueve carpetas que **otros skills resuelven por ruta**. Esta sección e
 única de las dos reglas que todos ellos aplican; cada skill la enuncia en su propio flujo,
 y aquí vive el porqué. Las dos son independientes y ninguna sustituye a la otra.
 
+> **`docs/archive/` en las dos reglas siguientes es el default de `specification.archivePath`**
+> (ver [Destinos](#destinos)). Todo skill que aplique la Regla 1 o la Regla 2 resuelve primero
+> `specification.archivePath` y sustituye ese valor por `docs/archive/` si el repo declaró
+> uno distinto — no vuelve a preguntarlo ni a asumir el literal.
+
 ### Regla 1 — Fallback de lectura
 
 **Quien busque la carpeta de un `US-XXX`, `WI-XXX` o `RS-XXX` y no la encuentre en la ruta
-activa, debe mirar en `docs/specs/archive/` antes de darla por inexistente.**
+activa, debe mirar en `docs/archive/` antes de darla por inexistente.**
 
 `
-docs/specs/user-stories/US-042-…/   →  docs/specs/archive/user-stories/US-042-…/
-docs/specs/work-items/WI-007-…/     →  docs/specs/archive/work-items/WI-007-…/
-docs/specs/research/RS-003-…/       →  docs/specs/archive/research/RS-003-…/
+docs/specs/user-stories/US-042-…/   →  docs/archive/user-stories/US-042-…/
+docs/specs/work-items/WI-007-…/     →  docs/archive/work-items/WI-007-…/
+docs/specs/research/RS-003-…/       →  docs/archive/research/RS-003-…/
 `
 
 Lo que se encuentra ahí es un trabajo **cerrado**. **Leerlo es siempre legítimo**: sirve
@@ -264,7 +295,7 @@ Desarchivar es mover la carpeta de vuelta — decisión del usuario, no de ning�
 
 #### Las dos únicas excepciones a la prohibición de escribir
 
-No hay más; cualquier otra escritura dentro de `docs/specs/archive/` es un defecto.
+No hay más; cualquier otra escritura dentro de `docs/archive/` es un defecto.
 
 | Quién | Qué puede escribir | Por qué |
 |-------|--------------------|---------|
@@ -283,7 +314,7 @@ Se enuncia aquí porque es donde se busca.
 ### Regla 2 — Los IDs archivados siguen ocupados
 
 **Todo escaneo de «siguiente número libre» o «este ID está disponible» cubre la ruta activa
-y `docs/specs/archive/`.** Un identificador no se libera al archivarse: `US-042` sigue
+y `docs/archive/`.** Un identificador no se libera al archivarse: `US-042` sigue
 siendo `US-042` para siempre.
 
 Sin esto, el contador **retrocede** en cuanto se archiva el trabajo con el número más alto:
@@ -295,9 +326,9 @@ Aplica a **todos** los contadores, no solo a los globales:
 
 | Contador | Dónde se escanea | Skill |
 |----------|------------------|-------|
-| `US-XXX` | `docs/specs/user-stories/` **+** `docs/specs/archive/user-stories/` | `work-define` |
-| `WI-XXX` | `docs/specs/work-items/` **+** `docs/specs/archive/work-items/` | `work-plan` |
-| `RS-XXX` | `docs/specs/research/` **+** `docs/specs/archive/research/`, y el `research/` del artefacto | `work-research` |
+| `US-XXX` | `docs/specs/user-stories/` **+** `docs/archive/user-stories/` | `work-define` |
+| `WI-XXX` | `docs/specs/work-items/` **+** `docs/archive/work-items/` | `work-plan` |
+| `RS-XXX` | `docs/specs/research/` **+** `docs/archive/research/`, y el `research/` del artefacto | `work-research` |
 | `TK-XXX` | El `US-XXX-…/` del padre | `work-plan` |
 | `TC-XXX` | El `test-cases/` del padre | `test-define` |
 
@@ -313,13 +344,16 @@ en `001`** y crear una carpeta fantasma. Las dos reglas van juntas justamente po
 
 - Archivar **antes** de que pasen las puertas, o antes de que `trace-validate` escriba su
   `trace-report.md` dentro de la carpeta.
-- **Archivar sin preguntar**, o dar la confirmación por supuesta porque las puertas pasaron.
+- **Archivar sin preguntar con `archiveMode: ask`**, o dar la confirmación por supuesta porque
+  las puertas pasaron.
+- **Preguntar igual con `archiveMode: always` o `never`.** La política ya resolvió la
+  pregunta; volver a hacerla la ignora.
 - Insistir tras una negativa, o volver a preguntar en la misma ejecución.
 - **Tratar un «no archivar» como un bloqueo**: el merge o el PR siguen adelante igual.
 - Preguntar **sin mostrar antes** qué carpeta y qué investigaciones se moverían.
 - Archivar por defecto cuando no hay quien responda: sin respuesta, no se mueve nada.
 - Usar `mv` en vez de `git mv`, perdiendo la detección de *rename*.
-- Sobrescribir un destino existente en `docs/specs/archive/` en lugar de parar.
+- Sobrescribir un destino existente en `docs/archive/` en lugar de parar.
 - Archivar un `RS-XXX` suelto sin comprobar que ningún artefacto activo lo referencia.
 - Archivar en una rama `test/`, o en un PR de promoción.
 - Mover la carpeta **después** del merge o del push: el archivado debe viajar en el mismo

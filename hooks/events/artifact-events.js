@@ -2,9 +2,9 @@
 'use strict';
 
 // Hook PostToolUse(Write|Edit|MultiEdit|Bash): notifica artifact.created /
-// artifact.updated / artifact.deleted a specTracking.url.
+// artifact.updated / artifact.deleted a specification.trackingUrl.
 //
-// - Write/Edit/MultiEdit sobre un archivo dentro de specTracking.basePath:
+// - Write/Edit/MultiEdit sobre un archivo dentro de specification.basePath:
 //   se clasifica con `git status --porcelain` — "??" (untracked) es
 //   artifact.created, cualquier otro estado no vacío (tracked, con diff) es
 //   artifact.updated. Se lee el encabezado del archivo para construir el
@@ -17,7 +17,7 @@
 //   encabezado — payload más liviano que created/updated.
 //
 // Lee la config del proyecto en <repo>/.sdd-devkit/settings.json y hace un
-// POST a specTracking.url.
+// POST a specification.trackingUrl.
 //
 // Falla silenciosamente ante cualquier condición ambigua o error: este hook
 // nunca debe bloquear ni ensuciar la sesión de Claude Code (PostToolUse
@@ -173,7 +173,7 @@ function postEvent(url, event, token) {
     });
     req.on('timeout', () => req.destroy());
     req.on('error', (err) => {
-      process.stderr.write(`[specTracking] no se pudo notificar: ${err.message}\n`);
+      process.stderr.write(`[specification] no se pudo notificar: ${err.message}\n`);
       resolve();
     });
     req.write(body);
@@ -210,7 +210,7 @@ function baseEventFields(hookInput, repoRoot, name, nowIso) {
 // Write / Edit / MultiEdit: clasifica el archivo tocado como created o
 // updated (o ninguno, si no matchea alcance/patrón) y devuelve el evento a
 // postear, o null.
-function buildCreatedOrUpdatedEvent(hookInput, repoRoot, specTracking, basePathNorm) {
+function buildCreatedOrUpdatedEvent(hookInput, repoRoot, specification, basePathNorm) {
   let filePath = hookInput.tool_input && hookInput.tool_input.file_path;
   const cwd = hookInput.cwd || process.cwd();
   if (!filePath) return null;
@@ -313,15 +313,15 @@ async function main() {
     return;
   }
 
-  const specTracking = settings.specTracking || {};
-  if (!specTracking.enabled || !specTracking.url) return;
+  const specification = settings.specification || {};
+  if (!specification.trackingEnabled || !specification.trackingUrl) return;
 
-  const basePath = specTracking.basePath || 'docs/specs/';
+  const basePath = specification.basePath || 'docs/specs/';
   const basePathNorm = `${basePath.replace(/^\/+|\/+$/g, '')}/`;
 
   let events;
   if (FILE_PATH_TOOLS.has(toolName)) {
-    const event = buildCreatedOrUpdatedEvent(hookInput, repoRoot, specTracking, basePathNorm);
+    const event = buildCreatedOrUpdatedEvent(hookInput, repoRoot, specification, basePathNorm);
     events = event ? [event] : [];
   } else if (toolName === 'Bash') {
     const command = (hookInput.tool_input && hookInput.tool_input.command) || '';
@@ -333,10 +333,10 @@ async function main() {
   }
 
   for (const event of events) {
-    await postEvent(specTracking.url, event, process.env.SDD_DEVKIT_ACCESS_TOKEN);
+    await postEvent(specification.trackingUrl, event, process.env.SDD_DEVKIT_ACCESS_TOKEN);
   }
 }
 
 main().catch((err) => {
-  process.stderr.write(`[specTracking] error inesperado: ${err.message}\n`);
+  process.stderr.write(`[specification] error inesperado: ${err.message}\n`);
 });

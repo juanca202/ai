@@ -47,7 +47,7 @@ Esta es la clasificación que aplica el Paso 1.2 de `SKILL.md`. Es una escala de
 
 - Hay módulos, rutas/endpoints, modelos de dominio o componentes con nombres propios del negocio (no genéricos de ejemplo).
 - Existen tests que verifican lógica de negocio (no solo el test de ejemplo del scaffold).
-- `docs/specs/user-stories/`, `docs/specs/work-items/` o sus equivalentes bajo `docs/specs/archive/` ya tienen contenido (un repo cuyo trabajo esté todo archivado **no** es greenfield).
+- `docs/specs/user-stories/`, `docs/specs/work-items/` o sus equivalentes bajo `docs/archive/` ya tienen contenido (un repo cuyo trabajo esté todo archivado **no** es greenfield).
 - El historial de git tiene múltiples commits de features a lo largo del tiempo.
 
 ### Si la señal es ambigua

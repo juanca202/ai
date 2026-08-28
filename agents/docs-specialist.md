@@ -28,13 +28,15 @@ No continúes hasta haber leído y aplicado `language.md`.
 |--------|-------------|
 | `.agents/MEMORY.md` | Reglas de dominio y convenciones del proyecto |
 | `docs/specs/user-stories/US-*/` | US existentes, numeración libre, `README.md`, `TK-*.md`, `progress.md` |
-| `docs/specs/archive/user-stories/US-*/` · `archive/work-items/WI-*/` | Trabajo **ya cerrado e integrado**. Se lee (contexto e historial) y **cuenta para la numeración libre**: un ID archivado sigue ocupado. No se escribe dentro. |
+| `docs/archive/user-stories/US-*/` · `archive/work-items/WI-*/` | Trabajo **ya cerrado e integrado**. Se lee (contexto e historial) y **cuenta para la numeración libre**: un ID archivado sigue ocupado. No se escribe dentro. |
 | `docs/specs/work-units.md` | Unidades de trabajo para alinear TK y US |
 | `docs/specs/technical-docs/` | Contratos, flujos y referencias técnicas existentes |
 | `docs/specs/glossary.md` | Términos de dominio ya definidos |
-| `docs/adr/` | ADRs previos (decisiones), estados, índice en `README.md` |
-| `docs/standards/` | Estándares vigentes (reglas verificables), estados, índice en `README.md` |
+| `docs/adr/` | ADRs previos (decisiones), estados, índice en `README.md`. **Relativo a la raíz de arquitectura**: en un repo con submódulos, cada uno lleva su propia serie |
+| `docs/standards/` | Estándares vigentes (reglas verificables), estados, índice en `README.md`. **Relativo a la raíz de arquitectura** |
 | Skills (`skills/*/SKILL.md`) | Plantillas en `assets/`, flujos y reglas del artefacto activo |
+
+Regla de fallback y numeración sobre `docs/archive/`: ver [`../skills/work-integrate/references/archive.md`](../skills/work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
 **No inventes** ids, decisiones de producto, BR/SC, endpoints ni estados. Si falta información, pregunta al usuario (preferir **herramienta de preguntas estructuradas** del cliente; fallback: prosa con opciones numeradas).
 
@@ -47,8 +49,8 @@ No continúes hasta haber leído y aplicado `language.md`.
 | Unidades de trabajo | `docs/specs/work-units.md` |
 | Documentación técnica | `docs/specs/technical-docs/` |
 | Glosario | `docs/specs/glossary.md` |
-| ADR (decisión) | `docs/adr/ADR-XXX-<slug>.md` (id `ADR-XXX`) |
-| Estándar de dominio (reglas vigentes) | `docs/standards/<dominio>.md` o `docs/standards/<dominio>/README.md` (identificado por nombre, sin código; agrupa requisitos `<estándar>/<requisito>` en RFC 2119) |
+| ADR (decisión) | `docs/adr/ADR-XXX-<slug>.md` (id `ADR-XXX`) — relativo a la **raíz de arquitectura** |
+| Estándar de dominio (reglas vigentes) | `docs/standards/<dominio>.md` o `docs/standards/<dominio>/README.md` (identificado por nombre, sin código; agrupa requisitos `<estándar>/<requisito>` en RFC 2119) — relativo a la **raíz de arquitectura** |
 | Memoria del proyecto | `.agents/MEMORY.md` |
 
 ## Prohibiciones absolutas

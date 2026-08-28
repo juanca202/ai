@@ -11,6 +11,11 @@ un selector) en lugar de redactar la pregunta como prosa libre.
 
 - **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita
   categorías. Entrada libre **solo** si no hay forma razonable de enumerar opciones.
+- **No gastar una opción en "ajustar" o "cambiar algo".** La herramienta ya ofrece una respuesta libre
+  (`Other`), y ahí es donde el usuario dice qué quiere cambiar y cómo — una opción «Ajustar X» solo
+  añade un turno para volver a preguntarle lo mismo. Reservar las opciones enumeradas para las
+  decisiones que sí son categorías cerradas (confirmar, elegir entre alternativas concretas, cancelar).
+  Vale igual para las variantes desglosadas del mismo ajuste («ajustar tipo / alcance / descripción»).
 - **Selección múltiple** solo donde el propio paso lo indique explícitamente (p. ej. capas de testing,
   candidatos de ADR, qué correcciones aplicar).
 - **No repreguntar** lo que ya esté resuelto en el contexto de la sesión, en `.agents/MEMORY.md`, en los
@@ -24,8 +29,8 @@ un selector) en lugar de redactar la pregunta como prosa libre.
 - **Una sola tanda al inicio.** Agrupar las preguntas pendientes de un mismo paso en un solo bloque
   (máximo 2–3 por bloque) en vez de ir descubriendo huecos turno a turno.
 - **Confirmaciones: una pregunta por turno**, con opciones claras
-  (p. ej. `[Confirmar] / [Ajustar] / [Cancelar]`, `[Sí, continuar] / [No, detener aquí]`).
-  **No avanzar ni escribir archivos antes de la respuesta.**
+  (p. ej. `[Confirmar] / [Cancelar]`, `[Sí, continuar] / [No, detener aquí]`) — el ajuste va por respuesta
+  libre, no como opción. **No avanzar ni escribir archivos antes de la respuesta.**
 - **Decidir con la información delante:** presentar primero el reporte, la propuesta o la tabla de
   candidatos, y preguntar después.
 - **No proponer un default implícito** cuando la respuesta condiciona operaciones destructivas o de

@@ -14,7 +14,7 @@ Flujo para **ejecutar en codigo** las tareas tecnicas `TK-XXX` de una historia d
 | Tareas | `docs/specs/user-stories/US-XXX-[nombre-corto]/TK-XXX-[nombre].md` |
 | Progreso | `docs/specs/user-stories/US-XXX-[nombre-corto]/progress.md` |
 | Glosario | `docs/specs/glossary.md` |
-| US ya archivada (fallback) | `docs/specs/archive/user-stories/US-XXX-[nombre-corto]/`, con la misma estructura interna |
+| US ya archivada (fallback) | `docs/archive/user-stories/US-XXX-[nombre-corto]/`, con la misma estructura interna |
 
 **Rama de trabajo:** `feature/US-XXX-[nombre-corto]` (el segmento tras `feature/` coincide con la carpeta de la US).
 
@@ -39,7 +39,7 @@ Flujo para **ejecutar en codigo** las tareas tecnicas `TK-XXX` de una historia d
 Ademas de la validacion de repositorio transversal (`SKILL.md`):
 
 - **US padre con README.md:** la carpeta de la US existe y tiene `README.md` con metadato `Estado: Ready`.
-- **US no archivada:** si la carpeta no aparece en `docs/specs/user-stories/`, buscarla en `docs/specs/archive/user-stories/` antes de darla por inexistente. Si esta ahi, la US **ya se cerro e integro**: **parar** y avisar — «`US-042` esta archivada; para retomarla hay que desarchivarla primero (mover su carpeta de vuelta), y eso lo decide el usuario». **Excepcion:** en [modo correccion](../SKILL.md#modo-correccion-delegado-desde-quality-check) delegado por `quality-check`, un artefacto archivado es esperable —la correccion llega en la fase de cierre, con el archivado ya commiteado—: ahi se continua, pero **sin escribir dentro de la carpeta archivada** (la nota de retrabajo va en el informe de `quality-check`). **Nunca** crear una carpeta nueva en la ruta activa por no haberla encontrado: dejaria dos artefactos con el mismo identificador. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+- **US no archivada:** si la carpeta no aparece en `docs/specs/user-stories/`, buscarla en `docs/archive/user-stories/` antes de darla por inexistente. Si esta ahi, la US **ya se cerro e integro**: **parar** y avisar — «`US-042` esta archivada; para retomarla hay que desarchivarla primero (mover su carpeta de vuelta), y eso lo decide el usuario». **Excepcion:** en [modo correccion](../SKILL.md#modo-correccion-delegado-desde-quality-check) delegado por `quality-check`, un artefacto archivado es esperable —la correccion llega en la fase de cierre, con el archivado ya commiteado—: ahi se continua, pero **sin escribir dentro de la carpeta archivada** (la nota de retrabajo va en el informe de `quality-check`). **Nunca** crear una carpeta nueva en la ruta activa por no haberla encontrado: dejaria dos artefactos con el mismo identificador. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 - **TK en estado Ready:** solo encolar tareas con `Estado: Ready`. Las `Draft` o `Done` en `progress.md` no son ejecutables por defecto.
 - **Test cases presentes:** verificar si existe la carpeta `docs/specs/user-stories/US-XXX-[nombre-corto]/test-cases/` con al menos un archivo `TC-XXX-*.md`. Si no existe o esta vacia, **preguntar al usuario** (herramienta estructurada) antes de continuar:
 

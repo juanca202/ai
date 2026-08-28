@@ -13,7 +13,7 @@ Detalla **cómo** ejecutar la revisión cualitativa paso a paso y cómo actuar a
 
 ## Flujo de ejecución
 
-> **Principio rector:** revisar el **diff**, no el repo. **Ninguna corrección se aplica sin autorización** —explícita del usuario, o de antemano vía `qualityGates.codeReviewConfirmFix: "never"` (ver [`SKILL.md` → Política de corrección](../SKILL.md#política-de-corrección))—. Tras aplicar una corrección autorizada (o cuando el usuario indique que corrigió manualmente), **reinicia la revisión desde el Paso 1** sobre el código ya corregido: los hallazgos anteriores pueden haber cambiado de forma o de severidad. Para ahorrar vueltas, si hay varias correcciones autorizadas, aplícalas juntas y reinicia **una sola vez**.
+> **Principio rector:** revisar el **diff**, no el repo. **Ninguna corrección se aplica sin autorización** —explícita del usuario, o de antemano vía `verification.codeReview.confirmFix: "never"` (ver [`SKILL.md` → Política de corrección](../SKILL.md#política-de-corrección))—. Tras aplicar una corrección autorizada (o cuando el usuario indique que corrigió manualmente), **reinicia la revisión desde el Paso 1** sobre el código ya corregido: los hallazgos anteriores pueden haber cambiado de forma o de severidad. Para ahorrar vueltas, si hay varias correcciones autorizadas, aplícalas juntas y reinicia **una sola vez**.
 >
 > **Este skill no ejecuta checks.** No corre pruebas, linter, tipado ni build; si la corrección de un hallazgo toca lógica cubierta por pruebas, **sugiere** re-ejecutar `quality-check` y sigue con la revisión.
 
@@ -90,7 +90,7 @@ Un hallazgo que ignora el patrón vigente del repo o una decisión ya tomada en 
 
 ### Paso 4 — Puerta cualitativa e informe
 
-1. **Puerta** — si hay hallazgos bloqueantes (🔴/🟠), resolver según `qualityGates.codeReviewConfirmFix` (ver [`SKILL.md` → Política de corrección](../SKILL.md#política-de-corrección)):
+1. **Puerta** — si hay hallazgos bloqueantes (🔴/🟠), resolver según `verification.codeReview.confirmFix` (ver [`SKILL.md` → Política de corrección](../SKILL.md#política-de-corrección)):
    - **`always`** (o sin `settings.json`) → **pausar y pedir** al usuario, por cada uno, **corregir** o **justificar**:
      - **Justificar** → registrar la justificación en el informe; el hallazgo deja de bloquear.
      - **Corregir con autorización expresa** → aplicar el cambio y **reiniciar la revisión desde el Paso 1**.
@@ -191,8 +191,8 @@ Reglas al rellenar:
 - Reportar hallazgos sobre archivos generados o vendorizados.
 - Declarar `APPROVED` con un hallazgo bloqueante sin corregir **ni** justificar.
 - Aceptar una justificación y **no registrarla** en el `code-review.md`.
-- Aplicar una corrección **sin autorización** — explícita del usuario, o de antemano vía `qualityGates.codeReviewConfirmFix: "never"`.
-- Pausar a preguntar «corregir o justificar» cuando `qualityGates.codeReviewConfirmFix = "never"` — ahí se corrige directo, sin esperar confirmación.
+- Aplicar una corrección **sin autorización** — explícita del usuario, o de antemano vía `verification.codeReview.confirmFix: "never"`.
+- Pausar a preguntar «corregir o justificar» cuando `verification.codeReview.confirmFix = "never"` — ahí se corrige directo, sin esperar confirmación.
 - Corregir un hallazgo y **no reiniciar** la revisión.
 - No decir nada cuando una dimensión está conforme (el silencio no es feedback).
 - Escribir `code-review.md` en la carpeta de una US/WI, o en `docs/specs/`, en vez de en `docs/audits/`; o no escribirlo porque el repo no sea spec-driven **cuando la revisión cubrió la rama completa**.

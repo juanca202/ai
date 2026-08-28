@@ -4,6 +4,8 @@ description: >
   Auditar el cumplimiento de los estándares de arquitectura (docs/standards/) y de las reglas de
   AGENTS.md contra el estado real del repositorio (Architecture Compliance Checking), citando el ADR
   de origen de cada estándar, y generar un informe priorizado en docs/audits/arch-audit-YYYY-MM-DD.md.
+  Audita una raíz de arquitectura por corrida —el repo principal o un submódulo—, con sus estándares,
+  sus fitness functions y su informe.
   Activar siempre que el usuario quiera verificar, auditar o comprobar si el código respeta los
   estándares, las decisiones arquitectónicas o las reglas del proyecto — incluso si no dice
   "estándar", "ADR" o "auditoría".
@@ -51,7 +53,11 @@ técnico o funcional), no el estándar entero, ni el requisito como bloque, ni e
 > incumplir un `MUST`/`REQUIRED`/`SHALL` pesa más que un `SHOULD`/`RECOMMENDED`; un `MAY`/`OPTIONAL` no
 > incumplido casi nunca es hallazgo.
 
-**Fuentes normativas (el "deber ser"):**
+**Fuentes normativas (el "deber ser").** Todas las rutas `docs/…` y `scripts/…` de esta sección y del
+resto del documento son **relativas a la raíz de arquitectura auditada** (`<raíz-arq>`: repo principal o
+submódulo), que se resuelve en la [Fase 0](#fase-0--raíz-de-arquitectura-nueva-auditoría-o-revalidación);
+`AGENTS.md` se lee de la raíz principal.
+
 - `docs/standards/` — todos los estándares de dominio (técnico o funcional) y sus **criterios de cumplimiento** (`CR-XXX`), agrupados por requisito, priorizando los de estándares `Active` (obligatorios). Criterios en estándares `Draft` se listan pero no generan hallazgo con prioridad ni afectan el veredicto; `Deprecated`/`Superseded` no generan hallazgos salvo que el código siga dependiendo de ellos.
 - `AGENTS.md` (y `AGENTS.md` anidados por subcarpeta, si existen) — cada regla explícita del documento.
 - `docs/adr/` — **solo como trazabilidad**: para cada criterio auditado, citar su ADR de origen; y para detectar ADR `Accepted` con regla enforceable que aún no fijó ningún criterio.
@@ -69,7 +75,7 @@ Para cada criterio, el skill evalúa si es **apto** para una fitness function (c
 automatizable — normalmente ya declarado en su columna `Automatizable: yes`), comprueba si ya existe y la
 ejecuta; si es apto pero no existe (`Verificación: no`), **sugiere crearla**.
 
-**Salida:** un único informe en `docs/audits/arch-audit-YYYY-MM-DD.md`, agrupado por prioridad
+**Salida:** un único informe en el `docs/audits/arch-audit-YYYY-MM-DD.md` **de la raíz auditada**, agrupado por prioridad
 (alta / media / baja), donde cada hallazgo referencia el criterio incumplido (`<estándar>/CR-XXX`, con
 el requisito que lo agrupa, su estándar de dominio y su ADR de origen) o la regla de AGENTS.md, lista
 evidencias y archivos infractores, propone una acción y fija un estado. El informe incluye además una
@@ -130,9 +136,30 @@ No continúes hasta haber leído y aplicado `verdicts.md`.
 
 ---
 
-## Fase 0 — Nueva auditoría o revalidación
+## Fase 0 — Raíz de arquitectura, nueva auditoría o revalidación
 
-Antes de auditar, comprobar si ya existen informes previos:
+**Primero, resolver qué raíz se audita.** Los estándares, sus checks y el informe pertenecen a la raíz del
+repositorio cuyo código gobiernan (`<raíz-arq>`): el repo principal o un **submódulo**. Listar los
+repositorios anidados (`git submodule status` / `.gitmodules`, más directorios con `.git` propio):
+
+- **Si no hay ninguno**, la raíz es el repo actual y no se pregunta nada.
+- **Si los hay**, preguntar al usuario qué raíz auditar, en la misma tanda que la pregunta de abajo.
+
+**Se audita una raíz por corrida:** se leen los estándares de esa raíz, se ejecuta **su** runner
+(`<raíz-arq>/scripts/arch/verify.<ext>`, desde esa raíz) y el informe se escribe en **su** `docs/audits/`.
+Auditar otra raíz es otra corrida, con su propio informe y su propia serie de informes previos. Regla
+completa: [`../../reference/artifacts.md`](../../reference/artifacts.md#raíz-de-arquitectura-adr-estándares-y-fitness-functions).
+
+**Todas las rutas de este documento (`docs/standards/`, `docs/adr/`, `docs/audits/`, `scripts/arch/`) son
+relativas a `<raíz-arq>`.** Dos excepciones: `AGENTS.md`, que es del harness y se lee de la raíz principal;
+y las notas sobre `docs/audits/` compartido y el fingerprint de la tubería de cierre (`quality-check.md`,
+`code-review.md`, `work-integrate`), que describen el `docs/audits/` **del repo principal** — el de un
+submódulo no participa de esa tubería.
+
+> **Si los artefactos quedan en un submódulo**, el informe se commitea **dentro del submódulo** y luego se
+> actualiza el puntero en el repo padre: un `git add` desde el padre no stagea contenido del submódulo.
+
+Resuelta la raíz, comprobar si ya existen informes previos **en ella**:
 
 ```bash
 ls docs/audits/arch-audit-*.md 2>/dev/null
@@ -420,10 +447,10 @@ flujo de `Comportamiento en Revalidación` descrito en la Fase 0 — no se reesc
    ``bash
    date +%F
    ``
-2. Asegurar el directorio: `docs/audits/` (crearlo si no existe).
+2. Asegurar el directorio: `docs/audits/` **de `<raíz-arq>`** (crearlo si no existe) — nunca el del repo principal cuando se auditó un submódulo.
 3. Leer `assets/audit-template.md` y redactar `docs/audits/arch-audit-<hoy>.md` siguiendo su estructura:
    - Encabezado con fecha, repositorio, alcance, método y **veredicto** (`COMPLIANT` | `NON_COMPLIANT` | `COMPLIANT_WITH_NOTES`, siguiendo el patrón de `trace-validate`).
-     - **Alcance:** ser específico — indicar cuántos criterios se auditaron y sobre cuántos estándares/requisitos de contexto, el desglose por estado de los excluidos, más las fuentes de AGENTS.md consideradas. Ejemplo: `14 criterios en 4 estándares · 1 Draft, 1 Superseded excluidos + AGENTS.md raíz`.
+     - **Alcance:** ser específico — indicar la **raíz de arquitectura auditada** (ruta relativa al repo principal, o «raíz principal»), cuántos criterios se auditaron y sobre cuántos estándares/requisitos de contexto, el desglose por estado de los excluidos, más las fuentes de AGENTS.md consideradas. Ejemplo: `submódulo packages/engine · 14 criterios en 4 estándares · 1 Draft, 1 Superseded excluidos + AGENTS.md raíz`.
      - **Método:** no es un texto fijo — describir en una frase corta qué se usó realmente en esta auditoría: las técnicas de inspección aplicadas (p. ej. `grep`, lectura de manifiestos) y las fitness functions ejecutadas. Aclarar que no se corre el build ni la suite completa.
    - **Resumen** con la tabla de conteos por prioridad y estado, seguida de 1-3 frases con la lectura global de la salud arquitectónica del repo.
    - Hallazgos **agrupados por prioridad** (alta → media → baja). Por cada hallazgo: el criterio (con su referencia `<estándar>/CR-XXX`, el requisito que lo agrupa, el nombre de su estándar de dominio, su ADR de origen y su `Enfoque` bloqueante/warning) o la regla de AGENTS.md incumplida, `Estado`, `Evidencias` (✔ a favor / ✖ en contra), `Incumplimientos` (rutas de archivos), y `Acción sugerida`. Si el criterio tiene fitness function, incluir en `Evidencias` el resultado de ejecutarla (PASS/FAIL/WARN + comando).
@@ -480,6 +507,7 @@ planificar la remediación de los hallazgos de alta prioridad.
 - **No inventar reglas ni veredictos.** Solo se auditan normas que existan en `docs/standards/` o `AGENTS.md`. Ante evidencia ambigua, preferir ⚠️ o ❔ y explicar la duda, en vez de afirmar un incumplimiento.
 - **Priorizar señal sobre volumen.** Mejor pocos hallazgos sólidos y bien evidenciados que una lista larga de detalles triviales.
 - **Sin estándares ni AGENTS.md:** si no hay ninguna fuente normativa, informarlo y sugerir `arch-init` — bootstrapea `AGENTS.md`, `.agents/MEMORY.md`, `docs/adr/` y `docs/standards/`, e invoca `arch-discover` por su cuenta si el repo ya tiene implementación — en vez de crear un `AGENTS.md` a mano; no fabricar un informe vacío de reglas inventadas. Si solo hay ADR pero ningún criterio, señalar que las decisiones no han emitido reglas auditables y sugerir emitirlas vía `arch-manage`.
+- **Una raíz de arquitectura por corrida.** No mezclar estándares, checks ni hallazgos del repo principal y de un submódulo en un mismo informe, ni escribir el informe fuera de la raíz auditada. Si el usuario quiere cubrir varias raíces, son varias corridas con varios informes; decirlo explícitamente en vez de auditar todo junto.
 - **Informe inmutable, revalidaciones aparte.** El contenido escrito al crear el informe (resumen, hallazgos, fitness functions, reglas no verificables) no se modifica nunca. Cada revalidación se documenta como una entrada nueva en `## Revalidaciones`; el único campo del contenido original que una revalidación actualiza es `Veredicto` en la cabecera.
 
 ---

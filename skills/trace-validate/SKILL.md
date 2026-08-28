@@ -1,7 +1,7 @@
 ---
 name: trace-validate
 description: >-
-  Generar un reporte de trazabilidad que cruza los criterios de aceptación de un artefacto —una historia de usuario (US-XXX), una tarea de mantenimiento (WI-XXX), un feature ya implementado (FT-XXX) o cualquier documento cuyos criterios tengan identificador codificado (AC-001, 1.1, R-3…)— contra los casos y artefactos de prueba del repositorio. Por cada criterio indica qué lo cubre, su estado (`COVERED` / `PARTIAL` / `UNCOVERED`), si la prueba se ejecutó y con qué resultado, y cierra con un veredicto. No corre la suite: delega la ejecución en quality-check. Activar siempre que el usuario pida validar cobertura, generar una matriz o reporte de trazabilidad, verificar que los criterios de aceptación están probados, comprobar si un trabajo o un feature está cubierto por pruebas, o mencione "trazabilidad", "matriz de cobertura" o "validar criterios de aceptación", aunque no nombre el formato exacto. Traza también trabajo archivado en docs/specs/archive/, dejando el reporte junto al artefacto.
+  Generar un reporte de trazabilidad que cruza los criterios de aceptación de un artefacto —una historia de usuario (US-XXX), una tarea de mantenimiento (WI-XXX), un feature ya implementado (FT-XXX) o cualquier documento cuyos criterios tengan identificador codificado (AC-001, 1.1, R-3…)— contra los casos y artefactos de prueba del repositorio. Por cada criterio indica qué lo cubre, su estado (`COVERED` / `PARTIAL` / `UNCOVERED`), si la prueba se ejecutó y con qué resultado, y cierra con un veredicto. No corre la suite: delega la ejecución en quality-check. Activar siempre que el usuario pida validar cobertura, generar una matriz o reporte de trazabilidad, verificar que los criterios de aceptación están probados, comprobar si un trabajo o un feature está cubierto por pruebas, o mencione "trazabilidad", "matriz de cobertura" o "validar criterios de aceptación", aunque no nombre el formato exacto. Traza también trabajo archivado en docs/archive/, dejando el reporte junto al artefacto.
 license: MIT
 ---
 
@@ -418,7 +418,7 @@ Lo propio de este skill:
 | Artefacto a trazar (entrada) | La carpeta de la `US-XXX` / `WI-XXX` / `FT-XXX`; para cualquier otro artefacto, la ruta que indique el usuario |
 | Casos de prueba documentados (entrada, los produce `test-define`) | `test-cases/` **dentro de la carpeta del artefacto**, con su índice `test-cases/README.md` |
 | Caché de corrida de pruebas (entrada, la produce `quality-check`) | `.sdd-devkit/test-run.json` (ubicación fija, no por unidad) |
-| Reporte de trazabilidad (**salida**) | `trace-report.md` **dentro de la carpeta del artefacto, allí donde se haya resuelto** — activa o bajo `docs/specs/archive/`; para otro artefacto, junto a él (confirmar la ruta con el usuario antes de escribir) |
+| Reporte de trazabilidad (**salida**) | `trace-report.md` **dentro de la carpeta del artefacto, allí donde se haya resuelto** — activa o bajo `docs/archive/`; para otro artefacto, junto a él (confirmar la ruta con el usuario antes de escribir) |
 
 > **Un `US`/`WI` archivado se traza igual.** Todo se resuelve relativo a la carpeta encontrada: los criterios, el `test-cases/`, la clave `SPEC_FINGERPRINT` y el `trace-report.md` de salida. `trace-validate` es el **único** skill que escribe dentro de un artefacto archivado, y solo su propio informe: es un derivado del artefacto, no trabajo nuevo, y revalidar un trabajo ya integrado tiene que seguir siendo posible.
 

@@ -134,7 +134,7 @@ propio subárbol `docs/specs/features/` (junto a `user-stories/` y `work-items/`
 - `{slug}` del RS: descripción corta del código analizado en *kebab-case* sin
   acentos, p. ej. `motor-facturacion`, `modulo-inventario-legacy`.
 - `XXX` del RS: secuencial de tres dígitos sobre las carpetas `RS-XXX-*` de
-  `docs/specs/research/` **y de `docs/specs/archive/research/`** (mayor + 1 entre las dos;
+  `docs/specs/research/` **y de `docs/archive/research/`** (mayor + 1 entre las dos;
   `001` si no hay ninguna). Archivar una investigación **no libera su número**: mirar solo
   la ruta activa haría retroceder el contador y reemitir un `RS-XXX` ya usado. Ver
   [`work-integrate/references/archive.md`](../../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).

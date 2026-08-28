@@ -3,10 +3,10 @@
 ## `events/artifact-events.js`
 
 Hook `PostToolUse` sobre `Write|Edit|MultiEdit|Bash`. Notifica a
-`specTracking.url` los eventos `artifact.created`, `artifact.updated` y
-`artifact.deleted` sobre artefactos dentro de `specTracking.basePath`. Ver
-`.sdd-devkit/settings.json` (bloque `specTracking`) para activarlo/
-configurarlo; si `enabled` es `false` o falta `url`, el hook no hace nada.
+`specification.trackingUrl` los eventos `artifact.created`, `artifact.updated` y
+`artifact.deleted` sobre artefactos dentro de `specification.basePath`. Ver
+`.sdd-devkit/settings.json` (bloque `specification`) para activarlo/
+configurarlo; si `trackingEnabled` es `false` o falta `trackingUrl`, el hook no hace nada.
 
 ### Cómo se clasifica cada evento
 
@@ -60,9 +60,10 @@ porque viven fuera de `docs/specs/`.
   recibe, cae a `sessionId`.
 - `iterationId` se lee de `.sdd-devkit/current-iteration.json`, en la raíz
   del proyecto, si `work-implement` lo dejó escrito — ver la sección
-  *Estado de iteración para specTracking* de su `SKILL.md`. Ese archivo
-  persiste el mismo id mientras se reintenta la unidad en curso (o una
-  corrección delegada por `quality-check`) y se elimina al cerrarla, así que
+  *Estado de iteración para el seguimiento de especificaciones* de su
+  `SKILL.md`. Ese archivo persiste el mismo id mientras se reintenta la
+  unidad en curso (o una corrección delegada por `quality-check`) y se
+  elimina al cerrarla, así que
   varios eventos de un mismo reintento comparten `iterationId`. Si el
   archivo no existe (no hubo implementación en curso, o el proyecto no usa
   ese skill), queda vacío.
@@ -74,7 +75,7 @@ porque viven fuera de `docs/specs/`.
 Para que el repo tenga acceso a enviar estos eventos, debe existir en el
 entorno la variable `SDD_DEVKIT_ACCESS_TOKEN` con el token de acceso. Si no
 está definida, el hook igual hace el `POST` pero sin cabecera
-`Authorization`, y `specTracking.url` puede rechazarlo.
+`Authorization`, y `specification.trackingUrl` puede rechazarlo.
 
 ### Limitaciones conocidas
 

@@ -47,7 +47,7 @@ No continúes hasta haber leído y aplicado `language.md`.
 
 Antes de ejecutar este skill, DEBES leer [`../../reference/implementation.md`](../../reference/implementation.md).
 
-Las reglas de `implementation.md` son obligatorias y tienen prioridad para determinar el ritmo de confirmacion entre unidades (`confirmByUnit`), el uso y la ubicacion de los worktrees (`workTree`, `workTreePath`) y el maximo de subagentes concurrentes (`maxParallel`).
+Las reglas de `implementation.md` son obligatorias y tienen prioridad para determinar el ritmo de confirmacion entre unidades (`confirmByUnit`), que hacer con cambios sin commitear al iniciar o reanudar (`uncommittedChanges`), el uso y la ubicacion de los worktrees (`workTree`, `workTreePath`), el maximo de subagentes concurrentes (`maxParallel`) y si el cierre pasa al siguiente skill sin preguntar (`handoff`, ver [Regla de handoff](#regla-de-handoff-transversal)).
 
 No continues hasta haber leido y aplicado `implementation.md`.
 
@@ -68,7 +68,7 @@ La senal que distingue los tipos es **el artefacto que el usuario referencia** (
 | **Caso de prueba** | El trabajo referencia uno o varios `TC-XXX`; viven en la carpeta `test-cases/` de un artefacto padre (`US-XXX`, `WI-XXX` o `FT-XXX`). | **Las pruebas automatizadas de esos `TC-XXX`** | **Un `TC-XXX`** | `references/test-cases.md` — **leer antes de implementar.** |
 | **Feature** | El trabajo referencia un `FT-XXX` — funcionalidad **ya implementada** registrada bajo `docs/specs/features/`. | **Las pruebas de todos los `TC-XXX` asociados a los `AC-XXX` que contiene el feature** — nunca funcionalidad nueva | **El `FT-XXX` completo** | `references/test-cases.md` — **leer antes de implementar.** |
 
-> **Artefacto archivado.** Al cerrar un trabajo, `work-integrate` y `pr-create` pueden mover su carpeta a `docs/specs/archive/user-stories/` o `docs/specs/archive/work-items/`. Si el artefacto referenciado no aparece en su ruta activa, **buscarlo ahi antes de darlo por inexistente** — y **nunca** crear la carpeta en la ruta activa por no haberla encontrado: este skill hace «leer o crear» el `progress.md`, asi que el descuido produciria una carpeta fantasma con un identificador ya usado. Que se haga con el hallazgo depende del modo:
+> **Artefacto archivado.** Al cerrar un trabajo, `work-integrate` y `pr-create` pueden mover su carpeta a `docs/archive/user-stories/` o `docs/archive/work-items/`. Si el artefacto referenciado no aparece en su ruta activa, **buscarlo ahi antes de darlo por inexistente** — y **nunca** crear la carpeta en la ruta activa por no haberla encontrado: este skill hace «leer o crear» el `progress.md`, asi que el descuido produciria una carpeta fantasma con un identificador ya usado. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo). Que se haga con el hallazgo depende del modo:
 >
 > - **En los cuatro tipos de implementacion** (US/TK, WI, TC, FT): **parar y avisar**. Implementar trabajo nuevo sobre un artefacto ya cerrado exige desarchivarlo primero —mover su carpeta de vuelta—, y eso lo decide el usuario.
 > - **En [modo correccion](#modo-correccion-delegado-desde-quality-check)**: un artefacto archivado es **esperable**, no un error — la correccion llega justo en la fase de cierre, cuando el archivado ya se commiteo. Continuar con la correccion, pero **sin escribir dentro de la carpeta archivada**: la nota de retrabajo va en el informe de `quality-check`, no en el `progress.md` archivado.
@@ -94,7 +94,7 @@ Verificar estas condiciones antes de implementar, sea cual sea el tipo. Si algun
 > **Excepcion — modo correccion.** En la correccion delegada desde `quality-check` (ver [Modo correccion](#modo-correccion-delegado-desde-quality-check)) **no aplican** ni «Working tree limpio» ni «Artefacto en `Ready`»: el cierre corre sobre la rama consolidada, con el artefacto ya implementado y posiblemente con cambios sin commitear. El resto de condiciones (rama del artefacto, solo trabajo de la rama actual) siguen vigentes.
 
 - **No iniciar en la rama de otro trabajo (primera verificacion):** obtener la rama actual con `git branch --show-current`. Si ya tiene un prefijo de implementacion (`feature/`, `fix/`, `chore/`, `refactor/`, `test/`) y **no** corresponde al artefacto que se va a implementar, **parar** e indicar al usuario que no se puede iniciar la implementacion desde la rama de otro trabajo; debe situarse en la rama base acordada (p. ej. `develop`/`main`) para que el skill cree o cambie a la rama del artefacto. **Excepcion - reanudar:** si la rama actual es precisamente la del artefacto pedido, continuar normalmente.
-- **Working tree limpio:** `git status --porcelain` sin cambios pendientes no resueltos **al iniciar la sesion de implementacion** (o al reanudarla). No aplica durante la pausa de confirmacion entre unidades: los cambios de la unidad recien terminada quedan sin commitear ahi a proposito (ver *Ritmo obligatorio*), hasta que el usuario confirma avanzar.
+- **Cambios sin commitear al iniciar:** `git status --porcelain` **al iniciar la sesion de implementacion** (o al reanudarla). Si hay salida, resolver segun `implementation.uncommittedChanges` (ver [`../../reference/implementation.md`](../../reference/implementation.md)): `commit` los comitea (invocando `git-commit`) y continua; `stash` los guarda con `git stash` y continua, avisando donde quedaron; `ask` (por defecto) para e informa al usuario, sin continuar hasta que lo resuelva. No aplica durante la pausa de confirmacion entre unidades: los cambios de la unidad recien terminada quedan sin commitear ahi a proposito (ver *Ritmo obligatorio*), hasta que el usuario confirma avanzar.
 - **Rama correcta:** estar en (o crear) la rama de trabajo del artefacto. No implementar en `main` ni en ramas de otro trabajo sin instruccion explicita. El nombre de rama lo define cada referencia segun el tipo. **Excepcion — `WI-XXX` de tipo `bug-fix` o `security-update`:** no llevan rama propia; se implementan **directamente sobre la rama de integracion** y cierran sin handoff (ver [`references/work-items.md`](references/work-items.md#excepcion-bug-fix-y-security-update-no-crean-rama)). Ahi la verificacion no es "estar en la rama del artefacto" sino **estar en la rama de integracion confirmada** con el usuario — que tampoco se asume.
 - **Solo trabajo de la rama actual:** solo se implementan unidades (TK / WI / TC / FT) que pertenezcan al artefacto asociado a la rama de implementacion actual. No implementar tareas de otro artefacto o de otra rama: si la unidad pedida no corresponde a la rama actual, **parar** y cambiar a su rama correspondiente (o pedir al usuario que lo haga) antes de continuar; nunca mezclar trabajo de distintos artefactos en una misma rama.
 - **Artefacto en `Ready`:** el artefacto a implementar existe y esta en `Estado: Ready` (lo verifica cada referencia con su regla propia).
@@ -128,7 +128,7 @@ Cada tipo mantiene un `progress.md` como **unica bitacora** que este skill puede
 
 ---
 
-## Estado de iteracion para specTracking (transversal)
+## Estado de iteracion para el seguimiento de especificaciones (transversal)
 
 Los hooks de seguimiento de especificaciones del plugin (ver `hooks/README.md`) necesitan un `iterationId` que se mantenga igual mientras se reintenta la unidad en curso -o la correccion delegada desde `quality-check`- y cambie al pasar a otra. Se resuelve con un archivo de estado local y no versionado: `.sdd-devkit/current-iteration.json`, con `{"iterationId": "<uuid>", "key": "<codigo de la unidad, o `correction:<check>` en modo correccion>"}`.
 
@@ -136,7 +136,7 @@ Los hooks de seguimiento de especificaciones del plugin (ver `hooks/README.md`) 
 - **En un reintento con el mismo `key`** (build/test que vuelve a fallar dentro de la misma unidad, o un segundo intento de la misma correccion): no tocar el archivo — el `iterationId` existente sigue siendo el correcto.
 - **Al cerrar la unidad como `Done`**, o **al terminar la correccion** (aplicada o no — ver [Cuando la correccion no se aplica](#cuando-la-correccion-no-se-aplica)): eliminar el archivo.
 - **La primera vez que se escribe**, normalizar el `.gitignore`: comprobar con `git check-ignore -q .sdd-devkit/current-iteration.json` y, si no esta ignorado, anadir esa linea — es una cache local y desechable, igual que `.sdd-devkit/test-run.json` (ver `quality-check`).
-- Mantenerlo **siempre**, sin comprobar antes si `specTracking` esta activo en `.sdd-devkit/settings.json`: es barato de escribir y, si ningun hook lo lee, no tiene efecto observable.
+- Mantenerlo **siempre**, sin comprobar antes si `specification.trackingEnabled` esta activo en `.sdd-devkit/settings.json`: es barato de escribir y, si ningun hook lo lee, no tiene efecto observable.
 
 ---
 
@@ -346,7 +346,7 @@ relevante y los archivos implicados.
   se inventan estados: los validos siguen siendo `Pending`, `In Progress`, `Done`, y una unidad ya en
   `Done` permanece en `Done`. **Si el artefacto es externo y no hay `progress.md`**, no crearlo: devolver
   esa misma nota en la respuesta a `quality-check`. **Si el artefacto esta archivado** (su carpeta vive bajo
-  `docs/specs/archive/`), tampoco escribir dentro: mismo trato — la nota va en la respuesta a
+  `docs/archive/`), tampoco escribir dentro: mismo trato — la nota va en la respuesta a
   `quality-check`, que la recoge en su informe.
 - **Sin commit automatico ni handoff:** al terminar, devolver el control a `quality-check`, que verifica el
   arreglo re-ejecutando el check, recalcula el fingerprint y reinicia su corrida. Este skill no re-ejecuta
@@ -367,7 +367,7 @@ se escalo**. `quality-check` no debe reintentar la delegacion sobre ese mismo fa
 reportarlo al usuario en su informe y emitir el veredicto que aplique (`REJECTED`), dejando el cierre
 bloqueado hasta que el escalado se resuelva. Anotar tambien la decision como **nota** en `progress.md` —
 salvo que el artefacto sea externo o este archivado, en cuyo caso la nota viaja en la respuesta a
-`quality-check` y no se escribe dentro de `docs/specs/archive/`.
+`quality-check` y no se escribe dentro de `docs/archive/`.
 
 ---
 
@@ -382,7 +382,7 @@ Todo paso a otra fase del ciclo se realiza **invocando el skill correspondiente*
 - **Para validar la cobertura** de los criterios de aceptacion tras automatizar las pruebas (tipos `TC-XXX` / `FT-XXX`): **invocar `/trace-validate`**. Este skill no genera la matriz de trazabilidad.
 - **`quality-check` es el unico origen entrante:** ademas de los handoffs salientes de arriba, este skill **recibe** correcciones delegadas desde [`quality-check`](../quality-check/SKILL.md#corrección-de-fallos) en el cierre (ver [Modo correccion](#modo-correccion-delegado-desde-quality-check)). Es la unica entrada que no viene de una especificacion recien planificada.
 
-Las opciones de cierre se ofrecen con la herramienta de preguntas estructuradas (ver el Paso 4 de cada referencia) y cada una hace handoff **invocando** el skill dueño de esa fase.
+Las opciones de cierre se resuelven segun `implementation.handoff` (ver [`../../reference/implementation.md`](../../reference/implementation.md)): con `ask` (comportamiento por defecto), se ofrecen con la herramienta de preguntas estructuradas (ver el Paso 4 de cada referencia) y se espera la eleccion del usuario; con `always`, se invoca directo el primer handoff saliente que aplique, sin presentar el menu. En ambos casos, cada opcion hace handoff **invocando** el skill dueño de esa fase.
 
 > **Excepcion — `WI-XXX` de tipo `bug-fix` / `security-update`.** Al implementarse directamente sobre la rama de integracion, **no hay handoff de cierre**: no queda rama que mergear ni PR que crear, asi que no se ofrecen las opciones ni se invoca `work-integrate` / `pr-create`. El ciclo termina con el commit. Los handoffs de escalado (`work-plan`, `work-define`, `test-define`) siguen vigentes igual.
 
@@ -409,7 +409,7 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
 
 - [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
-- [`../../reference/implementation.md`](../../reference/implementation.md): **Política de implementación** — ritmo de confirmación, worktrees y concurrencia desde `.sdd-devkit/settings.json`. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/implementation.md`](../../reference/implementation.md): **Política de implementación** — ritmo de confirmación, cambios sin commitear al iniciar, worktrees, concurrencia y handoff de cierre desde `.sdd-devkit/settings.json`. *Lectura obligatoria antes de ejecutar el skill.*
 - [`../../reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
 - [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
 

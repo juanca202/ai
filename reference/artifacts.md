@@ -11,6 +11,24 @@ específico (una salida propia, una excepción de ruta).
 > en un tracker externo, `XXX` es el `id` que asigna ese sistema, **sin padding de ceros** — ver
 > [`alm/azure-devops.md`](alm/azure-devops.md).
 
+> **Resolución de la raíz.** Las rutas de esta tabla son **relativas a una raíz**, no al directorio desde
+> el que se invoca el skill. Cuál es esa raíz depende de la familia del artefacto: los de **arquitectura**
+> (ADR, estándares, fitness functions, informe de `arch-audit`) cuelgan de la **raíz de arquitectura** —
+> ver [Raíz de arquitectura](#raíz-de-arquitectura-adr-estándares-y-fitness-functions); los de
+> **especificación** (`docs/specs/…`) cuelgan de la raíz del repositorio principal según
+> `specification.basePath`, y **no** se ven afectados por la resolución de arquitectura.
+
+> **Resolución de `docs/archive/`.** Es el valor por defecto de `specification.archivePath`
+> (`.sdd-devkit/settings.json`), y así aparece escrito —literal— en esta tabla, en
+> [`work-integrate/references/archive.md`](../skills/work-integrate/references/archive.md) y en el
+> resto del catálogo. **Antes de resolver cualquier ruta de archivado** (destino de un `git mv`,
+> fallback de lectura, o escaneo de IDs bajo el archivo), leer `specification.archivePath`: si el
+> repo declaró un valor distinto del default, sustituirlo por ese valor en lugar de
+> `docs/archive/`. Si no hay `settings.json`, o la clave falta, aplica el default. `basePath`
+> (`docs/specs/` en esta tabla) es puramente convencional hoy — solo lo resuelve el hook de
+> seguimiento de especificaciones (ver [`../hooks/README.md`](../hooks/README.md)) — y no se
+> sustituye en el resto del catálogo.
+
 ## Layout del harness
 
 | Artefacto | Ruta | Skill propietario |
@@ -18,9 +36,9 @@ específico (una salida propia, una excepción de ruta).
 | Memoria del harness | `.agents/MEMORY.md` | `arch-init` |
 | Configuración del plugin (incluye el idioma) | `.sdd-devkit/settings.json` | `arch-init` |
 | Instrucciones para agentes | `AGENTS.md` (+ `CLAUDE.md` como puntero) | `arch-init` |
-| ADR | `docs/adr/ADR-XXX-[slug].md` | `arch-manage` · índice `docs/adr/README.md`: lo crea `arch-init`, lo mantiene `arch-manage` |
-| Estándar de dominio | `docs/standards/[slug].md` (o `docs/standards/[slug]/README.md`) | `arch-manage` · índice `docs/standards/README.md`: lo crea `arch-init`, lo mantiene `arch-manage` |
-| Fitness functions | `scripts/arch/verify.<ext>` + `scripts/arch/checks/[slug-estándar].<ext>` | `arch-manage` |
+| ADR | `<raíz-arq>/docs/adr/ADR-XXX-[slug].md` | `arch-manage` · índice `<raíz-arq>/docs/adr/README.md`: lo crea `arch-init`, lo mantiene `arch-manage` |
+| Estándar de dominio | `<raíz-arq>/docs/standards/[slug].md` (o `<raíz-arq>/docs/standards/[slug]/README.md`) | `arch-manage` · índice `<raíz-arq>/docs/standards/README.md`: lo crea `arch-init`, lo mantiene `arch-manage` |
+| Fitness functions | `<raíz-arq>/scripts/arch/verify.<ext>` + `<raíz-arq>/scripts/arch/checks/[slug-estándar].<ext>` | `arch-manage` |
 | Definition of Done | `docs/policies/definition-of-done.md` | **Ninguno — lo escribe y lo mantiene el equipo.** Los skills lo leen; ningún skill del plugin lo genera ni ofrece generarlo. |
 | Historia de usuario | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md` | `work-define` |
 | Tarea técnica de una US | `docs/specs/user-stories/US-XXX-[nombre-corto]/TK-XXX-[kebab-case].md` | `work-plan` |
@@ -35,22 +53,75 @@ específico (una salida propia, una excepción de ruta).
 | Reporte de trazabilidad | `trace-report.md` dentro de la carpeta del artefacto | `trace-validate` |
 | Informe de calidad | `docs/audits/quality-check.md` (+ histórico `docs/audits/quality-check-<YYYYMMDD-HHMMSS>.md`) | `quality-check` |
 | Informe de code review | `docs/audits/code-review.md` (+ histórico `docs/audits/code-review-<YYYYMMDD-HHMMSS>.md`) | `code-review` |
-| Informe de auditoría de arquitectura | `docs/audits/arch-audit-YYYY-MM-DD.md` | `arch-audit` |
+| Informe de auditoría de arquitectura | `<raíz-arq>/docs/audits/arch-audit-YYYY-MM-DD.md` | `arch-audit` |
 | Caché de corrida de pruebas | `.sdd-devkit/test-run.json` (**ubicación fija**, no por unidad) | `quality-check` |
-| Estado de iteración para specTracking | `.sdd-devkit/current-iteration.json` (**ubicación fija**, vive mientras dura la unidad o corrección en curso) | `work-implement` |
+| Estado de iteración para el seguimiento de especificaciones | `.sdd-devkit/current-iteration.json` (**ubicación fija**, vive mientras dura la unidad o corrección en curso) | `work-implement` |
+
+## Raíz de arquitectura (ADR, estándares y fitness functions)
+
+Los artefactos de arquitectura describen **el código de un repositorio concreto**: sus decisiones, sus
+normas y los chequeos que las verifican. Por eso **no viven siempre en la raíz del repo principal**, sino
+en la raíz del repositorio al que pertenece el código del que trata la decisión — el **`<raíz-arq>`** de la
+tabla de arriba. Un submódulo con su propio stack tiene sus propios ADR, sus propios estándares y su propio
+runner de fitness functions, versionados junto a su código.
+
+> **Esto no afecta a las especificaciones.** `docs/specs/…` (US, WI, FT, TC, investigaciones, documentos
+> técnicos, glosario) se resuelve siempre contra `specification.basePath` de `.sdd-devkit/settings.json`,
+> sobre el repositorio principal. Un skill de arquitectura que escriba en un submódulo **no** mueve ni
+> duplica nada bajo `docs/specs/`.
+
+### Cómo se resuelve
+
+1. **Detectar los repositorios candidatos** desde la raíz del repo principal:
+   - `git submodule status` (o leer `.gitmodules`) lista los submódulos declarados.
+   - Adicionalmente, un directorio con su propio `.git` que no esté declarado como submódulo también es
+     un repositorio anidado válido.
+   - Si no hay ninguno, la raíz de arquitectura **es la raíz del repo principal**: `docs/adr/`,
+     `docs/standards/`, `scripts/arch/`. Fin — no se pregunta nada.
+2. **Si hay uno o más repositorios anidados**, resolver el destino **preguntando al usuario** con la
+   herramienta de preguntas estructuradas del cliente: presentar la raíz principal y cada submódulo
+   detectado (ruta relativa + stack detectado, si se conoce) y dejar que elija dónde vive el artefacto.
+   No inferirlo en silencio: un mismo ADR puede pertenecer legítimamente a la raíz (decisión transversal)
+   o a un submódulo (decisión de ese componente).
+3. **Preguntar una sola vez por invocación.** Resuelta la raíz, todos los artefactos de esa corrida
+   —ADR, estándar, checks, runner, índices— se escriben bajo ella. En invocaciones en lote (p. ej.
+   `arch-discover` generando varios ADR) se resuelve una vez para todo el lote, salvo que el propio lote
+   abarque explícitamente varios repositorios.
+4. **Todo se resuelve relativo a esa raíz**, sin excepción: los índices (`README.md` de `docs/adr/` y
+   `docs/standards/`), la numeración y el runner.
+
+### Consecuencias sobre numeración y auditoría
+
+- **Los secuenciales `ADR-XXX` son globales por raíz de arquitectura**, no por workspace. El repo
+  principal y cada submódulo llevan su propia serie: puede existir `ADR-001` en ambos y no es un
+  conflicto. Al calcular el siguiente número, leer **solo** el `docs/adr/` de la raíz resuelta.
+- Lo mismo vale para los `CR-XXX`: su alcance es el estándar, y el estándar vive en una raíz concreta.
+- **`arch-audit` audita una raíz de arquitectura a la vez.** Lee los estándares de esa raíz y ejecuta su
+  runner (`<raíz-arq>/scripts/arch/verify.<ext>`), escribiendo el informe en el `docs/audits/` de la
+  misma raíz. Auditar varias raíces implica varias corridas.
+- **Referencias entre raíces:** un ADR de un submódulo puede citar un ADR de la raíz principal (o al
+  revés). Como el mismo número existe en ambas series, el identificador solo no basta: citar **el nombre
+  de la raíz** junto al ID (p. ej. `ADR-004 de la raíz principal`) y, si se añade ruta, contarla desde el
+  archivo que la escribe hasta la otra raíz (`../../../docs/adr/ADR-004-….md` desde un submódulo de
+  primer nivel; un nivel más por cada carpeta intermedia). Ese enlace **no navega en GitHub** —cruza el
+  límite entre dos repositorios—, así que el nombre de la raíz es lo que hace legible la referencia.
+
+> **Excepción: `arch-init`.** Al bootstrapear el harness puede crear los índices de **varias** raíces en
+> una sola corrida (los que el usuario elija). El resto de skills de arquitectura —`arch-manage`,
+> `arch-discover`, `arch-audit`— operan siempre sobre **una** raíz por invocación.
 
 ## Identificadores y numeración
 
 | Prefijo | Artefacto | Alcance del secuencial |
 |---------|-----------|------------------------|
-| `ADR-XXX` | Architecture Decision Record | Global, sobre `docs/adr/` |
+| `ADR-XXX` | Architecture Decision Record | Global, sobre el `docs/adr/` **de su raíz de arquitectura** |
 | `US-XXX` | Historia de usuario | Global, sobre `docs/specs/user-stories/` **+ el archivo** |
 | `TK-XXX` | Tarea técnica | Por historia de usuario padre |
 | `WI-XXX` | Tarea de mantenimiento | Global, sobre `docs/specs/work-items/` **+ el archivo** |
 | `FT-XXX` | Feature ya implementada | Global, sobre `docs/specs/features/` |
 | `TC-XXX` | Caso de prueba | Por artefacto padre, sobre su `test-cases/` |
 | `RS-XXX` | Informe de investigación | Por carpeta base de destino, **+ el archivo** cuando la base es `docs/specs/research/` |
-| `CR-XXX` | Criterio de cumplimiento de un estándar | Por estándar; se referencia como `<estándar>/CR-XXX` |
+| `CR-XXX` | Criterio de cumplimiento de un estándar | Por estándar (y por tanto por raíz de arquitectura); se referencia como `<estándar>/CR-XXX` |
 
 Reglas comunes:
 
@@ -69,22 +140,22 @@ Reglas comunes:
 
 ## Archivado
 
-`work-integrate` y `pr-create` pueden mover la carpeta de un trabajo cerrado bajo `docs/specs/archive/`,
+`work-integrate` y `pr-create` pueden mover la carpeta de un trabajo cerrado bajo `docs/archive/`,
 si el usuario lo confirma:
 
 | Origen | Destino de archivado |
 |--------|----------------------|
-| `docs/specs/user-stories/US-XXX-[nombre-corto]/` | `docs/specs/archive/user-stories/US-XXX-[nombre-corto]/` |
-| `docs/specs/work-items/WI-XXX-[kebab-case]/` | `docs/specs/archive/work-items/WI-XXX-[kebab-case]/` |
-| `docs/specs/research/RS-XXX-[slug]/` (investigación suelta huérfana) | `docs/specs/archive/research/RS-XXX-[slug]/` |
+| `docs/specs/user-stories/US-XXX-[nombre-corto]/` | `docs/archive/user-stories/US-XXX-[nombre-corto]/` |
+| `docs/specs/work-items/WI-XXX-[kebab-case]/` | `docs/archive/work-items/WI-XXX-[kebab-case]/` |
+| `docs/specs/research/RS-XXX-[slug]/` (investigación suelta huérfana) | `docs/archive/research/RS-XXX-[slug]/` |
 
 **Contrato para el resto del catálogo** — archivar **no** libera el identificador ni hace invisible el
 trabajo:
 
 1. **El ID sigue ocupado.** El siguiente secuencial libre se calcula sobre la ruta activa **y** sobre
-   `docs/specs/archive/`.
+   `docs/archive/`.
 2. **La carpeta se busca en ambas rutas.** Antes de reportar que un artefacto no existe, buscarlo bajo
-   `docs/specs/archive/`. **No** recrear la carpeta en la ruta activa.
+   `docs/archive/`. **No** recrear la carpeta en la ruta activa.
 3. **La estructura interna se conserva** intacta (`README.md`, `TK-XXX-*.md`, `test-cases/`,
    `research/`, `progress.md`, `assets/`), así que todo se resuelve relativo a la carpeta encontrada.
 4. **Solo `trace-validate` escribe dentro de un artefacto archivado**, y solo su propio

@@ -1,5 +1,5 @@
 {
-  "description": "Notifica al endpoint de specTracking cuando se crea, actualiza o borra un artefacto en docs/specs/.",
+  "description": "Notifica al endpoint de seguimiento de especificaciones cuando se crea, actualiza o borra un artefacto en docs/specs/.",
   "hooks": {
     "PostToolUse": [
       {

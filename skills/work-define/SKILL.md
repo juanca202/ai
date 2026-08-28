@@ -1,6 +1,6 @@
 ---
 name: work-define
-description: Crear o actualizar una Historia de Usuario. Usar cuando se necesite crear, documentar, actualizar o estandarizar historias de usuario. Activar cuando el usuario solicite una nueva historia de usuario, describa una necesidad funcional, pida refinar requisitos, estructurar funcionalidades o alinear historias existentes a las convenciones del proyecto. El ID de una US archivada en docs/specs/archive/ sigue ocupado, y una US archivada no se actualiza sin desarchivarla antes.
+description: Crear o actualizar una Historia de Usuario. Usar cuando se necesite crear, documentar, actualizar o estandarizar historias de usuario. Activar cuando el usuario solicite una nueva historia de usuario, describa una necesidad funcional, pida refinar requisitos, estructurar funcionalidades o alinear historias existentes a las convenciones del proyecto. El ID de una US archivada en docs/archive/ sigue ocupado, y una US archivada no se actualiza sin desarchivarla antes.
 license: MIT
 ---
 
@@ -29,6 +29,7 @@ Reglas transversales del catálogo; viven en la raíz del plugin, no en este ski
 
 - [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
 - [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`../../reference/planning.md`](../../reference/planning.md): **Política de planificación** — si se pregunta, se invoca automáticamente o nunca se sugiere `test-define` al dejar la US en Ready. *Lectura obligatoria antes de ejecutar el skill.*
 
 ---
 
@@ -39,6 +40,16 @@ Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../r
 Las reglas de `language.md` son obligatorias y tienen prioridad para determinar el idioma de todos los artefactos y mensajes generados por este skill.
 
 No continúes hasta haber leído y aplicado `language.md`.
+
+---
+
+## Política de planificación
+
+Antes de ejecutar este skill, DEBES leer [`../../reference/planning.md`](../../reference/planning.md).
+
+Las reglas de `planning.md` son obligatorias y determinan, vía `specification.testCases`, si al dejar la US en `Ready` se pregunta si definir los casos de prueba (`ask`, comportamiento por defecto), se invoca `/test-define` automáticamente sin preguntar (`always`), o nunca se sugiere ni se invoca (`never`). Ver [Flujo (resumen)](#flujo-resumen).
+
+No continúes hasta haber leído y aplicado `planning.md`.
 
 ---
 
@@ -55,7 +66,7 @@ Lo propio de este skill:
 | Documentación técnica (solo lectura) | `docs/specs/technical-docs/[capability].md` — propiedad de `design-define`; este skill la referencia, nunca la crea ni la edita |
 | Glosario (opcional) | `docs/specs/glossary.md` |
 
-> **Las US archivadas siguen contando.** El siguiente `US-XXX` libre se calcula sobre la ruta activa **y** sobre `docs/specs/archive/user-stories/`, y el flujo *Actualizar* busca ahí la historia cuando no está en la activa.
+> **Las US archivadas siguen contando.** El siguiente `US-XXX` libre se calcula sobre la ruta activa **y** sobre `docs/archive/user-stories/`, y el flujo *Actualizar* busca ahí la historia cuando no está en la activa.
 
 ### Convenciones del nombre de carpeta
 
@@ -80,7 +91,7 @@ Antes de crear o editar cualquier US, el agente debe tener clara la siguiente in
 | **Criterios de aceptación (AC-XXX)**            | Del contexto o descripción del usuario                                                   | Preguntar; sin al menos un `AC-XXX` INVEST no es valorable y la historia solo puede crearse en Draft |
 | **Referencias de diseño** (solo US de UI)       | Figma, prototipos u otros enlaces aportados por el usuario                               | Sin ellas la historia no puede declararse Ready                                       |
 | **Dependencias con otras US o sistemas**        | Indicadas por el usuario o inferibles del contexto                                       | Preguntar; afectan las dimensiones I y E de INVEST                                    |
-| **ID de la US**                                 | Proporcionado por el usuario                                                             | Inferir el siguiente libre revisando carpetas `US-`* en `docs/specs/user-stories/` **y en `docs/specs/archive/user-stories/`** (archivar no libera el ID) |
+| **ID de la US**                                 | Proporcionado por el usuario                                                             | Inferir el siguiente libre revisando carpetas `US-`* en `docs/specs/user-stories/` **y en `docs/archive/user-stories/`** (archivar no libera el ID) |
 | **Repositorios afectados**                      | Proporcionados por el usuario o inferibles del repo                                      | Sin ellos la historia no puede declararse Ready                                       |
 
 
@@ -94,7 +105,7 @@ El procedimiento completo —cómo preguntar al usuario, validación antes de cr
 
 - **Crear:** fijar ID y carpeta `US-XXX-[nombre-corto]/` → redactar el `README.md` con la plantilla (Descripción RFC 2119, Referencias, Criterios `AC-XXX` con categoría y enunciado RFC 2119, Repositorios, Complejidad Fibonacci, INVEST, DoR, Observaciones) → si el requerimiento define modelos, APIs o flujos, **delegar la documentación técnica a `/design-define` mediante subagente** y agregar las referencias devueltas a la sección Referencias → glosario si aplica → cierre.
 - **Actualizar:** identificar y leer el `README.md` → aplicar cambios conservando **siempre** los ids `AC-XXX` existentes (son inmutables: los nuevos toman el siguiente libre) → revalidar → confirmar. Ante conflicto `TK-XXX` ↔ US, **la US prevalece**.
-- **Cierre:** si queda **Draft**, cerrar lagunas con preguntas estructuradas (una por laguna, máx. tres por bloque); si queda **Ready**, sugerir como próximos pasos definir los casos de prueba (si el usuario acepta, invocar `/test-define`) y crear las `TK-XXX` con `/work-plan` (nunca crear TCs ni tareas directamente desde este skill).
+- **Cierre:** si queda **Draft**, cerrar lagunas con preguntas estructuradas (una por laguna, máx. tres por bloque); si queda **Ready**, resolver la definición de casos de prueba según `specification.testCases` (`ask` pregunta, `always` invoca `/test-define` directo, `never` no la ofrece — ver [Política de planificación](#política-de-planificación)) y sugerir crear las `TK-XXX` con `/work-plan` (nunca crear TCs ni tareas directamente desde este skill).
 
 Las modalidades **RFC 2119**, las **categorías de AC-XXX** (funcionales e ISO 25010) y las rúbricas **INVEST** y **DoR** detalladas están en [`references/quality-criteria.md`](references/quality-criteria.md).
 

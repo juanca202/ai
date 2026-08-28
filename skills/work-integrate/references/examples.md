@@ -9,12 +9,12 @@ Referencias del skill **work-integrate**. Cubren los dos tipos de trabajo (`US-X
 **Ejemplo 1 — Historia de usuario (camino feliz)**
 
 - *Entrada:* Rama `feature/US-042-exportacion-csv`, working tree limpio, `progress.md` con tres TK todas en `Done`, reflog indica `Created from develop`.
-- *Salida:* `quality-check` → `APPROVED` (persiste `.sdd-devkit/test-run.json`); `code-review` → `APPROVED`; `trace-validate` → `APPROVED` (reutiliza ese `test-run.json`, sin re-ejecutar pruebas); se **pregunta si archivar**, mostrando `docs/specs/user-stories/US-042-exportacion-csv/` → `docs/specs/archive/user-stories/` más `RS-003-formatos-csv` (suelta, sin referencias activas) → el usuario confirma → `git mv` de ambas y `git-commit` recoge el renombrado junto con los artefactos de las puertas; `git checkout develop` → `git merge --no-ff --no-commit feature/US-042-exportacion-csv` → `git rm` de `docs/audits/quality-check.md` y `docs/audits/code-review.md` → `git commit -m "Merge US-042: exportacion-csv"` → reporte: «Merged 7 commits de `feature/US-042-exportacion-csv` → `develop`. Commit de merge: `a1b2c3d`. HEAD en `develop`, working tree limpio. Los informes de las puertas quedaron en la rama del trabajo, no se integraron. La rama no fue borrada ni se hizo push.»
+- *Salida:* `quality-check` → `APPROVED` (persiste `.sdd-devkit/test-run.json`); `code-review` → `APPROVED`; `trace-validate` → `APPROVED` (reutiliza ese `test-run.json`, sin re-ejecutar pruebas); se **pregunta si archivar**, mostrando `docs/specs/user-stories/US-042-exportacion-csv/` → `docs/archive/user-stories/` más `RS-003-formatos-csv` (suelta, sin referencias activas) → el usuario confirma → `git mv` de ambas y `git-commit` recoge el renombrado junto con los artefactos de las puertas; `git checkout develop` → `git merge --no-ff --no-commit feature/US-042-exportacion-csv` → `git rm` de `docs/audits/quality-check.md` y `docs/audits/code-review.md` → `git commit -m "Merge US-042: exportacion-csv"` → reporte: «Merged 7 commits de `feature/US-042-exportacion-csv` → `develop`. Commit de merge: `a1b2c3d`. HEAD en `develop`, working tree limpio. Los informes de las puertas quedaron en la rama del trabajo, no se integraron. La rama no fue borrada ni se hizo push.»
 
 **Ejemplo 2 — Work item (progress.md por carpeta del WI)**
 
 - *Entrada:* Rama `fix/WI-007-fuga-memoria`, working tree limpio, `docs/specs/work-items/WI-007-fuga-memoria/progress.md` con todas las unidades del WI en `Done`, reflog indica `Created from main`.
-- *Salida:* Puertas aprobadas → se pregunta si archivar y el usuario confirma → `docs/specs/archive/work-items/WI-007-fuga-memoria/` (el `RS-011` que enlaza se queda: `US-051`, aún activa, también lo referencia) → `git checkout main` → `git merge --no-ff --no-commit fix/WI-007-fuga-memoria` → `git rm` de los dos informes de `docs/audits/` → `git commit -m "Merge WI-007: fuga-memoria"` → reporte con commits integrados y hash de merge.
+- *Salida:* Puertas aprobadas → se pregunta si archivar y el usuario confirma → `docs/archive/work-items/WI-007-fuga-memoria/` (el `RS-011` que enlaza se queda: `US-051`, aún activa, también lo referencia) → `git checkout main` → `git merge --no-ff --no-commit fix/WI-007-fuga-memoria` → `git rm` de los dos informes de `docs/audits/` → `git commit -m "Merge WI-007: fuga-memoria"` → reporte con commits integrados y hash de merge.
 
 **Ejemplo 3 — Unidad pendiente**
 
@@ -41,7 +41,7 @@ Referencias del skill **work-integrate**. Cubren los dos tipos de trabajo (`US-X
 **Ejemplo 6 — Conflicto en el merge**
 
 - *Entrada:* Verificaciones OK, rama base `main`, `git merge --no-ff --no-commit` produce conflictos en `src/app/Module.java`.
-- *Comportamiento:* El agente ejecuta `git merge --abort`, deja el repo en el estado previo **al merge**, lista los archivos en conflicto y pide al usuario resolverlos manualmente. No reintenta. El commit del paso 11 —artefactos de las puertas, más el archivado si se confirmó— sigue en la rama del trabajo y **no se revierte**: es parte de ella y se integrará cuando el merge prospere. Se menciona en el reporte.
+- *Comportamiento:* El agente ejecuta `git merge --abort`, deja el repo en el estado previo **al merge**, lista los archivos en conflicto y pide al usuario resolverlos manualmente. No reintenta. El commit del paso 7 —artefactos de las puertas, más el archivado si se confirmó— sigue en la rama del trabajo y **no se revierte**: es parte de ella y se integrará cuando el merge prospere. Se menciona en el reporte.
 
 **Ejemplo 7 — Rama con prefijo inválido**
 
@@ -56,7 +56,7 @@ Referencias del skill **work-integrate**. Cubren los dos tipos de trabajo (`US-X
 **Ejemplo 9 — El usuario declina el archivado**
 
 - *Entrada:* Rama `feature/US-061-…`, todo en `Done`, las tres puertas en `APPROVED`, delta contra `develop` = 4.
-- *Comportamiento:* El paso 10 muestra `docs/specs/user-stories/US-061-…/` → `docs/specs/archive/user-stories/` y pregunta. El usuario responde **No archivar** (prefiere dejarlo visible hasta cerrar el épico). No se ejecuta ningún `git mv`: el paso 11 commitea solo los artefactos de las puertas y el merge continúa con normalidad. El reporte final incluye «📦 Archivado: omitido — `US-061` se queda en `docs/specs/user-stories/` (no confirmado por el usuario).» **Ni se bloquea el merge ni se vuelve a preguntar.**
+- *Comportamiento:* El paso 8 muestra `docs/specs/user-stories/US-061-…/` → `docs/archive/user-stories/` y pregunta. El usuario responde **No archivar** (prefiere dejarlo visible hasta cerrar el épico). No se ejecuta ningún `git mv`: el paso 7 commitea solo los artefactos de las puertas y el merge continúa con normalidad. El reporte final incluye «📦 Archivado: omitido — `US-061` se queda en `docs/specs/user-stories/` (no confirmado por el usuario).» **Ni se bloquea el merge ni se vuelve a preguntar.**
 
 **Ejemplo 10 — Cierre desatendido, sin nadie que confirme**
 
@@ -67,7 +67,7 @@ Referencias del skill **work-integrate**. Cubren los dos tipos de trabajo (`US-X
 
 ## Anti-patterns
 
-- **Correr este skill sobre una rama que ya se integró por un PR en la plataforma.** El delta contra la base es `0`, git responde *Already up to date*, y seguir adelante crea un commit que no es un merge y que solo borra los dos informes. El paso 9 lo corta antes — y por eso va delante del archivado: nada se mueve ni se commitea en una rama que solo había que dejar en paz.
+- **Correr este skill sobre una rama que ya se integró por un PR en la plataforma.** El delta contra la base es `0`, git responde *Already up to date*, y seguir adelante crea un commit que no es un merge y que solo borra los dos informes. El paso 7 lo corta antes — y por eso va delante del archivado: nada se mueve ni se commitea en una rama que solo había que dejar en paz.
 - Encadenar `pr-create` (PR de implementación) **y** este skill sobre el mismo trabajo: son rutas de integración alternativas, no fases sucesivas.
 - Hacer merge sin verificar `progress.md` o ignorando unidades no `Done`.
 - **Archivar antes de que pasen las tres puertas**, o antes de que `trace-validate` escriba su `trace-report.md` dentro de la carpeta del trabajo.

@@ -45,7 +45,7 @@ ese artefacto:
 | `FT-XXX` | `docs/specs/features/FT-XXX-{slug}/research/RS-XXX-{slug}/` |
 | Nada local (TC suelto o solo en el gestor de proyectos) | `docs/specs/research/RS-XXX-{slug}/` |
 
-> **Si el artefacto padre no está en su ruta activa, buscarlo bajo `docs/specs/archive/`**
+> **Si el artefacto padre no está en su ruta activa, buscarlo bajo `docs/archive/`**
 > antes de darlo por inexistente, y **nunca** recrear la carpeta en la ruta activa. Si está
 > archivado, **no escribir dentro** — pero tampoco parar: auditar el `TC-XXX` de un trabajo
 > ya entregado es un caso legítimo y frecuente. Se lee el padre archivado como contexto y

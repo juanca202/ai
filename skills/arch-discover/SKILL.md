@@ -1,6 +1,6 @@
 ---
 name: arch-discover
-description: Inspeccionar un proyecto existente para descubrir decisiones arquitectónicas implícitas y las reglas/convenciones vivas que están en vigor, y proponer los ADR y estándares candidatos que las documentarían. Usar cuando el usuario quiera auditar un repositorio en busca de decisiones o normas no documentadas, pida "descubrir ADRs", "descubrir estándares", "qué decisiones arquitectónicas tiene este proyecto", "qué convenciones sigue el código", "analiza la arquitectura del proyecto" o cualquier variante que implique explorar el código/estructura para inferir arquitectura relevante que merezca documentarse. Activar también cuando el usuario llegue a un proyecto nuevo y quiera entender qué decisiones y reglas ya existen, aunque no mencione explícitamente "ADR" o "estándar".
+description: Inspeccionar un proyecto existente para descubrir decisiones arquitectónicas implícitas y las reglas/convenciones vivas que están en vigor, y proponer los ADR y estándares candidatos que las documentarían. Usar cuando el usuario quiera auditar un repositorio en busca de decisiones o normas no documentadas, pida "descubrir ADRs", "descubrir estándares", "qué decisiones arquitectónicas tiene este proyecto", "qué convenciones sigue el código", "analiza la arquitectura del proyecto" o cualquier variante que implique explorar el código/estructura para inferir arquitectura relevante que merezca documentarse. Activar también cuando el usuario llegue a un proyecto nuevo y quiera entender qué decisiones y reglas ya existen, aunque no mencione explícitamente "ADR" o "estándar". Descubre una raíz de arquitectura por corrida —el repo principal o un submódulo—, y crea los artefactos aprobados en esa misma raíz.
 license: MIT
 ---
 
@@ -43,9 +43,10 @@ No continúes hasta haber leído y aplicado `language.md`.
 
 Antes de inspeccionar, determinar el alcance:
 
-1. **Leer `AGENTS.md`** (si existe, sección `# Stack tecnológico`) y **`.agents/MEMORY.md`** (si existe, contexto operativo) para entender lo ya conocido — el stack vive solo en `AGENTS.md`, no se duplica en `MEMORY.md`.
-2. **Leer `docs/adr/` y `docs/standards/`** para listar los artefactos ya existentes — nunca proponer un candidato que duplique un ADR o estándar existente (en cualquier estado).
-3. Si el usuario no indicó ruta, asumir raíz del repositorio actual.
+1. **Resolver la raíz de arquitectura (`<raíz-arq>`)** — el repositorio cuyo código se va a descubrir y donde vivirán los artefactos resultantes. Listar los repositorios anidados (`git submodule status` / `.gitmodules`, más directorios con `.git` propio): si no hay ninguno, es la raíz del repo actual y no se pregunta; si los hay, **preguntar al usuario** qué raíz descubrir (principal o submódulo `X`). Se resuelve **una vez para todo el lote** y todo lo demás —inspección, lectura de artefactos existentes y creación— es relativo a ella. Regla completa: [`../../reference/artifacts.md`](../../reference/artifacts.md#raíz-de-arquitectura-adr-estándares-y-fitness-functions).
+2. **Leer `AGENTS.md`** (si existe, sección `# Stack tecnológico`) y **`.agents/MEMORY.md`** (si existe, contexto operativo) del **repo principal** para entender lo ya conocido — el harness es uno solo; el stack vive en `AGENTS.md` y no se duplica en `MEMORY.md`. Si la raíz elegida es un submódulo, su stack puede diferir del que describe `AGENTS.md`: prevalece lo que se observe en la Fase 2.
+3. **Leer `docs/adr/` y `docs/standards/` de `<raíz-arq>`** para listar los artefactos ya existentes — nunca proponer un candidato que duplique un ADR o estándar existente **de esa raíz** (en cualquier estado). Los de otra raíz son series independientes y no cuentan como duplicado.
+4. Si el usuario no indicó ruta y no hay repositorios anidados, asumir raíz del repositorio actual.
 
 ---
 
@@ -95,6 +96,9 @@ grep -r "inject\|Injectable\|@Autowired\|provide\|container" src -l 2>/dev/null 
 ```
 
 ### 2d. Artefactos existentes
+
+Desde `<raíz-arq>` (sustituir por su ruta si no es el directorio actual):
+
 ```bash
 ls docs/adr/*.md docs/standards/*.md 2>/dev/null || echo "No hay ADRs ni estándares"
 ```
@@ -155,6 +159,7 @@ Por cada candidato aprobado por el usuario:
    - **Si fija un requisito:** el enunciado de la regla en lenguaje RFC 2119 y **el estándar de dominio** al que pertenece (para que `arch-manage` cree o amplíe ese estándar)
    - Las alternativas implícitas detectadas (si las hay)
    - Los **Decisores**, acordados una sola vez para todo el lote, de modo que `arch-manage` no vuelva a preguntar lo mismo por cada artefacto
+   - La **raíz de arquitectura (`<raíz-arq>`)** resuelta en la Fase 1, para que `arch-manage` escriba ahí y **no vuelva a preguntarla** por cada artefacto del lote
 
 2. Dejar que `arch-manage` ejecute su flujo completo: crea el ADR y, cuando corresponda, añade el requisito al estándar de dominio (creándolo o ampliándolo), **propone los criterios de cumplimiento candidatos con su mecanismo de verificación para que el usuario elija cuáles crear**, escribe los seleccionados como `CR-XXX` con su `Enfoque` (bloqueante/warning), enlaza `emits` (a nivel de CR) / `source_adrs` y crea las fitness functions elegidas. En lote, esa propuesta y selección se presenta **una sola vez para todos los candidatos aprobados** (una tabla con columna `Estándar`), no una por artefacto.
 
@@ -177,6 +182,7 @@ como subagente (p. ej. `arch-init`) debe dejarlo correr hasta aquí — no hay u
 - **No repetir trabajo.** Si ya existe un ADR o un requisito de estándar que cubre el hallazgo, omitir el candidato y mencionarlo en un pie de página: "X hallazgos omitidos por estar ya documentados."
 - **Distinguir decisión de regla, y agrupar por dominio.** No todo ADR fija un requisito; proponer requisito solo cuando hay una norma continua y verificable. Consolidar los requisitos del mismo dominio en un solo estándar (no un estándar por regla).
 - **Priorizar calidad sobre cantidad.** Mejor 4 candidatos sólidos que 12 rellenos.
+- **Una raíz por corrida.** El descubrimiento cubre **una** raíz de arquitectura: no mezclar hallazgos del repo principal y de un submódulo en el mismo lote, ni escribir sus artefactos en la raíz equivocada. Para cubrir otra raíz, otra corrida.
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: quality-check
 description: >-
-  Ejecutar sobre todo el repositorio las verificaciones automatizadas que exige el stack —tipado, linter, pruebas unitarias, cobertura, compilación, e2e, análisis estático (Sonar) y las suites de prueba que declare el estándar de testing del repo— y emitir un veredicto (aprobado/rechazado/incompleto) con informe por check, detalle de fallos y próximas acciones. Produce la caché de corrida test-run.json que consume trace-validate. No exige artefactos de este plugin: corre sobre cualquier repositorio y delega las correcciones en work-implement. Activar cuando el usuario pida correr las pruebas o las verificaciones: "ejecuta los checks", "corre los tests", "quality check", "pasa el linter y el build", "valida antes del PR/merge", "¿está verde el repo?", o cuando lo invoque otro skill (work-integrate, pr-create, trace-validate). Proceso de cierre, no proactivo durante el desarrollo. Por defecto pide confirmación antes de corregir un fallo; `.sdd-devkit/settings.json` (`qualityGates.qualityCheckConfirmFix: "never"`) permite corregir directo sin preguntar. La revisión cualitativa de diseño y arquitectura es de code-review.
+  Ejecutar sobre todo el repositorio las verificaciones automatizadas que exige el stack —tipado, linter, pruebas unitarias, cobertura, compilación, e2e, análisis estático (Sonar) y las suites de prueba que declare el estándar de testing del repo— y emitir un veredicto (aprobado/rechazado/incompleto) con informe por check, detalle de fallos y próximas acciones. Produce la caché de corrida test-run.json que consume trace-validate. No exige artefactos de este plugin: corre sobre cualquier repositorio y delega las correcciones en work-implement. Activar cuando el usuario pida correr las pruebas o las verificaciones: "ejecuta los checks", "corre los tests", "quality check", "pasa el linter y el build", "valida antes del PR/merge", "¿está verde el repo?", o cuando lo invoque otro skill (work-integrate, pr-create, trace-validate). Proceso de cierre, no proactivo durante el desarrollo. Por defecto pide confirmación antes de corregir un fallo; `.sdd-devkit/settings.json` (`verification.qualityCheck.confirmFix: "never"`) permite corregir directo sin preguntar. La revisión cualitativa de diseño y arquitectura es de code-review.
 license: MIT
 ---
 
@@ -11,7 +11,7 @@ Ejecuta la **batería de checks automatizados** que el stack exige (tipado, lint
 
 > **Alcance: solo el plano automatizado.** Este skill responde a «¿el código corre y cumple las reglas?». La pregunta «¿resuelve el problema correcto y está bien diseñado?» es del skill **[`code-review`](../code-review/SKILL.md)** (revisión cualitativa). Y «¿cada criterio de aceptación está probado?» es de **`trace-validate`**. Son **tres skills independientes**, cada uno con su veredicto e informe; quien los encadena es el orquestador de cierre (`work-integrate`, `pr-create`). Ver [Relación con otros skills](#relación-con-otros-skills).
 >
-> **Audita, no arregla (por defecto).** Aplica correcciones **solo si el usuario lo autoriza explícitamente** —o si `.sdd-devkit/settings.json` tiene `qualityGates.qualityCheckConfirmFix: "never"` (ver [Política de corrección](#política-de-corrección))— y, tras corregir, **vuelve a ejecutar**. Fuera de un ciclo de implementación, **entregar solo el informe es un resultado válido y frecuente** con la política por defecto (`always`): se pregunta antes de tocar código (ver [Corrección de fallos](#corrección-de-fallos)). No edita configuración, no instala dependencias ni hace commit/push/merge sin instrucción explícita. (**Única excepción:** dejar su propia caché ignorada en el `.gitignore` —añadiendo esa línea, y creando el archivo si no existiera—, ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate).)
+> **Audita, no arregla (por defecto).** Aplica correcciones **solo si el usuario lo autoriza explícitamente** —o si `.sdd-devkit/settings.json` tiene `verification.qualityCheck.confirmFix: "never"` (ver [Política de corrección](#política-de-corrección))— y, tras corregir, **vuelve a ejecutar**. Fuera de un ciclo de implementación, **entregar solo el informe es un resultado válido y frecuente** con la política por defecto (`always`): se pregunta antes de tocar código (ver [Corrección de fallos](#corrección-de-fallos)). No edita configuración, no instala dependencias ni hace commit/push/merge sin instrucción explícita. (**Única excepción:** dejar su propia caché ignorada en el `.gitignore` —añadiendo esa línea, y creando el archivo si no existiera—, ver [Caché de corrida de pruebas](#caché-de-corrida-de-pruebas-compartida-con-trace-validate).)
 >
 > **Proceso iterativo:** toda corrección reinicia la corrida completa hasta un veredicto estable.
 >
@@ -50,7 +50,7 @@ Reglas transversales del catálogo; viven en la raíz del plugin, no en este ski
 - [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
 - [`../../reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
 - [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
-- [`../../reference/quality-gates.md`](../../reference/quality-gates.md): **Política de corrección** — si se pregunta antes de corregir un fallo o se corrige directo. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/verification.md`](../../reference/verification.md): **Política de corrección** — si se pregunta antes de corregir un fallo o se corrige directo. *Lectura obligatoria antes de ejecutar el skill.*
 
 ---
 
@@ -66,11 +66,11 @@ Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar
 
 ## Política de corrección
 
-Antes de ejecutar este skill, DEBES leer [`../../reference/quality-gates.md`](../../reference/quality-gates.md).
+Antes de ejecutar este skill, DEBES leer [`../../reference/verification.md`](../../reference/verification.md).
 
-Las reglas de `quality-gates.md` son obligatorias y determinan, vía `qualityGates.qualityCheckConfirmFix`, si se pide confirmación antes de corregir un fallo (`always`, comportamiento por defecto) o si se corrige directamente sin preguntar (`never`). Ver [Corrección de fallos](#corrección-de-fallos).
+Las reglas de `verification.md` son obligatorias y determinan, vía `verification.qualityCheck.confirmFix`, si se pide confirmación antes de corregir un fallo (`always`, comportamiento por defecto) o si se corrige directamente sin preguntar (`never`). Ver [Corrección de fallos](#corrección-de-fallos).
 
-No continúes hasta haber leído y aplicado `quality-gates.md`.
+No continúes hasta haber leído y aplicado `verification.md`.
 
 ---
 
@@ -210,11 +210,11 @@ Las **claves** de los modificadores son siempre en inglés (estándar). Si el us
 
 ## Flujo de ejecución (resumen)
 
-**Ninguna corrección se aplica sin autorización** —explícita del usuario, o de antemano vía `qualityGates.qualityCheckConfirmFix: "never"` (ver [Política de corrección](#política-de-corrección))—; tras corregir, verifica el arreglo y reinicia. El detalle paso a paso, el formato del informe, el manejo de errores y los anti-patterns están en **[`references/execution.md`](references/execution.md)** — léelo al iniciar la ejecución.
+**Ninguna corrección se aplica sin autorización** —explícita del usuario, o de antemano vía `verification.qualityCheck.confirmFix: "never"` (ver [Política de corrección](#política-de-corrección))—; tras corregir, verifica el arreglo y reinicia. El detalle paso a paso, el formato del informe, el manejo de errores y los anti-patterns están en **[`references/execution.md`](references/execution.md)** — léelo al iniciar la ejecución.
 
 1. **Detectar entorno:** identificar stack, cargar `references/stacks.md`, **leer el estándar de testing** para resolver las suites configuradas, resolver comandos, capturar metadata y calcular el fingerprint.
 2. **Ejecutar los checks** secuencialmente según el catálogo.
-3. **Evaluar el resultado y el veredicto** con la tabla de [Veredicto](#veredicto). Si hay FAIL, mostrar el reporte y resolver si se corrige según `qualityGates.qualityCheckConfirmFix` (ver [Política de corrección](#política-de-corrección)): con `always`, **preguntar** qué hacer — dentro de una implementación la pregunta es si se corrige, **fuera de una implementación** ofrecer además la salida **«solo el informe»**; con `never`, corregir directo sin preguntar. Si corresponde corregir y la rama tiene un artefacto identificable (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin), la corrección se **delega en `work-implement`**; solo si no hay artefacto de ningún tipo se aplica aquí — ver [Corrección de fallos](#corrección-de-fallos).
+3. **Evaluar el resultado y el veredicto** con la tabla de [Veredicto](#veredicto). Si hay FAIL, mostrar el reporte y resolver si se corrige según `verification.qualityCheck.confirmFix` (ver [Política de corrección](#política-de-corrección)): con `always`, **preguntar** qué hacer — dentro de una implementación la pregunta es si se corrige, **fuera de una implementación** ofrecer además la salida **«solo el informe»**; con `never`, corregir directo sin preguntar. Si corresponde corregir y la rama tiene un artefacto identificable (`US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin), la corrección se **delega en `work-implement`**; solo si no hay artefacto de ningún tipo se aplica aquí — ver [Corrección de fallos](#corrección-de-fallos).
 4. **Construir informe:** rellenar [`assets/quality-check-template.md`](assets/quality-check-template.md).
 5. **Registro y salida:** escribir siempre el informe en `docs/audits/quality-check.md` y —**solo si la corrida ejecutó el conjunto de pruebas completo** (las tres fijas más todas las suites configuradas)— la caché en `.sdd-devkit/test-run.json` (creando los directorios si no existen), más un resumen en el chat. **Excepción `tests-only`:** no hay informe ni veredicto; el único artefacto es `test-run.json`. **No** hacer commit/push/merge sin instrucción explícita.
 
@@ -228,7 +228,7 @@ Todo hallazgo que implique **modificar código** —un check en FAIL o una prueb
 
 ### 1. ¿Se corrige o se entrega solo el informe?
 
-Se resuelve primero por `qualityGates.qualityCheckConfirmFix` (ver [Política de corrección](#política-de-corrección)):
+Se resuelve primero por `verification.qualityCheck.confirmFix` (ver [Política de corrección](#política-de-corrección)):
 
 - **`never`** → corregir directo, sin preguntar, en cuanto haya un check en FAIL o una prueba en rojo. Saltar el resto de este punto y seguir con el punto 2.
 - **`always`** (o sin `settings.json`, comportamiento por defecto) → depende del **contexto de ejecución**:
@@ -266,7 +266,7 @@ Solo si el usuario autorizó corregir. Depende de si hay un **artefacto de traba
 | `test/US-042-…` \| `test/WI-018-…` | los `TC-XXX` de ese padre | la carpeta de la US o el WI |
 | Otro prefijo o convención (`PROJ-1234`, `ticket/…`, ruta a un spec) | el artefacto externo | la que indique el usuario, o ninguna |
 
-> **Buscar también en `docs/specs/archive/`.** Al cerrar un trabajo, `work-integrate` y `pr-create` pueden mover su carpeta a `docs/specs/archive/user-stories/` o `docs/specs/archive/work-items/`. Si no está en la ruta activa, mirar ahí antes de concluir que «no hay artefacto» y dejar de delegar en `work-implement` — y **nunca** crear la carpeta en la ruta activa por no haberla encontrado. Este skill **solo lee** la carpeta (para resolver el artefacto y decidir si delega); no escribe nada dentro. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+> **Buscar también en `docs/archive/`.** Al cerrar un trabajo, `work-integrate` y `pr-create` pueden mover su carpeta a `docs/archive/user-stories/` o `docs/archive/work-items/`. Si no está en la ruta activa, mirar ahí antes de concluir que «no hay artefacto» y dejar de delegar en `work-implement` — y **nunca** crear la carpeta en la ruta activa por no haberla encontrado. Este skill **solo lee** la carpeta (para resolver el artefacto y decidir si delega); no escribe nada dentro. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 >
 > **Cuándo se da.** En el flujo normal el archivado ocurre **después** de esta puerta (`work-integrate` paso 10, `pr-create` Paso 5), así que aquí el artefacto suele estar todavía en la ruta activa. Se lo encuentra archivado al **repetir** el cierre tras una corrección, o al correr `quality-check` sobre trabajo ya integrado — dos situaciones normales, no excepcionales.
 >
@@ -274,7 +274,7 @@ Solo si el usuario autorizó corregir. Depende de si hay un **artefacto de traba
 
 Si no se resuelve un artefacto del plugin, **comprobar antes si hay uno externo** (ver [Artefactos externos al plugin](#artefactos-externos-al-plugin)); solo si tampoco lo hay, **no hay artefacto**: no delegar ni inventarlo. Si hay ambigüedad (varios candidatos), preguntar al usuario antes de delegar. Esta es también la señal que distingue los dos contextos del punto 1.
 
-**Qué se le pasa a `work-implement`** al delegar: el artefacto en curso (`US-XXX` / `WI-XXX` / `FT-XXX` / `TC-XXX`), el check que falló, el comando exacto, la salida de error relevante y los archivos implicados. La corrección se atribuye a ese artefacto y se anota en su `progress.md` como nota de retrabajo — **salvo que el artefacto esté archivado**, en cuyo caso la nota va en este informe y no se escribe dentro de `docs/specs/archive/` (ver la regla de artefacto archivado en [`work-implement`](../work-implement/SKILL.md#seleccion-del-tipo-de-implementacion)); `work-implement` aplica su propio criterio en su [Modo corrección](../work-implement/SKILL.md#modo-correccion-delegado-desde-quality-check) — un modo acotado, sin ritmo por unidad y sin exigir `Estado: Ready` ni working tree limpio.
+**Qué se le pasa a `work-implement`** al delegar: el artefacto en curso (`US-XXX` / `WI-XXX` / `FT-XXX` / `TC-XXX`), el check que falló, el comando exacto, la salida de error relevante y los archivos implicados. La corrección se atribuye a ese artefacto y se anota en su `progress.md` como nota de retrabajo — **salvo que el artefacto esté archivado**, en cuyo caso la nota va en este informe y no se escribe dentro de `docs/archive/` (ver la regla de artefacto archivado en [`work-implement`](../work-implement/SKILL.md#seleccion-del-tipo-de-implementacion)); `work-implement` aplica su propio criterio en su [Modo corrección](../work-implement/SKILL.md#modo-correccion-delegado-desde-quality-check) — un modo acotado, sin ritmo por unidad y sin exigir `Estado: Ready` ni working tree limpio.
 
 **Aplica igual a fallos de pruebas** (las tres fijas y cualquier suite configurada) que a fallos de tipado, linter o build: en ambos casos hay que escribir o ajustar código, que es justo lo que hace `work-implement`.
 
@@ -284,7 +284,7 @@ Si no se resuelve un artefacto del plugin, **comprobar antes si hay uno externo*
 
 **Si `work-implement` devuelve «corrección no aplicada»**, la iteración **se detiene ahí**. Ese resultado significa que el arreglo excedía su alcance acotado, que hay una discrepancia de especificación, o que el fallo es preexistente — y viene con el motivo y el skill al que se escaló (`work-plan` / `test-define`). En ese caso: **no reintentar la delegación sobre ese mismo fallo** ni corregirlo aquí como sustituto. Construir el informe (Paso 4) recogiendo el motivo y el escalado en **Próximas acciones**, emitir **`REJECTED`** y terminar. El cierre queda bloqueado hasta que el escalado se resuelva — que es el resultado correcto, no un flujo incompleto.
 
-> **Límites.** La delegación **no** convierte a este skill en implementador: no decide el diseño de la corrección ni escribe código por su cuenta cuando delega. Y **nunca** delega sin la autorización resuelta en el punto 1 (explícita del usuario, o `qualityGates.qualityCheckConfirmFix: "never"`) — la delegación es *cómo* se corrige, no *si* se corrige.
+> **Límites.** La delegación **no** convierte a este skill en implementador: no decide el diseño de la corrección ni escribe código por su cuenta cuando delega. Y **nunca** delega sin la autorización resuelta en el punto 1 (explícita del usuario, o `verification.qualityCheck.confirmFix: "never"`) — la delegación es *cómo* se corrige, no *si* se corrige.
 
 ### Artefactos externos al plugin
 

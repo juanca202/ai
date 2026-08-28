@@ -45,7 +45,7 @@ Antes de trabajar, evitar regenerar si nada cambió (ver [Reutilización del rep
    - **FT:** `docs/specs/features/FT-XXX-[slug]/README.md` (registro de funcionalidad ya implementada —inferida de código legacy o documentada como existente—; su cobertura responde si esa funcionalidad ya existente tiene pruebas).
    - **Cualquier otro artefacto:** la ruta que indique el usuario (buscarla en el repo si solo da un nombre). Si hay varios candidatos o la ruta no es clara, **preguntar**; no adivinar.
 
-   > **Si no está en la ruta activa, buscar en `docs/specs/archive/`** (`archive/user-stories/`, `archive/work-items/`) antes de darlo por inexistente: el trabajo pudo cerrarse e integrarse ya. Un artefacto archivado se traza igual —solo se lee— y el `trace-report.md` del Paso 7 se escribe **junto a él**, en su ruta de archive, no en la activa. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+   > **Si no está en la ruta activa, buscar en `docs/archive/`** (`archive/user-stories/`, `archive/work-items/`) antes de darlo por inexistente: el trabajo pudo cerrarse e integrarse ya. Un artefacto archivado se traza igual —solo se lee— y el `trace-report.md` del Paso 7 se escribe **junto a él**, en su ruta de archive, no en la activa. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
 2. Leer el documento y extraer **todos los criterios de aceptación** con su texto y su **identificador verbatim** — el formato es el que use el artefacto (`AC-012`, `AC-1`, `1.3`, `R-3`, `CA-07`…). **Nunca normalizarlo**: el identificador debe poder buscarse literalmente en el artefacto y en los TCs. Si algún criterio no tiene identificador, bloquear (ver «Cuándo bloquear» en `SKILL.md`).
 3. Si no existe la sección de criterios o no hay criterios explícitos, **parar** y reportar (ver «Cuándo bloquear» en `SKILL.md`). No continuar con supuestos.
@@ -193,8 +193,8 @@ Aplicar la tabla de «Veredicto» (en `SKILL.md`) sobre el conjunto de criterios
 ### Paso 7 — Entregar y guardar el reporte
 
 1. Guardar el reporte **dentro de la carpeta del artefacto tal como se resolvió en el Paso 1** —activa o archivada— (sobrescribir si ya existe, salvo que el usuario pida conservar histórico):
-   - **US:** `docs/specs/user-stories/US-XXX-[nombre-corto]/trace-report.md`, o `docs/specs/archive/user-stories/US-XXX-[nombre-corto]/trace-report.md` si la US está archivada.
-   - **WI:** `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` (dentro de la carpeta del WI), o su equivalente bajo `docs/specs/archive/work-items/`.
+   - **US:** `docs/specs/user-stories/US-XXX-[nombre-corto]/trace-report.md`, o `docs/archive/user-stories/US-XXX-[nombre-corto]/trace-report.md` si la US está archivada.
+   - **WI:** `docs/specs/work-items/WI-XXX-[kebab]/trace-report.md` (dentro de la carpeta del WI), o su equivalente bajo `docs/archive/work-items/`.
    - **FT:** `docs/specs/features/FT-XXX-[slug]/trace-report.md` (dentro de la carpeta del feature; los features no se archivan).
    - **Cualquier otro artefacto:** `trace-report.md` **junto al artefacto** (en su carpeta, o al lado del archivo si es suelto). Confirmar la ruta con el usuario antes de escribir; si el artefacto es de solo lectura o externo al repo, no escribir y entregar el reporte en el chat.
 

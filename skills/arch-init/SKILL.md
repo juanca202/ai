@@ -66,6 +66,15 @@ No continúes hasta haber leído y aplicado `language.md`.
 
 Cualquiera de estos seis que **ya exista** en el proyecto se lleva al formato de su plantilla en el Paso 3 (ver [3.1 Migración de formato](#31-migración-de-formato)) — el harness no admite variantes de formato, porque el resto del catálogo lee estas secciones por su título.
 
+> **Raíz de los índices de arquitectura.** Los cuatro primeros archivos son del **harness** y viven siempre
+> en la raíz del repositorio principal. Los dos índices (`docs/adr/README.md`, `docs/standards/README.md`)
+> son artefactos de **arquitectura**: pertenecen a la raíz del repositorio cuyo código documentan (ver
+> [`../../reference/artifacts.md`](../../reference/artifacts.md#raíz-de-arquitectura-adr-estándares-y-fitness-functions)).
+> La raíz principal **siempre** los recibe (`AGENTS.md` los referencia). **Si el proyecto tiene submódulos
+> o repositorios anidados**, preguntar en el Paso 3 para cuáles de ellos crear **además** los suyos — cada
+> raíz lleva su propia serie `ADR-XXX`. No crearlos en un submódulo sin preguntar, ni asumir que un
+> submódulo comparte los del padre.
+
 ---
 
 ## Paso 1 — Identificar el punto de partida
@@ -136,9 +145,16 @@ Antes de escribir cualquier archivo, verificar si ya existe y aplicar [Idempoten
 3. **`.agents/MEMORY.md`** — copiar `assets/memory-template.md` tal cual.
 4. **`docs/adr/README.md`** — copiar `assets/adr-index-template.md` tal cual.
 5. **`docs/standards/README.md`** — copiar `assets/standards-index-template.md` tal cual.
+   Los puntos 4 y 5 se escriben en la **raíz de arquitectura**. La raíz principal **siempre** los recibe
+   —`AGENTS.md` los referencia y sin ellos el puntero queda roto—; en un repo sin submódulos ahí acaba la
+   historia y no hay nada que preguntar. **Si hay submódulos o repositorios anidados**, preguntar —una sola
+   vez, con la herramienta de preguntas estructuradas— **para cuáles de ellos** crear además sus propios
+   índices. Cada raíz elegida recibe su propio par `docs/adr/README.md` + `docs/standards/README.md`, con su
+   serie `ADR-XXX` independiente. Este bootstrap es la **única** excepción a la regla de «una raíz por
+   invocación» del catálogo.
 6. **`.sdd-devkit/settings.json`** — copiar `assets/settings-template.json`, reemplazando `<código>` en `language` por el idioma resuelto en [Resolución de idioma](#resolución-de-idioma) (ISO 639-1). El resto de claves son la **configuración mínima obligatoria** del schema y se escriben con los valores de la plantilla; no preguntarlas aquí ni ofrecer configurarlas — el usuario las ajusta editando el archivo.
 
-> **Este archivo es JSON validado por schema, no markdown.** Debe cumplir [`schemas/settings.schema.json`](../../schemas/settings.schema.json): las seis claves de primer nivel (`language`, `implementation`, `git`, `projectManagement`, `telemetry`, `specTracking`) son **obligatorias**, el schema **no admite propiedades adicionales** (no agregar `$schema` ni claves propias) y `language` solo acepta los códigos de su `enum`. Cuando `projectManagement`, `telemetry` o `specTracking` quedan en `"enabled": false`, el schema **no exige** el resto de sus claves: dejarlas fuera.
+> **Este archivo es JSON validado por schema, no markdown.** Debe cumplir [`schemas/settings.schema.json`](../../schemas/settings.schema.json): las **6** claves de primer nivel (`language`, `specification`, `implementation`, `verification`, `git`, `projectManagement`) son **obligatorias** — la lista viva es la de `required` en el schema, no esta enumeración. `$schema` es opcional (ruta al schema para el editor; ningún skill la resuelve). Fuera de esa, el schema **no admite propiedades adicionales** y `language` solo acepta los códigos de su `enum`. Cuando `projectManagement` queda en `"enabled": false`, el schema **no exige** el resto de sus claves: dejarlas fuera. `specification` es distinto: `basePath`, `archivePath` y `testCases` son obligatorios siempre; solo `trackingUrl` se omite cuando `trackingEnabled` es `false`.
 
 ### Idempotencia / reejecución
 
@@ -179,7 +195,13 @@ Si los seis archivos existen y **todos** están conformes (o ya quedaron migrado
 
 Leer `references/adr-candidates.md` completo antes de este paso.
 
-- **Con implementación** (Paso 1.2) → delegar en un **subagente** que ejecute el skill **`arch-discover`** **completo** sobre el repo — sus cinco fases, incluida la Fase 5, en la que `arch-discover` mismo crea los artefactos aprobados invocando `/arch-manage` por su cuenta. `arch-discover` presenta sus candidatos al usuario, los agrupa por dominio funcional y los delega en `arch-manage` sin intervención de `arch-init` — **no** repetir esa presentación aquí, ni volver a delegarlos en `arch-manage` en el Paso 5.1: `arch-discover` ya es dueño de esa lista de principio a fin. Lo único que se retiene de esta ejecución es un resumen (cuántos ADR/estándares creó, con sus rutas) para reportarlo en el cierre (Paso 5.3) — **no** se agrega nada de esto a la lista consolidada del Paso 4.1/5.1.
+> **Pasar la raíz de arquitectura a los subagentes.** El bootstrap del Paso 3 pudo crear índices en varias
+> raíces, pero el descubrimiento y la creación de artefactos operan sobre **una**. Indicar explícitamente en
+> la instrucción del subagente qué `<raíz-arq>` cubre —por defecto la principal; si el usuario eligió
+> submódulos en el Paso 3, preguntar cuál se documenta ahora— para que `arch-discover`/`arch-manage` **no
+> la vuelvan a preguntar** ni acaben escribiendo en otra raíz. Cubrir otra raíz es otra corrida.
+
+- **Con implementación** (Paso 1.2) → delegar en un **subagente** que ejecute el skill **`arch-discover`** **completo** sobre la raíz de arquitectura indicada — sus cinco fases, incluida la Fase 5, en la que `arch-discover` mismo crea los artefactos aprobados invocando `/arch-manage` por su cuenta. `arch-discover` presenta sus candidatos al usuario, los agrupa por dominio funcional y los delega en `arch-manage` sin intervención de `arch-init` — **no** repetir esa presentación aquí, ni volver a delegarlos en `arch-manage` en el Paso 5.1: `arch-discover` ya es dueño de esa lista de principio a fin. Lo único que se retiene de esta ejecución es un resumen (cuántos ADR/estándares creó, con sus rutas) para reportarlo en el cierre (Paso 5.3) — **no** se agrega nada de esto a la lista consolidada del Paso 4.1/5.1.
 - **Con código base** o **Sin código** (tras el Paso 2) → no hay nada que "descubrir" en código que todavía no existe: el candidato es la **decisión de stack** tomada en el Paso 1.3 o el Paso 2 (con sus alternativas, si vinieron de una investigación), clasificada por dominio funcional según `adr-candidates.md § 1`.
 
 La lista consolidada que llega al Paso 5.1 se arma solo con la rama "con código base"/"sin código" de arriba (cuando aplica) más lo que aporte el 4.2 — nunca con los candidatos de `arch-discover`, que ya quedaron resueltos por su propia Fase 5. No delegar nada en `arch-manage` todavía desde aquí; eso ocurre en el Paso 5.1.
@@ -200,7 +222,7 @@ Leer `references/quality-gate.md` completo antes de este paso.
 
 ### 5.1 Documentar las decisiones aceptadas
 
-Presentar la lista consolidada de candidatos agrupada por dominio funcional, con la herramienta de preguntas estructuradas en **selección múltiple** (incluir siempre `Ninguno por ahora`). Esta lista es la decisión de stack del 4.1 (**solo** si la situación fue "con código base" o "sin código" — si fue "con implementación", esos candidatos ya los gestionó `arch-discover` en su propia Fase 5 y **no** se repiten aquí) más lo añadido en el 4.2. Si la lista queda vacía (p. ej. situación "con implementación" y la compuerta de calidad ya estaba completa), saltar directo al 5.2 sin preguntar. Si el usuario acepta algo: resolver los **decisores** una sola vez para todo el lote (`adr-candidates.md § 3`) y delegar en un **subagente** que ejecute **`/arch-manage`**, agrupando los candidatos aceptados **por dominio** en la misma invocación. `arch-manage` crea los ADR y, cuando corresponda, los requisitos en el estándar de dominio, actualizando ambos índices por su cuenta. Esperar su respuesta antes de continuar.
+Presentar la lista consolidada de candidatos agrupada por dominio funcional, con la herramienta de preguntas estructuradas en **selección múltiple** (incluir siempre `Ninguno por ahora`). Esta lista es la decisión de stack del 4.1 (**solo** si la situación fue "con código base" o "sin código" — si fue "con implementación", esos candidatos ya los gestionó `arch-discover` en su propia Fase 5 y **no** se repiten aquí) más lo añadido en el 4.2. Si la lista queda vacía (p. ej. situación "con implementación" y la compuerta de calidad ya estaba completa), saltar directo al 5.2 sin preguntar. Si el usuario acepta algo: resolver los **decisores** una sola vez para todo el lote (`adr-candidates.md § 3`) y delegar en un **subagente** que ejecute **`/arch-manage`**, agrupando los candidatos aceptados **por dominio** en la misma invocación y pasándole la **raíz de arquitectura** ya resuelta (ver la nota del Paso 4.1) para que no la vuelva a preguntar. `arch-manage` crea los ADR y, cuando corresponda, los requisitos en el estándar de dominio, actualizando ambos índices por su cuenta. Esperar su respuesta antes de continuar.
 
 ### 5.2 Actualizar el stack
 
@@ -249,12 +271,14 @@ Reglas transversales del catálogo; viven en la raíz del plugin, no en este ski
 - Migrar el formato **reescribiendo** la redacción del usuario — resumir, reformular o traducir su texto en vez de solo reubicarlo y normalizar el formato.
 - Descartar contenido del archivo original porque no encaja en ninguna sección de la plantilla, en vez de conservarlo al final.
 - Migrar sin restaurar los comentarios-marcador de los índices (`docs/adr/README.md`, `docs/standards/README.md`) — sin ellos `arch-manage` no tiene punto de inserción.
+- Crear los índices de arquitectura de un submódulo sin preguntar, o dar por hecho que un submódulo comparte los del repo principal — cada raíz de arquitectura lleva los suyos y su propia serie `ADR-XXX`.
+- Sacar `AGENTS.md`, `CLAUDE.md`, `.agents/MEMORY.md` o `.sdd-devkit/settings.json` de la raíz principal para meterlos en un submódulo: el harness es uno solo, solo los índices de arquitectura son por raíz.
 - Borrar el stack que un `AGENTS.md` existente ya describía para dejar el comentario de la plantilla, o al contrario redactar el stack durante la migración en vez de en el Paso 5.2.
 - Escribir la migración sin mostrar el diff y obtener confirmación, o preguntar archivo por archivo en vez de agrupar todas las migraciones en una sola tanda.
 - Sobrescribir un `AGENTS.md`/`CLAUDE.md`/etc. existente con contenido propio del usuario sin preguntar primero.
 - **Sobrescribir un `.sdd-devkit/settings.json` que ya existía** en vez de conservar sus valores y agregar solo las claves obligatorias que falten (Paso 3).
 - Escribir en `.sdd-devkit/settings.json` claves que el schema no declara (`$schema` incluido) o el resto de claves de un bloque que quedó en `"enabled": false` — `additionalProperties: false` rechaza el archivo.
-- Preguntar al usuario por `implementation`, `git`, `projectManagement`, `telemetry` o `specTracking` en el Paso 3: solo `language` se resuelve; el resto sale de la plantilla y el usuario lo ajusta editando el archivo.
+- Preguntar al usuario por `implementation`, `verification`, `git`, `projectManagement` o `specification` en el Paso 3: solo `language` se resuelve; el resto sale de la plantilla y el usuario lo ajusta editando el archivo.
 - Ejecutar el Paso 2 (conseguir el stack) cuando el Paso 1.2 ya clasificó "con código base" o "con implementación".
 - Clasificar la situación del Paso 1.2 sin evidencia clara, en vez de preguntar ante la ambigüedad.
 - Preguntar "tipo de proyecto" como categoría cerrada o "¿tienes preferencia de stack?" como pregunta aparte, en vez de capturar la necesidad en el 2.1 y extraer de ahí tipo/preferencia/restricciones.

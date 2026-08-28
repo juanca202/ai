@@ -1,6 +1,6 @@
 ---
 name: work-plan
-description: "Planifica trabajo de distintos tipos sin generar código ni pruebas. Dos tipos de plan: (1) tareas técnicas (TK-XXX) bajo una historia de usuario existente; (2) tareas de mantenimiento (WI-XXX) sin historia asociada — bugs, refactor, deuda técnica, actualización de dependencias, tareas operativas. Activar siempre que el usuario pida planificar implementación, descomponer trabajo, definir alcance técnico, documentar especificaciones técnicas o planificar mantenimiento / deuda técnica / refactor, aunque no nombre «tarea», «TK» o «WI». Activar también — por defecto — cuando solo entregue una referencia a una historia (p. ej. «US-004», «planifica US-007», «tareas para esta historia»): proponer la descomposición en tareas agrupadas por repositorio que cubra los criterios de aceptacion (AC-XXX) y preguntar si crear los planes completos, crear stubs, ajustar u otro, o cancelar. Selecciona el tipo según haya o no historia asociada y carga su definición desde references/. Cuenta el trabajo archivado en docs/specs/archive/ al asignar IDs y detectar solapamientos; lo archivado no se edita."
+description: "Planifica trabajo de distintos tipos sin generar código ni pruebas. Dos tipos de plan: (1) tareas técnicas (TK-XXX) bajo una historia de usuario existente; (2) tareas de mantenimiento (WI-XXX) sin historia asociada — bugs, refactor, deuda técnica, actualización de dependencias, tareas operativas. Activar siempre que el usuario pida planificar implementación, descomponer trabajo, definir alcance técnico, documentar especificaciones técnicas o planificar mantenimiento / deuda técnica / refactor, aunque no nombre «tarea», «TK» o «WI». Activar también — por defecto — cuando solo entregue una referencia a una historia (p. ej. «US-004», «planifica US-007», «tareas para esta historia»): proponer la descomposición en tareas agrupadas por repositorio que cubra los criterios de aceptacion (AC-XXX) y preguntar si crear los planes completos, crear stubs, ajustar u otro, o cancelar. Selecciona el tipo según haya o no historia asociada y carga su definición desde references/. Cuenta el trabajo archivado en docs/archive/ al asignar IDs y detectar solapamientos; lo archivado no se edita."
 license: MIT
 ---
 
@@ -28,6 +28,18 @@ No sustituir una invocación de skill por "hacer el trabajo aquí". El handoff e
 ## Subagente
 
 **Si el proyecto define el subagente `docs-specialist`, ejecutar este skill bajo ese subagente**, sea cual sea el tipo de plan. Si no existe, ejecutar el flujo normalmente.
+
+---
+
+## Política de planificación
+
+Antes de ejecutar este skill, DEBES leer [`../../reference/planning.md`](../../reference/planning.md).
+
+Las reglas de `planning.md` son obligatorias y determinan, vía `specification.testCases`, si al dejar las tareas del alcance en `Ready` se pregunta si definir los casos de prueba (`ask`, comportamiento por defecto), se invoca `/test-define` automáticamente sin preguntar (`always`), o nunca se sugiere ni se invoca (`never`).
+
+No continúes hasta haber leído y aplicado `planning.md`.
+
+**Excepción deliberada:** los `TC-XXX` cuelgan del **artefacto padre** (la US, o el propio `WI`), no de una `TK`. Antes de ofrecer o invocar nada, comprobar si ese padre ya tiene `test-cases/` con al menos un `TC-XXX`: si los tiene —`work-define` pudo crearlos en su propio cierre—, **no repetir la oferta ni la invocación**, ni siquiera con `always`.
 
 ---
 
@@ -65,7 +77,7 @@ La señal que distingue los tipos es **si el trabajo tiene una historia de usuar
 Reglas de selección:
 
 - **Hay historia asociada → tarea de historia de usuario. No la hay → mantenimiento.** Leer la referencia correspondiente y seguir **únicamente** su flujo.
-- **Una US archivada sigue siendo una US.** Antes de concluir que «no hay historia asociada», buscarla también bajo `docs/specs/archive/user-stories/`: `work-integrate` y `pr-create` mueven ahí la carpeta al cerrar el trabajo. Si aparece ahí, el tipo **es** tarea de historia de usuario y su referencia dirá que hay que parar por estar archivada — degradarla a `WI-XXX` por no encontrarla en la ruta activa crearía un artefacto nuevo para trabajo que ya existe. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+- **Una US archivada sigue siendo una US.** Antes de concluir que «no hay historia asociada», buscarla también bajo `docs/archive/user-stories/`: `work-integrate` y `pr-create` mueven ahí la carpeta al cerrar el trabajo. Si aparece ahí, el tipo **es** tarea de historia de usuario y su referencia dirá que hay que parar por estar archivada — degradarla a `WI-XXX` por no encontrarla en la ruta activa crearía un artefacto nuevo para trabajo que ya existe. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 - Si no está claro **si existe o no** una historia asociada (p. ej. una referencia ambigua que podría apuntar a una US), **preguntar al usuario** antes de continuar; no asumir la existencia de una US ni inventarla.
 - Si el tipo seleccionado aún no tiene su flujo definido, la propia referencia indica cómo proceder (p. ej. confirmar con el usuario en lugar de inventar estructura).
 
@@ -113,6 +125,7 @@ Reglas transversales del catálogo; viven en la raíz del plugin, no en este ski
 - [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
 - [`../../reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
 - [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`../../reference/planning.md`](../../reference/planning.md): **Política de planificación** — si se pregunta, se invoca automáticamente o nunca se sugiere `test-define` al dejar las tareas en Ready. *Lectura obligatoria antes de ejecutar el skill.*
 - [`../../reference/project-management.md`](../../reference/project-management.md): **Gestor de proyectos** — si la integración está activa, proveedor y datos de conexión. *Lectura obligatoria antes de ejecutar el skill.*
 - [`../../reference/alm/azure-devops.md`](../../reference/alm/azure-devops.md): **Azure DevOps** — MCP, URL, límites, sincronización. *Solo si el `provider` resuelto es `azure-devops`.*
 

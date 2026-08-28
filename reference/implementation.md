@@ -17,10 +17,12 @@ if (fs.existsSync(settingsPath)) {
 
 if (impl) {
   const confirm = impl.confirmByUnit;
+  const uncommitted = impl.uncommittedChanges;
   const tree = impl.workTree;
   const treePath = impl.workTreePath;
   const max = impl.maxParallel;
   const archive = impl.archiveMode;
+  const handoff = impl.handoff;
 
   console.log('Politica de implementacion resuelta desde .sdd-devkit/settings.json:');
 
@@ -28,6 +30,14 @@ if (impl) {
     console.log('- confirmByUnit = never -> **NO pausar entre unidades**. No pedir confirmacion al terminar cada unidad: encadenar la siguiente. La confirmacion del plan de ejecucion inicial sigue siendo obligatoria.');
   } else {
     console.log('- confirmByUnit = always -> **una unidad por confirmacion**. Al terminar cada unidad, esperar confirmacion explicita del usuario antes de arrancar la siguiente.');
+  }
+
+  if (uncommitted === 'commit') {
+    console.log('- uncommittedChanges = commit -> si hay cambios sin commitear al iniciar (o reanudar) la sesion, comitearlos primero (invocando git-commit) y continuar. No preguntar.');
+  } else if (uncommitted === 'stash') {
+    console.log('- uncommittedChanges = stash -> si hay cambios sin commitear al iniciar (o reanudar) la sesion, guardarlos con git stash (mensaje que identifique el motivo) y continuar. No preguntar. Avisar al usuario que quedaron en el stash.');
+  } else {
+    console.log('- uncommittedChanges = ask -> si hay cambios sin commitear al iniciar (o reanudar) la sesion, parar e informar al usuario; resolverlo antes de continuar (comitear, descartar o guardar en stash, segun decida).');
   }
 
   if (tree === 'always') {
@@ -47,13 +57,21 @@ if (impl) {
   }
 
   console.log('- archiveMode = ' + archive + ' -> politica de archivado del artefacto al cerrarlo (la aplica el skill que archiva, no el que implementa): always = archivar sin preguntar; never = no archivar; ask = preguntar.');
+
+  if (handoff === 'always') {
+    console.log('- handoff = always -> al cerrar el alcance implementado, invocar directamente el siguiente skill del ciclo (el primero de los handoffs salientes que aplique) sin presentar el menu de opciones.');
+  } else {
+    console.log('- handoff = ask -> al cerrar el alcance implementado, presentar las opciones de cierre con la herramienta de preguntas estructuradas y esperar la eleccion del usuario, como venia siendo el comportamiento por defecto.');
+  }
 } else {
   console.log('No hay .sdd-devkit/settings.json con bloque \\'implementation\\'. Aplicar los valores por defecto del catalogo:');
   console.log('- **confirmByUnit = always**: una unidad por confirmacion; esperar confirmacion explicita entre unidades.');
+  console.log('- **uncommittedChanges = ask**: parar e informar si hay cambios sin commitear al iniciar o reanudar.');
   console.log('- **workTree = ask**: preguntar una sola vez, al inicio, si usar worktrees.');
   console.log('- **workTreePath** sin definir: worktrees en una ruta temporal fuera del arbol principal.');
   console.log('- **maxParallel = 3**: hasta 3 subagentes concurrentes.');
   console.log('- **archiveMode = ask**: preguntar antes de archivar.');
+  console.log('- **handoff = ask**: presentar las opciones de cierre y esperar la eleccion del usuario.');
   console.log('**No decidir estos valores por cuenta propia** ni ofrecer escribirlos: arch-init es quien crea el archivo.');
 }
 "
@@ -65,3 +83,8 @@ if (impl) {
 
 > **Modo delegado.** Cuando el skill se ejecuta invocado por otro skill (subagente), la politica ya
 > resuelta se le pasa en la delegacion: en ese modo no se vuelve a resolver ni se pregunta nada.
+
+> **`handoff` solo decide si se pregunta, no a dónde va.** El "siguiente skill del ciclo" sigue siendo el
+> que ya determina la regla de handoff de cada referencia (`work-integrate` para cerrar/mergear,
+> `pr-create` para un PR, u otro según el tipo de unidad). `always` salta directamente a ese destino sin
+> mostrar el menú de opciones; `ask` sigue mostrándolo, como hoy.

@@ -15,16 +15,41 @@ if (fs.existsSync(settingsPath)) {
   } catch (e) {}
 }
 
+let branch = null;
+try {
+  branch = require('child_process').execSync('git branch --show-current', {stdio: ['ignore','pipe','ignore']}).toString().trim() || null;
+} catch (e) {}
+
+const reportBranches = (list) => {
+  if (!Array.isArray(list) || list.length === 0) {
+    console.log('- integrationBranches: **sin declarar**. El repo no dice cuales son sus ramas de integracion, asi que cuando un flujo necesite una hay que **preguntarla al usuario** (no adivinar main ni develop) y pedir confirmacion antes de comitear sobre ella.');
+    return;
+  }
+  const names = list.map(b => b.name + ' (' + b.commitPolicy + ')').join(' · ');
+  console.log('- integrationBranches: ' + names);
+  const current = branch ? list.find(b => b.name === branch) : null;
+  if (!branch) {
+    console.log('  No se pudo determinar la rama actual. Resolverla antes de decidir.');
+  } else if (!current) {
+    console.log('  Rama actual **' + branch + '**: NO es rama de integracion. Un flujo que exija una debe resolverla contra la lista: si hay una sola con commitPolicy=direct, usar esa (checkout previo); si hay varias, preguntar entre ellas; nunca proponer una que no este en la lista.');
+  } else if (current.commitPolicy === 'direct') {
+    console.log('  Rama actual **' + branch + '** = direct -> **comitear aqui directamente. NO preguntar cual es la rama de integracion ni pedir confirmacion extra por ser rama protegida**: el repo ya lo declaro.');
+  } else {
+    const alts = list.filter(b => b.commitPolicy === 'direct').map(b => b.name);
+    console.log('  Rama actual **' + branch + '** = pull_request -> **NO comitear ni mergear aqui**. Solo se integra via pull request. Ofrecer al usuario exactamente dos salidas: (a) cambiar a una rama con commitPolicy=direct' + (alts.length ? ' (' + alts.join(', ') + ')' : ' (no hay ninguna declarada)') + ', o (b) terminar aqui sin tocar nada. No hay tercera opcion ni se pide confirmacion para saltarselo.');
+  }
+};
+
 if (git) {
-  const confirm = git.confirmCommit;
+  const confirm = git.commitConfirmation;
   const push = git.push;
 
   console.log('Politica de git resuelta desde .sdd-devkit/settings.json:');
 
   if (confirm === 'never') {
-    console.log('- confirmCommit = never -> NO mostrar la propuesta de commit (ni la division en varios) ni esperar confirmacion: ejecutar el/los commits inferidos directamente. Las gates de seguridad (secretos, rama protegida) siguen aplicando igual y SI bloquean.');
+    console.log('- commitConfirmation = never -> NO mostrar la propuesta de commit (ni la division en varios) ni esperar confirmacion: ejecutar el/los commits inferidos directamente. Las gates de seguridad (secretos, rama protegida) siguen aplicando igual y SI bloquean.');
   } else {
-    console.log('- confirmCommit = always -> mostrar la propuesta de commit (o la division en varios) y esperar confirmacion explicita antes de ejecutar, como venia siendo el comportamiento por defecto.');
+    console.log('- commitConfirmation = always -> mostrar la propuesta de commit (o la division en varios) y esperar confirmacion explicita antes de ejecutar, como venia siendo el comportamiento por defecto.');
   }
 
   if (push === 'always') {
@@ -34,18 +59,34 @@ if (git) {
   } else {
     console.log('- push = never -> no hacer push ni ofrecerlo. El/los commits quedan solo en local.');
   }
+
+  reportBranches(git.integrationBranches);
 } else {
   console.log('No hay .sdd-devkit/settings.json con bloque \\'git\\'. Aplicar los valores por defecto del catalogo:');
-  console.log('- **confirmCommit = always**: mostrar la propuesta y esperar confirmacion antes de cada commit (o division de commits).');
+  console.log('- **commitConfirmation = always**: mostrar la propuesta y esperar confirmacion antes de cada commit (o division de commits).');
   console.log('- **push = never**: no hacer push ni ofrecerlo.');
+  console.log('- **integrationBranches sin declarar**: preguntar al usuario cual es la rama de integracion cuando un flujo la necesite, y pedir confirmacion antes de comitear sobre ella.');
   console.log('**No decidir estos valores por cuenta propia** ni ofrecer escribirlos: arch-init es quien crea el archivo.');
 }
 "
 ```
 
+> **`integrationBranches` sustituye a la adivinanza y a la pregunta.** Es la lista declarada de ramas de
+> integración o despliegue del repositorio. Cuando existe, **ningún skill pregunta cuál es la rama de
+> integración ni propone `main`/`develop` por su cuenta**: la lista manda. Y `commitPolicy` decide qué se
+> puede hacer sobre cada una:
+>
+> | `commitPolicy` | Qué significa |
+> |----------------|---------------|
+> | `direct` | Se comitea directamente sobre ella. **No** se pide la confirmación extra de «rama protegida»: el repo ya autorizó ese uso al declararla así. |
+> | `pull_request` | **No se comitea ni se mergea en local sobre ella.** Solo entra trabajo vía pull request. Un flujo que necesite escribir ahí ofrece dos salidas —cambiar a una rama `direct`, o terminar— y ninguna de las dos es «confirmar y seguir». |
+>
+> Una rama que **no** está en la lista no es rama de integración: no recibe trato especial, y un flujo que
+> exija una la resuelve contra la lista, nunca inventándola.
+
 > **`push` no aplica en invocación delegada.** Cuando `git-commit` se ejecuta invocado por otro skill
 > (`work-integrate`, `pr-create`), el commit queda **siempre local** — el invocador decide qué sigue
-> (merge, PR, y en qué momento hace push). `confirmCommit` sí se resuelve igual que en invocación directa.
+> (merge, PR, y en qué momento hace push). `commitConfirmation` sí se resuelve igual que en invocación directa.
 
 > **Una petición explícita del usuario gana.** Si en el turno el usuario pide algo incompatible con lo
 > resuelto ("sin preguntar", "commitea directo", "no hagas push", "sube los cambios"), se respeta esa

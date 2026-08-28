@@ -14,7 +14,7 @@ Detalla **cómo** ejecutar las verificaciones automatizadas paso a paso y cómo 
 
 ## Flujo de ejecución
 
-> **Principio rector:** ejecutar, reportar y **proponer**. **Ninguna corrección se aplica sin autorización** —explícita del usuario, o de antemano vía `qualityGates.qualityCheckConfirmFix: "never"` (ver [`SKILL.md` → Política de corrección](../SKILL.md#política-de-corrección))—. Tras aplicar una corrección, primero **verifica que el arreglo funciona** re-ejecutando solo el check o la prueba que fallaba; **únicamente si ese check puntual pasa**, dispara el **reinicio** de la corrida completa para re-evaluar sobre el código ya corregido. Si el arreglo no resuelve el fallo, sigue iterando la corrección — no reinicies con algo que aún no funciona. Para ahorrar vueltas, si hay varias correcciones autorizadas, aplícalas juntas, verifícalas y reinicia **una sola vez**.
+> **Principio rector:** ejecutar, reportar y **proponer**. **Ninguna corrección se aplica sin autorización** —explícita del usuario, o de antemano vía `verification.qualityCheck.confirmFix: "never"` (ver [`SKILL.md` → Política de corrección](../SKILL.md#política-de-corrección))—. Tras aplicar una corrección, primero **verifica que el arreglo funciona** re-ejecutando solo el check o la prueba que fallaba; **únicamente si ese check puntual pasa**, dispara el **reinicio** de la corrida completa para re-evaluar sobre el código ya corregido. Si el arreglo no resuelve el fallo, sigue iterando la corrección — no reinicies con algo que aún no funciona. Para ahorrar vueltas, si hay varias correcciones autorizadas, aplícalas juntas, verifícalas y reinicia **una sola vez**.
 
 ### Paso 1 — Detectar entorno
 
@@ -64,7 +64,7 @@ En otro caso, ejecutar **secuencialmente** (no en paralelo) los checks Bloqueant
 
 ### Paso 3 — Evaluar el resultado
 
-- **Hay al menos un FAIL** (Bloqueante o Condicional-presente): **mostrar el reporte completo al usuario** y resolver si se corrige según `qualityGates.qualityCheckConfirmFix` (ver [`SKILL.md` → Política de corrección](../SKILL.md#política-de-corrección) y [Corrección de fallos](../SKILL.md#corrección-de-fallos)).
+- **Hay al menos un FAIL** (Bloqueante o Condicional-presente): **mostrar el reporte completo al usuario** y resolver si se corrige según `verification.qualityCheck.confirmFix` (ver [`SKILL.md` → Política de corrección](../SKILL.md#política-de-corrección) y [Corrección de fallos](../SKILL.md#corrección-de-fallos)).
   - **`never`** → saltar la pregunta: ir directo a «autoriza la corrección» más abajo.
   - **`always`** (o sin `settings.json`) → **preguntar qué hacer**. **No corregir sin autorización**, y **no dar por hecho que hay que corregir**. Si la corrida está **dentro de una implementación** (hay un trabajo en curso al que atribuir la rama: `US-XXX`, `WI-XXX`, `FT-XXX`/`TC-XXX` en rama `test/`, o un artefacto externo al plugin (ticket, spec suelto, doc de otra herramienta)), preguntar si se corrigen los fallos. Si está **fuera de una implementación** (rama suelta sin artefacto de ningún tipo, auditoría, revisión puntual), ofrecer explícitamente las dos salidas: **[Corregir los hallazgos]** / **[Solo el informe, detener aquí]**.
   - Si el usuario elige **solo el informe** → ir al Paso 4 con el veredicto que corresponda y **terminar**: no tocar código, no reiniciar la corrida, no volver a ofrecer la corrección. Dejar lo pendiente en Próximas acciones.
@@ -257,8 +257,8 @@ estaba sucio, `workingTreeClean: false` queda registrado como señal para el con
 - Ejecutar `tsc --noEmit` en un proyecto Java — la compilación va en **build**.
 - Marcar `INCOMPLETE` un check Condicional que simplemente **no aplica** (debe ser `N/A`).
 - Marcar `N/A` un check cuya config **sí existe** pero falló al ejecutarse (debe ser `SKIPPED` o `FAIL`).
-- **Corregir código sin autorización** — explícita del usuario, o de antemano vía `qualityGates.qualityCheckConfirmFix: "never"` — con `always` (el default) solo se ejecuta y se reporta.
-- **Dar por hecho que el usuario quiere corregir** cuando la corrida ocurre fuera de un ciclo de implementación y `qualityGates.qualityCheckConfirmFix = "always"`: ahí hay que ofrecer explícitamente la salida «solo el informe».
+- **Corregir código sin autorización** — explícita del usuario, o de antemano vía `verification.qualityCheck.confirmFix: "never"` — con `always` (el default) solo se ejecuta y se reporta.
+- **Dar por hecho que el usuario quiere corregir** cuando la corrida ocurre fuera de un ciclo de implementación y `verification.qualityCheck.confirmFix = "always"`: ahí hay que ofrecer explícitamente la salida «solo el informe».
 - Insistir con la corrección después de que el usuario haya pedido solo el informe.
 - Usar `--fix` / `--write` / `--force` **al ejecutar un check** (falsea el resultado); la corrección autorizada es un paso aparte y deliberado.
 - Modificar manifiestos para añadir scripts faltantes.

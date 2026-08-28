@@ -78,7 +78,7 @@ la respuesta) sustituye al secuencial calculado de los archivos locales:
   `TC-1847-login-credenciales-validas-happy.md`.
 - **El check de ID disponible se hace igualmente:** verificar que no exista ya
   `<PREFIJO>-<ado_id>-*.md` en la carpeta destino antes de crear el archivo. El alcance del escaneo
-  (incluido o no `docs/specs/archive/`) es el mismo que define
+  (incluido o no `docs/archive/`) es el mismo que define
   [`../artifacts.md`](../artifacts.md#identificadores-y-numeración) para ese prefijo.
 
 ## Límites de formato

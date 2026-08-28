@@ -1,0 +1,63 @@
+# Resolución de la política de definición de casos de prueba
+
+```!
+node -e "
+const fs = require('fs');
+const path = require('path');
+
+const settingsPath = path.join(process.cwd(), '.sdd-devkit', 'settings.json');
+
+let specification = null;
+if (fs.existsSync(settingsPath)) {
+  try {
+    const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+    if (settings && settings.specification) specification = settings.specification;
+  } catch (e) {}
+}
+
+if (specification) {
+  const tc = specification.testCases;
+  console.log('Politica de planificacion resuelta desde .sdd-devkit/settings.json:');
+  if (tc === 'always') {
+    console.log('- testCases = always -> al cerrar la planificacion, invocar /test-define automaticamente, SIN preguntar.');
+    console.log('  - work-define: al dejar la historia en Ready. Sigue ofreciendo /work-plan para las tareas.');
+    console.log('  - work-plan: al dejar las tareas del alcance en Ready, sobre el artefacto padre (la US, o el propio WI). Sigue ofreciendo /work-implement.');
+  } else if (tc === 'never') {
+    console.log('- testCases = never -> NO sugerir ni invocar /test-define en ningun momento de la planificacion.');
+    console.log('  - work-define: ofrecer unicamente /work-plan para las tareas.');
+    console.log('  - work-plan: ofrecer unicamente /work-implement.');
+  } else {
+    console.log('- testCases = ask -> preguntar si se definen los casos de prueba, e invocar /test-define solo si el usuario acepta.');
+    console.log('  - work-define: opcion [Definir casos de prueba] junto a [Planificar tareas], al dejar la historia en Ready.');
+    console.log('  - work-plan: opcion [Definir casos de prueba] junto a [Implementar], al dejar las tareas en Ready.');
+  }
+  console.log('');
+  console.log('EN LOS TRES VALORES, antes de ofrecer o invocar nada: comprobar si el artefacto padre ya tiene test-cases/ con al menos un TC-XXX. Si ya los tiene, NO volver a ofrecerlo ni invocarlo — puede haberlos creado work-define en su propio cierre.');
+} else {
+  console.log('No hay .sdd-devkit/settings.json con bloque \\'specification\\'. Aplicar el valor por defecto del catalogo:');
+  console.log('- **testCases = ask**: preguntar si se definen los casos de prueba al cerrar la planificacion, tanto en work-define como en work-plan.');
+  console.log('**No decidir este valor por cuenta propia** ni ofrecer escribirlo: arch-init es quien crea el archivo.');
+}
+"
+```
+
+> **Solo gobierna la oferta de `test-define`.** El resto de próximos pasos de cada skill no cambia con
+> este bloque: `work-define` sigue sugiriendo `/work-plan` para las tareas y `work-plan` sigue sugiriendo
+> `/work-implement`, igual en los tres valores.
+
+> **Dos momentos, una sola vez.** Los `TC-XXX` cuelgan del **artefacto padre** (la US, o el propio `WI`),
+> no de una `TK`. Por eso los dos skills miran la misma carpeta `test-cases/` y **el que llegue segundo no
+> repite la oferta**: si `work-define` ya los creó al dejar la US en Ready, `work-plan` no vuelve a
+> ofrecerlos ni los invoca, ni siquiera con `always`. La comprobación previa —¿existe `test-cases/` con al
+> menos un `TC-XXX`?— es obligatoria en los tres valores.
+
+> **`always` no crea los `TC-XXX` aquí.** Sigue siendo `test-define` quien los redacta y con sus propias
+> reglas; este bloque solo decide si el skill lo invoca sin preguntar o pregunta primero.
+
+> **No bloquea la implementación.** Que no haya casos de prueba no impide cerrar la planificación ni
+> pasar a `work-implement`: ese skill tiene su propia comprobación de `test-cases/` y decide ahí qué
+> hacer. Este bloque solo gobierna si la planificación los **ofrece**.
+
+> **Una petición explícita del usuario gana.** Si en el turno el usuario pide algo incompatible con lo
+> resuelto ("no definas casos de prueba todavía", "define los TCs ya"), se respeta esa petición para
+> **esa** invocación y no se modifica `settings.json`.
