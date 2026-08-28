@@ -161,7 +161,7 @@ copian—; `SKILL.md` solo la resume.
 ### Fingerprint canónico
 
 Clave de frescura compartida entre las **tres puertas del cierre**, cada una sobre su propio artefacto:
-`test-run.json` aquí, el `trace-report.md` de
+`test-run.json` aquí, el `coverage.md` de
 [`trace-validate`](../../trace-validate/SKILL.md#reutilización-del-reporte-idempotencia) y el
 `docs/audits/code-review.md` de
 [`code-review`](../../code-review/SKILL.md#reutilización-del-informe-idempotencia). (`code-review` le
@@ -169,11 +169,11 @@ añade además el commit de la rama base, porque su unidad es un diff con dos la
 es idéntico en las tres.) Hash reproducible del commit + working tree + cambios sin commitear **del
 código y de la configuración visible**, excluyendo tres cosas para que escribirlas no desplace la clave:
 **toda carpeta oculta** (empieza por `.`, en la raíz o anidada), **todo `docs/`** y los
-**`trace-report.md`** que vivan fuera de `docs/`:
+**`coverage.md`** que vivan fuera de `docs/`:
 
 ```bash
 ROOT=$( git rev-parse --show-toplevel )
-EXC=( ':(top,exclude,glob)**/.*/**' ':(top,exclude,glob)**/docs/**' ':(top,exclude,glob)**/trace-report.md' )
+EXC=( ':(top,exclude,glob)**/.*/**' ':(top,exclude,glob)**/docs/**' ':(top,exclude,glob)**/coverage.md' )
 FINGERPRINT=$( { git -C "$ROOT" ls-files -s              -- "${EXC[@]}"; \
                  git -C "$ROOT" status --porcelain -uall -- "${EXC[@]}"; \
                  git -C "$ROOT" diff                     -- "${EXC[@]}"; \
@@ -202,11 +202,11 @@ difiere, hubo cambios y es **obsoleta** (re-ejecutar).
 > | Pathspec | Qué saca de la clave |
 > |----------|----------------------|
 > | `':(top,exclude,glob)**/.*/**'` | El contenido de **cualquier carpeta oculta**, en la raíz o anidada: `.sdd-devkit/` (donde vive `test-run.json`), y de paso `.git/`, `.github/`, `.venv/`, `.cache/`, `.idea/`… El `**/` inicial cubre los dos niveles con un solo patrón. **Los archivos ocultos de la raíz (`.gitignore`, `.eslintrc.json`, `.env`) NO se excluyen**: son configuración que sí puede cambiar el resultado de un check. |
-> | `':(top,exclude,glob)**/docs/**'` | **Cualquier `docs/`, en la raíz o dentro de un módulo**: el informe vigente (`quality-check.md`, `code-review.md`), las copias con marca de tiempo de `save-report`, los informes de `arch-audit`, los `trace-report.md` que viven junto a su artefacto y el resto de documentación. El `**/` inicial es lo que cubre el caso monorepo: `:(top,exclude)docs` a secas excluiría **solo** el `docs/` de la raíz, y en una corrida lanzada desde `packages/api/` el informe se escribe en `packages/api/docs/audits/` — que seguiría dentro de la clave y la desplazaría en cada corrida. |
-> | `':(top,exclude,glob)**/trace-report.md'` | Los `trace-report.md` de artefactos que viven **fuera** de `docs/` — `trace-validate` acepta artefactos externos al plugin y escribe el reporte junto a ellos. Sin este patrón, ese caso quedaría dentro de la clave. |
+> | `':(top,exclude,glob)**/docs/**'` | **Cualquier `docs/`, en la raíz o dentro de un módulo**: el informe vigente (`quality-check.md`, `code-review.md`), las copias con marca de tiempo de `save-report`, los informes de `arch-audit`, los `coverage.md` que viven junto a su artefacto y el resto de documentación. El `**/` inicial es lo que cubre el caso monorepo: `:(top,exclude)docs` a secas excluiría **solo** el `docs/` de la raíz, y en una corrida lanzada desde `packages/api/` el informe se escribe en `packages/api/docs/audits/` — que seguiría dentro de la clave y la desplazaría en cada corrida. |
+> | `':(top,exclude,glob)**/coverage.md'` | Los `coverage.md` de artefactos que viven **fuera** de `docs/` — `trace-validate` acepta artefactos externos al plugin y escribe el reporte junto a ellos. Sin este patrón, ese caso quedaría dentro de la clave. |
 >
 > Así ningún artefacto que produce la propia tubería puede desplazar la clave de frescura: correr
-> `arch-audit` no invalida un `trace-report.md`, ni escribir un informe invalida el `test-run.json`.
+> `arch-audit` no invalida un `coverage.md`, ni escribir un informe invalida el `test-run.json`.
 >
 > **Nada de `HEAD` — y es deliberado.** La receta **no** referencia `HEAD` en ningún punto, porque `HEAD` no
 > admite pathspec: cualquier commit lo mueve, incluidos los que solo tocan rutas excluidas. Con `git rev-parse HEAD`
@@ -319,7 +319,7 @@ solo si existen** —config e2e en el repo, o la suite declarada en el estándar
   **obsoleta/ausente**: ejecutar las suites, sobrescribir `test-run.json` y devolver los nuevos resultados.
 
 **Validez.** El fingerprint canónico (ver [Fingerprint canónico](#fingerprint-canónico)) cubre código, tests y manifiestos, y excluye
-las carpetas ocultas, `docs/` y los `trace-report.md` sueltos; no detecta la edición de **contenido** de un
+las carpetas ocultas, `docs/` y los `coverage.md` sueltos; no detecta la edición de **contenido** de un
 archivo que permanezca sin trackear, ni cambios de entorno (dependencias instaladas, red, servicios) — si el
 resultado pudiera depender de eso, tratar la caché como no concluyente. Si el árbol
 estaba sucio, `workingTreeClean: false` queda registrado como señal para el consumidor.
