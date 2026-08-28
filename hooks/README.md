@@ -98,3 +98,120 @@ está definida, el hook igual hace el `POST` pero sin cabecera
   rename dentro de la misma carpeta) igual dispara el escaneo — inofensivo
   (el escaneo no encuentra ninguna entrada `D` y no postea nada), pero es
   trabajo de más.
+
+## `events/activity-events.js`
+
+Hooks `PreToolUse` (`Bash|AskUserQuestion`), `PostToolUse`
+(`Write|Edit|MultiEdit|Bash|AskUserQuestion`) y `PostToolUseFailure` (`Bash`).
+Notifica a `specification.trackingUrl` seis eventos de actividad de sesión —
+distintos de los `artifact.*` de `artifact-events.js`, que solo cubren
+creación/edición/borrado de artefactos en `docs/specs/`. Mismo interruptor:
+si `specification.trackingEnabled` es `false` o falta `trackingUrl`, el hook
+no hace nada.
+
+### Los seis eventos
+
+- **`tool.called`** (`PreToolUse`, `Bash`) / **`tool.completed`**
+  (`PostToolUse` o `PostToolUseFailure`, `Bash`) — únicamente cuando el
+  comando invoca `git` o un runner de pruebas reconocido por patrón
+  heurístico. Payload: `command` (el comando completo), `category` (`"git"`
+  o `"test"`, según qué patrón lo disparó), `cwd`, y en `tool.completed`
+  además `result` con el desenlace de la ejecución.
+- **`question.asked`** (`PreToolUse`, `AskUserQuestion`) / **`question.answered`**
+  (`PostToolUse`, `AskUserQuestion`) — la pregunta, las opciones ofrecidas y
+  la respuesta del usuario.
+- **`implementation.started`** / **`implementation.completed`** — se infieren
+  de la aparición/desaparición (o cambio de `iterationId`) de
+  `.sdd-devkit/current-iteration.json`, que `work-implement` mantiene con ese
+  propósito (ver su `SKILL.md` → *Estado de iteración para el seguimiento de
+  especificaciones*). No existe una tool nativa de "empezó/terminó una
+  unidad de trabajo", así que se comparan en cada `PostToolUse`
+  (`Write|Edit|MultiEdit|Bash`, mismos matchers que usa `artifact-events.js`)
+  contra el último `iterationId` conocido, persistido en
+  `.sdd-devkit/activity-iteration-state.json` (caché local desechable, igual
+  que `.sdd-devkit/current-iteration.json` y `.sdd-devkit/test-run.json`: no
+  se versiona).
+
+### Por qué `tool.completed` se construye desde dos hooks distintos
+
+`PostToolUse` **solo se dispara cuando la tool call tiene éxito**. Un
+comando `Bash` que termina con código de salida distinto de cero —un
+`npm test` en rojo, un `git push` rechazado, un merge con conflictos—
+dispara en su lugar `PostToolUseFailure`, con un payload diferente:
+
+| | `PostToolUse` (éxito) | `PostToolUseFailure` (falla) |
+|---|---|---|
+| Campo con el resultado | `tool_response`: `{ stdout, stderr, interrupted, isImage }` | `error`: string que empieza con `"Exit code N"` seguido de la salida combinada; más `is_interrupt` (booleano) |
+| `exitCode` en el payload | `0` — se infiere del propio hecho de que `PostToolUse` se disparó, el campo no lo trae | Se parsea de la primera línea de `error` (`/^Exit code (-?\d+)/`); `null` si no matchea (p. ej. Claude Code no pudo arrancar el shell) |
+
+Sin registrar también `PostToolUseFailure`, un hook que solo escuchara
+`PostToolUse` jamás emitiría `tool.completed` para un comando de prueba en
+rojo — el caso más accionable de los dos. Por eso se registran ambos
+eventos para `Bash`, con dos funciones de construcción de payload distintas
+que comparten la misma clasificación (`category`) por regex.
+
+Estos payloads (`tool_response` de `Bash`, y el de `AskUserQuestion` en
+ambos hooks) **no están confirmados por la documentación pública de Claude
+Code consultada durante la planificación del WI que introdujo este hook**
+(ver `docs/archive/work-items/WI-002-hooks-eventos-actividad/` o su
+ubicación activa). Se verificaron empíricamente antes de escribir la lógica
+final. Si una versión futura de Claude Code cambia esta forma, el hook
+degrada con gracia (ver más abajo) en vez de fallar.
+
+### Detección de comandos git y de prueba
+
+Heurísticas de mejor esfuerzo, mismo espíritu que `DELETE_COMMAND_RE` en
+`artifact-events.js`: no resuelven el stack exacto del repositorio (eso es
+tarea completa de `quality-check`), solo reconocen el patrón textual del
+comando.
+
+- **`git`**: cualquier comando que contenga la palabra `git`.
+- **`test`**: scripts `npm`/`yarn`/`pnpm` cuyo nombre de script contiene
+  `test` o `e2e` (`npm test`, `npm run test:unit`, `npm run e2e`), `mvn
+  test`/`mvn verify`, `gradle test`, `pytest`, `go test`, `cargo test`,
+  `dotnet test`, y los runners directos `jest`, `vitest`, `mocha`,
+  `playwright test`, `cypress run`. Catálogo fuente: la tabla "Resolución de
+  comandos por stack" (filas `Unit`/`E2E`) de
+  [`../skills/quality-check/references/stacks.md`](../skills/quality-check/references/stacks.md).
+
+Un comando `Bash` que no matchea ninguna de las dos categorías no genera
+`tool.called` ni `tool.completed` — es una decisión explícita para no
+generar ruido con el resto de la actividad de `Bash` (lint, build, edición
+de archivos por script, etc.).
+
+### `AskUserQuestion`: campos y degradación
+
+`tool_input.questions` trae, por cada pregunta, `question`, `header`,
+`options` (`label`/`description` por opción) y `multiSelect` — confirmado
+por la documentación pública. La respuesta del usuario en el `tool_response`
+de `PostToolUse` se lee de `answers` (objeto que mapea el texto de la
+pregunta a la etiqueta elegida) y, si está presente, `response` (respuesta
+libre cuando el usuario no elige ninguna opción ofrecida). Si ninguno de los
+dos campos aparece, `question.answered` no se emite — degradación con
+gracia (AC-006), mismo criterio de "mejor esfuerzo" que ya aplican
+`processId`/`model` en `artifact-events.js`.
+
+### Campos que son mejor esfuerzo, no garantía
+
+Mismos campos comunes que `artifact-events.js` (`sessionId`, `processId`,
+`iterationId`, `model`) — ver la sección homónima arriba. `iterationId` en
+`tool.*` y `question.*` se lee de `.sdd-devkit/current-iteration.json` en el
+momento del evento; en `implementation.*` es el `iterationId` explícito del
+archivo que apareció, cambió o desapareció, no una relectura posterior.
+
+### Limitaciones conocidas
+
+- El patrón heurístico de comandos de prueba no cubre el 100% de los
+  ecosistemas posibles ni intenta resolver el stack exacto del repositorio
+  — mismo criterio que `DELETE_COMMAND_RE`.
+- `GIT_COMMAND_RE` es léxico: un comando que solo menciona la palabra `git`
+  sin invocar el binario (p. ej. `echo "usa git para esto"`) igual se
+  clasifica como categoría `git`. Riesgo bajo en la práctica.
+- Si `current-iteration.json` se crea y se borra entre dos `PostToolUse`
+  consecutivos sin que ninguno de los dos capture el estado intermedio
+  (ventana muy estrecha, poco probable en uso normal), esa unidad no emite
+  ni `implementation.started` ni `implementation.completed`.
+- Igual que en `artifact-events.js`, si `.sdd-devkit/activity-iteration-state.json`
+  no se puede escribir (permisos, disco lleno), el hook falla en silencio y
+  el próximo `PostToolUse` simplemente reintenta la comparación contra el
+  último estado que sí pudo persistirse.
