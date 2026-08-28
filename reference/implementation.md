@@ -20,8 +20,8 @@ if (impl) {
   const uncommitted = impl.uncommittedChanges;
   const tree = impl.workTree;
   const treePath = impl.workTreePath;
-  const max = impl.maxParallel;
-  const archive = impl.archiveMode;
+  const max = impl.maxParallel === undefined ? 3 : impl.maxParallel;
+  const archive = impl.archiveMode || 'ask';
   const handoff = impl.handoff;
 
   console.log('Politica de implementacion resuelta desde .sdd-devkit/settings.json:');
@@ -61,7 +61,7 @@ if (impl) {
   if (handoff === 'always') {
     console.log('- handoff = always -> al cerrar el alcance implementado, invocar directamente el siguiente skill del ciclo (el primero de los handoffs salientes que aplique) sin presentar el menu de opciones.');
   } else {
-    console.log('- handoff = ask -> al cerrar el alcance implementado, presentar las opciones de cierre con la herramienta de preguntas estructuradas y esperar la eleccion del usuario, como venia siendo el comportamiento por defecto.');
+    console.log('- handoff = ask -> al cerrar el alcance implementado, presentar las opciones de cierre con la herramienta de preguntas estructuradas y esperar la eleccion del usuario.');
   }
 } else {
   console.log('No hay .sdd-devkit/settings.json con bloque \\'implementation\\'. Aplicar los valores por defecto del catalogo:');

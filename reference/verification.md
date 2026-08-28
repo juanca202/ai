@@ -44,9 +44,9 @@ if (verification) {
   GATES.forEach(g => describeGate(g.key, g.skill, g.appliesFix, verification[g.key]));
   console.log('');
   if (verification.handoff === 'always') {
-    console.log('- handoff = always -> tras un veredicto de cierre que deja pasar (todas las puertas activas en APPROVED/APPROVED_WITH_NOTES), continuar automaticamente hacia work-integrate sin preguntar.');
+    console.log('- handoff = always -> dentro de work-integrate, tras un veredicto de cierre que deja pasar (todas las puertas activas en APPROVED/APPROVED_WITH_NOTES), continuar con el archivado y el merge sin preguntar.');
   } else {
-    console.log('- handoff = ask -> tras un veredicto de cierre que deja pasar, preguntar si se continua hacia work-integrate antes de invocarlo.');
+    console.log('- handoff = ask -> dentro de work-integrate, tras un veredicto de cierre que deja pasar, preguntar al usuario si se continua con el archivado y el merge.');
   }
 } else {
   console.log('No hay .sdd-devkit/settings.json con bloque \\'verification\\'. Aplicar el valor por defecto del catalogo:');
@@ -80,10 +80,10 @@ if (verification) {
 > es su comportamiento normal cuando no hay corrida fresca. Omitir `quality-check` no evita, por tanto,
 > que se ejecuten pruebas si la tercera puerta sigue activa.
 
-> **`handoff` gobierna si se pregunta antes de pasar a `work-integrate`, no las puertas en sí.** Con
-> `always`, un cierre de verificación sin bloqueantes invoca `work-integrate` directamente; con `ask`
-> (por defecto), se presenta la opción y se espera la confirmación del usuario, como venía siendo el
-> comportamiento por defecto.
+> **`handoff` gobierna el tramo final de `work-integrate`, no las puertas en sí.** Lo resuelve
+> **`work-integrate`** una vez pasadas sus puertas, para decidir si sigue con el archivado y el merge: con
+> `always` continúa directo; con `ask` (por defecto), presenta la opción y espera la confirmación del
+> usuario. Las puertas (`quality-check`, `code-review`, `trace-validate`) **no** leen esta clave.
 
 > **`pr-create` no usa este bloque.** Sus puertas se rigen por su propio flujo: un PR es un artefacto
 > público y su contrato de puertas es independiente del de la integración local.
