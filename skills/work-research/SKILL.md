@@ -7,31 +7,20 @@ license: MIT
 
 # Skill: Investigación de trabajo
 
-Skill **genérico** de investigación. Recopila información, la sintetiza y la
-persiste de forma estandarizada. Corre **seis flujos** según la entrada; todos
-comparten el mismo esqueleto —capturar intención → cargar contexto → investigar →
-sintetizar → guardar— y la **misma salida estandarizada**, con una excepción
-declarada: *Analizar issue*.
+Skill **genérico** de investigación. Recopila información, la sintetiza y la persiste de forma estandarizada. Corre **seis flujos** según la entrada; todos comparten el mismo esqueleto —capturar intención → cargar contexto → investigar → sintetizar → guardar— y la **misma salida estandarizada**, con una excepción declarada: *Analizar issue*.
 
 > **Propósito:** resolver dudas y preparar el terreno antes de especificar,
 > planificar o implementar. La investigación alimenta decisiones; **no** modifica
 > artefactos existentes ni genera código. Tampoco genera el plan de
 > implementación: ese paso lo continúan `work-define` o `work-plan`.
 
-Este archivo contiene **solo lo transversal**. El procedimiento de cada flujo vive en
-su propio archivo de `references/`, que se carga **únicamente** cuando ese flujo se
-selecciona.
+Este archivo contiene **solo lo transversal**. El procedimiento de cada flujo vive en su propio archivo de `references/`, que se carga **únicamente** cuando ese flujo se selecciona.
 
 ---
 
-
-
 ## Flujos
 
-El flujo se determina por la **entrada** en el Paso 1. **No mezclar flujos** en una
-misma ejecución: si la investigación revela que hace falta otro, se cierra el actual y
-se ofrece el siguiente como *handoff*.
-
+El flujo se determina por la **entrada** en el Paso 1. **No mezclar flujos** en una misma ejecución: si la investigación revela que hace falta otro, se cierra el actual y se ofrece el siguiente como *handoff*.
 
 | #   | Flujo                              | Entrada                                                                   | Qué produce                                                                                                                                                                                       | Procedimiento                                                  |
 | --- | ---------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
@@ -42,27 +31,17 @@ se ofrece el siguiente como *handoff*.
 | 5   | **Analizar legado**                | **Código existente** sin requisitos o con cobertura de pruebas inadecuada | `discovery` de ingeniería inversa (artefactos técnicos → casos de uso → capabilities → features cohesivos → reglas de negocio) y, por cada feature, un `FT-XXX` con sus casos de prueba inferidos | `[references/legacy/flow.md](references/legacy/flow.md)`       |
 | 6   | **Analizar migración**             | Un **proyecto origen** y uno **destino**                                  | `discovery` (mapeo tecnológico, verificación, golden master, riesgos) y **preparación de validación**; dimensiona el cambio y hace *handoff* a `work-define` (grande) o `work-plan` (pequeño)     | `[references/migrate/flow.md](references/migrate/flow.md)`     |
 
+Cada flujo se identifica **por su nombre**, nunca por su número de fila: el orden de la tabla es de lectura, no un identificador.
 
-Cada flujo se identifica **por su nombre**, nunca por su número de fila: el orden de la
-tabla es de lectura, no un identificador.
-
-Los cuatro flujos de análisis se solapan en sus señales de entrada; los criterios de
-desempate están en [Desempates](#desempates), dentro del Paso 1.
+Los cuatro flujos de análisis se solapan en sus señales de entrada; los criterios de desempate están en [Desempates](#desempates), dentro del Paso 1.
 
 ---
 
-
-
 ## Salida estandarizada
 
-Toda investigación genera **una carpeta** `research/RS-XXX-{slug}/` con un
-`README.md` como **informe principal**, redactado con
-`[assets/research-template.md](assets/research-template.md)`. Puede contener
-**archivos adicionales** en la misma carpeta si el flujo los define, siempre
-referenciados desde el `README.md`.
+Toda investigación genera **una carpeta** `research/RS-XXX-{slug}/` con un `README.md` como **informe principal**, redactado con `[assets/research-template.md](assets/research-template.md)`. Puede contener **archivos adicionales** en la misma carpeta si el flujo los define, siempre referenciados desde el `README.md`.
 
 **Dónde vive la carpeta** `research/`**:**
-
 
 | Caso                                    | Ubicación                                                                                                                                           |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -79,9 +58,7 @@ referenciados desde el `README.md`.
 >
 > Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
-
 **Archivos adicionales por flujo:**
-
 
 | Flujo              | Archivos adicionales                                    | Plantillas                                                                                                                                                       |
 | ------------------ | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -89,28 +66,14 @@ referenciados desde el `README.md`.
 | Analizar legado    | `discovery.md`                                          | `[assets/legacy/discovery-template.md](assets/legacy/discovery-template.md)`                                                                                     |
 | Analizar migración | `discovery.md`, `validation.md` y carpeta `validation/` | `[assets/migrate/discovery-template.md](assets/migrate/discovery-template.md)`, `[assets/migrate/validation-template.md](assets/migrate/validation-template.md)` |
 
-
-
-
 ### Salidas fuera de `research/`
 
 - **Analizar legado** crea además, por cada feature descubierto, una carpeta
-`docs/specs/features/FT-XXX-{slug}/` con su `README.md`
-(`[assets/legacy/feature-template.md](assets/legacy/feature-template.md)`) y sus
-casos de prueba vía `test-define`, en su propio subárbol y con numeración
-independiente. Condiciones y doctrina en
-`[references/legacy/flow.md](references/legacy/flow.md)`.
+`docs/specs/features/FT-XXX-{slug}/` con su `README.md` (`[assets/legacy/feature-template.md](assets/legacy/feature-template.md)`) y sus casos de prueba vía `test-define`, en su propio subárbol y con numeración independiente. Condiciones y doctrina en `[references/legacy/flow.md](references/legacy/flow.md)`.
 - **Analizar issue** es la **única excepción a la salida estandarizada: no crea un**
-`RS-XXX`**.** Su entregable es el `WI` de tipo `bug-fix` que crea `work-plan` en
-`docs/specs/work-items/WI-XXX-{kebab-case}/README.md`. Este skill produce el
-**dossier de bug** con
-`[assets/issue/diagnosis-template.md](assets/issue/diagnosis-template.md)`, lo
-presenta y lo pasa como insumo del *handoff*. Solo si el usuario lo pide
-explícitamente se guarda además un `RS-XXX` en `docs/specs/research/`.
+`RS-XXX`**.** Su entregable es el `WI` de tipo `bug-fix` que crea `work-plan` en `docs/specs/work-items/WI-XXX-{kebab-case}/README.md`. Este skill produce el **dossier de bug** con `[assets/issue/diagnosis-template.md](assets/issue/diagnosis-template.md)`, lo presenta y lo pasa como insumo del *handoff*. Solo si el usuario lo pide explícitamente se guarda además un `RS-XXX` en `docs/specs/research/`.
 
 ---
-
-
 
 ## Resolución de la integración con el gestor de proyectos
 
@@ -120,11 +83,7 @@ Las reglas de `project-management.md` son obligatorias y tienen prioridad para d
 
 No continúes hasta haber leído y aplicado `project-management.md`.
 
-**Delta de este skill:** cuando la integración está activa, **cualquier artefacto que el usuario pase
-por su código o URL** —no solo un bug— se lee vía MCP y **enruta al flujo que corresponda a su tipo**.
-Para `work-research` la integración es de **solo lectura**: trae contexto; no crea ni modifica work
-items. Todo el detalle propio de cada proveedor (herramienta MCP, nombres de campos, tipos de work item)
-vive exclusivamente en su archivo de `references/`.
+**Delta de este skill:** cuando la integración está activa, **cualquier artefacto que el usuario pase por su código o URL** —no solo un bug— se lee vía MCP y **enruta al flujo que corresponda a su tipo**. Para `work-research` la integración es de **solo lectura**: trae contexto; no crea ni modifica work items. Todo el detalle propio de cada proveedor (herramienta MCP, nombres de campos, tipos de work item) vive exclusivamente en su archivo de `references/`.
 
 - **Desactivada** → trabajar con lo que aporte el usuario y con el repo; **no** leer ninguna
   referencia de proveedor.
@@ -134,9 +93,7 @@ vive exclusivamente en su archivo de `references/`.
   conectado, informarlo y continuar con la información que aporte el usuario — **nunca detener la
   investigación por esto**.
 
-**Enrutado por tipo de artefacto** (los nombres exactos de cada tipo los define el
-archivo de referencia del proveedor):
-
+**Enrutado por tipo de artefacto** (los nombres exactos de cada tipo los define el archivo de referencia del proveedor):
 
 | Lo que se pasa                                   | Flujo                                                       |
 | ------------------------------------------------ | ----------------------------------------------------------- |
@@ -147,15 +104,12 @@ archivo de referencia del proveedor):
 | **Test case** / caso de prueba                   | **Analizar test case**                                      |
 | Cualquier otro tipo                              | Preguntar al usuario qué espera de él antes de elegir flujo |
 
-
 > Si el artefacto existe **a la vez** en el gestor y en el repo, leer ambos: el
 > documento local es la especificación; el work item aporta estado, comentarios,
 > adjuntos y decisiones que nunca llegaron al documento. Si discrepan, señalarlo como
 > hallazgo en lugar de elegir uno por cuenta propia.
 
 ---
-
-
 
 ## Cómo preguntar al usuario
 
@@ -169,27 +123,19 @@ No preguntar lo que ya consta en el artefacto, en el work item del gestor o en l
 
 ## Modo de ejecución
 
-Si este skill es invocado **dentro de una sesión activa de** `work-implement` (el
-agente principal está ejecutando una TK o un WI), ejecutar la investigación como
-**subagente o tarea delegada**:
+Si este skill es invocado **dentro de una sesión activa de** `work-implement` (el agente principal está ejecutando una TK o un WI), ejecutar la investigación como **subagente o tarea delegada**:
 
 - Lanzar la investigación usando la herramienta de subagente/tarea del cliente.
 - El subagente ejecuta el flujo de forma autónoma **hasta el Paso 4 inclusive**, sin
 escribir nada en disco: la confirmación del usuario no se salta por estar en subagente.
 - Al terminar, **devuelve al agente principal** el contenido íntegro propuesto (los
-archivos que se escribirían, completos) junto con la ruta tentativa. El agente principal
-lo presenta al usuario tal cual y ejecuta el Paso 5 solo tras la confirmación. En
-*Analizar issue* no hay RS: devuelve el dossier completo y, si el *handoff* ya se
-confirmó, la ruta del `WI` creado.
+archivos que se escribirían, completos) junto con la ruta tentativa. El agente principal lo presenta al usuario tal cual y ejecuta el Paso 5 solo tras la confirmación. En *Analizar issue* no hay RS: devuelve el dossier completo y, si el *handoff* ya se confirmó, la ruta del `WI` creado.
 - El agente principal continúa sin interrumpir el flujo de la sesión, pero **no da por
 guardada** una investigación que el usuario no confirmó.
 
-Si no hay sesión de implementación activa, ejecutar de forma interactiva con el
-usuario (flujo normal).
+Si no hay sesión de implementación activa, ejecutar de forma interactiva con el usuario (flujo normal).
 
 ---
-
-
 
 ## Resolución de idioma
 
@@ -235,14 +181,11 @@ Evaluar la entrada **en este orden** y quedarse con la primera coincidencia:
    dos, pedirlo; no inventar rutas ni stacks.
 7. **Si nada de lo anterior aplica** → **Investigación libre**.
 
-Una vez elegido el flujo, **cargar su archivo de** `references/` y seguirlo. No leer
-las referencias de los demás flujos.
+Una vez elegido el flujo, **cargar su archivo de** `references/` y seguirlo. No leer las referencias de los demás flujos.
 
 ### Desempates
 
-Cuando una entrada dispara dos reglas, manda el **objeto de la duda**, no el orden de
-la lista:
-
+Cuando una entrada dispara dos reglas, manda el **objeto de la duda**, no el orden de la lista:
 
 | Ambigüedad                               | Criterio                                                                                                                                                                                                                                         |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -252,15 +195,12 @@ la lista:
 | **Libre vs. legado**                     | Leer código para **responder una pregunta** es *investigación libre*. Solo es *legado* si el objetivo es **producir** `FT-XXX` y sus pruebas.                                                                                                    |
 | **Cualquiera vs. decisiones pendientes** | Un artefacto en contexto no gana por sí solo: si la entrada describe un defecto, una prueba dudosa o una migración, ese artefacto es **contexto**, no el objeto de la investigación.                                                             |
 
-
 En cualquier flujo, antes de investigar:
 
 - **Clarificar lagunas de alcance.** Si la entrada tiene vacíos que impedirían una
-investigación de calidad (alcance impreciso, contexto faltante, restricciones no
-mencionadas), resolverlos con la herramienta de preguntas estructuradas.
+investigación de calidad (alcance impreciso, contexto faltante, restricciones no mencionadas), resolverlos con la herramienta de preguntas estructuradas.
 - **Formular la pregunta de investigación** en una oración concisa y confirmarla:
-opciones [Confirmar / Ajustar / Cancelar]. No investigar hasta recibir confirmación.
-Qué forma toma la pregunta según el flujo:
+opciones [Confirmar / Ajustar / Cancelar]. No investigar hasta recibir confirmación. Qué forma toma la pregunta según el flujo:
 
   | Flujo                          | La pregunta es…                                                                                                               |
   | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -271,20 +211,15 @@ Qué forma toma la pregunta según el flujo:
   | Analizar legado                | «¿Qué hace hoy *<código en alcance>* y qué features y reglas implementa?»                                                     |
   | Analizar migración             | El objetivo de la migración: qué se migra y de qué origen a qué destino                                                       |
 
-
 ---
-
-
 
 ## Paso 2 — Cargar contexto
 
-Qué leer y en qué orden lo define el archivo de referencia del flujo elegido. Reglas
-comunes a todos:
+Qué leer y en qué orden lo define el archivo de referencia del flujo elegido. Reglas comunes a todos:
 
 - **Leer antes de investigar.** Nunca investigar sobre un artefacto sin haberlo abierto.
 - **No duplicar investigaciones previas.** Revisar el `research/` correspondiente —y, si
-la base es `docs/specs/research/`, también `docs/archive/research/`—; si ya hay un
-RS sobre el mismo tema, mostrarlo al usuario y partir de él.
+la base es `docs/specs/research/`, también `docs/archive/research/`—; si ya hay un RS sobre el mismo tema, mostrarlo al usuario y partir de él.
 - **Verificar contra el repo, no contra la memoria.** Stack, versiones y estructura se
 comprueban en los manifiestos y el código.
 - **Registrar lo que no existe.** «No hay ADR sobre esto», «no hay pruebas de este
@@ -292,12 +227,9 @@ módulo» son hallazgos, no omisiones.
 
 ---
 
-
-
 ## Paso 2.5 — Inspeccionar referencias visuales (imágenes y Figma)
 
-Si el usuario proporcionó referencias (imágenes, capturas, enlaces a Figma) —en el
-mensaje o dentro del artefacto cargado— inspeccionarlas **antes** de investigar:
+Si el usuario proporcionó referencias (imágenes, capturas, enlaces a Figma) —en el mensaje o dentro del artefacto cargado— inspeccionarlas **antes** de investigar:
 
 1. **Abrir e inspeccionar cada referencia en detalle** (layouts, componentes,
   estados, anotaciones), no de forma superficial.
@@ -309,13 +241,9 @@ mensaje o dentro del artefacto cargado— inspeccionarlas **antes** de investiga
 
 ---
 
-
-
 ## Paso 3 — Investigar
 
-Ejecutar el procedimiento del archivo de referencia del flujo elegido, usando búsqueda
-web, documentación oficial, repositorios públicos e inspección directa del código
-cuando corresponda.
+Ejecutar el procedimiento del archivo de referencia del flujo elegido, usando búsqueda web, documentación oficial, repositorios públicos e inspección directa del código cuando corresponda.
 
 ### Calidad de las fuentes (todos los flujos)
 
@@ -327,8 +255,6 @@ de sintetizar como si fuera certeza.
 es una hipótesis: se marca como tal y se verifica o se descarta.
 
 ---
-
-
 
 ## Paso 4 — Sintetizar y presentar
 
@@ -380,8 +306,6 @@ es una hipótesis: se marca como tal y se verifica o se descarta.
 
 ---
 
-
-
 ## Paso 5 — Guardar el informe
 
 > **Solo se llega aquí con la confirmación explícita del Paso 4.** Este es el **primer y
@@ -426,35 +350,23 @@ es una hipótesis: se marca como tal y se verifica o se descarta.
 
 ---
 
-
-
 ## Numeración y nomenclatura
 
 > Reglas comunes de identificadores y secuenciales: [`../../reference/artifacts.md`](../../reference/artifacts.md). Lo específico de los RS:
 
 - **Secuencial** `XXX`**:** tres dígitos, por carpeta base de destino. Leer las carpetas
-`RS-XXX-*` existentes y tomar el siguiente número. Cuando la base es
-`docs/specs/research/`, el escaneo incluye `docs/archive/research/`: archivar no
-libera el número.
+`RS-XXX-*` existentes y tomar el siguiente número. Cuando la base es `docs/specs/research/`, el escaneo incluye `docs/archive/research/`: archivar no libera el número.
 - **Slug:** kebab-case, descriptivo del tema. Máximo 5 palabras.
 - **Un RS por pregunta de investigación.** Si la sesión produce varias, generar un RS
-por cada una con su propio secuencial. *Excepción:* una migración con **varios
-proyectos destino** escribe un RS en cada uno, con el **mismo** `{slug}` y un
-secuencial común (ver `[references/migrate/flow.md](references/migrate/flow.md)`) —
-sigue siendo una sola pregunta de investigación.
+por cada una con su propio secuencial. *Excepción:* una migración con **varios proyectos destino** escribe un RS en cada uno, con el **mismo** `{slug}` y un secuencial común (ver `[references/migrate/flow.md](references/migrate/flow.md)`) — sigue siendo una sola pregunta de investigación.
 - **No aplica a *Analizar issue***, que no genera un `RS` (ver
 [Salida estandarizada](#salida-estandarizada)).
 
 ---
 
-
-
 ## Handoffs
 
-Este skill **alimenta** otros skills pero no los invoca automáticamente salvo donde se
-indica. El detalle de cada *handoff* vive en el archivo de referencia de su flujo;
-aquí queda el mapa general.
-
+Este skill **alimenta** otros skills pero no los invoca automáticamente salvo donde se indica. El detalle de cada *handoff* vive en el archivo de referencia de su flujo; aquí queda el mapa general.
 
 | Flujo                                       | Handoff                                                                                                                                                                                                                                                              | Cómo pasar el contexto                                                                                                                                                                                                        |
 | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -466,20 +378,13 @@ aquí queda el mapa general.
 | **Analizar migración**                      | `work-define` (cambio grande, varias US) o `work-plan` (cambio pequeño, un WI)                                                                                                                                                                                       | El `discovery.md` y el `validation.md` son la referencia; el criterio de dimensionamiento está en `[references/migrate/flow.md](references/migrate/flow.md)`                                                                  |
 | **Analizar legado que detecta un bug real** | Este mismo skill, flujo **Analizar issue**                                                                                                                                                                                                                           | En vez de congelar el comportamiento defectuoso como `AC-XXX` del `FT`, abrir su diagnóstico                                                                                                                                  |
 
+Cuando otro skill reciba un RS como insumo, leerlo desde `research/RS-XXX-{slug}/README.md` (y sus archivos adicionales) antes de ejecutar su propio flujo.
 
-Cuando otro skill reciba un RS como insumo, leerlo desde
-`research/RS-XXX-{slug}/README.md` (y sus archivos adicionales) antes de ejecutar su
-propio flujo.
-
-Al cerrar, ofrecer al usuario el *handoff* correspondiente con la referencia al RS
-generado (en *Analizar issue*, con el dossier de bug).
+Al cerrar, ofrecer al usuario el *handoff* correspondiente con la referencia al RS generado (en *Analizar issue*, con el dossier de bug).
 
 ---
 
-
-
 ## Mapa de referencias
-
 
 | Necesitas…                                                                                                          | Archivo                                                                                                                                                          |
 | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -498,8 +403,6 @@ generado (en *Analizar issue*, con el dossier de bug).
 | Plantillas del análisis de legado (`discovery.md`, `FT-XXX`)                                                        | `[assets/legacy/discovery-template.md](assets/legacy/discovery-template.md)`, `[assets/legacy/feature-template.md](assets/legacy/feature-template.md)`           |
 | Plantillas de la migración (`discovery.md`, `validation.md`)                                                        | `[assets/migrate/discovery-template.md](assets/migrate/discovery-template.md)`, `[assets/migrate/validation-template.md](assets/migrate/validation-template.md)` |
 
-
-
 ### Referencias compartidas del plugin
 
 Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
@@ -512,12 +415,9 @@ Reglas transversales del catálogo; viven en la raíz del plugin, no en este ski
 
 ---
 
-
-
 ## Anti-patterns
 
-Transversales a todos los flujos. Los específicos de cada uno viven en su archivo de
-referencia.
+Transversales a todos los flujos. Los específicos de cada uno viven en su archivo de referencia.
 
 - Investigar sin formular y confirmar antes la pregunta de investigación.
 - **Mezclar dos flujos en una misma ejecución** en lugar de cerrar uno y ofrecer el
@@ -541,11 +441,9 @@ incluida la carpeta `RS-XXX-{slug}/` «reservada» al empezar.
 - **Preguntar «¿guardo el resultado?» cuando el archivo ya está en disco.** Si ya se
 escribió, la pregunta es falsa: la confirmación va **antes** de escribir.
 - **Sustituir el contenido íntegro del `README.md` por un resumen, extracto, paráfrasis
-o tabla de hallazgos** al presentarlo en el chat; o recortarlo con `…` / «resto omitido»
-por ser largo.
+o tabla de hallazgos** al presentarlo en el chat; o recortarlo con `…` / «resto omitido» por ser largo.
 - **Volcar en el chat los archivos complementarios** (`discovery.md`, `validation.md`,
-`analysis.md`): en el chat va el `README.md` del RS y nada más; de los demás se lista
-nombre, ruta y estado.
+`analysis.md`): en el chat va el `README.md` del RS y nada más; de los demás se lista nombre, ruta y estado.
 - Reordenar, reformular o «limpiar» el informe al mostrarlo, de modo que lo presentado
 no coincida literalmente con lo que se escribirá.
 - Escribir en disco una versión distinta de la que el usuario vio y aprobó, sin volver a

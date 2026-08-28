@@ -179,42 +179,11 @@ ls docs/audits/arch-audit-*.md 2>/dev/null
 
 ### Comportamiento en Revalidación
 
-El informe original (resumen, hallazgos, fitness functions, reglas no verificables) se
-preserva **tal cual se creó la primera vez** — una revalidación nunca reescribe,
-reordena ni elimina ese contenido. Los cambios de cada revalidación se documentan aparte.
-
-1. Leer el informe previo elegido completo, incluida su sección `## Revalidaciones` si ya existe.
-   El **estado de referencia** para comparar no es solo el informe original: es el informe original
-   **ajustado** por los cambios acumulados en todas las entradas de `## Revalidaciones` previas (p.
-   ej. un hallazgo marcado `RESOLVED` en una revalidación anterior ya no cuenta como incumplimiento
-   vigente al comparar).
-2. Repetir la recopilación y verificación contra el estado actual del repo, reutilizando las mismas
-   fases que una auditoría nueva, sin modificar nada de lo ya escrito en el documento:
-   - **Fase 1** — detectar criterios de cumplimiento (`CR-XXX`) (o estándares de dominio) o reglas de `AGENTS.md` **nuevos** desde la última verificación.
-   - **Fase 2** — reevaluar cada regla/hallazgo ya documentado contra el estado actual.
-   - **Fase 2B** — re-ejecutar las fitness functions existentes y las creadas desde la última verificación.
-   - **Fase 3.5** — reverificar las dependencias de los estándares/ADR auditados (ver esa fase); su
-     resultado se trata como un cambio evidenciado más, no se pregunta ni se escribe por separado.
-3. Identificar **solo los cambios evidenciados** en esta corrida frente al estado de referencia (paso 1):
-   - Incumplimiento ya no presente → cambio `RESOLVED` (`✅`).
-   - Sigue presente pero con evidencia nueva relevante → registrar el cambio de evidencia.
-   - Nuevo incumplimiento (`NEW_VIOLATION`, `❌`) o regresión (`REGRESSION`, `⚠️`), de una regla ya auditada o de una nueva → registrarlo.
-   - Dependencia que faltaba y ya fue instalada, sigue faltando, o aparece una nueva (Fase 3.5) → registrarlo.
-   - Si no hubo ningún cambio desde la última verificación, la entrada lo indica explícitamente
-     ("Sin cambios respecto a la última verificación.") en vez de listar hallazgos sin novedad.
-4. Calcular fecha y hora de esta ejecución:
-   ``bash
-   date "+%F %H:%M"
-   ``
-5. Calcular el **veredicto resultante** de esta revalidación, considerando el estado combinado
-   (estado de referencia del paso 1 + cambios evidenciados en los pasos 2-3).
-6. **Añadir al final del mismo archivo** (nunca crear un archivo nuevo ni sobrescribir lo anterior)
-   una **única** entrada nueva en `## Revalidaciones`, con la fecha/hora, el veredicto resultante y
-   todos los cambios evidenciados (incluida la verificación de dependencias), siguiendo la estructura
-   de `assets/audit-template.md`.
-7. Actualizar el campo `Veredicto` de la **cabecera** de ese mismo archivo: conservar el
-   veredicto vigente y agregar junto a él `(revalidado YYYY-MM-DD HH:MM)` con la fecha/hora de esta
-   revalidación. Es el único dato del contenido original que una revalidación sí actualiza.
+El informe original se preserva **tal cual se creó la primera vez** — una revalidación nunca
+reescribe, reordena ni elimina ese contenido; solo agrega una entrada nueva en `## Revalidaciones`
+con los cambios evidenciados. Procedimiento completo (estado de referencia, qué repetir de cada
+fase, cómo clasificar cada cambio, y qué campo de la cabecera se actualiza) en
+[`references/revalidation.md`](references/revalidation.md).
 
 En una **Nueva auditoría desde cero** se ignora el histórico para el análisis, se crea un archivo
 **nuevo** `arch-audit-<hoy>.md` —o `arch-audit-<hoy>-<HHMM>.md` si ya existe uno de hoy— y se parte de la Fase 1.
@@ -361,35 +330,14 @@ existe, ejecutarla para validar el cumplimiento. Las fitness functions son **por
 
 ### 0. Preferir el runner de validaciones de arquitectura
 
-Antes de ejecutar chequeos uno por uno, comprobar si el proyecto tiene un **runner** que corre
-todas las validaciones de arquitectura de una vez (lo crea `arch-manage`, escrito en el lenguaje del
-stack del repo — Node, Python, PHP…, o shell como último recurso):
-
-```bash
-ls scripts/arch/verify.* scripts/arch/checks/* 2>/dev/null
-```
-
-- **Si existe**, es la vía preferida: una sola corrida acotada valida todos los criterios con fitness
-  function. Ejecutar el runner con el runtime del stack (`node scripts/arch/verify.mjs`,
-  `python scripts/arch/verify.py`, etc., o el alias nativo del repo — `npm run arch`, target de
-  `Makefile`, etc.) aplicando las mismas cautelas del paso 2 (no correr build/suite completa; si
-  requiere instalar dependencias pesadas, preguntar antes). Cada archivo de `checks/` agrupa las
-  fitness functions de **un estándar** (`checks/<slug-estándar>.<ext>`, p. ej. `checks/testing.mjs`) e
-  imprime una línea de protocolo por criterio — `PASS|FAIL|WARN <estándar>/CR-XXX — detalle`:
-  **mapear cada línea a su criterio por esa referencia** y alimentar ese resultado al estado del
-  criterio en la Fase 2. Para auditar un solo estándar, el runner acepta su slug como argumento
-  (`node scripts/arch/verify.mjs testing`). El resumen final (criterios PASS / WARN / FAIL) y el
-  código de salida agregado resumen la salud arquitectónica ejecutable: el runner sale con código ≠ 0
-  **solo** si falla algún criterio `bloqueante`; un criterio `warning` que falla se reporta como `WARN`
-  pero **no** cambia el código de salida ni el veredicto ejecutable.
-- Un criterio con `Verificación: yes` cuyo archivo de checks (`checks/<slug-estándar>.<ext>`) **no**
-  existe, o cuya referencia `CR-XXX` no aparece en la salida de la corrida, se ejecuta individualmente
-  (pasos 1-2) y además se anota como observación: la fitness function no está registrada en el archivo
-  de checks de su estándar (sugerir corregirlo vía `arch-manage`).
-- **Si no existe** el runner, continuar con la detección y ejecución individuales (pasos 1-2) y,
-  si hay dos o más fitness functions sueltas, **sugerir crear el runner** (`scripts/arch/verify.<ext>`
-  en el lenguaje del stack) vía `arch-manage`, para que en adelante todas se ejecuten con un solo
-  comando.
+Antes de ejecutar chequeos uno por uno, comprobar si el proyecto tiene un **runner** que corre todas
+las validaciones de arquitectura de una vez (`ls scripts/arch/verify.* scripts/arch/checks/*
+2>/dev/null`; lo crea `arch-manage`). **Si existe, es la vía preferida** — procedimiento completo
+(cómo ejecutarlo, mapear su salida a cada criterio por `CR-XXX`, y el caso de un criterio con
+`Verificación: yes` que no aparece en la corrida) en
+[`references/fitness-function-heuristics.md`](references/fitness-function-heuristics.md#preferir-el-runner-de-validaciones).
+**Si no existe**, continuar con la detección y ejecución individuales (pasos 1-2) y, si hay dos o más
+fitness functions sueltas, sugerir crear el runner vía `arch-manage`.
 
 ### 1. Detectar fitness functions existentes
 
@@ -516,8 +464,9 @@ Este `SKILL.md` contiene el flujo completo de las cinco fases. El rastreo heurí
 functions y el mecanismo de verificación de dependencias viven en `references/`; el formato de cada
 hallazgo vive en `assets/`. **Leerlos solo cuando la fase correspondiente lo pida**:
 
-- [`references/fitness-function-heuristics.md`](references/fitness-function-heuristics.md) — tabla de herramientas típicas por ecosistema + comandos de rastreo genérico. Leer en la Fase 2B, paso 1, solo cuando la fila del criterio no exista o esté incompleta.
+- [`references/fitness-function-heuristics.md`](references/fitness-function-heuristics.md) — cómo preferir y ejecutar el runner de validaciones (Fase 2B, paso 0), y tabla de herramientas típicas por ecosistema + comandos de rastreo genérico (Fase 2B, paso 1, solo cuando la fila del criterio no exista o esté incompleta).
 - [`references/dependency-verification.md`](references/dependency-verification.md) — flujo completo (extraer, comprobar, preguntar, instalar o dejar constancia) para las dependencias que implican las normas auditadas. Leer en la Fase 3.5.
+- [`references/revalidation.md`](references/revalidation.md) — procedimiento completo de la Fase 0 cuando el usuario elige revalidar un informe previo en vez de auditar desde cero.
 - [`assets/audit-template.md`](assets/audit-template.md) — plantilla del informe, incluido el formato exacto de cada hallazgo. Leer en la Fase 3, al redactar.
 
 
