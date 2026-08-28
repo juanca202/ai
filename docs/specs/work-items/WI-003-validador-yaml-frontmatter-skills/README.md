@@ -75,9 +75,9 @@ sdd-devkit/
 
 ## Plan de implementación
 
-- [ ] **IT-01** — Añadir pruebas que fallen con el parser actual ante `: ` sin citar
+- [x] **IT-01** — Añadir pruebas que fallen con el parser actual ante `: ` sin citar
   Fixture mínimo (no el archivo vivo `git-commit`): `description` en una línea con `` (`git.push`: ask/always/never) ``. Esperado: `ERROR` de sintaxis. Obtenido hoy: `findings: []`. Caso de control: el mismo texto entre comillas o en bloque `>` no es ERROR de sintaxis.
-- [ ] **IT-02** — Rechazar `: ` en valores en una línea no citados y emitir `ERROR` de sintaxis
+- [x] **IT-02** — Rechazar `: ` en valores en una línea no citados y emitir `ERROR` de sintaxis
   En `parseFrontmatter` / `validateSkill`: no reutilizar el mensaje de «faltan `---`». Bloques `>`/`|` y valores `"..."` / `'...'` siguen válidos. Sin añadir dependencias.
-- [ ] **IT-03** — Citar o plegar el `description` de `skills/git-commit/SKILL.md`
+- [x] **IT-03** — Citar o plegar el `description` de `skills/git-commit/SKILL.md`
   Mismo contenido semántico. Un motor YAML real (p. ej. Psych) DEBE cargar el frontmatter sin el error de mapping. `node --test scripts/validate-skills.test.js` en verde; revirtiendo el parser, el fixture de IT-01 vuelve a fallar.

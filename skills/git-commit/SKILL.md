@@ -1,6 +1,7 @@
 ---
 name: git-commit
-description: Preparar y ejecutar git commit con mensajes Conventional Commits inferidos del diff (tipo, scope, descripción, staging). El push es opcional y lo gobierna `.sdd-devkit/settings.json` (`git.push`: ask/always/never; nunca por defecto), y solo aplica en invocación directa del usuario, no cuando lo invocan otros skills. No mergea, no toca la configuración global de git ni aplica operaciones destructivas. Activar cuando el usuario pida hacer commit, generar el mensaje, separar cambios en varios commits, o use invocaciones tipo `/commit`; también lo invocan automáticamente work-integrate y pr-create ante un working tree sucio.
+description: >
+  Preparar y ejecutar git commit con mensajes Conventional Commits inferidos del diff (tipo, scope, descripción, staging). El push es opcional y lo gobierna `.sdd-devkit/settings.json` (`git.push`: ask/always/never; nunca por defecto), y solo aplica en invocación directa del usuario, no cuando lo invocan otros skills. No mergea, no toca la configuración global de git ni aplica operaciones destructivas. Activar cuando el usuario pida hacer commit, generar el mensaje, separar cambios en varios commits, o use invocaciones tipo `/commit`; también lo invocan automáticamente work-integrate y pr-create ante un working tree sucio.
 license: MIT
 ---
 

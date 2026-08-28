@@ -62,7 +62,12 @@ function parseFrontmatter(content) {
       }
       value = blockLines.join(isFolded ? ' ' : '\n').trim();
     } else {
-      value = value.replace(/^["'](.*)["']$/, '$1');
+      const quoted = /^(["'])([\s\S]*)\1$/.exec(value);
+      if (!quoted && /:\s/.test(value)) {
+        fields.yamlSyntaxError =
+          `el frontmatter no es YAML valido: \`${key}\` contiene ': ' en un valor sin citar (linea ${i + 1})`;
+      }
+      value = quoted ? quoted[2] : value;
       i++;
     }
     fields[key] = value;
@@ -309,6 +314,16 @@ function validateSkill(skillDir, repoRoot) {
         severity: 'ERROR',
         file: 'SKILL.md',
         message: 'el frontmatter no esta bien formado (falta `---` de apertura o de cierre)',
+      }],
+    };
+  }
+  if (fields.yamlSyntaxError) {
+    return {
+      skill: dirName,
+      findings: [{
+        severity: 'ERROR',
+        file: 'SKILL.md',
+        message: fields.yamlSyntaxError,
       }],
     };
   }

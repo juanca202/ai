@@ -73,6 +73,71 @@ test('parseFrontmatter: sin delimitador de cierre devuelve null', () => {
   assert.equal(parseFrontmatter('---\nname: foo\n'), null);
 });
 
+test('parseFrontmatter: description con `: ` sin citar marca yamlSyntaxError', () => {
+  const content = [
+    '---',
+    'name: foo',
+    'description: texto (`git.push`: ask/always/never)',
+    'license: MIT',
+    '---',
+    '',
+  ].join('\n');
+  const fm = parseFrontmatter(content);
+  assert.ok(fm.yamlSyntaxError);
+  assert.match(fm.yamlSyntaxError, /YAML/i);
+  assert.doesNotMatch(fm.yamlSyntaxError, /---/);
+});
+
+test('parseFrontmatter: description citada con `: ` no es error de sintaxis', () => {
+  const content = [
+    '---',
+    'name: foo',
+    'description: "texto (`git.push`: ask/always/never)"',
+    'license: MIT',
+    '---',
+    '',
+  ].join('\n');
+  const fm = parseFrontmatter(content);
+  assert.equal(fm.yamlSyntaxError, undefined);
+  assert.equal(fm.description, 'texto (`git.push`: ask/always/never)');
+});
+
+test('parseFrontmatter: description en bloque ">" con `: ` no es error de sintaxis', () => {
+  const content = [
+    '---',
+    'name: foo',
+    'description: >',
+    '  texto (`git.push`: ask/always/never)',
+    'license: MIT',
+    '---',
+    '',
+  ].join('\n');
+  const fm = parseFrontmatter(content);
+  assert.equal(fm.yamlSyntaxError, undefined);
+  assert.match(fm.description, /git\.push/);
+});
+
+test('validateSkill: ERROR de sintaxis YAML distinto de faltar ---', () => {
+  const root = makeFixture();
+  const skillDir = path.join(root, 'skills', 'demo-skill');
+  const skillMd = [
+    '---',
+    'name: demo-skill',
+    'description: texto (`git.push`: ask/always/never)',
+    'license: MIT',
+    '---',
+    '',
+    '# Demo',
+    '',
+  ].join('\n');
+  fs.writeFileSync(path.join(skillDir, 'SKILL.md'), skillMd);
+  const result = validateSkill(skillDir, root);
+  assert.equal(result.findings.length, 1);
+  assert.equal(result.findings[0].severity, 'ERROR');
+  assert.match(result.findings[0].message, /YAML/i);
+  assert.doesNotMatch(result.findings[0].message, /---/);
+});
+
 // --- checkNaming --------------------------------------------------------
 
 test('checkNaming: ok cuando coincide con la carpeta y es kebab-case', () => {
