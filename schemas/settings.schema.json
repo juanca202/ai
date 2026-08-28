@@ -55,6 +55,10 @@
           "format": "uri",
           "description": "URL del endpoint de eventos (ej: https://events.sdd.io)."
         },
+        "artifactRoot": {
+          "type": "string",
+          "description": "Code del artefacto raíz (ej: US-001) que el CLI de tracking consulta por defecto contra trackingUrl cuando la invocación no aporta el override --requirement <code>."
+        },
         "testCases": {
           "type": "object",
           "description": "Política de definición de casos de prueba: cuándo se ofrece test-define al cerrar la planificación, y si test-define entrevista al usuario o usa valores por defecto.",
@@ -101,7 +105,8 @@
                 }
               },
               "required": [
-                "trackingUrl"
+                "trackingUrl",
+                "artifactRoot"
               ]
             }
           ]
