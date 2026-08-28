@@ -128,6 +128,17 @@ test('checkDescription: ERROR si falta', () => {
   assert.equal(findings[0].severity, 'ERROR');
 });
 
+test('parseFrontmatter: description con tildes cuenta caracteres unicode, no bytes UTF-8', () => {
+  // Regresión: skills/code-review/SKILL.md tiene una description con varias
+  // vocales acentuadas (á/é/í/ó/ú) y ñ. En UTF-8 cada una ocupa 2 bytes, así
+  // que un conteo por bytes infla el resultado (~1013) frente al conteo real
+  // de caracteres (998, verificado con `wc -m` y con una reimplementación en
+  // Python independiente del parser de este archivo).
+  const content = fs.readFileSync(path.join(__dirname, '..', 'skills', 'code-review', 'SKILL.md'), 'utf-8');
+  const fm = parseFrontmatter(content);
+  assert.equal(fm.description.length, 998);
+});
+
 // --- checkLicense ---------------------------------------------------------
 
 test('checkLicense: sin hallazgos si es MIT', () => {
