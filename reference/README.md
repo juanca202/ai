@@ -12,7 +12,8 @@ Los skills y los agentes lo referencian con una **ruta relativa al archivo que l
 
 La ruta relativa es deliberada: funciona igual al leer el repositorio en GitHub o en un editor, al
 ejecutar el skill dentro del plugin y en cualquier agente que no expanda variables propias de un
-host. **No usar `${CLAUDE_PLUGIN_ROOT}` ni ninguna otra variable** para citar estos archivos.
+host. **No usar variables de host** (las que un cliente expande a la raíz del plugin instalado) para
+citar estos archivos.
 Lo que sí exige el plugin instalado es que la carpeta `reference/` viaje junto a `skills/` y
 `agents/`: un skill copiado suelto pierde sus referencias.
 
@@ -29,7 +30,7 @@ Lo que sí exige el plugin instalado es que la carpeta `reference/` viaje junto 
 | [`verdicts.md`](verdicts.md) | Vocabulario de veredictos y estados de los informes: valor canónico, símbolo y etiqueta en el idioma resuelto; cómo los lee un consumidor | `quality-check`, `code-review`, `trace-validate`, `arch-audit`, `work-integrate`, `pr-create` |
 | [`artifacts.md`](artifacts.md) | Layout del harness (rutas de cada artefacto), **resolución de la raíz de arquitectura** (repo principal vs. submódulo), identificadores y numeración, y el contrato de archivado | Todo el ciclo de trabajo y de arquitectura |
 | [`project-management.md`](project-management.md) | Integración con el gestor de proyectos resuelta desde `.sdd-devkit/settings.json`: si está activada, con qué proveedor y con qué datos de conexión (`host`, `workspace`, `project`) | `work-plan`, `test-define`, `work-research` |
-| [`alm/azure-devops.md`](alm/azure-devops.md) | Delta del proveedor Azure DevOps: verificación del MCP, URL del work item, el ID de ADO sobre el secuencial local, límites de formato y contrato de sincronización | `work-plan`, `test-define`, `work-research` |
+| [`project-managers/azure-devops.md`](project-managers/azure-devops.md) | Delta del proveedor Azure DevOps: verificación del MCP, URL del work item, el ID de ADO sobre el secuencial local, límites de formato y contrato de sincronización | `work-plan`, `test-define`, `work-research` |
 
 ## Cómo referenciarlo desde un `SKILL.md`
 

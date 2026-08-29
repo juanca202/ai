@@ -42,6 +42,7 @@ Referencia del skill `trace-validate`. Casos de uso y errores a evitar.
 
 ## Anti-patrones
 
+- **Narrar el flujo interno**: anunciar que se resuelve el idioma o la política, que se lee `settings.json`, que se carga una referencia, o ir enumerando los pasos en voz alta. Al usuario se le comunica el resultado, las preguntas que el flujo exija y lo que quede pendiente — no la maquinaria.
 - **Regenerar el reporte cuando el existente está fresco** (coinciden los dos hashes, sin filas `NOT_RUN` y sin `revalidate`): sería idéntico y obliga a redelegar la ejecución de pruebas. Devolver el existente.
 - A la inversa: **devolver un reporte cacheado** cuyo `fingerprint` o `spec` no coincide, uno **sin** marca de pie, o uno que registra una ejecución que no se pudo hacer — ese `⚠️` describe un fallo de entorno, no del código, y congelarlo lo vuelve permanente.
 - **Comparar solo el `fingerprint` y olvidar el `spec`**: es justo la mitad que detecta que los criterios de aceptación o los `TC-XXX` cambiaron. Sin ella, una US con criterios reescritos pasaría la puerta con un ✅ que traza criterios que ya no existen.

@@ -88,3 +88,10 @@ if (impl) {
 > que ya determina la regla de handoff de cada referencia (`work-integrate` para cerrar/mergear,
 > `pr-create` para un PR, u otro según el tipo de unidad). `always` salta directamente a ese destino sin
 > mostrar el menú de opciones; `ask` sigue mostrándolo, como hoy.
+
+> **Esta resolución es interna: no se narra.** Leer y aplicar este bloque es fontanería del skill, no
+> trabajo que el usuario haya pedido. **No anunciarlo** («voy a resolver el idioma y la política», «ya leí
+> la configuración», «ahora identifico el artefacto»), ni describir los pasos del flujo mientras se
+> ejecutan. Lo que se le dice al usuario es el **resultado** —lo que se produjo, lo que debe decidir y lo
+> que queda pendiente—, más las preguntas que el propio flujo exija. Si un valor resuelto cambia lo que el
+> usuario va a ver, se menciona **al reportar**, no al resolverlo.

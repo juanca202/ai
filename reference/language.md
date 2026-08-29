@@ -29,3 +29,10 @@ if (langCode) {
 > **De dónde sale la configuración.** `.sdd-devkit/settings.json` lo crea `arch-init` al inicializar el harness, con el idioma resuelto en su clave `language`. Si el proyecto todavía no lo tiene, se aplica el procedimiento de arriba sin él.
 
 > **Modo delegado.** Cuando el skill se ejecuta invocado por otro skill (subagente), se le debe indicar el idioma de preferencia del usuario ya resuelto. En este modo, el subagente debe omitir el proceso de inferencia y usar directamente la preferencia indicada.
+
+> **Esta resolución es interna: no se narra.** Leer y aplicar este bloque es fontanería del skill, no
+> trabajo que el usuario haya pedido. **No anunciarlo** («voy a resolver el idioma y la política», «ya leí
+> la configuración», «ahora identifico el artefacto»), ni describir los pasos del flujo mientras se
+> ejecutan. Lo que se le dice al usuario es el **resultado** —lo que se produjo, lo que debe decidir y lo
+> que queda pendiente—, más las preguntas que el propio flujo exija. Si un valor resuelto cambia lo que el
+> usuario va a ver, se menciona **al reportar**, no al resolverlo.

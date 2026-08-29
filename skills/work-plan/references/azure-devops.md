@@ -1,6 +1,6 @@
 # Integración con Azure DevOps — `work-plan`
 
-> **Base común obligatoria:** [`../../../reference/alm/azure-devops.md`](../../../reference/alm/azure-devops.md)
+> **Base común obligatoria:** [`../../../reference/project-managers/azure-devops.md`](../../../reference/project-managers/azure-devops.md)
 > — activación y datos de conexión resueltos en [`../../../reference/project-management.md`](../../../reference/project-management.md), verificación del MCP
 > y su degradación, construcción de la URL, campo `Work Item (ADO)`, uso del `id` de ADO como número
 > local, límite de 255 caracteres del título, contrato de reconstrucción íntegra y anti-patrones

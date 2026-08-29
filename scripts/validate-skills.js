@@ -365,7 +365,14 @@ function formatReport(results) {
 
 function main() {
   const repoRoot = process.cwd();
-  const skillsDir = path.join(repoRoot, 'skills');
+  // El contenido distribuible vive bajo plugin/; se acepta también la forma
+  // plana (skills/ en la raíz) para no depender del layout.
+  const candidates = [path.join(repoRoot, 'plugin', 'skills'), path.join(repoRoot, 'skills')];
+  const skillsDir = candidates.find((dir) => fs.existsSync(dir));
+  if (!skillsDir) {
+    console.error('No se encontró el directorio de skills (plugin/skills/ ni skills/).');
+    process.exit(1);
+  }
   const dirs = fs
     .readdirSync(skillsDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())

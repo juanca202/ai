@@ -22,7 +22,7 @@ if (!pm || pm.enabled !== true) {
   console.log('- No escribir el campo de vinculo al work item en el encabezado de los documentos.');
 } else {
   const provider = pm.provider;
-  const providerRef = { 'azure-devops': 'alm/azure-devops.md' }[provider];
+  const providerRef = { 'azure-devops': 'project-managers/azure-devops.md' }[provider];
 
   console.log('Integracion con gestor de proyectos: **ACTIVADA**.');
   console.log('- provider = ' + provider);
@@ -36,7 +36,7 @@ if (!pm || pm.enabled !== true) {
     console.log('Estos cuatro valores son la unica fuente de conexion: no preguntarlos al usuario ni inferirlos del MCP.');
   } else {
     console.log('');
-    console.log('**No hay referencia para ese provider en reference/alm/.** Informar al usuario y continuar con ID secuencial local; no improvisar la integracion.');
+    console.log('**No hay referencia para ese provider en reference/project-managers/.** Informar al usuario y continuar con ID secuencial local; no improvisar la integracion.');
   }
 }
 "
@@ -54,3 +54,10 @@ if (!pm || pm.enabled !== true) {
 
 > **Modo delegado.** Cuando el skill se ejecuta invocado por otro skill (subagente), la configuración
 > ya resuelta se le pasa en la delegación: en ese modo no se vuelve a resolver.
+
+> **Esta resolución es interna: no se narra.** Leer y aplicar este bloque es fontanería del skill, no
+> trabajo que el usuario haya pedido. **No anunciarlo** («voy a resolver el idioma y la política», «ya leí
+> la configuración», «ahora identifico el artefacto»), ni describir los pasos del flujo mientras se
+> ejecutan. Lo que se le dice al usuario es el **resultado** —lo que se produjo, lo que debe decidir y lo
+> que queda pendiente—, más las preguntas que el propio flujo exija. Si un valor resuelto cambia lo que el
+> usuario va a ver, se menciona **al reportar**, no al resolverlo.

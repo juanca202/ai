@@ -20,7 +20,7 @@ Lo **transversal a varios skills** no se duplica: vive en [`reference/`](referen
 - **Regla de extracción:** si una regla aplica a **tres o más skills** y su redacción es sustancialmente la misma, va a `reference/`. Si aplica a uno o dos, se queda en el `SKILL.md` o en su `references/`.
 - **Puntero, no copia.** El `SKILL.md` enlaza la referencia compartida y declara **solo su delta**: a qué aplica la regla en ese skill y qué excepción tiene, si la tiene. Reescribir el contenido común en el skill es el anti-patrón que esta carpeta existe para evitar.
 - **Las excepciones viven dentro de la sección del `SKILL.md`** que se aparta de la regla, empezando por `**Excepción deliberada:**`, y en ningún otro lugar del archivo ni de sus `references/`. El archivo compartido de `reference/` no lleva tabla de excepciones; el índice auditable es la tabla de reglas de [`SKILLS.md`](SKILLS.md).
-- **Formato del puntero** — ruta relativa idéntica en el texto y en el destino. **No usar `${CLAUDE_PLUGIN_ROOT}` ni otra variable de host:** la ruta relativa resuelve igual en GitHub, en un editor y en cualquier agente, la variable no.
+- **Formato del puntero** — ruta relativa idéntica en el texto y en el destino. **No usar variables de host** (las que un cliente expande a la raíz del plugin instalado): la ruta relativa resuelve igual en GitHub, en un editor y en cualquier agente, la variable no.
 
   ```markdown
   Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../reference/language.md).

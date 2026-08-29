@@ -308,6 +308,7 @@ Aplica siempre que se planifiquen o secuencien **varias TK dentro de la misma US
 
 ## Anti-patrones
 
+- **Narrar el flujo interno**: anunciar que se resuelve el idioma o la política, que se lee `settings.json`, que se carga una referencia, o ir enumerando los pasos en voz alta. Al usuario se le comunica el resultado, las preguntas que el flujo exija y lo que quede pendiente — no la maquinaria.
 - Implementar features, migraciones o tests mientras se redacta el TK.
 - Crear ADRs sin pedido explícito del usuario; solo referenciar existentes o sugerir su creación.
 - Crear o editar documentos en `docs/specs/technical-docs/` directamente desde este skill; la especificación técnica se delega a `/design-define` vía subagente y aquí solo se enlaza la referencia devuelta.

@@ -418,6 +418,7 @@ Reglas transversales del catálogo; viven en la raíz del plugin, no en este ski
 
 ## Anti-patterns (transversales)
 
+- **Narrar el flujo interno**: anunciar que se resuelve el idioma o la política, que se lee `settings.json`, que se carga una referencia, o ir enumerando los pasos en voz alta. Al usuario se le comunica el resultado, las preguntas que el flujo exija y lo que quede pendiente — no la maquinaria.
 - Implementar mas de una unidad por turno sin confirmacion intermedia del usuario **en modo secuencial** (el modo por defecto); solo el modo de ejecucion paralela, pedido explicitamente, omite las pausas.
 - Activar el modo de ejecucion paralela sin que el usuario lo haya pedido explicitamente, o sin completar antes el analisis de dependencias (Paso 0).
 - Lanzar mas subagentes en paralelo de los que permite `maxParallel`, o integrar (mergear) varias unidades a la vez en la rama del artefacto.

@@ -117,9 +117,10 @@ no hace nada.
   heurístico. Payload: `command` (el comando completo), `category` (`"git"`
   o `"test"`, según qué patrón lo disparó), `cwd`, y en `tool.completed`
   además `result` con el desenlace de la ejecución.
-- **`question.asked`** (`PreToolUse`, `AskUserQuestion`) / **`question.answered`**
-  (`PostToolUse`, `AskUserQuestion`) — la pregunta, las opciones ofrecidas y
-  la respuesta del usuario.
+- **`question.asked`** / **`question.answered`** (`PreToolUse`/`PostToolUse`,
+  `AskUserQuestion`) — la pregunta, las opciones ofrecidas y la respuesta del
+  usuario. Los skills preguntan con la tool nativa del cliente
+  (`reference/asking.md`); el hook solo observa, no pregunta.
 - **`implementation.started`** / **`implementation.completed`** — se infieren
   de la aparición/desaparición (o cambio de `iterationId`) de
   `.sdd-devkit/current-iteration.json`, que `work-implement` mantiene con ese
@@ -150,13 +151,14 @@ rojo — el caso más accionable de los dos. Por eso se registran ambos
 eventos para `Bash`, con dos funciones de construcción de payload distintas
 que comparten la misma clasificación (`category`) por regex.
 
-Estos payloads (`tool_response` de `Bash`, y el de `AskUserQuestion` en
-ambos hooks) **no están confirmados por la documentación pública de Claude
-Code consultada durante la planificación del WI que introdujo este hook**
-(ver `docs/archive/work-items/WI-002-hooks-eventos-actividad/` o su
-ubicación activa). Se verificaron empíricamente antes de escribir la lógica
-final. Si una versión futura de Claude Code cambia esta forma, el hook
-degrada con gracia (ver más abajo) en vez de fallar.
+Estos payloads (`tool_response` de `Bash`, y el de `AskUserQuestion` /
+`AskQuestion` en ambos hooks) **no están confirmados por la documentación
+pública de Claude Code consultada durante la planificación del WI que
+introdujo este hook** (ver `docs/archive/work-items/WI-002-hooks-eventos-actividad/`
+o su ubicación activa). Se verificaron empíricamente antes de escribir la
+lógica final para Claude Code. El schema de `AskQuestion` (Cursor) se mapea
+desde `prompt`/`id`/`allow_multiple` y `tool_output`. Si una versión futura
+cambia esta forma, el hook degrada con gracia (ver más abajo) en vez de fallar.
 
 ### Detección de comandos git y de prueba
 
@@ -179,17 +181,43 @@ Un comando `Bash` que no matchea ninguna de las dos categorías no genera
 generar ruido con el resto de la actividad de `Bash` (lint, build, edición
 de archivos por script, etc.).
 
-### `AskUserQuestion`: campos y degradación
+### Preguntas estructuradas: campos y degradación
 
-`tool_input.questions` trae, por cada pregunta, `question`, `header`,
-`options` (`label`/`description` por opción) y `multiSelect` — confirmado
-por la documentación pública. La respuesta del usuario en el `tool_response`
-de `PostToolUse` se lee de `answers` (objeto que mapea el texto de la
-pregunta a la etiqueta elegida) y, si está presente, `response` (respuesta
-libre cuando el usuario no elige ninguna opción ofrecida). Si ninguno de los
-dos campos aparece, `question.answered` no se emite — degradación con
-gracia (AC-006), mismo criterio de "mejor esfuerzo" que ya aplican
-`processId`/`model` en `artifact-events.js`.
+Los skills no invocan MCP para preguntar. El script normaliza al mismo par de
+eventos `question.asked` / `question.answered` las dos tools nativas de
+preguntas estructuradas, aunque solo la primera lo dispara desde este plugin
+(ver *Alcance por cliente*):
+
+| | Claude Code (`AskUserQuestion`) | Cursor (`AskQuestion`) |
+|---|---|---|
+| Eventos | `PreToolUse` / `PostToolUse` | `preToolUse` / `postToolUse` |
+| Pregunta | `question`, `header` | `prompt`, `id` (queda en `header`) |
+| Opciones | `label` / `description`, `multiSelect` | `id` / `label`, `allow_multiple` |
+| Respuesta | `tool_response.answers` y, si hay, `response` | `tool_output` (JSON: `answers` o mapa id→opción) |
+
+Si ninguno de los campos de respuesta aparece, `question.answered` no se
+emite — degradación con gracia (AC-006), mismo criterio de "mejor esfuerzo"
+que ya aplican `processId`/`model` en `artifact-events.js`.
+
+`agent` y `model`: Claude Code queda `agent: 'claude-code'` y `model` vacío
+(el hook no recibe el modelo). Cursor queda `agent: 'cursor'` y `model` de
+`model_id` (o `model` si no hay `model_id`). `sessionId`/`processId` en
+Cursor se leen de `conversation_id` / `generation_id` cuando no vienen
+`session_id` / `prompt_id`.
+
+### Alcance por cliente
+
+Los hooks de esta carpeta los carga **solo Claude Code**, vía
+[`hooks.json`](hooks.json) y el manifiesto [`../.claude-plugin/plugin.json`](../.claude-plugin/plugin.json).
+El plugin se distribuye además con el `plugin.json` de la raíz, en el formato
+del estándar abierto [Agent Plugins](https://agent-plugins.org/), cuya v1 solo
+estandariza skills y servidores MCP: los hooks no son un componente portable,
+así que en Cursor no se instalan con el plugin.
+
+Que el script entienda el payload de Cursor no es código muerto: sirve a quien
+quiera el seguimiento en Cursor conectándolo a mano en el `.cursor/hooks.json`
+de su repositorio (`preToolUse`/`postToolUse`), con la ruta absoluta al script.
+Eso es configuración del repositorio del usuario, no del plugin.
 
 ### Campos que son mejor esfuerzo, no garantía
 
@@ -215,3 +243,7 @@ archivo que apareció, cambió o desapareció, no una relectura posterior.
   no se puede escribir (permisos, disco lleno), el hook falla en silencio y
   el próximo `PostToolUse` simplemente reintenta la comparación contra el
   último estado que sí pudo persistirse.
+- Aun conectando el script a mano en Cursor, `AskQuestion` **hoy no dispara**
+  `preToolUse`/`postToolUse` (bug confirmado en el cliente), así que `question.*`
+  solo se observa con fiabilidad en Claude Code. Los skills siguen preguntando
+  con `AskQuestion` en Cursor — el hueco es de seguimiento, no de UX.

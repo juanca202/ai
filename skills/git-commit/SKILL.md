@@ -263,6 +263,7 @@ BREAKING CHANGE: `/v1/users` removed; clients must migrate to `/v2/users`.
 
 ## Anti-patterns
 
+- **Narrar el flujo interno**: anunciar que se resuelve el idioma o la política, que se lee `settings.json`, que se carga una referencia, o ir enumerando los pasos en voz alta. Al usuario se le comunica el resultado, las preguntas que el flujo exija y lo que quede pendiente — no la maquinaria.
 - Mezclar features, fixes y refactors sin relación en un mismo commit.
 - Mensajes vagos: `update`, `fix stuff`, `changes`, `wip`.
 - Headers de más de 100 caracteres: partir el detalle al body en vez de alargar la primera línea.

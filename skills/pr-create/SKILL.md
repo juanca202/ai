@@ -356,6 +356,7 @@ La rama ya tiene un PR/MR abierto hacia `develop`. Devolver la URL existente con
 
 ## Anti-patterns
 
+- **Narrar el flujo interno**: anunciar que se resuelve el idioma o la política, que se lee `settings.json`, que se carga una referencia, o ir enumerando los pasos en voz alta. Al usuario se le comunica el resultado, las preguntas que el flujo exija y lo que quede pendiente — no la maquinaria.
 - Preguntar la rama origen (siempre es la actual) o asumir la destino.
 - Preguntar la plataforma (se detecta del remoto).
 - Preguntar si correr una puerta que **aplica al modo**, u ofrecer saltarla: las que aplican son obligatorias.

@@ -380,6 +380,7 @@ estaba sucio, `workingTreeClean: false` queda registrado como señal para el con
 
 ## Anti-patterns
 
+- **Narrar el flujo interno**: anunciar que se resuelve el idioma o la política, que se lee `settings.json`, que se carga una referencia, o ir enumerando los pasos en voz alta. Al usuario se le comunica el resultado, las preguntas que el flujo exija y lo que quede pendiente — no la maquinaria.
 - Asumir TypeScript/Node si el repo es Java, Python u otro stack.
 - Ejecutar `tsc --noEmit` en un proyecto Java — la compilación va en **build**.
 - Marcar `INCOMPLETE` un check Condicional que simplemente **no aplica** (debe ser `N/A`).

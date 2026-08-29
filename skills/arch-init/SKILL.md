@@ -156,6 +156,8 @@ Antes de escribir cualquier archivo, verificar si ya existe y aplicar [Idempoten
 
 > **Este archivo es JSON validado por schema, no markdown.** Debe cumplir [`schemas/settings.schema.json`](../../schemas/settings.schema.json): las **6** claves de primer nivel (`language`, `specification`, `implementation`, `verification`, `git`, `projectManagement`) son **obligatorias** — la lista viva es la de `required` en el schema, no esta enumeración. `$schema` es opcional (ruta al schema para el editor; ningún skill la resuelve). Fuera de esa, el schema **no admite propiedades adicionales** y `language` solo acepta los códigos de su `enum`. Cuando `projectManagement` queda en `"enabled": false`, el schema **no exige** el resto de sus claves: dejarlas fuera. `specification` es distinto: `basePath`, `archivePath` y `testCases` son obligatorios siempre; solo `trackingUrl` se omite cuando `trackingEnabled` es `false`. `testCases` es un **objeto** que exige `mode` (`ask`/`always`/`never`) y `askDetails` (booleano), ambos obligatorios.
 
+7. **`.gitignore`** — asegurar que incluye `.sdd-devkit/.env`. Ahí vive `SDD_DEVKIT_ACCESS_TOKEN` (hooks y CLI); no se versiona. Si `.gitignore` no existe, crearlo con esa línea; si existe y no la tiene, añadirla. **No** crear el archivo `.env`.
+
 ### Idempotencia / reejecución
 
 Un proyecto existente puede ya tener alguno de los seis archivos del harness, escrito a mano o por otra herramienta. **Ninguno de ellos se deja como estaba si su formato no es el de la plantilla**: el harness solo funciona si los seis archivos tienen la estructura que el resto del catálogo espera leer (secciones, títulos y marcadores de las plantillas de `assets/`). Para cada archivo que ya exista, comparar su estructura contra la plantilla correspondiente y aplicar una de estas tres salidas:
@@ -265,6 +267,7 @@ Reglas transversales del catálogo; viven en la raíz del plugin, no en este ski
 
 ## Anti-patterns
 
+- **Narrar el flujo interno**: anunciar que se resuelve el idioma o la política, que se lee `settings.json`, que se carga una referencia, o ir enumerando los pasos en voz alta. Al usuario se le comunica el resultado, las preguntas que el flujo exija y lo que quede pendiente — no la maquinaria.
 - Rellenar `# Stack tecnológico` en `AGENTS.md` antes del Paso 5, aunque el stack ya se conozca desde el Paso 1 o el Paso 2.
 - Escribir el stack (o duplicarlo) en `.agents/MEMORY.md` — ese archivo no lleva sección de stack; `AGENTS.md` es la única fuente.
 - Dar por bueno un archivo del harness que ya existía solo porque existe, sin comparar su estructura contra la plantilla de `assets/` (Paso 3).

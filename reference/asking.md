@@ -6,8 +6,15 @@ mecanismo; no se repite en cada sección.
 
 ## Mecanismo
 
-Usar la **herramienta de preguntas estructuradas** del cliente (la que renderiza opciones tappables o
-un selector) en lugar de redactar la pregunta como prosa libre.
+Usar la **herramienta de preguntas estructuradas nativa del cliente** (la que renderiza opciones
+tappables o un selector) en lugar de redactar la pregunta como prosa libre. No usar una tool MCP
+(`ask-question` ni ninguna otra) para preguntarle al usuario: el seguimiento de esas preguntas, si
+está activo, lo hacen los hooks del plugin observando la tool nativa.
+
+| Cliente | Tool |
+|---------|------|
+| Claude Code | `AskUserQuestion` |
+| Cursor | `AskQuestion` |
 
 - **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita
   categorías. Entrada libre **solo** si no hay forma razonable de enumerar opciones.
@@ -21,8 +28,8 @@ un selector) en lugar de redactar la pregunta como prosa libre.
 - **No repreguntar** lo que ya esté resuelto en el contexto de la sesión, en `.agents/MEMORY.md`, en los
   documentos o manifiestos del repo, en el artefacto de trabajo o en el work item del tracker externo
   cuando su MCP está disponible.
-- **Fallback:** si el cliente no expone la herramienta, formular la pregunta en prosa con las opciones
-  **enumeradas** (1, 2, 3…).
+- **Fallback:** si el cliente no expone `AskUserQuestion` ni `AskQuestion`, formular la pregunta en
+  prosa con las opciones **enumeradas** (1, 2, 3…). No sustituir ese fallback por una tool MCP.
 
 ## Ritmo
 

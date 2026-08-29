@@ -86,6 +86,8 @@ Ejemplo con las integraciones activadas:
 
 Con las integraciones desactivadas —el mínimo que genera `arch-init` por defecto— `projectManagement` queda en `"enabled": false` sin el resto de sus campos, y `specification` omite `trackingUrl` con `trackingEnabled: false`. Ver la plantilla en `[skills/arch-init/assets/settings-template.json](skills/arch-init/assets/settings-template.json)`.
 
+Cuando el seguimiento está activo, el token `SDD_DEVKIT_ACCESS_TOKEN` vive en `.sdd-devkit/.env` (no versionado, `arch-init` lo deja en `.gitignore`): lo leen los hooks de eventos y el CLI `sdd-devkit`. No va en `settings.json`.
+
 ## Skills incluidos
 
 Detalle de uso, opciones y handoffs de cada skill: [SKILLS.md](SKILLS.md).

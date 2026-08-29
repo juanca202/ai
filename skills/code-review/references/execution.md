@@ -176,6 +176,7 @@ Reglas al rellenar:
 
 ## Anti-patterns
 
+- **Narrar el flujo interno**: anunciar que se resuelve el idioma o la política, que se lee `settings.json`, que se carga una referencia, o ir enumerando los pasos en voz alta. Al usuario se le comunica el resultado, las preguntas que el flujo exija y lo que quede pendiente — no la maquinaria.
 - **Comportarse como una herramienta de CI:** ejecutar checks, listar exit codes o pegar salidas de herramientas. Eso es `quality-check`.
 - Invocar `quality-check` desde aquí o unificar ambos veredictos en un solo informe — son skills independientes.
 - Condicionar el veredicto cualitativo al resultado de las pruebas (o al revés): cada skill responde por su plano.

@@ -183,6 +183,53 @@ test('buildQuestionAnsweredEvent: null si no hay answers ni response (AC-006)', 
   assert.equal(buildQuestionAnsweredEvent(hookInput, root, '2026-01-01T00:00:00.000Z'), null);
 });
 
+test('buildQuestionAskedEvent: mapea el schema de AskQuestion de Cursor (prompt/id/allow_multiple)', () => {
+  const root = makeRepoRoot();
+  const hookInput = {
+    hook_event_name: 'preToolUse',
+    tool_name: 'AskQuestion',
+    cursor_version: '1.0.0',
+    model_id: 'claude-opus-4-7',
+    conversation_id: 'conv-1',
+    generation_id: 'gen-1',
+    cwd: '/repo',
+    tool_input: {
+      questions: [
+        {
+          id: 'continuar',
+          prompt: '¿Continuo?',
+          options: [{ id: 'si', label: 'Si' }, { id: 'no', label: 'No' }],
+          allow_multiple: true,
+        },
+      ],
+    },
+  };
+  const event = buildQuestionAskedEvent(hookInput, root, '2026-01-01T00:00:00.000Z');
+  assert.equal(event.name, 'question.asked');
+  assert.equal(event.agent, 'cursor');
+  assert.equal(event.model, 'claude-opus-4-7');
+  assert.equal(event.sessionId, 'conv-1');
+  assert.equal(event.processId, 'gen-1');
+  assert.equal(event.payload.questions[0].question, '¿Continuo?');
+  assert.equal(event.payload.questions[0].header, 'continuar');
+  assert.equal(event.payload.questions[0].multiSelect, true);
+  assert.equal(event.payload.questions[0].options[0].label, 'Si');
+});
+
+test('buildQuestionAnsweredEvent: lee tool_output JSON de Cursor', () => {
+  const root = makeRepoRoot();
+  const hookInput = baseHookInput({
+    hook_event_name: 'postToolUse',
+    tool_name: 'AskQuestion',
+    cursor_version: '1.0.0',
+    tool_output: JSON.stringify({ continuar: 'si' }),
+  });
+  const event = buildQuestionAnsweredEvent(hookInput, root, '2026-01-01T00:00:00.000Z');
+  assert.equal(event.name, 'question.answered');
+  assert.equal(event.agent, 'cursor');
+  assert.deepEqual(event.payload.answers, { continuar: 'si' });
+});
+
 // --- implementation.started / implementation.completed (AC-007, AC-008) -
 
 function writeIterationFile(root, data) {
@@ -291,6 +338,45 @@ test('buildEvents: PostToolUse + Write sin cambios en current-iteration.json no 
   const root = makeRepoRoot();
   const hookInput = baseHookInput({ hook_event_name: 'PostToolUse', tool_name: 'Write', tool_input: { file_path: '/repo/x.md' } });
   assert.deepEqual(buildEvents(hookInput, root, '2026-01-01T00:00:00.000Z'), []);
+});
+
+test('buildEvents: PreToolUse + AskUserQuestion produce question.asked', () => {
+  const root = makeRepoRoot();
+  const hookInput = baseHookInput({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'AskUserQuestion',
+    tool_input: { questions: [{ question: '¿Ok?', options: [{ label: 'Si' }] }] },
+  });
+  const events = buildEvents(hookInput, root, '2026-01-01T00:00:00.000Z');
+  assert.equal(events.length, 1);
+  assert.equal(events[0].name, 'question.asked');
+  assert.equal(events[0].agent, 'claude-code');
+});
+
+test('buildEvents: preToolUse + AskQuestion produce question.asked', () => {
+  const root = makeRepoRoot();
+  const hookInput = baseHookInput({
+    hook_event_name: 'preToolUse',
+    tool_name: 'AskQuestion',
+    tool_input: { questions: [{ prompt: '¿Ok?', options: [{ id: 'si', label: 'Si' }] }] },
+  });
+  const events = buildEvents(hookInput, root, '2026-01-01T00:00:00.000Z');
+  assert.equal(events.length, 1);
+  assert.equal(events[0].name, 'question.asked');
+  assert.equal(events[0].payload.questions[0].question, '¿Ok?');
+});
+
+test('buildEvents: postToolUse + AskQuestion produce question.answered', () => {
+  const root = makeRepoRoot();
+  const hookInput = baseHookInput({
+    hook_event_name: 'postToolUse',
+    tool_name: 'AskQuestion',
+    tool_output: JSON.stringify({ answers: { '¿Ok?': 'Si' } }),
+  });
+  const events = buildEvents(hookInput, root, '2026-01-01T00:00:00.000Z');
+  assert.equal(events.length, 1);
+  assert.equal(events[0].name, 'question.answered');
+  assert.deepEqual(events[0].payload.answers, { '¿Ok?': 'Si' });
 });
 
 test('buildEvents: combinacion no reconocida devuelve array vacio sin lanzar', () => {

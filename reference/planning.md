@@ -84,3 +84,10 @@ if (specification) {
 > **Una petición explícita del usuario gana.** Si en el turno el usuario pide algo incompatible con lo
 > resuelto ("no definas casos de prueba todavía", "define los TCs ya"), se respeta esa petición para
 > **esa** invocación y no se modifica `settings.json`.
+
+> **Esta resolución es interna: no se narra.** Leer y aplicar este bloque es fontanería del skill, no
+> trabajo que el usuario haya pedido. **No anunciarlo** («voy a resolver el idioma y la política», «ya leí
+> la configuración», «ahora identifico el artefacto»), ni describir los pasos del flujo mientras se
+> ejecutan. Lo que se le dice al usuario es el **resultado** —lo que se produjo, lo que debe decidir y lo
+> que queda pendiente—, más las preguntas que el propio flujo exija. Si un valor resuelto cambia lo que el
+> usuario va a ver, se menciona **al reportar**, no al resolverlo.

@@ -9,7 +9,7 @@ específico (una salida propia, una excepción de ruta).
 > En documentos antiguos aparece la forma equivalente `{slug}` / `{nombre}`; significan lo mismo.
 > `XXX` es un secuencial de **tres dígitos** (`001`, `002`, …). **Excepción:** cuando el artefacto se crea
 > en un tracker externo, `XXX` es el `id` que asigna ese sistema, **sin padding de ceros** — ver
-> [`alm/azure-devops.md`](alm/azure-devops.md).
+> [`project-managers/azure-devops.md`](project-managers/azure-devops.md).
 
 > **Resolución de la raíz.** Las rutas de esta tabla son **relativas a una raíz**, no al directorio desde
 > el que se invoca el skill. Cuál es esa raíz depende de la familia del artefacto: los de **arquitectura**
@@ -136,7 +136,7 @@ Reglas comunes:
 - **Límite de longitud del tracker externo:** si el artefacto se vincula a un work item de un sistema
   externo, el nombre completo (`US-XXX-[nombre-corto]`, `TC-XXX-[slug]`…) debe respetar el límite de
   título de ese sistema; si lo supera, acortar el slug antes de crear la carpeta y conservar el título
-  completo en el encabezado del documento. Ver [`alm/azure-devops.md`](alm/azure-devops.md).
+  completo en el encabezado del documento. Ver [`project-managers/azure-devops.md`](project-managers/azure-devops.md).
 
 ## Archivado
 

@@ -8,7 +8,8 @@
 //
 // - tool.called / tool.completed — Bash que invoca git o un runner de pruebas
 //   reconocido por patrón heurístico.
-// - question.asked / question.answered — AskUserQuestion.
+// - question.asked / question.answered — AskUserQuestion (Claude Code) o
+//   AskQuestion (Cursor).
 // - implementation.started / implementation.completed — se infieren comparando,
 //   en cada PostToolUse, si .sdd-devkit/current-iteration.json (que mantiene
 //   work-implement) apareció, desapareció o cambió de iterationId respecto de la
@@ -40,6 +41,114 @@ const GIT_COMMAND_RE = /\bgit\b/i;
 const TEST_COMMAND_RE =
   /\b(?:npm|yarn|pnpm)\s+(?:run\s+)?[\w:.-]*(?:test|e2e)[\w:.-]*\b|\bmvn\s+(?:test|verify)\b|\bgradle\s+test\b|\bpytest\b|\bgo\s+test\b|\bcargo\s+test\b|\bdotnet\s+test\b|\bjest\b|\bvitest\b|\bmocha\b|\bplaywright\s+test\b|\bcypress\s+run\b/i;
 const EXIT_CODE_RE = /^Exit code (-?\d+)/;
+const QUESTION_TOOLS = new Set(['AskUserQuestion', 'AskQuestion']);
+const HOOK_EVENT_ALIASES = {
+  PreToolUse: 'PreToolUse',
+  PostToolUse: 'PostToolUse',
+  PostToolUseFailure: 'PostToolUseFailure',
+  preToolUse: 'PreToolUse',
+  postToolUse: 'PostToolUse',
+  postToolUseFailure: 'PostToolUseFailure',
+};
+
+function normalizeHookEventName(name) {
+  return (typeof name === 'string' && HOOK_EVENT_ALIASES[name]) || name;
+}
+
+function detectAgent(hookInput) {
+  const raw = hookInput.hook_event_name;
+  if (typeof raw === 'string' && raw.length > 0 && raw[0] === raw[0].toLowerCase()) {
+    return 'cursor';
+  }
+  if (hookInput.cursor_version || hookInput.tool_name === 'AskQuestion') return 'cursor';
+  return 'claude-code';
+}
+
+function resolveSessionId(hookInput) {
+  return hookInput.session_id || hookInput.conversation_id || '';
+}
+
+function resolveProcessId(hookInput, sessionId) {
+  return hookInput.prompt_id || hookInput.generation_id || sessionId;
+}
+
+function resolveModel(hookInput) {
+  if (typeof hookInput.model_id === 'string' && hookInput.model_id) return hookInput.model_id;
+  if (typeof hookInput.model === 'string' && hookInput.model) return hookInput.model;
+  return '';
+}
+
+function parseToolResult(hookInput) {
+  if (hookInput.tool_response && typeof hookInput.tool_response === 'object') {
+    return hookInput.tool_response;
+  }
+  const raw = hookInput.tool_output;
+  if (typeof raw === 'string' && raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : { response: raw };
+    } catch {
+      return { response: raw };
+    }
+  }
+  if (raw && typeof raw === 'object') return raw;
+  return {};
+}
+
+function mapQuestionOption(option) {
+  if (!option || typeof option !== 'object') return { label: '', description: '' };
+  const label =
+    typeof option.label === 'string'
+      ? option.label
+      : typeof option.id === 'string'
+        ? option.id
+        : '';
+  return {
+    label,
+    description: typeof option.description === 'string' ? option.description : '',
+  };
+}
+
+function mapQuestion(question) {
+  if (!question || typeof question !== 'object') {
+    return { question: '', header: '', options: [], multiSelect: false };
+  }
+  const text =
+    typeof question.question === 'string'
+      ? question.question
+      : typeof question.prompt === 'string'
+        ? question.prompt
+        : '';
+  const header =
+    typeof question.header === 'string'
+      ? question.header
+      : typeof question.id === 'string'
+        ? question.id
+        : '';
+  return {
+    question: text,
+    header,
+    options: Array.isArray(question.options) ? question.options.map(mapQuestionOption) : [],
+    multiSelect: !!(question.multiSelect || question.allow_multiple),
+  };
+}
+
+function extractAnswers(result) {
+  if (result.answers && typeof result.answers === 'object' && !Array.isArray(result.answers)) {
+    return result.answers;
+  }
+  const reserved = new Set(['response', 'duration']);
+  const mapped = {};
+  let any = false;
+  for (const [key, value] of Object.entries(result)) {
+    if (reserved.has(key)) continue;
+    if (typeof value === 'string' || Array.isArray(value)) {
+      mapped[key] = value;
+      any = true;
+    }
+  }
+  return any ? mapped : null;
+}
 
 function classifyCommand(command) {
   if (typeof command !== 'string' || !command) return null;
@@ -93,15 +202,15 @@ function writeActivityState(repoRoot, state) {
 }
 
 function baseEventFields(hookInput, repoRoot, name, nowIso, iterationIdOverride) {
-  const sessionId = hookInput.session_id || '';
+  const sessionId = resolveSessionId(hookInput);
   return {
     name,
     timestamp: nowIso,
     sessionId,
-    processId: hookInput.prompt_id || sessionId,
+    processId: resolveProcessId(hookInput, sessionId),
     iterationId: iterationIdOverride !== undefined ? iterationIdOverride : readIterationId(repoRoot),
-    agent: 'claude-code',
-    model: '',
+    agent: detectAgent(hookInput),
+    model: resolveModel(hookInput),
   };
 }
 
@@ -159,38 +268,28 @@ function buildToolCompletedEventFromFailure(hookInput, repoRoot, nowIso) {
   };
 }
 
-// question.asked (PreToolUse, AskUserQuestion) / question.answered
-// (PostToolUse, AskUserQuestion) — degradan con gracia (AC-006): si falta un
-// campo esperado, se omite del evento en vez de fallar.
+// question.asked (PreToolUse, AskUserQuestion / AskQuestion) /
+// question.answered (PostToolUse, mismas tools) — degradan con gracia
+// (AC-006): si falta un campo esperado, se omite del evento en vez de fallar.
+// Claude Code: tool_input.questions con question/header/options/multiSelect y
+// tool_response.answers. Cursor: prompt/id/allow_multiple y tool_output JSON.
 function buildQuestionAskedEvent(hookInput, repoRoot, nowIso) {
   const questions = hookInput.tool_input && hookInput.tool_input.questions;
   if (!Array.isArray(questions)) return null;
   return {
     ...baseEventFields(hookInput, repoRoot, 'question.asked', nowIso),
-    payload: {
-      questions: questions.map((q) => ({
-        question: q && typeof q.question === 'string' ? q.question : '',
-        header: q && typeof q.header === 'string' ? q.header : '',
-        options: Array.isArray(q && q.options)
-          ? q.options.map((o) => ({
-              label: o && typeof o.label === 'string' ? o.label : '',
-              description: o && typeof o.description === 'string' ? o.description : '',
-            }))
-          : [],
-        multiSelect: !!(q && q.multiSelect),
-      })),
-    },
+    payload: { questions: questions.map(mapQuestion) },
   };
 }
 
 function buildQuestionAnsweredEvent(hookInput, repoRoot, nowIso) {
-  const response = hookInput.tool_response || {};
-  const hasAnswers = !!(response.answers && typeof response.answers === 'object');
-  const hasFreeform = typeof response.response === 'string';
-  if (!hasAnswers && !hasFreeform) return null;
+  const result = parseToolResult(hookInput);
+  const answers = extractAnswers(result);
+  const hasFreeform = typeof result.response === 'string';
+  if (!answers && !hasFreeform) return null;
   const payload = {};
-  if (hasAnswers) payload.answers = response.answers;
-  if (hasFreeform) payload.response = response.response;
+  if (answers) payload.answers = answers;
+  if (hasFreeform) payload.response = result.response;
   return { ...baseEventFields(hookInput, repoRoot, 'question.answered', nowIso), payload };
 }
 
@@ -224,17 +323,17 @@ const IMPLEMENTATION_STATE_TOOLS = new Set(['Write', 'Edit', 'MultiEdit', 'Bash'
 // siempre un array (posiblemente vacío) — nunca lanza por una combinación no
 // reconocida.
 function buildEvents(hookInput, repoRoot, nowIso) {
-  const eventName = hookInput.hook_event_name;
+  const eventName = normalizeHookEventName(hookInput.hook_event_name);
   const toolName = hookInput.tool_name;
   const events = [];
 
   if (eventName === 'PreToolUse' && toolName === 'Bash') {
     const event = buildToolCalledEvent(hookInput, repoRoot, nowIso);
     if (event) events.push(event);
-  } else if (eventName === 'PreToolUse' && toolName === 'AskUserQuestion') {
+  } else if (eventName === 'PreToolUse' && QUESTION_TOOLS.has(toolName)) {
     const event = buildQuestionAskedEvent(hookInput, repoRoot, nowIso);
     if (event) events.push(event);
-  } else if (eventName === 'PostToolUse' && toolName === 'AskUserQuestion') {
+  } else if (eventName === 'PostToolUse' && QUESTION_TOOLS.has(toolName)) {
     const event = buildQuestionAnsweredEvent(hookInput, repoRoot, nowIso);
     if (event) events.push(event);
   } else if (eventName === 'PostToolUse' && toolName === 'Bash') {
