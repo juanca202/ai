@@ -56,6 +56,24 @@ Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **De
 
 
 
+## Flujo: Proponer varias historias en una misma invocación
+
+Aplica cuando una sola invocación va a producir **más de una** US: la migración investigada por `work-research` se descompuso en varias historias (ver plantilla, sección **Migración**), o el usuario describe de una vez varias funcionalidades relacionadas y pide crearlas todas. Con una sola historia, saltar directo al [flujo de creación](#flujo-crear-una-historia-nueva).
+
+1. **Identificar las historias candidatas** a partir de la necesidad descrita (o de la descomposición que ya trae `work-research`), cada una con su actor, valor y alcance diferenciado — sin fijar todavía IDs ni carpetas.
+2. **Detectar dependencias entre ellas.** Para cada candidata: ¿necesita que otra de la misma tanda ya exista o esté definida para poder redactar sus criterios de aceptación o su DoR? Casos típicos: una historia de infraestructura o modelo de datos compartido que las demás dan por sentado; autenticación/autorización de la que depende toda historia que exponga funcionalidad protegida; una historia que expone una API que otra consume.
+3. **Ordenar la propuesta:** primero las historias **sin dependencias dentro de la tanda** — incluida toda historia de infraestructura o base (configuración, modelos compartidos, autenticación, integraciones transversales) —, después las que dependen de alguna anterior, en el orden que sus dependencias permitan (orden topológico). Entre historias mutuamente independientes, el orden no importa.
+4. **Presentar la lista ordenada al usuario** —con la dependencia detectada de cada una, si tiene— mediante la herramienta de preguntas estructuradas, antes de crear ningún archivo. Confirmar el orden o aplicar el ajuste que pida y volver a mostrarlo.
+5. **Asignar los `US-XXX` en el orden ya confirmado**, no en el orden en que el usuario las mencionó: así cada historia dependiente cita el `US-XXX` real —ya creado— de su prerrequisito, en vez de una referencia provisional.
+6. **Crear cada historia siguiendo el [flujo de creación](#flujo-crear-una-historia-nueva)**, en el orden confirmado. En la fila **Dependencias listas** del DoR y en Observaciones, cada historia dependiente enlaza el `US-XXX` de su prerrequisito (`[US-0XX: Título](../US-0XX-slug/README.md)`) en vez de describir la dependencia en prosa suelta.
+7. **Cerrar los Draft del lote en conjunto.** Terminada la creación, si **más de una** historia quedó en `Estado: Draft`, no cerrar sus lagunas historia por historia: reunir las preguntas de **todas** las historias Draft del lote en tandas de **hasta 3 preguntas** —el mismo límite por bloque del [paso 5 del flujo de creación](#flujo-crear-una-historia-nueva)—, agrupadas por historia para que quede claro a cuál pertenece cada una, y presentarlas con la herramienta de preguntas estructuradas. Encadenar tantas tandas como haga falta mientras sigan quedando lagunas relevantes. Al agotar la batería —el usuario respondió todo lo que iba a responder, o indicó que prefiere dejar el resto pendiente—: revalidar INVEST y DoR de **cada** historia por separado y promover a `Estado: Ready` las que queden completas; las que conserven lagunas se quedan en `Draft` con el residual en Observaciones. Es normal que el lote quede mixto.
+
+> **Por qué el orden importa aquí y no en `work-plan`.** Ahí la agrupación de `TK-XXX` es por repositorio, no por dependencia entre historias — cada tarea vive dentro de su propia US ya definida. Aquí, en cambio, una US completa puede depender de que otra ya exista con su alcance cerrado: escribir primero la de infraestructura o la que no depende de nada le da a las siguientes un `US-XXX` real que citar, en vez de una promesa.
+
+---
+
+
+
 ## Flujo: Crear una historia nueva
 
 1. **Fijar el ID y nombre de carpeta**
@@ -202,6 +220,9 @@ Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **De
 - Copiar `assets/user-story-template.md` al repo del producto como artefacto en lugar de usarlo como molde.
 - Lanzar preguntas al usuario como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas; o ir descubriendo huecos turno a turno en lugar de agruparlos en tandas al inicio. (Encadenar **varias** tandas sí es correcto cuando hay más de tres lagunas — el límite es por bloque, no un tope al total.)
 - Crear una historia nueva estando en la rama de implementación de otra US o WI sin advertir al usuario y preguntar `Continuar` / `Detenerme aquí` primero.
+- Al proponer **varias** historias en la misma invocación, crearlas en el orden en que el usuario las mencionó (o el que resulte más cómodo) en vez de detectar sus dependencias y anteponer la infraestructura y las que no dependen de ninguna otra de la tanda.
+- Asignar los `US-XXX` de un lote antes de confirmar el orden, o dejar que una historia dependiente cite una referencia provisional a otra que todavía no tiene id, en vez de crear primero el prerrequisito.
+- Cerrar los Draft de un lote de varias historias historia por historia, con una tanda separada para cada una, en vez de agrupar las preguntas de todas las historias Draft del lote en las mismas tandas de hasta 3.
 
 ---
 
@@ -214,7 +235,7 @@ Posición: **inicio** del pipeline `work-define` → `work-plan` → `work-imple
 
 |                              |                                                                                                                                                                                                                                                                                              |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Entrada**                  | Necesidad funcional del usuario. No requiere US previa. También puede originarse en una investigación de migración (`RS-XXX` de `work-research`, flujo «Analizar migración») dimensionada como cambio grande y descompuesta en varias US — ver sección **Migración** de la plantilla.                          |
+| **Entrada**                  | Necesidad funcional del usuario. No requiere US previa. También puede originarse en una investigación de migración (`RS-XXX` de `work-research`, flujo «Analizar migración») dimensionada como cambio grande y descompuesta en varias US — ver sección **Migración** de la plantilla y el [flujo de varias historias](#flujo-proponer-varias-historias-en-una-misma-invocación) para su orden de creación.                          |
 | **Salida mínima (creación)** | Carpeta `US-XXX-[nombre-corto]/README.md` con actor y valor de negocio; puede quedar en `Estado: Draft` con lagunas en Observaciones.                                                                                                                                                        |
 | **Salida para continuar**    | `Estado: Ready` en el `README.md`; INVEST y DoR completos; al menos un `AC-XXX`; Observaciones sin pendientes abiertos.                                                                                                                                                                      |
 | **Siguiente paso**           | Con la US en `Ready`: `test-define` — según `specification.testCases.mode`, invocar `/test-define` directo (`always`), solo si el usuario acepta (`ask`, por defecto) o no ofrecerlo (`never`) — no crear `TC-XXX` desde este skill; y `work-plan` — invocar `/work-plan` para las tareas (o continuidad explícita del usuario), sin condicionar a `specification.testCases.mode`. No crear `TK-XXX` desde este skill. |

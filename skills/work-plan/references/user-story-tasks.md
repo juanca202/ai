@@ -195,8 +195,8 @@ Aplica cuando el input es **solo una referencia a una historia** (modo B). El pr
 7. **Materializar según la opción elegida.**
 
    **7a. Crear los planes** — por cada tarea confirmada, seguir el *[Flujo: Crear TK completa](#flujo-crear-tk-completa)* íntegro, respetando el orden del paso 5 (las Dependencias solo pueden referenciar TK de igual o mayor prioridad ya creadas):
-   - Reunir en **una sola tanda** de preguntas el contexto técnico que falte para el conjunto (ver [Información requerida antes de redactar](#información-requerida-antes-de-redactar)); no ir tarea por tarea preguntando lo mismo.
-   - **No inventar** Plan de implementación, Dependencias ni Referencias. Lo que siga sin acordar va a **Observaciones**, y esa TK queda en `Estado: Draft`.
+   - Reunir el contexto técnico que falte para el conjunto (ver [Información requerida antes de redactar](#información-requerida-antes-de-redactar)) en tandas de **hasta 3 preguntas**, agrupadas por tarea para que quede claro a cuál pertenece cada una; no ir tarea por tarea preguntando lo mismo. Encadenar tantas tandas como haga falta mientras sigan quedando lagunas relevantes.
+   - **No inventar** Plan de implementación, Dependencias ni Referencias. Lo que siga sin acordar tras agotar la batería de preguntas —el usuario respondió todo lo que iba a responder, o indicó que prefiere dejar el resto pendiente— va a **Observaciones**, y esa TK queda en `Estado: Draft`.
    - Asignar `Estado: Ready` **solo** a las TK que cumplan todas las condiciones de `Estado: Ready` del [checklist](#checklist-antes-de-redactar). Es normal que el lote quede mixto (unas `Ready`, otras `Draft`).
    - Si una TK requiere especificación técnica inexistente en `technical-docs/`, **delegar a `/design-define` vía subagente** y enlazar la referencia devuelta; nunca redactar la especificación aquí.
 
@@ -295,7 +295,7 @@ Aplica siempre que se planifiquen o secuencien **varias TK dentro de la misma US
 
 **Ejemplo 4b — Planificar desde una US, opción planes completos (modo B)**
 - *Entrada:* la misma que el Ejemplo 4; en el paso 6 el usuario elige **Crear los planes**.
-- *Comportamiento — turno 2:* Reúne en una sola tanda el contexto técnico faltante para el conjunto (repositorios sin definir, contratos, referencias de UI). Luego redacta cada TK siguiendo el *Flujo: Crear TK completa* en el orden propuesto, con Dependencias que solo referencian TK anteriores de la secuencia. Verifica el checklist por TK: las que lo cumplen salen en `Estado: Ready`; las que conservan pendientes salen en `Draft` con esos pendientes en **Observaciones**. No inventa pasos ni contratos para forzar `Ready`.
+- *Comportamiento — turno 2:* Reúne el contexto técnico faltante para el conjunto (repositorios sin definir, contratos, referencias de UI) en una tanda de hasta 3 preguntas agrupadas por tarea; si con las respuestas todavía quedan lagunas, encadena una segunda tanda. Luego redacta cada TK siguiendo el *Flujo: Crear TK completa* en el orden propuesto, con Dependencias que solo referencian TK anteriores de la secuencia. Verifica el checklist por TK: las que lo cumplen salen en `Estado: Ready`; las que conservan pendientes salen en `Draft` con esos pendientes en **Observaciones**. No inventa pasos ni contratos para forzar `Ready`.
 - *Salida:* `TK-001-...md` a `TK-NNN-...md`, cada una con su estado real, y un reporte que separa las `Ready` de las `Draft` con lo que a estas les falta.
 
 **Ejemplo 5 — US no Ready o sin AC-XXX**
@@ -334,6 +334,7 @@ Aplica siempre que se planifiquen o secuencien **varias TK dentro de la misma US
 - Postergar la infraestructura compartida en lugar de priorizarla, retrasando la posibilidad de ejecutar tareas en paralelo.
 - Exigir la ejecución de escenarios E2E como condición de `Estado: Ready` de una TK individual, en lugar de dejarla al Quality Gate previo a integrar o liberar la funcionalidad.
 - Lanzar preguntas como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas.
+- **Modo B, opción "Crear los planes":** cerrar el contexto técnico faltante tarea por tarea en vez de agrupar en las mismas tandas de hasta 3 preguntas cubriendo todas las TK del lote.
 
 ---
 

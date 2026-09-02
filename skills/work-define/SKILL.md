@@ -19,6 +19,7 @@ Carga el archivo correspondiente cuando vayas a ejecutar la tarea; el detalle í
 | Necesitas… | Archivo |
 | ---------- | ------- |
 | Flujo paso a paso de **crear** y **actualizar**, cómo preguntar al usuario, validación antes de crear, checklist completo, ejemplos, anti-patrones y handoffs del ciclo | [`references/flow.md`](references/flow.md) |
+| Cómo ordenar y encadenar IDs al proponer **varias historias en una misma invocación** (migración descompuesta, o varias funcionalidades relacionadas pedidas juntas) | [`references/flow.md`](references/flow.md#flujo-proponer-varias-historias-en-una-misma-invocación) |
 | Detalle de **RFC 2119** (tabla de modalidades), **ISO 25010** (categorías de criterios de aceptación no funcionales), rúbrica **INVEST** y **DoR** ampliado | [`references/quality-criteria.md`](references/quality-criteria.md) |
 | Estructura del `README.md` de una US | [`assets/user-story-template.md`](assets/user-story-template.md) |
 
@@ -103,6 +104,7 @@ Antes de crear o editar cualquier US, el agente debe tener clara la siguiente in
 
 El procedimiento completo —cómo preguntar al usuario, validación antes de crear, los pasos de **Crear** y **Actualizar**, el checklist y los ejemplos/anti-patrones— está en [`references/flow.md`](references/flow.md). Síntesis:
 
+- **Varias historias en una misma invocación:** si la migración investigada se descompuso en varias US, o el usuario pide crear de una vez varias historias relacionadas, primero detectar dependencias entre ellas y ordenarlas — la infraestructura y las que no dependen de ninguna otra de la tanda van primero — y confirmar ese orden con el usuario antes de fijar IDs; con una sola historia, saltar directo a Crear. Ver [`references/flow.md`](references/flow.md#flujo-proponer-varias-historias-en-una-misma-invocación).
 - **Crear:** fijar ID y carpeta `US-XXX-[nombre-corto]/` → redactar el `README.md` con la plantilla (Descripción RFC 2119, Referencias, Criterios `AC-XXX` con categoría y enunciado RFC 2119, Repositorios, Complejidad Fibonacci, INVEST, DoR, Observaciones) → si el requerimiento define modelos, APIs o flujos, **delegar la documentación técnica a `/design-define` mediante subagente** y agregar las referencias devueltas a la sección Referencias → glosario si aplica → cierre.
 - **Actualizar:** identificar y leer el `README.md` → aplicar cambios conservando **siempre** los ids `AC-XXX` existentes (son inmutables: los nuevos toman el siguiente libre) → revalidar → confirmar. Ante conflicto `TK-XXX` ↔ US, **la US prevalece**.
 - **Cierre:** si queda **Draft**, cerrar lagunas con preguntas estructuradas (una por laguna, máx. tres por bloque); si queda **Ready**, resolver la definición de casos de prueba según `specification.testCases.mode` (`ask` pregunta, `always` invoca `/test-define` directo, `never` no la ofrece — ver [Política de planificación](#política-de-planificación)) y sugerir crear las `TK-XXX` con `/work-plan` (nunca crear TCs ni tareas directamente desde este skill).

@@ -174,8 +174,8 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 2. **Identificar repositorios / alcances independientes** a partir de la descripción del esfuerzo. **No inventar** alcances no soportados por el pedido; lo no claro queda `Por definir` o se pregunta.
 3. **Presentar la propuesta** al usuario, un ítem por `WI-` tentativo: `WI-XXX` (siguiente libre **contando activos y archivados**), nombre de archivo, tipo, repositorio (o `Por definir`) y objetivo breve. **No crear archivos en este turno** — dejarlo explícito al final del mensaje.
 4. **Confirmar con el usuario** mediante la herramienta de preguntas estructuradas. Opciones: [Confirmar] / [Cancelar] — **sin** una opción de "ajustar alcance": el ajuste llega por respuesta libre, que ya explica qué cambiar. Si el usuario pide un ajuste, revisar y repetir pasos 3–4. **No continuar sin confirmación explícita.**
-5. **Crear cada WI** confirmado siguiendo el *Flujo: Crear stub* (o *WI completo* si el alcance ya está claro para alguno).
-6. **Reportar al usuario** la lista de WI creados con su objetivo breve.
+5. **Crear cada WI** confirmado siguiendo el *Flujo: Crear stub* (o *WI completo* si el alcance ya está claro para alguno). Si **más de uno** se redacta como WI completo, reunir el contexto técnico que falte para el conjunto en tandas de **hasta 3 preguntas**, agrupadas por WI para que quede claro a cuál pertenece cada una, en vez de preguntar WI por WI; encadenar tantas tandas como haga falta mientras sigan quedando lagunas relevantes. Lo que siga sin acordar tras agotar la batería —el usuario respondió todo lo que iba a responder, o prefiere dejar el resto pendiente— va a **Observaciones** de ese WI, que queda en `Estado: Draft`. Asignar `Estado: Ready` **solo** a los WI que cumplan todas las condiciones del [checklist](#checklist-antes-de-redactar); es normal que el lote quede mixto.
+6. **Reportar al usuario** la lista de WI creados con su objetivo breve, separando los que quedaron `Ready` de los `Draft` con su residual.
 7. **Casos de prueba:** para cada WI que quede en `Ready`, aplicar [`../../../reference/planning.md`](../../../reference/planning.md) sobre el propio `WI` como artefacto padre, saltándolo si ya tiene `test-cases/` con algún `TC-XXX`.
 8. **Handoff:** los WI en `Draft` deben completarse a `Ready` (modo A) antes de **`work-implement`**.
 
@@ -262,6 +262,7 @@ Aplica cuando el trabajo no cabe en un único WI autocontenido (modo B). El prop
 - Narrar el trabajo realizado en el mensaje al usuario; solo reportar resultados y pendientes.
 - Crear un work item nuevo estando en la rama de implementación de otra US o WI sin advertir al usuario y preguntar `Continuar` / `Detenerme aquí` primero.
 - **Modo B**: crear WI sin haber presentado la propuesta y recibido confirmación.
+- **Modo B**: al redactar varios WI completos del lote, cerrar el contexto técnico faltante WI por WI en vez de agrupar en las mismas tandas de hasta 3 preguntas cubriendo todos los del lote.
 - Lanzar preguntas como prosa libre cuando el cliente expone una herramienta de preguntas estructuradas.
 
 ---
