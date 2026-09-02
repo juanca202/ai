@@ -61,16 +61,17 @@ No continúes hasta haber leído y aplicado `language.md`.
 
 Antes de ejecutar este skill, DEBES leer [`../../reference/planning.md`](../../reference/planning.md).
 
-De ese bloque, este skill consume **`specification.testCases.askDetails`** (el `mode` lo consumen
-`work-define` y `work-plan` para decidir si invocan este skill; aquí ya es irrelevante):
+De ese bloque, este skill consume **`specification.testCases.askDetails`** y **`specification.testCases.mode`**:
 
-| `askDetails` | Comportamiento |
-|--------------|----------------|
-| `true` | **Hacer la entrevista de clarificación** del [Paso 2](#paso-2--entrevista-de-clarificación) antes de generar los TC. |
-| `false` | **No preguntar nada**: aplicar los [valores por defecto](#valores-por-defecto-askdetails-false) y dejar constancia de los supuestos en los propios TC. |
+| Clave | Valor | Comportamiento |
+|-------|-------|----------------|
+| `askDetails` | `true` | **Hacer la entrevista de clarificación** del [Paso 2](#paso-2--entrevista-de-clarificación) antes de generar los TC. |
+| `askDetails` | `false` | **No preguntar nada** en el Paso 2: aplicar los [valores por defecto](#valores-por-defecto-askdetails-false) y dejar constancia de los supuestos en los propios TC. |
+| `mode` | `always` | **No pedir aceptación final** en el [Paso 4, punto 5](#paso-4--guardar-y-reportar): mostrar el resumen, dar el resultado por aceptado y cerrar el skill directamente. |
+| `mode` | `ask` / `never` (o sin `settings.json`) | Pedir aceptación final como hoy (Paso 4, punto 5). |
 
-`askDetails` se aplica igual venga este skill invocado por la planificación o directamente por el usuario.
-**No afecta al alcance:** con cualquier valor, los TC cubren **todos** los criterios de aceptación.
+Ambas claves se aplican igual venga este skill invocado por la planificación o directamente por el usuario.
+**Ninguna afecta al alcance:** con cualquier valor, los TC cubren **todos** los criterios de aceptación.
 
 ---
 
@@ -150,7 +151,7 @@ discovery marcó como posible bug preservado, anotarlo para trazabilidad.
    ```
 
    No continuar hasta que todos los criterios tengan identificador. No asignar identificadores automáticamente.
-5. Listar los criterios encontrados (con su identificador tal como aparece y su título) y pedir confirmación al usuario antes de continuar.
+5. Registrar los criterios encontrados (identificador tal como aparece y título). **No se pide confirmación en este punto**: el alcance por defecto son **todos** los criterios de aceptación, salvo que el usuario haya pedido explícitamente un subconjunto (ver [Paso 2](#paso-2--entrevista-de-clarificación), «El alcance no se pregunta»). El listado completo se comunica en el resumen del Paso 4.
 
 ---
 
@@ -271,10 +272,12 @@ Usar `assets/test-case-template.md` para todos los campos. Reglas de llenado:
    - Criterios procesados.
    - TCs generados: ID · título · perspectiva.
    - TCs omitidos con justificación.
-5. Preguntar si el usuario acepta el resultado:
-   - **Acepta** → cerrar; el skill termina. Sugerir como siguiente paso `work-implement` (tipo `TC-XXX`/`FT-XXX`) para automatizar los TCs en `Ready`, y `trace-validate` para el veredicto de cobertura.
-   - **Ajuste puntual** (campo incorrecto, dato de prueba erróneo) → aplicar la corrección y volver a este paso para confirmar.
-   - **Cambio estructural** (nuevos criterios, redefinición del alcance) → reiniciar desde el Paso 1.
+5. **Aceptación del resultado — depende de `specification.testCases.mode`** (ver [Política de definición de casos de prueba](#política-de-definición-de-casos-de-prueba)):
+   - **`mode: always`** → no preguntar: dar el resultado por aceptado y cerrar directamente. Sugerir como siguiente paso `work-implement` (tipo `TC-XXX`/`FT-XXX`) para automatizar los TCs en `Ready`, y `trace-validate` para el veredicto de cobertura.
+   - **`mode: ask` / `mode: never`** (o sin `settings.json`) → preguntar si el usuario acepta el resultado:
+     - **Acepta** → cerrar; el skill termina. Sugerir como siguiente paso `work-implement` (tipo `TC-XXX`/`FT-XXX`) para automatizar los TCs en `Ready`, y `trace-validate` para el veredicto de cobertura.
+     - **Ajuste puntual** (campo incorrecto, dato de prueba erróneo) → aplicar la corrección y volver a este paso para confirmar.
+     - **Cambio estructural** (nuevos criterios, redefinición del alcance) → reiniciar desde el Paso 1.
 
 ---
 
@@ -357,6 +360,8 @@ La trazabilidad inversa (de un criterio a sus TCs) se obtiene buscando el identi
 - Confundir `askDetails` con el alcance: `false` suprime las preguntas de clarificación, **no** reduce los criterios cubiertos.
 - Crear un TC que cubra más de un criterio de aceptación.
 - **Preguntar al usuario si quiere cubrir todos los criterios o solo algunos.** Por defecto se cubren **todos**; un subconjunto solo se genera cuando el usuario lo pidió por su cuenta, sin que el skill se lo ofrezca.
+- **Pedir confirmación de la lista de criterios extraídos en el Paso 1** antes de generar los TC: el alcance ya es todos por defecto, no hay nada que confirmar en ese punto.
+- **Preguntar si se acepta el resultado en el Paso 4.5 cuando `specification.testCases.mode: always`**: con ese valor el resultado se da por aceptado sin preguntar.
 - **Dejar un criterio sin TC en una corrida de alcance completo** — aunque parezca trivial, redundante o difícil de probar. Si de verdad no admite un caso de prueba, generar igual el TC y dejar constancia del motivo, en vez de omitirlo en silencio.
 - Omitir una perspectiva que evidentemente debería existir sin dejar constancia del motivo (una perspectiva que no aplica al criterio puede omitirse sin justificación; ver Paso 3).
 - Dejar el campo **Criterio de aceptación** vacío o con un valor genérico ("criterio 1").

@@ -23,6 +23,11 @@ está activo, lo hacen los hooks del plugin observando la tool nativa.
   añade un turno para volver a preguntarle lo mismo. Reservar las opciones enumeradas para las
   decisiones que sí son categorías cerradas (confirmar, elegir entre alternativas concretas, cancelar).
   Vale igual para las variantes desglosadas del mismo ajuste («ajustar tipo / alcance / descripción»).
+- **No añadir manualmente una opción "Otro" / "Otro (especificar)"/ "Ninguno de los anteriores".**
+  La herramienta nativa ya agrega su propia opción de respuesta libre (`Other`) al final de cada
+  pregunta; declarar una opción equivalente en la lista la duplica. Si ninguna de las opciones
+  enumeradas encaja, esa es la respuesta libre que la herramienta ya ofrece — no una opción más de
+  la lista.
 - **Selección múltiple** solo donde el propio paso lo indique explícitamente (p. ej. capas de testing,
   candidatos de ADR, qué correcciones aplicar).
 - **No repreguntar** lo que ya esté resuelto en el contexto de la sesión, en `.agents/MEMORY.md`, en los

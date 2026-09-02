@@ -4,10 +4,12 @@
 
 | Clave | Quién la lee | Qué decide |
 |-------|--------------|------------|
-| `mode` (`ask` · `always` · `never`) | `work-define`, `work-plan` | **Si se ofrece o invoca `test-define`** al cerrar la planificación. |
+| `mode` (`ask` · `always` · `never`) | `work-define`, `work-plan`, `test-define` | **Si se ofrece o invoca `test-define`** al cerrar la planificación (`work-define`/`work-plan`); y, dentro de `test-define`, **si se pide aceptación final del resultado** (Paso 4.5) — con `always` no se pregunta, se da por aceptado. |
 | `askDetails` (`true` · `false`) | `test-define` | **Si `test-define` hace su entrevista de clarificación** (entorno, roles, datos de prueba, escenarios de error) o aplica sus valores por defecto. |
 
-Son ortogonales: `mode` gobierna la **oferta**, `askDetails` gobierna **cómo trabaja el skill una vez invocado** — también cuando lo invoca el usuario directamente, sin pasar por la planificación.
+Son independientes: `mode` gobierna la **oferta de invocación** y la **aceptación final**; `askDetails` gobierna la **entrevista de clarificación** del Paso 2 — también cuando lo invoca el usuario directamente, sin pasar por la planificación. `test-define` lee ambas claves siempre, venga o no invocado por la planificación.
+
+> **Extracción de criterios (Paso 1) sin confirmación.** Independientemente de `mode` y `askDetails`, `test-define` ya no pide confirmar la lista de criterios de aceptación extraídos antes de generar los TC: el alcance por defecto es siempre **todos** los criterios (ver `test-define/SKILL.md`, Paso 1 y Paso 2).
 
 ```!
 node -e "
@@ -33,6 +35,7 @@ if (specification) {
     console.log('- testCases.mode = always -> al cerrar la planificacion, invocar /test-define automaticamente, SIN preguntar.');
     console.log('  - work-define: al dejar la historia en Ready. Sigue ofreciendo /work-plan para las tareas.');
     console.log('  - work-plan: al dejar las tareas del alcance en Ready, sobre el artefacto padre (la US, o el propio WI). Sigue ofreciendo /work-implement.');
+    console.log('  - test-define: al terminar de generar los TC (Paso 4.5), NO pregunta si se acepta el resultado -> lo da por aceptado y cierra directamente.');
   } else if (tc === 'never') {
     console.log('- testCases.mode = never -> NO sugerir ni invocar /test-define en ningun momento de la planificacion.');
     console.log('  - work-define: ofrecer unicamente /work-plan para las tareas.');
@@ -59,9 +62,10 @@ if (specification) {
 "
 ```
 
-> **`mode` solo gobierna la oferta de `test-define`.** El resto de próximos pasos de cada skill no cambia con
-> este bloque: `work-define` sigue sugiriendo `/work-plan` para las tareas y `work-plan` sigue sugiriendo
-> `/work-implement`, igual en los tres valores.
+> **`mode` gobierna la oferta de `test-define` y, con `always`, también su aceptación final (Paso 4.5).**
+> El resto de próximos pasos de cada skill no cambia con este bloque: `work-define` sigue sugiriendo
+> `/work-plan` para las tareas y `work-plan` sigue sugiriendo `/work-implement`, igual en los tres valores.
+> Dentro de `test-define`, `ask` y `never` mantienen la pregunta de aceptación del Paso 4.5 tal cual estaba.
 
 > **`askDetails` no lo consume la planificación.** `work-define` y `work-plan` lo ignoran; es `test-define`
 > quien lo lee al arrancar, venga invocado por la planificación o directamente por el usuario. Un

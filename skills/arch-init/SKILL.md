@@ -1,13 +1,13 @@
 ---
 name: arch-init
 description: >-
-  Identifica el punto de partida de un proyecto (sin código / con código base / con implementación) e inicializa lo que falte de su harness multi-agente: repo git, placeholders `AGENTS.md`/`CLAUDE.md`/`.agents/MEMORY.md`/`.sdd-devkit/settings.json`/`docs/adr/README.md`/`docs/standards/README.md` — migrando al formato de las plantillas los que ya existan en otro formato, sin perder contenido —, el stack tecnológico (capturando qué se quiere desarrollar y, si hace falta, investigando con `work-research`), candidatos de ADR/estándares (vía `arch-discover` si ya hay implementación) y la compuerta de calidad (consultando `quality-check` para saber qué se suele validar por stack). Cierra actualizando el stack y sugiriendo continuar con `work-define` o `work-plan`. Activar al pedir inicializar, bootstrapear o preparar un proyecto para agentes, configurar su harness, crear `AGENTS.md`/`CLAUDE.md`/`MEMORY.md` desde cero, o mencionar "arch-init", "/arch-init", "inicializa el harness".
+  Identifica el punto de partida de un proyecto (sin código / con código base / con implementación) e inicializa lo que falte de su harness multi-agente: repo git, placeholders `AGENTS.md`/`CLAUDE.md`/`.agents/MEMORY.md`/`.sdd-devkit/settings.json`/`docs/adr/README.md`/`docs/standards/README.md`/`README.md` (raíz, con una descripción de qué hace el proyecto en 1-2 párrafos) — migrando al formato de las plantillas los seis primeros que ya existan en otro formato, sin perder contenido —, el stack tecnológico (capturando qué se quiere desarrollar y, si hace falta, investigando con `work-research`), candidatos de ADR/estándares (vía `arch-discover` si ya hay implementación) y la compuerta de calidad (consultando `quality-check` para saber qué se suele validar por stack). Cierra actualizando el stack y sugiriendo continuar con `work-define` o `work-plan`. Activar al pedir inicializar, bootstrapear o preparar un proyecto para agentes, configurar su harness, crear `AGENTS.md`/`CLAUDE.md`/`MEMORY.md` desde cero, o mencionar "arch-init", "/arch-init", "inicializa el harness".
 license: MIT
 ---
 
 # Skill: Inicialización del harness de agentes (arch-init)
 
-Inicializa, en un proyecto **en cualquier punto de partida**, las primeras instrucciones persistentes y compatibles con múltiples agentes: repositorio git, los archivos base del harness (`AGENTS.md`, `CLAUDE.md`, `.agents/MEMORY.md`, `.sdd-devkit/settings.json`, `docs/adr/README.md`, `docs/standards/README.md`), un stack tecnológico definido, una compuerta de calidad mínima y las decisiones relevantes documentadas como ADR/estándares.
+Inicializa, en un proyecto **en cualquier punto de partida**, las primeras instrucciones persistentes y compatibles con múltiples agentes: repositorio git, los archivos base del harness (`AGENTS.md`, `CLAUDE.md`, `.agents/MEMORY.md`, `.sdd-devkit/settings.json`, `docs/adr/README.md`, `docs/standards/README.md`, `README.md` de la raíz), un stack tecnológico definido, una compuerta de calidad mínima y las decisiones relevantes documentadas como ADR/estándares.
 
 > **Completa siempre lo que falta.** El punto de partida que identifica el Paso 1 — sin código, con código base, o con implementación — solo decide **cómo** se llega a cada pieza (p. ej. un stack ya detectado salta el Paso 2). El resultado al cerrar es siempre el mismo checklist completo, sin importar de dónde partió.
 >
@@ -17,7 +17,7 @@ Inicializa, en un proyecto **en cualquier punto de partida**, las primeras instr
 
 ## Relación con el resto de SDD Devkit
 
-`arch-init` es el único punto de entrada que **crea** `AGENTS.md`, `.agents/MEMORY.md`, `.sdd-devkit/settings.json`, `docs/adr/README.md` y `docs/standards/README.md` desde cero — el resto de skills de arquitectura los dan por existentes (o toleran que estén vacíos):
+`arch-init` es el único punto de entrada que **crea** `AGENTS.md`, `.agents/MEMORY.md`, `.sdd-devkit/settings.json`, `docs/adr/README.md`, `docs/standards/README.md` y el `README.md` de la raíz desde cero — el resto de skills de arquitectura los dan por existentes (o toleran que estén vacíos):
 
 | Skill | Qué asume/hace, y cómo se relaciona con `arch-init` |
 | ----- | ----------------------------------------------------- |
@@ -61,14 +61,15 @@ No continúes hasta haber leído y aplicado `language.md`.
 | `CLAUDE.md` | Solo `@AGENTS.md`, por compatibilidad | Paso 3 |
 | `.agents/MEMORY.md` | Memoria persistente (preferencias y reglas operativas — **no** el stack, eso vive solo en `AGENTS.md`) | Paso 3 (stub) |
 | `.sdd-devkit/settings.json` | Configuración del plugin conforme a [`schemas/settings.schema.json`](../../schemas/settings.schema.json); **persiste el idioma** en la clave `language` | Paso 3 |
+| `README.md` (raíz) | Descripción de qué hace el proyecto, 1-2 párrafos | Paso 3 (agregada/actualizada — sin plantilla de secciones fija) |
 | `docs/adr/README.md` | Índice de ADRs vigentes | Paso 3 (stub) → Paso 5 (poblado por `arch-manage`) |
 | `docs/standards/README.md` | Índice de estándares vigentes | Paso 3 (stub) → Paso 5 (poblado por `arch-manage`) |
 
-Cualquiera de estos seis que **ya exista** en el proyecto se lleva al formato de su plantilla en el Paso 3 (ver [3.1 Migración de formato](#31-migración-de-formato)) — el harness no admite variantes de formato, porque el resto del catálogo lee estas secciones por su título.
+Los **siete archivos del harness** que **ya existan** en el proyecto se revisan en el Paso 3. Los primeros seis (`AGENTS.md`, `CLAUDE.md`, `.agents/MEMORY.md`, `.sdd-devkit/settings.json`, `docs/adr/README.md`, `docs/standards/README.md`) se llevan al formato de su plantilla (ver [3.1 Migración de formato](#31-migración-de-formato)) — no admiten variantes de formato, porque el resto del catálogo lee sus secciones por título. `README.md` es el séptimo, pero **no tiene una plantilla de secciones fija**: es un artefacto libre del proyecto, y su única regla de conformidad es tener, cerca del inicio, la descripción de qué hace el proyecto en 1-2 párrafos, sin que `arch-init` toque el resto de su contenido — ver [3.4 README.md raíz — descripción del proyecto](#34-readmemd-raíz--descripción-del-proyecto).
 
-> **Raíz de los índices de arquitectura.** Los cuatro primeros archivos son del **harness** y viven siempre
-> en la raíz del repositorio principal. Los dos índices (`docs/adr/README.md`, `docs/standards/README.md`)
-> son artefactos de **arquitectura**: pertenecen a la raíz del repositorio cuyo código documentan (ver
+> **Raíz de los índices de arquitectura.** Los cinco primeros archivos (incluido `README.md`) son del
+> **harness** y viven siempre en la raíz del repositorio principal. Los dos índices (`docs/adr/README.md`,
+> `docs/standards/README.md`) son artefactos de **arquitectura**: pertenecen a la raíz del repositorio cuyo código documentan (ver
 > [`../../reference/artifacts.md`](../../reference/artifacts.md#raíz-de-arquitectura-adr-estándares-y-fitness-functions)).
 > La raíz principal **siempre** los recibe (`AGENTS.md` los referencia). **Si el proyecto tiene submódulos
 > o repositorios anidados**, preguntar en el Paso 3 para cuáles de ellos crear **además** los suyos — cada
@@ -157,16 +158,19 @@ Antes de escribir cualquier archivo, verificar si ya existe y aplicar [Idempoten
 > **Este archivo es JSON validado por schema, no markdown.** Debe cumplir [`schemas/settings.schema.json`](../../schemas/settings.schema.json): las **6** claves de primer nivel (`language`, `specification`, `implementation`, `verification`, `git`, `projectManagement`) son **obligatorias** — la lista viva es la de `required` en el schema, no esta enumeración. `$schema` es opcional (ruta al schema para el editor; ningún skill la resuelve). Fuera de esa, el schema **no admite propiedades adicionales** y `language` solo acepta los códigos de su `enum`. Cuando `projectManagement` queda en `"enabled": false`, el schema **no exige** el resto de sus claves: dejarlas fuera. `specification` es distinto: `basePath`, `archivePath` y `testCases` son obligatorios siempre; solo `trackingUrl` se omite cuando `trackingEnabled` es `false`. `testCases` es un **objeto** que exige `mode` (`ask`/`always`/`never`) y `askDetails` (booleano), ambos obligatorios.
 
 7. **`.gitignore`** — asegurar que incluye `.sdd-devkit/.env`. Ahí vive `SDD_DEVKIT_ACCESS_TOKEN` (hooks y CLI); no se versiona. Si `.gitignore` no existe, crearlo con esa línea; si existe y no la tiene, añadirla. **No** crear el archivo `.env`.
+8. **`README.md` (raíz)** — asegurar que incluya, cerca del inicio del archivo, una descripción de **qué hace el proyecto** en **máximo 1-2 párrafos**. Es el séptimo archivo del harness, pero no sigue la migración por plantilla completa del punto 3.1 — ver [3.4](#34-readmemd-raíz--descripción-del-proyecto).
 
 ### Idempotencia / reejecución
 
-Un proyecto existente puede ya tener alguno de los seis archivos del harness, escrito a mano o por otra herramienta. **Ninguno de ellos se deja como estaba si su formato no es el de la plantilla**: el harness solo funciona si los seis archivos tienen la estructura que el resto del catálogo espera leer (secciones, títulos y marcadores de las plantillas de `assets/`). Para cada archivo que ya exista, comparar su estructura contra la plantilla correspondiente y aplicar una de estas tres salidas:
+Un proyecto existente puede ya tener alguno de los siete archivos del harness, escrito a mano o por otra herramienta. **Ninguno de ellos se deja como estaba si no cumple su propia regla de conformidad.** Para los seis con plantilla fija (`AGENTS.md`, `CLAUDE.md`, `.agents/MEMORY.md`, `.sdd-devkit/settings.json`, `docs/adr/README.md`, `docs/standards/README.md`), el harness solo funciona si tienen la estructura que el resto del catálogo espera leer (secciones, títulos y marcadores de las plantillas de `assets/`); comparar su estructura contra la plantilla correspondiente y aplicar una de estas tres salidas:
 
 | Estado del archivo existente | Qué hacer |
 | ---------------------------- | --------- |
 | **Ya conforme** — tiene todas las secciones de la plantilla, con sus títulos y en su orden | No tocar. Continuar como si ya estuviera creado. |
 | **Formato divergente** — es reconociblemente el mismo archivo (mismo propósito) pero le faltan secciones, tiene otros títulos, otro orden, o perdió los comentarios-marcador | **Migrar al formato de la plantilla** (ver 3.1). |
 | **Contenido ajeno** — el archivo existe con un propósito distinto al del harness y no hay nada que migrar | No sobrescribir. Mostrar el contenido actual y preguntar si fusionar, reemplazar o dejar como está. |
+
+`README.md`, el séptimo, no tiene plantilla de secciones ni pasa por esta tabla: su conformidad se decide solo por si ya trae, o no, una descripción vigente del proyecto — ver [3.4](#34-readmemd-raíz--descripción-del-proyecto).
 
 > **`.sdd-devkit/settings.json` no se migra, se completa.** Si ya existe, **nunca** se sobrescribe: conservar los valores del usuario y limitarse a **agregar las claves obligatorias que falten** con los valores de la plantilla. Si le falta `language`, escribir ahí el idioma resuelto. Si tiene valores que el schema rechaza, no corregirlos por cuenta propia: informarlo en el cierre (Paso 5.3) y dejar el archivo como está.
 
@@ -187,7 +191,20 @@ Si el `AGENTS.md` existente ya describía el stack, ese contenido se **preserva*
 
 ### 3.3 Harness ya completo
 
-Si los seis archivos existen y **todos** están conformes (o ya quedaron migrados), informar que el proyecto ya está inicializado y preguntar si se desea continuar igualmente para revisar/completar el resto (Paso 4 en adelante) o terminar aquí.
+Si los siete archivos existen y **todos** están conformes (los seis con plantilla fija ya migrados si hacía falta, y `README.md` con su descripción vigente), informar que el proyecto ya está inicializado y preguntar si se desea continuar igualmente para revisar/completar el resto (Paso 4 en adelante) o terminar aquí.
+
+### 3.4 README.md raíz — descripción del proyecto
+
+A diferencia de los otros seis archivos del harness, `README.md` no tiene una plantilla de secciones fija: es un artefacto libre del proyecto, no una plantilla del catálogo. `arch-init` solo garantiza que tenga, cerca del inicio, una descripción de **qué hace el proyecto** — no toca el resto de su contenido (instalación, badges, licencia, contribución, tabla de contenidos, etc.), ni le impone secciones.
+
+1. **De dónde sale la descripción:**
+   - **Sin código:** la necesidad capturada en el [Paso 2.1](#21-preguntar-qué-se-quiere-desarrollar) — qué problema resuelve y para quién.
+   - **Con código base** o **con implementación:** inferirla del contenido existente (README previo, campo `description` de `package.json`/`pyproject.toml`/manifiesto equivalente, `docs/specs/` si ya hay historias) o de lo observado en el código durante el Paso 1 / Paso 4.1. Si no hay evidencia suficiente para redactarla con confianza, preguntar al usuario con una sola pregunta abierta (mismo estilo que el Paso 2.1): *"¿Qué hace este proyecto, en pocas palabras?"*.
+2. **Si `README.md` no existe:** crearlo con un título (nombre del repo) y la descripción, en 1-2 párrafos.
+3. **Si ya existe:**
+   - Si ya trae una descripción vigente del propósito del proyecto (aunque no esté bajo un encabezado con ese nombre), no tocarla.
+   - Si no la tiene, o quedó claramente desactualizada frente a lo detectado, proponer agregarla/actualizarla cerca del inicio del archivo — mostrando el fragmento a insertar, no un diff del archivo completo — y pedir confirmación antes de escribir, con el mismo criterio de "mostrar antes de escribir" que la migración del harness (3.1, punto 5). Si en el mismo Paso 3 hay además migraciones de formato pendientes (3.1), agrupar esta propuesta en la **misma tanda** de confirmación en vez de preguntar aparte.
+4. **Límite duro: 1-2 párrafos.** No agregar instalación, lista de features, badges, tabla de contenidos ni roadmap — eso, si el proyecto lo necesita, lo agrega el usuario o queda fuera del alcance de `arch-init`.
 
 ---
 
@@ -298,6 +315,10 @@ Reglas transversales del catálogo; viven en la raíz del plugin, no en este ski
 - Forzar el handoff a `work-define`/`work-plan` en el 5.3 en vez de ofrecerlo como sugerencia que el usuario puede declinar.
 - Hacer commit automático del harness sin que el usuario lo pida (queda para `git-commit`, fuera de este skill).
 - Lanzar preguntas como prosa libre cuando el cliente expone la herramienta de preguntas estructuradas.
+- Escribir más de 1-2 párrafos de descripción en el `README.md` raíz, o agregarle secciones que el usuario no pidió (instalación, features, badges, tabla de contenidos, roadmap).
+- Sobrescribir, reordenar o reformular el resto del `README.md` raíz al agregar/actualizar la descripción — solo se toca ese fragmento.
+- Inventar la descripción del `README.md` raíz sin evidencia (README/manifiesto previos, código, o la necesidad del Paso 2.1) en vez de preguntarle al usuario en una sola pregunta abierta.
+- Tratar el `README.md` raíz como uno de los seis archivos con plantilla fija: exigirle secciones, títulos u orden que su regla de conformidad (3.4) no pide.
 
 ---
 
@@ -305,7 +326,7 @@ Reglas transversales del catálogo; viven en la raíz del plugin, no en este ski
 
 **Ejemplo 1 — Sin código, necesidad con restricciones que ameritan investigar**
 
-Carpeta vacía salvo un `README.md`. Paso 1: no hay repo git → `git init`; sin manifiestos → situación "sin código". Paso 2.1: a "¿qué quieres desarrollar?" el usuario responde "una API para gestionar pedidos de un e-commerce, con picos fuertes de tráfico en fechas de descuentos" — sin preferencia de stack. Paso 2.2: la restricción de picos de tráfico no es trivial → se decide investigar; el subagente de `work-research` compara Node/Fastify, Python/FastAPI y Go con foco en throughput, con comandos de instalación para cada uno; el usuario elige Fastify + TypeScript. Paso 2.3: se ejecuta el scaffold. Paso 3: se crean los seis archivos del harness (incluido `.sdd-devkit/settings.json` con `"language": "es"`). Paso 4.1: como no hay implementación todavía, el único candidato es "Fastify + TypeScript" (dominio `api`, con las alternativas del `RS-XXX`). Paso 4.2: se consulta `quality-check/references/stacks.md` para Node+TS (tipado, linter, unit, coverage y build son bloqueantes); no hay nada configurado → se sugiere Vitest (unit) y, por tratarse de una API, Supertest (API testing); el usuario acepta ambos y se configuran. Se suma "Vitest + Supertest" (dominio `testing`) a la lista. Paso 5.1: el usuario acepta documentar ambos candidatos → subagente `/arch-manage` crea los ADR y los estándares de dominio `api` y `testing`. Paso 5.2: se escribe el stack en `AGENTS.md`. Paso 5.3: se confirma el cierre y se ofrece continuar con `work-define`; el usuario acepta.
+Carpeta vacía salvo un `README.md` con solo el título del repo, sin descripción. Paso 1: no hay repo git → `git init`; sin manifiestos → situación "sin código". Paso 2.1: a "¿qué quieres desarrollar?" el usuario responde "una API para gestionar pedidos de un e-commerce, con picos fuertes de tráfico en fechas de descuentos" — sin preferencia de stack. Paso 2.2: la restricción de picos de tráfico no es trivial → se decide investigar; el subagente de `work-research` compara Node/Fastify, Python/FastAPI y Go con foco en throughput, con comandos de instalación para cada uno; el usuario elige Fastify + TypeScript. Paso 2.3: se ejecuta el scaffold. Paso 3: se crean los seis archivos del harness con plantilla fija (incluido `.sdd-devkit/settings.json` con `"language": "es"`); el `README.md` preexistente no tenía descripción, así que se propone agregarle el párrafo redactado a partir de la necesidad capturada en 2.1 y, confirmado, se inserta cerca del inicio sin tocar el resto del archivo. Paso 4.1: como no hay implementación todavía, el único candidato es "Fastify + TypeScript" (dominio `api`, con las alternativas del `RS-XXX`). Paso 4.2: se consulta `quality-check/references/stacks.md` para Node+TS (tipado, linter, unit, coverage y build son bloqueantes); no hay nada configurado → se sugiere Vitest (unit) y, por tratarse de una API, Supertest (API testing); el usuario acepta ambos y se configuran. Se suma "Vitest + Supertest" (dominio `testing`) a la lista. Paso 5.1: el usuario acepta documentar ambos candidatos → subagente `/arch-manage` crea los ADR y los estándares de dominio `api` y `testing`. Paso 5.2: se escribe el stack en `AGENTS.md`. Paso 5.3: se confirma el cierre y se ofrece continuar con `work-define`; el usuario acepta.
 
 **Ejemplo 2 — Con implementación, delegando en arch-discover**
 
@@ -313,23 +334,24 @@ Repo git con historial de dos años, `package.json` con NestJS + Prisma, `docs/s
 
 **Ejemplo 3 — Con código base, sugerencia directa sin investigar**
 
-Carpeta con un scaffold de Astro recién generado (`npm create astro@latest`), sin posts ni contenido propio. Paso 1: repo existe; `package.json` detecta Astro → situación "con código base" → se salta el Paso 2 (el stack ya está decidido por el scaffold). Paso 3: se crean los seis archivos del harness. Paso 4.1: el candidato es "Astro" (dominio `frontend`), sin alternativas registradas porque no hubo Paso 2. Paso 4.2: `quality-check/references/stacks.md` para Node+TS marca unit/build como bloqueantes; se sugiere Vitest; el usuario acepta. Paso 5: se documenta lo aceptado, se escribe el stack, se confirma el cierre y se ofrece `work-define`.
+Carpeta con un scaffold de Astro recién generado (`npm create astro@latest`), sin posts ni contenido propio. Paso 1: repo existe; `package.json` detecta Astro → situación "con código base" → se salta el Paso 2 (el stack ya está decidido por el scaffold). Paso 3: se crean los seis archivos del harness con plantilla fija; el scaffold generó un `README.md` genérico ("Astro starter") sin describir el proyecto real, así que se pregunta en una sola pregunta abierta qué hace el sitio y se actualiza la descripción cerca del inicio. Paso 4.1: el candidato es "Astro" (dominio `frontend`), sin alternativas registradas porque no hubo Paso 2. Paso 4.2: `quality-check/references/stacks.md` para Node+TS marca unit/build como bloqueantes; se sugiere Vitest; el usuario acepta. Paso 5: se documenta lo aceptado, se escribe el stack, se confirma el cierre y se ofrece `work-define`.
 
 **Ejemplo 4 — Reejecución sobre un harness ya inicializado**
 
-El usuario vuelve a pedir `arch-init` sobre un proyecto donde ya corrió antes. Paso 3 detecta que los seis archivos ya existen y están conformes con las plantillas → informa que el harness ya está inicializado y pregunta si continuar para revisar/completar. El usuario confirma porque quiere agregar la compuerta E2E que no se configuró la primera vez → el skill retoma directamente en el Paso 4.2, sin tocar los archivos ya creados.
+El usuario vuelve a pedir `arch-init` sobre un proyecto donde ya corrió antes. Paso 3 detecta que los siete archivos ya existen y están conformes (los seis con sus plantillas, `README.md` con su descripción) → informa que el harness ya está inicializado y pregunta si continuar para revisar/completar. El usuario confirma porque quiere agregar la compuerta E2E que no se configuró la primera vez → el skill retoma directamente en el Paso 4.2, sin tocar los archivos ya creados.
 
 **Ejemplo 5 — Proyecto existente con documentos del harness en otro formato**
 
-Monorepo Django con historial propio. Ya tiene un `CLAUDE.md` de 60 líneas escrito a mano (reglas de estilo, comandos de test, una nota sobre migraciones), un `docs/adr/README.md` con una tabla de tres ADRs, y ningún `AGENTS.md`, `.agents/MEMORY.md`, `.sdd-devkit/settings.json` ni `docs/standards/README.md`. Paso 1: repo existe; stack Django detectado; situación "con implementación" → se salta el Paso 2.
+Monorepo Django con historial propio. Ya tiene un `CLAUDE.md` de 60 líneas escrito a mano (reglas de estilo, comandos de test, una nota sobre migraciones), un `docs/adr/README.md` con una tabla de tres ADRs, un `README.md` con instalación y badges pero sin ningún párrafo que diga qué hace el proyecto, y ningún `AGENTS.md`, `.agents/MEMORY.md`, `.sdd-devkit/settings.json` ni `docs/standards/README.md`. Paso 1: repo existe; stack Django detectado; situación "con implementación" → se salta el Paso 2.
 
 Paso 3 compara cada archivo existente contra su plantilla:
 
 - `CLAUDE.md` → **contenido ajeno** respecto a la plantilla (que es solo `@AGENTS.md`), pero su contenido sí es material de `AGENTS.md`. Se propone: crear `AGENTS.md` con la plantilla, reubicar las reglas de estilo y los comandos de test bajo `# Reglas generales`, dejar la nota sobre migraciones al final bajo su propio encabezado (no hay sección equivalente), y reducir `CLAUDE.md` a `@AGENTS.md`. El `# Stack tecnológico` de `AGENTS.md` queda con el comentario de la plantilla — el `CLAUDE.md` original no describía el stack, así que se rellenará en el Paso 5.2.
 - `docs/adr/README.md` → **formato divergente**: falta el encabezado y el comentario-marcador, y las entradas están en tabla. Se propone reescribir con el título y el párrafo de la plantilla, restaurar el marcador y convertir las tres filas en líneas `- [ADR-XXX: Título](ADR-XXX-slug.md)` ordenadas por identificador, conservando los títulos tal como los escribió el usuario.
-- Los cuatro archivos faltantes se crean desde plantilla, sin preguntar — `.sdd-devkit/settings.json` con el idioma resuelto en su clave `language` y el resto de valores de la plantilla.
+- `README.md` → no sigue esta comparación por plantilla (3.4): como no trae ninguna descripción del proyecto, se infiere una de lo detectado en el código Django y se propone insertarla cerca del inicio, sin tocar la instalación ni los badges existentes.
+- Los cuatro archivos del harness que faltan (`AGENTS.md`, `.agents/MEMORY.md`, `.sdd-devkit/settings.json`, `docs/standards/README.md`) se crean desde plantilla, sin preguntar — `.sdd-devkit/settings.json` con el idioma resuelto en su clave `language` y el resto de valores de la plantilla.
 
-Las dos migraciones se presentan en **una sola tanda** con su diff; el usuario acepta la del índice de ADRs y declina la de `CLAUDE.md` porque quiere reubicar él mismo esas reglas. `CLAUDE.md` queda intacto y `AGENTS.md` se crea igual desde plantilla (es una creación, no una migración) — solo sin las reglas heredadas. Se registra que `CLAUDE.md` queda fuera de formato para reportarlo en el 5.3, advirtiendo que sus reglas no las verá el resto del catálogo, que lee `AGENTS.md`. El flujo continúa en el Paso 4.
+Las dos migraciones y la propuesta de descripción del `README.md` se presentan en **una sola tanda**; el usuario acepta la del índice de ADRs y la descripción del `README.md`, y declina la de `CLAUDE.md` porque quiere reubicar él mismo esas reglas. `CLAUDE.md` queda intacto y `AGENTS.md` se crea igual desde plantilla (es una creación, no una migración) — solo sin las reglas heredadas. Se registra que `CLAUDE.md` queda fuera de formato para reportarlo en el 5.3, advirtiendo que sus reglas no las verá el resto del catálogo, que lee `AGENTS.md`. El flujo continúa en el Paso 4.
 
 ---
 
