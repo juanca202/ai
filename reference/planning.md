@@ -11,6 +11,11 @@ Son independientes: `mode` gobierna la **oferta de invocación** y la **aceptaci
 
 > **Extracción de criterios (Paso 1) sin confirmación.** Independientemente de `mode` y `askDetails`, `test-define` ya no pide confirmar la lista de criterios de aceptación extraídos antes de generar los TC: el alcance por defecto es siempre **todos** los criterios (ver `test-define/SKILL.md`, Paso 1 y Paso 2).
 
+> **Ejecutar este bloque con Bash — no leerlo como prosa ni reimplementar su lógica a mano.** Es un
+> script, no una explicación: correrlo y usar literalmente lo que imprime como la política ya resuelta.
+> Razonar a mano sobre `.sdd-devkit/settings.json` en su lugar —aunque se llegue a la misma
+> conclusión— reintroduce el margen de error de interpretación que el script existe para eliminar.
+
 ```!
 node -e "
 const fs = require('fs');

@@ -279,3 +279,5 @@ BREAKING CHANGE: `/v1/users` removed; clients must migrate to `/v2/users`.
 - Hacer push sin haber resuelto primero la política de `git.push`, o pushear con `push = never`.
 - Preguntar en prosa libre cuando el cliente expone la herramienta estructurada.
 - Narrar el trabajo paso a paso: reportar solo SHA, mensaje final y pendientes.
+- Leer `git.md` o `language.md` como prosa y razonar a mano sobre `.sdd-devkit/settings.json` en vez de ejecutar su bloque ` ```! ` con Bash — el resultado puede coincidir por suerte, no por garantía.
+- Reconstruir de memoria el comando de [detección de secretos](#detección-de-secretos-en-el-diff) en vez de copiar literal el de `secret-detection.md`, o saltarse el chequeo de nombres sensibles porque `git status` "ya los habría mostrado".

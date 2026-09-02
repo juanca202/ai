@@ -4,6 +4,8 @@ Ejecutar desde la raíz del repositorio **antes** de aceptar el staging. El agen
 
 ## Comando
 
+> **Copiar este comando literal y ejecutarlo — no reconstruirlo de memoria ni aproximarlo con una regex propia.** Ya resolvió sus casos borde (el filtro `grep '^+'` que sigue, para no bloquear commits que **quitan** un secreto en vez de introducirlo, es el que más se pierde al reescribirlo desde cero).
+
 ```bash
 git diff --staged | grep '^+' | grep -v '^+++' | \
   grep -nEi 'password[[:space:]]*=|api[_-]?key|secret[[:space:]]*=|token[[:space:]]*=|BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY|aws_access_key_id|aws_secret_access_key|-----BEGIN CERTIFICATE-----'

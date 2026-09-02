@@ -1,5 +1,10 @@
 # Resolución de idioma de artefactos y mensajes
 
+> **Ejecutar este bloque con Bash — no leerlo como prosa ni reimplementar su lógica a mano.** Es un
+> script, no una explicación: correrlo y usar literalmente lo que imprime como el idioma ya resuelto.
+> Razonar a mano sobre `.sdd-devkit/settings.json` en su lugar —aunque se llegue a la misma
+> conclusión— reintroduce el margen de error de interpretación que el script existe para eliminar.
+
 ```!
 node -e "
 const fs = require('fs');
