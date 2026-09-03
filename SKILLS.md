@@ -59,15 +59,16 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 | **Sin código**         | Obliga a definir stack (Paso 2); no hay descubrimiento desde código. |
 | **Con código base**    | Stack detectable; sin lógica de negocio propia aún.                  |
 | **Con implementación** | Invoca `arch-discover` completo para candidatos de ADR/estándares.   |
+| **Solo specs**         | Repositorio que nunca va a tener código de aplicación (solo documentación/especificaciones): salta el Paso 2 y el Paso 4 completos, y nunca recibe `docs/adr/`/`docs/standards/` propios. |
 
-Se clasifica por repositorio: en un proyecto de un solo repo, una sola vez; en multi-repo, una vez por cada submódulo (el repositorio de especificaciones nunca se clasifica — no tiene código propio).
+Se clasifica por repositorio: en un proyecto de un solo repo, una sola vez; en multi-repo, una vez por cada submódulo — el repositorio de especificaciones no se pregunta, es automáticamente "Solo specs" por definición (no tiene código propio).
 
 **Opciones — topología** (repo único vs. multi-repo, se resuelve antes de lo anterior):
 
 | Topología      | Qué implica                                                                                                    |
 | -------------- | ---------------------------------------------------------------------------------------------------------------- |
 | **Un solo repo** | Comportamiento estándar: el harness vive en ese mismo repositorio.                                              |
-| **Varios repos** | Crea (o usa) un repositorio de especificaciones como principal, con cada repo adicional agregado como submódulo en su raíz; el harness vive en el de especificaciones y el resto de pasos se repiten por submódulo. |
+| **Varios repos** | Crea (o usa) un repositorio de especificaciones como principal, con cada repo adicional agregado como submódulo en su raíz. `AGENTS.md`/`CLAUDE.md`/`README.md` se crean en el de especificaciones **y** en cada submódulo (uno por repositorio); `.agents/MEMORY.md`/`.sdd-devkit/settings.json` son únicos, solo en el de especificaciones. El resto de pasos se repiten por submódulo. |
 
 **Handoffs:** `arch-discover` (brownfield, por repositorio si es multi-repo), `arch-manage` (candidatos aceptados, por raíz de arquitectura), consulta a `quality-check` (qué validar por stack). Reejecutable: solo completa lo que falte.
 

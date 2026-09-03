@@ -1,7 +1,7 @@
 # Fuentes de contexto
 
 - @.agents/MEMORY.md — Preferencias del proyecto
-- @docs/adr/README.md — Índice de decisiones arquitectónicas
+- @docs/adr/README.md — Índice de decisiones arquitectónicas <!-- omitir esta línea y la siguiente si este repositorio está clasificado "Solo specs" (siempre el caso del repositorio de especificaciones en modo multi-repo) — nunca recibe estos índices -->
 - @docs/standards/README.md — Índice de estándares de arquitectura
 - README.md — Acerca del proyecto
 
@@ -11,4 +11,4 @@
 
 # Stack tecnológico
 
-<!-- Lenguaje(s) y versión, framework(s) principal(es), runtime, gestor de paquetes/build y capas de testing configuradas. Esta es la única fuente del stack del proyecto. Si el proyecto es multi-repo (este archivo vive en el repositorio de especificaciones), reemplazar por una tabla con una fila por repositorio (la raíz de especificaciones incluida, marcada sin stack de aplicación propio) en vez de una sola descripción — ver arch-init/references/multi-repo.md § 6. -->
+<!-- Lenguaje(s) y versión, framework(s) principal(es), runtime, gestor de paquetes/build y capas de testing configuradas. Esta es la única fuente del stack del proyecto. Si este repositorio está clasificado "Solo specs", reemplazar por "No aplica — repositorio de solo especificaciones" en vez de un stack. Si el proyecto es multi-repo (este archivo vive en el repositorio de especificaciones, que es siempre "Solo specs"), reemplazar en cambio por una tabla-resumen con una fila por submódulo y un enlace al AGENTS.md de cada uno — ver arch-init/references/multi-repo.md § 7. -->

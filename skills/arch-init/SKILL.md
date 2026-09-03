@@ -9,7 +9,7 @@ license: MIT
 
 Inicializa, en un proyecto **en cualquier punto de partida**, las primeras instrucciones persistentes y compatibles con múltiples agentes: repositorio git, los archivos base del harness (`AGENTS.md`, `CLAUDE.md`, `.agents/MEMORY.md`, `.sdd-devkit/settings.json`, `docs/adr/README.md`, `docs/standards/README.md`, `README.md` de la raíz), un stack tecnológico definido, una compuerta de calidad mínima y las decisiones relevantes documentadas como ADR/estándares.
 
-> **Completa siempre lo que falta.** El punto de partida que identifica el Paso 1 — sin código, con código base, o con implementación — solo decide **cómo** se llega a cada pieza (p. ej. un stack ya detectado salta el Paso 2). El resultado al cerrar es siempre el mismo checklist completo, sin importar de dónde partió.
+> **Completa siempre lo que falta.** El punto de partida que identifica el Paso 1 — sin código, con código base, o con implementación — solo decide **cómo** se llega a cada pieza (p. ej. un stack ya detectado salta el Paso 2). El resultado al cerrar es siempre el mismo checklist completo, sin importar de dónde partió. **Excepción: "Solo specs".** Un repositorio sin código de aplicación (nunca lo va a tener) no es un punto de partida más de esa escala, sino un tipo de repositorio distinto: su checklist de cierre es deliberadamente más corto — sin stack, sin candidatos de arquitectura ni compuerta de calidad, sin `docs/adr/`/`docs/standards/` propios — porque nada de eso aplica a un repositorio que solo contiene documentación.
 >
 > **Alcance:** este skill **bootstrapea** el harness — es el primer paso de SDD Devkit, antes de que exista nada que `arch-discover`, `arch-manage`, `arch-audit` o `quality-check` puedan leer, auditar o revisar. No reemplaza a `work-define` / `work-plan` / `work-implement` (historias y tareas) ni reimplementa la lógica de esos skills — los invoca cuando corresponde. Se ejecuta normalmente **una vez** por proyecto; volver a ejecutarlo sobre uno ya inicializado solo completa lo que falte (ver [Idempotencia](#idempotencia--reejecución)).
 >
@@ -57,30 +57,40 @@ No continúes hasta haber leído y aplicado `language.md`.
 
 | Archivo | Contenido | Se crea en |
 | ------- | --------- | ---------- |
-| `AGENTS.md` | Fuentes de contexto + reglas generales + sección `Stack tecnológico` | Paso 3 (stub) → Paso 5 (stack definitivo) |
-| `CLAUDE.md` | Solo `@AGENTS.md`, por compatibilidad | Paso 3 |
-| `.agents/MEMORY.md` | Memoria persistente (preferencias y reglas operativas — **no** el stack, eso vive solo en `AGENTS.md`) | Paso 3 (stub) |
-| `.sdd-devkit/settings.json` | Configuración del plugin conforme a [`schemas/settings.schema.json`](../../schemas/settings.schema.json); **persiste el idioma** en la clave `language` | Paso 3 |
-| `README.md` (raíz) | Descripción de qué hace el proyecto, 1-2 párrafos | Paso 3 (agregada/actualizada — sin plantilla de secciones fija) |
+| `AGENTS.md` | Fuentes de contexto + reglas generales + sección `Stack tecnológico` | Paso 3 (stub) → Paso 5 (stack definitivo). **Por repositorio**: uno en la raíz principal y uno en cada submódulo si es multi-repo — ver la nota de abajo. |
+| `CLAUDE.md` | Solo `@AGENTS.md`, por compatibilidad | Paso 3. **Por repositorio**, igual que `AGENTS.md`. |
+| `.agents/MEMORY.md` | Memoria persistente (preferencias y reglas operativas — **no** el stack, eso vive solo en `AGENTS.md`) | Paso 3 (stub). **Único**: solo en la raíz principal, nunca en un submódulo. |
+| `.sdd-devkit/settings.json` | Configuración del plugin conforme a [`schemas/settings.schema.json`](../../schemas/settings.schema.json); **persiste el idioma** en la clave `language` | Paso 3. **Único**: solo en la raíz principal, nunca en un submódulo. |
+| `README.md` (raíz) | Descripción de qué hace el proyecto, 1-2 párrafos | Paso 3 (agregada/actualizada — sin plantilla de secciones fija). **Por repositorio**, igual que `AGENTS.md`: en la raíz principal describe la solución completa; en cada submódulo, ese repositorio en particular. |
 | `docs/adr/README.md` | Índice de ADRs vigentes | Paso 3 (stub) → Paso 5 (poblado por `arch-manage`) |
 | `docs/standards/README.md` | Índice de estándares vigentes | Paso 3 (stub) → Paso 5 (poblado por `arch-manage`) |
 
-Los **siete archivos del harness** que **ya existan** en el proyecto se revisan en el Paso 3. Los primeros seis (`AGENTS.md`, `CLAUDE.md`, `.agents/MEMORY.md`, `.sdd-devkit/settings.json`, `docs/adr/README.md`, `docs/standards/README.md`) se llevan al formato de su plantilla (ver [3.1 Migración de formato](#31-migración-de-formato)) — no admiten variantes de formato, porque el resto del catálogo lee sus secciones por título. `README.md` es el séptimo, pero **no tiene una plantilla de secciones fija**: es un artefacto libre del proyecto, y su única regla de conformidad es tener, cerca del inicio, la descripción de qué hace el proyecto en 1-2 párrafos, sin que `arch-init` toque el resto de su contenido — ver [3.4 README.md raíz — descripción del proyecto](#34-readmemd-raíz--descripción-del-proyecto).
+Los archivos del harness que **ya existan** en el proyecto se revisan en el Paso 3. `AGENTS.md`, `CLAUDE.md`, `.agents/MEMORY.md`, `.sdd-devkit/settings.json`, `docs/adr/README.md` y `docs/standards/README.md` se llevan al formato de su plantilla (ver [3.1 Migración de formato](#31-migración-de-formato)) — no admiten variantes de formato, porque el resto del catálogo lee sus secciones por título; en multi-repo, esto aplica **una vez por cada copia** de `AGENTS.md`/`CLAUDE.md` (raíz principal y cada submódulo), cada una comparada contra la plantilla que le corresponde. `README.md` es distinto: **no tiene una plantilla de secciones fija**: es un artefacto libre del proyecto, y su única regla de conformidad es tener, cerca del inicio, la descripción de qué hace el proyecto (o ese repositorio, en un submódulo) en 1-2 párrafos, sin que `arch-init` toque el resto de su contenido — ver [3.4 README.md raíz — descripción del proyecto](#34-readmemd-raíz--descripción-del-proyecto).
 
-> **Raíz de los índices de arquitectura.** Los cinco primeros archivos (incluido `README.md`) son del
-> **harness** y viven siempre en la raíz del repositorio principal. Los dos índices (`docs/adr/README.md`,
-> `docs/standards/README.md`) son artefactos de **arquitectura**: pertenecen a la raíz del repositorio cuyo código documentan (ver
+> **Raíz de los índices de arquitectura.** Los dos índices (`docs/adr/README.md`, `docs/standards/README.md`)
+> son artefactos de **arquitectura**: pertenecen a la raíz del repositorio cuyo código documentan (ver
 > [`../../reference/artifacts.md`](../../reference/artifacts.md#raíz-de-arquitectura-adr-estándares-y-fitness-functions)).
-> La raíz principal **siempre** los recibe (`AGENTS.md` los referencia). **Si el proyecto tiene submódulos
-> o repositorios anidados**, preguntar en el Paso 3 para cuáles de ellos crear **además** los suyos — cada
-> raíz lleva su propia serie `ADR-XXX`. No crearlos en un submódulo sin preguntar, ni asumir que un
-> submódulo comparte los del padre.
+> La raíz principal los recibe (`AGENTS.md` los referencia) **salvo que esté clasificada "Solo specs"**
+> (Paso 1.2) — un repositorio sin código de aplicación nunca los recibe, sin excepción y sin preguntarlo; el
+> repositorio de especificaciones en multi-repo es siempre "Solo specs", así que nunca tiene los suyos
+> propios. **Si el proyecto tiene submódulos o repositorios anidados** que no sean "Solo specs", preguntar
+> en el Paso 3 para cuáles de ellos crear **además** los suyos — cada raíz lleva su propia serie `ADR-XXX`.
+> No crearlos en un submódulo sin preguntar (ni en uno "Solo specs" bajo ninguna circunstancia), ni asumir
+> que un submódulo comparte los del padre.
+>
+> **Único vs. por repositorio.** `.agents/MEMORY.md` y `.sdd-devkit/settings.json` son artefactos **únicos**
+> de la solución: viven solo en la raíz principal, nunca en un submódulo. `AGENTS.md`, `CLAUDE.md` y
+> `README.md` **no** son únicos: cada repositorio —la raíz principal y cada submódulo— tiene el suyo propio,
+> porque un agente puede trabajar directamente dentro de un submódulo sin pasar por la raíz principal y
+> necesita encontrar ahí sus propias instrucciones. `docs/adr/README.md`/`docs/standards/README.md` siguen
+> la lógica de la raíz de arquitectura de arriba, independiente de esta distinción.
 >
 > **Proyecto de un solo repo vs. multi-repo.** "Repositorio principal" arriba no es siempre el directorio
 > desde el que se invocó el skill: si la solución abarca **más de un repositorio**, el Paso 1.0 crea un
-> **repositorio de especificaciones** que pasa a ser el principal (el harness completo vive ahí) y agrega
-> el resto de repos como submódulos en su raíz — ver [`references/multi-repo.md`](references/multi-repo.md).
-> Con un solo repo, nada de esto aplica y el comportamiento es el descrito arriba sin cambios.
+> **repositorio de especificaciones** que pasa a ser el principal y agrega el resto de repos como
+> submódulos en su raíz — ver [`references/multi-repo.md`](references/multi-repo.md), en particular su § 4
+> para el contenido exacto del `AGENTS.md` de un submódulo. Con un solo repo, nada de esto aplica y el
+> comportamiento es el descrito arriba sin cambios.
 
 ---
 
@@ -110,17 +120,18 @@ que lo infiera con confianza, a diferencia de la clasificación del 1.2.
 
 ### 1.2 Clasificar la situación
 
-Aplicar las señales de `references/stack-detection.md § 2` para ubicar el proyecto en **una** de tres situaciones:
+Aplicar las señales de `references/stack-detection.md § 2` para ubicar el proyecto en **una** de cuatro situaciones:
 
 | Situación | Qué implica |
 | --------- | ------------ |
-| **Sin código** | No hay manifiestos de ningún stack ni código fuente propio. |
+| **Sin código** | No hay manifiestos de ningún stack ni código fuente propio, pero va a tener código de aplicación (más adelante, vía el Paso 2). |
 | **Con código base** | Hay un stack detectable (manifiestos / resultado de un scaffold) pero sin lógica de negocio propia todavía. |
 | **Con implementación** | Hay características de negocio ya implementadas (módulos, rutas, componentes o tests con lógica propia; `docs/specs/` con contenido). |
+| **Solo specs** | Este repositorio **nunca** va a tener código de aplicación — su único propósito es documentación o especificaciones. No es un punto de la misma escala que las otras tres. |
 
-Si el resultado es ambiguo, preguntar al usuario en vez de asumir. Esta clasificación decide si el Paso 2 hace falta (solo **Sin código**) y cómo se identifican los candidatos de arquitectura en el Paso 4.
+Si el resultado es ambiguo, preguntar al usuario en vez de asumir — la ausencia de manifiestos por sí sola no distingue "sin código" de "solo specs" (ver `stack-detection.md § 2`). Esta clasificación decide si el Paso 2 hace falta (**Sin código** únicamente) y cómo se identifican los candidatos de arquitectura en el Paso 4 (**Solo specs** lo salta por completo, igual que el Paso 2 — ver la nota en cada uno).
 
-**Multi-repo:** esta clasificación se aplica **una vez por cada submódulo** (nunca al repositorio de especificaciones, que no tiene código de aplicación propio) — cada uno puede quedar en una situación distinta. Ver `references/multi-repo.md § 3`.
+**Multi-repo:** esta clasificación se aplica **una vez por cada submódulo** (nunca al repositorio de especificaciones, que es automáticamente **Solo specs** por definición — no se le pregunta, ver `references/multi-repo.md § 8`) — cada submódulo puede quedar en una situación distinta, **Solo specs** incluida. Ver `references/multi-repo.md § 3`.
 
 ### 1.3 Detectar el stack tecnológico
 
@@ -132,7 +143,7 @@ Buscar los manifiestos de `references/stack-detection.md § 1`. **Con código ba
 
 ## Paso 2 — Conseguir el stack
 
-**Solo si el Paso 1.2 clasificó "Sin código".** En cualquier otro caso, saltar directo al Paso 3.
+**Solo si el Paso 1.2 clasificó "Sin código".** En cualquier otro caso —incluido **"Solo specs"**, que no tiene ni va a tener stack de aplicación— saltar directo al Paso 3.
 
 **Multi-repo:** este paso se ejecuta por cada submódulo que el 1.2 haya clasificado "sin código". Si son
 varios a la vez, agrupar sus preguntas del 2.1 en una sola tanda (una sub-pregunta por submódulo) en vez de
@@ -171,37 +182,43 @@ Si durante 2.1 o 2.2 hace falta alguna aclaración adicional del usuario para po
 
 Antes de escribir cualquier archivo, verificar si ya existe y aplicar [Idempotencia / reejecución](#idempotencia--reejecución): un archivo del harness que ya exista **nunca se deja con un formato distinto al de su plantilla**. Lo que sigue describe el caso en que el archivo **no** existe.
 
-**Multi-repo:** todo este paso opera **sobre el repositorio de especificaciones** (la raíz principal
-resuelta en el 1.0) — nunca sobre un submódulo. El punto 5 (índices de arquitectura) es la única
-excepción, y ya contempla submódulos; ver la nota ahí y `references/multi-repo.md § 5`.
+**Multi-repo:** no todo este paso opera sobre un único repositorio. `AGENTS.md`, `CLAUDE.md` y `README.md`
+(puntos 1, 2 y 8) se crean **en el repositorio de especificaciones y en cada submódulo** — cada uno con su
+propio contenido, ver `references/multi-repo.md § 4`. `.agents/MEMORY.md`, `.sdd-devkit/settings.json` y
+`.gitignore` (puntos 3, 6 y 7) son **únicos**: solo en el repositorio de especificaciones, nunca en un
+submódulo. Los índices de arquitectura (punto 5) siguen su propia lógica por raíz; ver la nota ahí y
+`references/multi-repo.md § 6`.
 
-1. **`AGENTS.md`** — copiar `assets/agents-template.md` tal cual (fuentes de contexto, el comentario de `# Reglas generales` y la sección `# Stack tecnológico` con su comentario, sin rellenar el stack).
-2. **`CLAUDE.md`** — copiar `assets/claude-template.md` tal cual.
-3. **`.agents/MEMORY.md`** — copiar `assets/memory-template.md` tal cual.
+1. **`AGENTS.md`** — copiar `assets/agents-template.md` tal cual (fuentes de contexto, el comentario de `# Reglas generales` y la sección `# Stack tecnológico` con su comentario, sin rellenar el stack). **Excepción — repositorio clasificado "Solo specs":** omitir, de la sección Fuentes de contexto, las líneas de `docs/adr/README.md` y `docs/standards/README.md` — este repositorio nunca los recibe (punto 4-5 de abajo), así que apuntar a ellos dejaría un enlace roto. **Multi-repo:** en cada submódulo, copiar en cambio `assets/agents-submodule-template.md` — su sección Fuentes de contexto apunta al `.agents/MEMORY.md` y al `README.md` del repositorio de especificaciones en vez de tener los suyos propios, y a los índices de arquitectura locales o del padre según si ese submódulo recibió los suyos (punto 5 de abajo, sujeto a la misma excepción de "Solo specs"); ver `references/multi-repo.md § 4.2`. El repositorio de especificaciones mismo es siempre "Solo specs" (§ 8 de esa referencia), así que su propio `AGENTS.md` **siempre** omite esas dos líneas — no es una excepción condicional ahí, es la regla.
+2. **`CLAUDE.md`** — copiar `assets/claude-template.md` tal cual. **Multi-repo:** igual en cada submódulo — el include es relativo al propio archivo, así que la misma plantilla sirve sin cambios en cualquier repositorio.
+3. **`.agents/MEMORY.md`** — copiar `assets/memory-template.md` tal cual. **Multi-repo:** solo en el repositorio de especificaciones; nunca crear este archivo dentro de un submódulo.
 4. **`docs/adr/README.md`** — copiar `assets/adr-index-template.md` tal cual.
 5. **`docs/standards/README.md`** — copiar `assets/standards-index-template.md` tal cual.
-   Los puntos 4 y 5 se escriben en la **raíz de arquitectura**. La raíz principal **siempre** los recibe
-   —`AGENTS.md` los referencia y sin ellos el puntero queda roto—; en un repo sin submódulos ahí acaba la
-   historia y no hay nada que preguntar. **Si hay submódulos o repositorios anidados**, el criterio depende
-   de su origen: si se **crearon en el Paso 1.0 de esta misma corrida** (proyecto multi-repo recién armado),
-   crear los índices para **todos** por defecto — el Paso 4 les va a generar candidatos de todas formas —,
-   preguntando solo si el usuario quiere **excluir** alguno explícitamente. Si en cambio **ya existían de
-   antes** (p. ej. una reejecución sobre un repo de especificaciones con submódulos previos), mantener la
-   pregunta de opt-in original — una sola vez, con la herramienta de preguntas estructuradas — **para
-   cuáles de ellos** crear además sus propios índices. Cada raíz elegida recibe su propio par
+   Los puntos 4 y 5 se escriben en la **raíz de arquitectura** — pero **nunca** en un repositorio clasificado
+   **"Solo specs"** (Paso 1.2): no hay código ahí que una decisión de arquitectura pueda describir, así que
+   ni se preguntan ni se crean, sin excepción — esto no es un opt-in/opt-out, es automático. En el resto de
+   casos, la raíz principal **siempre** los recibe —`AGENTS.md` los referencia y sin ellos el puntero queda
+   roto—; en un repo sin submódulos ahí acaba la historia y no hay nada que preguntar. **Si hay submódulos o
+   repositorios anidados** (y no son "Solo specs"), el criterio depende de su origen: si se **crearon en el
+   Paso 1.0 de esta misma corrida** (proyecto multi-repo recién armado), crear los índices para **todos**
+   por defecto — el Paso 4 les va a generar candidatos de todas formas —, preguntando solo si el usuario
+   quiere **excluir** alguno explícitamente. Si en cambio **ya existían de antes** (p. ej. una reejecución
+   sobre un repo de especificaciones con submódulos previos), mantener la pregunta de opt-in original — una
+   sola vez, con la herramienta de preguntas estructuradas — **para cuáles de ellos** (de los que no sean
+   "Solo specs") crear además sus propios índices. Cada raíz elegida recibe su propio par
    `docs/adr/README.md` + `docs/standards/README.md`, con su serie `ADR-XXX` independiente. Este bootstrap
    es la **única** excepción a la regla de «una raíz por invocación» del catálogo. Ver
-   `references/multi-repo.md § 5`.
-6. **`.sdd-devkit/settings.json`** — copiar `assets/settings-template.json`, reemplazando `<código>` en `language` por el idioma resuelto en [Resolución de idioma](#resolución-de-idioma) (ISO 639-1). El resto de claves son la **configuración mínima obligatoria** del schema y se escriben con los valores de la plantilla; no preguntarlas aquí ni ofrecer configurarlas — el usuario las ajusta editando el archivo.
+   `references/multi-repo.md § 6`.
+6. **`.sdd-devkit/settings.json`** — copiar `assets/settings-template.json`, reemplazando `<código>` en `language` por el idioma resuelto en [Resolución de idioma](#resolución-de-idioma) (ISO 639-1). El resto de claves son la **configuración mínima obligatoria** del schema y se escriben con los valores de la plantilla; no preguntarlas aquí ni ofrecer configurarlas — el usuario las ajusta editando el archivo. **Multi-repo:** solo en el repositorio de especificaciones; nunca crear este archivo dentro de un submódulo.
 
 > **Este archivo es JSON validado por schema, no markdown.** Debe cumplir [`schemas/settings.schema.json`](../../schemas/settings.schema.json): las **6** claves de primer nivel (`language`, `specification`, `implementation`, `verification`, `git`, `projectManagement`) son **obligatorias** — la lista viva es la de `required` en el schema, no esta enumeración. `$schema` es opcional (ruta al schema para el editor; ningún skill la resuelve). Fuera de esa, el schema **no admite propiedades adicionales** y `language` solo acepta los códigos de su `enum`. Cuando `projectManagement` queda en `"enabled": false`, el schema **no exige** el resto de sus claves: dejarlas fuera. `specification` es distinto: `basePath`, `archivePath` y `testCases` son obligatorios siempre; solo `trackingUrl` se omite cuando `trackingEnabled` es `false`. `testCases` es un **objeto** que exige `mode` (`ask`/`always`/`never`) y `askDetails` (booleano), ambos obligatorios.
 
-7. **`.gitignore`** — asegurar que incluye `.sdd-devkit/.env`. Ahí vive `SDD_DEVKIT_ACCESS_TOKEN` (hooks y CLI); no se versiona. Si `.gitignore` no existe, crearlo con esa línea; si existe y no la tiene, añadirla. **No** crear el archivo `.env`.
-8. **`README.md` (raíz)** — asegurar que incluya, cerca del inicio del archivo, una descripción de **qué hace el proyecto** en **máximo 1-2 párrafos**. Es el séptimo archivo del harness, pero no sigue la migración por plantilla completa del punto 3.1 — ver [3.4](#34-readmemd-raíz--descripción-del-proyecto).
+7. **`.gitignore`** — asegurar que incluye `.sdd-devkit/.env`. Ahí vive `SDD_DEVKIT_ACCESS_TOKEN` (hooks y CLI); no se versiona. Si `.gitignore` no existe, crearlo con esa línea; si existe y no la tiene, añadirla. **No** crear el archivo `.env`. **Multi-repo:** solo en el repositorio de especificaciones — el `.env` que ignora tampoco existe en un submódulo.
+8. **`README.md` (raíz)** — asegurar que incluya, cerca del inicio del archivo, una descripción de **qué hace el proyecto** en **máximo 1-2 párrafos**. Es el séptimo archivo del harness, pero no sigue la migración por plantilla completa del punto 3.1 — ver [3.4](#34-readmemd-raíz--descripción-del-proyecto). **Multi-repo:** en cada submódulo se aplica la misma regla, pero describiendo **ese repositorio en particular** en vez de la solución completa; ver `references/multi-repo.md § 4.4`.
 
 ### Idempotencia / reejecución
 
-Un proyecto existente puede ya tener alguno de los siete archivos del harness, escrito a mano o por otra herramienta. **Ninguno de ellos se deja como estaba si no cumple su propia regla de conformidad.** Para los seis con plantilla fija (`AGENTS.md`, `CLAUDE.md`, `.agents/MEMORY.md`, `.sdd-devkit/settings.json`, `docs/adr/README.md`, `docs/standards/README.md`), el harness solo funciona si tienen la estructura que el resto del catálogo espera leer (secciones, títulos y marcadores de las plantillas de `assets/`); comparar su estructura contra la plantilla correspondiente y aplicar una de estas tres salidas:
+Un proyecto existente puede ya tener alguno de los archivos del harness, escrito a mano o por otra herramienta. **Ninguno de ellos se deja como estaba si no cumple su propia regla de conformidad.** Para los que tienen plantilla fija (`AGENTS.md`, `CLAUDE.md`, `.agents/MEMORY.md`, `.sdd-devkit/settings.json`, `docs/adr/README.md`, `docs/standards/README.md`), el harness solo funciona si tienen la estructura que el resto del catálogo espera leer (secciones, títulos y marcadores de las plantillas de `assets/`); comparar su estructura contra la plantilla correspondiente y aplicar una de estas tres salidas. **Multi-repo:** para `AGENTS.md` y `CLAUDE.md` esta comparación se repite **por cada copia** (raíz principal y cada submódulo), cada una contra la plantilla que le corresponde (`agents-template.md` en la raíz, `agents-submodule-template.md` en un submódulo) — ver `references/multi-repo.md § 4.5`.
 
 | Estado del archivo existente | Qué hacer |
 | ---------------------------- | --------- |
@@ -232,6 +249,8 @@ Si el `AGENTS.md` existente ya describía el stack, ese contenido se **preserva*
 
 Si los siete archivos existen y **todos** están conformes (los seis con plantilla fija ya migrados si hacía falta, y `README.md` con su descripción vigente), informar que el proyecto ya está inicializado y preguntar si se desea continuar igualmente para revisar/completar el resto (Paso 4 en adelante) o terminar aquí.
 
+**Multi-repo:** esta verificación cubre el repositorio de especificaciones **y cada submódulo** — `AGENTS.md`, `CLAUDE.md` y `README.md` deben estar conformes en todos ellos (cada uno contra la plantilla que le corresponde), no solo en la raíz principal, antes de dar el harness por completo.
+
 ### 3.4 README.md raíz — descripción del proyecto
 
 A diferencia de los otros seis archivos del harness, `README.md` no tiene una plantilla de secciones fija: es un artefacto libre del proyecto, no una plantilla del catálogo. `arch-init` solo garantiza que tenga, cerca del inicio, una descripción de **qué hace el proyecto** — no toca el resto de su contenido (instalación, badges, licencia, contribución, tabla de contenidos, etc.), ni le impone secciones.
@@ -239,6 +258,7 @@ A diferencia de los otros seis archivos del harness, `README.md` no tiene una pl
 1. **De dónde sale la descripción:**
    - **Sin código:** la necesidad capturada en el [Paso 2.1](#21-preguntar-qué-se-quiere-desarrollar) — qué problema resuelve y para quién.
    - **Con código base** o **con implementación:** inferirla del contenido existente (README previo, campo `description` de `package.json`/`pyproject.toml`/manifiesto equivalente, `docs/specs/` si ya hay historias) o de lo observado en el código durante el Paso 1 / Paso 4.1. Si no hay evidencia suficiente para redactarla con confianza, preguntar al usuario con una sola pregunta abierta (mismo estilo que el Paso 2.1): *"¿Qué hace este proyecto, en pocas palabras?"*.
+   - **Solo specs:** qué documentación o especificaciones contiene este repositorio y de qué solución o repositorios trata — de lo que el usuario ya haya dicho al describirlo, o la misma pregunta abierta si hace falta.
 2. **Si `README.md` no existe:** crearlo con un título (nombre del repo) y la descripción, en 1-2 párrafos.
 3. **Si ya existe:**
    - Si ya trae una descripción vigente del propósito del proyecto (aunque no esté bajo un encabezado con ese nombre), no tocarla.
@@ -249,13 +269,18 @@ A diferencia de los otros seis archivos del harness, `README.md` no tiene una pl
 
 ## Paso 4 — Candidatos de arquitectura y compuerta de calidad
 
+**Repositorio "Solo specs":** saltar el Paso 4 **completo** (4.1 y 4.2) para cualquier repositorio así
+clasificado — no hay código que genere candidatos de arquitectura ni que necesite una compuerta de calidad.
+En multi-repo, esto incluye siempre al repositorio de especificaciones (nunca pasa por el Paso 4) y a
+cualquier submódulo que haya resultado "Solo specs" en su propio Paso 1.2.
+
 ### 4.1 Identificar candidatos de ADR/estándares
 
 Leer `references/adr-candidates.md` completo antes de este paso.
 
 **Multi-repo:** el 4.1 y el 4.2 se repiten **completos, uno por cada submódulo**, usando ese submódulo como
 la raíz de arquitectura de esa corrida — nunca se consolida el resultado de varios submódulos en una sola
-lista ni en una sola invocación de `arch-manage`. Ver `references/multi-repo.md § 4`.
+lista ni en una sola invocación de `arch-manage`. Ver `references/multi-repo.md § 5`.
 
 > **Pasar la raíz de arquitectura a los subagentes.** El bootstrap del Paso 3 pudo crear índices en varias
 > raíces, pero el descubrimiento y la creación de artefactos operan sobre **una**. Indicar explícitamente en
@@ -286,15 +311,23 @@ Leer `references/quality-gate.md` completo antes de este paso.
 
 Presentar la lista consolidada de candidatos agrupada por dominio funcional, con la herramienta de preguntas estructuradas en **selección múltiple** (incluir siempre `Ninguno por ahora`). Esta lista es la decisión de stack del 4.1 (**solo** si la situación fue "con código base" o "sin código" — si fue "con implementación", esos candidatos ya los gestionó `arch-discover` en su propia Fase 5 y **no** se repiten aquí) más lo añadido en el 4.2. Si la lista queda vacía (p. ej. situación "con implementación" y la compuerta de calidad ya estaba completa), saltar directo al 5.2 sin preguntar. Si el usuario acepta algo: resolver los **decisores** una sola vez para todo el lote (`adr-candidates.md § 3`) y delegar en un **subagente** que ejecute **`/arch-manage`**, agrupando los candidatos aceptados **por dominio** en la misma invocación y pasándole la **raíz de arquitectura** ya resuelta (ver la nota del Paso 4.1) para que no la vuelva a preguntar. `arch-manage` crea los ADR y, cuando corresponda, los requisitos en el estándar de dominio, actualizando ambos índices por su cuenta. Esperar su respuesta antes de continuar.
 
-**Multi-repo:** una corrida de 5.1 **por cada submódulo** (misma raíz de arquitectura que su propio 4.1/4.2), nunca una lista ni una invocación de `arch-manage` consolidada entre submódulos.
+**Multi-repo:** una corrida de 5.1 **por cada submódulo** (misma raíz de arquitectura que su propio 4.1/4.2), nunca una lista ni una invocación de `arch-manage` consolidada entre submódulos. Un submódulo "Solo specs" no participa del 5.1: nunca pasó por el Paso 4, así que no tiene candidatos que documentar.
 
 ### 5.2 Actualizar el stack
 
 Reemplazar el comentario bajo `# Stack tecnológico` en `AGENTS.md` con el stack definitivo — lenguaje(s), framework(s) y versión, gestor de paquetes/build, y las capas de testing configuradas en el 4.2. **`AGENTS.md` es la única fuente del stack** — no se repite en `.agents/MEMORY.md` (ese archivo no lleva sección de stack; ver plantilla). Este es el **único** momento del flujo en que se escribe esa sección.
 
-**Multi-repo:** no hay un único stack que escribir — la sección documenta, en una tabla, el repositorio de
-especificaciones (sin stack de aplicación propio) y cada submódulo con su stack definitivo, mismo nivel de
-detalle que un repo único. Formato exacto en `references/multi-repo.md § 6`.
+**Repositorio "Solo specs":** no hay stack que escribir — reemplazar el comentario de la plantilla por
+`No aplica — repositorio de solo especificaciones` en vez de un stack. Sigue siendo el único momento del
+flujo en que se toca esa sección; no adelantarlo al Paso 3 solo porque ya se sabe desde el 1.2 que no va a
+haber stack.
+
+**Multi-repo:** cada submódulo escribe su propio stack definitivo en su propio `AGENTS.md` (mismo nivel de
+detalle que un repo único, o `No aplica` si ese submódulo resultó "Solo specs"), en su propia pasada del
+5.2. El repositorio de especificaciones es la **única** excepción a la regla de "Solo specs" → `No aplica`
+de arriba: aunque él mismo es siempre "Solo specs", su `# Stack tecnológico` no queda en `No aplica` — se
+reemplaza por una tabla-resumen que enlaza al de cada submódulo, porque a diferencia de un "Solo specs"
+suelto, sí tiene hijos cuyo stack resumir. Formato exacto en `references/multi-repo.md § 7`.
 
 ### 5.3 Confirmar y sugerir el siguiente paso
 
@@ -311,11 +344,12 @@ No confirmar el cierre antes de que `AGENTS.md` tenga el stack ya escrito.
 | Archivo | Cuándo leerlo |
 | ------- | -------------- |
 | `references/multi-repo.md` | Paso 1.0 — cómo decidir repo único vs. multi-repo, crear el repositorio de especificaciones, agregar submódulos, y cómo se repiten los Pasos 1.2, 1.3, 2, 4 y 5.2 por cada uno. |
-| `references/stack-detection.md` | Paso 1 — manifiestos por ecosistema y la clasificación en las tres situaciones (sin código / con código base / con implementación). |
+| `references/stack-detection.md` | Paso 1 — manifiestos por ecosistema y la clasificación en las cuatro situaciones (sin código / con código base / con implementación / solo specs). |
 | `references/quality-gate.md` | Paso 4.2 — cómo interpretar la tabla de `quality-check` por stack, y cuándo sugerir E2E/API testing según el tipo de proyecto. |
 | `references/adr-candidates.md` | Paso 4.1 y 5.1 — cómo convertir la decisión de stack (o los candidatos de `arch-discover`) y la compuerta de calidad en candidatos por dominio funcional, y cómo delegarlos en `arch-manage`. |
-| `assets/agents-template.md` | Paso 3 — plantilla de `AGENTS.md`. |
-| `assets/claude-template.md` | Paso 3 — plantilla de `CLAUDE.md`. |
+| `assets/agents-template.md` | Paso 3 — plantilla de `AGENTS.md` de la raíz principal (repo único, o repositorio de especificaciones en multi-repo). |
+| `assets/agents-submodule-template.md` | Paso 3 — plantilla de `AGENTS.md` de un submódulo, solo multi-repo (Fuentes de contexto distinta a la de la raíz). |
+| `assets/claude-template.md` | Paso 3 — plantilla de `CLAUDE.md`, igual en la raíz principal y en cada submódulo. |
 | `assets/memory-template.md` | Paso 3 — plantilla de `.agents/MEMORY.md`. |
 | `assets/adr-index-template.md` | Paso 3 — plantilla de `docs/adr/README.md`. |
 | `assets/standards-index-template.md` | Paso 3 — plantilla de `docs/standards/README.md`. |
@@ -346,11 +380,19 @@ Reglas transversales del catálogo; viven en la raíz del plugin, no en este ski
 - Inferir la topología (repo único vs. multi-repo) del contenido del directorio en vez de preguntarla en el Paso 1.0 — a diferencia de la situación del 1.2, no hay señal de código que la determine con confianza.
 - Ejecutar el Paso 1.1 (`git init`) tanto sobre el directorio de invocación como sobre el repositorio de especificaciones recién creado en modo multi-repo — el 1.0 ya lo resuelve una sola vez.
 - Clasificar la situación (1.2) o detectar/conseguir el stack (1.3/2) "para el proyecto" en general cuando es multi-repo, en vez de una vez por cada submódulo.
-- Crear `AGENTS.md`, `CLAUDE.md`, `.agents/MEMORY.md` o `.sdd-devkit/settings.json` dentro de un submódulo en vez de en el repositorio de especificaciones — el Paso 3 opera siempre sobre la raíz principal.
+- Crear `.agents/MEMORY.md` o `.sdd-devkit/settings.json` dentro de un submódulo, o duplicarlos ahí desde el repositorio de especificaciones — son artefactos únicos de la solución, solo en la raíz principal.
+- **No** crear `AGENTS.md`, `CLAUDE.md` o `README.md` en un submódulo (o copiar ahí, sin adaptar, el `AGENTS.md` de la raíz principal) — cada repositorio necesita el suyo propio, y el de un submódulo usa `assets/agents-submodule-template.md`, no `assets/agents-template.md`.
+- Escribir en el `AGENTS.md` de un submódulo una sección Fuentes de contexto que apunte a un `.agents/MEMORY.md` o `README.md` locales — esos archivos no existen ahí; el include debe apuntar al repositorio de especificaciones (`../.agents/MEMORY.md`, `../README.md`).
 - Consolidar los candidatos de ADR/estándares (Paso 4) o la compuerta de calidad de varios submódulos en una sola lista o una sola invocación de `arch-manage` — cada submódulo es su propia raíz de arquitectura y se documenta por separado.
-- Escribir un único stack en `AGENTS.md` cuando el proyecto es multi-repo, en vez de la tabla por repositorio de `references/multi-repo.md § 6`.
+- Escribir el stack completo de todos los submódulos en el `AGENTS.md` del repositorio de especificaciones en vez de en el `AGENTS.md` de cada uno — la raíz principal solo resume con una tabla que enlaza a cada uno (`references/multi-repo.md § 7`).
 - Duplicar la lista de submódulos en `.sdd-devkit/settings.json` o en cualquier otro archivo del harness — `.gitmodules` ya es la fuente de verdad.
 - Agregar un repositorio como submódulo sin antes preguntar si ya existe (local o remoto) o si hay que crearlo desde cero.
+- Crear `docs/adr/README.md` o `docs/standards/README.md` para un repositorio clasificado "Solo specs" — nunca aplica, ni siquiera preguntándolo como opt-in; no es lo mismo que "el usuario no los pidió", es que no hay código que esos artefactos puedan describir.
+- Asumir "Sin código" por defecto ante un repositorio vacío sin evaluar si en realidad es "Solo specs" — la sola ausencia de manifiestos no distingue un greenfield normal de un repositorio que nunca va a tener código de aplicación.
+- Preguntar la situación del repositorio de especificaciones en modo multi-repo, o correr el Paso 2 o el Paso 4 sobre él — es "Solo specs" por definición, automático, nunca se evalúa ni se pregunta.
+- Ejecutar el Paso 4 (candidatos de arquitectura o compuerta de calidad) sobre un repositorio "Solo specs" — no hay código que lo justifique, se salta completo.
+- Dejar en el `AGENTS.md` de un repositorio "Solo specs" las líneas de Fuentes de contexto que apuntan a `docs/adr/README.md`/`docs/standards/README.md` — quedarían apuntando a archivos que nunca se crean.
+- Escribir un stack (o dejar el comentario de la plantilla sin resolver) en el `AGENTS.md` de un repositorio "Solo specs" en vez de `No aplica — repositorio de solo especificaciones`.
 - Borrar el stack que un `AGENTS.md` existente ya describía para dejar el comentario de la plantilla, o al contrario redactar el stack durante la migración en vez de en el Paso 5.2.
 - Escribir la migración sin mostrar el diff y obtener confirmación, o preguntar archivo por archivo en vez de agrupar todas las migraciones en una sola tanda.
 - Sobrescribir un `AGENTS.md`/`CLAUDE.md`/etc. existente con contenido propio del usuario sin preguntar primero.
@@ -417,9 +459,13 @@ El usuario invoca `/arch-init` desde una carpeta vacía y explica que la soluci�
 
 Paso 1.1 ya quedó resuelto por el 1.0. Paso 1.2/1.3 corren por submódulo: `backend` tiene `package.json` con NestJS y varias rutas de negocio → "con implementación"; `frontend` está vacío → "sin código". Paso 2 (solo para `frontend`, en una tanda): a "¿qué quieres desarrollar en `frontend`?" el usuario ya había dicho "una SPA que consume el backend de pedidos" al identificar el repo en el 1.0, así que solo se completa con restricciones adicionales; se sugiere React + Vite y el usuario acepta, se ejecuta el scaffold.
 
-Paso 3: se crean los siete archivos del harness en la raíz de `pedidos-specs`. Como `backend` y `frontend` se crearon en este mismo Paso 1.0, se proponen índices de arquitectura para ambos por defecto; el usuario no excluye ninguno → `docs/adr/README.md` + `docs/standards/README.md` se crean en `backend/` y en `frontend/`, cada uno con su propia serie `ADR-XXX`.
+Paso 3: en la raíz de `pedidos-specs` se crean los tres archivos únicos del harness (`.agents/MEMORY.md`, `.sdd-devkit/settings.json`, `.gitignore`) más su `AGENTS.md`/`CLAUDE.md`/`README.md` — `pedidos-specs` es "Solo specs" por definición, así que **no** recibe `docs/adr/README.md` ni `docs/standards/README.md` propios, y su `AGENTS.md` omite esas dos líneas de Fuentes de contexto. Como `backend` y `frontend` se crearon en este mismo Paso 1.0 y ninguno es "Solo specs" (ambos van a tener código), se proponen índices de arquitectura para ambos por defecto; el usuario no excluye ninguno → `docs/adr/README.md` + `docs/standards/README.md` se crean en `backend/` y en `frontend/`, cada uno con su propia serie `ADR-XXX`. Con esa decisión ya resuelta, se crea el `AGENTS.md` de cada submódulo desde `assets/agents-submodule-template.md`: el de `backend` referencia `docs/adr/README.md`/`docs/standards/README.md` **locales** (recibió los suyos), y ambos —`backend` y `frontend`— referencian `@../.agents/MEMORY.md` y `@../README.md` del repo de especificaciones. El `CLAUDE.md` de cada uno es el mismo `@AGENTS.md` de siempre. El `README.md` de `backend` describe la API de pedidos (ya lo dijo el usuario al identificar el repo en el 1.0); el de `frontend`, la SPA.
 
-Paso 4, una vez por submódulo: para `backend` ("con implementación") se delega en un subagente que corre `arch-discover` completo sobre `backend/` como raíz de arquitectura — encuentra y crea 2 ADR por su cuenta; su compuerta de calidad ya tenía Jest, se completa con Supertest para los endpoints. Para `frontend` ("sin código", scaffold recién instalado) el candidato es "React + Vite" (dominio `frontend`); su compuerta de calidad no tenía nada → se configura Vitest + Testing Library. Paso 5.1: dos corridas de `arch-manage`, una por raíz — la de `frontend` documenta el candidato de stack y el de testing; la de `backend` no repite lo que ya creó `arch-discover`, solo agrega el candidato de Supertest. Paso 5.2: `AGENTS.md` en `pedidos-specs` queda con la tabla de tres filas — `pedidos-specs` (raíz, sin stack propio), `backend` (NestJS, Jest + Supertest) y `frontend` (React + Vite, Vitest + Testing Library). Paso 5.3: se confirma el cierre resumiendo la topología (repo de especificaciones + 2 submódulos), la situación y el stack de cada uno, y los ADR/estándares creados por raíz; se ofrece continuar con `work-define`.
+Paso 4, una vez por submódulo: para `backend` ("con implementación") se delega en un subagente que corre `arch-discover` completo sobre `backend/` como raíz de arquitectura — encuentra y crea 2 ADR por su cuenta; su compuerta de calidad ya tenía Jest, se completa con Supertest para los endpoints. Para `frontend` ("sin código", scaffold recién instalado) el candidato es "React + Vite" (dominio `frontend`); su compuerta de calidad no tenía nada → se configura Vitest + Testing Library. `pedidos-specs` no pasa por el Paso 4 en ningún momento — es "Solo specs". Paso 5.1: dos corridas de `arch-manage`, una por raíz — la de `frontend` documenta el candidato de stack y el de testing; la de `backend` no repite lo que ya creó `arch-discover`, solo agrega el candidato de Supertest. Paso 5.2: `backend/AGENTS.md` queda con su propio stack completo (NestJS, Jest + Supertest); `frontend/AGENTS.md`, con el suyo (React + Vite, Vitest + Testing Library); el `AGENTS.md` de `pedidos-specs` no repite ese detalle — su `# Stack tecnológico` queda como una tabla de dos filas que enlaza a `backend/AGENTS.md` y `frontend/AGENTS.md`. Paso 5.3: se confirma el cierre resumiendo la topología (repo de especificaciones + 2 submódulos, cada uno con su propio `AGENTS.md`/`CLAUDE.md`/`README.md`), la situación y el stack de cada uno, y los ADR/estándares creados por raíz; se ofrece continuar con `work-define`.
+
+**Ejemplo 7 — Repo único "Solo specs"**
+
+El usuario invoca `/arch-init` sobre un repositorio recién creado y explica que va a usarlo solo para llevar los `SRS-XXX`, `US-XXX` y ADRs de un proyecto cuyo código vive en otro lado (fuera del alcance de `arch-init`, sin submódulos). Paso 1.0: proyecto de un solo repo, sin cambios de comportamiento. Paso 1.1: no hay repo git → `git init`. Paso 1.2: sin manifiestos ni código — antes de asumir "sin código", la descripción que el usuario ya dio ("solo para llevar specs y ADRs, el código vive en otro repo") es evidencia directa de "Solo specs"; no hace falta preguntar de nuevo. Paso 1.3: no aplica, no hay stack que detectar. Paso 2: se salta — "Solo specs" no tiene stack que conseguir, igual que "sin código" pero por una razón distinta. Paso 3: se crean los siete archivos del harness **menos** `docs/adr/README.md` y `docs/standards/README.md` — este repositorio nunca los recibe; su `AGENTS.md` omite esas dos líneas de Fuentes de contexto, y su `README.md` describe que el repositorio documenta las especificaciones del proyecto (usando lo que el usuario ya dijo). Paso 4: se salta completo, 4.1 y 4.2 — no hay código que audite ni compuerta de calidad que configurar. Paso 5.1: no hay candidatos que documentar, se salta directo al 5.2. Paso 5.2: `# Stack tecnológico` en `AGENTS.md` queda como `No aplica — repositorio de solo especificaciones`. Paso 5.3: se confirma el cierre señalando que este repositorio quedó sin índices de arquitectura porque es "Solo specs", y se ofrece continuar con `work-define` para empezar a escribir historias.
 
 ---
 
