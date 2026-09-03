@@ -132,6 +132,7 @@ Aplica cuando una sola invocación va a producir **más de una** US: la descompo
     - **`always`**: **invocar** `/test-define` directamente, sin preguntar, pasando el contexto de la US. Ofrecer igual el paso de planificar tareas.
     - **`never`**: no sugerir ni invocar `/test-define`. Ofrecer solo el paso de planificar tareas.
     - En cualquiera de los tres casos, si el usuario pide crear las tareas en continuidad o en el mismo turno: **invocar** `/work-plan` **obligatoriamente**; no crear tareas directamente desde este skill. El conocimiento y las reglas de formato de los `TK-XXX` residen en ese skill.
+    - **Repositorios sin harness:** por cada repositorio de la sección **Repositorios**, verificar si tiene `AGENTS.md`, `CLAUDE.md` y `.sdd-devkit/settings.json` en su raíz — un repositorio nuevo (sin código todavía) nunca los tiene; uno existente se verifica si es accesible localmente, y si no lo es, preguntar directamente al usuario. Si **alguno** carece del harness, agregar **`/arch-init`** como opción adicional en la misma pregunta de próximos pasos (junto a `/test-define`/`/work-plan`, cualquiera sea la rama de `testCases.mode` aplicada) — no es excluyente ni bloquea el handoff habitual, es una sugerencia más.
 
 ---
 
@@ -255,6 +256,8 @@ Aplica cuando una sola invocación va a producir **más de una** US: la descompo
 - Al descomponer un `SRS-XXX`, mapear cada `FR-XXX` 1:1 a una historia sin evaluar si varios `FR-XXX` relacionados (mismo actor, misma pantalla) deberían agruparse en una sola.
 - Volver a preguntar por repositorios, referencias de diseño o el enunciado del criterio de aceptación cuando el SRS de origen ya los trae resueltos — heredarlos, no repreguntarlos.
 - Terminar de crear las historias derivadas de un `SRS-XXX` sin actualizar su tabla de **Historias de usuario derivadas** (sección 16), dejando el SRS desactualizado sobre qué ya se descompuso.
+- Ofrecer `/arch-init` sin verificar antes si el repositorio realmente carece del harness, o al revés, no ofrecerlo cuando un repositorio nuevo (que por definición no tiene `AGENTS.md`/`CLAUDE.md`/`.sdd-devkit/settings.json`) lo necesita.
+- Bloquear el handoff a `/test-define`/`/work-plan` hasta que el usuario corra `/arch-init`, o presentarlo como paso obligatorio en vez de una opción adicional en la misma pregunta de cierre.
 
 ---
 
@@ -272,6 +275,7 @@ Posición: **inicio** del pipeline `work-define` → `work-plan` → `work-imple
 | **Salida mínima (creación)** | Carpeta `US-XXX-[nombre-corto]/README.md` con actor y valor de negocio; puede quedar en `Estado: Draft` con lagunas en Observaciones.                                                                                                                                                        |
 | **Salida para continuar**    | `Estado: Ready` en el `README.md`; INVEST y DoR completos; al menos un `AC-XXX`; Observaciones sin pendientes abiertos.                                                                                                                                                                      |
 | **Siguiente paso**           | Con la US en `Ready`: `test-define` — según `specification.testCases.mode`, invocar `/test-define` directo (`always`), solo si el usuario acepta (`ask`, por defecto) o no ofrecerlo (`never`) — no crear `TC-XXX` desde este skill; y `work-plan` — invocar `/work-plan` para las tareas (o continuidad explícita del usuario), sin condicionar a `specification.testCases.mode`. No crear `TK-XXX` desde este skill. |
+| **Repositorios sin harness**  | Si algún repositorio de la sección **Repositorios** (nuevo, o existente sin `AGENTS.md`/`CLAUDE.md`/`.sdd-devkit/settings.json`) todavía no tiene el harness inicializado, ofrecer también **`/arch-init`** junto a `/test-define`/`/work-plan` en la misma pregunta de cierre — opción adicional, no bloquea ni reemplaza el handoff habitual. |
 | **Si queda en Draft**        | No handoff a plan ni implement. Cerrar lagunas con preguntas estructuradas o mantener Draft documentado.                                                                                                                                                                                     |
 | **Regreso desde plan**       | Conflicto US ↔ TK detectado en `work-plan` → actualizar la US aquí; `work-plan` corrige el TK. La US prevalece sobre el TK.                                                                                                                                                                  |
 | **Regreso desde integrate**  | Alcance reducido o `progress.md` incompleto detectado en `work-integrate` → ajustar la US aquí y alinear TKs con `work-plan` antes de reintentar el merge.                                                                                                                                   |
