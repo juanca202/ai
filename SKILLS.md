@@ -286,9 +286,43 @@ Si el repo tiene activada la integración con un gestor de proyectos en `.sdd-de
 
 
 
+### requirement-refine
+
+**Cuándo:** estructurar un requerimiento en bruto (idea, ticket, correo, transcripción de reunión, diseño, wireframes, documentación técnica, imágenes) en una Especificación de Requisitos de Software (`SRS-XXX`, alineada a ISO/IEC/IEEE 29148) antes de convertirlo en historias de usuario. Paso previo **opcional**: si el requerimiento ya está claro, se puede ir directo a `work-define`.
+
+**Produce:** `docs/specs/requirements/SRS-XXX-{slug}/README.md` — alcance, `FR-XXX`/`NFR-XXX` priorizados y con método de verificación, interfaces externas, requisitos de datos, cumplimiento normativo, riesgos, wireframes en SVG enlazado si el requerimiento tiene UI (tipo de solución web/nativa/híbrida, responsiva o no), stack tecnológico, repositorios (nuevos o existentes) y proyecto base, equipo de desarrollo; no historias de usuario ni `AC-XXX` (eso es `work-define`) ni modelos/APIs (eso es `design-define`).
+
+**Opciones:**
+
+
+| Acción         | Notas                                                                 |
+| -------------- | ---------------------------------------------------------------------- |
+| **Crear**      | Cierra primero lo **funcional** por tandas (`FR-XXX`/`NFR-XXX` priorizados, interfaces externas, datos, cumplimiento normativo, supuestos de funcionalidad reutilizable, wireframes SVG y verificación/trazabilidad si aplica, riesgos); recién al final pregunta stack, repositorios (nuevo o existente + proyecto base) y equipo de desarrollo |
+| **Actualizar** | Conserva ids `FR-XXX`/`NFR-XXX`/`BR-XX`; si cambia el stack o los repos, avisa si la tabla de historias derivadas queda desalineada |
+
+
+**Estados:** `Draft` (lagunas en Observaciones) · `Ready` (los 12 criterios del DoR: stack, repositorios con tipo y proyecto base, `FR-XXX`/`NFR-XXX` priorizados y verificables, interfaces/datos/cumplimiento revisados, wireframes aprobados si hay UI, riesgos identificados). En Ready sugiere `work-define`, que hereda repos/wireframes/criterios de verificación del SRS y, al terminar, escribe de vuelta la tabla de historias derivadas.
+
+**Ejemplos de invocación:**
+
+```text
+/requirement-refine
+/requirement-refine portal de proveedores para subir facturas
+/requirement-refine actualiza SRS-002: cambia el stack a Auth0
+/requirement-refine estructura este requerimiento: <pegar ticket>
+```
+
+- «Refina este requerimiento antes de armar las historias»
+- «Necesito un SRS para esta idea, no sé todavía con qué la vamos a construir»
+- «Estructura esta necesidad: repos, stack y requisitos, antes de definirla como US»
+
+---
+
+
+
 ### work-define
 
-**Cuándo:** crear o actualizar una historia de usuario (`US-XXX`).
+**Cuándo:** crear o actualizar una historia de usuario (`US-XXX`). Caso habitual: parte directo de una necesidad descrita por el usuario. Entrada alternativa: descomponer un `SRS-XXX` en `Estado: Ready` de `requirement-refine`, heredando de él criterios de verificación, repos y wireframes en vez de repreguntarlos.
 
 **Produce:** `docs/specs/user-stories/US-XXX-{slug}/README.md` (documento funcional; no DTOs/endpoints — eso es `design-define`).
 
@@ -312,6 +346,7 @@ Si el repo tiene activada la integración con un gestor de proyectos en `.sdd-de
 /work-define como comprador quiero guardar favoritos
 /work-define actualiza US-003: añade AC de timeout 3s
 /work-define a partir de RS-002
+/work-define arma las historias de SRS-003
 ```
 
 - «Crea una historia de usuario para el checkout con tarjeta»

@@ -40,6 +40,7 @@ específico (una salida propia, una excepción de ruta).
 | Estándar de dominio | `<raíz-arq>/docs/standards/[slug].md` (o `<raíz-arq>/docs/standards/[slug]/README.md`) | `arch-manage` · índice `<raíz-arq>/docs/standards/README.md`: lo crea `arch-init`, lo mantiene `arch-manage` |
 | Fitness functions | `<raíz-arq>/scripts/arch/verify.<ext>` + `<raíz-arq>/scripts/arch/checks/[slug-estándar].<ext>` | `arch-manage` |
 | Definition of Done | `docs/policies/definition-of-done.md` | **Ninguno — lo escribe y lo mantiene el equipo.** Los skills lo leen; ningún skill del plugin lo genera ni ofrece generarlo. |
+| Especificación de requisitos (SRS) | `docs/specs/requirements/SRS-XXX-[nombre-corto]/README.md` | `requirement-refine` |
 | Historia de usuario | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md` | `work-define` |
 | Tarea técnica de una US | `docs/specs/user-stories/US-XXX-[nombre-corto]/TK-XXX-[kebab-case].md` | `work-plan` |
 | Tarea de mantenimiento | `docs/specs/work-items/WI-XXX-[kebab-case]/README.md` | `work-plan` |
@@ -118,6 +119,7 @@ runner de fitness functions, versionados junto a su código.
 | Prefijo | Artefacto | Alcance del secuencial |
 |---------|-----------|------------------------|
 | `ADR-XXX` | Architecture Decision Record | Global, sobre el `docs/adr/` **de su raíz de arquitectura** |
+| `SRS-XXX` | Especificación de requisitos de software | Global, sobre `docs/specs/requirements/` |
 | `US-XXX` | Historia de usuario | Global, sobre `docs/specs/user-stories/` **+ el archivo** |
 | `TK-XXX` | Tarea técnica | Por historia de usuario padre |
 | `WI-XXX` | Tarea de mantenimiento | Global, sobre `docs/specs/work-items/` **+ el archivo** |

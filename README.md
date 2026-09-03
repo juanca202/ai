@@ -167,6 +167,7 @@ Skills del ciclo de vida de un requerimiento: de la historia de usuario al PR me
 | Skill                                      | Uso                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [work‑research](SKILLS.md#work-research)   | Investigar y sintetizar en un informe (RS-XXX). Genérico con seis flujos: investigación libre (producto, arquitectura, técnica o cambio), analizar decisiones pendientes (US/TK/WI → lagunas y decisiones por tomar), analizar issue (defecto → reproducción, causa raíz, diagnóstico de pruebas y WI de corrección), analizar test case (TC-XXX → auditoría y veredicto), analizar legado (código sin requisitos → FT-XXX) y analizar migración (origen→destino → discovery y validación) |
+| [requirement‑refine](SKILLS.md#requirement-refine) | Estructurar un requerimiento en bruto en una Especificación de Requisitos de Software (SRS-XXX): stack tecnológico (investigado con `work-research` o ya decidido), repositorios y proyecto base, requisitos funcionales y no funcionales. Paso previo opcional a `work-define`                                                                                                                                                                                                          |
 | [work‑define](SKILLS.md#work-define)       | Crear o actualizar historias de usuario (US-XXX)                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | [design‑define](SKILLS.md#design-define)   | Crear o actualizar documentación técnica (modelos de datos, APIs/endpoints, flujos, diagramas de clases/C4) en `docs/specs/technical-docs/` como referencia de implementación                                                                                                                                                                                                                                                                                                              |
 | [test‑define](SKILLS.md#test-define)       | Crear casos de prueba (TC-XXX) desde los criterios de aceptación de una US, un WI o un feature ya implementado (FT-XXX) (IEEE 29119-4)                                                                                                                                                                                                                                                                                                                                                     |
@@ -195,6 +196,8 @@ Los pasos con línea punteada en el diagrama son opcionales.
 ```mermaid
 flowchart TD
     A[Requerimiento] --> B["Historias de usuario<br/>**/work-define**"]
+    A -.-> Z["Refinamiento a SRS<br/>**/requirement-refine**"]
+    Z -.-> B
     B -.-> C["Casos de prueba<br/>**/test-define**"]
     B -.-> D["Diseño arquitectónico<br/>**/design-define**"]
     B --> E["Planificación de tareas<br/>**/work-plan**"]
@@ -223,7 +226,7 @@ flowchart TD
 
 
 
-1. **Inicio**: un requerimiento se convierte en historias de usuario con `work-define`. Si son tareas de mantenimiento, el requerimiento entra directo a **Planificación de tareas** (`work-plan`) —nota en la línea del diagrama—.
+1. **Inicio**: un requerimiento se convierte en historias de usuario con `work-define`. Si el requerimiento llega crudo o ambiguo, opcionalmente pasa antes por **Refinamiento a SRS** (`requirement-refine`), que resuelve alcance funcional (`FR-XXX`/`NFR-XXX` priorizados y verificables), wireframes si hay UI, riesgos, stack tecnológico y repositorios/proyecto base antes del handoff a `work-define`, que hereda ese contexto al descomponer el SRS en historias. Si son tareas de mantenimiento, el requerimiento entra directo a **Planificación de tareas** (`work-plan`) —nota en la línea del diagrama—.
 2. Opcionalmente, desde las historias se definen casos de prueba (`test-define`) y/o diseño arquitectónico (`design-define`).
 3. **Planificación de tareas** (`work-plan`): desde una historia produce tareas técnicas (`TK-XXX`); sin historia, tareas de mantenimiento (`WI-XXX`).
 4. Durante la planificación, opcionalmente se investiga con `work-research` y/o se ajusta el diseño arquitectónico con `design-define`.
@@ -239,6 +242,8 @@ Variante del flujo Specs **cuando la implementación la ejecuta un framework de 
 ```mermaid
 flowchart TD
     A[Requerimiento] --> B["Historias de usuario<br/>**/work-define**"]
+    A -.-> Z["Refinamiento a SRS<br/>**/requirement-refine**"]
+    Z -.-> B
     B -.-> R["Investigación<br/>**/work-research**"]
     B -.-> C["Casos de prueba<br/>**/test-define**"]
     B -.-> D["Diseño arquitectónico<br/>**/design-define**"]
@@ -268,7 +273,7 @@ flowchart TD
 
 
 
-1. **Inicio**: el requerimiento se convierte en historias de usuario con `work-define`.
+1. **Inicio**: el requerimiento se convierte en historias de usuario con `work-define`. Si llega crudo o ambiguo, opcionalmente pasa antes por **Refinamiento a SRS** (`requirement-refine`).
 2. Opcionalmente, desde las historias se investiga (`work-research`), se definen casos de prueba (`test-define`) y/o diseño arquitectónico (`design-define`).
 3. Las historias alimentan **Specs de terceros** (la implementación la corre el framework elegido: Speckit, OpenSpec, AgentOS, etc.).
 4. El flujo termina por uno de dos caminos, igual que en Specs: integración directa (`work-integrate`) o vía Pull/Merge Request (`pr-create`); ambos llegan al entregable, ejecutan **internamente** las mismas puertas de calidad (`quality-check`, `code-review`, `trace-validate`) y ofrecen archivar el artefacto en `docs/archive/` previa confirmación del usuario —que puede declinarla sin bloquear el cierre—, sin ser pasos aparte de este flujo. **El archivado alcanza solo a los artefactos de SDD Devkit** (`US-XXX`, `WI-XXX`, y las investigaciones y casos de prueba que cuelgan de ellos): si la implementación la corrió un framework de terceros, **lo que ese framework haya generado no se toca** — sus specs, planes o tareas se quedan donde están, con el nombre y el ciclo de vida que él les dé. SDD Devkit no los mueve, no los renombra ni los archiva, ni siquiera cuando viven junto a los suyos. La promoción posterior a la rama de despliegue es un `pr-create` en **modo promoción**, que solo ejecuta `quality-check`.

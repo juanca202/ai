@@ -1,6 +1,6 @@
 # Flujo detallado, ejemplos y anti-patrones
 
-Procedimiento paso a paso para **crear** y **actualizar** Historias de Usuario, más ejemplos y anti-patrones. Las anclas de calidad (`#rfc-2119`, `#iso-25010`, `#invest`, `#definition-of-ready-dor`) viven en `[quality-criteria.md](quality-criteria.md)`.
+Procedimiento paso a paso para **crear** y **actualizar** Historias de Usuario, más ejemplos y anti-patrones. Las anclas de calidad (`#rfc-2119`, `#iso-25010`, `#invest`, `#definition-of-ready-dor`) viven en `[quality-criteria.md](quality-criteria.md)`. La entrada habitual es una necesidad funcional descrita por el usuario; también puede originarse en un `SRS-XXX` de `/requirement-refine` (ver [Flujo: Descomponer un SRS-XXX en historias](#flujo-descomponer-un-srs-xxx-en-historias)) o en una migración investigada por `work-research`.
 
 ---
 
@@ -56,9 +56,30 @@ Preguntar `Continuar en esta rama` / `Detenerme aquí`. Si el usuario elige **De
 
 
 
+## Flujo: Descomponer un SRS-XXX en historias
+
+**Este flujo es una entrada alternativa, no la única.** La mayoría de las invocaciones de este skill siguen partiendo directo de una necesidad funcional descrita por el usuario — sin SRS de por medio — y van directo al [flujo de creación](#flujo-crear-una-historia-nueva) o al [flujo de varias historias](#flujo-proponer-varias-historias-en-una-misma-invocación). Este flujo aplica **solo** cuando la entrada es explícitamente una Especificación de Requisitos de Software (`SRS-XXX`) ya existente, producida por `/requirement-refine`: el usuario pide «arma las historias» a partir de un SRS, o invoca este skill señalando directamente su ruta. No asumir que un SRS existe ni buscarlo por cuenta propia cuando el usuario simplemente describe una necesidad — eso sigue siendo el caso por defecto.
+
+1. **Leer el `README.md` del SRS completo** antes de proponer nada — nunca decidir el agrupamiento a partir de un resumen o de lo que el usuario recuerda del SRS. Si el SRS no está en `Estado: Ready`, avisar al usuario: se puede igual trabajar sobre un SRS en `Draft`, pero las lagunas documentadas en sus Observaciones probablemente se trasladen a las US resultantes — confirmar si prefiere cerrar el SRS primero (volviendo a `/requirement-refine`) o continuar igual.
+2. **Agrupar los `FR-XXX`/`NFR-XXX` en historias candidatas.** No hay mapeo 1:1 obligatorio: varios `FR-XXX` relacionados (mismo actor, misma pantalla, mismo flujo) pueden componer una sola historia, y un `FR-XXX` amplio puede dar lugar a varios `AC-XXX` dentro de una misma historia. Usar como guía la categoría de cada `FR-XXX`/`NFR-XXX` (ver [Categorías de criterios de aceptación](quality-criteria.md#categorías-de-criterios-de-aceptación) — el SRS ya usa el mismo catálogo) y las pantallas de la sección **12. Diseño de interfaz** del SRS, si las hay: una pantalla suele ser una buena frontera de historia. Los `NFR-XXX` casi nunca forman su propia historia — se distribuyen como `AC-XXX` no funcionales dentro de la historia funcional que califican, salvo que el propio SRS ya los trate como una capacidad transversal independiente (p. ej. un `NFR-XXX` de auditoría que aplica a todo el módulo).
+3. **Excluir los requisitos diferidos.** Los `FR-XXX`/`NFR-XXX` que el SRS ya registró en su sección **2.6 Requisitos diferidos a futuras versiones** no generan historia en esta pasada — anotarlo brevemente si el usuario podría esperar verlos.
+4. **Si el agrupamiento produce una sola historia**, saltar directo al [flujo de creación](#flujo-crear-una-historia-nueva), aplicando el paso 5 de abajo para poblar cada campo desde el SRS. **Si produce más de una**, presentar las historias candidatas al usuario (agrupamiento propuesto + qué `FR-XXX`/`NFR-XXX` cubre cada una) con la herramienta de preguntas estructuradas antes de crear nada, y continuar con el [flujo de varias historias](#flujo-proponer-varias-historias-en-una-misma-invocación) desde su paso 2 (detección de dependencias) — el paso 1 de ese flujo (identificar candidatas) ya quedó resuelto aquí.
+5. **Al redactar cada historia, heredar del SRS en lugar de volver a preguntar lo que ya resolvió:**
+   - **Criterios de aceptación:** cada `FR-XXX`/`NFR-XXX` asignado a esta historia se convierte en uno o más `AC-XXX`, conservando su categoría (el catálogo es el mismo). El **criterio de verificación** de la sección 13 del SRS (Verificación y trazabilidad) es el punto de partida del enunciado del `AC-XXX` — ya describe una condición observable; solo falta darle la forma RFC 2119 si el SRS no la trae ya en esa forma. No repreguntar la condición de cumplimiento al usuario si ya está en el SRS.
+   - **Reglas de negocio:** cada `BR-XX` del SRS que aplique a esta historia se copia con su mismo id y enunciado; sigue necesitando quedar verificada por al menos un `AC-XXX` de esta historia (misma regla que el flujo de creación).
+   - **Referencias:** si el SRS tiene wireframes aprobados en su sección 12 relevantes a esta historia, enlazarlos directamente (documento `.md` y su SVG) en vez de preguntar por referencias de diseño — la fila **Referencias de UI** del DoR puede marcarse `Cumple` de inmediato. Enlazar también el `README.md` del propio SRS como origen del requerimiento.
+   - **Repositorios:** copiar directamente de la sección **4. Repositorios e implementación** del SRS los repositorios relevantes a los `FR-XXX` de esta historia — no volver a preguntar cuáles son, salvo que el SRS deje alguno ambiguo.
+   - **Contexto/Observaciones:** si el SRS trae stack ya resuelto (sección 3), equipo de desarrollo (sección 5), interfaces externas (sección 9), requisitos de datos (sección 10) o cumplimiento normativo (sección 11) relevantes a esta historia, resumirlos en **Contexto** o citarlos para justificar dimensiones de INVEST o filas del DoR — no se repiten como secciones nuevas, la US no duplica la estructura del SRS.
+   - **Documentación técnica:** si algún `FR-XXX`/`NFR-XXX` de esta historia implica flujos, modelos de datos o APIs (a menudo señalado por las secciones 9-11 del SRS), aplica igual la delegación a `/design-define` del paso 3 del [flujo de creación](#flujo-crear-una-historia-nueva).
+6. **Al terminar de crear todas las historias del lote, actualizar la tabla de la sección 16 (`Historias de usuario derivadas`) del `README.md` del SRS** — una fila por historia creada, con su `US-XXX`, título y los `FR-XXX` que cubre. Esta es la única escritura que este skill hace sobre un `SRS-XXX`; el resto del documento es de solo lectura para este flujo. Si no es posible editar el SRS, informar al usuario qué fila habría que agregar en vez de omitirlo en silencio.
+
+---
+
+
+
 ## Flujo: Proponer varias historias en una misma invocación
 
-Aplica cuando una sola invocación va a producir **más de una** US: la migración investigada por `work-research` se descompuso en varias historias (ver plantilla, sección **Migración**), o el usuario describe de una vez varias funcionalidades relacionadas y pide crearlas todas. Con una sola historia, saltar directo al [flujo de creación](#flujo-crear-una-historia-nueva).
+Aplica cuando una sola invocación va a producir **más de una** US: la descomposición de un `SRS-XXX` (ver flujo anterior), la migración investigada por `work-research` (ver plantilla, sección **Migración**), o el usuario describe de una vez varias funcionalidades relacionadas y pide crearlas todas. Con una sola historia, saltar directo al [flujo de creación](#flujo-crear-una-historia-nueva).
 
 1. **Identificar las historias candidatas** a partir de la necesidad descrita (o de la descomposición que ya trae `work-research`), cada una con su actor, valor y alcance diferenciado — sin fijar todavía IDs ni carpetas.
 2. **Detectar dependencias entre ellas.** Para cada candidata: ¿necesita que otra de la misma tanda ya exista o esté definida para poder redactar sus criterios de aceptación o su DoR? Casos típicos: una historia de infraestructura o modelo de datos compartido que las demás dan por sentado; autenticación/autorización de la que depende toda historia que exponga funcionalidad protegida; una historia que expone una API que otra consume.
@@ -143,6 +164,7 @@ Aplica cuando una sola invocación va a producir **más de una** US: la migraci�
 - Si es US de UI: referencias de diseño presentes o acordadas
 - Dependencias con otras US o sistemas identificadas
 - **Artefactos visuales del requerimiento leídos:** si el requerimiento incluye imágenes, enlaces a Figma, o archivos `.md` con diagramas, wireframes o prototipos, **leerlos y cargarlos en el contexto antes de redactar** (no asumir su contenido). Si al revisarlos aparecen lagunas, conflictos con el texto del requerimiento, o algo no queda del todo claro, **incluir esas dudas en las preguntas estructuradas** (recopilación inicial, en tandas de máximo tres por bloque pero **sin limitar el total**: encadenar tandas hasta resolver toda laguna) en lugar de inventar o inferir
+- **Si el origen es un `SRS-XXX`** (ver [Flujo: Descomponer un SRS-XXX en historias](#flujo-descomponer-un-srs-xxx-en-historias)): `README.md` del SRS leído completo, agrupamiento de `FR-XXX`/`NFR-XXX` en historias candidatas resuelto, y repositorios/referencias de diseño/criterios de verificación heredados del SRS en vez de repreguntados
 
 **Validación:**
 
@@ -188,12 +210,18 @@ Aplica cuando una sola invocación va a producir **más de una** US: la migraci�
 - *Entrada:* Historia con enlace a Figma y capturas en `assets/`.
 - *Salida:* `README.md` con sección Referencias completa; fila Referencias de UI en DoR en `Cumple` o `Parcial` con notas; `Estado: Ready` solo si los criterios `AC-XXX` y el DoR lo permiten.
 
-**Ejemplo 4 — Ready y tareas**
+**Ejemplo 4 — Descomposición de un `SRS-XXX`**
+
+- *Entrada:* SRS cerrado en Ready (`SRS-003-portal-de-proveedores`) con 5 `FR-XXX` (carga de facturas, consulta de estado, notificación por email, exportar historial, gestión de usuarios del portal) y 2 pantallas aprobadas; el usuario dice «ya, arma las historias».
+- *Comportamiento:* El agente lee el `README.md` completo del SRS → agrupa los `FR-XXX` en tres historias candidatas por pantalla/actor (carga y consulta de facturas — pantalla 1; notificaciones — capacidad transversal a la anterior; gestión de usuarios — pantalla 2, sin dependencias) → detecta que «notificaciones» depende de que exista «carga y consulta» → presenta el agrupamiento y el orden al usuario, quien lo confirma → crea las tres US en ese orden, heredando de cada `FR-XXX` su criterio de verificación (sección 13 del SRS) como base del `AC-XXX`, los repositorios de la sección 4, y los wireframes aprobados de la sección 12 como Referencias (DoR **Referencias de UI** en `Cumple` de inmediato) → al terminar, actualiza la tabla **Historias de usuario derivadas** (sección 16) del SRS con las tres `US-XXX` y qué `FR-XXX` cubre cada una.
+- *Salida:* Tres carpetas `US-XXX-.../README.md`, todas con `AC-XXX` trazables a su `FR-XXX` de origen; el SRS actualizado registrando la descomposición.
+
+**Ejemplo 5 — Ready y tareas**
 
 - *Entrada:* Historia cerrada en Ready; el usuario dice: «crea las tareas para implementarla».
 - *Salida:* El agente no crea tareas directamente; invoca `/work-plan` pasando el contexto de la US. Toda la lógica de creación de `TK-XXX` (propuesta, elección entre planes completos o stubs, plantilla, agrupación por repositorio) es responsabilidad de ese skill.
 
-**Ejemplo 5 — Draft con cierre asistido**
+**Ejemplo 6 — Draft con cierre asistido**
 
 - *Entrada:* «US nueva: como analista quiero descargar el reporte mensual de ventas en CSV para procesarlo localmente.» Hay actor y valor, pero no se conocen story points, dependencias ni si existen referencias de UI.
 - *Comportamiento:* El agente crea `US-0XX-descarga-reporte-mensual-csv/` con `Estado: Draft`, documenta las lagunas en Observaciones, y en el cierre lanza una tanda de preguntas estructuradas:
@@ -223,6 +251,10 @@ Aplica cuando una sola invocación va a producir **más de una** US: la migraci�
 - Al proponer **varias** historias en la misma invocación, crearlas en el orden en que el usuario las mencionó (o el que resulte más cómodo) en vez de detectar sus dependencias y anteponer la infraestructura y las que no dependen de ninguna otra de la tanda.
 - Asignar los `US-XXX` de un lote antes de confirmar el orden, o dejar que una historia dependiente cite una referencia provisional a otra que todavía no tiene id, en vez de crear primero el prerrequisito.
 - Cerrar los Draft de un lote de varias historias historia por historia, con una tanda separada para cada una, en vez de agrupar las preguntas de todas las historias Draft del lote en las mismas tandas de hasta 3.
+- Asumir que existe un `SRS-XXX` y buscarlo por cuenta propia cuando el usuario simplemente describe una necesidad sin mencionar uno — el flujo de descomposición de SRS es una entrada alternativa, no el camino por defecto.
+- Al descomponer un `SRS-XXX`, mapear cada `FR-XXX` 1:1 a una historia sin evaluar si varios `FR-XXX` relacionados (mismo actor, misma pantalla) deberían agruparse en una sola.
+- Volver a preguntar por repositorios, referencias de diseño o el enunciado del criterio de aceptación cuando el SRS de origen ya los trae resueltos — heredarlos, no repreguntarlos.
+- Terminar de crear las historias derivadas de un `SRS-XXX` sin actualizar su tabla de **Historias de usuario derivadas** (sección 16), dejando el SRS desactualizado sobre qué ya se descompuso.
 
 ---
 
@@ -235,7 +267,8 @@ Posición: **inicio** del pipeline `work-define` → `work-plan` → `work-imple
 
 |                              |                                                                                                                                                                                                                                                                                              |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Entrada**                  | Necesidad funcional del usuario. No requiere US previa. También puede originarse en una investigación de migración (`RS-XXX` de `work-research`, flujo «Analizar migración») dimensionada como cambio grande y descompuesta en varias US — ver sección **Migración** de la plantilla y el [flujo de varias historias](#flujo-proponer-varias-historias-en-una-misma-invocación) para su orden de creación.                          |
+| **Entrada**                  | Necesidad funcional del usuario (caso por defecto). No requiere US previa. También puede originarse en un `SRS-XXX` en `Estado: Ready` de `/requirement-refine` — ver [Flujo: Descomponer un SRS-XXX en historias](#flujo-descomponer-un-srs-xxx-en-historias) — o en una investigación de migración (`RS-XXX` de `work-research`, flujo «Analizar migración») dimensionada como cambio grande y descompuesta en varias US — ver sección **Migración** de la plantilla y el [flujo de varias historias](#flujo-proponer-varias-historias-en-una-misma-invocación) para su orden de creación.                          |
+| **Origen: requirement-refine** | Si el lote proviene de un `SRS-XXX`, al terminar de crear las US se actualiza la tabla **Historias de usuario derivadas** (sección 16) del `README.md` del SRS con cada `US-XXX`, su título y los `FR-XXX` que cubre — es la única escritura de este skill sobre un SRS; el resto del documento queda de solo lectura. |
 | **Salida mínima (creación)** | Carpeta `US-XXX-[nombre-corto]/README.md` con actor y valor de negocio; puede quedar en `Estado: Draft` con lagunas en Observaciones.                                                                                                                                                        |
 | **Salida para continuar**    | `Estado: Ready` en el `README.md`; INVEST y DoR completos; al menos un `AC-XXX`; Observaciones sin pendientes abiertos.                                                                                                                                                                      |
 | **Siguiente paso**           | Con la US en `Ready`: `test-define` — según `specification.testCases.mode`, invocar `/test-define` directo (`always`), solo si el usuario acepta (`ask`, por defecto) o no ofrecerlo (`never`) — no crear `TC-XXX` desde este skill; y `work-plan` — invocar `/work-plan` para las tareas (o continuidad explícita del usuario), sin condicionar a `specification.testCases.mode`. No crear `TK-XXX` desde este skill. |
