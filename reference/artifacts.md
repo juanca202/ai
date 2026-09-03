@@ -107,7 +107,10 @@ runner de fitness functions, versionados junto a su código.
   límite entre dos repositorios—, así que el nombre de la raíz es lo que hace legible la referencia.
 
 > **Excepción: `arch-init`.** Al bootstrapear el harness puede crear los índices de **varias** raíces en
-> una sola corrida (los que el usuario elija). El resto de skills de arquitectura —`arch-manage`,
+> una sola corrida (los que el usuario elija). Si el proyecto es multi-repo, esas raíces pueden no existir
+> todavía: `arch-init` también puede crear el propio repositorio de especificaciones (la raíz principal) y
+> los submódulos que originan el resto de raíces, no solo detectar los ya existentes — ver
+> `skills/arch-init/references/multi-repo.md`. El resto de skills de arquitectura —`arch-manage`,
 > `arch-discover`, `arch-audit`— operan siempre sobre **una** raíz por invocación.
 
 ## Identificadores y numeración

@@ -47,7 +47,7 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 
 ### arch-init
 
-**Cuándo:** bootstrapear un proyecto para agentes (nuevo o existente): git, `AGENTS.md` / `CLAUDE.md` / `.agents/MEMORY.md` / `.sdd-devkit/settings.json`, índices de ADR/estándares, stack y compuerta de calidad.
+**Cuándo:** bootstrapear un proyecto para agentes (nuevo o existente, uno o varios repositorios): git — o, si la solución abarca varios repos, un repositorio de especificaciones que los agrega como submódulos —, `AGENTS.md` / `CLAUDE.md` / `.agents/MEMORY.md` / `.sdd-devkit/settings.json`, índices de ADR/estándares, stack y compuerta de calidad.
 
 **Produce:** archivos base del harness; al cerrar sugiere continuar con `work-define` o `work-plan`.
 
@@ -60,14 +60,23 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 | **Con código base**    | Stack detectable; sin lógica de negocio propia aún.                  |
 | **Con implementación** | Invoca `arch-discover` completo para candidatos de ADR/estándares.   |
 
+Se clasifica por repositorio: en un proyecto de un solo repo, una sola vez; en multi-repo, una vez por cada submódulo (el repositorio de especificaciones nunca se clasifica — no tiene código propio).
 
-**Handoffs:** `arch-discover` (brownfield), `arch-manage` (candidatos aceptados), consulta a `quality-check` (qué validar por stack). Reejecutable: solo completa lo que falte.
+**Opciones — topología** (repo único vs. multi-repo, se resuelve antes de lo anterior):
+
+| Topología      | Qué implica                                                                                                    |
+| -------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Un solo repo** | Comportamiento estándar: el harness vive en ese mismo repositorio.                                              |
+| **Varios repos** | Crea (o usa) un repositorio de especificaciones como principal, con cada repo adicional agregado como submódulo en su raíz; el harness vive en el de especificaciones y el resto de pasos se repiten por submódulo. |
+
+**Handoffs:** `arch-discover` (brownfield, por repositorio si es multi-repo), `arch-manage` (candidatos aceptados, por raíz de arquitectura), consulta a `quality-check` (qué validar por stack). Reejecutable: solo completa lo que falte.
 
 **Ejemplos de invocación:**
 
 ```text
 /arch-init
 /arch-init este repo ya tiene código; completa lo que falte del harness
+/arch-init la solución tendrá un backend y un frontend en repos separados
 ```
 
 - «Inicializa el harness del proyecto»

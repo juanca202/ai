@@ -11,4 +11,4 @@
 
 # Stack tecnológico
 
-<!-- Lenguaje(s) y versión, framework(s) principal(es), runtime, gestor de paquetes/build y capas de testing configuradas. Esta es la única fuente del stack del proyecto. -->
+<!-- Lenguaje(s) y versión, framework(s) principal(es), runtime, gestor de paquetes/build y capas de testing configuradas. Esta es la única fuente del stack del proyecto. Si el proyecto es multi-repo (este archivo vive en el repositorio de especificaciones), reemplazar por una tabla con una fila por repositorio (la raíz de especificaciones incluida, marcada sin stack de aplicación propio) en vez de una sola descripción — ver arch-init/references/multi-repo.md § 6. -->

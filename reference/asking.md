@@ -61,7 +61,7 @@ deliberadas**, una por turno:
 
 | Skill | Excepción |
 |-------|-----------|
-| `arch-init` | **Una tanda por paso**, no una sola al inicio: el flujo tiene cinco pasos con preguntas en cada uno, y no hay tope fijo de preguntas por bloque. Selección múltiple explícita en capas de testing y en candidatos de ADR. |
+| `arch-init` | **Una tanda por paso**, no una sola al inicio: el flujo tiene cinco pasos con preguntas en cada uno, y no hay tope fijo de preguntas por bloque. La topología (repo único vs. multi-repo) se pregunta al inicio del Paso 1, antes que la clasificación de situación. En multi-repo, los pasos que se repiten por submódulo (situación, stack, candidatos) agrupan las preguntas de varios submódulos en una sola tanda por paso, no una tanda por submódulo. Selección múltiple explícita en capas de testing y en candidatos de ADR. |
 | `design-define` | Si el *grilling* inicial detecta más de tres lagunas, **encadenar tandas** hasta agotarlas o hasta que el usuario indique que lo restante quede como Observación. |
 | `git-commit` | **No lee `.agents/MEMORY.md`**: sus fuentes de «no repreguntar» son el contexto de la sesión, el diff y la propuesta ya mostrada. Fuera de tanda, una por turno: propuesta de **división** (una sola por invocación, y **solo** cuando el diff se reparte en varios commits — un commit único se ejecuta sin confirmar), commit en rama protegida, archivo sensible detectado. |
 | `quality-check` | Si se corrigen los fallos o se entrega solo el informe: se pregunta con el reporte ya presentado. |
