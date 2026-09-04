@@ -165,7 +165,40 @@ flowchart TD
 4. Las tareas se implementan (`work-implement`); los casos de prueba también pueden automatizarse ahí.
 5. El trabajo se cierra integrándolo directo a tu rama de desarrollo (`work-integrate`) o mediante un Pull Request (`pr-create`) — ambos verifican calidad, revisan el código y validan la cobertura de pruebas antes de dar por cerrado el trabajo.
 
-**¿Usas Speckit, OpenSpec, AgentOS u otro framework de specs para implementar?** SDD Devkit puede quedarse solo en la definición de historias de usuario (y, opcionalmente, investigación, casos de prueba y diseño técnico) y dejarte el resto a tu framework de terceros; la integración final (`work-integrate`/`pr-create`) sigue corriendo las mismas puertas de calidad sobre lo que se vaya a entregar.
+
+
+#### Integración con otros frameworks de implementación
+
+¿Ya usas **Speckit, OpenSpec, AgentOS** u otro framework de specs para implementar? SDD Devkit puede cubrir solo hasta las historias de usuario (y, si quieres, investigación, casos de prueba y diseño técnico) y dejarte el resto a tu framework — el cierre sigue siendo el mismo.
+
+```mermaid
+flowchart TD
+    A[Requerimiento] --> B["Historias de usuario<br/>**/work-define**"]
+    A -.-> Z["Refinar el requerimiento<br/>**/requirement-refine**"]
+    Z -.-> B
+    B -.-> R["Investigación<br/>**/work-research**"]
+    B -.-> C["Casos de prueba<br/>**/test-define**"]
+    B -.-> D["Diseño técnico<br/>**/design-define**"]
+    subgraph NESTED["Tu framework · Speckit / OpenSpec / AgentOS…"]
+        S["Specs e implementación"]
+    end
+    B --> S
+    S --> H["Integración directa<br/>**/work-integrate**"]
+    S --> I["Creación de PR<br/>**/pr-create**"]
+    H --> J(["Entregable"])
+    I --> J
+
+    classDef main fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef nestedFlow fill:#fff7ed,stroke:#ea580c,stroke-width:2px,stroke-dasharray:5 5,color:#9a3412
+    classDef entryPoint fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d
+    classDef exitPoint fill:#fee2e2,stroke:#b91c1c,stroke-width:3px,color:#7f1d1d
+    class B,H,I main
+    class S nestedFlow
+    class A entryPoint
+    class J exitPoint
+```
+
+Las historias alimentan tu framework de terceros; al cerrar, `work-integrate`/`pr-create` corren igual las puertas de calidad sobre el entregable. Lo que genere tu framework (sus propias specs, planes o tareas) no lo toca SDD Devkit — solo archiva sus propios artefactos (historias, tareas de mantenimiento e investigaciones).
 
 
 
