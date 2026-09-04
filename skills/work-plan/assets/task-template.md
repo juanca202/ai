@@ -4,15 +4,13 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 -->
 
 # TK-XXX: {{título corto de la tarea}}
-
-**Estado:** {{Draft | Ready}}
-
 <!-- tk:status={{Draft|Ready}} -->
 <!--
 Esta marca se CONSERVA al publicar. Sus claves y sus valores van en inglés SIEMPRE, aunque el resto del
 documento esté en otro idioma: es el ancla que otros skills parsean, no contenido. La etiqueta visible
 de arriba sí se redacta en el idioma resuelto. Ver ../../reference/verdicts.md.
 -->
+**Estado:** {{Draft | Ready}}
 **Historia:** {{enlace markdown al README.md de la historia US-XXX}}
 **Repositorio:** {{obligatorio: nombre del repositorio git al que afecta la tarea; inferido del repo (git remote / carpeta) o indicado por el usuario}}
 **Asignado a:** {{opcional: priorizar lo indicado por el usuario; si no, inferir con `git config user.name`; omitir línea si no aplica}}

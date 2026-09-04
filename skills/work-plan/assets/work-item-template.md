@@ -4,15 +4,13 @@ Eliminar este bloque y sustituir todos los {{…}} al publicar el documento fina
 -->
 
 # WI-XXX: {{título corto del work item}}
-
-**Estado:** {{Draft | Ready}}
-
 <!-- wi:status={{Draft|Ready}} -->
 <!--
 Esta marca se CONSERVA al publicar. Sus claves y sus valores van en inglés SIEMPRE, aunque el resto del
 documento esté en otro idioma: es el ancla que otros skills parsean, no contenido. La etiqueta visible
 de arriba sí se redacta en el idioma resuelto. Ver ../../reference/verdicts.md.
 -->
+**Estado:** {{Draft | Ready}}
 **Tipo:** {{bug-fix | refactor | dependency-update | optimization | security-update | test-improvement | documentation-update | operational-change}}
 <!--
 Tipos de work item:
@@ -27,7 +25,6 @@ Tipos de work item:
 | documentation-update | Documentación técnica y funcional. |
 | operational-change | Configuración, CI/CD, infraestructura, despliegues y migraciones. |
 -->
-
 **Repositorio:** {{obligatorio para Ready: nombre del repositorio git al que afecta el work item; inferido del repo (git remote / carpeta) o indicado por el usuario}}
 **Asignado a:** {{opcional: priorizar lo indicado por el usuario; si no, inferir con `git config user.name`; omitir línea si no aplica}}
 **Work Item ({{Sistema}}):** {{enlace markdown al work item creado en el sistema de seguimiento vinculado — solo si se creó; {{Sistema}} es el nombre corto que define el archivo de referencia del sistema (p. ej. "ADO" para references/azure-devops.md); omitir línea si no aplica}}

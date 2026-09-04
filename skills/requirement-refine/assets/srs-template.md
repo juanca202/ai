@@ -8,15 +8,13 @@ completo y references/quality-criteria.md para los criterios normativos de cada 
 -->
 
 # SRS-XXX: {{título corto del requerimiento}}
-
-**Estado:** {{Draft | Ready}}
-
 <!-- srs:status={{Draft|Ready}} -->
 <!--
 Esta marca se CONSERVA al publicar. Sus claves y sus valores van en inglés SIEMPRE, aunque el resto del
 documento esté en otro idioma: es el ancla que otros skills parsean, no contenido. La etiqueta visible
 de arriba sí se redacta en el idioma resuelto. Ver ../../reference/verdicts.md.
 -->
+**Estado:** {{Draft | Ready}}
 **Fecha de creación:** {{YYYY-MM-DD}}
 **Última actualización:** {{YYYY-MM-DD}}
 
