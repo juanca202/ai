@@ -39,6 +39,6 @@ flowchart TD
 | El requerimiento sí tiene (o necesita) una historia de usuario | [Flujo de implementación](../../README.md#flujo-de-implementación) completo, con `work-define` |
 | Es una corrección de un defecto reportado | [Fix a bug](fix-a-bug.md) — investigación previa con diagnóstico de causa raíz |
 | Es un refactor de código existente | [Refactorización de código](refactor.md) — investigación previa de factibilidad e impacto |
-| La implementación la ejecuta un framework de terceros (Speckit, OpenSpec, AgentOS) | Variante [Specs (frameworks de terceros)](../../README.md#specs-frameworks-de-terceros) del README |
+| La implementación la ejecuta un framework de terceros (Speckit, OpenSpec, AgentOS) | Ver la nota sobre frameworks de terceros en [Flujo de implementación](../../README.md#flujo-de-implementación) del README |
 
 Definición de tareas de mantenimiento y sus tipos: [`skills/work-plan/references/maintenance-tasks.md`](../../skills/work-plan/references/maintenance-tasks.md).

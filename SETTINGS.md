@@ -1,6 +1,6 @@
 # Opciones de `.sdd-devkit/settings.json`
 
-Referencia completa de cada opción de `.sdd-devkit/settings.json`: para qué sirve y qué skill o regla transversal la resuelve. `arch-init` crea este archivo en la raíz de **cada proyecto** que adopta el harness (no en el plugin); ver la introducción y el ejemplo completo en el [README](README.md#configuración-del-proyecto-sdd-devkitsettingsjson). El schema formal —tipos, enums y campos obligatorios— vive en [schemas/settings.schema.json](schemas/settings.schema.json); la plantilla mínima que genera `arch-init` en [skills/arch-init/assets/settings-template.json](skills/arch-init/assets/settings-template.json).
+Referencia completa de cada opción de `.sdd-devkit/settings.json`: para qué sirve y qué skill o regla transversal la resuelve. `arch-init` crea este archivo en la raíz de **cada proyecto** que adopta el harness (no en el plugin); ver la introducción en el [README](README.md#configuración-del-proyecto). El schema formal —tipos, enums y campos obligatorios— vive en [schemas/settings.schema.json](schemas/settings.schema.json); la plantilla mínima que genera `arch-init` en [skills/arch-init/assets/settings-template.json](skills/arch-init/assets/settings-template.json).
 
 ---
 
