@@ -1,7 +1,7 @@
 ---
 name: code-review
 description: >-
-  Revisión cualitativa de código estilo ingeniero senior sobre el diff de una rama contra su base, incluido lo no commiteado: intención (¿resuelve el problema pedido?), arquitectura y diseño según ISO/IEC 25010 (SOLID, Clean Architecture, acoplamiento, duplicación, fiabilidad, seguridad, desempeño) y feedback accionable que explica el PORQUÉ y propone cambios. Devuelve hallazgos con severidad, veredicto (aprobado/rechazado/incompleto) y próximas acciones. No exige artefactos de este plugin: la intención puede venir de una US-XXX/WI-XXX/FT-XXX, de un ticket o spec externo, o de la rama y sus commits. Activar cuando el usuario pida "revisa este código", "code review", "revisión de código", "¿está bien resuelto esto?", "revisa el diseño antes del PR/merge", "revisa lo que llevo antes de commitear", o cuando lo invoque otro skill (work-integrate, pr-create). Proceso de cierre, no proactivo. NO ejecuta pruebas, linter ni build — eso es de quality-check. Nunca corrige sin autorización.
+  Revisión cualitativa de código, estilo ingeniero senior, sobre el diff de una rama contra su base (incluye lo no commiteado): intención, arquitectura y diseño (SOLID, Clean Architecture, ISO/IEC 25010: acoplamiento, fiabilidad, seguridad, desempeño) y feedback accionable que explica el porqué y propone cambios. Devuelve hallazgos con severidad, veredicto y próximas acciones. No exige artefactos de este plugin: la intención puede venir de una US-XXX/WI-XXX/FT-XXX, un ticket o spec externo, o la rama y sus commits. Activar cuando el usuario pida "revisa este código", "code review", "¿está bien resuelto esto?", "revisa el diseño antes del PR/merge", o cuando lo invoque otro skill (work-integrate, pr-create). Proceso de cierre, no proactivo. NO ejecuta pruebas, linter ni build — eso es de quality-check. Por defecto pide confirmación antes de corregir un hallazgo bloqueante; `.sdd-devkit/settings.json` (`verification.codeReview.confirmFix: "never"`) permite corregir directo sin preguntar.
 license: MIT
 ---
 
@@ -13,7 +13,7 @@ Revisar el **diff** de una implementación como lo haría un **ingeniero senior*
 >
 > **Skills independientes.** Las tres puertas del cierre —`quality-check`, `code-review` y `trace-validate`— son **hermanas**: ninguna condiciona el veredicto de otra; cada una emite el suyo y escribe su propio informe. Quien las encadena es el orquestador de cierre (`work-integrate`, `pr-create`). Ver [Relación con otros skills](#relación-con-otros-skills).
 >
-> **Alcance:** analiza, razona y **propone**. **Nunca corrige por iniciativa propia**; aplica correcciones **solo si el usuario lo autoriza explícitamente**. No hace commit/push/merge sin instrucción explícita.
+> **Alcance:** analiza, razona y **propone**. Aplica correcciones **solo si el usuario lo autoriza explícitamente** —o si `.sdd-devkit/settings.json` tiene `verification.codeReview.confirmFix: "never"` (ver [Política de corrección](#política-de-corrección))—. No hace commit/push/merge sin instrucción explícita.
 >
 > **Informe idempotente.** Si no hubo **cambios en los archivos** (ni en el código de la rama ni en su base) desde la última vez que se generó `docs/audits/code-review.md`, **no se vuelve a revisar**: se devuelven el veredicto y el resumen del informe existente. Ver [Reutilización del informe (idempotencia)](#reutilización-del-informe-idempotencia).
 >
@@ -45,6 +45,25 @@ Carga cada archivo **solo cuando lo necesites** (rutas relativas a la raíz del 
 | [`references/qualitative-review.md`](references/qualitative-review.md) | Detalle de las tres dimensiones, modelo ISO/IEC 25010, calibración de severidad y ejemplos de buen/mal feedback. | En el Paso 3, antes de redactar hallazgos. |
 | [`assets/code-review-template.md`](assets/code-review-template.md) | Plantilla canónica del informe. | En el Paso 4, para rellenar el informe. |
 
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`../../reference/verification.md`](../../reference/verification.md): **Política de corrección** — si se pregunta antes de corregir un hallazgo bloqueante o se corrige directo. *Lectura obligatoria antes de ejecutar el skill.*
+
+---
+
+## Política de corrección
+
+Antes de ejecutar este skill, DEBES leer [`../../reference/verification.md`](../../reference/verification.md).
+
+Las reglas de `verification.md` son obligatorias y determinan, vía `verification.codeReview.confirmFix`, si se pausa a preguntar «corregir o justificar» ante cada hallazgo bloqueante (`always`, comportamiento por defecto) o si se aplica directamente el cambio sugerido sin preguntar (`never`). Ver [Severidad y veredicto](#severidad-y-veredicto).
+
+No continúes hasta haber leído y aplicado `verification.md`.
+
 ---
 
 ## Las tres dimensiones
@@ -67,16 +86,16 @@ Resolver la intención por este orden, quedándose con la primera fuente disponi
 
 | Fuente | Cómo obtenerla |
 |--------|----------------|
-| **Artefacto del plugin** | `US-XXX` / `WI-XXX` / `FT-XXX` derivado del prefijo de rama + ID (`feature/US-042-…`, `fix/WI-007-…`, `test/FT-003-…`); leer su `README.md` y sus criterios de aceptación. Si la carpeta no está en la ruta activa, buscarla bajo `docs/specs/archive/` antes de descartarla (ver la regla siguiente). |
+| **Artefacto del plugin** | `US-XXX` / `WI-XXX` / `FT-XXX` derivado del prefijo de rama + ID (`feature/US-042-…`, `fix/WI-007-…`, `test/FT-003-…`); leer su `README.md` y sus criterios de aceptación. Si la carpeta no está en la ruta activa, buscarla bajo `docs/archive/` antes de descartarla (ver la regla siguiente). |
 | **Cualquier otro documento de especificación** | La ruta o nombre que indique el usuario, o el que la rama/PR referencie: un spec suelto en el repo, un documento de otra herramienta o formato. Leerlo completo antes de revisar. |
 | **Ticket de un tracker externo** | El ID en la rama, el commit o el título del PR (`PROJ-1234`). Si el contenido no es accesible desde aquí, **pedírselo al usuario**; no inventarlo. |
 | **Sin documento** | Deducirla de la rama, los mensajes de commit y la descripción del PR. Es una base más débil: decirlo en el informe. |
 
 Reglas:
 
-- **Un artefacto archivado sigue siendo la fuente de intención.** `work-integrate` y `pr-create` pueden mover la carpeta de un trabajo cerrado a `docs/specs/archive/user-stories/` o `docs/specs/archive/work-items/`. Ocurre de forma rutinaria al revisar una rama cuyo archivado ya se commiteó, así que **buscar ahí antes de bajar a la siguiente fuente**: dar por «sin documento» un artefacto que sí existe degradaría la dimensión 1 a `⚠️ Incompleto` sin motivo. Solo se lee. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+- **Un artefacto archivado sigue siendo la fuente de intención.** `work-integrate` y `pr-create` pueden mover la carpeta de un trabajo cerrado a `docs/archive/user-stories/` o `docs/archive/work-items/`. Ocurre de forma rutinaria al revisar una rama cuyo archivado ya se commiteó, así que **buscar ahí antes de bajar a la siguiente fuente**: dar por «sin documento» un artefacto que sí existe degradaría la dimensión 1 a `INCOMPLETE` sin motivo. Solo se lee. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 - **La ausencia de artefacto no bloquea la revisión.** Las dimensiones 2 y 3 (arquitectura/diseño y feedback) se evalúan igual sobre cualquier diff, en cualquier repo, sin `docs/specs/` ni convención de ramas.
-- **Sí condiciona la dimensión 1.** Si la intención no es determinable y el usuario no la aporta, no inventarla ni inferirla del propio código —eso es circular, el código siempre "cumple" consigo mismo—: marcar esa dimensión como no evaluada y emitir **`⚠️ Incompleto`**.
+- **Sí condiciona la dimensión 1.** Si la intención no es determinable y el usuario no la aporta, no inventarla ni inferirla del propio código —eso es circular, el código siempre "cumple" consigo mismo—: marcar esa dimensión como `NOT_ASSESSED` y emitir **`INCOMPLETE`**.
 - **Los criterios se citan verbatim.** Sea cual sea el formato del identificador (`AC-012`, `1.3`, `R-3`, `CA-07`), se usa **tal como está escrito** en el artefacto, sin normalizar — mismo contrato que `test-define` y `trace-validate`.
 - **Qué está probado no es asunto de este skill.** La cobertura criterio a criterio la valida `trace-validate`; aquí los criterios sirven solo para juzgar si el cambio resuelve el problema pedido.
 
@@ -88,33 +107,45 @@ Clasifica cada hallazgo. Solo los dos primeros niveles **bloquean**.
 
 | Severidad | Qué califica | Efecto en veredicto |
 |-----------|--------------|---------------------|
-| 🔴 **Crítico** | Desajuste intención↔implementación, violación grave de límites arquitectónicos, acoplamiento que impide el cambio, vulnerabilidad explotable, defecto de diseño que romperá el sistema o lo desvía del objetivo. | **Bloquea** salvo justificación aceptada. |
-| 🟠 **Mayor** | Violación SOLID con impacto real, duplicación significativa, abstracción innecesaria costosa, divergencia fuerte de los patrones del proyecto, cambio de contrato sin versionar. | **Bloquea** salvo justificación aceptada. |
-| 🟡 **Menor** | Mejoras recomendables sin riesgo sistémico (naming, legibilidad, duplicación pequeña). | No bloquea. |
-| 💡 **Sugerencia** | Ideas opcionales, alternativas de estilo. | No bloquea. |
+| `CRITICAL` (`🔴`) | Desajuste intención↔implementación, violación grave de límites arquitectónicos, acoplamiento que impide el cambio, vulnerabilidad explotable, defecto de diseño que romperá el sistema o lo desvía del objetivo. | **Bloquea** salvo justificación aceptada. |
+| `MAJOR` (`🟠`) | Violación SOLID con impacto real, duplicación significativa, abstracción innecesaria costosa, divergencia fuerte de los patrones del proyecto, cambio de contrato sin versionar. | **Bloquea** salvo justificación aceptada. |
+| `MINOR` (`🟡`) | Mejoras recomendables sin riesgo sistémico (naming, legibilidad, duplicación pequeña). | No bloquea. |
+| `SUGGESTION` (`💡`) | Ideas opcionales, alternativas de estilo. | No bloquea. |
+
+## Vocabulario de veredictos y estados
+
+Antes de redactar cualquier informe, DEBES leer [`../../reference/verdicts.md`](../../reference/verdicts.md).
+
+Las reglas de `verdicts.md` son obligatorias: el valor canónico y el símbolo son estables, y la **etiqueta que lee la persona se redacta siempre en el idioma resuelto** por `language.md`. Ninguna etiqueta de este skill se fija en un idioma concreto.
+
+No continúes hasta haber leído y aplicado `verdicts.md`.
+
+---
 
 ### Veredicto
 
 | Veredicto | Condición exacta |
 |-----------|------------------|
-| `✅ Aprobado` | **Cero** hallazgos bloqueantes (🔴/🟠) sin resolver — corregidos o justificados-y-aceptados. Hallazgos 🟡/💡 en cualquier estado. |
-| `❌ Rechazado` | **Al menos un** hallazgo 🔴/🟠 sin corregir ni justificar. |
-| `⚠️ Incompleto` | Sin bloqueantes pendientes, pero **alguna dimensión no pudo evaluarse** (p. ej. la intención no es determinable y el usuario no la aportó, o parte del diff es inaccesible/generado y no se pudo revisar). |
+| `APPROVED` | **Cero** hallazgos bloqueantes (🔴/🟠) sin resolver — corregidos o justificados-y-aceptados. Hallazgos 🟡/💡 en cualquier estado. |
+| `REJECTED` | **Al menos un** hallazgo 🔴/🟠 sin corregir ni justificar. |
+| `INCOMPLETE` | Sin bloqueantes pendientes, pero **alguna dimensión no pudo evaluarse** (p. ej. la intención no es determinable y el usuario no la aportó, o parte del diff es inaccesible/generado y no se pudo revisar). |
 
-Precedencia: `❌ Rechazado` > `⚠️ Incompleto` > `✅ Aprobado`.
+Precedencia: `REJECTED` > `INCOMPLETE` > `APPROVED`.
 
-> **Este veredicto cubre solo el plano cualitativo.** El del plano automatizado lo emite `quality-check` y el de la cobertura funcional `trace-validate`, cada uno por separado: el cierre de un trabajo exige **las tres** puertas en aprobado. Un `✅ Aprobado` aquí **no** dice nada sobre si las pruebas pasan ni sobre si cada criterio está cubierto. (En un **PR de promoción** —`develop → master`— esta puerta no corre: su unidad es un diff sin revisar, y ahí todo el diff ya se revisó PR a PR. Ver [`pr-create`](../pr-create/SKILL.md#puertas-en-un-pr-de-promoción).)
+> **Este veredicto cubre solo el plano cualitativo.** El del plano automatizado lo emite `quality-check` y el de la cobertura funcional `trace-validate`, cada uno por separado: el cierre de un trabajo exige **las tres** puertas en aprobado. Un `APPROVED` aquí **no** dice nada sobre si las pruebas pasan ni sobre si cada criterio está cubierto. (En un **PR de promoción** —`develop → master`— esta puerta no corre: su unidad es un diff sin revisar, y ahí todo el diff ya se revisó PR a PR. Ver [`pr-create`](../pr-create/SKILL.md#puertas-en-un-pr-de-promoción).)
 >
-> **Ojo con el símbolo `⚠️` en el cierre:** aquí (y en `quality-check`) `⚠️ Incompleto` **bloquea**; en `trace-validate`, `⚠️ Aprobado con observaciones` **no bloquea**. Mismo símbolo, efecto de compuerta opuesto.
+> **Ojo con el símbolo `⚠️` en el cierre:** aquí (y en `quality-check`) `INCOMPLETE` **bloquea**; en `trace-validate` y `arch-audit`, `APPROVED_WITH_NOTES` **no bloquea**. Mismo símbolo, efecto de compuerta opuesto.
 
-**Ante un hallazgo bloqueante (🔴/🟠), siempre se ofrecen DOS caminos al usuario:**
+**Ante un hallazgo bloqueante (🔴/🟠)**, lo que sigue depende de `verification.codeReview.confirmFix` (ver [Política de corrección](#política-de-corrección)):
 
-1. **Corregir** — el skill presenta el cambio sugerido. Sea corrección automática autorizada o manual del usuario, tras aplicarla se **reinicia la revisión desde el Paso 1** sobre el diff ya corregido. Si la corrección toca lógica cubierta por pruebas, **sugerir** re-ejecutar `quality-check`; no ejecutarlo desde aquí.
-2. **Justificar** — el usuario explica por qué el estado actual es aceptable; si se acepta, el hallazgo deja de bloquear y la justificación **se registra** en el informe (queda trazado quién aceptó el estado actual y por qué).
+- **`always`** (o sin `settings.json`, comportamiento por defecto) — se ofrecen **DOS caminos** al usuario, y se **pausa** a que elija antes de continuar:
+  1. **Corregir** — el skill presenta el cambio sugerido. Sea corrección automática autorizada o manual del usuario, tras aplicarla se **reinicia la revisión desde el Paso 1** sobre el diff ya corregido. Si la corrección toca lógica cubierta por pruebas, **sugerir** re-ejecutar `quality-check`; no ejecutarlo desde aquí.
+  2. **Justificar** — el usuario explica por qué el estado actual es aceptable; si se acepta, el hallazgo deja de bloquear y la justificación **se registra** en el informe (queda trazado quién aceptó el estado actual y por qué).
 
-> El skill **nunca** corrige sin que el usuario lo pida expresamente. Si no autoriza ni justifica, el hallazgo sigue bloqueando.
+  Si no autoriza ni justifica, el hallazgo sigue bloqueando.
+- **`never`** — **no pausar**: aplicar directamente el cambio sugerido para cada hallazgo bloqueante (equivalente a elegir «Corregir» en todos, sin esperar confirmación) y reiniciar la revisión. La vía de **justificar** sigue disponible si el usuario aporta la justificación explícitamente en el turno; sin ella, se corrige.
 
-Mientras haya hallazgos bloqueantes sin resolver, el veredicto es `❌ Rechazado`. Tras presentarlos, **pausa y pide al usuario** elegir corregir o justificar cada uno antes de finalizar.
+Mientras haya hallazgos bloqueantes sin resolver, el veredicto es `REJECTED`.
 
 ---
 
@@ -148,7 +179,7 @@ Mismo principio de caché que [`quality-check`](../quality-check/SKILL.md#caché
 
 | Componente | Qué cubre | Cómo se obtiene |
 |------------|-----------|-----------------|
-| `FINGERPRINT` | El lado de la rama: contenido trackeado, cambios sin stagear y rutas sin trackear, **excluyendo toda carpeta oculta, cualquier `docs/` y los `trace-report.md` sueltos**. Es **el mismo valor** que calculan `quality-check` y `trace-validate`; receta exacta en [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate). | `git hash-object` sobre `ls-files -s` + `status` + `diff` (ver receta) |
+| `FINGERPRINT` | El lado de la rama: contenido trackeado, cambios sin stagear y rutas sin trackear, **excluyendo toda carpeta oculta, cualquier `docs/` y los `coverage.md` sueltos**. Es **el mismo valor** que calculan `quality-check` y `trace-validate`; receta exacta en [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate). | `git hash-object` sobre `ls-files -s` + `status` + `diff` (ver receta) |
 | `BASE_COMMIT` | El otro lado: el commit de la **rama base** contra la que se diffea. Un `git fetch` que mueva la base cambia el diff sin tocar el árbol local, así que el `FINGERPRINT` solo no lo detectaría. Compara **commits**, no nombres de ref: `base develop` y `base origin/develop` apuntando al mismo commit son el mismo valor. | `git rev-parse --short <base>` con la base ya resuelta (Paso 0.1) |
 
 La exclusión de `docs/` es la que hace que **escribir el propio `code-review.md` no invalide su caché**.
@@ -157,11 +188,11 @@ La exclusión de `docs/` es la que hace que **escribir el propio `code-review.md
 
 1. Resolver la rama base y calcular `FINGERPRINT` y `BASE_COMMIT`. **Siempre**, haya caché o no: el Paso 5 los necesita para grabar la marca de pie, también en la primera corrida de un repo.
 2. Buscar `docs/audits/code-review.md`. Si no existe → no hay caché; ejecutar el flujo completo.
-3. Si existe, leer su **marca de pie** (`<!-- code-review:fingerprint=<hash> · base=<sha-corto> · generado=YYYY-MM-DD -->`) y reutilizarlo **solo si se cumple todo**: coinciden fingerprint y base, el **modo** es el mismo, el veredicto registrado es **`✅ Aprobado`**, y el usuario no pasó `revalidate`. Entonces → **no revisar**: devolver el veredicto y el resumen del informe existente, indicando que no hubo cambios desde `{{generado}}`. No reescribir el archivo, no releer el diff.
+3. Si existe, leer su **marca de pie** (`<!-- code-review:verdict=<canónico> · mode=<modo> · fingerprint=<hash> · base=<sha-corto> · generated=YYYY-MM-DD -->`) y reutilizarlo **solo si se cumple todo**: coinciden fingerprint y base, el **modo** es el mismo, el veredicto registrado es **`APPROVED`**, y el usuario no pasó `revalidate`. Entonces → **no revisar**: devolver el veredicto y el resumen del informe existente, indicando que no hubo cambios desde `{{generated}}`. No reescribir el archivo, no releer el diff.
 4. Si falla cualquiera de esas condiciones, o no hay marca de pie (informes antiguos) → ejecutar el flujo completo (Pasos 1-5) y **regrabar** la marca de pie al guardar.
 5. La marca de pie **se conserva** en el documento publicado (no se elimina como el bloque de instrucciones de la plantilla).
 
-> **Solo se cachea el `✅ Aprobado`.** `❌ Rechazado` y `⚠️ Incompleto` describen una puerta abierta, y las dos formas de cerrarla —**justificar** un hallazgo bloqueante o **aportar** la intención que faltaba— no tocan el código. Si se sirvieran desde caché, la clave nunca se movería, el veredicto quedaría congelado y, como los orquestadores tienen prohibido forzar `revalidate`, el usuario que justifica en vez de corregir no podría integrar jamás. Ante un veredicto no aprobado se revisa de nuevo, arrastrando del informe anterior las justificaciones ya aceptadas.
+> **Solo se cachea el `APPROVED`.** `REJECTED` y `INCOMPLETE` describen una puerta abierta, y las dos formas de cerrarla —**justificar** un hallazgo bloqueante o **aportar** la intención que faltaba— no tocan el código. Si se sirvieran desde caché, la clave nunca se movería, el veredicto quedaría congelado y, como los orquestadores tienen prohibido forzar `revalidate`, el usuario que justifica en vez de corregir no podría integrar jamás. Ante un veredicto no aprobado se revisa de nuevo, arrastrando del informe anterior las justificaciones ya aceptadas.
 
 **Lo que la caché no cubre:**
 
@@ -174,13 +205,13 @@ La exclusión de `docs/` es la que hace que **escribir el propio `code-review.md
 
 ## Flujo de ejecución (resumen)
 
-**Ninguna corrección se aplica sin autorización explícita del usuario**; tras corregir, se reinicia la revisión. El detalle paso a paso, el formato del informe, el manejo de errores y los anti-patterns están en **[`references/execution.md`](references/execution.md)** — léelo al iniciar la ejecución.
+**Ninguna corrección se aplica sin autorización** —explícita del usuario, o de antemano vía `verification.codeReview.confirmFix: "never"` (ver [Política de corrección](#política-de-corrección))—; tras corregir, se reinicia la revisión. El detalle paso a paso, el formato del informe, el manejo de errores y los anti-patterns están en **[`references/execution.md`](references/execution.md)** — léelo al iniciar la ejecución.
 
-0. **Resolver la base, calcular la clave y comprobar frescura:** si ya existe `docs/audits/code-review.md` con su marca de pie, no hubo cambios (mismo `FINGERPRINT`, misma base y mismo modo) **y su veredicto es `✅ Aprobado`**, **devolver ese informe sin volver a revisar** — ver [Reutilización del informe (idempotencia)](#reutilización-del-informe-idempotencia). Solo si hay cambios, la revisión es acotada, o el usuario pasa `revalidate`, continuar con los pasos siguientes.
+0. **Resolver la base, calcular la clave y comprobar frescura:** si ya existe `docs/audits/code-review.md` con su marca de pie, no hubo cambios (mismo `FINGERPRINT`, misma base y mismo modo) **y su veredicto es `APPROVED`**, **devolver ese informe sin volver a revisar** — ver [Reutilización del informe (idempotencia)](#reutilización-del-informe-idempotencia). Solo si hay cambios, la revisión es acotada, o el usuario pasa `revalidate`, continuar con los pasos siguientes.
 1. **Delimitar la revisión:** resolver el diff (rama base o `scope`), capturar metadata (rama, commit, working tree) y la **intención** del cambio.
 2. **Leer el contexto del sistema:** patrones del repo, capas, convenciones y, si existen, los criterios de aceptación del artefacto origen.
 3. **Evaluar las tres dimensiones** con [`references/qualitative-review.md`](references/qualitative-review.md) y emitir hallazgos con severidad, porqué, impacto y sugerencia concreta.
-4. **Puerta cualitativa e informe:** presentar los hallazgos bloqueantes, pedir corregir o justificar, y rellenar [`assets/code-review-template.md`](assets/code-review-template.md) con el veredicto.
+4. **Puerta cualitativa e informe:** presentar los hallazgos bloqueantes y resolver cada uno según `verification.codeReview.confirmFix` (pedir corregir o justificar con `always`; corregir directo con `never`), y rellenar [`assets/code-review-template.md`](assets/code-review-template.md) con el veredicto.
 5. **Registro y salida:** escribir siempre `docs/audits/code-review.md` (creando el directorio si no existe) **con la marca de pie del fingerprint y la base** para la próxima comprobación de frescura, más un resumen en el chat. **Excepción:** una revisión acotada (`working-tree` o `scope`) **no** sobrescribe ese archivo —no es el estado vigente de la rama—: va al chat o a `save-report`. **No** hacer commit/push/merge sin instrucción explícita.
 
 ---
@@ -192,15 +223,15 @@ La exclusión de `docs/` es la que hace que **escribir el propio `code-review.md
 Usar este skill **solo cuando se le invoca explícitamente** (ni de forma proactiva, ni "por si acaso", ni al detectar que se terminó código):
 
 - **El usuario lo pide explícitamente** — solicita una revisión de código, revisar el diseño antes de PR/merge, o nombra este skill.
-- **Otro skill lo invoca explícitamente**, p. ej. `work-integrate` (requiere `✅ Aprobado`, con hallazgos resueltos o justificados, antes de integrar) o `pr-create` (puede invocarlo de forma bloqueante antes de crear el PR).
+- **Otro skill lo invoca explícitamente**, p. ej. `work-integrate` (requiere `APPROVED`, con hallazgos resueltos o justificados, antes de integrar) o `pr-create` (puede invocarlo de forma bloqueante antes de crear el PR).
 
 **Relación con [`quality-check`](../quality-check/SKILL.md):** son skills **hermanos e independientes**, no uno dentro del otro.
 
 | | `quality-check` | `code-review` | `trace-validate` |
 |---|---|---|---|
 | Pregunta que responde | ¿El código corre y cumple las reglas? | ¿Resuelve el problema correcto y está bien diseñado? | ¿Cada criterio de aceptación está probado? |
-| Qué hace | Ejecuta tipado, linter, unit, coverage, integración, build, e2e, sonar | Analiza el diff en intención, arquitectura/diseño y feedback | Cruza criterios ↔ casos de prueba ↔ artefactos |
-| Artefactos | `docs/audits/quality-check.md`, `.sdd-devkit/test-run.json` | `docs/audits/code-review.md` | `trace-report.md` del trabajo |
+| Qué hace | Ejecuta tipado, linter, unit, coverage, build, e2e, sonar y las suites del estándar de testing | Analiza el diff en intención, arquitectura/diseño y feedback | Cruza criterios ↔ casos de prueba ↔ artefactos |
+| Artefactos | `docs/audits/quality-check.md`, `.sdd-devkit/test-run.json` | `docs/audits/code-review.md` | `coverage.md` del trabajo |
 | Veredicto | Propio, solo del plano automatizado | Propio, solo del plano cualitativo | Propio, solo de la cobertura funcional |
 
 Este skill **no ejecuta pruebas ni checks** y **no consume** `test-run.json`: si el usuario pide correr algo, redirigirlo a `quality-check`. El orden recomendado en el cierre es `quality-check` → `code-review` → `trace-validate` (revisar diseño sobre un código que ni compila suele ser trabajo perdido; y `trace-validate` va tras `quality-check` para reutilizar su corrida de pruebas), pero es una recomendación del orquestador, no una dependencia dura.
@@ -211,17 +242,16 @@ Es un proceso **posterior a la implementación**: no forma parte de `work-implem
 
 ### Fingerprint canónico de la tubería
 
-Las **tres** puertas del cierre usan el **mismo** fingerprint canónico como clave de frescura, con el mismo nombre de variable (`FINGERPRINT`) y la misma receta —que vive en [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate)—, cada una sobre su propio artefacto: `test-run.json` en `quality-check`, `trace-report.md` en `trace-validate` y `docs/audits/code-review.md` aquí. Este skill le añade un segundo componente, el commit de la **rama base**, porque su unidad de trabajo es un diff con dos lados (ver [Reutilización del informe (idempotencia)](#reutilización-del-informe-idempotencia)); el `FINGERPRINT` en sí **no** cambia de definición.
+Las **tres** puertas del cierre usan el **mismo** fingerprint canónico como clave de frescura, con el mismo nombre de variable (`FINGERPRINT`) y la misma receta —que vive en [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate)—, cada una sobre su propio artefacto: `test-run.json` en `quality-check`, `coverage.md` en `trace-validate` y `docs/audits/code-review.md` aquí. Este skill le añade un segundo componente, el commit de la **rama base**, porque su unidad de trabajo es un diff con dos lados (ver [Reutilización del informe (idempotencia)](#reutilización-del-informe-idempotencia)); el `FINGERPRINT` en sí **no** cambia de definición.
 
-Que la receta excluya **toda carpeta oculta, todo `docs/` y los `trace-report.md` sueltos** es lo que permite que escribir `code-review.md` no desplace la clave de frescura de ninguna de las tres. La contrapartida —que los criterios de aceptación de `docs/specs/` tampoco cuenten— está en [Reutilización del informe (idempotencia)](#reutilización-del-informe-idempotencia).
+Que la receta excluya **toda carpeta oculta, todo `docs/` y los `coverage.md` sueltos** es lo que permite que escribir `code-review.md` no desplace la clave de frescura de ninguna de las tres. La contrapartida —que los criterios de aceptación de `docs/specs/` tampoco cuenten— está en [Reutilización del informe (idempotencia)](#reutilización-del-informe-idempotencia).
 
 ### Resolución de idioma
 
-El idioma del informe se decide en este orden; detenerse en el primer paso que aplique:
+Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../reference/language.md).
 
-1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>`. Es la clave canónica que escribe `arch-init`; si existe, manda.
-2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesión.
-3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md` con `preferred language: <código>`.
-4. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta, **preguntar si desea persistirlo** en `.agents/MEMORY.md`; no decidir el idioma por cuenta propia.
+Las reglas de `language.md` son obligatorias y tienen prioridad para determinar el idioma de todos los artefactos y mensajes generados por este skill.
 
-Los mensajes de error de las herramientas no se traducen.
+No continúes hasta haber leído y aplicado `language.md`.
+
+**Excepción deliberada:** la salida y los mensajes de error de las herramientas no se traducen; se citan literales.

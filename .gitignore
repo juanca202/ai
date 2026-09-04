@@ -2,6 +2,4 @@ skills/*/evals/workspace/
 .DS_Store
 skills/.DS_Store
 
-# Caché local de la corrida de pruebas (la produce quality-check). No se versiona:
-# es desechable y un resultado producido en otra máquina no es evidencia aquí.
-.sdd-devkit/test-run.json
+.sdd-devkit/

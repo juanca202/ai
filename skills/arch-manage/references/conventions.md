@@ -3,6 +3,12 @@
 Referencia de consulta al **escribir el frontmatter y los identificadores** de un ADR, un estándar, un
 requisito o un criterio (CR). Leer al redactar/editar cualquiera de estos artefactos.
 
+> **Todas las rutas de este documento (`docs/adr/`, `docs/standards/`, `scripts/arch/`) son relativas a la
+> raíz de arquitectura (`<raíz-arq>`)** — el repositorio (principal o submódulo) al que pertenece el código
+> de la decisión, resuelto antes de escribir nada. La **numeración también es por raíz**: el correlativo
+> `ADR-XXX` se calcula sobre el `docs/adr/` de esa raíz y nunca continúa la serie de otra. Ver
+> [`../../../reference/artifacts.md`](../../../reference/artifacts.md#raíz-de-arquitectura-adr-estándares-y-fitness-functions).
+
 ## Identidad y numeración
 
 | | ADR | Estándar (dominio) | Requisito (dentro de un estándar) | Criterio de cumplimiento (dentro del estándar, ligado a un requisito) |

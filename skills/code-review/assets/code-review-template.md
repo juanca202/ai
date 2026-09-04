@@ -1,6 +1,12 @@
 <!--
 Convención de placeholders: sustituir manualmente cada {{texto}}; no es un motor de plantillas.
 Eliminar este bloque y sustituir todos los {{…}} al publicar el documento final.
+IDIOMA: los títulos de sección, los encabezados de columna, la leyenda y TODA etiqueta de veredicto,
+severidad y estado de dimensión se redactan en el IDIOMA RESUELTO (ver «Resolución de idioma» en
+SKILL.md). Esta plantilla los muestra en español solo porque el repositorio del plugin está en
+español: son un ejemplo de redacción, no un texto fijo. Lo que NO cambia nunca: la estructura, el
+orden, los símbolos y los valores canónicos (APPROVED/REJECTED/INCOMPLETE, CLEAN/NOT_ASSESSED,
+CRITICAL/MAJOR/MINOR/SUGGESTION). Ver ../../reference/verdicts.md.
 Excepción: la marca de pie del final (code-review:fingerprint) SÍ se conserva en el documento
 publicado — es la clave de frescura que lee el Paso 0 de la próxima revisión.
 -->
@@ -13,11 +19,11 @@ publicado — es la clave de frescura que lee el Paso 0 de la próxima revisión
 **Alcance del diff:** {{rama vs base, incluidos los cambios sin commitear | solo cambios sin commitear (`working-tree`) | rutas de `scope`}} — {{N archivos, +X/−Y líneas}}
 **Modo:** {{default / blocking-only}}
 **Base del diff:** {{rama base}} @ {{sha-corto}}
-**Veredicto:** {{✅ Aprobado / ❌ Rechazado / ⚠️ Incompleto}} — {{justificación en una línea}}
+**Veredicto:** {{símbolo + etiqueta en el idioma resuelto: `✅` APPROVED / `❌` REJECTED / `⚠️` INCOMPLETE}} — {{justificación en una línea}}
 
 ## Resumen
 
-{{2-3 frases: qué se revisó, el resultado global y, si algo bloquea, qué falta para llegar a Aprobado. Sin listar aún el detalle.}}
+{{2-3 frases: qué se revisó, el resultado global y, si algo bloquea, qué falta para llegar a `APPROVED`. Sin listar aún el detalle.}}
 
 ## Intención detectada
 
@@ -25,24 +31,25 @@ publicado — es la clave de frescura que lee el Paso 0 de la próxima revisión
 
 ## Hallazgos
 
-Símbolos de severidad: `🔴` Crítico · `🟠` Mayor · `🟡` Menor · `💡` Sugerencia · `✅` Conforme.
+Leyenda de severidad — **redactar cada etiqueta en el idioma resuelto**, con estos símbolos:
+`🔴` {{CRITICAL}} · `🟠` {{MAJOR}} · `🟡` {{MINOR}} · `💡` {{SUGGESTION}} · `✅` {{CLEAN}}.
 Formato de cada hallazgo: `[ISO-25010: <Característica>]` + severidad + qué (ubicado) + por qué + impacto + sugerencia concreta.
 
 ### Análisis semántico (intención)
 
-{{`✅ Conforme` con una frase que explique por qué, o lista de hallazgos.}}
+{{`✅` + etiqueta de `CLEAN` con una frase que explique por qué, o lista de hallazgos.}}
 
 - {{🔴 | 🟠 | 🟡 | 💡}} `[ISO-25010: Adecuación funcional]` {{título del hallazgo}} — **Qué:** {{problema, en archivo/símbolo}} **Por qué:** {{qué se rompe o encarece}} **Impacto:** {{alcance en el sistema}} **Sugerencia:** {{cómo quedaría mejor}}
 
 ### Arquitectura y diseño
 
-{{`✅ Conforme` con una frase que explique por qué, o lista de hallazgos (SOLID, límites de capas, acoplamiento, duplicación, abstracción innecesaria, patrones del proyecto, fiabilidad, seguridad, desempeño, compatibilidad).}}
+{{`✅` + etiqueta de `CLEAN` con una frase que explique por qué, o lista de hallazgos (SOLID, límites de capas, acoplamiento, duplicación, abstracción innecesaria, patrones del proyecto, fiabilidad, seguridad, desempeño, compatibilidad).}}
 
 - {{🔴 | 🟠 | 🟡 | 💡}} `[ISO-25010: {{Característica}}]` {{título}} — **Qué:** {{…}} **Por qué:** {{…}} **Impacto:** {{…}} **Sugerencia:** {{…}}
 
 ### Dimensiones no evaluadas
 
-{{«Ninguna» si las tres se evaluaron. Si alguna no pudo evaluarse (intención no determinable, diff inaccesible o generado), listarla con su motivo — es lo que produce el veredicto ⚠️ Incompleto.}}
+{{Si las tres se evaluaron, una palabra en el idioma resuelto equivalente a «ninguna». Si alguna quedó en `NOT_ASSESSED` (intención no determinable, diff inaccesible o generado), listarla con su motivo — es lo que produce el veredicto `INCOMPLETE`.}}
 
 ### Feedback adicional
 
@@ -50,18 +57,18 @@ Formato de cada hallazgo: `[ISO-25010: <Característica>]` + severidad + qué (u
 
 ## Próximas acciones
 
-{{Orden de prioridad: hallazgos 🔴/🟠 sin resolver → dimensiones sin evaluar → hallazgos 🟡/💡. Si el veredicto es Aprobado y no hay pendientes: «Sin acciones pendientes».}}
+{{Orden de prioridad: hallazgos 🔴/🟠 sin resolver → dimensiones sin evaluar → hallazgos 🟡/💡. Si el veredicto es Aprobado y no hay pendientes: «una frase en el idioma resuelto equivalente a «sin acciones pendientes»».}}
 
 1. {{acción concreta}}
 2. {{…}}
 
 ## Justificaciones aceptadas
 
-{{Solo si el usuario justificó hallazgos bloqueantes (🔴/🟠). Si no hubo: «Ninguna».}}
+{{Solo si el usuario justificó hallazgos bloqueantes (`🔴`/`🟠`). Si no hubo, una palabra en el idioma resuelto equivalente a «ninguna».}}
 
 | Hallazgo | Severidad | Dimensión | Justificación | Aceptada por |
 | -------- | --------- | --------- | ------------- | ------------ |
-| {{hallazgo}} | {{🔴 / 🟠}} | {{Semántica / Arquitectura / Feedback}} | {{motivo aceptado para conservar el estado actual}} | {{usuario / rol}} |
+| {{hallazgo}} | {{🔴 / 🟠}} | {{dimensión: semántica / arquitectura / feedback, en el idioma resuelto}} | {{motivo aceptado para conservar el estado actual}} | {{usuario / rol}} |
 
 <!--
 Dentro de una tabla, las opciones de un placeholder se separan con / en vez de con | (un pipe sin
@@ -76,4 +83,4 @@ tras la última corrección si la hubo. Solo se graba en el informe vigente de l
 acotada (working-tree/scope) no escribe este archivo—.
 -->
 
-<!-- code-review:fingerprint={{hash}} · base={{sha-corto}} · generado={{YYYY-MM-DD}} -->
+<!-- code-review:verdict={{APPROVED|REJECTED|INCOMPLETE}} · mode={{default|blocking-only}} · fingerprint={{hash}} · base={{sha-corto}} · generated={{YYYY-MM-DD}} -->

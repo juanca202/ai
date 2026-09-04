@@ -17,7 +17,7 @@ Esta referencia se carga desde `SKILL.md` cuando la seleccion de tipo resuelve a
 > - Entrada `FT-XXX` => **el `FT-XXX` completo** (todos sus TC automatizables). Se implementa el feature entero como una unidad; al terminarlo se actualiza `progress.md` y se pide confirmacion antes de pasar al siguiente FT (si el alcance incluye varios).
 > - Entrada `TC-XXX` => **un `TC-XXX` por turno.** Al terminar cada TC, detenerse y preguntar si continuar con el siguiente.
 >
-> **Excepcion:** si el alcance tiene varias unidades y el usuario pide ejecutar **sin confirmacion**, se activa el **modo de ejecucion paralela** del `SKILL.md` (analisis de dependencias, subagentes con worktree — max 3 — y merge secuencial), que omite estas pausas.
+> **Excepcion:** si el alcance tiene varias unidades y la politica resuelta no exige pausar entre ellas (`confirmByUnit: never`, o peticion explicita del usuario en el turno), se activa el **modo de ejecucion paralela** del `SKILL.md` (analisis de dependencias, subagentes con worktree — hasta `maxParallel` — y merge secuencial), que omite estas pausas.
 >
 > **Subagente:** si el proyecto define el subagente **`quality-specialist`**, ejecutar la escritura de las pruebas bajo ese subagente (es el autor de pruebas del harness). Si no existe, escribir las pruebas directamente.
 
@@ -36,16 +36,16 @@ El `TC-XXX` siempre vive en la carpeta `test-cases/` de un **artefacto padre**. 
 | Otros artefactos | Ruta |
 | ---------------- | ---- |
 | Indice de test cases | `[carpeta del padre]/test-cases/README.md` |
-| Reporte de trazabilidad | `[carpeta del padre]/trace-report.md` (lo produce `trace-validate`, no este skill) |
-| Padre ya archivado (fallback) | `docs/specs/archive/user-stories/US-XXX-…/` · `docs/specs/archive/work-items/WI-XXX-…/`, con la misma estructura interna |
+| Reporte de trazabilidad | `[carpeta del padre]/coverage.md` (lo produce `trace-validate`, no este skill) |
+| Padre ya archivado (fallback) | `docs/archive/user-stories/US-XXX-…/` · `docs/archive/work-items/WI-XXX-…/`, con la misma estructura interna |
 | ADR | `docs/adr/` |
 | Glosario | `docs/specs/glossary.md` |
 
-> **Si la carpeta del padre no esta en la ruta activa, buscarla bajo `docs/specs/archive/`** antes de darla por inexistente: `work-integrate` y `pr-create` pueden moverla ahi al cerrar el trabajo, si el usuario lo confirma. Un padre archivado significa que ese trabajo **ya se cerro**: parar y avisar en vez de escribir dentro, y **nunca** recrear la carpeta en la ruta activa — dejaria dos artefactos con el mismo identificador y la numeracion de los `TC-XXX` reiniciaria en `001`.
+> **Si la carpeta del padre no esta en la ruta activa, buscarla bajo `docs/archive/`** antes de darla por inexistente: `work-integrate` y `pr-create` pueden moverla ahi al cerrar el trabajo, si el usuario lo confirma. Un padre archivado significa que ese trabajo **ya se cerro**: parar y avisar en vez de escribir dentro, y **nunca** recrear la carpeta en la ruta activa — dejaria dos artefactos con el mismo identificador y la numeracion de los `TC-XXX` reiniciaria en `001`.
 >
 > **Excepcion — modo correccion.** En la correccion delegada desde `quality-check` (ver [modo correccion](../SKILL.md#modo-correccion-delegado-desde-quality-check)) un padre archivado es **esperable**, no un error: ahi se continua, pero sin escribir nada dentro de la carpeta archivada — la nota de retrabajo va en el informe de `quality-check`. Importa especialmente en este flujo, porque `quality-check` senala la rama `test/` como el caso donde delegar es **mas** importante, y ahi el padre archivado es lo habitual.
 >
-> Aparte de eso, el unico skill que escribe dentro de un artefacto archivado es `trace-validate`, y solo su `trace-report.md`. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+> Aparte de eso, el unico skill que escribe dentro de un artefacto archivado es `trace-validate`, y solo su `coverage.md`. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
 **Rama de trabajo:** `test/[ID del artefacto padre]-[slug]` — p. ej. `test/FT-003-carga-masiva`, `test/US-042-login`, `test/WI-018-migracion-logs`. **Una rama por artefacto padre**, aunque se automaticen varios TC de el. No asumir la rama base; acordarla con el usuario.
 
@@ -85,7 +85,7 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 
 - **Indice de test cases:** leer `test-cases/README.md` (columnas `TC · Perspectiva · Tipo de prueba · Estado · Prioridad · Criterio de aceptacion`). Es la fuente para construir el alcance. Si el indice no existe pero hay archivos `TC-XXX-*.md`, leer los propios test cases.
 - **Estado de cada TC:** tomarlo de la columna `Estado` del indice; solo abrir el `TC-XXX-*.md` si el indice no la trae (formato anterior a esa convencion). Solo se automatizan los TC en `Estado: Ready`. Los `Draft` se excluyen (devolver a `test-define`); los `Obsolete` se excluyen sin mas.
-- **`Tipo de prueba` del TC:** un TC con `Tipo de prueba: Manual` **no es automatizable por diseno** — se excluye del alcance y se registra en `Cobertura de test cases` del `progress.md`. Para el resto, el campo (`Unit`, `Integration`, `API Test`, `Visual Test`, `E2E`, o una combinacion) determina **que nivel de prueba escribir**.
+- **`testType` del TC** (clave de su marca oculta `<!-- tc:… -->`, no la etiqueta visible): un TC con `testType=Manual` **no es automatizable por diseno** — se excluye del alcance y se registra en `Cobertura de test cases` del `progress.md`. Para el resto, el campo (`Unit`, `Integration`, `API Test`, `Visual Test`, `E2E`, o una combinacion) determina **que nivel de prueba escribir**.
 - **AC sin TC:** si algun `AC-XXX` del padre no tiene ningun `TC-XXX` que lo cubra, **avisar al usuario** antes de continuar y ofrecer handoff a `test-define` para completar la cobertura, o continuar dejando constancia del hueco en `progress.md`. Este skill **no inventa** casos de prueba que `test-define` no documento.
 
 ---
@@ -117,7 +117,7 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 
 ### Paso 3 - Implementar la unidad
 
-> IMPORTANTE **Una unidad por turno.** Con entrada `FT-XXX`, la unidad es el feature completo; con entrada `TC-XXX`, la unidad es cada TC. Al terminar la unidad, detenerse y preguntar antes de la siguiente.
+> IMPORTANTE **Una unidad por turno, con `confirmByUnit: always`.** Con entrada `FT-XXX`, la unidad es el feature completo; con entrada `TC-XXX`, la unidad es cada TC. Al terminar la unidad, detenerse y preguntar antes de la siguiente.
 
 Por cada `TC-XXX` automatizable de la unidad, en el orden del indice:
 
@@ -149,7 +149,7 @@ Por cada `TC-XXX` automatizable de la unidad, en el orden del indice:
 
    > **No se marcan checkboxes:** un `TC-XXX` no tiene subtareas. La *excepcion de checkboxes* del `SKILL.md` no aplica a este tipo; el `TC-XXX-*.md`, el indice `test-cases/README.md` y el `README.md` del padre **no se modifican** desde aqui.
 
-7. **Detenerse y preguntar** (herramienta estructurada), **sin commitear todavia**: "FT-XXX completado. Continuo con FT-YYY - [titulo]?" (o el TC siguiente). Opciones: [Si, continuar] / [No, detener aqui]. Aunque el alcance sea una sola unidad, confirmar antes del cierre. Esta pausa, con el working tree sin commitear, es la ventana para que el usuario revise las pruebas escritas antes de que queden commiteadas.
+7. **Detenerse y preguntar** (herramienta estructurada), **sin commitear todavia**: "FT-XXX completado. Continuo con FT-YYY - [titulo]?" (o el TC siguiente). Opciones: [Si, continuar] / [No, detener aqui]. Con `confirmByUnit: always`, aunque el alcance sea una sola unidad, confirmar antes del cierre; con `confirmByUnit: never` no hay pausa y se encadena el cierre. Esta pausa, con el working tree sin commitear, es la ventana para que el usuario revise las pruebas escritas antes de que queden commiteadas.
 8. Solo si confirma: **invocar `/git-commit`** sobre los cambios de la unidad, delegando en ese skill la agrupacion, el mensaje, el staging y la deteccion de secretos. Recien despues, pasar a la siguiente unidad. Si detiene, registrar nota y pasar al Paso 4 — la invocacion a `/git-commit` se hace ahi.
 
 ### Paso 4 - Cierre
@@ -178,11 +178,11 @@ Un `TC-XXX` siempre vive bajo la carpeta `test-cases/` de una US, un WI o un FT.
 2. Si aparece en **varias** (numeracion local repetida entre artefactos) o en **ninguna**, **preguntar** a que artefacto pertenece antes de continuar.
 3. Si no se encuentra, **parar** e informar:
 
-```
+`
 WARNING No es posible continuar con la implementacion:
 - TC-XXX no se encontro en ninguna carpeta test-cases/ de docs/specs/.
 - Verificar el numero del caso y el artefacto padre antes de continuar.
-```
+`
 
 4. **No** automatizar hasta confirmar la relacion TC => artefacto padre: sin el padre no hay `AC-XXX` de referencia, ni rama, ni `progress.md`.
 
@@ -256,6 +256,6 @@ Posicion: **implementacion de pruebas** - entre `test-define` y `trace-validate`
 |--|--|
 | **Entrada** | Artefacto padre (`FT-XXX`, `US-XXX` o `WI-XXX`) en `Estado: Ready` con `AC-XXX`, y su carpeta `test-cases/` poblada por `test-define` con TC en `Ready`. |
 | **Salida** | Pruebas automatizadas commiteadas y en verde; `progress.md` con cada unidad en `Done` y su `Cobertura de test cases`; working tree limpio. |
-| **Siguiente paso** | `trace-validate` sobre el artefacto padre (matriz de cobertura y veredicto) => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara las tres puertas de cierre (`quality-check`, `code-review` y `trace-validate`) y exigira veredicto Aprobado en las tres antes de integrar. |
+| **Siguiente paso** | `trace-validate` sobre el artefacto padre (matriz de cobertura y veredicto) => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara las tres puertas de cierre (`quality-check`, `code-review` y `trace-validate`) y exigira veredicto `APPROVED` en las tres antes de integrar. |
 | **Regreso a definicion** | TC ambiguo, erroneo o AC sin cobertura => volver a `test-define`. Si el hueco es del propio artefacto (criterio no testeable o mal definido), volver a quien lo registro: `work-define`/`work-plan` para US/WI, el flujo «Analizar legado» de `work-research` para un `FT-XXX`. |
 | **Bug detectado** | Discrepancia real entre TC y codigo que el usuario no quiere corregir en el momento => flujo «Analizar issue» de `work-research` y, desde ahi, un `WI-XXX` de tipo bug via `work-plan`. |

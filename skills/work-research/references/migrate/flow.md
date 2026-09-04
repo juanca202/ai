@@ -20,10 +20,15 @@ más la carpeta `validation/` si se almacenan recursos.
 **Pregunta de investigación:** el objetivo de la migración — qué se migra y de qué
 origen a qué destino. Confirmarlo con el usuario antes de investigar.
 
-> **Este flujo reserva su `RS-XXX` al empezar.** El `discovery.md` y el `validation.md`
-> se escriben durante la investigación, así que la carpeta `research/RS-XXX-{slug}/` se
-> crea antes del Paso 1 —no en el Paso 5 de `SKILL.md`—. Los estados (`Draft` /
-> `Ready`) se fijan al cerrar cada archivo.
+> **Este flujo NO reserva su `RS-XXX` al empezar.** El `RS-XXX` y su carpeta son
+> **tentativos** mientras se investiga: nada se escribe en disco sin confirmación del
+> usuario (regla dura del Paso 4 de `SKILL.md`). El `discovery.md` y el `validation.md`
+> se componen en la conversación pero **no se vuelcan en el chat** —lo que se presenta
+> íntegro es el `README.md` del RS; de ellos solo se declara nombre, ruta tentativa y
+> estado—. Sus compuertas (no preparar la validación con el discovery en `Draft`, no
+> hacer *handoff* sin ambos en `Ready`) son de **contenido**, no de escritura: los tres
+> archivos se escriben juntos tras la confirmación, revalidando el secuencial en ese
+> momento.
 
 El flujo es **secuencial y con compuertas**: no se prepara la validación hasta que
 el discovery esté en `Ready`, y no se hace *handoff* hasta que discovery **y**
@@ -59,7 +64,7 @@ La investigación de migración se guarda en el **proyecto destino**:
   `orm-sequelize-a-prisma`, `auth-passportjs-a-authjs`.
 - `XXX`: secuencial de tres dígitos, calculado sobre las carpetas `RS-XXX-*`
   existentes en `<destino>/docs/specs/research/` **y en
-  `<destino>/docs/specs/archive/research/`** (mayor + 1 entre las dos; `001` si no hay
+  `<destino>/docs/archive/research/`** (mayor + 1 entre las dos; `001` si no hay
   ninguna). Archivar una investigación **no libera su número**. Ver
   [`work-integrate/references/archive.md`](../../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
@@ -70,7 +75,7 @@ destino tiene su propia carpeta** `RS-XXX-{slug}/` con su `discovery.md`,
 `validation.md` y `README.md`, acotados a la porción del origen que recibe. Usa el
 **mismo `{slug}`** en todos para trazabilidad; calcula `XXX` como el siguiente libre
 considerando el número **más alto entre todos** los `docs/specs/research/` —y sus
-`docs/specs/archive/research/`— de los destinos involucrados. En este documento "el
+`docs/archive/research/`— de los destinos involucrados. En este documento "el
 destino" se refiere a **cada** proyecto destino cuando está fragmentado.
 
 ## Entradas necesarias
@@ -145,8 +150,13 @@ El objetivo es dejar el discovery en **`Ready`**. Si no se resuelven todas, qued
 - **Draft**: hay pendientes en `Notas`, alguna equivalencia **Pendiente**, o
   información incompleta.
 
-Copia `assets/migrate/discovery-template.md`, **renómbrala a `discovery.md`** dentro
-de la carpeta `research/RS-XXX-{slug}/` y rellénala siguiendo la plantilla.
+Compón el `discovery.md` a partir de `assets/migrate/discovery-template.md` siguiendo
+la plantilla.
+
+> **No escribir todavía.** El `discovery.md` queda compuesto en la conversación, **no se
+> vuelca en el chat** y **no se escribe en disco** aquí: se escribe junto al `README.md`
+> tras la confirmación del Paso 4 (ver Paso 3.1). Fijar su estado (`Draft` / `Ready`) es
+> parte de componerlo.
 
 > **No se prepara la validación (Paso 2) ni se hace el handoff (Paso 3) si el
 > discovery no está en `Ready`.**
@@ -184,8 +194,13 @@ Solo empieza con el discovery en **`Ready`**. Para cada caso/oportunidad sigue
 5. **Estado de `validation.md`.** **Ready** si no hay casos en `Pendiente` ni
    pendientes en `Notas`; **Draft** en caso contrario.
 
-Copia `assets/migrate/validation-template.md`, **renómbrala a `validation.md`** y
-rellénala. Enlaza el discovery con `[discovery.md](./discovery.md)`.
+Compón el `validation.md` a partir de `assets/migrate/validation-template.md`. Enlaza
+el discovery con `[discovery.md](./discovery.md)`.
+
+> **No escribir todavía.** El `validation.md` tampoco se vuelca en el chat ni se escribe
+> aquí: se escribe con el resto tras la confirmación del Paso 4. Los recursos de
+> `validation/` (capturas, volcados, entradas y salidas de referencia) se listan por
+> nombre, origen y destino, y se copian en esa misma escritura confirmada.
 
 ---
 
@@ -202,6 +217,12 @@ origen→destino), contexto, hallazgos clave del discovery, riesgos, y en
 **"Impacto en el artefacto / próximo paso"** el dimensionamiento y el handoff
 recomendado. Enlaza `discovery.md` y `validation.md` en "Archivos adicionales".
 
+> **Este es el único punto de presentación y escritura.** Muestra en el chat el
+> `README.md` **íntegro y literal** —sin resumir ni alterar— con su ruta tentativa; de
+> `discovery.md` y `validation.md` solo nombre, ruta y estado, **sin volcarlos**. Tras la
+> confirmación (Paso 4 del `SKILL.md`), crea `research/RS-XXX-{slug}/` con los tres
+> archivos y la carpeta `validation/`, revalidando el secuencial `RS-XXX`.
+
 ### 2. Dimensionar el cambio (¿grande o pequeño?)
 
 Evalúa el tamaño y la complejidad de la migración a partir del discovery. Señales
@@ -213,7 +234,7 @@ de **cambio grande** (→ `work-define`, varias US):
 - Requiere una estrategia incremental por fases (Strangler Fig, Branch by
   Abstraction, arquitectura transitoria — ver
   [migration-strategies.md](./migration-strategies.md)) que conviene descomponer en
-  varias unidades de trabajo.
+  varios `WI-XXX`.
 
 Señales de **cambio pequeño** (→ `work-plan`, un `WI-XXX`):
 
@@ -264,6 +285,12 @@ carpeta creada en **cada** proyecto destino con su estado y su handoff recomenda
   inventar rutas, stacks o versiones que no se leyeron de sus manifiestos.
 - Preparar la validación con el discovery aún en `Draft`, u ofrecer el *handoff* con
   discovery o validación sin cerrar.
+- Crear la carpeta `research/RS-XXX-{slug}/` o escribir `discovery.md` / `validation.md`
+  **antes** de presentar el `README.md` y recibir confirmación; o preguntar «¿lo guardo?»
+  cuando ya está escrito.
+- Presentar el `README.md` resumido en vez de su contenido completo y literal.
+- Volcar `discovery.md` o `validation.md` en el chat: no se muestran, se listan por
+  nombre, ruta y estado.
 - Guardar el `RS-XXX` en el proyecto **origen** en vez del destino.
 - Producir el plan de implementación aquí en lugar de hacer *handoff* a `work-define` o
   `work-plan`.

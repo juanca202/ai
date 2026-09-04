@@ -1,4 +1,4 @@
-# Architecture Decision Records
+# Registros de Decisiones de Arquitectura
 
 Catálogo de las decisiones arquitectónicas del proyecto. Sirve para localizar rápidamente qué se decidió, por qué y con qué estado (`Draft`/`Proposed`/`Accepted`).
 

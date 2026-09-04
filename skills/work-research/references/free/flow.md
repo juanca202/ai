@@ -66,7 +66,7 @@ usuario, restricciones de negocio o regulatorias, coste y modelo de licencia.
 **Arquitectura.** Patrones aplicables y sus trade-offs, ejemplos reales de uso,
 compatibilidad con lo que ya existe en el repo, y una recomendación de diseño. Si la
 conclusión es una decisión estructural, el *handoff* natural es
-`engineering:architecture` (ADR).
+`arch-manage` (ADR).
 
 **Técnica.** Viabilidad con el stack actual (verificarlo contra los manifiestos del
 repo, no de memoria), comparativa de opciones (rendimiento, madurez, mantenimiento
@@ -86,7 +86,7 @@ inconclusa, decir qué información adicional se necesita y de dónde saldría.
 
 | Si la conclusión es… | Skill siguiente |
 |----------------------|-----------------|
-| Una decisión de arquitectura que conviene documentar | `engineering:architecture` (ADR) — el RS alimenta su sección «Contexto» |
+| Una decisión de arquitectura que conviene documentar | `arch-manage` (ADR) — el RS alimenta su sección «Contexto» |
 | Una necesidad funcional que hay que especificar | `work-define` (US) |
 | Un trabajo técnico concreto y acotado | `work-plan` (WI o TK) |
 | Que el código existente hay que **documentar** y cubrir con pruebas | Flujo **Analizar legado** de este mismo skill |

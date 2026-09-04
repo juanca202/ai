@@ -4,14 +4,14 @@ description: >
   Auditar el cumplimiento de los estándares de arquitectura (docs/standards/) y de las reglas de
   AGENTS.md contra el estado real del repositorio (Architecture Compliance Checking), citando el ADR
   de origen de cada estándar, y generar un informe priorizado en docs/audits/arch-audit-YYYY-MM-DD.md.
+  Audita una raíz de arquitectura por corrida (repo principal o submódulo), con sus estándares,
+  fitness functions e informe.
   Activar siempre que el usuario quiera verificar, auditar o comprobar si el código respeta los
-  estándares, las decisiones arquitectónicas o las reglas del proyecto — incluso si no dice
-  "estándar", "ADR" o "auditoría".
-  Frases que activan este skill: "audita el cumplimiento", "¿el código respeta los estándares?",
-  "¿el código respeta los ADR?", "verifica que seguimos las reglas de AGENTS.md",
-  "revisa si cumplimos la arquitectura", "compliance de arquitectura", "qué normas estamos incumpliendo",
-  "chequea las reglas del repo", "arch-audit", "/arch-audit". Usar también cuando el usuario sospeche
-  que el repo se desvió de lo documentado y quiera un informe de brechas con acciones.
+  estándares, decisiones arquitectónicas o reglas del proyecto, aunque no diga "estándar", "ADR" o
+  "auditoría".
+  Frases: "audita el cumplimiento", "¿el código respeta los estándares/ADR?", "verifica que seguimos
+  las reglas de AGENTS.md", "compliance de arquitectura", "arch-audit", "/arch-audit". Usar también
+  ante sospecha de desvío de lo documentado, para un informe de brechas con acciones.
 license: MIT
 ---
 
@@ -51,11 +51,15 @@ técnico o funcional), no el estándar entero, ni el requisito como bloque, ni e
 > incumplir un `MUST`/`REQUIRED`/`SHALL` pesa más que un `SHOULD`/`RECOMMENDED`; un `MAY`/`OPTIONAL` no
 > incumplido casi nunca es hallazgo.
 
-**Fuentes normativas (el "deber ser"):**
+**Fuentes normativas (el "deber ser").** Todas las rutas `docs/…` y `scripts/…` de esta sección y del
+resto del documento son **relativas a la raíz de arquitectura auditada** (`<raíz-arq>`: repo principal o
+submódulo), que se resuelve en la [Fase 0](#fase-0--raíz-de-arquitectura-nueva-auditoría-o-revalidación);
+`AGENTS.md` se lee de la raíz principal.
+
 - `docs/standards/` — todos los estándares de dominio (técnico o funcional) y sus **criterios de cumplimiento** (`CR-XXX`), agrupados por requisito, priorizando los de estándares `Active` (obligatorios). Criterios en estándares `Draft` se listan pero no generan hallazgo con prioridad ni afectan el veredicto; `Deprecated`/`Superseded` no generan hallazgos salvo que el código siga dependiendo de ellos.
 - `AGENTS.md` (y `AGENTS.md` anidados por subcarpeta, si existen) — cada regla explícita del documento.
 - `docs/adr/` — **solo como trazabilidad**: para cada criterio auditado, citar su ADR de origen; y para detectar ADR `Accepted` con regla enforceable que aún no fijó ningún criterio.
-- `.agents/MEMORY.md` (si existe) — contexto de idioma, **no** es fuente de reglas por sí mismo (el stack vive en `AGENTS.md § Stack tecnológico`, no aquí).
+- `.agents/MEMORY.md` (si existe) — contexto operativo, **no** es fuente de reglas por sí mismo (el stack vive en `AGENTS.md § Stack tecnológico`, no aquí).
 
 **Evidencia (el "ser"):** el código, la estructura de carpetas y los manifiestos de dependencias del repo.
 
@@ -69,7 +73,7 @@ Para cada criterio, el skill evalúa si es **apto** para una fitness function (c
 automatizable — normalmente ya declarado en su columna `Automatizable: yes`), comprueba si ya existe y la
 ejecuta; si es apto pero no existe (`Verificación: no`), **sugiere crearla**.
 
-**Salida:** un único informe en `docs/audits/arch-audit-YYYY-MM-DD.md`, agrupado por prioridad
+**Salida:** un único informe en el `docs/audits/arch-audit-YYYY-MM-DD.md` **de la raíz auditada**, agrupado por prioridad
 (alta / media / baja), donde cada hallazgo referencia el criterio incumplido (`<estándar>/CR-XXX`, con
 el requisito que lo agrupa, su estándar de dominio y su ADR de origen) o la regla de AGENTS.md, lista
 evidencias y archivos infractores, propone una acción y fija un estado. El informe incluye además una
@@ -91,7 +95,7 @@ sección de **fitness functions**: cuáles existen y su resultado al ejecutarlas
 >
 > Todo `docs/` —y por tanto `docs/audits/`— está **excluido del fingerprint canónico** de la tubería de
 > cierre (ver [`quality-check`](../quality-check/SKILL.md#caché-de-corrida-de-pruebas-compartida-con-trace-validate)):
-> **escribir el informe** de auditoría no invalida la caché de pruebas, ni el `trace-report.md`, ni el
+> **escribir el informe** de auditoría no invalida la caché de pruebas, ni el `coverage.md`, ni el
 > `code-review.md`.
 >
 > **Pero verificar dependencias sí las invalida.** La Fase 3.5 puede **instalar dependencias** y tocar el
@@ -112,20 +116,48 @@ cualquier informe y respetar su estructura.
 
 ## Resolución de idioma
 
-Decidir el idioma del informe y de los mensajes al usuario en este orden; detenerse en el primer paso que aplique:
+Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../reference/language.md).
 
-1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>`. Es la clave canónica que escribe `arch-init`; si existe, manda.
-2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesión.
-3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md` con `preferred language: <código>`.
-4. Si no se puede inferir, **preguntar** qué idioma prefiere; no decidir por cuenta propia.
+Las reglas de `language.md` son obligatorias y tienen prioridad para determinar el idioma de todos los artefactos y mensajes generados por este skill.
 
-Las rutas de archivo, identificadores (`ADR-XXX`, referencias de criterio `<estándar>/CR-XXX`, referencias de requisito `<estándar>/<slug-requisito>`) y salidas de comandos no se traducen.
+No continúes hasta haber leído y aplicado `language.md`.
 
 ---
 
-## Fase 0 — Nueva auditoría o revalidación
+## Vocabulario de veredictos y estados
 
-Antes de auditar, comprobar si ya existen informes previos:
+Antes de redactar cualquier informe, DEBES leer [`../../reference/verdicts.md`](../../reference/verdicts.md).
+
+Las reglas de `verdicts.md` son obligatorias: el valor canónico y el símbolo son estables, y la **etiqueta que lee la persona se redacta siempre en el idioma resuelto** por `language.md`. Ninguna etiqueta de este skill se fija en un idioma concreto.
+
+No continúes hasta haber leído y aplicado `verdicts.md`.
+
+---
+
+## Fase 0 — Raíz de arquitectura, nueva auditoría o revalidación
+
+**Primero, resolver qué raíz se audita.** Los estándares, sus checks y el informe pertenecen a la raíz del
+repositorio cuyo código gobiernan (`<raíz-arq>`): el repo principal o un **submódulo**. Listar los
+repositorios anidados (`git submodule status` / `.gitmodules`, más directorios con `.git` propio):
+
+- **Si no hay ninguno**, la raíz es el repo actual y no se pregunta nada.
+- **Si los hay**, preguntar al usuario qué raíz auditar, en la misma tanda que la pregunta de abajo.
+
+**Se audita una raíz por corrida:** se leen los estándares de esa raíz, se ejecuta **su** runner
+(`<raíz-arq>/scripts/arch/verify.<ext>`, desde esa raíz) y el informe se escribe en **su** `docs/audits/`.
+Auditar otra raíz es otra corrida, con su propio informe y su propia serie de informes previos. Regla
+completa: [`../../reference/artifacts.md`](../../reference/artifacts.md#raíz-de-arquitectura-adr-estándares-y-fitness-functions).
+
+**Todas las rutas de este documento (`docs/standards/`, `docs/adr/`, `docs/audits/`, `scripts/arch/`) son
+relativas a `<raíz-arq>`.** Dos excepciones: `AGENTS.md`, que es del harness y se lee de la raíz principal;
+y las notas sobre `docs/audits/` compartido y el fingerprint de la tubería de cierre (`quality-check.md`,
+`code-review.md`, `work-integrate`), que describen el `docs/audits/` **del repo principal** — el de un
+submódulo no participa de esa tubería.
+
+> **Si los artefactos quedan en un submódulo**, el informe se commitea **dentro del submódulo** y luego se
+> actualiza el puntero en el repo padre: un `git add` desde el padre no stagea contenido del submódulo.
+
+Resuelta la raíz, comprobar si ya existen informes previos **en ella**:
 
 ```bash
 ls docs/audits/arch-audit-*.md 2>/dev/null
@@ -147,42 +179,11 @@ ls docs/audits/arch-audit-*.md 2>/dev/null
 
 ### Comportamiento en Revalidación
 
-El informe original (resumen, hallazgos, fitness functions, reglas no verificables) se
-preserva **tal cual se creó la primera vez** — una revalidación nunca reescribe,
-reordena ni elimina ese contenido. Los cambios de cada revalidación se documentan aparte.
-
-1. Leer el informe previo elegido completo, incluida su sección `## Revalidaciones` si ya existe.
-   El **estado de referencia** para comparar no es solo el informe original: es el informe original
-   **ajustado** por los cambios acumulados en todas las entradas de `## Revalidaciones` previas (p.
-   ej. un hallazgo marcado `✅ Resuelto` en una revalidación anterior ya no cuenta como incumplimiento
-   vigente al comparar).
-2. Repetir la recopilación y verificación contra el estado actual del repo, reutilizando las mismas
-   fases que una auditoría nueva, sin modificar nada de lo ya escrito en el documento:
-   - **Fase 1** — detectar criterios de cumplimiento (`CR-XXX`) (o estándares de dominio) o reglas de `AGENTS.md` **nuevos** desde la última verificación.
-   - **Fase 2** — reevaluar cada regla/hallazgo ya documentado contra el estado actual.
-   - **Fase 2B** — re-ejecutar las fitness functions existentes y las creadas desde la última verificación.
-   - **Fase 3.5** — reverificar las dependencias de los estándares/ADR auditados (ver esa fase); su
-     resultado se trata como un cambio evidenciado más, no se pregunta ni se escribe por separado.
-3. Identificar **solo los cambios evidenciados** en esta corrida frente al estado de referencia (paso 1):
-   - Incumplimiento ya no presente → cambio `✅ Resuelto`.
-   - Sigue presente pero con evidencia nueva relevante → registrar el cambio de evidencia.
-   - Nuevo incumplimiento o regresión (de una regla ya auditada o de una nueva) → registrarlo.
-   - Dependencia que faltaba y ya fue instalada, sigue faltando, o aparece una nueva (Fase 3.5) → registrarlo.
-   - Si no hubo ningún cambio desde la última verificación, la entrada lo indica explícitamente
-     ("Sin cambios respecto a la última verificación.") en vez de listar hallazgos sin novedad.
-4. Calcular fecha y hora de esta ejecución:
-   ```bash
-   date "+%F %H:%M"
-   ```
-5. Calcular el **veredicto resultante** de esta revalidación, considerando el estado combinado
-   (estado de referencia del paso 1 + cambios evidenciados en los pasos 2-3).
-6. **Añadir al final del mismo archivo** (nunca crear un archivo nuevo ni sobrescribir lo anterior)
-   una **única** entrada nueva en `## Revalidaciones`, con la fecha/hora, el veredicto resultante y
-   todos los cambios evidenciados (incluida la verificación de dependencias), siguiendo la estructura
-   de `assets/audit-template.md`.
-7. Actualizar el campo `Veredicto` de la **cabecera** de ese mismo archivo: conservar el
-   veredicto vigente y agregar junto a él `(revalidado YYYY-MM-DD HH:MM)` con la fecha/hora de esta
-   revalidación. Es el único dato del contenido original que una revalidación sí actualiza.
+El informe original se preserva **tal cual se creó la primera vez** — una revalidación nunca
+reescribe, reordena ni elimina ese contenido; solo agrega una entrada nueva en `## Revalidaciones`
+con los cambios evidenciados. Procedimiento completo (estado de referencia, qué repetir de cada
+fase, cómo clasificar cada cambio, y qué campo de la cabecera se actualiza) en
+[`references/revalidation.md`](references/revalidation.md).
 
 En una **Nueva auditoría desde cero** se ignora el histórico para el análisis, se crea un archivo
 **nuevo** `arch-audit-<hoy>.md` —o `arch-audit-<hoy>-<HHMM>.md` si ya existe uno de hoy— y se parte de la Fase 1.
@@ -192,15 +193,15 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
 ## Fase 1 — Recopilar las normas (el "deber ser")
 
 1. **Estándares, sus requisitos y sus criterios** — listar y leer:
-   ```bash
+   ``bash
    ls docs/standards/*.md 2>/dev/null || echo "No hay estándares"
-   ```
+   ``
    De cada estándar de dominio técnico o funcional (identificado por su **nombre**, sin código; archivo
    `docs/standards/<slug>.md` o carpeta `docs/standards/<slug>/README.md`) extraer del **frontmatter YAML**
    su `name`, `domain`, `status` y `source_adrs` — es ahí donde `arch-manage` los escribe
    (`assets/standard-template.md`), no en una línea del cuerpo. **Si falta el frontmatter o la clave
-   `domain`** (estándar previo a esta convención, o escrito a mano), usar el nombre del archivo/carpeta como
-   `domain` de facto y señalarlo como observación (formato de estándar desactualizado) — no bloquea la
+   `domain`** (estándar escrito a mano o por otra herramienta), usar el nombre del archivo/carpeta como
+   `domain` de facto y señalarlo como observación (estándar fuera de la convención de `arch-manage`) — no bloquea la
    auditoría de sus criterios. Dentro del
    documento, cada **requisito** (`## <Nombre>` con `**ID:** <slug-requisito>` y `**Estado:**`;
    referencia `<slug-estándar>/<slug-requisito>`) es una **agrupación legible**. **Leer ese estado**
@@ -215,10 +216,10 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
    que fijó ese criterio), `Automatizable` (yes/no), `Enfoque` (`bloqueante` | `warning`; por defecto
    `bloqueante`) y `Verificación` (`yes` = la verificación existe — el chequeo vive en el archivo de
    checks de su estándar, que se localiza por convención en `scripts/arch/checks/<slug-estándar>.<ext>`,
-   o hay evidencia externa registrada en el requisito; `no` = pendiente). **Si el estándar trae el
-   formato antiguo** (una tabla `### Criterios de cumplimiento` dentro de cada requisito, sin columna
-   `Requisito`, o con rutas/`TODO`/`N/A` en `Verificación` en vez de yes/no), leer esas
-   tablas igual y señalarlo como observación (formato de estándar desactualizado) — no bloquea la
+   o hay evidencia externa registrada en el requisito; `no` = pendiente). **Si el estándar no sigue esa
+   estructura** (una tabla `### Criterios de cumplimiento` dentro de cada requisito en vez de la tabla única,
+   sin columna `Requisito`, o con rutas/`TODO`/`N/A` en `Verificación` en vez de yes/no), leer esas
+   tablas igual y señalarlo como observación (estándar fuera de la convención de `arch-manage`) — no bloquea la
    auditoría. **Cada criterio `CR-XXX` es una entrada en la lista de reglas a auditar**,
    contextualizado por el requisito que lo agrupa.
 
@@ -227,15 +228,15 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
    `emits: [testing/CR-001]`). Además, detectar **ADR `Accepted` con una regla claramente enforceable
    que no fijó ningún criterio** (`emits: []`): no auditar el ADR como norma, sino anotarlo como
    observación → sugerir emitir el criterio vía `arch-manage`. **Si el ADR no tiene el campo `emits`
-   en absoluto** (formato antiguo, previo a esta convención) en vez de `emits: []`, tratarlo igual que
+   en absoluto** (escrito a mano o por otra herramienta) en vez de `emits: []`, tratarlo igual que
    un ADR sin criterio para esta fase (mismo tratamiento: observación + sugerir emitir vía
-   `arch-manage`), pero señalar además que el ADR usa un formato desactualizado (sin `emits`), para no
-   confundirlo con una decisión deliberada de no fijar criterios.
+   `arch-manage`), pero señalar además que al ADR le falta el campo `emits`, para no confundir la
+   ausencia del campo con una decisión deliberada de no fijar criterios.
 
 3. **AGENTS.md** — leer el/los archivo(s):
-   ```bash
+   ``bash
    find . -maxdepth 3 -iname "AGENTS.md" -not -path "*/node_modules/*" 2>/dev/null
-   ```
+   ``
    Descomponer el documento en **reglas atómicas y verificables**. Ignorar prosa de contexto sin
    una regla accionable. A cada regla asignarle un identificador estable con el formato
    `AGENTS.md §<sección>` (p. ej. `AGENTS.md §APIs`).
@@ -249,7 +250,7 @@ En una **Nueva auditoría desde cero** se ignora el histórico para el análisis
    — no queda a discreción de cada corrida, precisamente para que dos auditorías del mismo repo no
    difieran en el conteo de hallazgos por esta razón.
 
-4. **Contexto de stack** — leer `## Stack tecnológico` en `AGENTS.md` si existe, para saber
+4. **Contexto de stack** — leer `# Stack tecnológico` en `AGENTS.md` si existe, para saber
    lenguajes/frameworks y afinar los patrones de búsqueda (evita falsos negativos por buscar en el
    lenguaje equivocado).
 
@@ -329,35 +330,14 @@ existe, ejecutarla para validar el cumplimiento. Las fitness functions son **por
 
 ### 0. Preferir el runner de validaciones de arquitectura
 
-Antes de ejecutar chequeos uno por uno, comprobar si el proyecto tiene un **runner** que corre
-todas las validaciones de arquitectura de una vez (lo crea `arch-manage`, escrito en el lenguaje del
-stack del repo — Node, Python, PHP…, o shell como último recurso):
-
-```bash
-ls scripts/arch/verify.* scripts/arch/checks/* 2>/dev/null
-```
-
-- **Si existe**, es la vía preferida: una sola corrida acotada valida todos los criterios con fitness
-  function. Ejecutar el runner con el runtime del stack (`node scripts/arch/verify.mjs`,
-  `python scripts/arch/verify.py`, etc., o el alias nativo del repo — `npm run arch`, target de
-  `Makefile`, etc.) aplicando las mismas cautelas del paso 2 (no correr build/suite completa; si
-  requiere instalar dependencias pesadas, preguntar antes). Cada archivo de `checks/` agrupa las
-  fitness functions de **un estándar** (`checks/<slug-estándar>.<ext>`, p. ej. `checks/testing.mjs`) e
-  imprime una línea de protocolo por criterio — `PASS|FAIL|WARN <estándar>/CR-XXX — detalle`:
-  **mapear cada línea a su criterio por esa referencia** y alimentar ese resultado al estado del
-  criterio en la Fase 2. Para auditar un solo estándar, el runner acepta su slug como argumento
-  (`node scripts/arch/verify.mjs testing`). El resumen final (criterios PASS / WARN / FAIL) y el
-  código de salida agregado resumen la salud arquitectónica ejecutable: el runner sale con código ≠ 0
-  **solo** si falla algún criterio `bloqueante`; un criterio `warning` que falla se reporta como `WARN`
-  pero **no** cambia el código de salida ni el veredicto ejecutable.
-- Un criterio con `Verificación: yes` cuyo archivo de checks (`checks/<slug-estándar>.<ext>`) **no**
-  existe, o cuya referencia `CR-XXX` no aparece en la salida de la corrida, se ejecuta individualmente
-  (pasos 1-2) y además se anota como observación: la fitness function no está registrada en el archivo
-  de checks de su estándar (sugerir corregirlo vía `arch-manage`).
-- **Si no existe** el runner, continuar con la detección y ejecución individuales (pasos 1-2) y,
-  si hay dos o más fitness functions sueltas, **sugerir crear el runner** (`scripts/arch/verify.<ext>`
-  en el lenguaje del stack) vía `arch-manage`, para que en adelante todas se ejecuten con un solo
-  comando.
+Antes de ejecutar chequeos uno por uno, comprobar si el proyecto tiene un **runner** que corre todas
+las validaciones de arquitectura de una vez (`ls scripts/arch/verify.* scripts/arch/checks/*
+2>/dev/null`; lo crea `arch-manage`). **Si existe, es la vía preferida** — procedimiento completo
+(cómo ejecutarlo, mapear su salida a cada criterio por `CR-XXX`, y el caso de un criterio con
+`Verificación: yes` que no aparece en la corrida) en
+[`references/fitness-function-heuristics.md`](references/fitness-function-heuristics.md#preferir-el-runner-de-validaciones).
+**Si no existe**, continuar con la detección y ejecución individuales (pasos 1-2) y, si hay dos o más
+fitness functions sueltas, sugerir crear el runner vía `arch-manage`.
 
 ### 1. Detectar fitness functions existentes
 
@@ -410,20 +390,20 @@ Esta fase aplica a una **Nueva auditoría desde cero**. Para revalidaciones, seg
 flujo de `Comportamiento en Revalidación` descrito en la Fase 0 — no se reescribe el informe.
 
 1. Calcular la fecha de hoy:
-   ```bash
+   ``bash
    date +%F
-   ```
-2. Asegurar el directorio: `docs/audits/` (crearlo si no existe).
+   ``
+2. Asegurar el directorio: `docs/audits/` **de `<raíz-arq>`** (crearlo si no existe) — nunca el del repo principal cuando se auditó un submódulo.
 3. Leer `assets/audit-template.md` y redactar `docs/audits/arch-audit-<hoy>.md` siguiendo su estructura:
-   - Encabezado con fecha, repositorio, alcance, método y **veredicto** (`✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones`, siguiendo el patrón de `trace-validate`).
-     - **Alcance:** ser específico — indicar cuántos criterios se auditaron y sobre cuántos estándares/requisitos de contexto, el desglose por estado de los excluidos, más las fuentes de AGENTS.md consideradas. Ejemplo: `14 criterios en 4 estándares · 1 Draft, 1 Superseded excluidos + AGENTS.md raíz`.
+   - Encabezado con fecha, repositorio, alcance, método y **veredicto** (`APPROVED` | `REJECTED` | `APPROVED_WITH_NOTES`, siguiendo el patrón de `trace-validate`).
+     - **Alcance:** ser específico — indicar la **raíz de arquitectura auditada** (ruta relativa al repo principal, o «raíz principal»), cuántos criterios se auditaron y sobre cuántos estándares/requisitos de contexto, el desglose por estado de los excluidos, más las fuentes de AGENTS.md consideradas. Ejemplo: `submódulo packages/engine · 14 criterios en 4 estándares · 1 Draft, 1 Superseded excluidos + AGENTS.md raíz`.
      - **Método:** no es un texto fijo — describir en una frase corta qué se usó realmente en esta auditoría: las técnicas de inspección aplicadas (p. ej. `grep`, lectura de manifiestos) y las fitness functions ejecutadas. Aclarar que no se corre el build ni la suite completa.
    - **Resumen** con la tabla de conteos por prioridad y estado, seguida de 1-3 frases con la lectura global de la salud arquitectónica del repo.
    - Hallazgos **agrupados por prioridad** (alta → media → baja). Por cada hallazgo: el criterio (con su referencia `<estándar>/CR-XXX`, el requisito que lo agrupa, el nombre de su estándar de dominio, su ADR de origen y su `Enfoque` bloqueante/warning) o la regla de AGENTS.md incumplida, `Estado`, `Evidencias` (✔ a favor / ✖ en contra), `Incumplimientos` (rutas de archivos), y `Acción sugerida`. Si el criterio tiene fitness function, incluir en `Evidencias` el resultado de ejecutarla (PASS/FAIL/WARN + comando).
    - **Fitness functions**: indicar si existe el **runner** (`scripts/arch/verify.<ext>`, en el lenguaje del stack del repo) y su resultado conjunto (criterios PASS / WARN / FAIL); una sub-tabla de las **existentes** (criterio `CR-XXX`, enfoque, herramienta, comando, si está registrada en el archivo de checks de su estándar, resultado PASS/FAIL/WARN/No ejecutable) y una lista de las **sugeridas** (criterio apto sin fitness function → qué medir, herramienta y esbozo). Si hay dos o más fitness functions sueltas y no existe el runner, recomendarlo aquí.
    - Sección de reglas **No verificables**.
    - Sección de **Decisiones sin criterio** (opcional): ADR `Accepted` con regla enforceable que no fijó ningún criterio (`emits: []`) → sugerir emitirlo vía `arch-manage`.
-   - Sección de **Observaciones** (opcional): notas operativas que no son un hallazgo de incumplimiento (fitness function no registrada en el archivo de checks de su estándar, runner o checks escritos en un lenguaje ajeno al stack del repo, estándar/ADR en formato antiguo, dependencia rechazada en la Fase 3.5, etc.) — es el destino de cualquier "señalar/anotar como observación" mencionado en las fases anteriores.
+   - Sección de **Observaciones** (opcional): notas operativas que no son un hallazgo de incumplimiento (fitness function no registrada en el archivo de checks de su estándar, runner o checks escritos en un lenguaje ajeno al stack del repo, estándar/ADR fuera de la convención de `arch-manage`, dependencia rechazada en la Fase 3.5, etc.) — es el destino de cualquier "señalar/anotar como observación" mencionado en las fases anteriores.
 4. **Nunca sobrescribir** un informe anterior: el nombre lleva la fecha para conservar el histórico. Si ya existe un `arch-audit-<hoy>.md`, **no se sobrescribe**: una auditoría nueva del mismo día se guarda como `arch-audit-<hoy>-<HHMM>.md`, y una revalidación añade su entrada en `## Revalidaciones` del informe existente. Al buscar la auditoría previa, desempatar por el sufijo horario y, si no lo hay, por la fecha de modificación.
 
 El formato exacto de cada hallazgo (qué campos lleva y en qué orden) es el que ya trae
@@ -466,6 +446,7 @@ planificar la remediación de los hallazgos de alta prioridad.
 
 ## Notas de comportamiento
 
+- **No narrar el flujo interno.** Nada de anunciar que se resuelve el idioma o la política, que se lee `settings.json`, que se carga una referencia, ni ir enumerando las fases en voz alta. Al usuario se le comunica el resultado, las preguntas que el flujo exija y lo que quede pendiente — no la maquinaria.
 - **Auditar, no arreglar.** Este skill diagnostica y propone; no modifica código de la aplicación ni "corrige" incumplimientos por iniciativa propia. Tampoco crea las fitness functions: las **sugiere**. La única excepción es instalar/configurar dependencias faltantes (Fase 3.5), y solo con aprobación explícita del usuario.
 - **El criterio de cumplimiento (CR) es la unidad auditable; el requisito es la agrupación legible y el ADR es contexto.** Se audita el cumplimiento de los criterios (`CR-XXX`) de los estándares de dominio (y reglas de AGENTS.md), criterio por criterio, según su término RFC 2119 y su `Enfoque` (bloqueante/warning), agrupados por su requisito y citando el ADR de origen para trazabilidad. No se audita un ADR como si fuera la norma.
 - **Ejecución acotada.** Solo se ejecutan las fitness functions / chequeos de arquitectura detectados, con comandos de solo lectura. Nunca correr scripts de propósito desconocido, ni comandos que desplieguen o modifiquen el repo más allá de la instalación de dependencias aprobada en la Fase 3.5; ante la duda, preguntar antes de ejecutar.
@@ -473,6 +454,7 @@ planificar la remediación de los hallazgos de alta prioridad.
 - **No inventar reglas ni veredictos.** Solo se auditan normas que existan en `docs/standards/` o `AGENTS.md`. Ante evidencia ambigua, preferir ⚠️ o ❔ y explicar la duda, en vez de afirmar un incumplimiento.
 - **Priorizar señal sobre volumen.** Mejor pocos hallazgos sólidos y bien evidenciados que una lista larga de detalles triviales.
 - **Sin estándares ni AGENTS.md:** si no hay ninguna fuente normativa, informarlo y sugerir `arch-init` — bootstrapea `AGENTS.md`, `.agents/MEMORY.md`, `docs/adr/` y `docs/standards/`, e invoca `arch-discover` por su cuenta si el repo ya tiene implementación — en vez de crear un `AGENTS.md` a mano; no fabricar un informe vacío de reglas inventadas. Si solo hay ADR pero ningún criterio, señalar que las decisiones no han emitido reglas auditables y sugerir emitirlas vía `arch-manage`.
+- **Una raíz de arquitectura por corrida.** No mezclar estándares, checks ni hallazgos del repo principal y de un submódulo en un mismo informe, ni escribir el informe fuera de la raíz auditada. Si el usuario quiere cubrir varias raíces, son varias corridas con varios informes; decirlo explícitamente en vez de auditar todo junto.
 - **Informe inmutable, revalidaciones aparte.** El contenido escrito al crear el informe (resumen, hallazgos, fitness functions, reglas no verificables) no se modifica nunca. Cada revalidación se documenta como una entrada nueva en `## Revalidaciones`; el único campo del contenido original que una revalidación actualiza es `Veredicto` en la cabecera.
 
 ---
@@ -483,9 +465,18 @@ Este `SKILL.md` contiene el flujo completo de las cinco fases. El rastreo heurí
 functions y el mecanismo de verificación de dependencias viven en `references/`; el formato de cada
 hallazgo vive en `assets/`. **Leerlos solo cuando la fase correspondiente lo pida**:
 
-- [`references/fitness-function-heuristics.md`](references/fitness-function-heuristics.md) — tabla de herramientas típicas por ecosistema + comandos de rastreo genérico. Leer en la Fase 2B, paso 1, solo cuando la fila del criterio no exista o esté incompleta.
+- [`references/fitness-function-heuristics.md`](references/fitness-function-heuristics.md) — cómo preferir y ejecutar el runner de validaciones (Fase 2B, paso 0), y tabla de herramientas típicas por ecosistema + comandos de rastreo genérico (Fase 2B, paso 1, solo cuando la fila del criterio no exista o esté incompleta).
 - [`references/dependency-verification.md`](references/dependency-verification.md) — flujo completo (extraer, comprobar, preguntar, instalar o dejar constancia) para las dependencias que implican las normas auditadas. Leer en la Fase 3.5.
+- [`references/revalidation.md`](references/revalidation.md) — procedimiento completo de la Fase 0 cuando el usuario elige revalidar un informe previo en vez de auditar desde cero.
 - [`assets/audit-template.md`](assets/audit-template.md) — plantilla del informe, incluido el formato exacto de cada hallazgo. Leer en la Fase 3, al redactar.
+
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
 
 ---
 

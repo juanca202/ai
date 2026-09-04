@@ -28,6 +28,13 @@ El nombre del archivo y, si hay un tracker externo vinculado, el título usado a
 **Artefacto padre:** {{US-XXX | WI-XXX | FT-XXX | identificador o ruta del artefacto externo}}
 **Work Item ({{Sistema}}):** {{enlace markdown al work item creado en el sistema vinculado — solo si se creó vía MCP; {{Sistema}} es el nombre corto que define el archivo de referencia del sistema (p. ej. "ADO" para references/azure-devops.md); omitir línea si no aplica}}
 **Estado:** {{Draft | Ready | Obsolete}}
+
+<!-- tc:status={{Draft|Ready|Obsolete}} · testType={{Manual|Unit|Integration|API Test|Visual Test|E2E, separados por coma}} · criterion={{identificador verbatim del criterio}} · parent={{US-XXX|WI-XXX|FT-XXX}} -->
+<!--
+Esta marca se CONSERVA al publicar. Sus claves y sus valores van en inglés SIEMPRE, aunque el resto del
+documento esté en otro idioma: es el ancla que otros skills parsean, no contenido. La etiqueta visible
+de arriba sí se redacta en el idioma resuelto. Ver ../../reference/verdicts.md.
+-->
 **Creado por:** {{nombre}}
 **Fecha:** {{YYYY-MM-DD}}
 

@@ -1,71 +1,50 @@
-# Integración con Azure DevOps (ADO)
+# Integración con Azure DevOps — `work-plan`
 
-Referencia específica del sistema **Azure DevOps**. Se activa cuando `.agents/MEMORY.md` contiene `work_item_tracking: azure_devops` (ver «Integración con un sistema de seguimiento externo» en `SKILL.md`). Todo el detalle propio de ADO —herramienta MCP, campos, tipos de work item, configuración de conexión, límites de formato— vive únicamente en este archivo; `SKILL.md` y las referencias de tipo de plan (`user-story-tasks.md`, `maintenance-tasks.md`) no deben contener nada específico de ADO. Aplica de forma transversal a cualquier tipo de plan que cree work items; cuando este documento dice «tarea» se refiere al artefacto del tipo de plan en curso (p. ej. un `TK-XXX` de historia de usuario).
+> **Base común obligatoria:** [`../../../reference/project-managers/azure-devops.md`](../../../reference/project-managers/azure-devops.md)
+> — activación y datos de conexión resueltos en [`../../../reference/project-management.md`](../../../reference/project-management.md), verificación del MCP
+> y su degradación, construcción de la URL, campo `Work Item (ADO)`, uso del `id` de ADO como número
+> local, límite de 255 caracteres del título, contrato de reconstrucción íntegra y anti-patrones
+> comunes. **Leerla antes que este archivo.**
 
-## Configuración (`.agents/MEMORY.md`)
+Este archivo contiene **solo el delta de `work-plan`**. Se activa desde «Resolución de la integración con el
+gestor de proyectos» en `SKILL.md`, y aplica de forma transversal a cualquier tipo de plan que cree work
+items; cuando dice «tarea» se refiere al artefacto del tipo de plan en curso (p. ej. un `TK-XXX` de
+historia de usuario).
 
-Además de `work_item_tracking: azure_devops`, esta integración lee de `.agents/MEMORY.md`:
+## Qué se crea en ADO
 
-| Clave | Uso |
-|-------|-----|
-| `azure_devops_org:` / `ado_org:` | Organización de ADO; usada para construir la URL del work item (Paso 3). |
-| `azure_devops_project:` / `ado_project:` | Proyecto de ADO; usada para construir la URL del work item (Paso 3). |
-| `ado_area_path:` | Area Path a asignar al crear el work item (Paso 2). |
-| `ado_iteration:` | Iteración a asignar al crear el work item (Paso 2). |
+Antes de generar el archivo local, crear el work item vía MCP:
 
-Si `azure_devops_org` / `azure_devops_project` no están definidos, intentar resolver la URL a partir de lo que devuelva el MCP al crear el work item.
+| Campo | Valor |
+|-------|-------|
+| **Título** | El nombre descriptivo de la tarea (el mismo que iría en el nombre de archivo). |
+| **Tipo de work item — `TK-`** | `Task` (o el tipo equivalente configurado en el proyecto). |
+| **Tipo de work item — `WI-`** | Según el `Tipo` del WI: `bug-fix` → `Bug`; el resto (`refactor`, `dependency-update`, `optimization`, `security-update`, `test-improvement`, `documentation-update`, `operational-change`) → `Task`. Ante duda, confirmar con el usuario. |
+| **Criterios de aceptación** | Solo si el artefacto tiene esa sección (un `WI-XXX` puede tenerla, un `TK-XXX` no). Campo dedicado `Microsoft.VSTS.Common.AcceptanceCriteria` si existe; si no, dentro de Descripción. |
+| **Descripción** | El documento completo, serializado con los mismos encabezados que el `.md`. `TK-XXX`: Descripción, Dependencias, Referencias, Plan de implementación (`IT-XX`), Observaciones. `WI-XXX`: Descripción, Contexto, Fuera de alcance, Reglas de negocio, Dependencias, Referencias, Plan de implementación, Observaciones. |
+| **Iteración / Area Path** | Omitir: no son configurables (ver la base común). ADO aplica los valores por defecto del proyecto. |
+| **Padre** | Si aplica (p. ej. una US vinculada en ADO), vincular al work item padre. Best-effort. |
 
-## Paso 1 — Verificar disponibilidad del MCP de ADO
+Tras la llamada, extraer el `id` numérico y usarlo como número de la tarea local, con el prefijo del
+tipo de plan en curso: `TK-<ado_id>-[nombre-descriptivo].md` o `WI-<ado_id>-[nombre-descriptivo].md`.
 
-Comprobar si existe una herramienta MCP de Azure DevOps disponible en el cliente actual (p. ej. `mcp_azure-devops_*` o similar).
+## Alcance del check de ID disponible
 
-- **MCP disponible** → continuar con el Paso 2.
-- **MCP no disponible** → notificar al usuario y continuar con el flujo normal del tipo de plan usando **ID secuencial local**:
-  ```
-  ⚠️ El repo está vinculado a Azure DevOps pero el MCP no está conectado.
-  La tarea se creará solo en local con ID secuencial.
-  Para habilitar la sincronización, conecta el MCP de ADO desde el menú de herramientas.
-  ```
-
-## Paso 2 — Crear primero en Azure DevOps (cuando MCP disponible)
-
-Antes de generar el archivo local, usar el MCP para crear el work item en ADO:
-
-1. **Título**: el nombre descriptivo de la tarea (el mismo que iría en el nombre de archivo). **No debe superar los 255 caracteres** (límite del campo Título en ADO); si el nombre descriptivo lo supera, usar una versión abreviada que conserve el sentido y mantener el nombre completo en el documento local.
-2. **Tipo de work item**, según el tipo de plan:
-   - **Tarea de historia de usuario (`TK-`)**: `Task` (o el tipo equivalente configurado en el proyecto ADO).
-   - **Tarea de mantenimiento (`WI-`)**: según el `Tipo` del WI — `bug-fix` → `Bug`; el resto (`refactor`, `dependency-update`, `optimization`, `security-update`, `test-improvement`, `documentation-update`, `operational-change`) → `Task`. Si hay duda, confirmar con el usuario.
-3. **Criterios de aceptación** (solo si el artefacto tiene esa sección — un `WI-XXX` puede tenerla, un `TK-XXX` no): si el tipo de work item de ADO expone un campo dedicado (p. ej. `Microsoft.VSTS.Common.AcceptanceCriteria`), volcar ahí esa sección tal como aparece en el `.md`. Si el tipo de work item no expone ese campo, inclúyela también dentro de **Descripción** (punto 4) en lugar de omitirla.
-4. **Descripción**: el resto del documento completo, serializado de forma estructurada con los mismos encabezados que el `.md` local — para un `TK-XXX`: Descripción, Dependencias, Referencias, Plan de implementación (`IT-XX`), Observaciones; para un `WI-XXX`: Descripción, Contexto, Fuera de alcance, Reglas de negocio, Dependencias, Referencias, Plan de implementación, Observaciones (y Criterios de aceptación si el punto 3 no tuvo campo dedicado). El objetivo es que el documento pueda **reconstruirse íntegro** a partir del work item si el archivo local se pierde: no omitir ninguna sección del `.md` en la sincronización, aunque el resultado sea una Descripción larga.
-5. **Iteración / Area Path**: leer de `.agents/MEMORY.md` si está definido (`ado_area_path:`, `ado_iteration:`); si no, omitir (ADO usará los defaults del proyecto).
-6. **Padre**: si aplica (p. ej. una US vinculada en ADO), intentar vincular al work item padre correspondiente. Si no hay forma de resolverlo, omitir la vinculación sin bloquear.
-
-Tras la llamada al MCP, **extraer el `id` numérico** del work item creado (campo `id` en la respuesta).
-
-## Paso 3 — Usar el ID de ADO como número de tarea local
-
-En lugar del número secuencial calculado de los archivos existentes, usar el **ID del work item ADO** como número de la tarea. El prefijo es el del tipo de plan en curso (`TK-` para historias de usuario, `WI-` para mantenimiento):
-
-- Formato: `<PREFIJO>-<ado_id>-[nombre-descriptivo].md`.
-  Ejemplos: si ADO devuelve `id: 1847`, el archivo será `TK-1847-modelo-dominio.md` (US) o `WI-1847-upgrade-spring-boot.md` (mantenimiento). Sin padding de ceros.
-- Registrar el vínculo al work item en el campo `Work Item (ADO)` de la plantilla:
-  ```
-  Work Item (ADO): [#<ado_id>](<url-al-work-item>)
-  ```
-  Usar la URL que devuelva el MCP, o construirla como `https://dev.azure.com/<org>/<project>/_workitems/edit/<ado_id>` (con `<org>` y `<project>` de la configuración anterior).
-
-> **Nota de solapamiento:** al usar IDs de ADO, el check «ID disponible» se realiza igualmente — verificar que no exista ya `<PREFIJO>-<ado_id>-*.md` en la carpeta destino del tipo de plan (carpeta de la US para `TK-`, `docs/specs/work-items/` para `WI-`) antes de crear el archivo. **Para `WI-`, el check cubre también `docs/specs/archive/work-items/`**: un WI archivado conserva su ID de ADO, y saltárselo produciría dos carpetas locales para un mismo work item del tracker. **Para `TK-` no se escanea el archivo**: el `TK-` es por historia, y si la US padre estuviera archivada el flujo ya habría parado antes de llegar aquí (Regla 1) — lo que se comprueba es la carpeta de la US **realmente resuelta**.
-
-## Anti-patrones específicos de ADO
-
-- Crear el archivo local con ID secuencial cuando el repo está vinculado a ADO y el MCP está disponible — siempre crear en ADO primero y usar su `id`.
-- Omitir el campo `Work Item (ADO)` en los metadatos cuando la tarea fue creada vía MCP.
-- Bloquear la creación porque no se pudo vincular el padre — la vinculación es best-effort; omitir sin bloquear.
-- Usar un Título de más de 255 caracteres al crear el work item en ADO en lugar de una versión abreviada.
-- Enviar a ADO solo un resumen u objetivo breve en Descripción y omitir el resto de las secciones del `.md` (Dependencias, Referencias, Plan de implementación, Observaciones, Criterios de aceptación, etc.) — el documento debe poder reconstruirse íntegro desde el work item.
+- **`WI-`**: el escaneo cubre `docs/specs/work-items/` **y** `docs/archive/work-items/`. Un WI
+  archivado conserva su ID de ADO, y saltárselo produciría dos carpetas locales para un mismo work item
+  del tracker. (`docs/archive/` resuelto desde `specification.archivePath` — ver
+  [`../../work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).)
+- **`TK-`**: **no** se escanea el archivo. El `TK-` es por historia, y si la US padre estuviera
+  archivada el flujo ya habría parado antes de llegar aquí (Regla 1) — lo que se comprueba es la carpeta
+  de la US **realmente resuelta**.
 
 ## Ejemplo — Repo vinculado a ADO con MCP disponible
 
-- *Contexto:* `.agents/MEMORY.md` contiene `azure_devops_project: MyProject`. MCP de ADO disponible.
+- *Contexto:* `project-management.md` resolvió `project: MyProject`. MCP de ADO disponible.
 - *Entrada:* «TK para el endpoint de autenticación en US-003.»
-- *Comportamiento:* El agente detecta ADO (en `SKILL.md`), lee esta referencia, verifica MCP disponible, crea el work item en ADO (`Task`, título "Endpoint de autenticación", Descripción con el documento completo del TK — Descripción, Dependencias, Referencias, Plan de implementación, Observaciones — serializado por secciones, US-003 como padre si hay vinculación), extrae `id: 2031`. Genera el archivo local `TK-2031-endpoint-autenticacion.md` con el campo `Work Item (ADO): [#2031](https://dev.azure.com/…)`. El flujo del tipo de plan (stub o TK completa) continúa según la intención del usuario.
+- *Comportamiento:* El agente detecta ADO (en `SKILL.md`), lee la base común y este archivo, verifica que
+  el MCP está disponible, crea el work item en ADO (`Task`, título "Endpoint de autenticación",
+  Descripción con el documento completo del TK serializado por secciones, US-003 como padre si hay
+  vinculación) y extrae `id: 2031`. Genera el archivo local `TK-2031-endpoint-autenticacion.md` con el
+  campo `Work Item (ADO): [#2031](https://dev.azure.com/…)`. El flujo del tipo de plan (stub o TK
+  completa) continúa según la intención del usuario.

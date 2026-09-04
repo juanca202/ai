@@ -6,7 +6,7 @@ aportaría un requisito.
 
 **Título del estándar vs. nombre del dominio — no son lo mismo.** El **dominio** (p. ej. «Arquitectura
 y diseño», slug `architecture`) es la clasificación interna del catálogo
-([`references/functional-domains.md`](references/functional-domains.md)) — la que se usa para agrupar
+([`functional-domains.md`](functional-domains.md)) — la que se usa para agrupar
 candidatos y decidir si van al mismo estándar. El **título del estándar** que se muestra en la lista
 (p. ej. «Testing Standards», «Architecture / Modularidad») es solo un nombre ilustrativo/legible; el
 título real del archivo `docs/standards/<slug>.md` lo decide `arch-manage` al crearlo, y no tiene que

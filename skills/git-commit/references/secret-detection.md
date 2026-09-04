@@ -4,6 +4,8 @@ Ejecutar desde la raíz del repositorio **antes** de aceptar el staging. El agen
 
 ## Comando
 
+> **Copiar este comando literal y ejecutarlo — no reconstruirlo de memoria ni aproximarlo con una regex propia.** Ya resolvió sus casos borde (el filtro `grep '^+'` que sigue, para no bloquear commits que **quitan** un secreto en vez de introducirlo, es el que más se pierde al reescribirlo desde cero).
+
 ```bash
 git diff --staged | grep '^+' | grep -v '^+++' | \
   grep -nEi 'password[[:space:]]*=|api[_-]?key|secret[[:space:]]*=|token[[:space:]]*=|BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY|aws_access_key_id|aws_secret_access_key|-----BEGIN CERTIFICATE-----'
@@ -13,7 +15,7 @@ Salida esperada cuando hay hallazgos: números de línea en el diff unificado (n
 
 > **Solo líneas añadidas.** El filtro `grep '^+'` (descartando la cabecera `+++`) es lo que hace útil la detección: sin él, el patrón casa también con líneas **eliminadas** y de contexto, y bloquearía commits que precisamente **quitan** un secreto del repo o que borran un archivo que lo mencionaba. Un ejemplo real en este plugin: el commit de promoción de `pr-create` retira `docs/audits/quality-check.md`, un informe que puede citar salidas de linter con `api_key` o `token =`; con el diff completo, ese borrado detendría el cierre sin salida posible. Lo que hay que vigilar es lo que **entra** en la historia, no lo que sale.
 
-> **Renombrados: exigir `-M` y no bloquear por un falso positivo del archivado.** El commit del archivado de un `US-XXX`/`WI-XXX` mueve una carpeta entera de documentación (`git mv` a `docs/specs/archive/`). Si git **detecta el rename**, el diff es solo la ruta y no hay línea añadida que inspeccionar. Si **no** lo detecta —umbral de similitud, o `diff.renames` desactivado en el repo—, el contenido íntegro de cada archivo movido aparece como líneas `+`, así que un `README.md` o un `trace-report.md` que cite `token =` o `api_key` en un criterio de aceptación, en la salida de un test o en un ejemplo dispara el patrón. Ese hallazgo es **espurio**: nada nuevo entra en la historia, el archivo ya estaba versionado.
+> **Renombrados: exigir `-M` y no bloquear por un falso positivo del archivado.** El commit del archivado de un `US-XXX`/`WI-XXX` mueve una carpeta entera de documentación (`git mv` a `docs/archive/`). Si git **detecta el rename**, el diff es solo la ruta y no hay línea añadida que inspeccionar. Si **no** lo detecta —umbral de similitud, o `diff.renames` desactivado en el repo—, el contenido íntegro de cada archivo movido aparece como líneas `+`, así que un `README.md` o un `coverage.md` que cite `token =` o `api_key` en un criterio de aceptación, en la salida de un test o en un ejemplo dispara el patrón. Ese hallazgo es **espurio**: nada nuevo entra en la historia, el archivo ya estaba versionado.
 >
 > Por eso, cuando el staging contiene renombrados, computar el diff con detección forzada:
 >

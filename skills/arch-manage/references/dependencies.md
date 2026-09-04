@@ -12,7 +12,9 @@ explícita del usuario.
    NetArchTest, etc.) — esas se investigan al **proponer** el criterio y se instalan al crear su fitness
    function, en [`references/fitness-functions.md`](fitness-functions.md), para no preguntar dos veces
    por lo mismo.
-2. **Comprobar si ya existen** en el proyecto, leyendo el manifiesto del ecosistema y su lockfile:
+2. **Comprobar si ya existen** en el proyecto, leyendo el manifiesto del ecosistema y su lockfile **de la
+   raíz de arquitectura resuelta** (`<raíz-arq>`) — si la decisión es de un submódulo, el manifiesto que
+   cuenta es el suyo, y ahí se instala; el del repo principal es otro proyecto:
    `package.json`, `pom.xml`/`build.gradle`, `pyproject.toml`/`requirements.txt`, `composer.json`,
    `*.csproj`, `go.mod`, `Cargo.toml`, etc. Si todas están presentes, no hay nada que ofrecer — fin.
 3. **Si falta una o más, preguntar explícitamente** con la herramienta de preguntas estructuradas:

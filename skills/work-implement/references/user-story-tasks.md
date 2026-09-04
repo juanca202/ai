@@ -2,7 +2,7 @@
 
 Flujo para **ejecutar en codigo** las tareas tecnicas `TK-XXX` de una historia de usuario `US-XXX` bajo `docs/specs/user-stories/`. Esta referencia se carga desde `SKILL.md` cuando la seleccion de tipo resuelve a este caso. Asume ya resueltos el mecanismo de preguntas, el idioma, la validacion de repositorio y el ritmo de confirmacion (ver `SKILL.md`).
 
-> **Unidad de confirmacion:** **una `TK-XXX` por turno.** Al terminar cada TK, detenerse y preguntar si continuar con la siguiente, aunque el usuario haya aprobado la cola completa. **Excepcion:** si el alcance tiene varias TK y el usuario pide ejecutar **sin confirmacion**, se activa el **modo de ejecucion paralela** del `SKILL.md` (analisis de dependencias, subagentes con worktree — max 3 — y merge secuencial), que omite estas pausas.
+> **Unidad de confirmacion:** **una `TK-XXX` por turno.** Al terminar cada TK, detenerse y preguntar si continuar con la siguiente, aunque el usuario haya aprobado la cola completa. **Excepcion:** si el alcance tiene varias TK y la politica resuelta no exige pausar entre ellas (`confirmByUnit: never`, o peticion explicita del usuario en el turno), se activa el **modo de ejecucion paralela** del `SKILL.md` (analisis de dependencias, subagentes con worktree — hasta `maxParallel` — y merge secuencial), que omite estas pausas.
 
 ---
 
@@ -14,7 +14,7 @@ Flujo para **ejecutar en codigo** las tareas tecnicas `TK-XXX` de una historia d
 | Tareas | `docs/specs/user-stories/US-XXX-[nombre-corto]/TK-XXX-[nombre].md` |
 | Progreso | `docs/specs/user-stories/US-XXX-[nombre-corto]/progress.md` |
 | Glosario | `docs/specs/glossary.md` |
-| US ya archivada (fallback) | `docs/specs/archive/user-stories/US-XXX-[nombre-corto]/`, con la misma estructura interna |
+| US ya archivada (fallback) | `docs/archive/user-stories/US-XXX-[nombre-corto]/`, con la misma estructura interna |
 
 **Rama de trabajo:** `feature/US-XXX-[nombre-corto]` (el segmento tras `feature/` coincide con la carpeta de la US).
 
@@ -39,7 +39,7 @@ Flujo para **ejecutar en codigo** las tareas tecnicas `TK-XXX` de una historia d
 Ademas de la validacion de repositorio transversal (`SKILL.md`):
 
 - **US padre con README.md:** la carpeta de la US existe y tiene `README.md` con metadato `Estado: Ready`.
-- **US no archivada:** si la carpeta no aparece en `docs/specs/user-stories/`, buscarla en `docs/specs/archive/user-stories/` antes de darla por inexistente. Si esta ahi, la US **ya se cerro e integro**: **parar** y avisar — «`US-042` esta archivada; para retomarla hay que desarchivarla primero (mover su carpeta de vuelta), y eso lo decide el usuario». **Excepcion:** en [modo correccion](../SKILL.md#modo-correccion-delegado-desde-quality-check) delegado por `quality-check`, un artefacto archivado es esperable —la correccion llega en la fase de cierre, con el archivado ya commiteado—: ahi se continua, pero **sin escribir dentro de la carpeta archivada** (la nota de retrabajo va en el informe de `quality-check`). **Nunca** crear una carpeta nueva en la ruta activa por no haberla encontrado: dejaria dos artefactos con el mismo identificador. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+- **US no archivada:** si la carpeta no aparece en `docs/specs/user-stories/`, buscarla en `docs/archive/user-stories/` antes de darla por inexistente. Si esta ahi, la US **ya se cerro e integro**: **parar** y avisar — «`US-042` esta archivada; para retomarla hay que desarchivarla primero (mover su carpeta de vuelta), y eso lo decide el usuario». **Excepcion:** en [modo correccion](../SKILL.md#modo-correccion-delegado-desde-quality-check) delegado por `quality-check`, un artefacto archivado es esperable —la correccion llega en la fase de cierre, con el archivado ya commiteado—: ahi se continua, pero **sin escribir dentro de la carpeta archivada** (la nota de retrabajo va en el informe de `quality-check`). **Nunca** crear una carpeta nueva en la ruta activa por no haberla encontrado: dejaria dos artefactos con el mismo identificador. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 - **TK en estado Ready:** solo encolar tareas con `Estado: Ready`. Las `Draft` o `Done` en `progress.md` no son ejecutables por defecto.
 - **Test cases presentes:** verificar si existe la carpeta `docs/specs/user-stories/US-XXX-[nombre-corto]/test-cases/` con al menos un archivo `TC-XXX-*.md`. Si no existe o esta vacia, **preguntar al usuario** (herramienta estructurada) antes de continuar:
 
@@ -74,7 +74,7 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 
 ### Paso 3 - Implementar tarea a tarea
 
-> IMPORTANTE **Regla de oro - una TK por turno.** Al terminar cada TK, detenerse y preguntar si continuar. Esta regla no tiene excepciones, aunque el usuario haya aprobado la cola completa en el Paso 2.
+> IMPORTANTE **Regla de oro - una TK por turno, con `confirmByUnit: always`.** Al terminar cada TK, detenerse y preguntar si continuar, aunque el usuario haya aprobado la cola completa en el Paso 2. Las unicas dos situaciones que levantan la pausa son las de la nota de cabecera: `confirmByUnit: never` y la peticion explicita del usuario en el turno.
 
 Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto:
 
@@ -90,7 +90,7 @@ Por cada tarea aprobada, en orden numerico salvo dependencias obvias en el texto
    - **Por cada subtarea completada:** marcar `[~]` => `[x]` en la seccion de subtareas del `TK-XXX.md` correspondiente y marcar su entrada en la lista de to-dos del agente como `completed`.
    - **Al cerrar la TK:** cambiar su estado en `progress.md` a `Done` y rellenar el campo **Archivos** (rutas tocadas, una por linea, sin vineta, prefijadas `+`/`~`/`-`), con todas las subtareas de su plan ya `completed` en la lista de to-dos del agente; marcar tambien la **primera entrada (titulo de la TK) como `completed`** una vez que todas las tareas del plan hayan finalizado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion. Si la US tenia test cases, completar el campo `Cobertura de test cases` de la TK solo con observaciones puntuales: **cuales `TC-XXX` no se pudieron crear** (con motivo) o **para cuales se decidio otro tipo de prueba** distinto al del test case. Si todos se automatizaron como se esperaba, dejar el campo sin comentarios.
 5. **Detenerse y preguntar** (herramienta estructurada), **sin commitear todavia los cambios de la TK**: "TK-XXX completada. Continuo con TK-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui]. Esta pausa, con el working tree aun sin commitear, es la ventana para que el usuario revise el resultado, aplique correcciones manuales o le indique ajustes al agente antes de que el cambio quede commiteado.
-6. Solo si el usuario confirma: **invocar `/git-commit`** sobre los cambios de TK-XXX, delegando en ese skill la agrupacion, el mensaje, el staging y la deteccion de secretos — este skill no decide un mensaje ni stagea por cuenta propia. `git-commit` puede a su vez mostrar su propia propuesta y pedir confirmacion antes de comitear: es una confirmacion distinta a la del paso anterior (esa es sobre continuar a la siguiente TK; esta es sobre el commit en si) y no la sustituye. Recien despues, pasar a la siguiente TK. Si detiene, registrar nota y pasar al Paso 4 — la invocacion a `/git-commit` para esta TK se hace ahi, en el cierre.
+6. Solo si el usuario confirma: **invocar `/git-commit`** sobre los cambios de TK-XXX, delegando en ese skill la agrupacion, el mensaje, el staging y la deteccion de secretos — este skill no decide un mensaje ni stagea por cuenta propia. `git-commit` no comitea en silencio: un commit unico lo ejecuta sin confirmar, pero puede pausar para confirmar su **propuesta de division** cuando el diff se reparte en varios commits (con `commitConfirmation = always`), y puede detenerse ante secretos, rama protegida o hook fallido. Esa pausa es distinta a la del paso anterior (esa es sobre continuar a la siguiente TK; esta es sobre como se reparte el commit) y no la sustituye. Recien despues, pasar a la siguiente TK. Si detiene, registrar nota y pasar al Paso 4 — la invocacion a `/git-commit` para esta TK se hace ahi, en el cierre.
 
 ### Paso 4 - Cierre
 
@@ -116,11 +116,11 @@ Un `TK-XXX` siempre vive bajo la carpeta de una US. Si el usuario indica solo el
 2. **Validar** que `TK-XXX-[nombre].md` existe dentro de `docs/specs/user-stories/US-XXX-[nombre-corto]/`.
 3. Si no pertenece o no se encuentra, **parar** e informar:
 
-```
+`
 WARNING No es posible continuar con la implementacion:
 - TK-XXX no pertenece a US-XXX o no se encontro en su carpeta.
 - Verificar el numero de tarea y la historia indicada antes de continuar.
-```
+`
 
 4. **No** implementar hasta confirmar la relacion TK => US.
 
@@ -154,13 +154,13 @@ WARNING No es posible continuar con la implementacion:
 
 **Ejemplo 4 - "implementar todo de corrido"**
 - *Entrada:* "Implementa todas las tareas Ready de la US-042 de una vez, sin preguntar."
-- *Comportamiento:* varias TK + peticion explicita de no confirmar => **modo de ejecucion paralela** (ver `SKILL.md`). Primero el analisis de dependencias (Paso 0): ordenar por olas y, si alguna TK depende de trabajo fuera del alcance, avisar para excluirla o detener. Tras confirmar el plan una vez, ejecutar las TK independientes en subagentes con worktree (max 3 en paralelo) e integrarlas por merge secuencial a `feature/US-042-*`. Si el alcance fuera una sola TK o no se pidiera "sin preguntar", se mantiene el flujo estandar con una TK por confirmacion.
+- *Comportamiento:* varias TK + peticion explicita de no confirmar => **modo de ejecucion paralela** (ver `SKILL.md`). Primero el analisis de dependencias (Paso 0): ordenar por olas y, si alguna TK depende de trabajo fuera del alcance, avisar para excluirla o detener. Tras confirmar el plan una vez, ejecutar las TK independientes en subagentes con worktree (hasta `maxParallel` en paralelo) e integrarlas por merge secuencial a `feature/US-042-*`. Si el alcance fuera una sola TK o no se pidiera "sin preguntar", se mantiene el flujo estandar con una TK por confirmacion.
 
 ---
 
 ## Anti-patterns (especificos del tipo)
 
-- Arrancar la siguiente TK sin confirmacion explicita (aunque la cola este aprobada), salvo cuando el usuario haya pedido el **modo de ejecucion paralela**.
+- Con `confirmByUnit: always`, arrancar la siguiente TK sin confirmacion explicita (aunque la cola este aprobada), salvo en **modo de ejecucion paralela**.
 - Comitear los cambios de una TK inmediatamente al terminarla, antes de la pausa de confirmacion; el commit se hace al confirmar el avance a la siguiente TK (o en el cierre, si el usuario detiene ahi).
 - Omitir el mensaje de cola e ir directo al codigo.
 - Tratar tareas en Draft como ejecutables.
@@ -178,5 +178,5 @@ Posicion: **implementacion** - entre `work-plan` e `work-integrate`.
 |--|--|
 | **Entrada** | US `Ready`; TK del alcance `Ready`; rama `feature/US-XXX-*` activa o creada desde la rama base. |
 | **Salida** | Codigo commiteado; `progress.md` con cada TK del alcance en `Done`; working tree limpio. |
-| **Siguiente paso** | Cada TK ya comiteada via `/git-commit` durante la implementacion => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara las tres puertas de cierre (`quality-check`, `code-review` y `trace-validate`) y exigira veredicto Aprobado en las tres antes de integrar. |
+| **Siguiente paso** | Cada TK ya comiteada via `/git-commit` durante la implementacion => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara las tres puertas de cierre (`quality-check`, `code-review` y `trace-validate`) y exigira veredicto `APPROVED` en las tres antes de integrar. |
 | **Regreso desde plan** | TK en Draft o conflicto tecnico => volver a `work-plan`. |

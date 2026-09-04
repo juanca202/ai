@@ -27,7 +27,7 @@ fecha/hora que lo confirma. Cada revalidación posterior agrega además una entr
 **Repositorio**: {{nombre/ruta del repo o subproyecto auditado}}
 **Alcance**: {{criterios auditados y estándares/requisitos de contexto cubiertos + fuentes AGENTS.md — p. ej. "14 criterios en 4 estándares (Testing, API, Persistence, Security) · 2 en Draft excluidos + AGENTS.md raíz"}}
 **Método**: {{descripción corta de lo que realmente se usó — herramientas de inspección y fitness functions ejecutadas, p. ej. "grep + lectura de package.json/composer.json; runner node scripts/arch/verify.mjs ejecutado". No se corre el build ni la suite completa.}}
-**Veredicto**: {{✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones}} {{si hubo alguna revalidación, agregar aquí mismo "(revalidado YYYY-MM-DD HH:MM)" con la fecha/hora de la última entrada de ## Revalidaciones; omitir si no hubo ninguna}}
+**Veredicto**: {{`APPROVED` | `REJECTED` | `APPROVED_WITH_NOTES`}} {{si hubo alguna revalidación, agregar aquí mismo "(revalidado YYYY-MM-DD HH:MM)" con la fecha/hora de la última entrada de ## Revalidaciones; omitir si no hubo ninguna}}
 
 ## Resumen
 
@@ -187,7 +187,7 @@ Opcional. Notas operativas que no son un hallazgo de incumplimiento (no van bajo
 decisión sin criterio, pero que la próxima auditoría o el mantenimiento del harness debería conocer.
 Ejemplos: una fitness function ejecutada individualmente porque no está registrada en el archivo de
 checks de su estándar (scripts/arch/checks/<slug-estándar>.<ext>); un runner o checks escritos en un
-lenguaje ajeno al stack del repo; un estándar o ADR en formato antiguo (sin frontmatter o sin la clave "domain", sin "emits",
+lenguaje ajeno al stack del repo; un estándar o ADR fuera de la convención de arch-manage (sin frontmatter o sin la clave "domain", sin "emits",
 o con los criterios en tablas por requisito en vez de la tabla única); una dependencia que el
 usuario rechazó instalar (Fase 3.5). Si no hay ninguna, omitir esta sección o escribir "Ninguna.".
 -->
@@ -210,10 +210,18 @@ refleja también en "Veredicto" de la cabecera, junto a la fecha/hora que lo con
 
 ### Revalidación — {{YYYY-MM-DD HH:MM}}
 
-**Veredicto resultante**: {{✅ Conforme | ❌ No conforme | ⚠️ Conforme con observaciones}}
+**Veredicto resultante**: {{`APPROVED` | `REJECTED` | `APPROVED_WITH_NOTES`}}
 
 **Cambios evidenciados:**
 
-- {{<estándar>/CR-XXX | AGENTS.md §Regla}} — {{✅ Resuelto | ❌ Nuevo incumplimiento | ⚠️ Regresión / cambio de evidencia}}: {{descripción corta del cambio, con rutas afectadas si aplica}}
+- {{<estándar>/CR-XXX | AGENTS.md §Regla}} — {{símbolo + etiqueta en el idioma resuelto: `✅` RESOLVED | `❌` NEW_VIOLATION | `⚠️` REGRESSION}}: {{descripción corta del cambio, con rutas afectadas si aplica}}
 
 {{Si no hubo ningún cambio desde la última verificación, escribir "Sin cambios respecto a la última verificación." y omitir la lista de arriba.}}
+
+<!-- arch-audit:verdict={{APPROVED|REJECTED|APPROVED_WITH_NOTES}} · generated={{YYYY-MM-DD}} -->
+<!--
+Esta marca se CONSERVA al publicar. Sus claves y su valor van en inglés SIEMPRE, aunque el resto del
+informe esté en otro idioma; es el identificador estable del veredicto, no contenido.
+En una revalidación, actualizar su `verdict` al veredicto resultante y su `generated` a la fecha de esa
+entrada de `## Revalidaciones`. Ver ../../reference/verdicts.md.
+-->

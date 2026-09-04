@@ -6,6 +6,24 @@ Invocación típica: `/nombre-skill` o una frase que active la descripción del 
 
 ---
 
+## Reglas transversales
+
+Estas reglas aplican a **todos los skills**. Cuando un skill se aparta de alguna, lo declara como excepción en su propia sección:
+
+| Regla | Detalle | Qué fija |
+|-------|-----------|----------|
+| **Resolución de idioma** | [`reference/language.md`](reference/language.md) | Todo skill y agente resuelve el idioma antes de ejecutarse. Declaran excepción: `arch-init`, `test-define`, `design-define`, `git-commit`, `pr-create`, `work-research`, `code-review`, `quality-check`, `trace-validate`, `work-implement`, y los agentes `quality-specialist` y `ui-specialist`. |
+| **Política de planificación** | [`reference/planning.md`](reference/planning.md) | Para `work-define` y `work-plan`: al cerrar la planificación —US en Ready, o tareas en Ready— se pregunta si definir los casos de prueba (`ask`, por defecto), se invoca `test-define` directo (`always`) o no se ofrece (`never`), resuelto desde `.sdd-devkit/settings.json` (`specification.testCases.mode`). Los `TC-XXX` cuelgan del artefacto padre: el segundo skill en llegar no repite la oferta. |
+| **Política de implementación** | [`reference/implementation.md`](reference/implementation.md) | Para `work-implement`: ritmo de confirmación por unidad (`confirmByUnit`), qué hacer con cambios sin commitear al iniciar (`uncommittedChanges`), worktrees y su ruta (`workTree`, `workTreePath`), concurrencia máxima (`maxParallel`) y si el cierre pasa al siguiente skill sin preguntar (`handoff`), resueltos desde `.sdd-devkit/settings.json`. |
+| **Política de commit y push** | [`reference/git.md`](reference/git.md) | Para `git-commit`: si se muestra la propuesta de división en varios commits y se espera confirmación (`commitConfirmation` — un commit único nunca se confirma) y si se hace push tras commitear (`push`, solo en invocación directa), resueltos desde `.sdd-devkit/settings.json`. Las gates de seguridad no son configurables. |
+| **Política de verificación** | [`reference/verification.md`](reference/verification.md) | Para `quality-check`, `code-review` y `work-integrate`: por puerta (`qualityCheck`, `codeReview`, `requirementCoverage`), si corre antes del merge (`enabled`, lo resuelve `work-integrate`) y si pide confirmación antes de corregir lo que encuentre (`confirmFix`, lo resuelve `quality-check`/`code-review`; no aplica a `trace-validate`); y si, dentro de `work-integrate`, el cierre continúa con el archivado y el merge sin preguntar (`handoff`). Resuelto desde `.sdd-devkit/settings.json` (`verification.*`). Una puerta omitida no bloquea el merge pero tampoco cuenta como aprobada. |
+| **Cómo preguntar al usuario** | [`reference/asking.md`](reference/asking.md) | Herramienta de preguntas estructuradas, opciones cortas y excluyentes, una tanda al inicio, fallback en prosa enumerada. |
+| **Veredictos y estados** | [`reference/verdicts.md`](reference/verdicts.md) | Para `quality-check`, `code-review`, `trace-validate` y `arch-audit`: valor canónico + símbolo estables, **etiqueta siempre en el idioma resuelto**. Los consumidores leen el **símbolo**, nunca la palabra. |
+| **Artefactos** | [`reference/artifacts.md`](reference/artifacts.md) | Ruta de cada artefacto, identificadores y numeración, y el contrato de archivado (archivar no libera el ID). |
+| **Gestor de proyectos** | [`reference/project-management.md`](reference/project-management.md) | Para `work-plan`, `test-define` y `work-research`: si la integración está activa, con qué proveedor y con qué `host`/`workspace`/`project`, resueltos desde `.sdd-devkit/settings.json`. Desactivada ⇒ ID secuencial local. |
+
+---
+
 ## Convención: enlace al gestor de proyectos
 
 Cualquier artefacto que enlace a su work item en un sistema de seguimiento externo (Azure DevOps, Jira u otro) lo hace **en la cabecera de metadatos** con esta etiqueta única, sin variantes por tipo de artefacto:
@@ -14,7 +32,7 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 **Work Item ({{Sistema}}):** {{enlace markdown al work item — omitir la línea si no aplica}}
 ```
 
-- `{{Sistema}}` es el nombre corto que define el archivo de referencia del sistema (p. ej. `Work Item (ADO):` para `references/azure-devops.md`).
+- `{{Sistema}}` es el nombre corto del sistema de seguimiento (p. ej. `Work Item (ADO):` para Azure DevOps).
 - Aplica a `US-XXX`, `TK-XXX`, `WI-XXX`, `TC-XXX`, `FT-XXX` y a los artefactos de investigación (`RS-XXX`, diagnóstico de bug, análisis de test case). **No** se usan etiquetas propias por tipo (`Bug (gestor de proyectos):`, `Test Case (ADO):`, etc.).
 - La línea se **omite** si el artefacto no tiene work item; nunca se deja con `N/A`.
 - Fuera de la cabecera —listas de referencias, tablas, prosa— el enlace se escribe como cualquier otro enlace markdown; esta convención rige solo la etiqueta de cabecera.
@@ -29,7 +47,7 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 
 ### arch-init
 
-**Cuándo:** bootstrapear un proyecto para agentes (nuevo o existente): git, `AGENTS.md` / `CLAUDE.md` / `.agents/MEMORY.md`, índices de ADR/estándares, stack y compuerta de calidad.
+**Cuándo:** bootstrapear un proyecto para agentes (nuevo o existente, uno o varios repositorios): git — o, si la solución abarca varios repos, un repositorio de especificaciones que los agrega como submódulos —, `AGENTS.md` / `CLAUDE.md` / `.agents/MEMORY.md` / `.sdd-devkit/settings.json`, índices de ADR/estándares, stack y compuerta de calidad.
 
 **Produce:** archivos base del harness; al cerrar sugiere continuar con `work-define` o `work-plan`.
 
@@ -41,15 +59,25 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 | **Sin código**         | Obliga a definir stack (Paso 2); no hay descubrimiento desde código. |
 | **Con código base**    | Stack detectable; sin lógica de negocio propia aún.                  |
 | **Con implementación** | Invoca `arch-discover` completo para candidatos de ADR/estándares.   |
+| **Solo specs**         | Repositorio que nunca va a tener código de aplicación (solo documentación/especificaciones): salta el Paso 2 y el Paso 4 completos, y nunca recibe `docs/adr/`/`docs/standards/` propios. |
 
+Se clasifica por repositorio: en un proyecto de un solo repo, una sola vez; en multi-repo, una vez por cada submódulo — el repositorio de especificaciones no se pregunta, es automáticamente "Solo specs" por definición (no tiene código propio).
 
-**Handoffs:** `arch-discover` (brownfield), `arch-manage` (candidatos aceptados), consulta a `quality-check` (qué validar por stack). Reejecutable: solo completa lo que falte.
+**Opciones — topología** (repo único vs. multi-repo, se resuelve antes de lo anterior):
+
+| Topología      | Qué implica                                                                                                    |
+| -------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Un solo repo** | Comportamiento estándar: el harness vive en ese mismo repositorio.                                              |
+| **Varios repos** | Crea (o usa) un repositorio de especificaciones como principal, con cada repo adicional agregado como submódulo en su raíz. `AGENTS.md`/`CLAUDE.md`/`README.md` se crean en el de especificaciones **y** en cada submódulo (uno por repositorio); `.agents/MEMORY.md`/`.sdd-devkit/settings.json` son únicos, solo en el de especificaciones. El resto de pasos se repiten por submódulo. |
+
+**Handoffs:** `arch-discover` (brownfield, por repositorio si es multi-repo), `arch-manage` (candidatos aceptados, por raíz de arquitectura), consulta a `quality-check` (qué validar por stack). Reejecutable: solo completa lo que falte.
 
 **Ejemplos de invocación:**
 
 ```text
 /arch-init
 /arch-init este repo ya tiene código; completa lo que falte del harness
+/arch-init la solución tendrá un backend y un frontend en repos separados
 ```
 
 - «Inicializa el harness del proyecto»
@@ -64,7 +92,7 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 
 **Cuándo:** documentar o cambiar una decisión arquitectónica (ADR) o una norma de dominio (estándar / criterio de cumplimiento).
 
-**Produce:** `docs/adr/ADR-XXX-*.md` y/o criterios de cumplimiento (`CR-XXX`) en `docs/standards/` (p. ej. *Testing Standards*), con fitness functions cuando apliquen.
+**Produce:** `docs/adr/ADR-XXX-*.md` y/o criterios de cumplimiento (`CR-XXX`) en `docs/standards/` (p. ej. *Testing Standards*), con fitness functions cuando apliquen — **en la raíz del repositorio al que pertenece el código**: la principal, o la del submódulo, si la decisión es suya (ver [`reference/artifacts.md`](reference/artifacts.md#raíz-de-arquitectura-adr-estándares-y-fitness-functions)).
 
 **Opciones — qué se produce:**
 
@@ -102,7 +130,7 @@ Cualquier artefacto que enlace a su work item en un sistema de seguimiento exter
 
 **Cuándo:** hay código existente y se quieren sacar a la luz decisiones/normas implícitas.
 
-**Produce:** lista de candidatos; tras aprobación del usuario, crea los artefactos vía `arch-manage`.
+**Produce:** lista de candidatos; tras aprobación del usuario, crea los artefactos vía `arch-manage`. Cubre **una raíz de arquitectura por corrida** (repo principal o submódulo).
 
 **Opciones — clasificación de cada candidato:**
 
@@ -135,9 +163,9 @@ Los candidatos se agrupan por **dominio técnico/funcional** (testing, api, secu
 
 ### arch-audit
 
-**Cuándo:** comprobar si el repo cumple los criterios de cumplimiento de `docs/standards/` y las reglas de `AGENTS.md`.
+**Cuándo:** comprobar si una raíz de arquitectura —el repo principal o un submódulo— cumple los criterios de cumplimiento de su `docs/standards/` y las reglas de `AGENTS.md`. Una raíz por corrida.
 
-**Produce:** `docs/audits/arch-audit-YYYY-MM-DD.md` con hallazgos priorizados y veredicto.
+**Produce:** `docs/audits/arch-audit-YYYY-MM-DD.md` **en la raíz auditada**, con hallazgos priorizados y veredicto.
 
 **Opciones — si ya hay auditoría previa:**
 
@@ -148,7 +176,7 @@ Los candidatos se agrupan por **dominio técnico/funcional** (testing, api, secu
 | **Nueva auditoría desde cero** | Audita todas las normas de nuevo                                                                  |
 
 
-**Veredicto:** `✅ Conforme` · `❌ No conforme` · `⚠️ Conforme con observaciones`.
+**Veredicto:** `APPROVED` (`✅`) · `REJECTED` (`❌`) · `APPROVED_WITH_NOTES` (`⚠️`) — la etiqueta del informe va en el idioma resuelto.
 
 Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Deprecated`/`Superseded` solo si el código sigue dependiendo de ellos.
 
@@ -175,7 +203,7 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 
 **Cuándo:** hacer commit(s) con Conventional Commits a partir del diff real.
 
-**Produce:** commit(s) locales (no hace push).
+**Produce:** commit(s) locales; push opcional según `.sdd-devkit/settings.json` (`git.push`), solo en invocación directa del usuario.
 
 **Opciones — flujo:**
 
@@ -183,9 +211,11 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 | Condición                | Flujo                                                                                           |
 | ------------------------ | ----------------------------------------------------------------------------------------------- |
 | Sin cambios              | Informa y no commitea                                                                           |
-| Un solo tema lógico      | Commit estándar (propuesta → confirmación → commit)                                             |
-| Varios temas mezclados   | Propone varios commits y ejecuta en secuencia                                                   |
+| Un solo tema lógico      | Commit estándar: infiere el mensaje, valida y commitea **sin confirmar** (`commitConfirmation` no aplica aquí) |
+| Varios temas mezclados   | Propone varios commits y ejecuta en secuencia (misma excepción con `commitConfirmation: never`)       |
 | Falló un pre-commit hook | Corrige, re-stagea y **nuevo** commit (sin `--amend` ni `--no-verify` salvo petición explícita) |
+
+**Configuración (`.sdd-devkit/settings.json` → `git`):** `commitConfirmation` (`always`/`never`) decide si se confirma la propuesta de división en varios commits — un commit único nunca se confirma; `push` (`ask`/`always`/`never`) decide si se hace push tras completar el/los commits — nunca en invocación delegada por `work-integrate`/`pr-create`. Por defecto: `commitConfirmation: "always"`, `push: "never"`.
 
 
 **Tipos de mensaje:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert` (tipo/scope en inglés). Detiene el commit ante secretos o archivos sensibles salvo confirmación explícita sobre ese archivo.
@@ -231,7 +261,7 @@ Criterios en estándares `Draft` se listan pero no priorizan el veredicto; `Depr
 | **Analizar migración**             | Proyecto origen + destino                    | Discovery + validación → `work-define` (cambio grande) o `work-plan` / WI (pequeño)                                                                 |
 
 
-Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefacto que se pase por su código se lee vía MCP y enruta al flujo según su tipo (historia/tarea → decisiones pendientes; bug → issue; test case → test case).
+Si el repo tiene activada la integración con un gestor de proyectos en `.sdd-devkit/settings.json`, cualquier artefacto que se pase por su código se lee vía MCP y enruta al flujo según su tipo (historia/tarea → decisiones pendientes; bug → issue; test case → test case).
 
 **Ejemplos de invocación:**
 
@@ -257,9 +287,43 @@ Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefa
 
 
 
+### requirement-refine
+
+**Cuándo:** estructurar un requerimiento en bruto (idea, ticket, correo, transcripción de reunión, diseño, wireframes, documentación técnica, imágenes) en una Especificación de Requisitos de Software (`SRS-XXX`, alineada a ISO/IEC/IEEE 29148) antes de convertirlo en historias de usuario. Paso previo **opcional**: si el requerimiento ya está claro, se puede ir directo a `work-define`.
+
+**Produce:** `docs/specs/requirements/SRS-XXX-{slug}/README.md` — alcance, `FR-XXX`/`NFR-XXX` priorizados y con método de verificación, interfaces externas, requisitos de datos, cumplimiento normativo, riesgos, wireframes en SVG enlazado si el requerimiento tiene UI (tipo de solución web/nativa/híbrida, responsiva o no), stack tecnológico, repositorios (nuevos o existentes) y proyecto base, equipo de desarrollo; no historias de usuario ni `AC-XXX` (eso es `work-define`) ni modelos/APIs (eso es `design-define`).
+
+**Opciones:**
+
+
+| Acción         | Notas                                                                 |
+| -------------- | ---------------------------------------------------------------------- |
+| **Crear**      | Cierra primero lo **funcional** por tandas (`FR-XXX`/`NFR-XXX` priorizados, interfaces externas, datos, cumplimiento normativo, supuestos de funcionalidad reutilizable, wireframes SVG y verificación/trazabilidad si aplica, riesgos); recién al final pregunta stack, repositorios (nuevo o existente + proyecto base) y equipo de desarrollo |
+| **Actualizar** | Conserva ids `FR-XXX`/`NFR-XXX`/`BR-XX`; si cambia el stack o los repos, avisa si la tabla de historias derivadas queda desalineada |
+
+
+**Estados:** `Draft` (lagunas en Observaciones) · `Ready` (los 12 criterios del DoR: stack, repositorios con tipo y proyecto base, `FR-XXX`/`NFR-XXX` priorizados y verificables, interfaces/datos/cumplimiento revisados, wireframes aprobados si hay UI, riesgos identificados). En Ready sugiere `work-define`, que hereda repos/wireframes/criterios de verificación del SRS y, al terminar, escribe de vuelta la tabla de historias derivadas.
+
+**Ejemplos de invocación:**
+
+```text
+/requirement-refine
+/requirement-refine portal de proveedores para subir facturas
+/requirement-refine actualiza SRS-002: cambia el stack a Auth0
+/requirement-refine estructura este requerimiento: <pegar ticket>
+```
+
+- «Refina este requerimiento antes de armar las historias»
+- «Necesito un SRS para esta idea, no sé todavía con qué la vamos a construir»
+- «Estructura esta necesidad: repos, stack y requisitos, antes de definirla como US»
+
+---
+
+
+
 ### work-define
 
-**Cuándo:** crear o actualizar una historia de usuario (`US-XXX`).
+**Cuándo:** crear o actualizar una historia de usuario (`US-XXX`). Caso habitual: parte directo de una necesidad descrita por el usuario. Entrada alternativa: descomponer un `SRS-XXX` en `Estado: Ready` de `requirement-refine`, heredando de él criterios de verificación, repos y wireframes en vez de repreguntarlos.
 
 **Produce:** `docs/specs/user-stories/US-XXX-{slug}/README.md` (documento funcional; no DTOs/endpoints — eso es `design-define`).
 
@@ -274,6 +338,8 @@ Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefa
 
 **Estados:** `Draft` (lagunas en Observaciones) · `Ready` (DoR + INVEST + repos + AC completos). En Ready sugiere `test-define` y `work-plan`.
 
+**Configuración (`.sdd-devkit/settings.json` → `specification.testCases.mode`):** `ask` (por defecto) pregunta si se definen los casos de prueba al llegar a Ready; `always` invoca `test-define` directo, sin preguntar; `never` no lo ofrece. `work-plan` se sigue ofreciendo igual en los tres casos. La otra clave del objeto, `askDetails`, la consume `test-define`, no la planificación.
+
 **Ejemplos de invocación:**
 
 ```text
@@ -281,6 +347,7 @@ Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefa
 /work-define como comprador quiero guardar favoritos
 /work-define actualiza US-003: añade AC de timeout 3s
 /work-define a partir de RS-002
+/work-define arma las historias de SRS-003
 ```
 
 - «Crea una historia de usuario para el checkout con tarjeta»
@@ -379,7 +446,7 @@ Si el repo declara `work_item_tracking` en `.agents/MEMORY.md`, cualquier artefa
 | **Mantenimiento**     | Sin US (bug, refactor, deuda, deps, operativa) | `WI-XXX` en `docs/specs/work-items/` |
 
 
-Solo se hace handoff a `work-implement` si el artefacto está en `Ready`. Si hay vinculación ADO en `.agents/MEMORY.md`, sincroniza work items antes de crear archivos locales. Puede delegar detalle técnico a `design-define`.
+Solo se hace handoff a `work-implement` si el artefacto está en `Ready`. Si la integración con el gestor de proyectos está activa en `.sdd-devkit/settings.json`, sincroniza work items antes de crear archivos locales. Puede delegar detalle técnico a `design-define`.
 
 **Ejemplos de invocación:**
 
@@ -391,7 +458,7 @@ Solo se hace handoff a `work-implement` si el artefacto está en `Ready`. Si hay
 /work-plan completa TK-002 a Ready
 ```
 
-- «Planifica US-007» → stubs `TK-XXX` por repositorio / AC
+- «Planifica US-007» → propuesta de `TK-XXX` por repositorio / AC, y luego elegir: crear los planes completos, crear stubs, otro o cancelar
 - «Tareas para esta historia» (+ US en contexto)
 - «Plan de mantenimiento: refactor del módulo de auth» → `WI-XXX`
 - «Descompón el bug de timeouts en un WI»
@@ -424,8 +491,8 @@ Los dos primeros entregan **funcionalidad**; los dos últimos entregan **pruebas
 
 | Modo                     | Cuándo                                                                                                                                                      |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Secuencial** (default) | Una unidad → lint/build → pausa → commit al confirmar → siguiente                                                                                           |
-| **Paralelo**             | Solo si hay **más de una** unidad **y** el usuario pide explícitamente «sin preguntar» / «de corrido»; worktrees + subagentes tras análisis de dependencias |
+| **Secuencial** (default) | Una unidad → lint/build → pausa (`confirmByUnit: always`) → commit al confirmar → siguiente                                                                 |
+| **Paralelo**             | Solo si hay **más de una** unidad **y** no hay que pausar entre ellas (`confirmByUnit: never`, o petición explícita del usuario en el turno); worktrees + subagentes tras análisis de dependencias |
 
 
 Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrate` o `pr-create` (para `TC`/`FT`, además `trace-validate`).
@@ -461,11 +528,13 @@ Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrat
 
 **Alcance:** **todo el repositorio** en el estado actual de la rama (o todo el módulo elegido, en monorepo). No se acota al diff: una regresión en código que nadie tocó también debe salir.
 
-**Checks:** tipado → linter → unit → coverage → integración → build → e2e → sonar, con categoría por stack (Bloqueante / Condicional / Informativo).
+**Checks:** tipado → linter → unit → coverage → suites configuradas → build → e2e → sonar. La categoría (Bloqueante / Condicional / Informativo) la fija el **stack** en todos salvo las suites configuradas, donde la fija el estándar de testing.
 
-**Correcciones:** nunca por iniciativa propia. Ante hallazgos que impliquen tocar código pregunta primero: **dentro** de una implementación, si se corrigen; **fuera** de una implementación (rama suelta, auditoría), ofrece explícitamente [Corregir] / [Solo el informe]. Si se corrige y la rama es de un `US-XXX`/`WI-XXX`, delega el arreglo en `work-implement` (modo corrección); si no hay artefacto, corrige él mismo. Aplica igual a fallos de pruebas.
+**Suites de prueba:** las únicas **fijas** son `unit` y `coverage` (siempre se listan, aunque salgan `N/A`). **Cualquier otro check que quede en `N/A` se omite del informe** — e2e sin config incluido, igual que tipado, linter, build o sonar: la tabla lista solo lo que se ejecutó. El resto del conjunto —e2e, integración, contrato, rendimiento…— sale del **estándar de testing** del repo (`docs/standards/testing.md`) o, en el caso de e2e, de la config del propio repo: una suite por requisito vigente, con la categoría que fije su enunciado RFC 2119 (DEBE → Bloqueante; DEBERÍA/PUEDE → Condicional). Sin estándar, solo las dos fijas más e2e si hay config.
 
-**Veredicto:** `✅ Aprobado` · `❌ Rechazado` · `⚠️ Incompleto`.
+**Correcciones:** gobernadas por `.sdd-devkit/settings.json` → `verification.qualityCheck.confirmFix` (`always` por defecto / `never`). Con `always`, nunca corrige por iniciativa propia — ante hallazgos que impliquen tocar código pregunta primero: **dentro** de una implementación, si se corrigen; **fuera** de una implementación (rama suelta, auditoría), ofrece explícitamente [Corregir] / [Solo el informe]. Con `never`, corrige directo sin preguntar. Si se corrige y la rama es de un `US-XXX`/`WI-XXX`, delega el arreglo en `work-implement` (modo corrección); si no hay artefacto, corrige él mismo. Aplica igual a fallos de pruebas.
+
+**Veredicto:** `APPROVED` (`✅`) · `REJECTED` (`❌`) · `INCOMPLETE` (`⚠️`) — la etiqueta del informe va en el idioma resuelto.
 
 **Modificadores de invocación** (opcionales; claves en inglés; se pueden combinar cuando no se contradicen). Sin ninguno se asume `default`.
 
@@ -475,7 +544,7 @@ Pruebas solo sobre archivos/paquete afectados. Handoff de cierre: `work-integrat
 | `default`                                                                                   | Bloqueantes + condicionales presentes + Sonar si hay config            |
 | `blocking-only` / `no-sonar`                                                                | Omite informativos (Sonar)                                             |
 | `include-linter-warnings`                                                                   | Warnings del linter como error                                         |
-| `no-tests` / `no-unit-tests` / `no-integration` / `no-e2e` / `no-coverage` / `no-typecheck` | Omite ese check (`N/A`)                                                |
+| `no-tests` / `no-unit-tests` / `no-e2e` / `no-coverage` / `no-typecheck` / `no-<suite>`      | Omite ese check (`N/A`); `no-<suite>` omite una suite configurada por su `ID` (p. ej. `no-integration`) |
 | `only <check>`                                                                              | Solo ese check                                                         |
 | `tests-only`                                                                                | Solo suites de prueba (caché `test-run.json`; lo usa `trace-validate`) |
 | `save-report`                                                                               | Copia con marca de tiempo en `docs/audits/quality-check-<timestamp>.md`, además del informe vigente |
@@ -512,9 +581,11 @@ En prosa (el skill mapea al modificador en inglés):
 
 **Severidad:** `🔴` Crítico · `🟠` Mayor (bloquean) · `🟡` Menor · `💡` Sugerencia.
 
-**Veredicto:** `✅ Aprobado` · `❌ Rechazado` · `⚠️ Incompleto` — **independiente** del de `quality-check`.
+**Correcciones:** gobernadas por `.sdd-devkit/settings.json` → `verification.codeReview.confirmFix` (`always` por defecto / `never`). Ante un hallazgo bloqueante, con `always` pausa y ofrece [Corregir] / [Justificar]; con `never` corrige directo sin preguntar (la justificación sigue disponible si el usuario la aporta).
 
-Idempotente: si ni el fingerprint, ni el commit de la base, ni el modo cambiaron **y el informe existente está `✅ Aprobado`**, no vuelve a revisar (usar `revalidate` para forzar). Un `❌`/`⚠️` nunca se sirve desde caché: justificar un hallazgo no toca el código y el veredicto quedaría congelado. Las revisiones acotadas (`working-tree`, `scope`) no se cachean.
+**Veredicto:** `APPROVED` (`✅`) · `REJECTED` (`❌`) · `INCOMPLETE` (`⚠️`) — **independiente** del de `quality-check`; la etiqueta del informe va en el idioma resuelto.
+
+Idempotente: si ni el fingerprint, ni el commit de la base, ni el modo cambiaron **y el informe existente está en `APPROVED`**, no vuelve a revisar (usar `revalidate` para forzar). Un `❌`/`⚠️` nunca se sirve desde caché: justificar un hallazgo no toca el código y el veredicto quedaría congelado. Las revisiones acotadas (`working-tree`, `scope`) no se cachean.
 
 **Modificadores de invocación** (opcionales; claves en inglés). Sin ninguno se asume `default`.
 
@@ -561,13 +632,13 @@ En prosa:
 
 **Estados por criterio:** Cubierto · Parcial · No cubierto.
 
-**Veredicto:** `✅ Aprobado` · `⚠️ Aprobado con observaciones` · `❌ Rechazado`.
+**Veredicto:** `APPROVED` (`✅`) · `APPROVED_WITH_NOTES` (`⚠️`, no bloquea) · `REJECTED` (`❌`) — la etiqueta del informe va en el idioma resuelto.
 
 No ejecuta pruebas: reutiliza `.sdd-devkit/test-run.json` fresco o invoca `quality-check` en `tests-only`. Idempotente con **dos** claves: el `fingerprint` canónico (código y tests) y un `spec` sobre la carpeta del artefacto (criterios y `TC-XXX`). Si ambos coinciden y la corrida anterior sí pudo ejecutar las pruebas, devuelve el reporte sin regenerarlo; `revalidate` fuerza.
 
 **Alcance:** **un artefacto** y sus criterios de aceptación — ni el repo ni el diff. Si la rama abarca varios trabajos, se valida uno por corrida.
 
-**Reporte:** `trace-report.md` en la carpeta del artefacto.
+**Reporte:** `coverage.md` en la carpeta del artefacto.
 
 **Ejemplos de invocación:**
 
@@ -594,7 +665,7 @@ No ejecuta pruebas: reutiliza `.sdd-devkit/test-run.json` fresco o invoca `quali
 
 **Cuándo:** cerrar e integrar localmente (merge `--no-ff` a la rama base). No push, no PR.
 
-El merge se hace en tres tiempos (`--no-commit` → retirar `docs/audits/quality-check.md` y `code-review.md` → `commit`): esos dos informes son fotos de la rama del trabajo y no deben llegar a la base. Los `arch-audit-*.md`, las copias de `save-report` y el `trace-report.md` sí se integran.
+El merge se hace en tres tiempos (`--no-commit` → retirar `docs/audits/quality-check.md` y `code-review.md` → `commit`): esos dos informes son fotos de la rama del trabajo y no deben llegar a la base. Los `arch-audit-*.md`, las copias de `save-report` y el `coverage.md` sí se integran.
 
 **Opciones — tipo:**
 
@@ -608,7 +679,7 @@ El merge se hace en tres tiempos (`--no-commit` → retirar `docs/audits/quality
 
 **Puertas (obligatorias):** `quality-check` → `code-review` → `trace-validate`. Working tree sucio → invoca `git-commit` automáticamente.
 
-**Archivado (paso 10, previa confirmación):** con el `progress.md` en `Done`, las tres puertas aprobadas y el delta contra la base verificado > 0, se **pregunta al usuario** si archivar —mostrando antes qué se movería—. Solo con un sí explícito la carpeta del trabajo se mueve con `git mv` a `docs/specs/archive/user-stories/` o `docs/specs/archive/work-items/` **en la rama**, para que se integre en el mismo merge. Las investigaciones sueltas de `docs/specs/research/` que quedan sin referencias activas se archivan también; las internas viajan con la carpeta. Un «no» no bloquea el merge: se anota y se sigue. No aplica a ramas `test/`. Detalle en [archive.md](skills/work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+**Archivado (paso 8, según `implementation.archiveMode`):** con el `progress.md` en `Done`, las tres puertas aprobadas y el delta contra la base verificado > 0, se resuelve `implementation.archiveMode`: con `ask` (por defecto) **pregunta al usuario** si archivar —mostrando antes qué se movería—, con `always` archiva directo sin preguntar, con `never` no archiva ni pregunta. Cuando archiva, la carpeta del trabajo se mueve con `git mv` a `docs/archive/user-stories/` o `docs/archive/work-items/` **en la rama**, para que se integre en el mismo merge. Las investigaciones sueltas de `docs/specs/research/` que quedan sin referencias activas se archivan también; las internas viajan con la carpeta. No archivar —negativa, `never`, o sin canal para preguntar— no bloquea el merge: se anota y se sigue. No aplica a ramas `test/`. Detalle en [archive.md](skills/work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 
 **Ejemplos de invocación:**
 
@@ -642,7 +713,7 @@ El merge se hace en tres tiempos (`--no-commit` → retirar `docs/audits/quality
 | **Implementación** | `feature/`\|`fix/`\|`chore/`\|`refactor/`\|`test/` → rama de integración | `quality-check` + `code-review` + `trace-validate` (+ DoD si existe) |
 | **Promoción** | `develop` → `master`\|`main`\|`release/*` | `quality-check` (+ DoD si existe) |
 
-En una promoción, `code-review` y `trace-validate` se reportan como `— No aplica`: cada trabajo ya pasó las tres puertas al integrarse, y lo que queda por demostrar es que la rama consolidada está verde. Estar en una rama protegida **no** bloquea; el Paso 3 confirma la intención antes de seguir.
+En una promoción, `code-review` y `trace-validate` se reportan como `N/A` (`—`): cada trabajo ya pasó las tres puertas al integrarse, y lo que queda por demostrar es que la rama consolidada está verde. Estar en una rama protegida **no** bloquea; el Paso 3 confirma la intención antes de seguir.
 
 **Puertas (obligatorias, sin draft ni skip):**
 
@@ -651,7 +722,7 @@ En una promoción, `code-review` y `trace-validate` se reportan como `— No apl
 3. `trace-validate` sobre el `US`/`WI` de la rama — solo en implementación
 4. Definition of Done (`docs/policies/definition-of-done.md`) — **solo si existe**; si no, se omite
 
-**Archivado (solo implementación, Paso 5):** pasadas las puertas y **antes del push**, se pregunta al usuario si archivar; confirmado, la carpeta del trabajo se mueve a `docs/specs/archive/` para que el movimiento viaje dentro del PR. Declinarlo no impide crear el PR. Mismo procedimiento que `work-integrate` ([archive.md](skills/work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo)). **No aplica** en promoción ni en ramas `test/`; con el `progress.md` incompleto se omite y se avisa, pero el PR se crea igual.
+**Archivado (solo implementación, Paso 5, según `implementation.archiveMode`):** pasadas las puertas y **antes del push**, se resuelve la misma política que `work-integrate` — con `ask` (por defecto) se pregunta al usuario si archivar, con `always` archiva directo, con `never` no archiva ni pregunta. Confirmado o forzado por `always`, la carpeta del trabajo se mueve a `docs/archive/` para que el movimiento viaje dentro del PR. Declinarlo (o `never`) no impide crear el PR. Mismo procedimiento que `work-integrate` ([archive.md](skills/work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo)). **No aplica** en promoción ni en ramas `test/`; con el `progress.md` incompleto se omite y se avisa, pero el PR se crea igual.
 
 Working tree sucio → `git-commit` automático. Título/descripción se generan sin pedir confirmación. Ante fallo de puerta: informa, propone acciones y solo corrige con autorización explícita.
 

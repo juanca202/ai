@@ -10,17 +10,7 @@
       "displayName": "SDD Devkit",
       "source": "./",
       "description": "Utilidades para el desarrollo de SDD (Spec-Driven Development): ADRs, historias de usuario, planificacion e implementacion de tareas tecnicas y de mantenimiento, definicion y trazabilidad de pruebas, migraciones, verificaciones automatizadas y code review.",
-      "version": "1.2.0",
-      "author": {
-        "name": "juanca202"
-      }
-    },
-    {
-      "name": "sdd-utils",
-      "displayName": "SDD Utils",
-      "source": "./others/utils",
-      "description": "Skills de utilidad generales: instalacion de MCP ALM (Azure DevOps / Jira), creacion de proyectos desde plantilla y validacion de prompts.",
-      "version": "1.0.0",
+      "version": "2.0.17",
       "author": {
         "name": "juanca202"
       }

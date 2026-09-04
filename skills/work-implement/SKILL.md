@@ -13,9 +13,9 @@ Guia general para **ejecutar en codigo** trabajo ya especificado, de **distintos
 >
 > **Solo implementacion:** no modifica documentacion de producto (README de US, `TK-XXX`, `WI-XXX`, `TC-XXX`, `FT-XXX`, ADRs, technical-docs) - solo el `progress.md`. **Excepcion de checkboxes:** avanzar el estado de las subtareas del artefacto en ejecucion **a medida que se trabajan** —`[ ]` (pendiente) => `[~]` (en curso) => `[x]` (completada)— es la unica modificacion permitida en archivos de especificacion; no se toca ninguna otra seccion del artefacto. El archivo a editar depende del tipo: `TK-XXX.md` para tareas de historia de usuario, el `README.md` del WI para tareas de mantenimiento. **En los tipos de automatizacion de pruebas (`TC-XXX` / `FT-XXX`) no aplica**: los test cases no tienen subtareas y su especificacion no se toca en absoluto. Si se detecta un conflicto en la documentacion que pueda afectar el resultado, **parar inmediatamente y notificar al usuario** antes de continuar.
 >
-> **Ritmo obligatorio - una unidad por confirmacion (modo por defecto):** implementar una unidad, actualizar `progress.md` **y la lista de tareas (to-dos) del agente**, ejecutar lint/build, y **esperar confirmacion explicita del usuario antes de arrancar la siguiente**. La **unidad** depende del tipo (ver tabla de seleccion). **El commit de la unidad terminada no se hace al completarla:** queda pendiente durante la pausa de confirmacion, dejando una ventana para que el usuario revise el resultado, aplique correcciones manuales o le indique ajustes al agente antes de que el cambio quede commiteado. El commit se hace **al confirmar el avance**, como primer paso antes de arrancar la siguiente unidad (o, si el usuario detiene el flujo ahi, en el cierre — ver Paso 4 de cada referencia).
+> **Ritmo - una unidad por confirmacion (`confirmByUnit: always`, valor por defecto):** implementar una unidad, actualizar `progress.md` **y la lista de tareas (to-dos) del agente**, ejecutar lint/build, y **esperar confirmacion explicita del usuario antes de arrancar la siguiente**. La **unidad** depende del tipo (ver tabla de seleccion). **El commit de la unidad terminada no se hace al completarla:** queda pendiente durante la pausa de confirmacion, dejando una ventana para que el usuario revise el resultado, aplique correcciones manuales o le indique ajustes al agente antes de que el cambio quede commiteado. El commit se hace **al confirmar el avance**, como primer paso antes de arrancar la siguiente unidad (o, si el usuario detiene el flujo ahi, en el cierre — ver Paso 4 de cada referencia).
 >
-> **Unica excepcion - modo de ejecucion paralela:** si el alcance incluye **mas de una unidad** y el usuario pide **explicitamente ejecutar sin confirmacion entre unidades** (p. ej. "sin preguntar", "de corrido", "todas a la vez"), se activa el modo de ejecucion paralela (ver seccion *Ejecucion paralela con subagentes y worktrees*), que corre las unidades independientes en subagentes con worktree y omite las pausas intermedias. Si falta cualquiera de las dos condiciones, se mantiene el modo secuencial.
+> **Modo de ejecucion paralela:** si el alcance incluye **mas de una unidad** y la politica resuelta dice no pausar entre unidades — porque `implementation.md` resolvio `confirmByUnit: never`, o porque el usuario lo pide **explicitamente** en el turno (p. ej. "sin preguntar", "de corrido", "todas a la vez") —, se activa el modo de ejecucion paralela (ver seccion *Ejecucion paralela con subagentes y worktrees*), que corre las unidades independientes en subagentes con worktree y omite las pausas intermedias. Si falta cualquiera de las dos condiciones, se mantiene el modo secuencial.
 >
 > **Alcance de las pruebas - solo archivos afectados:** este skill ejecuta las pruebas (y `lint`/`typecheck`/`build`) **unicamente sobre los archivos o el paquete afectados** por la unidad implementada — tanto por unidad (Paso 3) como en el cierre (Paso 4) y tras cada merge en modo paralelo. **Nunca corre la bateria completa de pruebas del repositorio.** Ejecutar **toda la bateria de pruebas** (regresion de todo el repo) es responsabilidad **exclusiva de `quality-check`**, que corre en `work-integrate` / `pr-create` antes de integrar o crear el PR; este skill no la sustituye ni la anticipa.
 
@@ -23,27 +23,35 @@ Guia general para **ejecutar en codigo** trabajo ya especificado, de **distintos
 
 ## Como preguntar al usuario
 
-Cuando este skill (o cualquiera de sus referencias) indique **preguntar, pedir, confirmar o validar** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** del cliente (la que renderiza opciones tappables o un selector) en lugar de redactar la pregunta como prosa libre. Reglas:
+Mecanismo, ritmo y fallback compartidos: [`../../reference/asking.md`](../../reference/asking.md).
 
-- **Opciones cortas y mutuamente excluyentes** (2-4 por pregunta) cuando la respuesta admita categorias.
-- **No repreguntar** lo que ya esta respondido en el contexto de la sesion o en los documentos del repo.
-- **Confirmaciones entre unidades:** una pregunta por turno con opciones claras (p. ej. Opciones: [Si, continuar] / [No, detener aqui]). No avanzar antes de la respuesta.
-- **Fallback:** si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3...).
+Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar*, *validar* o *sugerir* algo al usuario, asume ese mecanismo; no se repite allí.
 
-Cada vez que una referencia diga *preguntar al usuario*, *validar con el usuario* o *confirmar* asume este mecanismo; no se repite alli.
+**Confirmaciones entre unidades:** solo con `confirmByUnit: always`. Una pregunta por turno con opciones claras (p. ej. Opciones: [Si, continuar] / [No, detener aqui]). No avanzar antes de la respuesta.
 
 ---
 
-## Resolucion de idioma
+## Resolución de idioma
 
-El idioma de los mensajes al usuario y de las notas de `progress.md` se decide en este orden; detenerse en el primer paso que aplique:
+Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../reference/language.md).
 
-1. **`.agents/MEMORY.md`** (raiz del repo) => linea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Es la clave canonica que escribe `arch-init`; si existe, manda.
-2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesion.
-3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md` con `preferred language: <codigo>`.
-4. Si no se puede inferir, **preguntar al usuario** que idioma prefiere y, tras su respuesta, **preguntar si desea persistirlo** en `.agents/MEMORY.md`; no decidir el idioma por cuenta propia.
+Las reglas de `language.md` son obligatorias y tienen prioridad para determinar el idioma de todos los artefactos y mensajes generados por este skill.
 
-El idioma resuelto aplica a los mensajes al usuario y a las notas de `progress.md`. La salida y los mensajes de error de las herramientas (lint, build, tests) no se traducen; el codigo, los identificadores y los nombres de artefacto tampoco.
+No continúes hasta haber leído y aplicado `language.md`.
+
+**Excepción deliberada:** la salida y los mensajes de error de las herramientas (lint, build, tests) no se traducen; el código, los identificadores y los nombres de artefacto tampoco.
+
+---
+
+## Resolucion de la politica de implementacion
+
+Antes de ejecutar este skill, DEBES leer [`../../reference/implementation.md`](../../reference/implementation.md).
+
+Las reglas de `implementation.md` son obligatorias y tienen prioridad para determinar el ritmo de confirmacion entre unidades (`confirmByUnit`), que hacer con cambios sin commitear al iniciar o reanudar (`uncommittedChanges`), el uso y la ubicacion de los worktrees (`workTree`, `workTreePath`), el maximo de subagentes concurrentes (`maxParallel`) y si el cierre pasa al siguiente skill sin preguntar (`handoff`, ver [Regla de handoff](#regla-de-handoff-transversal)).
+
+No continues hasta haber leido y aplicado `implementation.md`.
+
+**Excepcion deliberada:** `archiveMode` **no** lo aplica este skill — el archivado del artefacto ocurre al cerrarlo, en `work-integrate` / `pr-create`.
 
 ---
 
@@ -60,7 +68,7 @@ La senal que distingue los tipos es **el artefacto que el usuario referencia** (
 | **Caso de prueba** | El trabajo referencia uno o varios `TC-XXX`; viven en la carpeta `test-cases/` de un artefacto padre (`US-XXX`, `WI-XXX` o `FT-XXX`). | **Las pruebas automatizadas de esos `TC-XXX`** | **Un `TC-XXX`** | `references/test-cases.md` — **leer antes de implementar.** |
 | **Feature** | El trabajo referencia un `FT-XXX` — funcionalidad **ya implementada** registrada bajo `docs/specs/features/`. | **Las pruebas de todos los `TC-XXX` asociados a los `AC-XXX` que contiene el feature** — nunca funcionalidad nueva | **El `FT-XXX` completo** | `references/test-cases.md` — **leer antes de implementar.** |
 
-> **Artefacto archivado.** Al cerrar un trabajo, `work-integrate` y `pr-create` pueden mover su carpeta a `docs/specs/archive/user-stories/` o `docs/specs/archive/work-items/`. Si el artefacto referenciado no aparece en su ruta activa, **buscarlo ahi antes de darlo por inexistente** — y **nunca** crear la carpeta en la ruta activa por no haberla encontrado: este skill hace «leer o crear» el `progress.md`, asi que el descuido produciria una carpeta fantasma con un identificador ya usado. Que se haga con el hallazgo depende del modo:
+> **Artefacto archivado.** Al cerrar un trabajo, `work-integrate` y `pr-create` pueden mover su carpeta a `docs/archive/user-stories/` o `docs/archive/work-items/`. Si el artefacto referenciado no aparece en su ruta activa, **buscarlo ahi antes de darlo por inexistente** — y **nunca** crear la carpeta en la ruta activa por no haberla encontrado: este skill hace «leer o crear» el `progress.md`, asi que el descuido produciria una carpeta fantasma con un identificador ya usado. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo). Que se haga con el hallazgo depende del modo:
 >
 > - **En los cuatro tipos de implementacion** (US/TK, WI, TC, FT): **parar y avisar**. Implementar trabajo nuevo sobre un artefacto ya cerrado exige desarchivarlo primero —mover su carpeta de vuelta—, y eso lo decide el usuario.
 > - **En [modo correccion](#modo-correccion-delegado-desde-quality-check)**: un artefacto archivado es **esperable**, no un error — la correccion llega justo en la fase de cierre, cuando el archivado ya se commiteo. Continuar con la correccion, pero **sin escribir dentro de la carpeta archivada**: la nota de retrabajo va en el informe de `quality-check`, no en el `progress.md` archivado.
@@ -86,7 +94,7 @@ Verificar estas condiciones antes de implementar, sea cual sea el tipo. Si algun
 > **Excepcion — modo correccion.** En la correccion delegada desde `quality-check` (ver [Modo correccion](#modo-correccion-delegado-desde-quality-check)) **no aplican** ni «Working tree limpio» ni «Artefacto en `Ready`»: el cierre corre sobre la rama consolidada, con el artefacto ya implementado y posiblemente con cambios sin commitear. El resto de condiciones (rama del artefacto, solo trabajo de la rama actual) siguen vigentes.
 
 - **No iniciar en la rama de otro trabajo (primera verificacion):** obtener la rama actual con `git branch --show-current`. Si ya tiene un prefijo de implementacion (`feature/`, `fix/`, `chore/`, `refactor/`, `test/`) y **no** corresponde al artefacto que se va a implementar, **parar** e indicar al usuario que no se puede iniciar la implementacion desde la rama de otro trabajo; debe situarse en la rama base acordada (p. ej. `develop`/`main`) para que el skill cree o cambie a la rama del artefacto. **Excepcion - reanudar:** si la rama actual es precisamente la del artefacto pedido, continuar normalmente.
-- **Working tree limpio:** `git status --porcelain` sin cambios pendientes no resueltos **al iniciar la sesion de implementacion** (o al reanudarla). No aplica durante la pausa de confirmacion entre unidades: los cambios de la unidad recien terminada quedan sin commitear ahi a proposito (ver *Ritmo obligatorio*), hasta que el usuario confirma avanzar.
+- **Cambios sin commitear al iniciar:** `git status --porcelain` **al iniciar la sesion de implementacion** (o al reanudarla). Si hay salida, resolver segun `implementation.uncommittedChanges` (ver [`../../reference/implementation.md`](../../reference/implementation.md)): `commit` los comitea (invocando `git-commit`) y continua; `stash` los guarda con `git stash` y continua, avisando donde quedaron; `ask` (por defecto) para e informa al usuario, sin continuar hasta que lo resuelva. No aplica durante la pausa de confirmacion entre unidades: los cambios de la unidad recien terminada quedan sin commitear ahi a proposito (ver *Ritmo obligatorio*), hasta que el usuario confirma avanzar.
 - **Rama correcta:** estar en (o crear) la rama de trabajo del artefacto. No implementar en `main` ni en ramas de otro trabajo sin instruccion explicita. El nombre de rama lo define cada referencia segun el tipo. **Excepcion — `WI-XXX` de tipo `bug-fix` o `security-update`:** no llevan rama propia; se implementan **directamente sobre la rama de integracion** y cierran sin handoff (ver [`references/work-items.md`](references/work-items.md#excepcion-bug-fix-y-security-update-no-crean-rama)). Ahi la verificacion no es "estar en la rama del artefacto" sino **estar en la rama de integracion confirmada** con el usuario — que tampoco se asume.
 - **Solo trabajo de la rama actual:** solo se implementan unidades (TK / WI / TC / FT) que pertenezcan al artefacto asociado a la rama de implementacion actual. No implementar tareas de otro artefacto o de otra rama: si la unidad pedida no corresponde a la rama actual, **parar** y cambiar a su rama correspondiente (o pedir al usuario que lo haga) antes de continuar; nunca mezclar trabajo de distintos artefactos en una misma rama.
 - **Artefacto en `Ready`:** el artefacto a implementar existe y esta en `Estado: Ready` (lo verifica cada referencia con su regla propia).
@@ -94,10 +102,10 @@ Verificar estas condiciones antes de implementar, sea cual sea el tipo. Si algun
 
 Si hay conflicto:
 
-```
+`
 WARNING No es posible continuar:
 - <razon concreta>
-```
+`
 
 ---
 
@@ -107,7 +115,7 @@ Cada tipo mantiene un `progress.md` como **unica bitacora** que este skill puede
 
 - Crear desde `assets/progress-template.md` si no existe, adaptando el encabezado y las unidades al tipo (TK / WI / TC / FT) segun indique la referencia.
 - Por cada unidad: `Pending` => `In Progress` => `Done`; anadir notas si quedan aspectos parciales.
-- **Archivos:** registrar los archivos tocados al implementar la unidad, **uno por linea y sin vineta**, prefijando cada ruta con `+` (creado), `~` (modificado) o `-` (eliminado). Se llena al cerrar la unidad, con lo que efectivamente se toco — no con lo que el plan preveia. Va sin vineta a proposito: el prefijo `-` de un archivo eliminado se confundiria con el guion de la lista.
+- **Archivos:** registrar los archivos tocados al implementar la unidad, **uno por linea dentro de un bloque de codigo** (fences ` ` `, con el titulo `**Archivos:**` fuera del bloque), prefijando cada ruta con `+` (creado), `~` (modificado) o `-` (eliminado). Se llena al cerrar la unidad, con lo que efectivamente se toco — no con lo que el plan preveia. Va en bloque de codigo y sin vineta a proposito: el prefijo `-` de un archivo eliminado se confundiria con el guion de la lista.
 - **Implementador:** registrar `{{usuario}} / {{agente}} / {{modelo}} / {{session id}}`, donde el usuario se infiere de `git config user.name`, el agente es el que ejecuta la implementacion (p. ej. `Claude`, `Cursor`, `Codex`), el modelo es el modelo concreto usado en la sesion (p. ej. `claude-sonnet-5`) y el session id es el identificador de la sesion o conversacion actual (p. ej. `juanca202 / Claude / claude-sonnet-5 / 0cc3519b-0e7f-456d-93de-4203d89e38fe`). Omitir de derecha a izquierda cualquier dato que el agente no exponga (sin session id; sin modelo ni session id; o solo el usuario si tampoco puede identificarse el agente).
 - Registrar en `Decisiones adicionales` **toda decision tomada durante la sesion de chat** que no este ya documentada en la especificacion. Si no hubo decisiones nuevas, omitir la seccion.
 - **Cobertura de test cases:** cuando el artefacto tiene test cases, el campo `Cobertura de test cases` de la unidad **no es un detalle exhaustivo de cada `TC-XXX`**: registrar solo observaciones puntuales -- **todo `TC-XXX` que no se pudo automatizar** (con el motivo) y **toda decision de crear un tipo de prueba distinto** al que sugiere el test case (p. ej. cubrir con integracion un TC pensado como unit). Si la implementacion fue como se esperaba (todos los `TC-XXX` se automatizaron tal cual), **no es necesario comentar nada** en el campo; si el artefacto no tiene test cases, omitirlo. En los tipos `TC-XXX` / `FT-XXX` este campo es **obligatorio** (los test cases son el objeto mismo de la unidad) y suma dos observaciones propias: **`AC-XXX` sin ningun TC que lo cubra** y **discrepancias entre el TC y el codigo** con la decision tomada.
@@ -117,6 +125,18 @@ Cada tipo mantiene un `progress.md` como **unica bitacora** que este skill puede
 | Posponer una unidad | Mantener `Pending` y registrar el motivo en `Notas`. |
 | Sacar una unidad del alcance | Parar; alinear con el skill de planificacion correspondiente; eliminar la entrada si ya no aplica. |
 | Unidad completada | `Done`. |
+
+---
+
+## Estado de iteracion para el seguimiento de especificaciones (transversal)
+
+Los hooks de seguimiento de especificaciones del plugin (ver `hooks/README.md`) necesitan un `iterationId` que se mantenga igual mientras se reintenta la unidad en curso -o la correccion delegada desde `quality-check`- y cambie al pasar a otra. Se resuelve con un archivo de estado local y no versionado: `.sdd-devkit/current-iteration.json`, con `{"iterationId": "<uuid>", "key": "<codigo de la unidad, o `correction:<check>` en modo correccion>"}`.
+
+- **Al iniciar una unidad** (`Pending` -> `In Progress`, primera vez) o **al recibir una correccion delegada** para un check nuevo: si el archivo no existe, o su `key` no coincide con la unidad/correccion actual, generar un UUID nuevo (p. ej. `uuidgen`) y sobrescribir el archivo.
+- **En un reintento con el mismo `key`** (build/test que vuelve a fallar dentro de la misma unidad, o un segundo intento de la misma correccion): no tocar el archivo — el `iterationId` existente sigue siendo el correcto.
+- **Al cerrar la unidad como `Done`**, o **al terminar la correccion** (aplicada o no — ver [Cuando la correccion no se aplica](#cuando-la-correccion-no-se-aplica)): eliminar el archivo.
+- **La primera vez que se escribe**, normalizar el `.gitignore`: comprobar con `git check-ignore -q .sdd-devkit/current-iteration.json` y, si no esta ignorado, anadir esa linea — es una cache local y desechable, igual que `.sdd-devkit/test-run.json` (ver `quality-check`).
+- Mantenerlo **siempre**, sin comprobar antes si `specification.trackingEnabled` esta activo en `.sdd-devkit/settings.json`: es barato de escribir y, si ningun hook lo lee, no tiene efecto observable.
 
 ---
 
@@ -189,7 +209,7 @@ pero **ejecutarlas todas y completas en cada iteracion es caro**. Escalonar la *
 
 **En modo paralelo (worktrees):** el subagente ejecuta la integracion de su unidad **cuando puede aislar
 la infraestructura** (base de datos por worktree, contenedor efimero, testcontainers, esquema o namespace
-propio). Si la infra es compartida y no aislable —hasta 3 worktrees concurrentes colisionarian en
+propio). Si la infra es compartida y no aislable —los worktrees concurrentes colisionarian en
 migraciones, fixtures o estado—, **difiere esas pruebas**, lo registra en `progress.md` y lo reporta al
 orquestador, que las ejecuta en el paso de Integracion tras el merge de la unidad. Un fallo por colision
 de infra no es un defecto del codigo: no se corrige, se aisla o se difiere.
@@ -228,9 +248,11 @@ Los subagentes `ui-specialist` y `quality-specialist` solo se usan **si el proye
 Modo alternativo al ritmo secuencial por defecto. Aplica a los cuatro tipos (`TK-XXX`, `WI-XXX`, `TC-XXX` y `FT-XXX`). **Se activa unicamente cuando se cumplen las dos condiciones a la vez:**
 
 1. El alcance incluye **mas de una unidad** (varias `TK`, varios `WI`, varios `TC` o varios `FT`).
-2. El usuario **pide explicitamente ejecutar sin confirmacion entre unidades** (p. ej. "sin preguntar", "de corrido", "todas a la vez", "sin pausas").
+2. No hay que pausar entre unidades: `implementation.md` resolvio **`confirmByUnit: never`**, o el usuario **pide explicitamente** ejecutar sin confirmacion en el turno (p. ej. "sin preguntar", "de corrido", "todas a la vez", "sin pausas").
 
-Si falta cualquiera de las dos, se mantiene el **modo secuencial** con una unidad por confirmacion (comportamiento por defecto de cada referencia). El modo paralelo **no** cambia *como* se implementa cada unidad — ciclo TDD, Clean Architecture, lint/build, checkboxes del artefacto, cobertura de test cases, validacion por criterios de aceptacion siguen igual —: solo cambia **cuantas** unidades avanzan a la vez y como se integran.
+Si falta cualquiera de las dos, se mantiene el **modo secuencial** con una unidad por confirmacion (comportamiento por defecto de cada referencia).
+
+> **Worktrees en modo secuencial.** El modo paralelo siempre usa worktrees. En modo secuencial los usa segun `workTree`: con `always`, cada unidad va en su worktree sin preguntar; con `never`, se trabaja en el arbol principal; con `ask`, se pregunta **una sola vez** al inicio y la respuesta vale para toda la ejecucion. El modo paralelo **no** cambia *como* se implementa cada unidad — ciclo TDD, Clean Architecture, lint/build, checkboxes del artefacto, cobertura de test cases, validacion por criterios de aceptacion siguen igual —: solo cambia **cuantas** unidades avanzan a la vez y como se integran.
 
 ### Paso 0 - Analisis de dependencias (obligatorio, antes de ejecutar nada)
 
@@ -252,11 +274,11 @@ Es el **primer paso** y condiciona todo lo demas. No lanzar ningun subagente ant
 
 ### Concurrencia y worktrees
 
-- **Maximo 3 subagentes en paralelo.** Si una ola tiene mas de 3 unidades independientes, despacharlas en lotes de hasta 3; al liberarse un cupo, entra la siguiente unidad pendiente de la ola.
+- **El maximo de subagentes en paralelo lo fija `maxParallel`** (por defecto 3; `-1` = sin limite). Si una ola tiene mas unidades independientes que ese maximo, despacharlas en lotes de ese tamano; al liberarse un cupo, entra la siguiente unidad pendiente de la ola.
 - **Un worktree por unidad.** Cada subagente trabaja en su propio `git worktree`, en una rama derivada de la rama del artefacto:
   - Rama base = la rama del artefacto de esta ejecucion (`feature/US-XXX-*` o la rama del `WI`). **Si el alcance son WI de tipo `bug-fix` / `security-update`** —que no tienen rama propia—, la base de los worktrees es la **rama de integracion** confirmada, y ahi mismo se hacen los merges de las unidades; no se crea una rama intermedia para agruparlos.
-  - Crear el worktree en una ruta temporal fuera del arbol principal con `git worktree add <ruta-temporal> -b wt/<unidad> <rama-base>` (p. ej. rama `wt/TK-003`). El worktree parte del estado de la rama base **ya integrado con las olas anteriores**.
-- Cada subagente **ejecuta el flujo completo de su unidad** segun la referencia del tipo (Paso 3 de la referencia correspondiente): ciclo TDD, lint/typecheck/build, validacion, checkboxes del artefacto, cobertura de test cases y commits dentro de su worktree. **Excepcion a la delegacion en `/git-commit` del Paso 3:** dentro del worktree el commit se hace de forma **directa** (`git commit`), sin invocar `/git-commit` — ese skill siempre pausa a confirmar su propuesta con el usuario (no tiene modo silencioso ni delegado), algo incompatible con el modo paralelo, que existe precisamente para no pausar. Como compensacion, el subagente debe aplicar antes de cada commit directo la misma deteccion de secretos que usa `git-commit` (patrones de nombre de archivo sensibles y `grep` sobre el diff staged) y, si encuentra alguno, **abortar la unidad sin comitear** y escalar el hallazgo al orquestador en vez de comitear. El subagente **no** integra ni mergea a la rama base ni ofrece handoffs; al terminar devuelve al orquestador el resultado (unidad, rama, estado, notas, resultado de tests/validacion).
+  - Crear el worktree bajo la raiz que fije **`workTreePath`** (relativa a la raiz del repo si no es absoluta — p. ej. `.worktrees/`; sin definir, una ruta temporal fuera del arbol principal) con `git worktree add <workTreePath>/<unidad> -b wt/<unidad> <rama-base>` (p. ej. `.worktrees/TK-003` con rama `wt/TK-003`). El worktree parte del estado de la rama base **ya integrado con las olas anteriores**.
+- Cada subagente **ejecuta el flujo completo de su unidad** segun la referencia del tipo (Paso 3 de la referencia correspondiente): ciclo TDD, lint/typecheck/build, validacion, checkboxes del artefacto, cobertura de test cases y commits dentro de su worktree. **Excepcion a la delegacion en `/git-commit` del Paso 3:** dentro del worktree el commit se hace de forma **directa** (`git commit`), sin invocar `/git-commit` — un subagente en su propio worktree no puede sostener las pausas de ese skill (la propuesta de division, o una parada por secretos, rama protegida o hook fallido), y el modo paralelo existe precisamente para no pausar. Como compensacion, el subagente debe aplicar antes de cada commit directo la misma deteccion de secretos que usa `git-commit` (patrones de nombre de archivo sensibles y `grep` sobre el diff staged) y, si encuentra alguno, **abortar la unidad sin comitear** y escalar el hallazgo al orquestador en vez de comitear. El subagente **no** integra ni mergea a la rama base ni ofrece handoffs; al terminar devuelve al orquestador el resultado (unidad, rama, estado, notas, resultado de tests/validacion).
 - El orquestador arranca una **nueva ola solo cuando la anterior este completamente integrada** en la rama base, para que las unidades dependientes vean el codigo de sus predecesoras.
 
 ### Integracion (merge secuencial a la rama del artefacto)
@@ -267,7 +289,7 @@ La hace **el orquestador, una unidad a la vez** (nunca merges concurrentes), a m
 2. **Resolver conflictos** si los hay; si el conflicto no es trivial o el resultado queda ambiguo, **parar e informar al usuario** antes de continuar con el resto.
 3. Ejecutar **lint/typecheck/build y las pruebas unitarias y de integracion** de los archivos/paquete afectados por las unidades integradas, en la rama del artefacto tras el merge (acotadas al cambio, no la bateria completa; esa la corre `quality-check`). **Incluir aqui las pruebas de integracion que el subagente difirio por infra no aislable** (las registradas en `progress.md`): en la rama del artefacto ya no hay concurrencia entre worktrees, asi que este es su punto de ejecucion. **E2E no se corre por merge:** se difiere al cierre (paso 6). Ver [Uso escalonado de pruebas](#uso-escalonado-de-pruebas-optimizacion). Si algo falla, **intentar corregirlo**; solo si el error **persiste tras varios intentos** (p. ej. 2-3), **parar** y avisar. No seguir integrando sobre una base rota.
 4. Marcar `progress.md` de esa unidad a `Done` (y su `Cobertura de test cases`) solo **despues** de un merge y una validacion en verde.
-5. Al integrar todas las unidades, **limpiar los worktrees y ramas temporales** (`git worktree remove <ruta-temporal>` y borrar la rama `wt/<unidad>`).
+5. Al integrar todas las unidades, **limpiar los worktrees y ramas temporales** (`git worktree remove <ruta-del-worktree>` y borrar la rama `wt/<unidad>`).
 6. **Cierre de la implementacion:** con todas las unidades integradas, correr **una sola vez** las pruebas **e2e** que apliquen al alcance sobre el codigo consolidado (si el repo las tiene). La corrida exhaustiva como puerta formal la hara luego `quality-check`.
 
 `progress.md` y la lista de to-dos siguen siendo la bitacora: el orquestador refleja el avance global (una entrada por unidad + la ola en curso) y cada subagente mantiene los checkboxes de su propia unidad; la coherencia entre ambos se mantiene igual que en el modo secuencial. Al cerrar, el handoff es identico al del modo secuencial (`work-integrate` / `pr-create` / terminar).
@@ -324,7 +346,7 @@ relevante y los archivos implicados.
   se inventan estados: los validos siguen siendo `Pending`, `In Progress`, `Done`, y una unidad ya en
   `Done` permanece en `Done`. **Si el artefacto es externo y no hay `progress.md`**, no crearlo: devolver
   esa misma nota en la respuesta a `quality-check`. **Si el artefacto esta archivado** (su carpeta vive bajo
-  `docs/specs/archive/`), tampoco escribir dentro: mismo trato — la nota va en la respuesta a
+  `docs/archive/`), tampoco escribir dentro: mismo trato — la nota va en la respuesta a
   `quality-check`, que la recoge en su informe.
 - **Sin commit automatico ni handoff:** al terminar, devolver el control a `quality-check`, que verifica el
   arreglo re-ejecutando el check, recalcula el fingerprint y reinicia su corrida. Este skill no re-ejecuta
@@ -342,10 +364,10 @@ En esos casos, **no seguir intentando ni improvisar un arreglo parcial**. Devolv
 `quality-check` con un resultado explicito de **correccion no aplicada**, indicando: el check que seguia
 fallando, **el motivo** (fuera de alcance / discrepancia de especificacion / preexistente) y **a que skill
 se escalo**. `quality-check` no debe reintentar la delegacion sobre ese mismo fallo: le corresponde
-reportarlo al usuario en su informe y emitir el veredicto que aplique (`❌ Rechazado`), dejando el cierre
+reportarlo al usuario en su informe y emitir el veredicto que aplique (`REJECTED`), dejando el cierre
 bloqueado hasta que el escalado se resuelva. Anotar tambien la decision como **nota** en `progress.md` —
 salvo que el artefacto sea externo o este archivado, en cuyo caso la nota viaja en la respuesta a
-`quality-check` y no se escribe dentro de `docs/specs/archive/`.
+`quality-check` y no se escribe dentro de `docs/archive/`.
 
 ---
 
@@ -360,7 +382,7 @@ Todo paso a otra fase del ciclo se realiza **invocando el skill correspondiente*
 - **Para validar la cobertura** de los criterios de aceptacion tras automatizar las pruebas (tipos `TC-XXX` / `FT-XXX`): **invocar `/trace-validate`**. Este skill no genera la matriz de trazabilidad.
 - **`quality-check` es el unico origen entrante:** ademas de los handoffs salientes de arriba, este skill **recibe** correcciones delegadas desde [`quality-check`](../quality-check/SKILL.md#corrección-de-fallos) en el cierre (ver [Modo correccion](#modo-correccion-delegado-desde-quality-check)). Es la unica entrada que no viene de una especificacion recien planificada.
 
-Las opciones de cierre se ofrecen con la herramienta de preguntas estructuradas (ver el Paso 4 de cada referencia) y cada una hace handoff **invocando** el skill dueño de esa fase.
+Las opciones de cierre se resuelven segun `implementation.handoff` (ver [`../../reference/implementation.md`](../../reference/implementation.md)): con `ask` (comportamiento por defecto), se ofrecen con la herramienta de preguntas estructuradas (ver el Paso 4 de cada referencia) y se espera la eleccion del usuario; con `always`, se invoca directo el primer handoff saliente que aplique, sin presentar el menu. En ambos casos, cada opcion hace handoff **invocando** el skill dueño de esa fase.
 
 > **Excepcion — `WI-XXX` de tipo `bug-fix` / `security-update`.** Al implementarse directamente sobre la rama de integracion, **no hay handoff de cierre**: no queda rama que mergear ni PR que crear, asi que no se ofrecen las opciones ni se invoca `work-integrate` / `pr-create`. El ciclo termina con el commit. Los handoffs de escalado (`work-plan`, `work-define`, `test-define`) siguen vigentes igual.
 
@@ -381,13 +403,25 @@ Solo resultados y lo que el usuario debe saber o decidir. No incluir razonamient
 | `references/test-cases.md` | Tipo = caso de prueba (`TC-XXX`) o feature (`FT-XXX`). Automatizacion de las pruebas documentadas por `test-define`: ubicaciones por artefacto padre, rama `test/`, matriz AC=>TC, traduccion del TC a codigo de prueba, que hacer ante una prueba en rojo, cierre con `trace-validate`, ejemplos y anti-patrones. |
 | `assets/progress-template.md` | Plantilla de `progress.md`. Adaptar encabezado y unidades al tipo. |
 
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/implementation.md`](../../reference/implementation.md): **Política de implementación** — ritmo de confirmación, cambios sin commitear al iniciar, worktrees, concurrencia y handoff de cierre desde `.sdd-devkit/settings.json`. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/asking.md`](../../reference/asking.md): **Preguntas** — mecanismo estructurado, ritmo, fallback. *Antes de la primera pregunta.*
+- [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`../../reference/git.md`](../../reference/git.md): **Política de commit y push** — `integrationBranches` y su `commitPolicy`, al resolver sobre qué rama se trabaja y se commitea. *Lectura obligatoria antes de ejecutar el skill.*
+
 ---
 
 ## Anti-patterns (transversales)
 
+- **Narrar el flujo interno**: anunciar que se resuelve el idioma o la política, que se lee `settings.json`, que se carga una referencia, o ir enumerando los pasos en voz alta. Al usuario se le comunica el resultado, las preguntas que el flujo exija y lo que quede pendiente — no la maquinaria.
 - Implementar mas de una unidad por turno sin confirmacion intermedia del usuario **en modo secuencial** (el modo por defecto); solo el modo de ejecucion paralela, pedido explicitamente, omite las pausas.
 - Activar el modo de ejecucion paralela sin que el usuario lo haya pedido explicitamente, o sin completar antes el analisis de dependencias (Paso 0).
-- Lanzar mas de 3 subagentes en paralelo, o integrar (mergear) varias unidades a la vez en la rama del artefacto.
+- Lanzar mas subagentes en paralelo de los que permite `maxParallel`, o integrar (mergear) varias unidades a la vez en la rama del artefacto.
 - Ejecutar una unidad que depende de trabajo fuera del alcance de la ejecucion sin avisar al usuario para excluirla o detener.
 - Arrancar una nueva ola antes de integrar la anterior en la rama del artefacto.
 - Mezclar dos tipos de implementacion en una misma ejecucion.

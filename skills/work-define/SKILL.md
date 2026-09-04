@@ -1,6 +1,6 @@
 ---
 name: work-define
-description: Crear o actualizar una Historia de Usuario. Usar cuando se necesite crear, documentar, actualizar o estandarizar historias de usuario. Activar cuando el usuario solicite una nueva historia de usuario, describa una necesidad funcional, pida refinar requisitos, estructurar funcionalidades o alinear historias existentes a las convenciones del proyecto. El ID de una US archivada en docs/specs/archive/ sigue ocupado, y una US archivada no se actualiza sin desarchivarla antes.
+description: Crear o actualizar una Historia de Usuario. Usar cuando se necesite crear, documentar, actualizar o estandarizar historias de usuario. Activar cuando el usuario solicite una nueva historia de usuario, describa una necesidad funcional, pida refinar requisitos, estructurar funcionalidades o alinear historias existentes a las convenciones del proyecto. El ID de una US archivada en docs/archive/ sigue ocupado, y una US archivada no se actualiza sin desarchivarla antes.
 license: MIT
 ---
 
@@ -19,37 +19,60 @@ Carga el archivo correspondiente cuando vayas a ejecutar la tarea; el detalle í
 | Necesitas… | Archivo |
 | ---------- | ------- |
 | Flujo paso a paso de **crear** y **actualizar**, cómo preguntar al usuario, validación antes de crear, checklist completo, ejemplos, anti-patrones y handoffs del ciclo | [`references/flow.md`](references/flow.md) |
+| Cómo **descomponer un `SRS-XXX`** de `/requirement-refine` en una o más historias (mapeo `FR-XXX`/`NFR-XXX` → `AC-XXX`, herencia de repos/wireframes, escritura de vuelta en el SRS) — entrada alternativa, no la habitual | [`references/flow.md`](references/flow.md#flujo-descomponer-un-srs-xxx-en-historias) |
+| Cómo ordenar y encadenar IDs al proponer **varias historias en una misma invocación** (SRS descompuesto, migración descompuesta, o varias funcionalidades relacionadas pedidas juntas) | [`references/flow.md`](references/flow.md#flujo-proponer-varias-historias-en-una-misma-invocación) |
 | Detalle de **RFC 2119** (tabla de modalidades), **ISO 25010** (categorías de criterios de aceptación no funcionales), rúbrica **INVEST** y **DoR** ampliado | [`references/quality-criteria.md`](references/quality-criteria.md) |
 | Estructura del `README.md` de una US | [`assets/user-story-template.md`](assets/user-story-template.md) |
+
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+- [`../../reference/planning.md`](../../reference/planning.md): **Política de planificación** — si se pregunta, se invoca automáticamente o nunca se sugiere `test-define` al dejar la US en Ready. *Lectura obligatoria antes de ejecutar el skill.*
 
 ---
 
 ## Resolución de idioma
 
-El idioma de la US (criterios de aceptación, INVEST, DoR y texto natural) se decide en este orden; detenerse en el primer paso que aplique:
+Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../reference/language.md).
 
-1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Es la clave canónica que escribe `arch-init`; si existe, manda.
-2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesión.
-3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md` con `preferred language: <código>`.
-4. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta, **preguntar si desea persistirlo** en `.agents/MEMORY.md`; no decidir el idioma por cuenta propia.
+Las reglas de `language.md` son obligatorias y tienen prioridad para determinar el idioma de todos los artefactos y mensajes generados por este skill.
+
+No continúes hasta haber leído y aplicado `language.md`.
+
+---
+
+## Política de planificación
+
+Antes de ejecutar este skill, DEBES leer [`../../reference/planning.md`](../../reference/planning.md).
+
+Las reglas de `planning.md` son obligatorias y determinan, vía `specification.testCases.mode`, si al dejar la US en `Ready` se pregunta si definir los casos de prueba (`ask`, comportamiento por defecto), se invoca `/test-define` automáticamente sin preguntar (`always`), o nunca se sugiere ni se invoca (`never`). La otra clave del objeto, `askDetails`, **no la consume este skill**: la lee `test-define`. Ver [Flujo (resumen)](#flujo-resumen).
+
+No continúes hasta haber leído y aplicado `planning.md`.
 
 ---
 
 ## Ubicación de archivos
 
+Layout completo del harness, identificadores y contrato de archivado: [`../../reference/artifacts.md`](../../reference/artifacts.md).
 
-| Artefacto             | Ruta                                                                                                                   |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Historia de usuario   | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md`                                                            |
-| Archivos de apoyo     | `docs/specs/user-stories/US-XXX-[nombre-corto]/assets/`                                                              |
-| Documentación técnica | `docs/specs/technical-docs/[capability].md` (propiedad del skill `design-define`; este skill solo la referencia, nunca la crea ni edita directamente) |
-| Glosario              | `docs/specs/glossary.md` (opcional)                                                                                  |
-| US ya archivada (fallback) | `docs/specs/archive/user-stories/US-XXX-[nombre-corto]/`, con la misma estructura interna                     |
+Lo propio de este skill:
 
-> **Las US archivadas siguen contando.** Al cerrar una historia, `work-integrate` y `pr-create` pueden mover su carpeta a `docs/specs/archive/user-stories/`. Eso **no libera su ID** ni la hace invisible: el siguiente `US-XXX` libre se calcula sobre las dos rutas, y el flujo *Actualizar* la busca ahí cuando no está en la activa. Ver [`work-integrate/references/archive.md`](../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+| Artefacto | Ruta |
+| --------- | ---- |
+| Historia de usuario (**salida**) | `docs/specs/user-stories/US-XXX-[nombre-corto]/README.md` |
+| Archivos de apoyo | `docs/specs/user-stories/US-XXX-[nombre-corto]/assets/` |
+| Documentación técnica (solo lectura) | `docs/specs/technical-docs/[capability].md` — propiedad de `design-define`; este skill la referencia, nunca la crea ni la edita |
+| Glosario (opcional) | `docs/specs/glossary.md` |
 
+> **Las US archivadas siguen contando.** El siguiente `US-XXX` libre se calcula sobre la ruta activa **y** sobre `docs/archive/user-stories/`, y el flujo *Actualizar* busca ahí la historia cuando no está en la activa.
 
 ### Convenciones del nombre de carpeta
+
+> Reglas comunes de slug e identificadores: [`../../reference/artifacts.md`](../../reference/artifacts.md). Lo específico de las US:
 
 - Formato: `US-XXX-[nombre-corto]` con `US-XXX` en mayúsculas y número de 3 dígitos.
 - Nombre corto: minúsculas, kebab-case, sin artículos ni palabras vacías.
@@ -68,11 +91,11 @@ Antes de crear o editar cualquier US, el agente debe tener clara la siguiente in
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | **Actor y valor de negocio**                    | Del contexto o descripción del usuario                                                   | Preguntar al usuario                                                                  |
 | **Criterios de aceptación (AC-XXX)**            | Del contexto o descripción del usuario                                                   | Preguntar; sin al menos un `AC-XXX` INVEST no es valorable y la historia solo puede crearse en Draft |
-| **Idioma de preferencia**                       | Ver [Resolución de idioma](#resolución-de-idioma) | Preguntar al usuario; no decidir el idioma por cuenta propia                          |
 | **Referencias de diseño** (solo US de UI)       | Figma, prototipos u otros enlaces aportados por el usuario                               | Sin ellas la historia no puede declararse Ready                                       |
 | **Dependencias con otras US o sistemas**        | Indicadas por el usuario o inferibles del contexto                                       | Preguntar; afectan las dimensiones I y E de INVEST                                    |
-| **ID de la US**                                 | Proporcionado por el usuario                                                             | Inferir el siguiente libre revisando carpetas `US-`* en `docs/specs/user-stories/` **y en `docs/specs/archive/user-stories/`** (archivar no libera el ID) |
-| **Repositorios afectados**                      | Proporcionados por el usuario o inferibles del repo                                      | Sin ellos la historia no puede declararse Ready                                       |
+| **ID de la US**                                 | Proporcionado por el usuario                                                             | Inferir el siguiente libre revisando carpetas `US-`* en `docs/specs/user-stories/` **y en `docs/archive/user-stories/`** (archivar no libera el ID) |
+| **Repositorios afectados**                      | Proporcionados por el usuario o inferibles del repo, o heredados de un `SRS-XXX` de origen | Sin ellos la historia no puede declararse Ready                                       |
+| **`SRS-XXX` de origen** (opcional)               | Solo si el usuario pide descomponer un SRS de `/requirement-refine`; en ese caso, actor/valor/AC-XXX/repos/referencias de UI se heredan de él en vez de preguntarse desde cero | No aplica — la mayoría de las US no parten de un SRS; caso por defecto sigue siendo la necesidad descrita directamente |
 
 
 > El único dato estrictamente obligatorio para crear la historia es tener identificado el actor y el valor de negocio. Si INVEST no es completamente valorable con la información disponible, la historia se crea con `Estado: Draft` y las lagunas documentadas en Observaciones. El estado **Ready** requiere todos los datos sin excepción.
@@ -83,9 +106,11 @@ Antes de crear o editar cualquier US, el agente debe tener clara la siguiente in
 
 El procedimiento completo —cómo preguntar al usuario, validación antes de crear, los pasos de **Crear** y **Actualizar**, el checklist y los ejemplos/anti-patrones— está en [`references/flow.md`](references/flow.md). Síntesis:
 
+- **Descomponer un `SRS-XXX` (entrada alternativa):** solo cuando el usuario pide explícitamente descomponer un SRS de `/requirement-refine` — leer su `README.md` completo, agrupar `FR-XXX`/`NFR-XXX` en historias candidatas (por pantalla/actor, no 1:1 obligatorio), heredar de él criterios de verificación, repositorios y wireframes en vez de repreguntarlos, y al terminar actualizar la tabla **Historias de usuario derivadas** del SRS. Ver [`references/flow.md`](references/flow.md#flujo-descomponer-un-srs-xxx-en-historias).
+- **Varias historias en una misma invocación:** si el agrupamiento de un SRS o la migración investigada produjeron varias US, o el usuario pide crear de una vez varias historias relacionadas, primero detectar dependencias entre ellas y ordenarlas — la infraestructura y las que no dependen de ninguna otra de la tanda van primero — y confirmar ese orden con el usuario antes de fijar IDs; con una sola historia, saltar directo a Crear. Ver [`references/flow.md`](references/flow.md#flujo-proponer-varias-historias-en-una-misma-invocación).
 - **Crear:** fijar ID y carpeta `US-XXX-[nombre-corto]/` → redactar el `README.md` con la plantilla (Descripción RFC 2119, Referencias, Criterios `AC-XXX` con categoría y enunciado RFC 2119, Repositorios, Complejidad Fibonacci, INVEST, DoR, Observaciones) → si el requerimiento define modelos, APIs o flujos, **delegar la documentación técnica a `/design-define` mediante subagente** y agregar las referencias devueltas a la sección Referencias → glosario si aplica → cierre.
 - **Actualizar:** identificar y leer el `README.md` → aplicar cambios conservando **siempre** los ids `AC-XXX` existentes (son inmutables: los nuevos toman el siguiente libre) → revalidar → confirmar. Ante conflicto `TK-XXX` ↔ US, **la US prevalece**.
-- **Cierre:** si queda **Draft**, cerrar lagunas con preguntas estructuradas (una por laguna, máx. tres por bloque); si queda **Ready**, sugerir como próximos pasos definir los casos de prueba (si el usuario acepta, invocar `/test-define`) y crear las `TK-XXX` con `/work-plan` (nunca crear TCs ni tareas directamente desde este skill).
+- **Cierre:** si queda **Draft**, cerrar lagunas con preguntas estructuradas (una por laguna, máx. tres por bloque); si queda **Ready**, resolver la definición de casos de prueba según `specification.testCases.mode` (`ask` pregunta, `always` invoca `/test-define` directo, `never` no la ofrece — ver [Política de planificación](#política-de-planificación)) y sugerir crear las `TK-XXX` con `/work-plan` (nunca crear TCs ni tareas directamente desde este skill). Si algún repositorio de la sección Repositorios no tiene el harness (`AGENTS.md`/`CLAUDE.md`/`.sdd-devkit/settings.json`), agregar `/arch-init` como opción adicional en la misma pregunta.
 
 Las modalidades **RFC 2119**, las **categorías de AC-XXX** (funcionales e ISO 25010) y las rúbricas **INVEST** y **DoR** detalladas están en [`references/quality-criteria.md`](references/quality-criteria.md).
 

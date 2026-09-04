@@ -45,7 +45,7 @@ ese artefacto:
 | `FT-XXX` | `docs/specs/features/FT-XXX-{slug}/research/RS-XXX-{slug}/` |
 | Nada local (TC suelto o solo en el gestor de proyectos) | `docs/specs/research/RS-XXX-{slug}/` |
 
-> **Si el artefacto padre no está en su ruta activa, buscarlo bajo `docs/specs/archive/`**
+> **Si el artefacto padre no está en su ruta activa, buscarlo bajo `docs/archive/`**
 > antes de darlo por inexistente, y **nunca** recrear la carpeta en la ruta activa. Si está
 > archivado, **no escribir dentro** — pero tampoco parar: auditar el `TC-XXX` de un trabajo
 > ya entregado es un caso legítimo y frecuente. Se lee el padre archivado como contexto y
@@ -155,6 +155,10 @@ secundarios):
 El `README.md` del RS resume el veredicto en su **Conclusión y recomendación**; el
 `analysis.md` guarda el detalle (respuestas a las cinco preguntas, comparación
 implementación vs. esperado, evidencia).
+
+> **Qué se presenta en el chat.** Solo el `README.md`, íntegro y literal (Paso 4 del
+> `SKILL.md`). El `analysis.md` **no se vuelca**: se lista por nombre, ruta tentativa y
+> estado. Ninguno de los dos se escribe antes de la confirmación.
 
 ## Anti-patrones
 

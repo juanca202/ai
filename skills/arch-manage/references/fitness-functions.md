@@ -11,6 +11,12 @@ repositorio** (Node en un proyecto Angular/React/Vue/Node, Python en uno Python,
 y un **runner** único (`scripts/arch/verify.<ext>`) que ejecuta todos los estándares por defecto o solo
 uno pasado por argumento.
 
+> **`scripts/arch/` cuelga de la raíz de arquitectura (`<raíz-arq>`)**, igual que `docs/standards/`: si el
+> estándar vive en un submódulo, sus checks y su runner viven en el `scripts/arch/` de **ese** submódulo, se
+> versionan con él y se ejecutan desde su raíz. El lenguaje del runner es el del stack de esa raíz, que puede
+> diferir del stack del repo principal. Nunca mezclar en un mismo runner checks de estándares de raíces
+> distintas. Ver [`../../../reference/artifacts.md`](../../../reference/artifacts.md#raíz-de-arquitectura-adr-estándares-y-fitness-functions).
+
 ## Propuesta de criterios y selección del usuario
 
 Cada **criterio de cumplimiento** (`CR-XXX`) de un estándar es una regla **verificable**. Al añadir un
@@ -172,7 +178,7 @@ el comando ya están decididos (paso 2b de la propuesta) — aquí se instalan y
    instalar»), no repreguntar. Al instalar: usar el gestor de paquetes del ecosistema detectado
    (`npm`/`pnpm`/`yarn`, `pip`/`poetry`/`uv`, Maven/Gradle, `dotnet add package`, `go get`,
    `cargo add`, etc.), como dependencia de desarrollo, y aplicar la **configuración mínima** para que
-   quede operativa (mismo criterio que [`references/dependencies.md`](references/dependencies.md),
+   quede operativa (mismo criterio que [`references/dependencies.md`](dependencies.md),
    pero resuelto en este paso — no repetir la pregunta en el paso 8 del flujo principal para esta
    misma herramienta). Si rechaza instalar pero quiere seguir, volver al paso 2b de la propuesta con
    la alternativa que proponga y **reproponerle el mecanismo**; si no hay ninguna viable sin instalar

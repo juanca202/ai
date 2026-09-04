@@ -44,7 +44,7 @@ Define la **categoría** de cada check según el stack (Bloqueante / Condicional
 | Linter | **Bloqueante** (`eslint`) | **Bloqueante** | Condicional (Checkstyle/SpotBugs/PMD) | Condicional (`ruff`/`flake8`) | Condicional (`golangci-lint`) | Condicional (`clippy`) | Condicional (`dotnet format`/analyzers) |
 | Unit tests | **Bloqueante** | **Bloqueante** | **Bloqueante** | **Bloqueante** | **Bloqueante** | **Bloqueante** | **Bloqueante** |
 | Coverage | **Bloqueante** | **Bloqueante** | **Bloqueante** (JaCoCo) | **Bloqueante** | **Bloqueante** | **Bloqueante** | **Bloqueante** |
-| Integración | Condicional⁴ | Condicional⁴ | Condicional⁴ | Condicional⁴ | Condicional⁴ | Condicional⁴ | Condicional⁴ |
+| Suites configuradas | ⁴ | ⁴ | ⁴ | ⁴ | ⁴ | ⁴ | ⁴ |
 | Build | **Bloqueante** | **Bloqueante** | **Bloqueante** | Condicional³ | **Bloqueante** | **Bloqueante** | **Bloqueante** |
 | E2E | Condicional | Condicional | Condicional | Condicional | Condicional | Condicional | Condicional |
 | Sonar | Informativo | Informativo | Informativo | Informativo | Informativo | Informativo | Informativo |
@@ -52,9 +52,9 @@ Define la **categoría** de cada check según el stack (Bloqueante / Condicional
 ¹ En Java/Kotlin la compilación estática ocurre en **build** (`mvn compile`, `gradle build`). No ejecutar un check de tipado separado.
 ² Go valida tipos en `go build` / `go test`; no añadir paso de tipado duplicado.
 ³ Python: si hay script/tarea de build → ejecutar (FAIL si exit ≠ 0). Si no hay ninguno → `N/A`.
-⁴ Integración: solo si el repo **distingue** una suite separada de la unitaria — script `test:it`/`test:integration`, perfil Failsafe (Maven), tarea Gradle dedicada, marcador `pytest -m integration`, tag `//go:build integration`, carpeta `tests/integration/`, etc. Si el repo corre todo en una sola suite, → `N/A`: no partir la suite unitaria ni inventar un comando.
+⁴ **Suites configuradas: la categoría no la fija el stack, la fija el estándar de testing** del repo (`docs/standards/testing.md`), y por eso esta fila no lleva valor por ecosistema. Integración, contrato, rendimiento, mutación… existen **solo si el estándar las declara**; su categoría sale del enunciado RFC 2119 del requisito (DEBE → Bloqueante; DEBERÍA/PUEDE → Condicional). Ver [`SKILL.md` → Suites de prueba](../SKILL.md#suites-de-prueba-fijas-y-configuradas). Lo que esta tabla sí aporta es **cómo se ejecutan** en cada stack: ver la fila «Suites configuradas» de [Resolución de comandos](#resolución-de-comandos-por-stack).
 
-> **Consecuencia clave del modelo:** un check **Condicional** sin config ni herramienta es `N/A`, **no** `⚠️ Incompleto`. Ej.: Python sin `mypy` → tipado `N/A`; proyecto sin nada de e2e → e2e `N/A`; repo con una sola suite de tests → integración `N/A`. Solo es `SKIPPED` (Incompleto) cuando la config existe pero la ejecución no es posible.
+> **Consecuencia clave del modelo:** un check **Condicional** sin config ni herramienta es `N/A`, **no** `INCOMPLETE`. Ej.: Python sin `mypy` → tipado `N/A`; proyecto sin nada de e2e → e2e `N/A`. Solo es `SKIPPED` (`INCOMPLETE`) cuando la config existe pero la ejecución no es posible — **o cuando el estándar de testing declara la suite y el repo no la puede correr**: la declaración del estándar equivale a config presente.
 >
 > **Excepción de Coverage:** aunque la tabla lo marca Bloqueante en todos los stacks, un repo **sin ninguna herramienta ni configuración** de cobertura lo reporta `N/A` (con recomendación en Próximas acciones), no `SKIPPED` — ver el catálogo de checks en `SKILL.md`. En cuanto exista config o herramienta, vuelve a ser Bloqueante.
 
@@ -72,7 +72,7 @@ Resolver el comando concreto leyendo scripts/tareas del manifiesto; *fallback* a
 | Linter | script `lint` → `eslint` | `mvn checkstyle:check` / plugin | `gradle checkstyleMain` / `lint` | `ruff check` / script `lint` | `golangci-lint run` | `cargo clippy` | `dotnet format --verify-no-changes` |
 | Unit | script `test` | `mvn test` | `gradle test` | `pytest` / script `test` | `go test ./...` | `cargo test` | `dotnet test` |
 | Coverage | `test:coverage` → `coverage` → *(sin script)* ver nota¹ | JaCoCo en `mvn verify` / `jacoco:report` | `gradle jacocoTestReport` | `pytest --cov` | `go test -coverprofile=...` | `cargo llvm-cov` / tarpaulin | `dotnet test /p:CollectCoverage=true` |
-| Integración | script `test:it` / `test:integration` | `mvn verify` (Failsafe) | tarea `integrationTest` | `pytest -m integration` / script | `go test -tags=integration ./...` | `cargo test --test '*'` | `dotnet test --filter Category=Integration` |
+| Suites configuradas⁵ | script dedicado (`test:it`, `test:contract`…) | perfil/goal dedicado (`mvn verify` con Failsafe) | tarea dedicada (`integrationTest`) | marcador/script (`pytest -m integration`) | tag de build (`go test -tags=integration ./...`) | `cargo test --test '<suite>'` | `dotnet test --filter Category=<Suite>` |
 | Build | script `build` → *(sin script)* ver nota² | `mvn package -DskipTests` | `gradle build -x test` | script `build` si existe | `go build ./...` | `cargo build` | `dotnet build` |
 | E2E | `test:e2e` → `e2e` | `mvn verify` (Failsafe) / perfil e2e | `gradle e2e` / task custom | script e2e / Playwright | script e2e | script e2e | script e2e |
 | Sonar | `sonar-scanner` | `mvn sonar:sonar` | `gradle sonarqube` | `sonar-scanner` | `sonar-scanner` | `sonar-scanner` | `dotnet sonarscanner` |
@@ -82,6 +82,8 @@ Resolver el comando concreto leyendo scripts/tareas del manifiesto; *fallback* a
 ¹ **Coverage/Node sin script `test:coverage` ni `coverage`:** detectar el test runner desde `devDependencies` (`jest`, `vitest`, `mocha`+`nyc`, `ava`, etc.) y usar su bandera nativa de cobertura como comando canónico — `jest --coverage`, `vitest run --coverage`, `nyc mocha`, etc. Si no se puede identificar el runner con certeza, preguntar al usuario en vez de adivinar un comando.
 
 ² **Build/Node + TS sin script `build`:** si el repo no tiene bundler propio (Webpack, Vite, esbuild, tsup…) — es decir, un proyecto TS puro que solo transpila — el build canónico es `tsc` (compilación real, **sin** `--noEmit`). Esto es casi el mismo comando que el check de **Tipado** (`tsc --noEmit`), solo que Build sí emite salida. Cuando ambos terminan resolviendo al mismo comando base, ejecutarlos igual como dos checks independientes (siguen siendo señales distintas: Tipado valida tipos, Build valida que el output se genera), pero **señalarlo en el informe** — una nota breve de que Build y Tipado comparten el mismo compilador en este repo — en vez de presentarlos como si fueran verificaciones completamente independientes que por casualidad coinciden.
+
+⁵ **Suites configuradas:** los comandos de la fila son la **forma habitual** de cada ecosistema, con la integración como ejemplo; la suite concreta y su nombre salen del requisito del estándar de testing. Resolver primero el script/tarea que el propio requisito mencione, luego el del manifiesto, y **preguntar** si no se identifica con certeza. Nunca partir la suite unitaria para simular una configurada.
 
 > Al **ejecutar** un check nunca añadir `--fix`, `--write`, `--force` ni equivalentes: falsearían el resultado. Las correcciones autorizadas por el usuario son un paso aparte y deliberado (ver `SKILL.md` → Flujo de ejecución).
 

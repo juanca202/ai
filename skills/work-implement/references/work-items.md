@@ -4,7 +4,7 @@ Flujo para **ejecutar en codigo** una tarea de mantenimiento `WI-XXX` bajo `docs
 
 > **Naturaleza del WI:** documento **unico y combinado** - el requerimiento, los criterios de aceptacion y el plan de implementacion conviven en `WI-XXX-[kebab-case]/README.md`, que mapea 1:1 con un work item del tracker externo, si el repo usa uno. **No se descompone en sub-tareas** (modelo plano). Un esfuerzo grande son varios `WI-` hermanos, nunca un WI con hijos.
 >
-> **Unidad de confirmacion:** **el `WI-XXX` completo.** Se implementa el plan del WI como una unidad; al terminarlo se actualiza `progress.md` y se pide confirmacion antes de pasar al siguiente WI (si el alcance incluye varios). **Excepcion:** si el alcance tiene varios WI y el usuario pide ejecutar **sin confirmacion**, se activa el **modo de ejecucion paralela** del `SKILL.md` (analisis de dependencias, subagentes con worktree — max 3 — y merge secuencial), que omite estas pausas.
+> **Unidad de confirmacion:** **el `WI-XXX` completo.** Se implementa el plan del WI como una unidad; al terminarlo se actualiza `progress.md` y se pide confirmacion antes de pasar al siguiente WI (si el alcance incluye varios). **Excepcion:** si el alcance tiene varios WI y la politica resuelta no exige pausar entre ellos (`confirmByUnit: never`, o peticion explicita del usuario en el turno), se activa el **modo de ejecucion paralela** del `SKILL.md` (analisis de dependencias, subagentes con worktree — hasta `maxParallel` — y merge secuencial), que omite estas pausas.
 
 ---
 
@@ -37,15 +37,22 @@ No asumir la rama base ni la de integracion; acordarla con el usuario.
 
 ### Excepcion: `bug-fix` y `security-update` no crean rama
 
-Un WI de tipo **`bug-fix`** o **`security-update`** se implementa **directamente sobre la rama de integracion** (la que el equipo use como tal: `develop`, `main`, `trunk`…). **No se crea ni se cambia a una rama `fix/`.**
+Un WI de tipo **`bug-fix`** o **`security-update`** se implementa **directamente sobre la rama de integracion**. **No se crea ni se cambia a una rama `fix/`.**
 
 - **Es el comportamiento por defecto y no se pregunta.** Basta con leer `Tipo` del WI: si es uno de esos dos, no hay eleccion de rama que ofrecer al usuario.
-- **La rama de integracion si se confirma**, porque no se asume: si la rama actual no es la de integracion acordada, resolverla con el usuario (opciones tappables con los candidatos detectados) y hacer checkout antes de tocar codigo. No adivinar `main` ni `develop`.
-- **El commit avisara.** `git-commit` pide una confirmacion extra al comitear en una rama de integracion o despliegue; es esperado, se responde una sola vez por invocacion y no sustituye la confirmacion de avance del Paso 3.
+- **La rama de integracion la declara el repo, no el usuario.** Antes de tocar codigo, resolverla con [`../../../reference/git.md`](../../../reference/git.md) — lectura obligatoria — y actuar segun lo que devuelva para la **rama actual**:
+
+  | Politica de la rama actual | Que hacer |
+  |----------------------------|-----------|
+  | `direct` | **Trabajar aqui, sin preguntar nada.** El repo ya declaro esta rama como valida para comitear directo. |
+  | `pull_request` | **No comitear aqui.** Ofrecer exactamente dos opciones: *cambiar a una rama `merge` de la lista* (checkout y continuar) o *terminar aqui*. Si el usuario elige terminar, cerrar sin tocar codigo y decir por que. |
+  | No esta en la lista | Resolver contra la lista: una sola rama `merge` -> usar esa (checkout previo); varias -> preguntar entre ellas; ninguna declarada -> preguntar al usuario cual es, sin proponer `main` ni `develop` por cuenta propia. |
+
+- **El commit no avisa dos veces.** En una rama `merge`, `git-commit` **no** pide la confirmacion extra de rama protegida: el repo ya la autorizo al declararla asi. Solo la pide cuando la rama de integracion no esta declarada en `integrationBranches`.
 - **El cierre no hace handoff:** ver [Paso 4](#paso-4---cierre). No hay rama que mergear, asi que no se invoca `work-integrate` ni `pr-create`.
 - **Sigue rigiendo todo lo demas:** `Ready` con criterios de aceptacion, ciclo TDD, lint/build, `progress.md`, checkboxes y la pausa de confirmacion antes de comitear.
 
-> Si el repo esta vinculado a un tracker externo (`work_item_tracking:` en `.agents/MEMORY.md`), el numero del WI es el ID del work item en ese sistema (`WI-1847`); si no lo esta, es un secuencial local (`WI-001`). Respetar el numero tal cual aparece en el archivo.
+> Si el repo tiene activada la integracion con un gestor de proyectos (`projectManagement.enabled` en `.sdd-devkit/settings.json`), el numero del WI es el ID del work item en ese sistema (`WI-1847`); si no, es un secuencial local (`WI-001`). Respetar el numero tal cual aparece en el archivo.
 
 ---
 
@@ -57,7 +64,7 @@ Un WI de tipo **`bug-fix`** o **`security-update`** se implementa **directamente
 | **Alcance** | Un WI concreto o una lista de `WI-` hermanos | Preguntar si hay ambiguedad |
 | **Tipo** | Campo `Tipo` del WI — uno de los ocho canonicos: `bug-fix`, `refactor`, `dependency-update`, `optimization`, `security-update`, `test-improvement`, `documentation-update`, `operational-change` | Leer del archivo; condiciona la rama (ver la tabla de prefijos) y el cierre |
 | **Repositorio** | Campo `Repositorio` del WI (nombre del repositorio git al que afecta) | Leer del archivo; para `Ready` es obligatorio |
-| **Rama** | Derivada del WI segun convencion del equipo. **`bug-fix` y `security-update` no tienen rama propia:** se trabaja en la rama de integracion | Crear desde la rama base acordada; para `bug-fix`/`security-update`, confirmar cual es la rama de integracion |
+| **Rama** | Derivada del WI segun convencion del equipo. **`bug-fix` y `security-update` no tienen rama propia:** se trabaja en la rama de integracion | Crear desde la rama base acordada; para `bug-fix`/`security-update`, resolverla con `reference/git.md` (`integrationBranches`), no preguntando |
 
 ---
 
@@ -66,7 +73,7 @@ Un WI de tipo **`bug-fix`** o **`security-update`** se implementa **directamente
 Ademas de la validacion de repositorio transversal (`SKILL.md`):
 
 - **WI existente y en `Ready`:** la carpeta `WI-XXX-[kebab-case]/` existe en `docs/specs/work-items/` y su `README.md` tiene `Estado: Ready`. Un `WI` en `Draft` (stub o incompleto) **no** es ejecutable - devolver a `work-plan` para completarlo.
-- **WI no archivado:** si la carpeta no aparece en `docs/specs/work-items/`, buscarla en `docs/specs/archive/work-items/` antes de darla por inexistente. Si esta ahi, el WI **ya se cerro e integro**: **parar** y avisar — «`WI-007` esta archivado; para retomarlo hay que desarchivarlo primero, y eso lo decide el usuario». **Excepcion:** en [modo correccion](../SKILL.md#modo-correccion-delegado-desde-quality-check) delegado por `quality-check`, un artefacto archivado es esperable —la correccion llega en la fase de cierre, con el archivado ya commiteado—: ahi se continua, pero **sin escribir dentro de la carpeta archivada** (la nota de retrabajo va en el informe de `quality-check`). Importa especialmente en este flujo porque el Paso 1 hace «leer **o crear**» el `progress.md`: sin esta comprobacion crearia una carpeta fantasma en la ruta activa con un identificador ya usado. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
+- **WI no archivado:** si la carpeta no aparece en `docs/specs/work-items/`, buscarla en `docs/archive/work-items/` antes de darla por inexistente. Si esta ahi, el WI **ya se cerro e integro**: **parar** y avisar — «`WI-007` esta archivado; para retomarlo hay que desarchivarlo primero, y eso lo decide el usuario». **Excepcion:** en [modo correccion](../SKILL.md#modo-correccion-delegado-desde-quality-check) delegado por `quality-check`, un artefacto archivado es esperable —la correccion llega en la fase de cierre, con el archivado ya commiteado—: ahi se continua, pero **sin escribir dentro de la carpeta archivada** (la nota de retrabajo va en el informe de `quality-check`). Importa especialmente en este flujo porque el Paso 1 hace «leer **o crear**» el `progress.md`: sin esta comprobacion crearia una carpeta fantasma en la ruta activa con un identificador ya usado. Ver [`work-integrate/references/archive.md`](../../work-integrate/references/archive.md#contrato-para-el-resto-del-catálogo).
 - **Criterios de aceptacion presentes:** el WI tiene **Criterios de aceptacion** verificables. Si faltan, parar: el WI no estaba realmente `Ready`.
 - **Referencia de UI (si toca UI):** si el WI modifica UI, debe tener referencia de diseno en **Referencias** (Figma/wireframe). Sin ella, parar y avisar.
 - **Test cases presentes:** verificar si existe la carpeta `docs/specs/work-items/WI-XXX-[kebab-case]/test-cases/` (dentro de la carpeta del WI) con al menos un archivo `TC-XXX-*.md`. Si no existe o esta vacia, **preguntar al usuario** (herramienta estructurada) antes de continuar:
@@ -88,7 +95,7 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 
 1. Verificar working tree limpio; si no, parar y avisar.
 2. Resolver la rama segun el `Tipo` del WI:
-   - **`bug-fix` / `security-update`:** no crear rama. Confirmar cual es la rama de integracion y hacer checkout de ella si no se esta ya ahi (ver [Excepcion](#excepcion-bug-fix-y-security-update-no-crean-rama)).
+   - **`bug-fix` / `security-update`:** no crear rama. Resolver la rama de integracion con `reference/git.md` y hacer checkout de ella si no se esta ya ahi (ver [Excepcion](#excepcion-bug-fix-y-security-update-no-crean-rama)).
    - **Resto de tipos:** hacer checkout de la rama del WI (crear desde la rama base acordada si no existe).
 3. Leer o crear `progress.md` dentro de la carpeta del WI (`docs/specs/work-items/WI-XXX-[kebab-case]/progress.md`) desde `assets/progress-template.md`. El `progress.md` es específico de este WI — contiene únicamente las entradas del plan de implementación del `README.md`.
 
@@ -103,7 +110,7 @@ Ademas de la validacion de repositorio transversal (`SKILL.md`):
 
 ### Paso 3 - Implementar WI a WI
 
-> IMPORTANTE **Una unidad = un WI completo.** Se implementa todo el plan del WI; al terminarlo, detenerse y preguntar antes del siguiente WI del alcance (si hay varios). No avanzar sin confirmacion.
+> IMPORTANTE **Una unidad = un WI completo.** Se implementa todo el plan del WI; con `confirmByUnit: always`, al terminarlo detenerse y preguntar antes del siguiente WI del alcance (si hay varios): no avanzar sin confirmacion.
 
 Por cada WI aprobado:
 
@@ -119,8 +126,8 @@ Por cada WI aprobado:
    - **Al iniciar cada tarea del plan:** marcar `[ ]` => `[~]` (en progreso) en la seccion del plan de implementacion del `README.md` del WI y marcar su entrada en la lista de to-dos del agente como `in_progress`. Solo una tarea puede estar `[~]` a la vez.
    - **Por cada tarea del plan completada:** marcar `[~]` => `[x]` en la seccion del plan de implementacion del `README.md` del WI y marcar su entrada en la lista de to-dos del agente como `completed`.
    - **Al cerrar el WI:** cambiar su estado en `progress.md` a `Done` y rellenar el campo **Archivos** (rutas tocadas, una por linea, sin vineta, prefijadas `+`/`~`/`-`), con todas las tareas de su plan ya `completed` en la lista de to-dos del agente; marcar tambien la **primera entrada (titulo del WI) como `completed`** una vez que todas las tareas del plan hayan finalizado; registrar `Decisiones adicionales` si hubo decisiones nuevas en la sesion. Si el WI tenia test cases, completar el campo `Cobertura de test cases` del WI solo con observaciones puntuales: **cuales `TC-XXX` no se pudieron crear** (con motivo) o **para cuales se decidio otro tipo de prueba** distinto al del test case. Si todos se automatizaron como se esperaba, dejar el campo sin comentarios.
-6. **Detenerse y preguntar** (herramienta estructurada), **sin commitear todavia los cambios del WI**: "WI-XXX completado. Continuo con WI-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui]. Si el alcance es un unico WI, igualmente confirmar antes de pasar al cierre. Esta pausa, con el working tree aun sin commitear, es la ventana para que el usuario revise el resultado, aplique correcciones manuales o le indique ajustes al agente antes de que el cambio quede commiteado.
-7. Solo si confirma: **invocar `/git-commit`** sobre los cambios de WI-XXX, delegando en ese skill la agrupacion, el mensaje, el staging y la deteccion de secretos — este skill no decide un mensaje ni stagea por cuenta propia. `git-commit` puede a su vez mostrar su propia propuesta y pedir confirmacion antes de comitear: es una confirmacion distinta a la del paso anterior (esa es sobre continuar al siguiente WI; esta es sobre el commit en si) y no la sustituye. Recien despues, pasar al siguiente WI. Si detiene, registrar nota y pasar al Paso 4 — la invocacion a `/git-commit` para este WI se hace ahi, en el cierre.
+6. **Detenerse y preguntar** (herramienta estructurada), **sin commitear todavia los cambios del WI**: "WI-XXX completado. Continuo con WI-YYY - [titulo]?" Opciones: [Si, continuar] / [No, detener aqui]. Con `confirmByUnit: always`, si el alcance es un unico WI igualmente confirmar antes de pasar al cierre; con `confirmByUnit: never` no hay pausa y se encadena el cierre. Esta pausa, con el working tree aun sin commitear, es la ventana para que el usuario revise el resultado, aplique correcciones manuales o le indique ajustes al agente antes de que el cambio quede commiteado.
+7. Solo si confirma: **invocar `/git-commit`** sobre los cambios de WI-XXX, delegando en ese skill la agrupacion, el mensaje, el staging y la deteccion de secretos — este skill no decide un mensaje ni stagea por cuenta propia. `git-commit` no comitea en silencio: un commit unico lo ejecuta sin confirmar, pero puede pausar para confirmar su **propuesta de division** cuando el diff se reparte en varios commits (con `commitConfirmation = always`), y puede detenerse ante secretos, rama protegida o hook fallido. Esa pausa es distinta a la del paso anterior (esa es sobre continuar al siguiente WI; esta es sobre como se reparte el commit) y no la sustituye. Recien despues, pasar al siguiente WI. Si detiene, registrar nota y pasar al Paso 4 — la invocacion a `/git-commit` para este WI se hace ahi, en el cierre.
 
 ### Paso 4 - Cierre
 
@@ -141,7 +148,7 @@ Por cada WI aprobado:
 
 ## Checklist
 
-**Repositorio:** working tree limpio; rama del WI activa o creada — **o**, si el `Tipo` es `bug-fix`/`security-update`, rama de integracion confirmada y activa, sin crear rama; `progress.md` leido o creado.
+**Repositorio:** working tree limpio; rama del WI activa o creada — **o**, si el `Tipo` es `bug-fix`/`security-update`, rama de integracion resuelta por `integrationBranches` y activa, con politica `direct`, sin crear rama; `progress.md` leido o creado.
 
 **Alcance:** cada `WI-*/README.md` leido completo; listas presentadas; confirmacion recibida antes del primer cambio de codigo.
 
@@ -163,11 +170,11 @@ Por cada WI aprobado:
 
 **Ejemplo 2b - Varios WI hermanos sin confirmacion**
 - *Entrada:* "Implementa WI-003, WI-004 y WI-005 de corrido, sin preguntar."
-- *Comportamiento:* varios WI + peticion explicita de no confirmar => **modo de ejecucion paralela** (ver `SKILL.md`). Analisis de dependencias primero: si son independientes, corren en subagentes con worktree (max 3 en paralelo); si un WI depende de otro fuera del alcance, avisar para excluir o detener. Merge secuencial a la rama del artefacto, con lint/build/tests tras cada merge.
+- *Comportamiento:* varios WI + peticion explicita de no confirmar => **modo de ejecucion paralela** (ver `SKILL.md`). Analisis de dependencias primero: si son independientes, corren en subagentes con worktree (hasta `maxParallel` en paralelo); si un WI depende de otro fuera del alcance, avisar para excluir o detener. Merge secuencial a la rama del artefacto, con lint/build/tests tras cada merge.
 
 **Ejemplo 2c - WI de tipo `bug-fix`**
 - *Entrada:* "Implementa el WI-011, corregir el calculo de impuestos en el carrito" (`Tipo: bug-fix`).
-- *Comportamiento:* no se crea rama `fix/`; se confirma cual es la rama de integracion y se trabaja ahi. Mismo ciclo TDD, lint/build, `progress.md` a `Done` y pausa de confirmacion; al confirmar, `/git-commit` (que pedira su confirmacion extra por ser rama de integracion). El cierre **no** ofrece integrar ni crear PR: se reporta el WI cerrado y los SHA.
+- *Comportamiento:* no se crea rama `fix/`; `reference/git.md` resuelve que la rama actual es `direct`, asi que se trabaja ahi **sin preguntar**. Mismo ciclo TDD, lint/build, `progress.md` a `Done` y pausa de confirmacion; al confirmar, `/git-commit` (sin confirmacion extra de rama protegida: la rama esta declarada `direct`). El cierre **no** ofrece integrar ni crear PR: se reporta el WI cerrado y los SHA.
 
 **Ejemplo 3 - WI en Draft**
 - *Entrada:* "Ejecuta WI-007" y esta en Draft (stub sin criterios).
@@ -203,5 +210,5 @@ Posicion: **implementacion** - un WI es autocontenido (no proviene de `work-defi
 |--|--|
 | **Entrada** | `WI-XXX` en `Estado: Ready` (Descripcion, Criterios de aceptacion, Dependencias, Referencias y Plan). Stubs en `Draft` **no** habilitan la implementacion. |
 | **Salida** | Codigo commiteado; `progress.md` con el WI en `Done`; working tree limpio. |
-| **Siguiente paso** | El WI ya comiteado via `/git-commit` durante la implementacion => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara las tres puertas de cierre (`quality-check`, `code-review` y `trace-validate`) y exigira veredicto Aprobado en las tres antes de integrar. **Excepcion `bug-fix` / `security-update`:** el trabajo ya esta en la rama de integracion, asi que **no hay siguiente paso** — el ciclo termina con el commit. |
+| **Siguiente paso** | El WI ya comiteado via `/git-commit` durante la implementacion => `pr-create` (opcional) => `work-integrate`. Nota: `work-integrate` ejecutara las tres puertas de cierre (`quality-check`, `code-review` y `trace-validate`) y exigira veredicto `APPROVED` en las tres antes de integrar. **Excepcion `bug-fix` / `security-update`:** el trabajo ya esta en la rama de integracion, asi que **no hay siguiente paso** — el ciclo termina con el commit. |
 | **Regreso desde plan** | Ambiguedad tecnica, criterios faltantes o alcance incorrecto => volver a `work-plan` para ajustar el WI. |

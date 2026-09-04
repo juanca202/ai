@@ -1,12 +1,20 @@
 <!--
 Convención de placeholders: sustituir manualmente cada {{texto}}; no es un motor de plantillas.
 Eliminar este bloque y sustituir todos los {{…}} al publicar el documento final.
+
+Las marcas `<!-- work:… -->` y `<!-- unit:… -->` SE CONSERVAN al publicar: son el ancla que
+`work-integrate` y `pr-create` parsean para comprobar que cada unidad esta en `Done`. Sus claves y sus
+valores van en ingles SIEMPRE, aunque el resto del documento este en otro idioma; las etiquetas
+visibles (`**Estado:**`, `**Archivos:**`…) si se redactan en el idioma resuelto.
+Ver ../../reference/verdicts.md.
 -->
 
 # Progreso
 
 ## {{identificador del trabajo}}
 **Estado:** {{Pending | In Progress | Done}}
+
+<!-- work:id={{US-XXX|WI-XXX|FT-XXX}} · status={{Pending|In Progress|Done}} -->
 **Tipo:** {{historia de usuario | tarea de mantenimiento | casos de prueba | feature}}
 **Fecha de creación:** {{YYYY-MM-DD HH:mm}}
 **Ultima actualizacion:** {{YYYY-MM-DD HH:mm}}
@@ -19,7 +27,7 @@ Ubicacion y alcance por tipo (cada trabajo tiene su propio `progress.md` dentro 
 - Feature (`FT-XXX`): un `progress.md` por carpeta del feature (`docs/specs/features/FT-XXX-{{slug}}/progress.md`); el encabezado lleva su `FT-XXX` y la unidad es el `FT-XXX` completo (una sola entrada que cubre todos sus `TC-XXX`).
 - Casos de prueba (`TC-XXX`) sueltos: el `progress.md` vive en la carpeta del **artefacto padre** que los contiene (US, WI o FT); el encabezado lleva el ID de ese padre y hay **una unidad por cada `TC-XXX`** del alcance.
 
-Transversal: si el trabajo ya se archivo, su carpeta vive bajo `docs/specs/archive/` y su `progress.md` con ella. Ahi **solo se lee**: nunca se crea ni se edita, y nunca se recrea la carpeta en la ruta activa. Ver `skills/work-integrate/references/archive.md`.
+Transversal: si el trabajo ya se archivo, su carpeta vive bajo `docs/archive/` y su `progress.md` con ella. Ahi **solo se lee**: nunca se crea ni se edita, y nunca se recrea la carpeta en la ruta activa. Ver `skills/work-integrate/references/archive.md`.
 -->
 
 ## Unidades
@@ -31,13 +39,17 @@ La "unidad" depende del tipo: TK para historias de usuario, el WI completo para 
 
 ### {{TK-XXX | WI-XXX | TC-XXX | FT-XXX}}: {{titulo corto}}
 **Estado:** {{Pending | In Progress | Done}}
+
+<!-- unit:id={{TK-XXX|WI-XXX|TC-XXX|FT-XXX}} · status={{Pending|In Progress|Done}} -->
 **Iniciado:** {{YYYY-MM-DD HH:mm}}
 **Finalizado:** {{YYYY-MM-DD HH:mm}}
 **Implementador:** {{inferido de git config user.name}} / {{agente que implementa: Claude | Cursor | Codex | …}} / {{modelo, si el agente lo expone}} / {{id de sesion, si el agente lo expone}}
 
-<!-- Archivos: los archivos tocados durante la implementación de esta unidad, uno por línea y SIN viñeta (a diferencia de Notas, Decisiones adicionales y Cobertura de test cases, que sí la llevan): el prefijo - de un archivo eliminado se confundiría con el guion de la viñeta. Prefijar cada ruta con + (creado), ~ (modificado) o - (eliminado); el símbolo basta, no hace falta etiqueta. -->
+<!-- Archivos: los archivos tocados durante la implementación de esta unidad, uno por línea dentro de un bloque de código (a diferencia de Notas, Decisiones adicionales y Cobertura de test cases, que van con viñeta): el prefijo - de un archivo eliminado se confundiría con el guion de la viñeta, por eso el contenido se envuelve en ` y el título queda fuera. Prefijar cada ruta con + (creado), ~ (modificado) o - (eliminado); el símbolo basta, no hace falta etiqueta. -->
 **Archivos:** 
+`
 []
+`
 
 <!-- Notas: observaciones surgidas durante la implementación de esta unidad; describirlas de forma específica y concisa. -->
 **Notas:** 
@@ -58,7 +70,9 @@ La "unidad" depende del tipo: TK para historias de usuario, el WI completo para 
 **Implementador:** {{usuario}} / {{agente}} / {{modelo}} / {{session id}}
 
 **Archivos:**
+`
 {{+ / ~ / -}} {{src/ruta/al/archivo.ext}}
+`
 
 **Notas:** 
 - {{observación relevante encontrada al implementar}}

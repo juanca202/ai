@@ -33,26 +33,39 @@ Carga el archivo correspondiente cuando vayas a ejecutar la tarea; el detalle í
 | Estándares de definición de **modelos de datos** (`MD-XX`), **APIs/endpoints** (`API-XX`), **flujos/procesos** (`FL-XX`) y **diagramas** (`DG-XX`: clases, contexto, contenedores, componentes): tablas, diagramas Mermaid, ejemplos | [`references/element-standards.md`](references/element-standards.md) |
 | Estructura del documento técnico de una capability | `assets/technical-doc-template.md` |
 
+
+### Referencias compartidas del plugin
+
+Reglas transversales del catálogo; viven en la raíz del plugin, no en este skill.
+
+- [`../../reference/language.md`](../../reference/language.md): **Idioma** — resolución obligatoria del idioma de artefactos y mensajes. *Lectura obligatoria antes de ejecutar el skill.*
+- [`../../reference/artifacts.md`](../../reference/artifacts.md): **Artefactos** — rutas del harness, identificadores, archivado. *Al resolver una ruta o calcular un ID.*
+
 ---
 
 ## Resolución de idioma
 
-El idioma del documento técnico (descripciones y texto natural; los nombres de campos, rutas y payloads siguen la convención del código) se decide en este orden; detenerse en el primer paso que aplique:
+Antes de ejecutar este skill, DEBES leer [`../../reference/language.md`](../../reference/language.md).
 
-1. **`.agents/MEMORY.md`** (raíz del repo) → línea `preferred language: <ISO 639-1>` (p. ej. `es`, `en`). Es la clave canónica que escribe `arch-init`; si existe, manda.
-2. Si no, la preferencia de idioma del usuario que conste en el contexto de la sesión. En modo delegado, usar la preferencia que transmita el skill llamador o el idioma de la US/TK/WI de origen.
-3. Si no, usar el idioma del mensaje del usuario y **preguntar si desea persistirlo** en `.agents/MEMORY.md` con `preferred language: <código>`.
-4. Si no se puede inferir, **preguntar al usuario** qué idioma prefiere y, tras su respuesta, **preguntar si desea persistirlo** en `.agents/MEMORY.md`; no decidir el idioma por cuenta propia.
+Las reglas de `language.md` son obligatorias y tienen prioridad para determinar el idioma de todos los artefactos y mensajes generados por este skill.
+
+No continúes hasta haber leído y aplicado `language.md`.
+
+**Excepción deliberada:** los nombres de campos, rutas y payloads **no** siguen el idioma resuelto — siguen la convención del código existente (ver [`references/element-standards.md`](references/element-standards.md)).
 
 ---
 
 ## Ubicación de archivos
 
+Layout completo del harness e identificadores: [`../../reference/artifacts.md`](../../reference/artifacts.md).
+
+Lo propio de este skill:
+
 | Artefacto | Ruta |
 | --------- | ---- |
-| Documento técnico de capability | `docs/specs/technical-docs/[capability].md` |
+| Documento técnico de capability (**salida**) | `docs/specs/technical-docs/[capability].md` |
 | Archivos de apoyo (imágenes, esquemas exportados) | `docs/specs/technical-docs/assets/[capability]/` |
-| Glosario | `docs/specs/glossary.md` (opcional) |
+| Glosario (opcional) | `docs/specs/glossary.md` |
 
 ### Convenciones
 
@@ -77,12 +90,13 @@ En modo delegado, el grilling de preguntas se dirige igualmente al usuario (el s
 
 ## Cómo preguntar al usuario (grilling)
 
-Cuando este skill (o sus referencias) indique **preguntar, pedir, confirmar, validar o sugerir** algo al usuario, hacerlo mediante la **herramienta de preguntas estructuradas** del cliente (la que renderiza opciones tappables o un selector) en lugar de prosa libre. Reglas:
+Mecanismo, ritmo y fallback compartidos: [`../../reference/asking.md`](../../reference/asking.md).
 
-- **Opciones cortas y mutuamente excluyentes** (2–4 por pregunta) cuando la respuesta admita categorías; entrada libre solo si no hay forma razonable de enumerar opciones (p. ej. la descripción de un campo).
-- **No repreguntar** lo que ya está respondido en el contexto, en `.agents/MEMORY.md`, en la US/TK/WI de origen o en el documento técnico existente.
-- **Recopilación inicial (antes de redactar):** una sola tanda con hasta **tres preguntas por bloque**; agrupar las lagunas detectadas, no ir descubriendo turno a turno. Si hay más de tres lagunas, encadenar tandas hasta agotarlas o hasta que el usuario indique que lo restante quede como Observación.
-- **Fallback:** si el cliente no expone esta herramienta, formular la pregunta en prosa con opciones enumeradas (1, 2, 3…).
+Cada vez que este skill o sus referencias digan *preguntar*, *pedir*, *confirmar*, *validar* o *sugerir* algo al usuario, asume ese mecanismo; no se repite allí.
+
+**Recopilación inicial (antes de redactar):** si hay más de tres lagunas, encadenar tandas hasta agotarlas o hasta que el usuario indique que lo restante quede como Observación.
+
+**No repreguntar** lo que ya está respondido en la US/TK/WI de origen o en el documento técnico existente.
 
 El detalle de **qué preguntar por tipo de elemento** (campos sin tipo, códigos de error sin definir, ramas de flujo ambiguas…) está en [`references/flow.md`](references/flow.md#grilling-por-tipo-de-elemento).
 
@@ -98,7 +112,6 @@ El detalle de **qué preguntar por tipo de elemento** (campos sin tipo, códigos
 | **Tipo(s) de elemento** (modelo, API, flujo, diagrama) | Del pedido o del contenido de la US/TK/WI | Preguntar |
 | **Contenido de cada elemento** (campos, contratos, pasos) | Del input recibido, del código existente del repo, o de la US/TK/WI de origen | Grilling de preguntas; lo irresoluble queda en Observaciones |
 | **Artefacto(s) que lo consumirán** (US/TK/WI) | Del contexto o del skill llamador | Opcional en modo directo; si existe, ofrecer enlazar la referencia al terminar |
-| **Idioma de preferencia** | Ver [Resolución de idioma](#resolución-de-idioma) | Preguntar; no decidir por cuenta propia |
 
 ---
 
