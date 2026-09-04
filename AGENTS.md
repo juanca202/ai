@@ -27,7 +27,7 @@ Lo **transversal a varios skills** no se duplica: vive en [`reference/`](referen
   ```
 
 - Cada skill lista además las referencias compartidas que consume en una subsección **Referencias compartidas del plugin** dentro de su *Mapa de referencias*.
-- **La carpeta `reference/` viaja con el catálogo.** Un skill copiado suelto fuera del plugin deja de resolver sus rutas relativas; el catálogo se distribuye e instala como plugin (ver [INSTALL.md](INSTALL.md)).
+- **La carpeta `reference/` viaja con el catálogo.** Un skill copiado suelto fuera del plugin deja de resolver sus rutas relativas; el catálogo se distribuye e instala como plugin (ver [README.md](README.md#instalación)).
 - Al añadir un archivo a `reference/`, registrarlo en la tabla de [`reference/README.md`](reference/README.md).
 
 ### Frontmatter obligatorio
