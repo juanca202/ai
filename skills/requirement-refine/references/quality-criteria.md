@@ -108,7 +108,7 @@ Ambos modos pueden dejar **Decisiones pendientes** si alguna capa queda sin reso
 
 ## Definition of Ready (DoR) del SRS
 
-Tabla con los doce criterios de la plantilla. Para cada uno: `Cumple` / `No cumple` / `Parcial` (los criterios marcados abajo admiten además `No aplica`, en las condiciones que se indican).
+Tabla con los trece criterios de la plantilla. Para cada uno: `Cumple` / `No cumple` / `Parcial` (los criterios marcados abajo admiten además `No aplica`, en las condiciones que se indican).
 
 | Criterio DoR | Qué exige |
 | ------------ | --------- |
@@ -124,5 +124,6 @@ Tabla con los doce criterios de la plantilla. Para cada uno: `Cumple` / `No cump
 | Riesgos identificados | La sección 14 existe con al menos una fila, o se dejó explícitamente «Ninguno identificado» — no se omite sin más. |
 | Alcance y fuera de alcance claros | La sección 1.2 delimita qué cubre el requerimiento y qué queda explícitamente fuera. |
 | Sin aclaraciones pendientes | Observaciones vacías o «Ninguna»; nada pendiente con usuario/producto. |
+| Validación final (Ola 3) superada | El análisis de gaps, la revisión cruzada PO+UX+ARCH y la **validación con subagente sin contexto de sesión** (ver [`interview.md`](interview.md#ola-3-en-detalle-paso-12-de-flowmd)) se ejecutaron sobre el documento redactado, sin hallazgos pendientes: lo no resuelto vive en Observaciones y bloquea Ready vía el criterio anterior. |
 
 El estado **Ready** requiere todos los criterios sin excepción (los marcados `No aplica` cuentan como satisfechos cuando la condición de exclusión aplica y está declarada). Si falta cualquiera, el SRS permanece en `Estado: Draft` con las lagunas documentadas en Observaciones — nunca se declara Ready «con reservas».

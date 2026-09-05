@@ -4,6 +4,7 @@
   "type": "object",
   "required": [
     "language",
+    "trackingEnabled",
     "specification",
     "implementation",
     "verification",
@@ -27,13 +28,21 @@
         "it"
       ]
     },
+    "trackingEnabled": {
+      "type": "boolean",
+      "description": "Activa o desactiva el envío de eventos de seguimiento de especificaciones."
+    },
+    "trackingUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL del endpoint de eventos (ej: https://events.sdd.io)."
+    },
     "specification": {
       "type": "object",
-      "description": "Configuración de especificaciones: rutas base y de archivado de docs/specs/, envío de eventos de seguimiento y política de definición de casos de prueba al planificar.",
+      "description": "Configuración de especificaciones: rutas base y de archivado de docs/specs/, artefacto raíz del CLI de tracking y política de definición de casos de prueba al planificar.",
       "required": [
         "basePath",
         "archivePath",
-        "trackingEnabled",
         "testCases"
       ],
       "additionalProperties": false,
@@ -45,15 +54,6 @@
         "archivePath": {
           "type": "string",
           "description": "Ruta relativa a la raíz del repositorio donde se archivan los trabajos cerrados (ej: docs/archive/)."
-        },
-        "trackingEnabled": {
-          "type": "boolean",
-          "description": "Activa o desactiva el envío de eventos de seguimiento de especificaciones."
-        },
-        "trackingUrl": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL del endpoint de eventos (ej: https://events.sdd.io)."
         },
         "artifactRoot": {
           "type": "string",
@@ -82,34 +82,6 @@
               "description": "Si test-define hace su entrevista de clarificación (entorno de referencia, roles involucrados, datos de prueba y escenarios de error críticos) antes de generar los TC. Con false no pregunta nada: aplica los valores por defecto documentados en el skill y anota los supuestos en los propios TC. No afecta al alcance, que siempre son todos los criterios de aceptación."
             }
           }
-        }
-      },
-      "dependencies": {
-        "trackingEnabled": {
-          "oneOf": [
-            {
-              "properties": {
-                "trackingEnabled": {
-                  "enum": [
-                    false
-                  ]
-                }
-              }
-            },
-            {
-              "properties": {
-                "trackingEnabled": {
-                  "enum": [
-                    true
-                  ]
-                }
-              },
-              "required": [
-                "trackingUrl",
-                "artifactRoot"
-              ]
-            }
-          ]
         }
       }
     },
@@ -388,6 +360,38 @@
           ]
         }
       }
+    }
+  },
+  "dependencies": {
+    "trackingEnabled": {
+      "oneOf": [
+        {
+          "properties": {
+            "trackingEnabled": {
+              "enum": [
+                false
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "trackingEnabled": {
+              "enum": [
+                true
+              ]
+            },
+            "specification": {
+              "required": [
+                "artifactRoot"
+              ]
+            }
+          },
+          "required": [
+            "trackingUrl"
+          ]
+        }
+      ]
     }
   }
 }

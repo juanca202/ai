@@ -5,6 +5,13 @@ CR es **apto para automatizar** y hay que crear/registrar su fitness function, o
 crear/tocar el runner. Cubre tres cosas: (1) la **propuesta de criterios** que el usuario selecciona,
 (2) la fitness function del CR y (3) el runner que las orquesta.
 
+**El objetivo:** las fitness functions definen **resultados arquitectónicos medibles, no decisiones
+de implementación**. Especifican **qué debe lograr la arquitectura y qué umbral debe cumplir**; la
+tecnología, librería, framework o herramienta utilizada para lograrlo o verificarlo pertenece a la
+implementación, **salvo que dicha tecnología sea explícitamente una restricción arquitectónica** (p. ej.
+fijada por un ADR). Este principio rige tanto la **redacción de los CR** (resultado + umbral, no "usar X")
+como la propuesta: la herramienta de verificación es el *mecanismo*, nunca el criterio en sí.
+
 **El modelo, en una línea:** los scripts de verificación se escriben en el **lenguaje del stack del
 repositorio** (Node en un proyecto Angular/React/Vue/Node, Python en uno Python, PHP en uno PHP…), hay
 **un archivo de checks por estándar** (no por criterio) en `scripts/arch/checks/<slug-estándar>.<ext>`,
@@ -36,6 +43,12 @@ A partir del requisito, listar los CR candidatos: cada aspecto **medible y compr
 independiente. Un requisito casi siempre da más de uno (p. ej. «Unit testing» → cobertura mínima,
 framework obligatorio, ubicación/nombrado de los archivos de test). Preferir criterios **atómicos**
 (uno mide una sola cosa) frente a uno grande que mezcla varias comprobaciones.
+
+Redactar cada candidato como **resultado arquitectónico + umbral** («la cobertura de unit tests MUST ser
+≥ 80%»), no como decisión de implementación («usar Jest»). Una tecnología concreta solo aparece **dentro
+del criterio** cuando es en sí misma una restricción arquitectónica explícita (como el «framework
+obligatorio» del ejemplo, fijado por su ADR); en el resto de casos la herramienta pertenece al
+**mecanismo de verificación** que se investiga en el punto 2, no al criterio.
 
 Numerar los candidatos como `C1`, `C2`… **solo para la conversación** — el `CR-XXX` definitivo se asigna
 después, al escribir en el estándar, y solo a los criterios que el usuario haya seleccionado (para no

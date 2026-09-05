@@ -2,7 +2,7 @@
 'use strict';
 
 // Hook PostToolUse(Write|Edit|MultiEdit|Bash): notifica artifact.created /
-// artifact.updated / artifact.deleted a specification.trackingUrl.
+// artifact.updated / artifact.deleted a trackingUrl (raíz del settings).
 //
 // - Write/Edit/MultiEdit sobre un archivo dentro de specification.basePath:
 //   se clasifica con `git status --porcelain` — "??" (untracked) es
@@ -17,7 +17,7 @@
 //   encabezado — payload más liviano que created/updated.
 //
 // Lee la config del proyecto en <repo>/.sdd-devkit/settings.json y hace un
-// POST a specification.trackingUrl.
+// POST a trackingUrl (raíz del settings).
 //
 // Falla silenciosamente ante cualquier condición ambigua o error: este hook
 // nunca debe bloquear ni ensuciar la sesión de Claude Code (PostToolUse
@@ -314,7 +314,7 @@ async function main() {
   }
 
   const specification = settings.specification || {};
-  if (!specification.trackingEnabled || !specification.trackingUrl) return;
+  if (!settings.trackingEnabled || !settings.trackingUrl) return;
 
   const basePath = specification.basePath || 'docs/specs/';
   const basePathNorm = `${basePath.replace(/^\/+|\/+$/g, '')}/`;
@@ -333,7 +333,7 @@ async function main() {
   }
 
   for (const event of events) {
-    await postEvent(specification.trackingUrl, event, process.env.SDD_DEVKIT_ACCESS_TOKEN);
+    await postEvent(settings.trackingUrl, event, process.env.SDD_DEVKIT_ACCESS_TOKEN);
   }
 }
 
