@@ -1,6 +1,6 @@
 # SDD Devkit
 
-![version](https://img.shields.io/badge/version-2.0.17-blue)
+![version](https://img.shields.io/badge/version-2.0.18-blue)
 
 **SDD Devkit** es un plugin de Spec-Driven Development: convierte un requerimiento en documentación (historias de usuario, decisiones de arquitectura, diseño técnico, casos de prueba) y te acompaña hasta un entregable verificado. Incluye skills para:
 
