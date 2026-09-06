@@ -10,6 +10,15 @@ Referencia completa de cada opción de `.sdd-devkit/settings.json`: para qué si
 |-------|---------|-----------------|
 | `language` | `es` · `en` · `fr` · `de` · `it` | Idioma en el que cada skill redacta artefactos y mensajes al usuario. Sin este valor, el skill lo infiere del contexto o pregunta — ver [reference/language.md](reference/language.md). |
 
+## `trackingEnabled` y `trackingUrl`
+
+Seguimiento de especificaciones: envío de eventos a un endpoint externo. Viven en la **raíz** de `settings.json`.
+
+| Campo | Valores | Para qué sirve |
+|-------|---------|-----------------|
+| `trackingEnabled` | `true` · `false` | Activa o desactiva el envío de eventos de seguimiento de especificaciones. |
+| `trackingUrl` | URL | Endpoint de eventos. Obligatorio cuando `trackingEnabled: true`, junto con `specification.artifactRoot`. |
+
 ## `specification`
 
 Rutas de las especificaciones y política de casos de prueba al planificar.
@@ -18,9 +27,7 @@ Rutas de las especificaciones y política de casos de prueba al planificar.
 |-------|---------|-----------------|
 | `basePath` | ruta relativa (ej. `docs/specs/`) | Dónde viven las especificaciones (`US-XXX`, `WI-XXX`, `TK-XXX`, `TC-XXX`, `RS-XXX`...). |
 | `archivePath` | ruta relativa (ej. `docs/archive/`) | Dónde se archiva el trabajo cerrado. Ver el contrato de archivado en [reference/artifacts.md](reference/artifacts.md). |
-| `trackingEnabled` | `true` · `false` | Activa o desactiva el envío de eventos de seguimiento de especificaciones. |
-| `trackingUrl` | URL | Endpoint de eventos. Obligatorio cuando `trackingEnabled: true`. |
-| `artifactRoot` | código (ej. `US-001`) | Artefacto raíz que el CLI de tracking consulta por defecto cuando la invocación no trae `--requirement <code>`. |
+| `artifactRoot` | código (ej. `US-001`) | Artefacto raíz que el CLI de tracking consulta por defecto cuando la invocación no trae `--requirement <code>`. Obligatorio cuando `trackingEnabled: true` (raíz). |
 | `testCases.mode` | `ask` · `always` · `never` | Si `work-define`/`work-plan` ofrecen `test-define` al dejar una historia o sus tareas en `Ready`: preguntando, invocándolo directo o sin ofrecerlo. Detalle en [reference/planning.md](reference/planning.md). |
 | `testCases.askDetails` | `true` · `false` | Si `test-define` entrevista al usuario (entorno, roles, datos, escenarios de error) antes de generar los `TC-XXX`, o aplica valores por defecto documentados y anota los supuestos. No cambia el alcance: siempre cubre todos los criterios de aceptación. |
 
@@ -80,4 +87,4 @@ Integración opcional con un sistema de tickets externo, usada por `work-plan`, 
 
 ---
 
-Cuando el seguimiento de specs está activo (`specification.trackingEnabled: true`), el token `SDD_DEVKIT_ACCESS_TOKEN` vive en `.sdd-devkit/.env` (no versionado, `arch-init` lo deja en `.gitignore`) — no en `settings.json`.
+Cuando el seguimiento de specs está activo (`trackingEnabled: true`), el token `SDD_DEVKIT_ACCESS_TOKEN` vive en `.sdd-devkit/.env` (no versionado, `arch-init` lo deja en `.gitignore`) — no en `settings.json`.

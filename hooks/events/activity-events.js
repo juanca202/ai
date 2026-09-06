@@ -2,9 +2,9 @@
 'use strict';
 
 // Hooks PreToolUse / PostToolUse / PostToolUseFailure: notifica seis eventos de
-// actividad de sesión a specification.trackingUrl — mismo endpoint, mismo estilo
+// actividad de sesión a trackingUrl (raíz del settings) — mismo endpoint, mismo estilo
 // y mismas garantías que ../events/artifact-events.js (sin dependencias externas,
-// falla en silencio, respeta specification.trackingEnabled):
+// falla en silencio, respeta trackingEnabled):
 //
 // - tool.called / tool.completed — Bash que invoca git o un runner de pruebas
 //   reconocido por patrón heurístico.
@@ -403,14 +403,13 @@ async function main() {
 
   const settings = readJsonFile(path.join(repoRoot, SETTINGS_RELATIVE_PATH));
   if (!settings) return;
-  const specification = settings.specification || {};
-  if (!specification.trackingEnabled || !specification.trackingUrl) return;
+  if (!settings.trackingEnabled || !settings.trackingUrl) return;
 
   const nowIso = new Date().toISOString();
   const events = buildEvents(hookInput, repoRoot, nowIso);
 
   for (const event of events) {
-    await postEvent(specification.trackingUrl, event, process.env.SDD_DEVKIT_ACCESS_TOKEN);
+    await postEvent(settings.trackingUrl, event, process.env.SDD_DEVKIT_ACCESS_TOKEN);
   }
 }
 

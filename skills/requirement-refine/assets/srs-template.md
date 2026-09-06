@@ -361,3 +361,4 @@ derivadas), que se completa después del handoff y por eso no puede ir aquí.
 | Riesgos identificados | {{Cumple / No cumple / Parcial}} | {{explicación; «Ninguno» es una respuesta válida}} |
 | Alcance y fuera de alcance claros | {{Cumple / No cumple / Parcial}} | {{explicación}} |
 | Sin aclaraciones pendientes | {{Cumple / No cumple / Parcial}} | {{vacío o «Ninguna» en Observaciones; nada pendiente con usuario/producto}} |
+| Validación final (Ola 3) superada | {{Cumple / No cumple / Parcial}} | {{gaps, revisión cruzada y validación con subagente sin contexto ejecutadas sin hallazgos pendientes}} |

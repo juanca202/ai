@@ -1,9 +1,9 @@
 {
   "language": "<código>",
+  "trackingEnabled": false,
   "specification": {
     "basePath": "docs/specs/",
     "archivePath": "docs/archive/",
-    "trackingEnabled": false,
     "testCases": {
       "mode": "ask",
       "askDetails": true

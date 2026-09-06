@@ -136,7 +136,7 @@ Los hooks de seguimiento de especificaciones del plugin (ver `hooks/README.md`) 
 - **En un reintento con el mismo `key`** (build/test que vuelve a fallar dentro de la misma unidad, o un segundo intento de la misma correccion): no tocar el archivo — el `iterationId` existente sigue siendo el correcto.
 - **Al cerrar la unidad como `Done`**, o **al terminar la correccion** (aplicada o no — ver [Cuando la correccion no se aplica](#cuando-la-correccion-no-se-aplica)): eliminar el archivo.
 - **La primera vez que se escribe**, normalizar el `.gitignore`: comprobar con `git check-ignore -q .sdd-devkit/current-iteration.json` y, si no esta ignorado, anadir esa linea — es una cache local y desechable, igual que `.sdd-devkit/test-run.json` (ver `quality-check`).
-- Mantenerlo **siempre**, sin comprobar antes si `specification.trackingEnabled` esta activo en `.sdd-devkit/settings.json`: es barato de escribir y, si ningun hook lo lee, no tiene efecto observable.
+- Mantenerlo **siempre**, sin comprobar antes si `trackingEnabled` esta activo en `.sdd-devkit/settings.json`: es barato de escribir y, si ningun hook lo lee, no tiene efecto observable.
 
 ---
 
